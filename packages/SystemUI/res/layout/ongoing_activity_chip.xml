@@ -34,13 +34,13 @@
         android:background="@drawable/ongoing_activity_chip_bg"
         android:paddingStart="@dimen/ongoing_activity_chip_side_padding"
         android:paddingEnd="@dimen/ongoing_activity_chip_side_padding"
-        android:contentDescription="@string/ongoing_phone_call_content_description"
         android:minWidth="@dimen/min_clickable_item_size"
     >
 
         <ImageView
             android:src="@*android:drawable/ic_phone"
             android:id="@+id/ongoing_activity_chip_icon"
+            android:contentDescription="@string/ongoing_phone_call_content_description"
             android:layout_width="@dimen/ongoing_activity_chip_icon_size"
             android:layout_height="@dimen/ongoing_activity_chip_icon_size"
             android:tint="?android:attr/colorPrimary"

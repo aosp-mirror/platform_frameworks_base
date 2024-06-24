@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 import android.app.ActivityManager
 import androidx.annotation.DrawableRes
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -64,8 +65,13 @@ constructor(
                     }
                     is ScreenRecordChipModel.Recording -> {
                         OngoingActivityChipModel.Shown.Timer(
-                            // TODO(b/332662551): Also provide a content description.
-                            icon = Icon.Resource(ICON, contentDescription = null),
+                            icon =
+                                Icon.Resource(
+                                    ICON,
+                                    ContentDescription.Resource(
+                                        R.string.screenrecord_ongoing_screen_only,
+                                    ),
+                                ),
                             colors = ColorsModel.Red,
                             startTimeMs = systemClock.elapsedRealtime(),
                             createDialogLaunchOnClickListener(

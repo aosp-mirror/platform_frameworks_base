@@ -105,6 +105,8 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             assertThat(((latest as OngoingActivityChipModel.Shown).icon as Icon.Resource).res)
                 .isEqualTo(com.android.internal.R.drawable.ic_phone)
+            assertThat((latest as OngoingActivityChipModel.Shown).icon!!.contentDescription)
+                .isNotNull()
         }
 
     @Test

@@ -129,6 +129,7 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
             val icon = (latest as OngoingActivityChipModel.Shown).icon
             assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_present_to_all)
+            assertThat(icon.contentDescription).isNotNull()
         }
 
     @Test
@@ -142,6 +143,7 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
             val icon = (latest as OngoingActivityChipModel.Shown).icon
             assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_present_to_all)
+            assertThat(icon.contentDescription).isNotNull()
         }
 
     @Test

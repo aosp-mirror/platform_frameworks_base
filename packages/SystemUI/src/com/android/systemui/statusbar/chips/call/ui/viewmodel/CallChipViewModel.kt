@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.chips.call.ui.viewmodel
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -65,7 +66,9 @@ constructor(
                             icon =
                                 Icon.Resource(
                                     com.android.internal.R.drawable.ic_phone,
-                                    contentDescription = null,
+                                    ContentDescription.Resource(
+                                        R.string.ongoing_phone_call_content_description,
+                                    ),
                                 ),
                             colors = ColorsModel.Themed,
                             startTimeMs = startTimeInElapsedRealtime,
