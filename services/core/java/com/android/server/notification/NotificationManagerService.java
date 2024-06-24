@@ -8565,6 +8565,13 @@ public class NotificationManagerService extends SystemService {
          */
         private boolean enqueueNotification() {
             synchronized (mNotificationLock) {
+                if (android.app.Flags.secureAllowlistToken()) {
+                    // allowlistToken is populated by unparceling, so it will be absent if the
+                    // EnqueueNotificationRunnable is created directly by NMS (as we do for group
+                    // summaries) instead of via notify(). Fix that.
+                    r.getNotification().overrideAllowlistToken(ALLOWLIST_TOKEN);
+                }
+
                 final long snoozeAt =
                         mSnoozeHelper.getSnoozeTimeForUnpostedNotification(
                                 r.getUser().getIdentifier(),
