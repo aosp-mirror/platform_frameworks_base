@@ -152,3 +152,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "collect_logcat_on_run_synchronously"
+    namespace: "dropbox"
+    description: "Allow logcat collection on synchronous dropbox collection"
+    bug: "324222683"
+    is_fixed_read_only: true
+}
