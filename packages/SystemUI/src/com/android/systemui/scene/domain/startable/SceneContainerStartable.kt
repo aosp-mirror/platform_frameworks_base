@@ -38,6 +38,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInt
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
+import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor
@@ -126,6 +127,7 @@ constructor(
     private val shadeSessionStorage: SessionStorage,
     private val windowMgrLockscreenVisInteractor: WindowManagerLockscreenVisibilityInteractor,
     private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
+    private val dismissCallbackRegistry: DismissCallbackRegistry,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -144,6 +146,7 @@ constructor(
             hydrateBackStack()
             resetShadeSessions()
             handleKeyguardEnabledness()
+            notifyKeyguardDismissCallbacks()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -710,6 +713,18 @@ constructor(
         applicationScope.launch {
             sceneInteractor.currentScene.pairwise().collect { (from, to) ->
                 sceneBackInteractor.onSceneChange(from = from, to = to)
+            }
+        }
+    }
+
+    private fun notifyKeyguardDismissCallbacks() {
+        applicationScope.launch {
+            sceneInteractor.currentScene.pairwise().collect { (from, to) ->
+                when {
+                    from != Scenes.Bouncer -> Unit
+                    to == Scenes.Gone -> dismissCallbackRegistry.notifyDismissSucceeded()
+                    else -> dismissCallbackRegistry.notifyDismissCancelled()
+                }
             }
         }
     }
