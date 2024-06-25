@@ -127,6 +127,7 @@ cc_library_shared_for_libandroid_runtime {
     ],
 
     defaults: [
+        "aconfig_lib_cc_shared_link.defaults",
         "latest_android_media_audio_common_types_cpp_target_shared",
     ],
 
@@ -365,6 +366,7 @@ cc_library_shared_for_libandroid_runtime {
                 "libdl_android",
                 "libtimeinstate",
                 "server_configurable_flags",
+                "libaconfig_storage_read_api_cc",
                 "libimage_io",
                 "libultrahdr",
                 "libperfetto_c",

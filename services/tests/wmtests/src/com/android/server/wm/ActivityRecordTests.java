@@ -3098,6 +3098,30 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
+    public void testOnStartingWindowDrawn() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        // The task-has-been-visible should not affect the decision of making transition ready.
+        activity.getTask().setHasBeenVisible(true);
+        activity.detachFromProcess();
+        activity.mStartingData = mock(StartingData.class);
+        registerTestTransitionPlayer();
+        final Transition transition = activity.mTransitionController.requestTransitionIfNeeded(
+                WindowManager.TRANSIT_OPEN, 0 /* flags */, null /* trigger */, mDisplayContent);
+        activity.onStartingWindowDrawn();
+        assertTrue(activity.mStartingData.mIsDisplayed);
+        // The transition can be ready by the starting window of a visible-requested activity
+        // without a running process.
+        assertTrue(transition.allReady());
+
+        // If other event makes the transition unready, the reentrant of onStartingWindowDrawn
+        // should not replace the readiness again.
+        transition.setReady(mDisplayContent, false);
+        activity.onStartingWindowDrawn();
+        assertFalse(transition.allReady());
+    }
+
+
+    @Test
     public void testCloseToSquareFixedOrientation() {
         if (Flags.insetsDecoupledConfiguration()) {
             // No test needed as decor insets no longer affects orientation.

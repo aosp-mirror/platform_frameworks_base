@@ -50,7 +50,6 @@ constructor(
             ) { screenRecordState, mediaProjectionState ->
                 when (screenRecordState) {
                     is ScreenRecordModel.DoingNothing -> ScreenRecordChipModel.DoingNothing
-                    // TODO(b/332662551): Implement the 3-2-1 countdown chip.
                     is ScreenRecordModel.Starting ->
                         ScreenRecordChipModel.Starting(screenRecordState.millisUntilStarted)
                     is ScreenRecordModel.Recording -> {

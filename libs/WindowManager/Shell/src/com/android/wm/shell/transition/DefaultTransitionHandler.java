@@ -517,7 +517,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     animRelOffset.y = Math.max(animRelOffset.y, change.getEndRelOffset().y);
                 }
 
-                if (change.getActivityComponent() != null && !isActivityLevel) {
+                if (change.getActivityComponent() != null && !isActivityLevel
+                        && !mRotator.isRotated(change)) {
                     // At this point, this is an independent activity change in a non-activity
                     // transition. This means that an activity transition got erroneously combined
                     // with another ongoing transition. This then means that the animation root may

@@ -224,6 +224,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         });
     }
 
+    boolean isBound() {
+        return mBound.get();
+    }
+
     @WorkerThread
     private void setBindService(boolean bind) {
         if (mBound.get() && mUnbindImmediate.get()) {

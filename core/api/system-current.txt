@@ -11471,6 +11471,19 @@ package android.os.storage {
 
 }
 
+package android.os.vibrator.persistence {
+
+  @FlaggedApi("android.os.vibrator.vibration_xml_apis") public final class ParsedVibration {
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
+  }
+
+  @FlaggedApi("android.os.vibrator.vibration_xml_apis") public final class VibrationXmlParser {
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @NonNull public static android.os.vibrator.persistence.ParsedVibration parse(@NonNull java.io.InputStream) throws java.io.IOException;
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @NonNull public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.InputStream) throws java.io.IOException;
+  }
+
+}
+
 package android.permission {
 
   public final class AdminPermissionControlParams implements android.os.Parcelable {

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.call.ui.viewmodel
 
+import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.common.shared.model.Icon
@@ -60,7 +61,7 @@ constructor(
                         val startTimeInElapsedRealtime =
                             state.startTimeMs - systemClock.currentTimeMillis() +
                                 systemClock.elapsedRealtime()
-                        OngoingActivityChipModel.Shown(
+                        OngoingActivityChipModel.Shown.Timer(
                             icon =
                                 Icon.Resource(
                                     com.android.internal.R.drawable.ic_phone,
@@ -68,26 +69,30 @@ constructor(
                                 ),
                             colors = ColorsModel.Themed,
                             startTimeMs = startTimeInElapsedRealtime,
-                        ) {
-                            if (state.intent != null) {
-                                val backgroundView =
-                                    it.requireViewById<ChipBackgroundContainer>(
-                                        R.id.ongoing_activity_chip_background
-                                    )
-                                // TODO(b/332662551): Log the click event.
-                                // This mimics OngoingCallController#updateChipClickListener.
-                                activityStarter.postStartActivityDismissingKeyguard(
-                                    state.intent,
-                                    ActivityTransitionAnimator.Controller.fromView(
-                                        backgroundView,
-                                        InteractionJankMonitor
-                                            .CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
-                                    )
-                                )
-                            }
-                        }
+                            getOnClickListener(state),
+                        )
                     }
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+
+    private fun getOnClickListener(state: OngoingCallModel.InCall): View.OnClickListener? {
+        if (state.intent == null) {
+            return null
+        }
+
+        return View.OnClickListener { view ->
+            val backgroundView =
+                view.requireViewById<ChipBackgroundContainer>(R.id.ongoing_activity_chip_background)
+            // TODO(b/332662551): Log the click event.
+            // This mimics OngoingCallController#updateChipClickListener.
+            activityStarter.postStartActivityDismissingKeyguard(
+                state.intent,
+                ActivityTransitionAnimator.Controller.fromView(
+                    backgroundView,
+                    InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
+                )
+            )
+        }
+    }
 }

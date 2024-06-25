@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.row;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
+import com.android.systemui.statusbar.notification.row.shared.RichOngoingNotificationFlag;
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.RichOngoingViewModelComponent;
 
 import dagger.Binds;
 import dagger.Module;
@@ -28,7 +30,7 @@ import javax.inject.Provider;
 /**
  * Dagger Module containing notification row and view inflation implementations.
  */
-@Module
+@Module(subcomponents = {RichOngoingViewModelComponent.class})
 public abstract class NotificationRowModule {
 
     /**
@@ -46,6 +48,25 @@ public abstract class NotificationRowModule {
             return legacyImpl.get();
         }
     }
+
+    /** Provides ron content model extractor. */
+    @Provides
+    @SysUISingleton
+    public static RichOngoingNotificationContentExtractor provideRonContentExtractor(
+            Provider<RichOngoingNotificationContentExtractorImpl> realImpl
+    ) {
+        if (RichOngoingNotificationFlag.isEnabled()) {
+            return realImpl.get();
+        } else {
+            return new NoOpRichOngoingNotificationContentExtractor();
+        }
+    }
+
+    /** Provides ron view inflater. */
+    @Binds
+    @SysUISingleton
+    public abstract RichOngoingNotificationViewInflater provideRonViewInflater(
+            RichOngoingNotificationViewInflaterImpl impl);
 
     /**
      * Provides notification remote view cache instance.

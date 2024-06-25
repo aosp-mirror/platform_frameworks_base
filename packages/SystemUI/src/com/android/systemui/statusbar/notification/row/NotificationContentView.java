@@ -72,6 +72,8 @@ import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
 
+import kotlinx.coroutines.DisposableHandle;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -108,6 +110,8 @@ public class NotificationContentView extends FrameLayout implements Notification
     private View mExpandedChild;
     private View mHeadsUpChild;
     private HybridNotificationView mSingleLineView;
+
+    @Nullable public DisposableHandle mContractedBinderHandle;
 
     private RemoteInputView mExpandedRemoteInput;
     private RemoteInputView mHeadsUpRemoteInput;
