@@ -1450,6 +1450,8 @@ public class BubbleController implements ConfigurationChangeListener,
             if (b != null) {
                 // It's in the overflow, so remove it & reinflate
                 mBubbleData.dismissBubbleWithKey(appBubbleKey, Bubbles.DISMISS_NOTIF_CANCEL);
+                // Update the bubble entry in the overflow with the latest intent.
+                b.setAppBubbleIntent(intent);
             } else {
                 // App bubble does not exist, lets add and expand it
                 b = Bubble.createAppBubble(intent, user, icon, mMainExecutor);
