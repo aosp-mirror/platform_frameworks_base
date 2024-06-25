@@ -527,14 +527,14 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
         if (testCase.isFaceOnly) {
-            assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_dark_to_error)
+            assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_error)
             assertThat(iconContentDescriptionId).isEqualTo(R.string.keyguard_face_failed)
             assertThat(shouldAnimateIconView).isEqualTo(true)
 
             // Clear error, go to idle
             errorJob.join()
 
-            assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_error_to_idle)
+            assertThat(iconAsset).isEqualTo(R.raw.face_dialog_error_to_idle)
             assertThat(iconContentDescriptionId)
                 .isEqualTo(R.string.biometric_dialog_face_icon_description_idle)
             assertThat(shouldAnimateIconView).isEqualTo(true)
@@ -620,7 +620,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
             // If co-ex, using implicit flow (explicit flow always requires confirmation)
             if (testCase.isFaceOnly || testCase.isCoex) {
-                assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_dark_to_checkmark)
+                assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_checkmark)
                 assertThat(iconContentDescriptionId)
                     .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
                 assertThat(shouldAnimateIconView).isEqualTo(true)
@@ -645,7 +645,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             )
 
             if (testCase.isFaceOnly) {
-                assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_wink_from_dark)
+                assertThat(iconAsset).isEqualTo(R.raw.face_dialog_wink_from_dark)
                 assertThat(iconContentDescriptionId)
                     .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
                 assertThat(shouldAnimateIconView).isEqualTo(true)
@@ -690,7 +690,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             viewModel.confirmAuthenticated()
 
             if (testCase.isFaceOnly) {
-                assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_dark_to_checkmark)
+                assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_checkmark)
                 assertThat(iconContentDescriptionId)
                     .isEqualTo(R.string.biometric_dialog_face_icon_description_confirmed)
                 assertThat(shouldAnimateIconView).isEqualTo(true)
