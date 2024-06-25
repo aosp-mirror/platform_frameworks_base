@@ -93,7 +93,7 @@ java_library {
     srcs: [
         "junit-flag-src/**/*.java",
     ],
-    sdk_version: "test_current",
+    sdk_version: "module_current",
     libs: [
         "junit",
         "flag-junit",
