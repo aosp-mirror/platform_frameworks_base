@@ -32,6 +32,7 @@ import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepositor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
@@ -132,6 +133,21 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pin
             )
             setDeviceEntered(true)
+
+            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
+                .isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    fun upTransitionSceneKey_keyguardDisabled_gone() =
+        testScope.runTest {
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
                 .isEqualTo(SceneFamilies.Home)
