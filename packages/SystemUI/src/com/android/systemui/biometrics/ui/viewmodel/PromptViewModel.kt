@@ -50,6 +50,7 @@ import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.PromptKind
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.res.R
@@ -132,11 +133,11 @@ constructor(
             R.dimen.biometric_prompt_landscape_medium_horizontal_padding
         )
 
+    val udfpsOverlayParams: StateFlow<UdfpsOverlayParams> =
+        udfpsOverlayInteractor.udfpsOverlayParams
+
     private val udfpsSensorBounds: Flow<Rect> =
-        combine(
-                udfpsOverlayInteractor.udfpsOverlayParams,
-                displayStateInteractor.currentRotation
-            ) { params, rotation ->
+        combine(udfpsOverlayParams, displayStateInteractor.currentRotation) { params, rotation ->
                 val rotatedBounds = Rect(params.sensorBounds)
                 RotationUtils.rotateBounds(
                     rotatedBounds,
@@ -153,31 +154,26 @@ constructor(
             }
             .distinctUntilChanged()
 
+    private val udfpsSensorWidth: Flow<Int> = udfpsOverlayParams.map { it.sensorBounds.width() }
+    private val udfpsSensorHeight: Flow<Int> = udfpsOverlayParams.map { it.sensorBounds.height() }
+
     val legacyFingerprintSensorWidth: Flow<Int> =
-        combine(modalities, udfpsOverlayInteractor.udfpsOverlayParams) { modalities, overlayParams
-            ->
+        combine(modalities, udfpsSensorWidth) { modalities, udfpsSensorWidth ->
             if (modalities.hasUdfps) {
-                overlayParams.sensorBounds.width()
+                udfpsSensorWidth
             } else {
                 fingerprintIconWidth
             }
         }
 
     val legacyFingerprintSensorHeight: Flow<Int> =
-        combine(modalities, udfpsOverlayInteractor.udfpsOverlayParams) { modalities, overlayParams
-            ->
+        combine(modalities, udfpsSensorHeight) { modalities, udfpsSensorHeight ->
             if (modalities.hasUdfps) {
-                overlayParams.sensorBounds.height()
+                udfpsSensorHeight
             } else {
                 fingerprintIconHeight
             }
         }
-
-    val fingerprintSensorWidth: Int =
-        udfpsOverlayInteractor.udfpsOverlayParams.value.sensorBounds.width()
-
-    val fingerprintSensorHeight: Int =
-        udfpsOverlayInteractor.udfpsOverlayParams.value.sensorBounds.height()
 
     private val _accessibilityHint = MutableSharedFlow<String>()
 
@@ -442,12 +438,16 @@ constructor(
 
     /** The size of the biometric icon */
     val iconSize: Flow<Pair<Int, Int>> =
-        combine(iconViewModel.activeAuthType, modalities) { activeAuthType, modalities ->
+        combine(iconViewModel.activeAuthType, modalities, udfpsSensorWidth, udfpsSensorHeight) {
+            activeAuthType,
+            modalities,
+            udfpsSensorWidth,
+            udfpsSensorHeight ->
             if (activeAuthType == PromptIconViewModel.AuthType.Face) {
                 Pair(faceIconWidth, faceIconHeight)
             } else {
                 if (modalities.hasUdfps) {
-                    Pair(fingerprintSensorWidth, fingerprintSensorHeight)
+                    Pair(udfpsSensorWidth, udfpsSensorHeight)
                 } else {
                     Pair(fingerprintIconWidth, fingerprintIconHeight)
                 }
@@ -921,13 +921,13 @@ constructor(
                 udfpsUtils.getTouchInNativeCoordinates(
                     event.getPointerId(0),
                     event,
-                    udfpsOverlayInteractor.udfpsOverlayParams.value
+                    udfpsOverlayParams.value
                 )
             if (
                 !udfpsUtils.isWithinSensorArea(
                     event.getPointerId(0),
                     event,
-                    udfpsOverlayInteractor.udfpsOverlayParams.value
+                    udfpsOverlayParams.value
                 )
             ) {
                 _accessibilityHint.emit(
@@ -936,7 +936,7 @@ constructor(
                         context,
                         scaledTouch.x,
                         scaledTouch.y,
-                        udfpsOverlayInteractor.udfpsOverlayParams.value
+                        udfpsOverlayParams.value
                     )
                 )
             }

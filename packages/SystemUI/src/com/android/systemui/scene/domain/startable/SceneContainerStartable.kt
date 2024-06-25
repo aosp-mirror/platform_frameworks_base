@@ -22,7 +22,6 @@ import android.app.StatusBarManager
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.UiEventLogger
-import com.android.internal.policy.IKeyguardStateCallback
 import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -39,6 +38,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInt
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
+import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor
 import com.android.systemui.model.SceneContainerPlugin
@@ -83,6 +83,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -124,11 +125,10 @@ constructor(
     private val sceneBackInteractor: SceneBackInteractor,
     private val shadeSessionStorage: SessionStorage,
     private val windowMgrLockscreenVisInteractor: WindowManagerLockscreenVisibilityInteractor,
+    private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
-
-    private val keyguardStateCallbacks = mutableListOf<IKeyguardStateCallback>()
 
     override fun start() {
         if (SceneContainerFlag.isEnabled) {
@@ -143,6 +143,7 @@ constructor(
             hydrateWindowController()
             hydrateBackStack()
             resetShadeSessions()
+            handleKeyguardEnabledness()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -650,6 +651,51 @@ constructor(
                 // Only consider negative scrolling, AKA overscroll.
                 .filter { it == -1 }
                 .collect { faceUnlockInteractor.onSwipeUpOnBouncer() }
+        }
+    }
+
+    private fun handleKeyguardEnabledness() {
+        // Automatically switches scenes when keyguard is enabled or disabled, as needed.
+        applicationScope.launch {
+            keyguardEnabledInteractor.isKeyguardEnabled
+                .sample(
+                    combine(
+                        deviceEntryInteractor.isInLockdown,
+                        deviceEntryInteractor.isDeviceEntered,
+                        ::Pair,
+                    )
+                ) { isKeyguardEnabled, (isInLockdown, isDeviceEntered) ->
+                    when {
+                        !isKeyguardEnabled && !isInLockdown && !isDeviceEntered -> {
+                            keyguardEnabledInteractor.setShowKeyguardWhenReenabled(true)
+                            Scenes.Gone to "Keyguard became disabled"
+                        }
+                        isKeyguardEnabled &&
+                            keyguardEnabledInteractor.isShowKeyguardWhenReenabled() -> {
+                            keyguardEnabledInteractor.setShowKeyguardWhenReenabled(false)
+                            Scenes.Lockscreen to "Keyguard became enabled"
+                        }
+                        else -> null
+                    }
+                }
+                .filterNotNull()
+                .collect { (targetScene, loggingReason) ->
+                    switchToScene(targetScene, loggingReason)
+                }
+        }
+
+        // Clears the showKeyguardWhenReenabled if the auth method changes to an insecure one.
+        applicationScope.launch {
+            authenticationInteractor
+                .get()
+                .authenticationMethod
+                .map { it.isSecure }
+                .distinctUntilChanged()
+                .collect { isAuthenticationMethodSecure ->
+                    if (!isAuthenticationMethodSecure) {
+                        keyguardEnabledInteractor.setShowKeyguardWhenReenabled(false)
+                    }
+                }
         }
     }
 

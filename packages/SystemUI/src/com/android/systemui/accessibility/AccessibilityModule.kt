@@ -42,4 +42,7 @@ interface AccessibilityModule {
     fun accessibilityQsShortcutsRepository(
         impl: AccessibilityQsShortcutsRepositoryImpl
     ): AccessibilityQsShortcutsRepository
+
+    @Binds
+    fun magnification(impl: MagnificationImpl): Magnification
 }

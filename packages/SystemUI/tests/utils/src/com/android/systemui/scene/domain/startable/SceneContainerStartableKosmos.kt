@@ -25,6 +25,7 @@ import com.android.systemui.classifier.falsingManager
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.windowManagerLockscreenVisibilityInteractor
 import com.android.systemui.kosmos.Kosmos
@@ -71,5 +72,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         sceneBackInteractor = sceneBackInteractor,
         shadeSessionStorage = shadeSessionStorage,
         windowMgrLockscreenVisInteractor = windowManagerLockscreenVisibilityInteractor,
+        keyguardEnabledInteractor = keyguardEnabledInteractor,
     )
 }

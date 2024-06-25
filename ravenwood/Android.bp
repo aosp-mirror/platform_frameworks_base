@@ -170,7 +170,7 @@ java_library {
     srcs: [
         "junit-flag-src/**/*.java",
     ],
-    sdk_version: "module_current",
+    sdk_version: "test_current",
     libs: [
         "junit",
         "flag-junit",
@@ -274,5 +274,79 @@ sh_test_host {
         ":services.core.ravenwood.stats",
         ":services.core.ravenwood.apis",
         ":services.core.ravenwood.keep_all",
+    ],
+}
+
+java_library {
+    name: "services.fakes.ravenwood-jarjar",
+    installable: false,
+    srcs: [":services.fakes-sources"],
+    libs: [
+        "ravenwood-framework",
+        "services.core.ravenwood",
+    ],
+    jarjar_rules: ":ravenwood-services-jarjar-rules",
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "mockito-ravenwood-prebuilt",
+    installable: false,
+    static_libs: [
+        "mockito-robolectric-prebuilt",
+    ],
+}
+
+java_library {
+    name: "inline-mockito-ravenwood-prebuilt",
+    installable: false,
+    static_libs: [
+        "inline-mockito-robolectric-prebuilt",
+    ],
+}
+
+android_ravenwood_libgroup {
+    name: "ravenwood-runtime",
+    libs: [
+        "100-framework-minus-apex.ravenwood",
+        "200-kxml2-android",
+
+        "ravenwood-runtime-common-ravenwood",
+
+        "android.test.mock.ravenwood",
+        "ravenwood-helper-runtime",
+        "hoststubgen-helper-runtime.ravenwood",
+        "services.core.ravenwood-jarjar",
+        "services.fakes.ravenwood-jarjar",
+
+        // Provide runtime versions of utils linked in below
+        "junit",
+        "truth",
+        "flag-junit",
+        "ravenwood-framework",
+        "ravenwood-junit-impl",
+        "ravenwood-junit-impl-flag",
+        "mockito-ravenwood-prebuilt",
+        "inline-mockito-ravenwood-prebuilt",
+
+        // It's a stub, so it should be towards the end.
+        "z00-all-updatable-modules-system-stubs",
+    ],
+    jni_libs: [
+        "libandroid_runtime",
+        "libravenwood_runtime",
+    ],
+}
+
+android_ravenwood_libgroup {
+    name: "ravenwood-utils",
+    libs: [
+        "junit",
+        "truth",
+        "flag-junit",
+        "ravenwood-framework",
+        "ravenwood-junit",
+        "mockito-ravenwood-prebuilt",
+        "inline-mockito-ravenwood-prebuilt",
     ],
 }

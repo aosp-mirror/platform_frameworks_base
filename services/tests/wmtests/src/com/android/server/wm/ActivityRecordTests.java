@@ -3357,14 +3357,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         // to client if the app didn't request IME visible.
         assertFalse(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
-        if (Flags.bundleClientTransactionFlag()) {
-            verify(app2.getProcess(), atLeastOnce()).scheduleClientTransactionItem(
-                    isA(WindowStateResizeItem.class));
-        } else {
-            verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),
-                    insetsStateCaptor.capture(), anyBoolean(), anyBoolean(), anyInt(), anyInt(),
-                    anyBoolean(), any());
-        }
+        verify(app2.getProcess(), atLeastOnce()).scheduleClientTransactionItem(
+                isA(WindowStateResizeItem.class));
         assertFalse(app2.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
     }
 

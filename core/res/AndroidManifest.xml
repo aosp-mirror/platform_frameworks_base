@@ -8222,6 +8222,19 @@
     <permission android:name="android.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD"
                 android:protectionLevel="internal|appop" />
 
+    <!-- @hide @SystemApi
+         @FlaggedApi(android.os.Flags.FLAG_ALLOW_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT)
+         Allows system applications to capture bugreport directly without consent dialog when using
+         the bugreporting API, and instead use the applications-owned consent page.
+         <p>The application still needs to hold {@link android.permission.DUMP} permission and be
+         bugreport-whitelisted to be able to capture a bugreport using the bugreporting API in the
+         first place.
+         <p>Protection level: signature|privileged
+         <p>Not for use by third-party applications. -->
+    <permission
+        android:name="android.permission.CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows to call APIs that log process lifecycle events
          @hide -->
     <permission android:name="android.permission.LOG_FOREGROUND_RESOURCE_USE"

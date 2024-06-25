@@ -975,7 +975,7 @@ class DesktopTasksController(
         if (!desktopModeTaskRepository.isDesktopModeShowing(task.displayId)) {
             KtProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: switch freeform task to fullscreen oon transition" +
+                "DesktopTasksController: bring desktop tasks to front on transition" +
                     " taskId=%d",
                 task.taskId
             )

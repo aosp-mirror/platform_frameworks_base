@@ -577,6 +577,7 @@ public class AudioServiceEvents {
         static final int DOSE_REPEAT_5X = 2;
         static final int DOSE_ACCUMULATION_START = 3;
         static final int LOWER_VOLUME_TO_RS1 = 4;
+        static final int UPDATE_ABS_VOLUME_ATTENUATION = 5;
 
         final int mEventType;
         final float mFloatValue;
@@ -608,6 +609,10 @@ public class AudioServiceEvents {
             return new SoundDoseEvent(LOWER_VOLUME_TO_RS1, 0 /*ignored*/, 0 /*ignored*/);
         }
 
+        static SoundDoseEvent getAbsVolumeAttenuationEvent(float attenuation, int device) {
+            return new SoundDoseEvent(UPDATE_ABS_VOLUME_ATTENUATION, attenuation, device);
+        }
+
         @Override
         public String eventToString() {
             switch (mEventType) {
@@ -623,6 +628,10 @@ public class AudioServiceEvents {
                     return "CSD accumulating: RS2 entered";
                 case LOWER_VOLUME_TO_RS1:
                     return "CSD lowering volume to RS1";
+                case UPDATE_ABS_VOLUME_ATTENUATION:
+                    return String.format(java.util.Locale.US,
+                            "Updating CSD absolute volume attenuation on device %d with %.2f dB ",
+                            mLongValue, mFloatValue);
             }
             return new StringBuilder("FIXME invalid event type:").append(mEventType).toString();
         }

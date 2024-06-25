@@ -1177,6 +1177,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void goToFullShade(long delay) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.goToFullShade(delay);
     }
 
