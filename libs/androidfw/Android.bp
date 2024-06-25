@@ -267,6 +267,7 @@ cc_test {
 cc_benchmark {
     name: "libandroidfw_benchmarks",
     defaults: ["libandroidfw_defaults"],
+    test_config: "tests/AndroidTest_Benchmarks.xml",
     srcs: [
         // Helpers/infra for benchmarking.
         "tests/BenchMain.cpp",
@@ -282,7 +283,11 @@ cc_benchmark {
         "tests/Theme_bench.cpp",
     ],
     shared_libs: common_test_libs,
-    data: ["tests/data/**/*.apk"],
+    data: [
+        "tests/data/**/*.apk",
+        ":FrameworkResourcesSparseTestApp",
+        ":FrameworkResourcesNotSparseTestApp",
+    ],
 }
 
 cc_library {
