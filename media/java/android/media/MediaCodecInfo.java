@@ -2388,6 +2388,24 @@ public final class MediaCodecInfo {
             }
 
             /**
+             * Width in macroblocks.
+             *
+             * @hide
+             */
+            /** package private */ int getWidth() {
+                return mWidth;
+            }
+
+            /**
+             * Height in macroblocks.
+             *
+             * @hide
+             */
+            /** package private */ int getHeight() {
+                return mHeight;
+            }
+
+            /**
              * Maximum frame rate in frames per second.
              *
              * @hide
@@ -2405,6 +2423,24 @@ public final class MediaCodecInfo {
             @TestApi
             public long getMaxMacroBlockRate() {
                 return mMaxMacroBlockRate;
+            }
+
+            /**
+             * Codec block width in macroblocks.
+             *
+             * @hide
+             */
+            /** package private */ int getBlockWidth() {
+                return mBlockSize.getWidth();
+            }
+
+            /**
+             * Codec block height in macroblocks.
+             *
+             * @hide
+             */
+            /** package private */ int getBlockHeight() {
+                return mBlockSize.getHeight();
             }
 
             /** Convert to a debug string */
@@ -2494,6 +2530,20 @@ public final class MediaCodecInfo {
                 this(width, height, frameRate, frameRate /* maxFrameRate */, new Size(16, 16));
             }
 
+            /* package private */ PerformancePoint(int width, int height, int maxFrameRate,
+                    long maxMacroBlockRate, int blockSizeWidth, int blockSizeHeight) {
+                mWidth = width;
+                mHeight = height;
+                mMaxFrameRate = maxFrameRate;
+                mMaxMacroBlockRate = maxMacroBlockRate;
+                mBlockSize = new Size(blockSizeWidth, blockSizeHeight);
+            }
+
+            private PerformancePoint(PerformancePoint pp) {
+                this(pp.mWidth, pp.mHeight, pp.mMaxFrameRate, pp.mMaxMacroBlockRate,
+                        pp.mBlockSize.getWidth(), pp.mBlockSize.getHeight());
+            }
+
             /** Saturates a long value to int */
             private int saturateLongToInt(long value) {
                 if (value < Integer.MIN_VALUE) {
@@ -2547,14 +2597,18 @@ public final class MediaCodecInfo {
              * @return {@code true} if the performance point covers the other.
              */
             public boolean covers(@NonNull PerformancePoint other) {
-                // convert performance points to common block size
-                Size commonSize = getCommonBlockSize(other);
-                PerformancePoint aligned = new PerformancePoint(this, commonSize);
-                PerformancePoint otherAligned = new PerformancePoint(other, commonSize);
+                if (GetFlag(() -> android.media.codec.Flags.nativeCapabilites())) {
+                    return native_covers(other);
+                } else {
+                    // convert performance points to common block size
+                    Size commonSize = getCommonBlockSize(other);
+                    PerformancePoint aligned = new PerformancePoint(this, commonSize);
+                    PerformancePoint otherAligned = new PerformancePoint(other, commonSize);
 
-                return (aligned.getMaxMacroBlocks() >= otherAligned.getMaxMacroBlocks()
-                        && aligned.mMaxFrameRate >= otherAligned.mMaxFrameRate
-                        && aligned.mMaxMacroBlockRate >= otherAligned.mMaxMacroBlockRate);
+                    return (aligned.getMaxMacroBlocks() >= otherAligned.getMaxMacroBlocks()
+                            && aligned.mMaxFrameRate >= otherAligned.mMaxFrameRate
+                            && aligned.mMaxMacroBlockRate >= otherAligned.mMaxMacroBlockRate);
+                }
             }
 
             private @NonNull Size getCommonBlockSize(@NonNull PerformancePoint other) {
@@ -2568,15 +2622,26 @@ public final class MediaCodecInfo {
                 if (o instanceof PerformancePoint) {
                     // convert performance points to common block size
                     PerformancePoint other = (PerformancePoint)o;
-                    Size commonSize = getCommonBlockSize(other);
-                    PerformancePoint aligned = new PerformancePoint(this, commonSize);
-                    PerformancePoint otherAligned = new PerformancePoint(other, commonSize);
+                    if (GetFlag(() -> android.media.codec.Flags.nativeCapabilites())) {
+                        return native_equals(other);
+                    } else {
+                        Size commonSize = getCommonBlockSize(other);
+                        PerformancePoint aligned = new PerformancePoint(this, commonSize);
+                        PerformancePoint otherAligned = new PerformancePoint(other, commonSize);
 
-                    return (aligned.getMaxMacroBlocks() == otherAligned.getMaxMacroBlocks()
-                            && aligned.mMaxFrameRate == otherAligned.mMaxFrameRate
-                            && aligned.mMaxMacroBlockRate == otherAligned.mMaxMacroBlockRate);
+                        return (aligned.getMaxMacroBlocks() == otherAligned.getMaxMacroBlocks()
+                                && aligned.mMaxFrameRate == otherAligned.mMaxFrameRate
+                                && aligned.mMaxMacroBlockRate == otherAligned.mMaxMacroBlockRate);
+                    }
                 }
                 return false;
+            }
+
+            private native boolean native_covers(PerformancePoint other);
+            private native boolean native_equals(PerformancePoint other);
+
+            static {
+                System.loadLibrary("media_jni");
             }
 
             /** 480p 24fps */
@@ -4994,6 +5059,11 @@ public final class MediaCodecInfo {
     /* package private */ class GenericHelper {
         private static Range<Integer> constructIntegerRange(int lower, int upper) {
             return Range.create(Integer.valueOf(lower), Integer.valueOf(upper));
+        }
+
+        private static List<VideoCapabilities.PerformancePoint>
+                constructPerformancePointList(VideoCapabilities.PerformancePoint[] array) {
+            return Arrays.asList(array);
         }
     }
 }
