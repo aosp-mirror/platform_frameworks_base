@@ -5797,8 +5797,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     void finishSync(Transaction outMergedTransaction, BLASTSyncEngine.SyncGroup group,
             boolean cancel) {
-        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
-        if (syncGroup != null && group != syncGroup) return;
+        if (isDifferentSyncGroup(group)) return;
         mPrepareSyncSeqId = 0;
         if (cancel) {
             // This is leaving sync so any buffers left in the sync have a chance of
