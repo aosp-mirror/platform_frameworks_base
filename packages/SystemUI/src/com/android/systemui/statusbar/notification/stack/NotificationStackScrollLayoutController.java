@@ -1609,10 +1609,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         return mView.getTransientView(i);
     }
 
-    public int getPositionInLinearLayout(ExpandableView row) {
-        return mView.getPositionInLinearLayout(row);
-    }
-
     public NotificationStackScrollLayout getView() {
         return mView;
     }

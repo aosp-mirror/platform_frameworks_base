@@ -196,11 +196,9 @@ fun SceneScope.NotificationScrollingStack(
         viewModel.isCurrentGestureOverscroll.collectAsStateWithLifecycle(false)
     val expansionFraction by viewModel.expandFraction.collectAsStateWithLifecycle(0f)
 
-    val navBarHeightPx =
-        with(density) {
-            WindowInsets.systemBars.asPaddingValues().calculateBottomPadding().toPx().toInt()
-        }
-    val bottomPaddingPx = if (shouldReserveSpaceForNavBar) navBarHeightPx else 0
+    val topPadding = dimensionResource(id = R.dimen.notification_side_paddings)
+    val navBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+    val bottomPadding = if (shouldReserveSpaceForNavBar) navBarHeight else 0.dp
 
     val screenHeight = LocalRawScreenHeight.current
 
@@ -369,8 +367,12 @@ fun SceneScope.NotificationScrollingStack(
                             Modifier.nestedScroll(scrimNestedScrollConnection)
                         }
                         .verticalScroll(scrollState)
+                        .padding(top = topPadding)
                         .fillMaxWidth()
-                        .notificationStackHeight(view = stackScrollView, padding = bottomPaddingPx)
+                        .notificationStackHeight(
+                            view = stackScrollView,
+                            totalVerticalPadding = topPadding + bottomPadding,
+                        )
                         .onSizeChanged { size -> stackHeight.intValue = size.height },
             )
         }
