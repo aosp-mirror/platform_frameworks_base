@@ -11698,7 +11698,7 @@ public class AudioService extends IAudioService.Stub
     static final int LOG_NB_EVENTS_VOLUME = 100;
     static final int LOG_NB_EVENTS_DYN_POLICY = 10;
     static final int LOG_NB_EVENTS_SPATIAL = 30;
-    static final int LOG_NB_EVENTS_SOUND_DOSE = 30;
+    static final int LOG_NB_EVENTS_SOUND_DOSE = 50;
 
     static final int LOG_NB_EVENTS_LOUDNESS_CODEC = 30;
 
