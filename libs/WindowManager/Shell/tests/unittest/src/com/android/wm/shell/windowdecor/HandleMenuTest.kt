@@ -126,11 +126,11 @@ class HandleMenuTest : ShellTestCase() {
     fun testFullscreenMenuUsesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_FULLSCREEN, SPLIT_POSITION_UNDEFINED)
         val handleMenu = createAndShowHandleMenu()
-        assertTrue(handleMenu.mHandleMenuViewContainer is AdditionalSystemViewContainer)
+        assertTrue(handleMenu.handleMenuViewContainer is AdditionalSystemViewContainer)
         // Verify menu is created at coordinates that, when added to WindowManager,
         // show at the top-center of display.
         val expected = Point(DISPLAY_BOUNDS.centerX() - MENU_WIDTH / 2, MENU_TOP_MARGIN)
-        assertEquals(expected.toPointF(), handleMenu.mHandleMenuPosition)
+        assertEquals(expected.toPointF(), handleMenu.handleMenuPosition)
     }
 
     @Test
@@ -138,10 +138,10 @@ class HandleMenuTest : ShellTestCase() {
     fun testFreeformMenu_usesViewHostViewContainer() {
         createTaskInfo(WINDOWING_MODE_FREEFORM, SPLIT_POSITION_UNDEFINED)
         handleMenu = createAndShowHandleMenu()
-        assertTrue(handleMenu.mHandleMenuViewContainer is AdditionalViewHostViewContainer)
+        assertTrue(handleMenu.handleMenuViewContainer is AdditionalViewHostViewContainer)
         // Verify menu is created near top-left of task.
         val expected = Point(MENU_START_MARGIN, MENU_TOP_MARGIN)
-        assertEquals(expected.toPointF(), handleMenu.mHandleMenuPosition)
+        assertEquals(expected.toPointF(), handleMenu.handleMenuPosition)
     }
 
     @Test
@@ -149,11 +149,11 @@ class HandleMenuTest : ShellTestCase() {
     fun testSplitLeftMenu_usesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, SPLIT_POSITION_TOP_OR_LEFT)
         handleMenu = createAndShowHandleMenu()
-        assertTrue(handleMenu.mHandleMenuViewContainer is AdditionalSystemViewContainer)
+        assertTrue(handleMenu.handleMenuViewContainer is AdditionalSystemViewContainer)
         // Verify menu is created at coordinates that, when added to WindowManager,
         // show at the top-center of split left task.
         val expected = Point(SPLIT_LEFT_BOUNDS.centerX() - MENU_WIDTH / 2, MENU_TOP_MARGIN)
-        assertEquals(expected.toPointF(), handleMenu.mHandleMenuPosition)
+        assertEquals(expected.toPointF(), handleMenu.handleMenuPosition)
     }
 
     @Test
@@ -161,11 +161,11 @@ class HandleMenuTest : ShellTestCase() {
     fun testSplitRightMenu_usesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, SPLIT_POSITION_BOTTOM_OR_RIGHT)
         handleMenu = createAndShowHandleMenu()
-        assertTrue(handleMenu.mHandleMenuViewContainer is AdditionalSystemViewContainer)
+        assertTrue(handleMenu.handleMenuViewContainer is AdditionalSystemViewContainer)
         // Verify menu is created at coordinates that, when added to WindowManager,
         // show at the top-center of split right task.
         val expected = Point(SPLIT_RIGHT_BOUNDS.centerX() - MENU_WIDTH / 2, MENU_TOP_MARGIN)
-        assertEquals(expected.toPointF(), handleMenu.mHandleMenuPosition)
+        assertEquals(expected.toPointF(), handleMenu.handleMenuPosition)
     }
 
     private fun createTaskInfo(windowingMode: Int, splitPosition: Int) {
