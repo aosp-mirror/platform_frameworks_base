@@ -105,7 +105,7 @@
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"ମିଡିଆ ଅଡିଓ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ଫୋନ କଲ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ଇନ୍‌ପୁଟ୍‌ ଡିଭାଇସ୍"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ଇନପୁଟ ଡିଭାଇସ"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ଇଣ୍ଟରନେଟ ଆକ୍ସେସ"</string>
     <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"କଣ୍ଟାକ୍ଟ ଏବଂ କଲ ଇତିହାସ ସେୟାରିଂ"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"କଣ୍ଟାକ୍ଟ ଏବଂ କଲ ଇତିହାସ ସେୟାରିଂ ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
