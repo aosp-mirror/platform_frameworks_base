@@ -21,16 +21,16 @@ import com.android.systemui.shared.settings.data.repository.SecureSettingsReposi
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
 /** Provides access to state related to notification settings. */
 class NotificationSettingsRepository(
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
     private val backgroundDispatcher: CoroutineDispatcher,
     private val secureSettingsRepository: SecureSettingsRepository,
 ) {
@@ -41,16 +41,15 @@ class NotificationSettingsRepository(
             .distinctUntilChanged()
 
     /** The current state of the notification setting. */
-    val isShowNotificationsOnLockScreenEnabled: StateFlow<Boolean> =
+    suspend fun isShowNotificationsOnLockScreenEnabled(): StateFlow<Boolean> =
         secureSettingsRepository
             .intSetting(
                 name = Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
             )
             .map { it == 1 }
+            .flowOn(backgroundDispatcher)
             .stateIn(
                 scope = scope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
             )
 
     suspend fun setShowNotificationsOnLockscreenEnabled(enabled: Boolean) {
