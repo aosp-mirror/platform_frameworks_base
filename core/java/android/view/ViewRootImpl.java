@@ -4400,7 +4400,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mAppStartInfoTimestampsFlagValue && !mAppStartTrackingStarted) {
             mAppStartTrackingStarted = true;
             Transaction transaction = new Transaction();
-            transaction.addTransactionCompletedListener(mExecutor,
+            transaction.addTransactionCompletedListener(mSimpleExecutor,
                     new Consumer<TransactionStats>() {
                         @Override
                         public void accept(TransactionStats transactionStats) {
