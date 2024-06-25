@@ -53,17 +53,6 @@ flag {
 }
 
 flag {
-  name: "remove_prepare_surface_in_placement"
-  namespace: "windowing_frontend"
-  description: "Reduce unnecessary invocation to improve performance"
-  bug: "330721336"
-  is_fixed_read_only: true
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "close_to_square_config_includes_status_bar"
   namespace: "windowing_frontend"
   description: "On close to square display, when necessary, configuration includes status bar"
