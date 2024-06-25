@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip2.phone;
 
+import static androidx.dynamicanimation.animation.SpringForce.DAMPING_RATIO_LOW_BOUNCY;
 import static androidx.dynamicanimation.animation.SpringForce.DAMPING_RATIO_NO_BOUNCY;
 import static androidx.dynamicanimation.animation.SpringForce.STIFFNESS_LOW;
 import static androidx.dynamicanimation.animation.SpringForce.STIFFNESS_MEDIUM;
@@ -25,6 +26,7 @@ import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_NONE;
 import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_RIGHT;
 import static com.android.wm.shell.pip2.phone.PipMenuView.ANIM_TYPE_DISMISS;
 import static com.android.wm.shell.pip2.phone.PipMenuView.ANIM_TYPE_NONE;
+import static com.android.wm.shell.pip2.phone.PipTransition.ANIMATING_BOUNDS_CHANGE_DURATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -36,6 +38,7 @@ import android.os.Debug;
 import android.view.SurfaceControl;
 
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.util.Preconditions;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -45,6 +48,7 @@ import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
+import com.android.wm.shell.pip2.animation.PipResizeAnimator;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
 
@@ -62,6 +66,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         PipTransitionState.PipTransitionStateChangedListener {
     private static final String TAG = "PipMotionHelper";
     private static final String FLING_BOUNDS_CHANGE = "fling_bounds_change";
+    private static final String ANIMATING_BOUNDS_CHANGE = "animating_bounds_change";
     private static final boolean DEBUG = false;
 
     private static final int SHRINK_STACK_FROM_MENU_DURATION = 250;
@@ -113,7 +118,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     /** SpringConfig to use for fling-then-spring animations. */
     private final PhysicsAnimator.SpringConfig mSpringConfig =
-            new PhysicsAnimator.SpringConfig(700f, DAMPING_RATIO_NO_BOUNCY);
+            new PhysicsAnimator.SpringConfig(300f, DAMPING_RATIO_LOW_BOUNCY);
 
     /** SpringConfig used for animating into the dismiss region, matches the one in
      * {@link MagnetizedObject}. */
@@ -152,9 +157,16 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private boolean mDismissalPending = false;
 
     /**
-     * Set to true if bounds change transition has been scheduled from PipMotionHelper.
+     * Set to true if bounds change transition has been scheduled from PipMotionHelper
+     * after animating is over.
      */
-    private boolean mWaitingForBoundsChangeTransition = false;
+    private boolean mWaitingForFlingTransition = false;
+
+    /**
+     * Set to true if bounds change transition has been scheduled from PipMotionHelper,
+     * and if the animation is supposed to run while transition is playing.
+     */
+    private boolean mWaitingToPlayBoundsChangeTransition = false;
 
     /**
      * Gets set in {@link #animateToExpandedState(Rect, Rect, Rect, Runnable)}, this callback is
@@ -634,6 +646,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         // The physics animation ended, though we may not necessarily be done animating, such as
         // when we're still dragging after moving out of the magnetic target.
         if (!mDismissalPending && !mSpringingToTouch && !mMagnetizedPip.getObjectStuckToTarget()) {
+            // Update the earlier estimate on bounds we are animating towards, since physics
+            // animator is non-deterministic.
+            setAnimatingToBounds(mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
             // do not schedule resize if PiP is dismissing, which may cause app re-open to
             // mBounds instead of its normal bounds.
             Bundle extra = new Bundle();
@@ -673,6 +688,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * Directly resizes the PiP to the given {@param bounds}.
      */
     private void resizeAndAnimatePipUnchecked(Rect toBounds, int duration) {
+        if (mPipBoundsState.getMotionBoundsState().isInMotion()) {
+            // Do not carry out any resizing if we are dragging or physics animator is running.
+            return;
+        }
+
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: resizeAndAnimatePipUnchecked: toBounds=%s"
@@ -682,10 +702,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
         // Intentionally resize here even if the current bounds match the destination bounds.
         // This is so all the proper callbacks are performed.
-
-        // mPipTaskOrganizer.scheduleAnimateResizePip(toBounds, duration,
-        //         TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND, null /* updateBoundsCallback */);
-        // setAnimatingToBounds(toBounds);
+        setAnimatingToBounds(toBounds);
+        Bundle extra = new Bundle();
+        extra.putBoolean(ANIMATING_BOUNDS_CHANGE, true);
+        extra.putInt(ANIMATING_BOUNDS_CHANGE_DURATION, duration);
+        mPipTransitionState.setState(PipTransitionState.SCHEDULED_BOUNDS_CHANGE, extra);
     }
 
     @Override
@@ -694,7 +715,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             @Nullable Bundle extra) {
         switch (newState) {
             case PipTransitionState.SCHEDULED_BOUNDS_CHANGE:
-                if (!extra.getBoolean(FLING_BOUNDS_CHANGE)) break;
+                mWaitingForFlingTransition = extra.getBoolean(FLING_BOUNDS_CHANGE);
+                mWaitingToPlayBoundsChangeTransition = extra.getBoolean(ANIMATING_BOUNDS_CHANGE);
+                if (!mWaitingForFlingTransition && !mWaitingToPlayBoundsChangeTransition) {
+                    break;
+                }
 
                 if (mPipBoundsState.getBounds().equals(
                         mPipBoundsState.getMotionBoundsState().getBoundsInMotion())) {
@@ -709,30 +734,30 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                     break;
                 }
 
-                // If touch is turned off and we are in a fling animation, schedule a transition.
-                mWaitingForBoundsChangeTransition = true;
+                // Delay config until the end, if we are animating after scheduling the transition.
                 mPipScheduler.scheduleAnimateResizePip(
-                        mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
+                        mPipBoundsState.getMotionBoundsState().getAnimatingToBounds(),
+                        mWaitingToPlayBoundsChangeTransition,
+                        extra.getInt(ANIMATING_BOUNDS_CHANGE_DURATION,
+                                PipTransition.BOUNDS_CHANGE_JUMPCUT_DURATION));
                 break;
             case PipTransitionState.CHANGING_PIP_BOUNDS:
-                if (!mWaitingForBoundsChangeTransition) break;
-
-                // If bounds change transition was scheduled from this class, handle leash updates.
-                mWaitingForBoundsChangeTransition = false;
                 SurfaceControl.Transaction startTx = extra.getParcelable(
                         PipTransition.PIP_START_TX, SurfaceControl.Transaction.class);
+                SurfaceControl.Transaction finishTx = extra.getParcelable(
+                        PipTransition.PIP_FINISH_TX, SurfaceControl.Transaction.class);
                 Rect destinationBounds = extra.getParcelable(
                         PipTransition.PIP_DESTINATION_BOUNDS, Rect.class);
-                startTx.setPosition(mPipTransitionState.mPinnedTaskLeash,
-                        destinationBounds.left, destinationBounds.top);
-                startTx.apply();
+                final int duration = extra.getInt(ANIMATING_BOUNDS_CHANGE_DURATION,
+                        PipTransition.BOUNDS_CHANGE_JUMPCUT_DURATION);
 
-                // All motion operations have actually finished, so make bounds cache updates.
-                settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
-                cleanUpHighPerfSessionMaybe();
-
-                // Signal that the transition is done - should update transition state by default.
-                mPipScheduler.scheduleFinishResizePip(false /* configAtEnd */);
+                if (mWaitingForFlingTransition) {
+                    mWaitingForFlingTransition = false;
+                    handleFlingTransition(startTx, finishTx, destinationBounds);
+                } else if (mWaitingToPlayBoundsChangeTransition) {
+                    mWaitingToPlayBoundsChangeTransition = false;
+                    startResizeAnimation(startTx, finishTx, destinationBounds, duration);
+                }
                 break;
             case PipTransitionState.EXITING_PIP:
                 // We need to force finish any local animators if about to leave PiP, to avoid
@@ -740,7 +765,44 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 if (!mPipBoundsState.getMotionBoundsState().isInMotion()) break;
                 cancelPhysicsAnimation();
                 settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
+                break;
         }
+    }
+
+    private void handleFlingTransition(SurfaceControl.Transaction startTx,
+            SurfaceControl.Transaction finishTx, Rect destinationBounds) {
+        startTx.setPosition(mPipTransitionState.mPinnedTaskLeash,
+                destinationBounds.left, destinationBounds.top);
+        startTx.apply();
+
+        // All motion operations have actually finished, so make bounds cache updates.
+        settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
+        cleanUpHighPerfSessionMaybe();
+
+        // Signal that the transition is done - should update transition state by default.
+        mPipScheduler.scheduleFinishResizePip(false /* configAtEnd */);
+    }
+
+    private void startResizeAnimation(SurfaceControl.Transaction startTx,
+            SurfaceControl.Transaction finishTx, Rect destinationBounds, int duration) {
+        SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+        Preconditions.checkState(pipLeash != null,
+                "No leash cached by mPipTransitionState=" + mPipTransitionState);
+
+        startTx.setWindowCrop(pipLeash, mPipBoundsState.getBounds().width(),
+                mPipBoundsState.getBounds().height());
+
+        PipResizeAnimator animator = new PipResizeAnimator(mContext, pipLeash,
+                startTx, finishTx, mPipBoundsState.getBounds(), mPipBoundsState.getBounds(),
+                destinationBounds, duration, 0f /* angle */);
+        animator.setAnimationEndCallback(() -> {
+            mPipBoundsState.setBounds(destinationBounds);
+            // All motion operations have actually finished, so make bounds cache updates.
+            cleanUpHighPerfSessionMaybe();
+            // Signal that we are done with resize transition
+            mPipScheduler.scheduleFinishResizePip(true /* configAtEnd */);
+        });
+        animator.start();
     }
 
     private void settlePipBoundsAfterPhysicsAnimation(boolean animatingAfter) {
