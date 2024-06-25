@@ -16,8 +16,10 @@ package com.android.systemui.statusbar.phone;
 
 import static android.content.Intent.ACTION_DEVICE_LOCKED_CHANGED;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,8 +40,10 @@ import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationContentView;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -55,6 +59,8 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
+
+    @Mock private GroupExpansionManager mGroupExpansionManager;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private com.android.systemui.shade.ShadeController mShadeController;
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
@@ -77,7 +83,7 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
                 mNotificationLockscreenUserManager);
 
         mRemoteInputCallback = spy(new StatusBarRemoteInputCallback(mContext,
-                mock(GroupExpansionManager.class), mNotificationLockscreenUserManager,
+                mGroupExpansionManager, mNotificationLockscreenUserManager,
                 mKeyguardStateController, mStatusBarStateController, mStatusBarKeyguardViewManager,
                 mActivityStarter, mShadeController,
                 new CommandQueue(mContext, new FakeDisplayTracker(mContext)),
@@ -102,5 +108,76 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
                 mock(ExpandableNotificationRow.class), mock(View.class));
 
         verify(mStatusBarKeyguardViewManager).showBouncer(true);
+    }
+
+    @Test
+    public void onMakeExpandedVisibleForRemoteInput_collapsedGroup_expandGroupExpansion() {
+        // GIVEN
+        final Runnable onExpandedVisibleRunner = mock(Runnable.class);
+
+        final ExpandableNotificationRow enr = mock(ExpandableNotificationRow.class);
+        final NotificationContentView privateLayout = mock(NotificationContentView.class);
+        final NotificationEntry enrEntry = mock(NotificationEntry.class);
+
+        when(enr.getPrivateLayout()).thenReturn(privateLayout);
+        when(enr.getEntry()).thenReturn(enrEntry);
+        when(enr.isChildInGroup()).thenReturn(true);
+        when(enr.areChildrenExpanded()).thenReturn(false);
+
+        // WHEN
+        mRemoteInputCallback.onMakeExpandedVisibleForRemoteInput(
+                enr, mock(View.class), false, onExpandedVisibleRunner);
+
+        // THEN
+        verify(mGroupExpansionManager).toggleGroupExpansion(enrEntry);
+        verify(enr).setUserExpanded(true);
+        verify(privateLayout).setOnExpandedVisibleListener(onExpandedVisibleRunner);
+    }
+
+    @Test
+    public void onMakeExpandedVisibleForRemoteInput_expandedGroup_setUserExpandedTrue() {
+        // GIVEN
+        final Runnable onExpandedVisibleRunner = mock(Runnable.class);
+
+        final ExpandableNotificationRow enr = mock(ExpandableNotificationRow.class);
+        final NotificationContentView privateLayout = mock(NotificationContentView.class);
+        final NotificationEntry enrEntry = mock(NotificationEntry.class);
+
+        when(enr.getPrivateLayout()).thenReturn(privateLayout);
+        when(enr.getEntry()).thenReturn(enrEntry);
+        when(enr.isChildInGroup()).thenReturn(true);
+        when(enr.areChildrenExpanded()).thenReturn(true);
+
+        // WHEN
+        mRemoteInputCallback.onMakeExpandedVisibleForRemoteInput(
+                enr, mock(View.class), false, onExpandedVisibleRunner);
+
+        // THEN
+        verify(mGroupExpansionManager, never()).toggleGroupExpansion(any());
+        verify(enr).setUserExpanded(true);
+        verify(privateLayout).setOnExpandedVisibleListener(onExpandedVisibleRunner);
+    }
+
+    @Test
+    public void onMakeExpandedVisibleForRemoteInput_nonGroupNotifications_setUserExpandedTrue() {
+        // GIVEN
+        final Runnable onExpandedVisibleRunner = mock(Runnable.class);
+
+        final ExpandableNotificationRow enr = mock(ExpandableNotificationRow.class);
+        final NotificationContentView privateLayout = mock(NotificationContentView.class);
+        final NotificationEntry enrEntry = mock(NotificationEntry.class);
+
+        when(enr.getPrivateLayout()).thenReturn(privateLayout);
+        when(enr.getEntry()).thenReturn(enrEntry);
+        when(enr.isChildInGroup()).thenReturn(false);
+
+        // WHEN
+        mRemoteInputCallback.onMakeExpandedVisibleForRemoteInput(
+                enr, mock(View.class), false, onExpandedVisibleRunner);
+
+        // THEN
+        verify(mGroupExpansionManager, never()).toggleGroupExpansion(any());
+        verify(enr).setUserExpanded(true);
+        verify(privateLayout).setOnExpandedVisibleListener(onExpandedVisibleRunner);
     }
 }

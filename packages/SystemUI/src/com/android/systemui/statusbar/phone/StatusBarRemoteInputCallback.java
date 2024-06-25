@@ -208,6 +208,9 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
                 // expand notification emits expanded information to HUN listener.
                 row.expandNotification();
             } else {
+                // TODO(b/346976443) Group and normal notification expansions are two different
+                // concepts. We should never call setUserExpanded for expanding groups.
+
                 // Note: Since Normal HUN has remote input view in it, we don't expect to hit
                 // onMakeExpandedVisibleForRemoteInput from activateRemoteInput for Normal HUN.
                 row.setUserExpanded(true);
