@@ -486,6 +486,11 @@ class SceneContainerStartableTest : SysuiTestCase() {
                         QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING != 0L
                 )
                 .isFalse()
+            assertThat(
+                    sysUiState.flags and
+                        QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED != 0L
+                )
+                .isFalse()
 
             kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(false)
             runCurrent()
@@ -497,6 +502,11 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(
                     sysUiState.flags and
                         QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING != 0L
+                )
+                .isTrue()
+            assertThat(
+                    sysUiState.flags and
+                        QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED != 0L
                 )
                 .isTrue()
         }
