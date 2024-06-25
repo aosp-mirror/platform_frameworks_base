@@ -18,15 +18,21 @@ package com.android.server.inputmethod;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.platform.test.ravenwood.RavenwoodRule;
+
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.pm.UserManagerInternal;
 
@@ -61,10 +67,15 @@ public final class UserDataRepositoryTest {
 
     private IntFunction<InputMethodBindingController> mBindingControllerFactory;
 
+    private Context mMockedContext;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         SecureSettingsWrapper.startTestMode();
+        mMockedContext = spy(InstrumentationRegistry.getInstrumentation().getTargetContext());
+        doReturn(mMockedContext).when(mMockedContext).createContextAsUser(any(), anyInt());
+
         mHandler = new Handler(Looper.getMainLooper());
         mBindingControllerFactory = new IntFunction<InputMethodBindingController>() {
 
@@ -85,8 +96,8 @@ public final class UserDataRepositoryTest {
         // Create UserDataRepository and capture the user lifecycle listener
         final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
         final var bindingControllerFactorySpy = spy(mBindingControllerFactory);
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
-                bindingControllerFactorySpy);
+        final var repository = new UserDataRepository(mMockedContext, mHandler,
+                mMockUserManagerInternal, bindingControllerFactorySpy);
 
         verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
         final var listener = captor.getValue();
@@ -112,7 +123,8 @@ public final class UserDataRepositoryTest {
     public void testUserDataRepository_removesUserInfoOnUserRemovedEvent() {
         // Create UserDataRepository and capture the user lifecycle listener
         final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
+        final var repository = new UserDataRepository(mMockedContext, mHandler,
+                mMockUserManagerInternal,
                 userId -> new InputMethodBindingController(userId, mMockInputMethodManagerService));
 
         verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
@@ -134,8 +146,8 @@ public final class UserDataRepositoryTest {
 
     @Test
     public void testGetOrCreate() {
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
-                mBindingControllerFactory);
+        final var repository = new UserDataRepository(mMockedContext, mHandler,
+                mMockUserManagerInternal, mBindingControllerFactory);
 
         synchronized (ImfLock.class) {
             final var userData = repository.getOrCreate(ANY_USER_ID);

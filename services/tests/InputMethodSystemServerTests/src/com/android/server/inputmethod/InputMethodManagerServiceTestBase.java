@@ -181,6 +181,7 @@ public class InputMethodManagerServiceTestBase {
         // InputMethodManagerService.
         doNothing().when(mContext).enforceCallingPermission(anyString(), anyString());
         doNothing().when(mContext).sendBroadcastAsUser(any(), any());
+        doReturn(mContext).when(mContext).createContextAsUser(any(), anyInt());
         doReturn(null).when(mContext).registerReceiver(any(), any());
         doReturn(null)
                 .when(mContext)
