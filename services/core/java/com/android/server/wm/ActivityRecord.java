@@ -158,7 +158,6 @@ import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANG
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
-import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
@@ -4576,9 +4575,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!delayed) {
             updateReportedVisibilityLocked();
         }
-
-        // Reset the last saved PiP snap fraction on removal.
-        mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
         mDisplayContent.onRunningActivityChanged();
         mRemovingFromDisplay = false;
     }
@@ -6736,8 +6732,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (task.mLastRecentsAnimationTransaction != null) {
             task.clearLastRecentsAnimationTransaction(true /* forceRemoveOverlay */);
         }
-        // Reset the last saved PiP snap fraction on app stop.
-        mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
         if (isClientVisible()) {
             // Though this is usually unlikely to happen, still make sure the client is invisible.
             setClientVisible(false);
