@@ -400,9 +400,9 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Questa app può essere eseguita in background, velocizzando il consumo della batteria."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"utilizzo dei dati in background"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Questa app può usare dati in background, aumentando l\'utilizzo dei dati."</string>
-    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Pianificare la precisione delle azioni temporizzate"</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Programma azioni temporizzate con precisione"</string>
     <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Questa app può pianificare il lavoro al momento desiderato nel futuro. Significa anche che l\'app può essere eseguita quando non stai attivamente utilizzando il dispositivo."</string>
-    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Pianifica sveglie o promemoria eventi"</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Programma sveglie o promemoria eventi"</string>
     <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Quest\'app può pianificare azioni come sveglie e promemoria per notificarti al momento desiderato nel futuro."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"esecuzione permanente delle applicazioni"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Consente all\'applicazione di rendere persistenti in memoria alcune sue parti. Ciò può limitare la memoria disponibile per altre applicazioni, rallentando il tablet."</string>

@@ -634,7 +634,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Moveu o dedo demasiado lentamente. Tente novamente."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Experimente outra impressão digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Está demasiado claro"</string>
-    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Detetou-se que o botão ligar/desligar foi premido"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Detetou-se que o botão ligar/desligar foi pressionado"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Experimente ajustar"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Altere a posição do seu dedo ligeiramente de cada vez"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -656,7 +656,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo não tem sensor de impressões digitais."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor temporariamente desativado."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Não é possível usar o sensor de impressões digitais. Visite um fornecedor de serviços de reparação"</string>
-    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Botão ligar/desligar premido"</string>
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Botão ligar/desligar pressionado"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar a impressão digital"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar o bloqueio de ecrã ou a impressão digital"</string>

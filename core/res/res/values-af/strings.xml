@@ -462,7 +462,7 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Laat die program toe om jou Android TV-toestel se oproeprekord te wysig, insluitend data oor inkomende en uitgaande oproepe. Kwaadwillige programme kan dit gebruik om jou oproeprekord uit te vee of te wysig."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Laat die program toe om jou foon se oproeprekord, insluitende data oor inkomende en uitgaande oproepe, te verander. Kwaadwillige programme kan dit gebruik om jou oproeprekord uit te vee of te verander."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"Kry toegang tot liggaamsensordata, soos polsslag, terwyl program gebruik word"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Gee die program toegang tot liggaamsensordata, soos polsslag, temperatuur en bloedsuurstofpersentasie, terwyl die program gebruik word."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Gee die app toegang tot liggaamsensordata, soos polsslag, temperatuur en bloedsuurstofpersentasie, terwyl die app  gebruik word."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Kry toegang tot liggaamsensordata, soos polsslag, terwyl program op agtergrond is"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Gee die program toegang tot liggaamsensordata, soos polsslag, temperatuur en bloedsuurstofpersentasie, terwyl dit op die agtergrond is."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lees kalendergebeurtenisse en -besonderhede"</string>
