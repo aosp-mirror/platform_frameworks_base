@@ -1020,6 +1020,9 @@ public class PipTransition extends PipTransitionController {
             mPipMenuController.attach(leash);
         }
 
+        // Make sure we have the launcher shelf into destination bounds calculation
+        // before the animator starts.
+        mPipBoundsState.mayUseCachedLauncherShelfHeight();
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         final Rect currentBounds = pipChange.getStartAbsBounds();
 
