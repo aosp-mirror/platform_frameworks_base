@@ -152,7 +152,6 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.Slogf;
-import com.android.window.flags.Flags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -789,13 +788,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
-        if (Flags.bundleClientTransactionFlag()) {
-            // mWmService.mResizingWindows is populated in #applySurfaceChangesTransaction()
-            handleResizingWindows();
+        // mWmService.mResizingWindows is populated in #applySurfaceChangesTransaction()
+        handleResizingWindows();
+        clearFrameChangingWindows();
 
-            // Called after #handleResizingWindows to include WindowStateResizeItem if any.
-            mWmService.mAtmService.getLifecycleManager().dispatchPendingTransactions();
-        }
+        // Called after #handleResizingWindows to include WindowStateResizeItem if any.
+        mWmService.mAtmService.getLifecycleManager().dispatchPendingTransactions();
 
         // Send any pending task-info changes that were queued-up during a layout deferment
         mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -838,11 +836,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         defaultDisplay.pendingLayoutChanges);
             }
         }
-
-        if (!Flags.bundleClientTransactionFlag()) {
-            handleResizingWindows();
-        }
-        clearFrameChangingWindows();
 
         if (mWmService.mDisplayFrozen) {
             ProtoLog.v(WM_DEBUG_ORIENTATION,
