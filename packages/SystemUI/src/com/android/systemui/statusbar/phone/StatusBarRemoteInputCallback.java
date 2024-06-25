@@ -192,30 +192,42 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         if (!deferBouncer && mKeyguardStateController.isShowing()) {
             onLockedRemoteInput(row, clickedView);
         } else {
-            if (row.isChildInGroup() && !row.areChildrenExpanded()) {
-                // The group isn't expanded, let's make sure it's visible!
-                mGroupExpansionManager.toggleGroupExpansion(row.getEntry());
-            }
-
-            if (android.app.Flags.compactHeadsUpNotificationReply()
-                    && row.isCompactConversationHeadsUpOnScreen()) {
-                // Notification can be system expanded true and it is set user expanded in
-                // activateRemoteInput. notifyHeightChanged also doesn't work as visibleType doesn't
-                // change. To expand huning notification properly, we need set userExpanded false.
-                if (!row.isPinned() && row.isExpanded()) {
-                    row.setUserExpanded(false);
+            if (ExpandHeadsUpOnInlineReply.isEnabled()) {
+                if (row.isChildInGroup() && !row.areChildrenExpanded()) {
+                    // The group isn't expanded, let's make sure it's visible!
+                    mGroupExpansionManager.toggleGroupExpansion(row.getEntry());
+                } else if (!row.isChildInGroup() && !row.isExpanded()) {
+                    // notification isn't expanded, let's make sure it's visible!
+                    row.toggleExpansionState();
+                    row.getPrivateLayout().setOnExpandedVisibleListener(runnable);
                 }
-                // expand notification emits expanded information to HUN listener.
-                row.expandNotification();
             } else {
-                // TODO(b/346976443) Group and normal notification expansions are two different
-                // concepts. We should never call setUserExpanded for expanding groups.
+                if (row.isChildInGroup() && !row.areChildrenExpanded()) {
+                    // The group isn't expanded, let's make sure it's visible!
+                    mGroupExpansionManager.toggleGroupExpansion(row.getEntry());
+                }
 
-                // Note: Since Normal HUN has remote input view in it, we don't expect to hit
-                // onMakeExpandedVisibleForRemoteInput from activateRemoteInput for Normal HUN.
-                row.setUserExpanded(true);
+                if (android.app.Flags.compactHeadsUpNotificationReply()
+                        && row.isCompactConversationHeadsUpOnScreen()) {
+                    // Notification can be system expanded true and it is set user expanded in
+                    // activateRemoteInput. notifyHeightChanged also doesn't work as visibleType
+                    // doesn't change. To expand huning notification properly,
+                    // we need set userExpanded false.
+                    if (!row.isPinned() && row.isExpanded()) {
+                        row.setUserExpanded(false);
+                    }
+                    // expand notification emits expanded information to HUN listener.
+                    row.expandNotification();
+                } else {
+                    // TODO(b/346976443) Group and normal notification expansions are two different
+                    // concepts. We should never call setUserExpanded for expanding groups.
+
+                    // Note: Since Normal HUN has remote input view in it, we don't expect to hit
+                    // onMakeExpandedVisibleForRemoteInput from activateRemoteInput for Normal HUN.
+                    row.setUserExpanded(true);
+                }
+                row.getPrivateLayout().setOnExpandedVisibleListener(runnable);
             }
-            row.getPrivateLayout().setOnExpandedVisibleListener(runnable);
         }
     }
 

@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.phone;
 import static android.content.Intent.ACTION_DEVICE_LOCKED_CHANGED;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import android.content.Intent;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.view.View;
 
@@ -179,5 +181,107 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
         verify(mGroupExpansionManager, never()).toggleGroupExpansion(any());
         verify(enr).setUserExpanded(true);
         verify(privateLayout).setOnExpandedVisibleListener(onExpandedVisibleRunner);
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void onMakeExpandedVisibleForRemoteInput_notExpandedGroup_toggleExpansion() {
+        // GIVEN
+        final Runnable onExpandedVisibleRunner = mock(Runnable.class);
+
+        final ExpandableNotificationRow enr = mock(ExpandableNotificationRow.class);
+        final NotificationContentView privateLayout = mock(NotificationContentView.class);
+        final NotificationEntry enrEntry = mock(NotificationEntry.class);
+
+        when(enr.getPrivateLayout()).thenReturn(privateLayout);
+        when(enr.getEntry()).thenReturn(enrEntry);
+        when(enr.isChildInGroup()).thenReturn(true);
+        when(enr.areChildrenExpanded()).thenReturn(false);
+
+        // WHEN
+        mRemoteInputCallback.onMakeExpandedVisibleForRemoteInput(
+                enr, mock(View.class), false, onExpandedVisibleRunner);
+
+        // THEN
+        verify(mGroupExpansionManager).toggleGroupExpansion(enrEntry);
+        verify(enr, never()).setUserExpanded(anyBoolean());
+        verify(privateLayout, never()).setOnExpandedVisibleListener(any());
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void onMakeExpandedVisibleForRemoteInput_expandedGroup_notToggleExpansion() {
+        // GIVEN
+        final Runnable onExpandedVisibleRunner = mock(Runnable.class);
+
+        final ExpandableNotificationRow enr = mock(ExpandableNotificationRow.class);
+        final NotificationContentView privateLayout = mock(NotificationContentView.class);
+        final NotificationEntry enrEntry = mock(NotificationEntry.class);
+
+        when(enr.getPrivateLayout()).thenReturn(privateLayout);
+        when(enr.getEntry()).thenReturn(enrEntry);
+        when(enr.isChildInGroup()).thenReturn(true);
+        when(enr.areChildrenExpanded()).thenReturn(true);
+
+        // WHEN
+        mRemoteInputCallback.onMakeExpandedVisibleForRemoteInput(
+                enr, mock(View.class), false, onExpandedVisibleRunner);
+
+        // THEN
+        verify(mGroupExpansionManager, never()).toggleGroupExpansion(enrEntry);
+        verify(enr, never()).setUserExpanded(anyBoolean());
+        verify(privateLayout, never()).setOnExpandedVisibleListener(any());
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void onMakeExpandedVisibleForRemoteInput_notExpandedNotification_toggleExpansion() {
+        // GIVEN
+        final Runnable onExpandedVisibleRunner = mock(Runnable.class);
+
+        final ExpandableNotificationRow enr = mock(ExpandableNotificationRow.class);
+        final NotificationContentView privateLayout = mock(NotificationContentView.class);
+        final NotificationEntry enrEntry = mock(NotificationEntry.class);
+
+        when(enr.getPrivateLayout()).thenReturn(privateLayout);
+        when(enr.getEntry()).thenReturn(enrEntry);
+        when(enr.isChildInGroup()).thenReturn(false);
+        when(enr.isExpanded()).thenReturn(false);
+
+        // WHEN
+        mRemoteInputCallback.onMakeExpandedVisibleForRemoteInput(
+                enr, mock(View.class), false, onExpandedVisibleRunner);
+
+        // THEN
+        verify(enr).toggleExpansionState();
+        verify(privateLayout).setOnExpandedVisibleListener(onExpandedVisibleRunner);
+        verify(enr, never()).setUserExpanded(anyBoolean());
+        verify(mGroupExpansionManager, never()).toggleGroupExpansion(any());
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void onMakeExpandedVisibleForRemoteInput_expandedNotification_notToggleExpansion() {
+        // GIVEN
+        final Runnable onExpandedVisibleRunner = mock(Runnable.class);
+
+        final ExpandableNotificationRow enr = mock(ExpandableNotificationRow.class);
+        final NotificationContentView privateLayout = mock(NotificationContentView.class);
+        final NotificationEntry enrEntry = mock(NotificationEntry.class);
+
+        when(enr.getPrivateLayout()).thenReturn(privateLayout);
+        when(enr.getEntry()).thenReturn(enrEntry);
+        when(enr.isChildInGroup()).thenReturn(false);
+        when(enr.isExpanded()).thenReturn(true);
+
+        // WHEN
+        mRemoteInputCallback.onMakeExpandedVisibleForRemoteInput(
+                enr, mock(View.class), false, onExpandedVisibleRunner);
+
+        // THEN
+        verify(enr, never()).toggleExpansionState();
+        verify(privateLayout, never()).setOnExpandedVisibleListener(onExpandedVisibleRunner);
+        verify(enr, never()).setUserExpanded(anyBoolean());
+        verify(mGroupExpansionManager, never()).toggleGroupExpansion(any());
     }
 }
