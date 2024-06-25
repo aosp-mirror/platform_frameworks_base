@@ -157,6 +157,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-system-current-compat",
     srcs: [
+        ":android.api.public.latest",
         ":android.api.system.latest",
         ":android-incompatibilities.api.system.latest",
         ":frameworks-base-api-current.txt",
@@ -165,33 +166,35 @@ genrule {
     out: ["updated-baseline.txt"],
     tools: ["metalava"],
     cmd: metalava_cmd +
+        "--check-compatibility:api:released $(location :android.api.public.latest) " +
         "--check-compatibility:api:released $(location :android.api.system.latest) " +
-        "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.system.latest) " +
         "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +
+        "$(location :frameworks-base-api-current.txt) " +
         "$(location :frameworks-base-api-system-current.txt)",
 }
 
 genrule {
     name: "frameworks-base-api-module-lib-current-compat",
     srcs: [
+        ":android.api.public.latest",
+        ":android.api.system.latest",
         ":android.api.module-lib.latest",
         ":android-incompatibilities.api.module-lib.latest",
         ":frameworks-base-api-current.txt",
+        ":frameworks-base-api-system-current.txt",
         ":frameworks-base-api-module-lib-current.txt",
     ],
     out: ["updated-baseline.txt"],
     tools: ["metalava"],
     cmd: metalava_cmd +
+        "--check-compatibility:api:released $(location :android.api.public.latest) " +
+        "--check-compatibility:api:released $(location :android.api.system.latest) " +
         "--check-compatibility:api:released $(location :android.api.module-lib.latest) " +
-        // Note: having "public" be the base of module-lib is not perfect -- it should
-        // ideally be a merged public+system (which metalava is not currently able to generate).
-        // This "base" will help when migrating from MODULE_LIBS -> public, but not when
-        // migrating from MODULE_LIBS -> system (where it needs to instead be listed as
-        // an incompatibility).
-        "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.module-lib.latest) " +
         "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +
+        "$(location :frameworks-base-api-current.txt) " +
+        "$(location :frameworks-base-api-system-current.txt) " +
         "$(location :frameworks-base-api-module-lib-current.txt)",
 }
 
@@ -370,7 +373,6 @@ stubs_defaults {
     high_mem: true, // Lots of sources => high memory use, see b/170701554
     installable: false,
     annotations_enabled: true,
-    previous_api: ":android.api.public.latest",
     merge_annotations_dirs: ["metalava-manual"],
     defaults_visibility: ["//frameworks/base/api"],
     visibility: [
