@@ -111,6 +111,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationChildrenCon
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
+import com.android.systemui.statusbar.phone.ExpandHeadsUpOnInlineReply;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
@@ -354,6 +355,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     nowExpanded = !isExpanded();
                     setUserExpanded(nowExpanded);
                 }
+
+                if (ExpandHeadsUpOnInlineReply.isEnabled() && mExpandable) {
+                    // it is triggered by the user.
+                    // So, mHasUserChangedExpansion should be marked true.
+                    mHasUserChangedExpansion = true;
+                }
+
                 notifyHeightChanged(/* needsAnimation= */ true);
                 mOnExpandClickListener.onExpandClicked(mEntry, v, nowExpanded);
                 mMetricsLogger.action(MetricsEvent.ACTION_NOTIFICATION_EXPANDER, nowExpanded);
@@ -2845,9 +2853,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public boolean isExpanded(boolean allowOnKeyguard) {
+        // System expanded should be ignored in heads up state
+        final boolean isHeadsUpState = ExpandHeadsUpOnInlineReply.isEnabled()
+                && canShowHeadsUp() && isHeadsUpState();
+        // Heads Up Notification can be expanded when it is pinned.
+        final boolean isPinnedAndExpanded =
+                isHeadsUpState && isPinnedAndExpanded();
         return (!shouldShowPublic()) && (!mOnKeyguard || allowOnKeyguard)
-                && (!hasUserChangedExpansion() && (isSystemExpanded() || isSystemChildExpanded())
-                || isUserExpanded());
+                && (!hasUserChangedExpansion() && !isHeadsUpState
+                && (isSystemExpanded() || isSystemChildExpanded())
+                || isUserExpanded() || isPinnedAndExpanded);
     }
 
     private boolean isSystemChildExpanded() {
