@@ -111,6 +111,7 @@ cc_library_shared_for_libandroid_runtime {
         "libminikin",
         "libz",
         "server_configurable_flags",
+        "libaconfig_storage_read_api_cc",
         "android.database.sqlite-aconfig-cc",
         "android.media.audiopolicy-aconfig-cc",
     ],
