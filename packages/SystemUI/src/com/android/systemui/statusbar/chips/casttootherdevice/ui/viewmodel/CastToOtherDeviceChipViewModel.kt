@@ -70,7 +70,8 @@ constructor(
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            // See b/347726238.
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden)
 
     /** Stops the currently active projection. */
     private fun stopProjecting() {
@@ -80,7 +81,7 @@ constructor(
     private fun createCastToOtherDeviceChip(
         state: ProjectionChipModel.Projecting,
     ): OngoingActivityChipModel.Shown {
-        return OngoingActivityChipModel.Shown(
+        return OngoingActivityChipModel.Shown.Timer(
             icon =
                 Icon.Resource(
                     CAST_TO_OTHER_DEVICE_ICON,

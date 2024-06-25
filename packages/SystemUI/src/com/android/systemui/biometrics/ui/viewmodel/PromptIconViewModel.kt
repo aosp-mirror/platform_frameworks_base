@@ -21,7 +21,6 @@ import android.annotation.DrawableRes
 import android.annotation.RawRes
 import android.content.res.Configuration
 import android.graphics.Rect
-import android.hardware.face.Face
 import android.util.RotationUtils
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
@@ -137,7 +136,7 @@ constructor(
                         displayStateInteractor.currentRotation,
                         displayStateInteractor.isFolded,
                         displayStateInteractor.isInRearDisplayMode,
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.showingError
@@ -183,7 +182,7 @@ constructor(
                         displayStateInteractor.currentRotation,
                         displayStateInteractor.isFolded,
                         displayStateInteractor.isInRearDisplayMode,
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.isPendingConfirmation,
@@ -330,7 +329,7 @@ constructor(
                 AuthType.Coex ->
                     combine(
                         displayStateInteractor.currentRotation,
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.showingError
@@ -430,7 +429,7 @@ constructor(
                 AuthType.Fingerprint,
                 AuthType.Coex ->
                     combine(
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.isPendingConfirmation,
@@ -508,7 +507,7 @@ constructor(
             when (activeAuthType) {
                 AuthType.Fingerprint ->
                     combine(
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.showingError
@@ -546,7 +545,7 @@ constructor(
                     }
                 AuthType.Coex ->
                     combine(
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.isPendingConfirmation,
@@ -606,7 +605,7 @@ constructor(
                 AuthType.Fingerprint,
                 AuthType.Coex ->
                     combine(
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.showingError
@@ -642,7 +641,7 @@ constructor(
                 AuthType.Fingerprint,
                 AuthType.Coex ->
                     combine(
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         displayStateInteractor.currentRotation
                     ) { sensorType: FingerprintSensorType, rotation: DisplayRotation ->
                         when (sensorType) {

@@ -73,6 +73,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.Cuj;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
@@ -81,6 +82,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.InteractionJankMonitorUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
@@ -470,11 +472,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.collapse_menu_button) {
                 decoration.closeHandleMenu();
             } else if (id == R.id.maximize_window) {
+                InteractionJankMonitorUtils.beginTracing(
+                        Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, /* view= */ v,
+                        /* tag= */ "caption_bar_button");
                 final RunningTaskInfo taskInfo = decoration.mTaskInfo;
                 decoration.closeHandleMenu();
                 decoration.closeMaximizeMenu();
                 mDesktopTasksController.toggleDesktopTaskSize(taskInfo);
             } else if (id == R.id.maximize_menu_maximize_button) {
+                InteractionJankMonitorUtils.beginTracing(
+                        Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, /* view= */ v,
+                        /* tag= */ "maximize_menu_option");
                 final RunningTaskInfo taskInfo = decoration.mTaskInfo;
                 mDesktopTasksController.toggleDesktopTaskSize(taskInfo);
                 decoration.closeHandleMenu();
@@ -712,6 +720,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 return false;
             }
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+            InteractionJankMonitorUtils.beginTracing(
+                    Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, mContext,
+                    /* surface= */ decoration.mTaskSurface, /* tag= */ "double_tap");
             mDesktopTasksController.toggleDesktopTaskSize(decoration.mTaskInfo);
             return true;
         }

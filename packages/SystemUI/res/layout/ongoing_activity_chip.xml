@@ -46,6 +46,8 @@
             android:tint="?android:attr/colorPrimary"
         />
 
+        <!-- Only one of [ongoing_activity_chip_time, ongoing_activity_chip_text] will ever
+             be shown at one time. -->
         <com.android.systemui.statusbar.chips.ui.view.ChipChronometer
             android:id="@+id/ongoing_activity_chip_time"
             android:layout_width="wrap_content"
@@ -57,6 +59,20 @@
             android:fontFamily="@*android:string/config_headlineFontFamily"
             android:textColor="?android:attr/colorPrimary"
         />
+
+        <!-- Used to show generic text in the chip instead of a timer. -->
+        <TextView
+            android:id="@+id/ongoing_activity_chip_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:gravity="center|start"
+            android:paddingStart="@dimen/ongoing_activity_chip_icon_text_padding"
+            android:textAppearance="@android:style/TextAppearance.Material.Small"
+            android:fontFamily="@*android:string/config_headlineFontFamily"
+            android:textColor="?android:attr/colorPrimary"
+            android:visibility="gone"
+            />
 
     </com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer>
 </FrameLayout>

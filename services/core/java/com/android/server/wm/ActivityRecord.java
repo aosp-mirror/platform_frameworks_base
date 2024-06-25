@@ -6975,14 +6975,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         updateReportedVisibilityLocked();
     }
 
-    /**
-     * Sets whether something has been visible in the task and returns {@code true} if the state
-     * is changed from invisible to visible.
-     */
-    private boolean setTaskHasBeenVisible() {
+    /** Sets whether something has been visible in the task. */
+    private void setTaskHasBeenVisible() {
         final boolean wasTaskVisible = task.getHasBeenVisible();
         if (wasTaskVisible) {
-            return false;
+            return;
         }
         if (inTransition()) {
             // The deferring will be canceled until transition is ready so it won't dispatch
@@ -6990,20 +6987,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             task.setDeferTaskAppear(true);
         }
         task.setHasBeenVisible(true);
-        return true;
     }
 
     void onStartingWindowDrawn() {
-        boolean wasTaskVisible = false;
         if (task != null) {
             mSplashScreenStyleSolidColor = true;
-            wasTaskVisible = !setTaskHasBeenVisible();
+            setTaskHasBeenVisible();
         }
+        if (mStartingData == null || mStartingData.mIsDisplayed) {
+            return;
+        }
+        mStartingData.mIsDisplayed = true;
 
         // The transition may not be executed if the starting process hasn't attached. But if the
         // starting window is drawn, the transition can start earlier. Exclude finishing and bubble
         // because it may be a trampoline.
-        if (!wasTaskVisible && mStartingData != null && !finishing && !mLaunchedFromBubble
+        if (app == null && !finishing && !mLaunchedFromBubble
                 && mVisibleRequested && !mDisplayContent.mAppTransition.isReady()
                 && !mDisplayContent.mAppTransition.isRunning()
                 && mDisplayContent.isNextTransitionForward()) {
@@ -7240,9 +7239,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         isInterestingAndDrawn = true;
                     }
                 }
-            } else if (mStartingData != null && w.isDrawn()) {
-                // The starting window for this container is drawn.
-                mStartingData.mIsDisplayed = true;
             }
         }
 
@@ -7526,7 +7522,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *               use an icon or solid color splash screen will be made by WmShell.
      */
     private boolean shouldUseSolidColorSplashScreen(ActivityRecord sourceRecord,
-            boolean startActivity, ActivityOptions options, int resolvedTheme) {
+            boolean startActivity, ActivityOptions options, int resolvedTheme,
+            boolean newTask) {
         if (sourceRecord == null && !startActivity) {
             // Use simple style if this activity is not top activity. This could happen when adding
             // a splash screen window to the warm start activity which is re-create because top is
@@ -7549,21 +7546,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Choose the default behavior when neither the ActivityRecord nor the activity theme have
         // specified a splash screen style.
-
-        if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME || launchedFromUid == Process.SHELL_UID) {
-            return false;
-        } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
+        if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
             return true;
         } else {
             // Need to check sourceRecord in case this activity is launched from a service.
             if (sourceRecord == null) {
                 sourceRecord = searchCandidateLaunchingActivity();
             }
-
             if (sourceRecord != null) {
-                return sourceRecord.mSplashScreenStyleSolidColor;
+                return sourceRecord.mSplashScreenStyleSolidColor; // follow previous activity
+            } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME
+                    || launchedFromUid == Process.SHELL_UID) {
+                return !newTask; // only show icon for new task
             }
-
             // Use an icon if the activity was launched from System for the first start.
             // Otherwise, must use solid color splash screen.
             return mLaunchSourceType != LAUNCH_SOURCE_TYPE_SYSTEM || !startActivity;
@@ -7631,7 +7626,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 splashScreenTheme);
 
         mSplashScreenStyleSolidColor = shouldUseSolidColorSplashScreen(sourceRecord, startActivity,
-                startOptions, resolvedTheme);
+                startOptions, resolvedTheme, newTask);
 
         final boolean activityCreated =
                 mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal();
