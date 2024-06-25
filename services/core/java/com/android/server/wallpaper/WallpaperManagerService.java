@@ -629,9 +629,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             synchronized (mLock) {
                 if (mLastWallpaper != null) {
                     WallpaperData targetWallpaper = null;
-                    if (mLastWallpaper.connection.containsDisplay(displayId)) {
+                    if (mLastWallpaper.connection != null &&
+                            mLastWallpaper.connection.containsDisplay(displayId)) {
                         targetWallpaper = mLastWallpaper;
-                    } else if (mFallbackWallpaper.connection.containsDisplay(displayId)) {
+                    } else if (mFallbackWallpaper != null &&
+                            mFallbackWallpaper.connection != null &&
+                            mFallbackWallpaper.connection.containsDisplay(displayId)) {
                         targetWallpaper = mFallbackWallpaper;
                     }
                     if (targetWallpaper == null) return;
