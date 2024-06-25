@@ -109,7 +109,7 @@
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"אודיו של מדיה"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"שיחות טלפון"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"העברת קבצים"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"התקן קלט"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"מכשיר לקליטת נתונים"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"גישה לאינטרנט"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"אישור גישה אל אנשי הקשר והיסטוריית השיחות"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"המידע הזה ישמש למשל כדי להשמיע התראות על שיחות נכנסות"</string>
