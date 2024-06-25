@@ -96,6 +96,7 @@ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
+import static android.util.SequenceUtils.getNextSeq;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
@@ -3652,6 +3653,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
         outFrames.compatScale = getCompatScaleForClient();
+        outFrames.seq = getNextSeq(mLastReportedFrames.seq);
         if (mLastReportedFrames != outFrames) {
             mLastReportedFrames.setTo(outFrames);
         }
@@ -3682,7 +3684,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void fillInsetsState(@NonNull InsetsState outInsetsState, boolean copySources) {
+        final int lastSeq = mLastReportedInsetsState.getSeq();
         outInsetsState.set(getCompatInsetsState(), copySources);
+        outInsetsState.setSeq(getNextSeq(lastSeq));
         if (outInsetsState != mLastReportedInsetsState) {
             // No need to copy for the recorded.
             mLastReportedInsetsState.set(outInsetsState, false /* copySources */);
@@ -3691,9 +3695,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void fillInsetsSourceControls(@NonNull InsetsSourceControl.Array outArray,
             boolean copyControls) {
+        final int lastSeq = mLastReportedInsetsState.getSeq();
         final InsetsSourceControl[] controls =
                 getDisplayContent().getInsetsStateController().getControlsForDispatch(this);
         outArray.set(controls, copyControls);
+        outArray.setSeq(getNextSeq(lastSeq));
         if (outArray != mLastReportedActiveControls) {
             // No need to copy for the recorded.
             mLastReportedActiveControls.setTo(outArray, false /* copyControls */);
