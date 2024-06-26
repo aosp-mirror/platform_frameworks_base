@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.call.domain.interactor
+package com.android.systemui.statusbar.chips
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.statusbar.chips.statusBarChipsLogger
-import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
+import javax.inject.Qualifier
 
-val Kosmos.callChipInteractor: CallChipInteractor by
-    Kosmos.Fixture {
-        CallChipInteractor(
-            scope = applicationCoroutineScope,
-            repository = ongoingCallRepository,
-            logger = statusBarChipsLogger,
-        )
-    }
+/** Logs for events related to the status bar chips. */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class StatusBarChipsLog
