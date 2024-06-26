@@ -280,6 +280,8 @@
     <string name="select_text">Select</string>
     <!-- Accessibility text for the handle menu screenshot button [CHAR LIMIT=NONE] -->
     <string name="screenshot_text">Screenshot</string>
+    <!-- Accessibility text for the handle menu open in browser button [CHAR LIMIT=NONE] -->
+    <string name="open_in_browser_text">Open in browser</string>
     <!-- Accessibility text for the handle menu close button [CHAR LIMIT=NONE] -->
     <string name="close_text">Close</string>
     <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->

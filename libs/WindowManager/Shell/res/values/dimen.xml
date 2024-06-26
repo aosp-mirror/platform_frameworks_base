@@ -507,8 +507,11 @@
     <!-- The height of the handle menu's "More Actions" pill in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_more_actions_pill_height">52dp</dimen>
 
+    <!-- The height of the handle menu's "Open in browser" pill in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_open_in_browser_pill_height">52dp</dimen>
+
     <!-- The height of the handle menu in desktop mode. -->
-    <dimen name="desktop_mode_handle_menu_height">328dp</dimen>
+    <dimen name="desktop_mode_handle_menu_height">380dp</dimen>
 
     <!-- The top margin of the handle menu in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_margin_top">4dp</dimen>
