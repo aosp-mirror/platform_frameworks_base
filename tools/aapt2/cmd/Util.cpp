@@ -128,7 +128,7 @@ bool ParseFeatureFlagsParameter(StringPiece arg, android::IDiagnostics* diag,
     if (parts.size() > 2) {
       diag->Error(android::DiagMessage()
                   << "Invalid feature flag and optional value '" << flag_and_value
-                  << "'. Must be in the format 'flag_name[=true|false]");
+                  << "'. Must be in the format 'flag_name[:ro][=true|false]");
       return false;
     }
 
@@ -136,6 +136,25 @@ bool ParseFeatureFlagsParameter(StringPiece arg, android::IDiagnostics* diag,
     if (flag_name.empty()) {
       diag->Error(android::DiagMessage() << "No name given for one or more flags in: " << arg);
       return false;
+    }
+    std::vector<std::string> name_parts = util::Split(flag_name, ':');
+    if (name_parts.size() > 2) {
+      diag->Error(android::DiagMessage()
+                  << "Invalid feature flag and optional value '" << flag_and_value
+                  << "'. Must be in the format 'flag_name[:ro][=true|false]");
+      return false;
+    }
+    flag_name = name_parts[0];
+    bool read_only = false;
+    if (name_parts.size() == 2) {
+      if (name_parts[1] == "ro") {
+        read_only = true;
+      } else {
+        diag->Error(android::DiagMessage()
+                    << "Invalid feature flag and optional value '" << flag_and_value
+                    << "'. Must be in the format 'flag_name[:ro][=true|false]");
+        return false;
+      }
     }
 
     std::optional<bool> flag_value = {};
@@ -151,13 +170,13 @@ bool ParseFeatureFlagsParameter(StringPiece arg, android::IDiagnostics* diag,
       }
     }
 
-    if (auto [it, inserted] =
-            out_feature_flag_values->try_emplace(std::string(flag_name), flag_value);
+    auto ffp = FeatureFlagProperties{read_only, flag_value};
+    if (auto [it, inserted] = out_feature_flag_values->try_emplace(std::string(flag_name), ffp);
         !inserted) {
       // We are allowing the same flag to appear multiple times, last value wins.
       diag->Note(android::DiagMessage()
                  << "Value for feature flag '" << flag_name << "' was given more than once");
-      it->second = flag_value;
+      it->second = ffp;
     }
   }
   return true;
