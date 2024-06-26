@@ -165,6 +165,10 @@ constructor(
                 initialValue = isVisibleInternal()
             )
 
+    /** Whether there's an ongoing remotely-initiated user interaction. */
+    val isRemoteUserInteractionOngoing: StateFlow<Boolean> =
+        repository.isRemoteUserInteractionOngoing
+
     /**
      * The amount of transition into or out of the given [scene].
      *
