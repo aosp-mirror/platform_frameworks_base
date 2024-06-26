@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.notification.dagger.IncomingHeader
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.logKey
+import com.android.systemui.statusbar.notification.shared.GroupHunAnimationFix
 import com.android.systemui.statusbar.notification.stack.BUCKET_HEADS_UP
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
@@ -726,6 +727,12 @@ class HeadsUpCoordinator @Inject constructor(
      */
     private fun isAttemptingToShowHun(entry: ListEntry) =
         mHeadsUpManager.isHeadsUpEntry(entry.key) || isEntryBinding(entry)
+                || isHeadsUpAnimatingAway(entry)
+
+    private fun isHeadsUpAnimatingAway(entry: ListEntry): Boolean {
+        if (!GroupHunAnimationFix.isEnabled) return false
+        return entry.representativeEntry?.row?.isHeadsUpAnimatingAway ?: false
+    }
 
     /**
      * Whether the notification is already heads up/binding per [isAttemptingToShowHun] OR if it
