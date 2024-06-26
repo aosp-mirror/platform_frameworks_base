@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ડિબગ ઍપ માટે GPU ડિબગ સ્તરો લોડ કરવાની મંજૂરી આપો"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"વર્બોઝ વેન્ડર લૉગિંગ ચાલુ કરો"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ખામીની જાણકારીમાં ડિવાઇસથી જોડાયેલા ચોક્કસ વેન્ડર લૉગ શામેલ કરો, જેમાં ખાનગી માહિતી શામેલ હોઈ શકે છે, તે વધુ બૅટરીનો ઉપયોગ કરી શકે છે અને/અથવા વધુ સ્ટોરેજનો ઉપયોગ કરી શકે છે."</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"વિન્ડો ઍનિમેશન સ્કેલ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ટ્રાન્ઝિશન ઍનિમેશન સ્કેલ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ઍનિમેટર અવધિ સ્કેલ"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"અલાર્મ અને રિમાઇન્ડર"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"આ ઍપને અલાર્મ સેટ કરવા અને સમય પ્રતિ સંવેદનશીલ ક્રિયાઓ શેડ્યૂલ કરવા માટે મંજૂરી આપો. આ ઍપને બૅકગ્રાઉન્ડમાં ચાલવા દે છે, જેને કારણે બૅટરીનો વધુ વપરાશ થઈ શકે છે.\n\nજો આ પરવાનગી બંધ હોય, તો આ ઍપ દ્વારા શેડ્યૂલ કરવામાં આવેલા વર્તમાન અલાર્મ અને સમય આધારિત ઇવેન્ટ કામ કરશે નહીં."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"શેડ્યૂલ, અલાર્મ, રિમાઇન્ડર, ઘડિયાળ"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"ખલેલ પાડશો નહીં"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ચાલુ કરો"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ખલેલ પાડશો નહીં ચાલુ કરો"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ક્યારેય નહીં"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"અવધિ"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"દર વખતે પૂછો"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"તમે બંધ ન કરો ત્યાં સુધી"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(નામ નથી)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"હમણાં જ"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"આ ફોન"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"આ ટૅબ્લેટ"</string>
