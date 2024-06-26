@@ -1293,6 +1293,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var userData = getUserData(mCurrentUserId);
             userData.mSwitchingController.resetCircularListLocked(settings);
             userData.mHardwareKeyboardShortcutController.update(settings);
+
             mMenuController = new InputMethodMenuController(this);
             mVisibilityStateComputer = new ImeVisibilityStateComputer(this);
             mVisibilityApplier = new DefaultImeVisibilityApplier(this);
