@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel
 
 import androidx.annotation.DrawableRes
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -78,8 +79,11 @@ constructor(
         state: ProjectionChipModel.Projecting,
     ): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.Timer(
-            // TODO(b/332662551): Use the right content description.
-            icon = Icon.Resource(SHARE_TO_APP_ICON, contentDescription = null),
+            icon =
+                Icon.Resource(
+                    SHARE_TO_APP_ICON,
+                    ContentDescription.Resource(R.string.share_to_app_chip_accessibility_label),
+                ),
             colors = ColorsModel.Red,
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),

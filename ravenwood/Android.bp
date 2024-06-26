@@ -170,7 +170,7 @@ java_library {
     srcs: [
         "junit-flag-src/**/*.java",
     ],
-    sdk_version: "test_current",
+    sdk_version: "module_current",
     libs: [
         "junit",
         "flag-junit",
@@ -228,6 +228,12 @@ java_device_for_host {
     libs: [
         "androidx.test.monitor",
     ],
+}
+
+filegroup {
+    name: "ravenwood-framework-jarjar-rules",
+    srcs: ["texts/ravenwood-framework-jarjar-rules.txt"],
+    visibility: ["//frameworks/base"],
 }
 
 filegroup {

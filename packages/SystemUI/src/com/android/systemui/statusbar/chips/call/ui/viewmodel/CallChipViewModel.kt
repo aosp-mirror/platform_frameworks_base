@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.chips.call.ui.viewmodel
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -54,23 +55,26 @@ constructor(
                 when (state) {
                     is OngoingCallModel.NoCall -> OngoingActivityChipModel.Hidden
                     is OngoingCallModel.InCall -> {
-                        // This mimics OngoingCallController#updateChip.
-                        // TODO(b/332662551): Handle `state.startTimeMs = 0` correctly (see
-                        // b/192379214 and
-                        // OngoingCallController.CallNotificationInfo.hasValidStartTime).
-                        val startTimeInElapsedRealtime =
-                            state.startTimeMs - systemClock.currentTimeMillis() +
-                                systemClock.elapsedRealtime()
-                        OngoingActivityChipModel.Shown.Timer(
-                            icon =
-                                Icon.Resource(
-                                    com.android.internal.R.drawable.ic_phone,
-                                    contentDescription = null,
-                                ),
-                            colors = ColorsModel.Themed,
-                            startTimeMs = startTimeInElapsedRealtime,
-                            getOnClickListener(state),
-                        )
+                        // This block mimics OngoingCallController#updateChip.
+                        if (state.startTimeMs <= 0L) {
+                            // If the start time is invalid, don't show a timer and show just an
+                            // icon. See b/192379214.
+                            OngoingActivityChipModel.Shown.IconOnly(
+                                icon = phoneIcon,
+                                colors = ColorsModel.Themed,
+                                getOnClickListener(state),
+                            )
+                        } else {
+                            val startTimeInElapsedRealtime =
+                                state.startTimeMs - systemClock.currentTimeMillis() +
+                                    systemClock.elapsedRealtime()
+                            OngoingActivityChipModel.Shown.Timer(
+                                icon = phoneIcon,
+                                colors = ColorsModel.Themed,
+                                startTimeMs = startTimeInElapsedRealtime,
+                                getOnClickListener(state),
+                            )
+                        }
                     }
                 }
             }
@@ -94,5 +98,15 @@ constructor(
                 )
             )
         }
+    }
+
+    companion object {
+        private val phoneIcon =
+            Icon.Resource(
+                com.android.internal.R.drawable.ic_phone,
+                ContentDescription.Resource(
+                    R.string.ongoing_phone_call_content_description,
+                ),
+            )
     }
 }

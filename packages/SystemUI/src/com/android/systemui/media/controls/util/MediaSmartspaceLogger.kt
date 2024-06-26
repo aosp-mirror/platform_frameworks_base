@@ -71,7 +71,7 @@ class MediaSmartspaceLogger @Inject constructor() {
      * @param eventId id of the event. eg: dismiss, click, or seen.
      * @param instanceId id to uniquely identify a card.
      * @param uid uid for the application that media comes from.
-     * @param location location of media carousel holding media card.
+     * @param surface location of media carousel holding media card.
      * @param cardinality number of card in carousel.
      * @param isRecommendationCard whether media card being logged is a recommendations card.
      * @param isSsReactivated indicates resume media card is reactivated by Smartspace
@@ -83,7 +83,7 @@ class MediaSmartspaceLogger @Inject constructor() {
         eventId: Int,
         instanceId: Int,
         uid: Int,
-        location: Int,
+        surface: Int,
         cardinality: Int,
         isRecommendationCard: Boolean = false,
         isSsReactivated: Boolean = false,
@@ -96,7 +96,7 @@ class MediaSmartspaceLogger @Inject constructor() {
             eventId,
             instanceId,
             uid,
-            surfaces = intArrayOf(location),
+            surfaces = intArrayOf(surface),
             cardinality,
             isRecommendationCard,
             isSsReactivated,

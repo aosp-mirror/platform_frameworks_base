@@ -2,14 +2,6 @@ package: "android.service.chooser"
 container: "system"
 
 flag {
-  name: "chooser_album_text"
-  is_exported: true
-  namespace: "intentresolver"
-  description: "Flag controlling the album text subtype hint for sharesheet"
-  bug: "323380224"
-}
-
-flag {
     name: "enable_sharesheet_metadata_extra"
     is_exported: true
     namespace: "intentresolver"

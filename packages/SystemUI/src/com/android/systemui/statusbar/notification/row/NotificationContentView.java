@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInf
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationCustomViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
+import com.android.systemui.statusbar.phone.ExpandHeadsUpOnInlineReply;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -913,7 +914,9 @@ public class NotificationContentView extends FrameLayout implements Notification
                 View visibleView = getViewForVisibleType(visibleType);
                 if (visibleView != null) {
                     visibleView.setVisibility(VISIBLE);
-                    transferRemoteInputFocus(visibleType);
+                    if (!ExpandHeadsUpOnInlineReply.isEnabled()) {
+                        transferRemoteInputFocus(visibleType);
+                    }
                 }
 
                 if (animate && ((visibleType == VISIBLE_TYPE_EXPANDED && mExpandedChild != null)
@@ -1397,30 +1400,39 @@ public class NotificationContentView extends FrameLayout implements Notification
         mCachedExpandedRemoteInput = null;
         mCachedExpandedRemoteInputViewController = null;
 
-        if (mHeadsUpChild != null) {
-            RemoteInputViewData headsUpData = applyRemoteInput(mHeadsUpChild, mNotificationEntry,
-                    hasFreeformRemoteInput, mPreviousHeadsUpRemoteInputIntent,
-                    mCachedHeadsUpRemoteInput, mCachedHeadsUpRemoteInputViewController,
-                    mHeadsUpWrapper);
-            mHeadsUpRemoteInput = headsUpData.mView;
-            mHeadsUpRemoteInputController = headsUpData.mController;
-            if (mHeadsUpRemoteInputController != null) {
-                mHeadsUpRemoteInputController.bind();
-            }
-        } else {
+        if (ExpandHeadsUpOnInlineReply.isEnabled()) {
             mHeadsUpRemoteInput = null;
-            if (mHeadsUpRemoteInputController != null) {
-                mHeadsUpRemoteInputController.unbind();
-            }
             mHeadsUpRemoteInputController = null;
+            mCachedHeadsUpRemoteInput = null;
+            mCachedHeadsUpRemoteInputViewController = null;
+        } else {
+            ExpandHeadsUpOnInlineReply.assertInLegacyMode();
+            if (mHeadsUpChild != null) {
+                RemoteInputViewData headsUpData = applyRemoteInput(mHeadsUpChild,
+                        mNotificationEntry,
+                        hasFreeformRemoteInput, mPreviousHeadsUpRemoteInputIntent,
+                        mCachedHeadsUpRemoteInput, mCachedHeadsUpRemoteInputViewController,
+                        mHeadsUpWrapper);
+                mHeadsUpRemoteInput = headsUpData.mView;
+                mHeadsUpRemoteInputController = headsUpData.mController;
+                if (mHeadsUpRemoteInputController != null) {
+                    mHeadsUpRemoteInputController.bind();
+                }
+            } else {
+                mHeadsUpRemoteInput = null;
+                if (mHeadsUpRemoteInputController != null) {
+                    mHeadsUpRemoteInputController.unbind();
+                }
+                mHeadsUpRemoteInputController = null;
+            }
+            if (mCachedHeadsUpRemoteInput != null
+                    && mCachedHeadsUpRemoteInput != mHeadsUpRemoteInput) {
+                // We had a cached remote input but didn't reuse it. Clean up required.
+                mCachedHeadsUpRemoteInput.dispatchFinishTemporaryDetach();
+            }
+            mCachedHeadsUpRemoteInput = null;
+            mCachedHeadsUpRemoteInputViewController = null;
         }
-        if (mCachedHeadsUpRemoteInput != null
-                && mCachedHeadsUpRemoteInput != mHeadsUpRemoteInput) {
-            // We had a cached remote input but didn't reuse it. Clean up required.
-            mCachedHeadsUpRemoteInput.dispatchFinishTemporaryDetach();
-        }
-        mCachedHeadsUpRemoteInput = null;
-        mCachedHeadsUpRemoteInputViewController = null;
     }
 
     private RemoteInputViewData applyRemoteInput(View view, NotificationEntry entry,

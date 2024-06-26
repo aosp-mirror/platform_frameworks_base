@@ -72,14 +72,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.AdditionalAnswers.answer;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -486,27 +484,22 @@ public class MockingOomAdjusterTests {
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
         WindowProcessController wpc = app.getWindowProcessController();
         doReturn(true).when(wpc).hasActivities();
-        doAnswer(answer(callback -> {
-            Field field = callback.getClass().getDeclaredField("adj");
-            field.set(callback, VISIBLE_APP_ADJ);
-            field = callback.getClass().getDeclaredField("foregroundActivities");
-            field.set(callback, true);
-            field = callback.getClass().getDeclaredField("procState");
-            field.set(callback, PROCESS_STATE_TOP);
-            field = callback.getClass().getDeclaredField("schedGroup");
-            field.set(callback, SCHED_GROUP_TOP_APP);
-            field = callback.getClass().getDeclaredField("mAdjType");
-            field.set(callback, "vis-activity");
-            return 0;
-        })).when(wpc).computeOomAdjFromActivities(
-                any(WindowProcessController.ComputeOomAdjCallback.class));
+        doReturn(WindowProcessController.ACTIVITY_STATE_FLAG_IS_VISIBLE)
+                .when(wpc).getActivityStateFlags();
         mService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app);
 
-        assertProcStates(app, PROCESS_STATE_TOP, VISIBLE_APP_ADJ, SCHED_GROUP_TOP_APP);
+        assertProcStates(app, PROCESS_STATE_TOP, VISIBLE_APP_ADJ, SCHED_GROUP_DEFAULT);
         assertFalse(app.mState.isCached());
         assertFalse(app.mState.isEmpty());
         assertEquals("vis-activity", app.mState.getAdjType());
+
+        doReturn(WindowProcessController.ACTIVITY_STATE_FLAG_IS_VISIBLE
+                | WindowProcessController.ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN)
+                .when(wpc).getActivityStateFlags();
+        updateOomAdj(app);
+        assertProcStates(app, PROCESS_STATE_TOP, VISIBLE_APP_ADJ, SCHED_GROUP_TOP_APP);
+        assertEquals("resumed-split-screen-activity", app.mState.getAdjType());
     }
 
     @SuppressWarnings("GuardedBy")

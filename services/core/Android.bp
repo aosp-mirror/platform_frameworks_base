@@ -239,6 +239,9 @@ java_library_static {
     ],
     lint: {
         baseline_filename: "lint-baseline.xml",
+        warning_checks: [
+            "FlaggedApi",
+        ],
     },
 }
 

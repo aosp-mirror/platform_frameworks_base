@@ -21,6 +21,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
@@ -121,6 +122,52 @@ public class ViewFrameRateTest {
         waitForAfterDraw();
     }
 
+    @Test
+    @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
+    public void inputMethodWithContentMoves() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        // update the window type to TYPE_INPUT_METHOD
+        int windowType = mViewRoot.mWindowAttributes.type;
+        final WindowManager.LayoutParams attrs = mViewRoot.mWindowAttributes;
+        attrs.type = TYPE_INPUT_METHOD;
+        instrumentation.runOnMainSync(() -> {
+            mViewRoot.setLayoutParams(attrs, false);
+        });
+        instrumentation.waitForIdleSync();
+
+        final WindowManager.LayoutParams newAttrs = mViewRoot.mWindowAttributes;
+        assertTrue(newAttrs.type == TYPE_INPUT_METHOD);
+
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.offsetLeftAndRight(100);
+            runAfterDraw(() -> {
+                if (toolkitFrameRateVelocityMappingReadOnly()) {
+                    float frameRate = mViewRoot.getLastPreferredFrameRate();
+                    // frame rate shouldn't be boost with TYPE_INPUT_METHOD window type
+                    assertTrue(frameRate == 0);
+                } else {
+                    assertEquals(FRAME_RATE_CATEGORY_HIGH,
+                            mViewRoot.getLastPreferredFrameRateCategory());
+                }
+            });
+        });
+        waitForAfterDraw();
+
+        // Reset the window type back to the original one.
+        newAttrs.type = windowType;
+        instrumentation.runOnMainSync(() -> {
+            mViewRoot.setLayoutParams(newAttrs, false);
+        });
+        instrumentation.waitForIdleSync();
+        assertTrue(mViewRoot.mWindowAttributes.type == windowType);
+    }
+
     @UiThreadTest
     @Test
     @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
@@ -161,7 +208,7 @@ public class ViewFrameRateTest {
     @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
             FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
-    public void lowVelocity60() throws Throwable {
+    public void lowVelocity80() throws Throwable {
         if (!ViewProperties.vrr_enabled().orElse(true)) {
             return;
         }

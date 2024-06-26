@@ -4804,8 +4804,7 @@ class Task extends TaskFragment {
                     // task is still updated by core. Otherwise if the task is collected (e.g.
                     // rotation change) after leaving this scope, the visibility operation will be
                     // put in sync transaction, then it is not synced with reparent.
-                    if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()
-                            && lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
+                    if (lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
                         lastParentBeforePip.prepareSurfaces();
                         // If the moveToFront is a part of finishing transition, then make sure
                         // the z-order of tasks are up-to-date.

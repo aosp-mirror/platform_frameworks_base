@@ -3476,6 +3476,7 @@ package android.companion.virtual {
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.input.VirtualMouseConfig);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualNavigationTouchpad createVirtualNavigationTouchpad(@NonNull android.hardware.input.VirtualNavigationTouchpadConfig);
+    method @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualRotaryEncoder createVirtualRotaryEncoder(@NonNull android.hardware.input.VirtualRotaryEncoderConfig);
     method @FlaggedApi("android.companion.virtual.flags.virtual_stylus") @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualStylus createVirtualStylus(@NonNull android.hardware.input.VirtualStylusConfig);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.input.VirtualTouchscreenConfig);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
@@ -5760,6 +5761,37 @@ package android.hardware.input {
   public static final class VirtualNavigationTouchpadConfig.Builder extends android.hardware.input.VirtualInputDeviceConfig.Builder<android.hardware.input.VirtualNavigationTouchpadConfig.Builder> {
     ctor public VirtualNavigationTouchpadConfig.Builder(@IntRange(from=1) int, @IntRange(from=1) int);
     method @NonNull public android.hardware.input.VirtualNavigationTouchpadConfig build();
+  }
+
+  @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") public class VirtualRotaryEncoder implements java.io.Closeable {
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendScrollEvent(@NonNull android.hardware.input.VirtualRotaryEncoderScrollEvent);
+  }
+
+  @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") public final class VirtualRotaryEncoderConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualRotaryEncoderConfig> CREATOR;
+  }
+
+  public static final class VirtualRotaryEncoderConfig.Builder extends android.hardware.input.VirtualInputDeviceConfig.Builder<android.hardware.input.VirtualRotaryEncoderConfig.Builder> {
+    ctor public VirtualRotaryEncoderConfig.Builder();
+    method @NonNull public android.hardware.input.VirtualRotaryEncoderConfig build();
+  }
+
+  @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") public final class VirtualRotaryEncoderScrollEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getEventTimeNanos();
+    method @FloatRange(from=-1.0F, to=1.0f) public float getScrollAmount();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualRotaryEncoderScrollEvent> CREATOR;
+  }
+
+  public static final class VirtualRotaryEncoderScrollEvent.Builder {
+    ctor public VirtualRotaryEncoderScrollEvent.Builder();
+    method @NonNull public android.hardware.input.VirtualRotaryEncoderScrollEvent build();
+    method @NonNull public android.hardware.input.VirtualRotaryEncoderScrollEvent.Builder setEventTimeNanos(long);
+    method @NonNull public android.hardware.input.VirtualRotaryEncoderScrollEvent.Builder setScrollAmount(@FloatRange(from=-1.0F, to=1.0f) float);
   }
 
   @FlaggedApi("android.companion.virtual.flags.virtual_stylus") public class VirtualStylus implements java.io.Closeable {
@@ -12907,7 +12939,6 @@ package android.service.notification {
     field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_OTHER = 0; // 0x0
     field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_PROMOTION = 1; // 0x1
     field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_SOCIAL_MEDIA = 2; // 0x2
-    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_UNKNOWN = -1; // 0xffffffff
   }
 
   public abstract class NotificationAssistantService extends android.service.notification.NotificationListenerService {

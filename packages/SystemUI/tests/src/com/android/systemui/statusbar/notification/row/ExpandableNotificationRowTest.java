@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightCh
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
+import com.android.systemui.statusbar.phone.ExpandHeadsUpOnInlineReply;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import org.junit.Assert;
@@ -857,6 +858,133 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         // THEN
         assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void isExpanded_systemExpandedTrueForHeadsUp_notExpanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setHeadsUp(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void isExpanded_systemExpandedTrueForHeadsUpDisappearRunning_notExpanded()
+            throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setHeadsUpAnimatingAway(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void isExpanded_userExpandedTrueForHeadsUp_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setHeadsUpAnimatingAway(true);
+        row.setUserExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void isExpanded_userExpandedTrueForHeadsUpDisappearRunning_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setHeadsUpAnimatingAway(true);
+        row.setUserExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void isExpanded_userExpandedFalseForHeadsUp_notExpanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setHeadsUpAnimatingAway(true);
+        row.setUserExpanded(false);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
+    }
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void isExpanded_userExpandedFalseForHeadsUpDisappearRunning_notExpanded()
+            throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setHeadsUpAnimatingAway(true);
+        row.setUserExpanded(false);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void isExpanded_HUNexpandedWhenPinningTrue_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setHeadsUp(true);
+        row.setPinned(true);
+
+        // WHEN
+        row.expandNotification();
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void isExpanded_HUNexpandedWhenPinningFalse_notExpanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(false);
+        row.setHeadsUp(true);
+        row.setPinned(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void hasUserChangedExpansion_expandPinned_returnTrue() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPinned(true);
+
+        // WHEN
+        row.expandNotification();
+
+        // THEN
+        assertThat(row.hasUserChangedExpansion()).isTrue();
     }
 
     @Test

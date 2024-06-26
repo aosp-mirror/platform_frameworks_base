@@ -98,9 +98,9 @@ class AccessibilityUserState {
 
     final Set<ComponentName> mTouchExplorationGrantedServices = new HashSet<>();
 
-    final ArraySet<String> mAccessibilityShortcutKeyTargets = new ArraySet<>();
+    private final ArraySet<String> mAccessibilityShortcutKeyTargets = new ArraySet<>();
 
-    final ArraySet<String> mAccessibilityButtonTargets = new ArraySet<>();
+    private final ArraySet<String> mAccessibilityButtonTargets = new ArraySet<>();
     private final ArraySet<String> mAccessibilityQsTargets = new ArraySet<>();
 
     /**
@@ -771,7 +771,8 @@ class AccessibilityUserState {
 
     /**
      * Returns a set which contains the flattened component names and the system class names
-     * assigned to the given shortcut.
+     * assigned to the given shortcut. The set is a defensive copy. To apply any changes to the set,
+     * use {@link #updateShortcutTargetsLocked(Set, int)}
      *
      * @param shortcutType The shortcut type.
      * @return The array set of the strings
@@ -779,6 +780,7 @@ class AccessibilityUserState {
     public ArraySet<String> getShortcutTargetsLocked(@UserShortcutType int shortcutType) {
         return new ArraySet<>(getShortcutTargetsInternalLocked(shortcutType));
     }
+
     private ArraySet<String> getShortcutTargetsInternalLocked(@UserShortcutType int shortcutType) {
         if (shortcutType == UserShortcutType.HARDWARE) {
             return mAccessibilityShortcutKeyTargets;
@@ -857,7 +859,7 @@ class AccessibilityUserState {
     }
 
     /**
-     * Removes given shortcut target in the list.
+     * Removes given shortcut target in the set.
      *
      * @param shortcutType The shortcut type.
      * @param target The component name of the shortcut target.
