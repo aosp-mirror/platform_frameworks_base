@@ -20087,7 +20087,7 @@ public final class Settings {
              * (0 = false, 1 = true)
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String REDUCE_MOTION = "reduce_motion";
 
             /**
