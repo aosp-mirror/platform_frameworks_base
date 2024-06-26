@@ -300,7 +300,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ਬਲੂਟੁੱਥ ਆਡੀਓ LDAC ਕੋਡੇਕ: ਪਲੇਬੈਕ ਕੁਆਲਿਟੀ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ਬਲੂਟੁੱਥ ਆਡੀਓ LDAC\nਕੋਡੇਕ ਚੋਣ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰੋ: ਪਲੇਬੈਕ ਕੁਆਲਿਟੀ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"ਸਟ੍ਰੀਮਿੰਗ: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"ਨਿੱਜੀ DNS"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"ਪ੍ਰਾਈਵੇਟ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"ਨਿੱਜੀ DNS ਮੋਡ ਚੁਣੋ"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"ਬੰਦ"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"ਸਵੈਚਲਿਤ"</string>

@@ -64,7 +64,7 @@
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"‏اتصال خودکار ازطریق %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"اتصال خودکار ازطریق ارائه‌دهنده رده‌بندی شبکه"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"متصل شده ازطریق <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="tap_to_sign_up" msgid="5356397741063740395">"برای ثبت‌نام ضربه بزنید"</string>
+    <string name="tap_to_sign_up" msgid="5356397741063740395">"برای ثبت‌نام تک‌ضرب بزنید"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"عدم اتصال به اینترنت"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"‏سرور DNS خصوصی قابل دسترسی نیست"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"اتصال محدود"</string>
@@ -74,7 +74,7 @@
     <string name="osu_opening_provider" msgid="4318105381295178285">"درحال بازکردن <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"متصل نشد"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"درحال تکمیل ثبت‌نام…"</string>
-    <string name="osu_sign_up_failed" msgid="5605453599586001793">"ثبت‌نام تکمیل نشد. برای امتحان مجدد ضربه بزنید."</string>
+    <string name="osu_sign_up_failed" msgid="5605453599586001793">"ثبت‌نام تکمیل نشد. برای امتحان مجدد تک‌ضرب بزنید."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"ثبت‌نام کامل شد. درحال اتصال…"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"آهسته"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"تأیید"</string>
@@ -412,7 +412,7 @@
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"فعال کردن پشتیبانی برای پنجره‌های آزاد آزمایشی."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"گذرواژه پشتیبان‌گیری محلی"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"پشتیبان‌گیری کامل رایانه درحال حاضر محافظت نمی‌شود"</string>
-    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"برای تغییر یا حذف گذرواژه برای نسخه‌های پشتیبان کامل رایانه‌ای ضربه بزنید"</string>
+    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"برای تغییر یا حذف گذرواژه برای نسخه‌های پشتیبان کامل رایانه‌ای تک‌ضرب بزنید"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"گذرواژه جدید نسخهٔ پشتیبان تنظیم شد"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"گذرواژه جدید و تأیید آن با یکدیگر مطابقت ندارند"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"گذرواژه پشتیبان‌گیری تنظیم نشد"</string>
@@ -428,8 +428,8 @@
     <item msgid="1282170165150762976">"رنگ‌های بهینه‌شده برای محتوای دیجیتالی"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="5372523625297212320">"برنامه‌های آماده به‌کار"</string>
-    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"غیرفعال. برای تغییر حالت ضربه بزنید."</string>
-    <string name="inactive_app_active_summary" msgid="8047630990208722344">"فعال. برای تغییر حالت ضربه بزنید."</string>
+    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"غیرفعال. برای تغییر حالت تک‌ضرب بزنید."</string>
+    <string name="inactive_app_active_summary" msgid="8047630990208722344">"فعال. برای تغییر حالت تک‌ضرب بزنید."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"وضعیت حالت آماده به‌کار برنامه:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"تنظیمات تراتبدیل رسانه"</string>
     <string name="transcode_user_control" msgid="6176368544817731314">"ملغی کردن پیش‌فرض‌های تراتبدیل"</string>
