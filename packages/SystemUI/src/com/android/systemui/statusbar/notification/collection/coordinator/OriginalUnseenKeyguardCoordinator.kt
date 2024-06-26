@@ -100,7 +100,7 @@ constructor(
     private var unseenFilterEnabled = false
 
     override fun attach(pipeline: NotifPipeline) {
-        if (NotificationMinimalismPrototype.V2.isEnabled) {
+        if (NotificationMinimalismPrototype.isEnabled) {
             pipeline.addPromoter(unseenNotifPromoter)
             pipeline.addOnBeforeTransformGroupsListener(::pickOutTopUnseenNotifs)
         }
@@ -265,10 +265,7 @@ constructor(
     }
 
     private fun unseenFeatureEnabled(): Flow<Boolean> {
-        if (
-            NotificationMinimalismPrototype.V1.isEnabled ||
-                NotificationMinimalismPrototype.V2.isEnabled
-        ) {
+        if (NotificationMinimalismPrototype.isEnabled) {
             return flowOf(true)
         }
         return secureSettings
@@ -341,7 +338,7 @@ constructor(
         }
 
     private fun pickOutTopUnseenNotifs(list: List<ListEntry>) {
-        if (NotificationMinimalismPrototype.V2.isUnexpectedlyInLegacyMode()) return
+        if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return
         // Only ever elevate a top unseen notification on keyguard, not even locked shade
         if (statusBarStateController.state != StatusBarState.KEYGUARD) {
             seenNotificationsInteractor.setTopOngoingNotification(null)
@@ -376,8 +373,8 @@ constructor(
     val unseenNotifPromoter =
         object : NotifPromoter("$TAG-unseen") {
             override fun shouldPromoteToTopLevel(child: NotificationEntry): Boolean =
-                if (NotificationMinimalismPrototype.V2.isUnexpectedlyInLegacyMode()) false
-                else if (!NotificationMinimalismPrototype.V2.ungroupTopUnseen) false
+                if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) false
+                else if (!NotificationMinimalismPrototype.ungroupTopUnseen) false
                 else
                     seenNotificationsInteractor.isTopOngoingNotification(child) ||
                         seenNotificationsInteractor.isTopUnseenNotification(child)
@@ -386,7 +383,7 @@ constructor(
     val topOngoingSectioner =
         object : NotifSectioner("TopOngoing", BUCKET_TOP_ONGOING) {
             override fun isInSection(entry: ListEntry): Boolean {
-                if (NotificationMinimalismPrototype.V2.isUnexpectedlyInLegacyMode()) return false
+                if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return false
                 return entry.anyEntry { notificationEntry ->
                     seenNotificationsInteractor.isTopOngoingNotification(notificationEntry)
                 }
@@ -396,7 +393,7 @@ constructor(
     val topUnseenSectioner =
         object : NotifSectioner("TopUnseen", BUCKET_TOP_UNSEEN) {
             override fun isInSection(entry: ListEntry): Boolean {
-                if (NotificationMinimalismPrototype.V2.isUnexpectedlyInLegacyMode()) return false
+                if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return false
                 return entry.anyEntry { notificationEntry ->
                     seenNotificationsInteractor.isTopUnseenNotification(notificationEntry)
                 }
@@ -427,13 +424,8 @@ constructor(
              * allow seen notifications to appear in the locked shade.
              */
             private fun isOnKeyguard(): Boolean =
-                if (NotificationMinimalismPrototype.V2.isEnabled) {
+                if (NotificationMinimalismPrototype.isEnabled) {
                     false // disable this feature under this prototype
-                } else if (
-                    NotificationMinimalismPrototype.V1.isEnabled &&
-                        NotificationMinimalismPrototype.V1.showOnLockedShade
-                ) {
-                    statusBarStateController.state == StatusBarState.KEYGUARD
                 } else {
                     keyguardRepository.isKeyguardShowing()
                 }

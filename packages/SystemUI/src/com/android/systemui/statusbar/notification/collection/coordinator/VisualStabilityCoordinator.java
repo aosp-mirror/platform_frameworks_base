@@ -150,8 +150,9 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                     if (entry == null) {
                         return false;
                     }
-                    boolean isTopUnseen = NotificationMinimalismPrototype.V2.isEnabled()
-                            && mSeenNotificationsInteractor.isTopUnseenNotification(entry);
+                    boolean isTopUnseen = NotificationMinimalismPrototype.isEnabled()
+                            && (mSeenNotificationsInteractor.isTopUnseenNotification(entry)
+                                || mSeenNotificationsInteractor.isTopOngoingNotification(entry));
                     if (isTopUnseen || mHeadsUpManager.isHeadsUpEntry(entry.getKey())) {
                         return !mVisibilityLocationProvider.isInVisibleLocation(entry);
                     }

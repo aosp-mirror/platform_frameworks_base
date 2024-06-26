@@ -120,11 +120,11 @@ constructor(
         }
 
         // Manually add Ordered Sections
-        if (NotificationMinimalismPrototype.V2.isEnabled) {
+        if (NotificationMinimalismPrototype.isEnabled) {
             mOrderedSections.add(unseenKeyguardCoordinator.topOngoingSectioner) // Top Ongoing
         }
         mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
-        if (NotificationMinimalismPrototype.V2.isEnabled) {
+        if (NotificationMinimalismPrototype.isEnabled) {
             mOrderedSections.add(unseenKeyguardCoordinator.topUnseenSectioner) // Top Unseen
         }
         mOrderedSections.add(colorizedFgsCoordinator.sectioner) // ForegroundService
