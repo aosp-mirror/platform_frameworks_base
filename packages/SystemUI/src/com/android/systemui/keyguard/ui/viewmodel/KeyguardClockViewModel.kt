@@ -31,7 +31,6 @@ import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
-import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxy
 import javax.inject.Inject
@@ -50,7 +49,6 @@ constructor(
     keyguardClockInteractor: KeyguardClockInteractor,
     @Application private val applicationScope: CoroutineScope,
     aodNotificationIconViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
-    notifsKeyguardInteractor: NotificationsKeyguardInteractor,
     @get:VisibleForTesting val shadeInteractor: ShadeInteractor,
     private val systemBarUtils: SystemBarUtilsProxy,
     configurationInteractor: ConfigurationInteractor,
@@ -90,14 +88,13 @@ constructor(
                 currentClock?.let { clock ->
                     val face = if (isLargeClock) clock.largeClock else clock.smallClock
                     face.config.hasCustomWeatherDataDisplay
-                }
-                    ?: false
+                } ?: false
             }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = currentClock.value?.largeClock?.config?.hasCustomWeatherDataDisplay
-                        ?: false
+                initialValue =
+                    currentClock.value?.largeClock?.config?.hasCustomWeatherDataDisplay ?: false
             )
 
     val clockShouldBeCentered: StateFlow<Boolean> =
@@ -109,15 +106,14 @@ constructor(
 
     // To translate elements below smartspace in weather clock to avoid overlapping between date
     // element in weather clock and aod icons
-    val isAodIconsVisible: StateFlow<Boolean> = combine(aodNotificationIconViewModel.icons.map {
-        it.visibleIcons.isNotEmpty()
-    }, notifsKeyguardInteractor.areNotificationsFullyHidden) { hasIcons, visible ->
-        hasIcons && visible
-    }.stateIn(
-            scope = applicationScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = false
-        )
+    val hasAodIcons: StateFlow<Boolean> =
+        aodNotificationIconViewModel.icons
+            .map { it.visibleIcons.isNotEmpty() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false
+            )
 
     val currentClockLayout: StateFlow<ClockLayout> =
         combine(
