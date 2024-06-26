@@ -477,12 +477,9 @@ final class InputMethodSubtypeSwitchingController {
     }
 
     @NonNull
-    private final Context mContext;
-    @NonNull
     private ControllerImpl mController;
 
-    InputMethodSubtypeSwitchingController(@NonNull Context context) {
-        mContext = context;
+    InputMethodSubtypeSwitchingController() {
         mController = ControllerImpl.createFrom(null, Collections.emptyList());
     }
 
@@ -491,11 +488,12 @@ final class InputMethodSubtypeSwitchingController {
         mController.onUserActionLocked(imi, subtype);
     }
 
-    public void resetCircularListLocked(@NonNull InputMethodSettings settings) {
+    public void resetCircularListLocked(@NonNull Context context,
+            @NonNull InputMethodSettings settings) {
         mController = ControllerImpl.createFrom(mController,
                 getSortedInputMethodAndSubtypeList(
                         false /* includeAuxiliarySubtypes */, false /* isScreenLocked */,
-                        false /* forImeMenu */, mContext, settings));
+                        false /* forImeMenu */, context, settings));
     }
 
     @Nullable

@@ -1282,7 +1282,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @SuppressWarnings("GuardedBy") final IntFunction<InputMethodBindingController>
                     bindingControllerFactory = userId -> new InputMethodBindingController(userId,
                     InputMethodManagerService.this);
-            mUserDataRepository = new UserDataRepository(mContext, mHandler, mUserManagerInternal,
+            mUserDataRepository = new UserDataRepository(mHandler, mUserManagerInternal,
                     bindingControllerForTesting != null ? bindingControllerForTesting
                             : bindingControllerFactory);
             for (int id : mUserManagerInternal.getUserIds()) {
@@ -1291,7 +1291,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
             final var userData = getUserData(mCurrentUserId);
-            userData.mSwitchingController.resetCircularListLocked(settings);
+            userData.mSwitchingController.resetCircularListLocked(mContext, settings);
             userData.mHardwareKeyboardShortcutController.update(settings);
 
             mMenuController = new InputMethodMenuController(this);
@@ -2958,7 +2958,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         final var userData = getUserData(userId);
-        userData.mSwitchingController.resetCircularListLocked(settings);
+        userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
     }
 
@@ -3036,7 +3036,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         final var userData = getUserData(userId);
-        userData.mSwitchingController.resetCircularListLocked(settings);
+        userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
         sendOnNavButtonFlagsChangedLocked();
     }
@@ -5301,7 +5301,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         updateDefaultVoiceImeIfNeededLocked();
 
         final var userData = getUserData(userId);
-        userData.mSwitchingController.resetCircularListLocked(settings);
+        userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
 
         sendOnNavButtonFlagsChangedLocked();
