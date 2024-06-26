@@ -108,11 +108,8 @@ final class UserDataRepository {
                 @NonNull InputMethodBindingController bindingController, @NonNull Context context) {
             mUserId = userId;
             mBindingController = bindingController;
-            final var emptySettings = InputMethodSettings.createEmptyMap(userId);
-            mSwitchingController = new InputMethodSubtypeSwitchingController(context,
-                    emptySettings);
-            mHardwareKeyboardShortcutController = new HardwareKeyboardShortcutController(
-                    emptySettings);
+            mSwitchingController = new InputMethodSubtypeSwitchingController(context);
+            mHardwareKeyboardShortcutController = new HardwareKeyboardShortcutController();
         }
 
         @Override
