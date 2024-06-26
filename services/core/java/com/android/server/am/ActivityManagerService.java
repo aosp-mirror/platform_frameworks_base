@@ -10238,6 +10238,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         addStartInfoTimestampInternal(key, timestampNs, userId, callingUid);
     }
 
+    @Override
+    public void reportStartInfoViewTimestamps(long renderThreadDrawStartTimeNs,
+            long framePresentedTimeNs) {
+        int callingUid = Binder.getCallingUid();
+        int userId = UserHandle.getUserId(callingUid);
+        addStartInfoTimestampInternal(
+                ApplicationStartInfo.START_TIMESTAMP_INITIAL_RENDERTHREAD_FRAME,
+                renderThreadDrawStartTimeNs, userId, callingUid);
+        addStartInfoTimestampInternal(
+                ApplicationStartInfo.START_TIMESTAMP_SURFACEFLINGER_COMPOSITION_COMPLETE,
+                framePresentedTimeNs, userId, callingUid);
+    }
+
     private void addStartInfoTimestampInternal(int key, long timestampNs, int userId, int uid) {
         mProcessList.getAppStartInfoTracker().addTimestampToStart(
                 Settings.getPackageNameForUid(mContext, uid),
