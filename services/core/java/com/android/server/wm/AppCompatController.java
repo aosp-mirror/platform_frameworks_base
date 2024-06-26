@@ -16,6 +16,7 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 
 import com.android.server.wm.utils.OptPropFactory;
@@ -26,16 +27,17 @@ import com.android.server.wm.utils.OptPropFactory;
 class AppCompatController {
 
     @NonNull
+    private final ActivityRecord mActivityRecord;
+    @NonNull
     private final TransparentPolicy mTransparentPolicy;
     @NonNull
     private final AppCompatOrientationPolicy mOrientationPolicy;
     @NonNull
     private final AppCompatOverrides mAppCompatOverrides;
-    @NonNull
-    private final AppCompatCameraPolicy mAppCompatCameraPolicy;
 
     AppCompatController(@NonNull WindowManagerService wmService,
                         @NonNull ActivityRecord activityRecord) {
+        mActivityRecord = activityRecord;
         final PackageManager packageManager = wmService.mContext.getPackageManager();
         final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
                 activityRecord.packageName);
@@ -49,8 +51,6 @@ class AppCompatController {
                 mAppCompatOverrides, tmpController::shouldApplyUserFullscreenOverride,
                 tmpController::shouldApplyUserMinAspectRatioOverride,
                 tmpController::isSystemOverrideToFullscreenEnabled);
-        mAppCompatCameraPolicy = new AppCompatCameraPolicy(activityRecord,
-                mAppCompatOverrides.getAppCompatCameraOverrides());
     }
 
     @NonNull
@@ -61,11 +61,6 @@ class AppCompatController {
     @NonNull
     AppCompatOrientationPolicy getOrientationPolicy() {
         return mOrientationPolicy;
-    }
-
-    @NonNull
-    AppCompatCameraPolicy getAppCompatCameraPolicy() {
-        return mAppCompatCameraPolicy;
     }
 
     @NonNull
@@ -81,5 +76,13 @@ class AppCompatController {
     @NonNull
     AppCompatCameraOverrides getAppCompatCameraOverrides() {
         return mAppCompatOverrides.getAppCompatCameraOverrides();
+    }
+
+    @Nullable
+    AppCompatCameraPolicy getAppCompatCameraPolicy() {
+        if (mActivityRecord.mDisplayContent != null) {
+            return mActivityRecord.mDisplayContent.mAppCompatCameraPolicy;
+        }
+        return null;
     }
 }

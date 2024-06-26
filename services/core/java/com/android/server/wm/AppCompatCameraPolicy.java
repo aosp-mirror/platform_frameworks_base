@@ -16,34 +16,158 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.ScreenOrientation;
+import android.content.res.Configuration;
+import android.widget.Toast;
+
+import com.android.window.flags.Flags;
 
 /**
- * Encapsulate the app compat logic related to camera.
+ * Encapsulate policy logic related to app compat display rotation.
  */
 class AppCompatCameraPolicy {
 
-    private static final String TAG = TAG_WITH_CLASS_NAME
-            ? "AppCompatCameraPolicy" : TAG_ATM;
+    @Nullable
+    private final CameraStateMonitor mCameraStateMonitor;
+    @Nullable
+    private final ActivityRefresher mActivityRefresher;
+    @Nullable
+    final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
+    @Nullable
+    final CameraCompatFreeformPolicy mCameraCompatFreeformPolicy;
 
-    @NonNull
-    private final ActivityRecord mActivityRecord;
-
-    @NonNull
-    private final AppCompatCameraOverrides mAppCompatCameraOverrides;
-
-    AppCompatCameraPolicy(@NonNull ActivityRecord activityRecord,
-            @NonNull AppCompatCameraOverrides appCompatCameraOverrides) {
-        mActivityRecord = activityRecord;
-        mAppCompatCameraOverrides = appCompatCameraOverrides;
-    }
-
-    void recomputeConfigurationForCameraCompatIfNeeded() {
-        if (mAppCompatCameraOverrides.shouldRecomputeConfigurationForCameraCompat()) {
-            mActivityRecord.recomputeConfiguration();
+    AppCompatCameraPolicy(@NonNull WindowManagerService wmService,
+            @NonNull DisplayContent displayContent) {
+        // Not checking DeviceConfig value here to allow enabling via DeviceConfig
+        // without the need to restart the device.
+        final boolean needsDisplayRotationCompatPolicy =
+                wmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
+        final boolean needsCameraCompatFreeformPolicy = Flags.cameraCompatForFreeform()
+                && DesktopModeLaunchParamsModifier.canEnterDesktopMode(wmService.mContext);
+        if (needsDisplayRotationCompatPolicy || needsCameraCompatFreeformPolicy) {
+            mCameraStateMonitor = new CameraStateMonitor(displayContent, wmService.mH);
+            mActivityRefresher = new ActivityRefresher(wmService, wmService.mH);
+            mDisplayRotationCompatPolicy =
+                    needsDisplayRotationCompatPolicy ? new DisplayRotationCompatPolicy(
+                            displayContent, mCameraStateMonitor, mActivityRefresher) : null;
+            mCameraCompatFreeformPolicy =
+                    needsCameraCompatFreeformPolicy ? new CameraCompatFreeformPolicy(displayContent,
+                            mCameraStateMonitor, mActivityRefresher) : null;
+        } else {
+            mDisplayRotationCompatPolicy = null;
+            mCameraCompatFreeformPolicy = null;
+            mCameraStateMonitor = null;
+            mActivityRefresher = null;
         }
     }
+
+    void onActivityRefreshed(@NonNull ActivityRecord activity) {
+        if (mActivityRefresher != null) {
+            mActivityRefresher.onActivityRefreshed(activity);
+        }
+    }
+
+    /**
+     * "Refreshes" activity by going through "stopped -> resumed" or "paused -> resumed" cycle.
+     * This allows to clear cached values in apps (e.g. display or camera rotation) that influence
+     * camera preview and can lead to sideways or stretching issues persisting even after force
+     * rotation.
+     */
+    void onActivityConfigurationChanging(@NonNull ActivityRecord activity,
+            @NonNull Configuration newConfig, @NonNull Configuration lastReportedConfig) {
+        if (mActivityRefresher != null) {
+            mActivityRefresher.onActivityConfigurationChanging(activity, newConfig,
+                    lastReportedConfig);
+        }
+    }
+
+    /**
+     * Notifies that animation in {@link ScreenRotationAnimation} has finished.
+     *
+     * <p>This class uses this signal as a trigger for notifying the user about forced rotation
+     * reason with the {@link Toast}.
+     */
+    void onScreenRotationAnimationFinished() {
+        if (mDisplayRotationCompatPolicy != null) {
+            mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
+        }
+    }
+
+    boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
+        if (mDisplayRotationCompatPolicy != null) {
+            return mDisplayRotationCompatPolicy.isActivityEligibleForOrientationOverride(activity);
+        }
+        return false;
+    }
+
+    /**
+     * Whether camera compat treatment is applicable for the given activity.
+     *
+     * <p>Conditions that need to be met:
+     * <ul>
+     *     <li>Camera is active for the package.
+     *     <li>The activity is in fullscreen
+     *     <li>The activity has fixed orientation but not "locked" or "nosensor" one.
+     * </ul>
+     */
+    boolean isTreatmentEnabledForActivity(@Nullable ActivityRecord activity) {
+        if (mDisplayRotationCompatPolicy != null) {
+            return mDisplayRotationCompatPolicy.isTreatmentEnabledForActivity(activity);
+        }
+        return false;
+    }
+
+    void start() {
+        if (mCameraCompatFreeformPolicy != null) {
+            mCameraCompatFreeformPolicy.start();
+        }
+        if (mCameraStateMonitor != null) {
+            mCameraStateMonitor.startListeningToCameraState();
+        }
+    }
+
+    void dispose() {
+        if (mDisplayRotationCompatPolicy != null) {
+            mDisplayRotationCompatPolicy.dispose();
+        }
+        if (mCameraCompatFreeformPolicy != null) {
+            mCameraCompatFreeformPolicy.dispose();
+        }
+        if (mCameraStateMonitor != null) {
+            mCameraStateMonitor.dispose();
+        }
+    }
+
+    boolean hasDisplayRotationCompatPolicy() {
+        return mDisplayRotationCompatPolicy != null;
+    }
+
+    boolean hasCameraCompatFreeformPolicy() {
+        return mCameraCompatFreeformPolicy != null;
+    }
+
+    @ScreenOrientation
+    int getOrientation() {
+        return mDisplayRotationCompatPolicy != null
+                ? mDisplayRotationCompatPolicy.getOrientation()
+                : SCREEN_ORIENTATION_UNSPECIFIED;
+    }
+
+    boolean isCameraActive(@NonNull ActivityRecord activity, boolean mustBeFullscreen) {
+        return mDisplayRotationCompatPolicy != null
+                && mDisplayRotationCompatPolicy.isCameraActive(activity, mustBeFullscreen);
+    }
+
+    @Nullable
+    String getSummaryForDisplayRotationHistoryRecord() {
+        if (mDisplayRotationCompatPolicy != null) {
+            return mDisplayRotationCompatPolicy.getSummaryForDisplayRotationHistoryRecord();
+        }
+        return null;
+    }
+
 }

@@ -105,8 +105,8 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.policy.TransitionAnimation;
-import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -1443,11 +1443,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 asyncRotationController.onTransitionFinished();
             }
             dc.onTransitionFinished();
-            if (hasParticipatedDisplay && dc.mDisplayRotationCompatPolicy != null) {
+            if (hasParticipatedDisplay) {
                 final ChangeInfo changeInfo = mChanges.get(dc);
                 if (changeInfo != null
                         && changeInfo.mRotation != dc.getWindowConfiguration().getRotation()) {
-                    dc.mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
+                    dc.mAppCompatCameraPolicy.onScreenRotationAnimationFinished();
                 }
             }
             if (mTransientLaunches != null) {

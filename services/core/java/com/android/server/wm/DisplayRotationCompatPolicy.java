@@ -299,8 +299,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
         // Checking whether an activity in fullscreen rather than the task as this camera
         // compat treatment doesn't cover activity embedding.
         if (cameraActivity.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-            cameraActivity.mAppCompatController
-                    .getAppCompatCameraPolicy().recomputeConfigurationForCameraCompatIfNeeded();
+            recomputeConfigurationForCameraCompatIfNeeded(cameraActivity);
             mDisplayContent.updateOrientation();
             return true;
         }
@@ -367,8 +366,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                 || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
             return true;
         }
-        topActivity.mAppCompatController
-                .getAppCompatCameraPolicy().recomputeConfigurationForCameraCompatIfNeeded();
+        recomputeConfigurationForCameraCompatIfNeeded(topActivity);
         mDisplayContent.updateOrientation();
         return true;
     }
@@ -382,5 +380,13 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
             return false;
         }
         return mActivityRefresher.isActivityRefreshing(topActivity);
+    }
+
+    private void recomputeConfigurationForCameraCompatIfNeeded(
+            @NonNull ActivityRecord activityRecord) {
+        if (activityRecord.mAppCompatController.getAppCompatCameraOverrides()
+                .shouldRecomputeConfigurationForCameraCompat()) {
+            activityRecord.recomputeConfiguration();
+        }
     }
 }

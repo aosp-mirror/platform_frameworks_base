@@ -462,12 +462,16 @@ final class LetterboxUiController {
         final boolean isTabletopMode = isDisplayFullScreenAndInPosture(/* isTabletop */ true);
         final boolean isLandscape = isFixedOrientationLandscape(
                 mActivityRecord.getOverrideOrientation());
-
+        final AppCompatCameraOverrides appCompatCameraOverrides =
+                mActivityRecord.mAppCompatController.getAppCompatCameraOverrides();
+        final AppCompatCameraPolicy cameraPolicy =
+                mActivityRecord.mAppCompatController.getAppCompatCameraPolicy();
+        final boolean isCameraCompatTreatmentActive = cameraPolicy != null
+                && cameraPolicy.isTreatmentEnabledForActivity(mActivityRecord);
         // Don't resize to split screen size when in book mode if letterbox position is centered
         return (isBookMode && isNotCenteredHorizontally || isTabletopMode && isLandscape)
-                    || mActivityRecord.mAppCompatController.getAppCompatCameraOverrides()
-                            .isCameraCompatSplitScreenAspectRatioAllowed()
-                                && getAppCompatOverrides().isCameraCompatTreatmentActive();
+                    || (appCompatCameraOverrides.isCameraCompatSplitScreenAspectRatioAllowed()
+                    && isCameraCompatTreatmentActive);
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {

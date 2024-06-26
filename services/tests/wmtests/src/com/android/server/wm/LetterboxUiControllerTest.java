@@ -636,8 +636,9 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
     public void shouldOverrideMinAspectRatioForCamera_overrideEnabled_returnsTrue() {
-        doReturn(true).when(mActivity).isCameraActive();
-        mController = new LetterboxUiController(mWm, mActivity);
+        mActivity = setUpActivityWithComponent();
+        doReturn(true).when(mActivity.mAppCompatController
+                .getAppCompatCameraOverrides()).isCameraActive();
 
         assertTrue(mActivity.mAppCompatController.getAppCompatCameraOverrides()
                 .shouldOverrideMinAspectRatioForCamera());
@@ -647,9 +648,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
     public void shouldOverrideMinAspectRatioForCamera_propertyTrue_overrideEnabled_returnsTrue()
             throws Exception {
-        doReturn(true).when(mActivity).isCameraActive();
         mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
+        mActivity = setUpActivityWithComponent();
+        doReturn(true).when(mActivity.mAppCompatController
+                .getAppCompatCameraOverrides()).isCameraActive();
 
         assertTrue(mActivity.mAppCompatController.getAppCompatCameraOverrides()
                 .shouldOverrideMinAspectRatioForCamera());
@@ -659,9 +661,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
     public void shouldOverrideMinAspectRatioForCamera_propertyTrue_overrideEnabled_returnsFalse()
             throws Exception {
-        doReturn(false).when(mActivity).isCameraActive();
         mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
+        mActivity = setUpActivityWithComponent();
+        doReturn(false).when(mActivity.mAppCompatController
+                .getAppCompatCameraOverrides()).isCameraActive();
 
         assertFalse(mActivity.mAppCompatController.getAppCompatCameraOverrides()
                 .shouldOverrideMinAspectRatioForCamera());
@@ -671,9 +674,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
     public void shouldOverrideMinAspectRatioForCamera_propertyTrue_overrideDisabled_returnsFalse()
             throws Exception {
-        doReturn(true).when(mActivity).isCameraActive();
         mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
+        mActivity = setUpActivityWithComponent();
+        doReturn(true).when(mActivity.mAppCompatController
+                .getAppCompatCameraOverrides()).isCameraActive();
 
         assertFalse(mActivity.mAppCompatController.getAppCompatCameraOverrides()
                 .shouldOverrideMinAspectRatioForCamera());
@@ -682,8 +686,9 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
     public void shouldOverrideMinAspectRatioForCamera_overrideDisabled_returnsFalse() {
-        doReturn(true).when(mActivity).isCameraActive();
-        mController = new LetterboxUiController(mWm, mActivity);
+        mActivity = setUpActivityWithComponent();
+        doReturn(true).when(mActivity.mAppCompatController
+                .getAppCompatCameraOverrides()).isCameraActive();
 
         assertFalse(mActivity.mAppCompatController.getAppCompatCameraOverrides()
                 .shouldOverrideMinAspectRatioForCamera());
@@ -694,7 +699,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void shouldOverrideMinAspectRatioForCamera_propertyFalse_overrideEnabled_returnsFalse()
             throws Exception {
         mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ false);
-        mController = new LetterboxUiController(mWm, mActivity);
+        mActivity = setUpActivityWithComponent();
 
         assertFalse(mActivity.mAppCompatController.getAppCompatCameraOverrides()
                 .shouldOverrideMinAspectRatioForCamera());
@@ -705,8 +710,11 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void shouldOverrideMinAspectRatioForCamera_propertyFalse_noOverride_returnsFalse()
             throws Exception {
         mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ false);
-        doReturn(true).when(mActivity).isCameraActive();
-        mController = new LetterboxUiController(mWm, mActivity);
+
+        mActivity = setUpActivityWithComponent();
+
+        doReturn(true).when(mActivity.mAppCompatController
+                .getAppCompatCameraOverrides()).isCameraActive();
 
         assertFalse(mActivity.mAppCompatController.getAppCompatCameraOverrides()
                 .shouldOverrideMinAspectRatioForCamera());
@@ -848,8 +856,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         assertEquals(1.5f, mController.getFixedOrientationLetterboxAspectRatio(
                 mActivity.getParent().getConfiguration()), /* delta */ 0.01);
 
-        spyOn(mDisplayContent.mDisplayRotationCompatPolicy);
-        doReturn(true).when(mDisplayContent.mDisplayRotationCompatPolicy)
+        spyOn(mDisplayContent.mAppCompatCameraPolicy);
+        doReturn(true).when(mDisplayContent.mAppCompatCameraPolicy)
                 .isTreatmentEnabledForActivity(eq(mActivity));
 
         assertEquals(mController.getSplitScreenAspectRatio(),
@@ -980,6 +988,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
                 .setComponent(ComponentName.createRelative(mContext,
                         com.android.server.wm.LetterboxUiControllerTest.class.getName()))
                 .build();
+        spyOn(activity.mAppCompatController.getAppCompatCameraOverrides());
         return activity;
     }
 }
