@@ -161,6 +161,13 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
 
                 chipTextView.visibility = View.GONE
             }
+            is OngoingActivityChipModel.Shown.IconOnly -> {
+                chipTextView.visibility = View.GONE
+                // The Chronometer should be stopped to prevent leaks -- see b/192243808 and
+                // [Chronometer.start].
+                chipTimeView.stop()
+                chipTimeView.visibility = View.GONE
+            }
         }
         updateChipTextPadding(chipModel, chipTextView, chipTimeView)
     }
@@ -201,7 +208,8 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                 // Set as assertive so talkback will announce the countdown
                 chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
             }
-            is OngoingActivityChipModel.Shown.Timer -> {
+            is OngoingActivityChipModel.Shown.Timer,
+            is OngoingActivityChipModel.Shown.IconOnly -> {
                 chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE
             }
         }
