@@ -118,7 +118,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.isA
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
@@ -131,6 +130,7 @@ import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
@@ -157,6 +157,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
   @Mock lateinit var transitions: Transitions
   @Mock lateinit var keyguardManager: KeyguardManager
+  @Mock lateinit var mReturnToDragStartAnimator: ReturnToDragStartAnimator
   @Mock lateinit var exitDesktopTransitionHandler: ExitDesktopTaskTransitionHandler
   @Mock lateinit var enterDesktopTransitionHandler: EnterDesktopTaskTransitionHandler
   @Mock
@@ -250,6 +251,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         dragAndDropController,
         transitions,
         keyguardManager,
+        mReturnToDragStartAnimator,
         enterDesktopTransitionHandler,
         exitDesktopTransitionHandler,
         toggleResizeDesktopTaskTransitionHandler,
@@ -2375,10 +2377,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.onDragPositioningEnd(
         task,
+        mockSurface,
         Point(100, -100), /* position */
         PointF(200f, -200f), /* inputCoordinate */
         Rect(100, -100, 500, 1000), /* currentDragBounds */
-        Rect(0, 50, 2000, 2000) /* validDragArea */)
+        Rect(0, 50, 2000, 2000), /* validDragArea */
+        Rect() /* dragStartBounds */ )
     val rectAfterEnd = Rect(100, 50, 500, 1150)
     verify(transitions)
         .startTransition(
@@ -2408,10 +2412,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     spyController.onDragPositioningEnd(
       task,
+      mockSurface,
       Point(100, 200), /* position */
       PointF(200f, 300f), /* inputCoordinate */
       currentDragBounds, /* currentDragBounds */
-      Rect(0, 50, 2000, 2000) /* validDragArea */)
+      Rect(0, 50, 2000, 2000) /* validDragArea */,
+      Rect() /* dragStartBounds */)
 
 
     verify(transitions)
@@ -2529,6 +2535,41 @@ class DesktopTasksControllerTest : ShellTestCase() {
     // Assert bounds set to stable bounds
     val wct = getLatestToggleResizeDesktopTaskWct(currentDragBounds)
     assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
+  }
+
+  @Test
+  @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
+  fun handleSnapResizingTask_nonResizable_snapsToHalfScreen() {
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, Rect(0, 0, 200, 100)).apply {
+      isResizeable = false
+    }
+    val preDragBounds = Rect(100, 100, 400, 500)
+    val currentDragBounds = Rect(0, 100, 300, 500)
+
+    controller.handleSnapResizingTask(
+      task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds)
+    val wct = getLatestToggleResizeDesktopTaskWct(currentDragBounds)
+    assertThat(findBoundsChange(wct, task)).isEqualTo(
+      Rect(STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom))
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
+  fun handleSnapResizingTask_nonResizable_startsRepositionAnimation() {
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, Rect(0, 0, 200, 100)).apply {
+      isResizeable = false
+    }
+    val preDragBounds = Rect(100, 100, 400, 500)
+    val currentDragBounds = Rect(0, 100, 300, 500)
+
+    controller.handleSnapResizingTask(
+      task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds)
+    verify(mReturnToDragStartAnimator).start(
+      eq(task.taskId),
+      eq(mockSurface),
+      eq(currentDragBounds),
+      eq(preDragBounds)
+    )
   }
 
   @Test

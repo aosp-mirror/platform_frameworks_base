@@ -163,7 +163,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         } else {
             DragPositioningCallbackUtility.updateTaskBounds(mRepositionTaskBounds,
                     mTaskBoundsAtDragStart, mRepositionStartPoint, x, y);
-                mInteractionJankMonitor.end(CUJ_DESKTOP_MODE_DRAG_WINDOW);
+            mInteractionJankMonitor.end(CUJ_DESKTOP_MODE_DRAG_WINDOW);
         }
 
         mCtrlType = CTRL_TYPE_UNDEFINED;

@@ -43,6 +43,7 @@ enum class DesktopModeFlags(
     APP_HEADER_WITH_TASK_DENSITY(Flags::enableAppHeaderWithTaskDensity, true),
     TASK_STACK_OBSERVER_IN_SHELL(Flags::enableTaskStackObserverInShell, true),
     SIZE_CONSTRAINTS(Flags::enableDesktopWindowingSizeConstraints, true),
+    DISABLE_SNAP_RESIZE(Flags::disableNonResizableAppSnapResizing, true),
     DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, true),
     ENABLE_DESKTOP_WINDOWING_TASK_LIMIT(Flags::enableDesktopWindowingTaskLimit, true),
     BACK_NAVIGATION(Flags::enableDesktopWindowingBackNavigation, true),
