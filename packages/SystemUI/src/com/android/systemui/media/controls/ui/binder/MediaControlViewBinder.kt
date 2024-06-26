@@ -109,6 +109,10 @@ object MediaControlViewBinder {
         mainDispatcher: CoroutineDispatcher,
         mediaFlags: MediaFlags,
     ) {
+        // Set up media control location and its listener.
+        viewModel.onLocationChanged(viewController.currentEndLocation)
+        viewController.locationChangeListener = viewModel.onLocationChanged
+
         with(viewHolder) {
             // AlbumView uses a hardware layer so that clipping of the foreground is handled with
             // clipping the album art. Otherwise album art shows through at the edges.
@@ -221,7 +225,7 @@ object MediaControlViewBinder {
             dismiss.isEnabled = model.isDismissEnabled
             dismiss.setOnClickListener {
                 if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                    model.onDismissClicked.invoke()
+                    model.onDismissClicked()
                 }
             }
             cancelText.background = model.cancelTextBackground
@@ -349,7 +353,7 @@ object MediaControlViewBinder {
         if (actionViewModel.isEnabled) {
             button.setOnClickListener {
                 if (!falsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
-                    actionViewModel.onClicked.invoke(it.id)
+                    actionViewModel.onClicked(it.id)
 
                     viewController.multiRippleController.play(
                         createTouchRippleAnimation(
@@ -469,8 +473,7 @@ object MediaControlViewBinder {
                         transitionDrawable.startTransition(
                             if (viewModel.shouldAddGradient) 333 else 80
                         )
-                    }
-                        ?: albumView.setImageDrawable(artwork)
+                    } ?: albumView.setImageDrawable(artwork)
                 }
                 viewController.isArtworkBound = viewModel.shouldAddGradient
                 viewController.prevArtwork = artwork

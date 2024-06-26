@@ -183,7 +183,10 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
                 SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE, true)
             )
             underTest.addSelectedUserMediaEntry(playingData)
-            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(playingInstanceId))
+            underTest.addMediaDataLoadingState(
+                MediaDataLoadingModel.Loaded(playingInstanceId),
+                false
+            )
 
             verify(smartspaceLogger)
                 .logSmartspaceCardReceived(
@@ -193,7 +196,10 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
                 )
 
             underTest.addSelectedUserMediaEntry(remoteData)
-            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(remoteInstanceId))
+            underTest.addMediaDataLoadingState(
+                MediaDataLoadingModel.Loaded(remoteInstanceId),
+                false
+            )
 
             verify(smartspaceLogger)
                 .logSmartspaceCardReceived(
@@ -442,7 +448,7 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             reset(smartspaceLogger)
 
             underTest.addSelectedUserMediaEntry(data)
-            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId))
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId), false)
 
             verify(smartspaceLogger)
                 .logSmartspaceCardReceived(data.smartspaceId, data.appUid, cardinality = 2)
@@ -451,7 +457,8 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
 
             underTest.addSelectedUserMediaEntry(data)
             underTest.addMediaDataLoadingState(
-                MediaDataLoadingModel.Loaded(instanceId, receivedSmartspaceCardLatency = 123)
+                MediaDataLoadingModel.Loaded(instanceId, receivedSmartspaceCardLatency = 123),
+                true
             )
 
             verify(smartspaceLogger)
