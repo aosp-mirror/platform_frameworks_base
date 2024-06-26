@@ -2791,12 +2791,13 @@ public class AudioDeviceBroker {
         return mDeviceInventory.getImmutableDeviceInventory();
     }
 
-    void addOrUpdateDeviceSAStateInInventory(AdiDeviceState deviceState) {
-        mDeviceInventory.addOrUpdateDeviceSAStateInInventory(deviceState);
+    void addOrUpdateDeviceSAStateInInventory(AdiDeviceState deviceState, boolean syncInventory) {
+        mDeviceInventory.addOrUpdateDeviceSAStateInInventory(deviceState, syncInventory);
     }
 
-    void addOrUpdateBtAudioDeviceCategoryInInventory(AdiDeviceState deviceState) {
-        mDeviceInventory.addOrUpdateAudioDeviceCategoryInInventory(deviceState);
+    void addOrUpdateBtAudioDeviceCategoryInInventory(
+            AdiDeviceState deviceState, boolean syncInventory) {
+        mDeviceInventory.addOrUpdateAudioDeviceCategoryInInventory(deviceState, syncInventory);
     }
 
     @Nullable
