@@ -257,7 +257,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Felhasználó"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Használhatók hálózatok"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Elérhető hálózatok"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nem használhatók hálózatok"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Nincs elérhető Wi-Fi-hálózat"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Bekapcsolás…"</string>

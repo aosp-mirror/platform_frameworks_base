@@ -642,7 +642,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Chuyển đổi bố cục bàn phím"</string>
     <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Xoá văn bản"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Lối tắt"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Lối tắt tìm kiếm"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Tìm lối tắt"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Không tìm thấy lối tắt"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Hệ thống"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Đầu vào"</string>

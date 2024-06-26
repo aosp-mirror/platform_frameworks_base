@@ -670,8 +670,8 @@
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Syöttötapa"</string>
     <string name="input_switch_input_language_next" msgid="3394291576873633793">"Vaihda syöttökieli (seuraava kieli)"</string>
     <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Vaihda syöttökieli (edellinen kieli)"</string>
-    <string name="input_access_emoji" msgid="8105642858900406351">"Emojien käyttö"</string>
-    <string name="input_access_voice_typing" msgid="7291201476395326141">"Puhekirjoituksen käyttö"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"Käytä emojeja"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"Käytä puhekirjoitusta"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Sovellukset"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Apusovellus"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Selain (oletuksena Chrome)"</string>
