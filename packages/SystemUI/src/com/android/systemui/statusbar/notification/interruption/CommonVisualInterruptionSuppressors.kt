@@ -381,6 +381,7 @@ class AvalancheSuppressor(
                 .setContentText(textStr)
                 .setSmallIcon(com.android.systemui.res.R.drawable.ic_settings)
                 .setCategory(Notification.CATEGORY_SYSTEM)
+                .setTimeoutAfter(/* one day in ms */ 24 * 60 * 60 * 1000L)
                 .setAutoCancel(true)
                 .addAction(android.R.drawable.button_onoff_indicator_off, actionStr, pendingIntent)
                 .setContentIntent(pendingIntent)
