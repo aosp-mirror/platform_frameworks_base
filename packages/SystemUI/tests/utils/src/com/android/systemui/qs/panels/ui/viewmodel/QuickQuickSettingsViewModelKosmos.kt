@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.brightness.ui.viewmodel.brightnessSliderViewModel
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.quickQuickSettingsViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.tileGridViewModel
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.qs.panels.domain.interactor.quickQuickSettingsRowInteractor
+import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 
-val Kosmos.quickSettingsContainerViewModel by
+val Kosmos.quickQuickSettingsViewModel by
     Kosmos.Fixture {
-        QuickSettingsContainerViewModel(
-            brightnessSliderViewModel,
-            tileGridViewModel,
-            editModeViewModel,
-            quickQuickSettingsViewModel,
+        QuickQuickSettingsViewModel(
+            currentTilesInteractor,
+            fixedColumnsSizeViewModel,
+            quickQuickSettingsRowInteractor,
+            iconTilesViewModel,
+            applicationCoroutineScope,
         )
     }

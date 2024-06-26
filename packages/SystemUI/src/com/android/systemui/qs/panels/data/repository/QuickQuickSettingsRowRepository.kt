@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.qs.panels.data.repository
 
-import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
+import android.content.res.Resources
+import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
+import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
+import kotlinx.coroutines.flow.map
 
 @SysUISingleton
-class QuickSettingsContainerViewModel
+class QuickQuickSettingsRowRepository
 @Inject
 constructor(
-    val brightnessSliderViewModel: BrightnessSliderViewModel,
-    val tileGridViewModel: TileGridViewModel,
-    val editModeViewModel: EditModeViewModel,
-    val quickQuickSettingsViewModel: QuickQuickSettingsViewModel,
-)
+    @Main private val resources: Resources,
+    configurationRepository: ConfigurationRepository,
+) {
+    val rows =
+        configurationRepository.onConfigurationChange.emitOnStart().map {
+            resources.getInteger(R.integer.quick_qs_panel_max_rows)
+        }
+}

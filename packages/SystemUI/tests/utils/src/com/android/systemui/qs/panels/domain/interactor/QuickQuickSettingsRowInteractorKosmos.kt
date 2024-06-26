@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.qs.panels.domain.interactor
 
-import com.android.systemui.brightness.ui.viewmodel.brightnessSliderViewModel
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.quickQuickSettingsViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.tileGridViewModel
+import com.android.systemui.qs.panels.data.repository.quickQuickSettingsRowRepository
 
-val Kosmos.quickSettingsContainerViewModel by
-    Kosmos.Fixture {
-        QuickSettingsContainerViewModel(
-            brightnessSliderViewModel,
-            tileGridViewModel,
-            editModeViewModel,
-            quickQuickSettingsViewModel,
-        )
-    }
+val Kosmos.quickQuickSettingsRowInteractor by
+    Kosmos.Fixture { QuickQuickSettingsRowInteractor(quickQuickSettingsRowRepository) }

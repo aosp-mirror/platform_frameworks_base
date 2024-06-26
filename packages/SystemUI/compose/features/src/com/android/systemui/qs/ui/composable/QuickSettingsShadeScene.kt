@@ -16,14 +16,14 @@
 
 package com.android.systemui.qs.ui.composable
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,6 +46,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.qs.panels.ui.compose.EditMode
 import com.android.systemui.qs.panels.ui.compose.TileGrid
+import com.android.systemui.qs.ui.composable.QuickSettingsShade.Transitions.QuickSettingsLayoutEnter
+import com.android.systemui.qs.ui.composable.QuickSettingsShade.Transitions.QuickSettingsLayoutExit
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneViewModel
 import com.android.systemui.scene.shared.model.Scenes
@@ -109,27 +111,18 @@ private fun ShadeBody(
 ) {
     val isEditing by viewModel.editModeViewModel.isEditing.collectAsStateWithLifecycle()
 
-    Box {
-        // The main Quick Settings grid layout.
-        AnimatedVisibility(
-            visible = !isEditing,
-            enter = QuickSettingsShade.Transitions.QuickSettingsLayoutEnter,
-            exit = QuickSettingsShade.Transitions.QuickSettingsLayoutExit,
-        ) {
-            QuickSettingsLayout(
-                viewModel = viewModel,
-            )
-        }
-
-        // The Quick Settings Editor layout.
-        AnimatedVisibility(
-            visible = isEditing,
-            enter = QuickSettingsShade.Transitions.QuickSettingsEditorEnter,
-            exit = QuickSettingsShade.Transitions.QuickSettingsEditorExit,
-        ) {
+    AnimatedContent(
+        targetState = isEditing,
+        transitionSpec = { QuickSettingsLayoutEnter togetherWith QuickSettingsLayoutExit }
+    ) { editing ->
+        if (editing) {
             EditMode(
                 viewModel = viewModel.editModeViewModel,
                 modifier = Modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding)
+            )
+        } else {
+            QuickSettingsLayout(
+                viewModel = viewModel,
             )
         }
     }
