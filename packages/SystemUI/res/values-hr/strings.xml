@@ -342,10 +342,10 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Snimanje zaslona"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Početak"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavi"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Zabilježi poteškoću"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Zabilježite poteškoću"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Pokreni"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Zaustavi"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Na koji dio doživljaja na uređaju to utjecalo?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Na koji je dio doživljaja na uređaju to utjecalo?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Odaberite vrstu problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Snimanje zaslona"</string>
   <string-array name="qs_record_issue_types">

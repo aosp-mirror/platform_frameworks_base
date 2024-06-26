@@ -345,7 +345,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Registar problema"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Iniciar"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Parar"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Que parte da experiência do disposit. foi afetada?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Que parte do dispositivo foi afetada?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Selecione o tipo de problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Gravação de ecrã"</string>
   <string-array name="qs_record_issue_types">
@@ -428,7 +428,7 @@
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Ignorar"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Adicionar, remover e reordenar widgets neste espaço"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Adicionar mais widgets"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Mantenha premido para personalizar os widgets"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Mantenha pressionado para personalizar os widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personalizar widgets"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ícone da app do widget desativado"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Editar widget"</string>
@@ -566,7 +566,7 @@
     <string name="stream_voice_call" msgid="7468348170702375660">"Chamada"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Toque"</string>
-    <string name="stream_music" msgid="2188224742361847580">"Suporte de dados"</string>
+    <string name="stream_music" msgid="2188224742361847580">"Multimédia"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarme"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notificação"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>

@@ -342,7 +342,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"บันทึกหน้าจอ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"เริ่ม"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"หยุด"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"ปัญหาการบันทึก"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"บันทึกปัญหา"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"เริ่ม"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"หยุด"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ประสบการณ์การใช้งานอุปกรณ์ส่วนใดที่ได้รับผลกระทบ"</string>

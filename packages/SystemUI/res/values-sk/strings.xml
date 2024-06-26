@@ -342,8 +342,8 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Rekordér obrazovky"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Začať"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ukončiť"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Problém s nahrávaním"</string>
-    <string name="qs_record_issue_start" msgid="2979831312582567056">"Začnite"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Nahrať problém"</string>
+    <string name="qs_record_issue_start" msgid="2979831312582567056">"Začať"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Zastavte"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Čo v zariadení bolo ovplyvnené?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Vyberte typ problému"</string>

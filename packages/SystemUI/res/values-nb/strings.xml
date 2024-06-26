@@ -72,32 +72,32 @@
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skjermdump"</string>
     <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Hold ulåst er slått av"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"har sendt et bilde"</string>
-    <string name="screenshot_saving_title" msgid="2298349784913287333">"Lagrer skjermdumpen …"</string>
-    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Lagrer skjermdumpen i jobbprofilen …"</string>
+    <string name="screenshot_saving_title" msgid="2298349784913287333">"Lagrer skjermbildet …"</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Lagrer skjermbildet i jobbprofilen …"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Skjermdumpen er lagret"</string>
-    <string name="screenshot_failed_title" msgid="3259148215671936891">"Kunne ikke lagre skjermdump"</string>
+    <string name="screenshot_failed_title" msgid="3259148215671936891">"Kunne ikke lagre skjermbilde"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"Ekstern skjerm"</string>
-    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Enheten må være låst opp før skjermdumpen kan lagres"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Prøv å ta skjermdump på nytt"</string>
-    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Kan ikke lagre skjermdumpen"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisasjonen din tillater ikke at du tar skjermdumper"</string>
-    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Funksjonen for å ta skjermdumper er blokkert av IT-administratoren din"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Enheten må være låst opp før skjermbildet kan lagres"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Prøv å ta skjermbilde på nytt"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Kan ikke lagre skjermbildet"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisasjonen din tillater ikke at du tar skjermbilder"</string>
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Funksjonen for å ta skjermbilder er blokkert av IT-administratoren din"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Rediger"</string>
-    <string name="screenshot_edit_description" msgid="3333092254706788906">"Rediger skjermdumpen"</string>
+    <string name="screenshot_edit_description" msgid="3333092254706788906">"Rediger skjermbildet"</string>
     <string name="screenshot_share_label" msgid="1653061117238861559">"Del"</string>
-    <string name="screenshot_share_description" msgid="2861628935812656612">"Del skjermdumpen"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Utvidet skjermdump"</string>
-    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Avvis skjermdumpen"</string>
+    <string name="screenshot_share_description" msgid="2861628935812656612">"Del skjermbildet"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Utvidet skjermbilde"</string>
+    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Avvis skjermbildet"</string>
     <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Avvis melding fra jobbprofilen"</string>
-    <string name="screenshot_preview_description" msgid="7606510140714080474">"Forhåndsvisning av skjermdump"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Forhåndsvisning av skjermbilde"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Øvre grense <xliff:g id="PERCENT">%1$d</xliff:g> prosent"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Nedre grense <xliff:g id="PERCENT">%1$d</xliff:g> prosent"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Venstre grense <xliff:g id="PERCENT">%1$d</xliff:g> prosent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Høyre grense <xliff:g id="PERCENT">%1$d</xliff:g> prosent"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Lagret i <xliff:g id="APP">%1$s</xliff:g> i jobbprofilen"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Filer"</string>
-    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> har registrert denne skjermdumpen."</string>
-    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> og andre åpne apper har registrert denne skjermdumpen."</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> har registrert dette skjermbildet."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> og andre åpne apper har registrert dette skjermbildet."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Legg til i notat"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Skjermopptak"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Behandler skjermopptaket"</string>
@@ -728,7 +728,7 @@
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Viser snarveier som åpner apper"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Viser snarveier for den gjeldende appen"</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Se varsler"</string>
-    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Ta skjermdump"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Ta skjermbilde"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Vis snarveier"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Gå tilbake"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Gå til startskjermen"</string>
@@ -1220,8 +1220,8 @@
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Vil du bytte skjerm?"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Bruk baksidekameraet for å få høyere oppløsning"</string>
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Brett ut telefonen for å få høyere oppløsning"</string>
-    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"En sammenleggbar enhet blir brettet ut"</string>
-    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"En sammenleggbar enhet blir snudd"</string>
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"En foldbar enhet blir brettet ut"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"En foldbar enhet blir snudd"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"lagt sammen"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"åpen"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>

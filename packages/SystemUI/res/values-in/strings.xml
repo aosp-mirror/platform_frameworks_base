@@ -345,7 +345,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Mencatat Masalah"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Mulai"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Berhenti"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Bagian pengalaman perangkat mana yang terpengaruh?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Hal apa yang terpengaruh?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Pilih jenis masalah"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Perekaman layar"</string>
   <string-array name="qs_record_issue_types">
