@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.os.UserHandle
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
@@ -29,18 +30,24 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.expansionChanges
+import com.android.systemui.statusbar.notification.collection.GroupEntry
+import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.stack.BUCKET_TOP_ONGOING
+import com.android.systemui.statusbar.notification.stack.BUCKET_TOP_UNSEEN
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.headsUpEvents
 import com.android.systemui.util.asIndenting
-import com.android.systemui.util.indentIfPossible
+import com.android.systemui.util.printCollection
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import java.io.PrintWriter
@@ -65,16 +72,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
 /**
- * If the setting is enabled, this will track and hide seen notifications on the lockscreen.
+ * If the setting is enabled, this will track seen notifications and ensure that they only show in
+ * the shelf on the lockscreen.
  *
- * This is the "original" unseen keyguard coordinator because this is the logic originally developed
- * for large screen devices where showing "seen" notifications on the lock screen was distracting.
- * Moreover, this file was created during a project that will replace this logic, so the
- * [LockScreenMinimalismCoordinator] is the expected replacement of this file.
+ * This class is a replacement of the [OriginalUnseenKeyguardCoordinator].
  */
 @CoordinatorScope
 @SuppressLint("SharedFlowCreation")
-class OriginalUnseenKeyguardCoordinator
+class LockScreenMinimalismCoordinator
 @Inject
 constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
@@ -95,8 +100,11 @@ constructor(
     private var unseenFilterEnabled = false
 
     override fun attach(pipeline: NotifPipeline) {
-        NotificationMinimalismPrototype.assertInLegacyMode()
-        pipeline.addFinalizeFilter(unseenNotifFilter)
+        if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) {
+            return
+        }
+        pipeline.addPromoter(unseenNotifPromoter)
+        pipeline.addOnBeforeTransformGroupsListener(::pickOutTopUnseenNotifs)
         pipeline.addCollectionListener(collectionListener)
         scope.launch { trackUnseenFilterSettingChanges() }
         dumpManager.registerDumpable(this)
@@ -135,7 +143,7 @@ constructor(
                     )
                     notificationsSeenWhileLocked.clear()
                 }
-                unseenNotifFilter.invalidateList("keyguard no longer showing")
+                unseenNotifPromoter.invalidateList("keyguard no longer showing")
                 // Keyguard is gone, notifications can be immediately marked as seen when they
                 // become visible.
                 trackSeenNotificationsWhileUnlocked()
@@ -258,9 +266,10 @@ constructor(
     }
 
     private fun unseenFeatureEnabled(): Flow<Boolean> {
+        // TODO(b/330387368): create LOCK_SCREEN_NOTIFICATION_MINIMALISM setting to use here?
+        //  Or should we actually just repurpose using the existing setting?
         if (NotificationMinimalismPrototype.isEnabled) {
-            // TODO(b/330387368): should this really just be turned off? If so, hide the setting.
-            return flowOf(false)
+            return flowOf(true)
         }
         return secureSettings
             // emit whenever the setting has changed
@@ -292,7 +301,7 @@ constructor(
             // update local field and invalidate if necessary
             if (setting != unseenFilterEnabled) {
                 unseenFilterEnabled = setting
-                unseenNotifFilter.invalidateList("unseen setting changed")
+                unseenNotifPromoter.invalidateList("unseen setting changed")
             }
             // if the setting is enabled, then start tracking and filtering unseen notifications
             if (setting) {
@@ -331,59 +340,84 @@ constructor(
             }
         }
 
+    private fun pickOutTopUnseenNotifs(list: List<ListEntry>) {
+        if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return
+        // Only ever elevate a top unseen notification on keyguard, not even locked shade
+        if (statusBarStateController.state != StatusBarState.KEYGUARD) {
+            seenNotificationsInteractor.setTopOngoingNotification(null)
+            seenNotificationsInteractor.setTopUnseenNotification(null)
+            return
+        }
+        // On keyguard pick the top-ranked unseen or ongoing notification to elevate
+        val nonSummaryEntries: Sequence<NotificationEntry> =
+            list
+                .asSequence()
+                .flatMap {
+                    when (it) {
+                        is NotificationEntry -> listOfNotNull(it)
+                        is GroupEntry -> it.children
+                        else -> error("unhandled type of $it")
+                    }
+                }
+                .filter { it.importance >= NotificationManager.IMPORTANCE_DEFAULT }
+        seenNotificationsInteractor.setTopOngoingNotification(
+            nonSummaryEntries
+                .filter { ColorizedFgsCoordinator.isRichOngoing(it) }
+                .minByOrNull { it.ranking.rank }
+        )
+        seenNotificationsInteractor.setTopUnseenNotification(
+            nonSummaryEntries
+                .filter { !ColorizedFgsCoordinator.isRichOngoing(it) && it in unseenNotifications }
+                .minByOrNull { it.ranking.rank }
+        )
+    }
+
     @VisibleForTesting
-    val unseenNotifFilter =
-        object : NotifFilter(TAG) {
-
-            var hasFilteredAnyNotifs = false
-
-            override fun shouldFilterOut(entry: NotificationEntry, now: Long): Boolean =
-                when {
-                    // Don't apply filter if the setting is disabled
-                    !unseenFilterEnabled -> false
-                    // Don't apply filter if the keyguard isn't currently showing
-                    !keyguardRepository.isKeyguardShowing() -> false
-                    // Don't apply the filter if the notification is unseen
-                    unseenNotifications.contains(entry) -> false
-                    // Don't apply the filter to (non-promoted) group summaries
-                    //  - summary will be pruned if necessary, depending on if children are filtered
-                    entry.parent?.summary == entry -> false
-                    // Check that the entry satisfies certain characteristics that would bypass the
-                    // filter
-                    shouldIgnoreUnseenCheck(entry) -> false
-                    else -> true
-                }.also { hasFiltered -> hasFilteredAnyNotifs = hasFilteredAnyNotifs || hasFiltered }
-
-            override fun onCleanup() {
-                logger.logProviderHasFilteredOutSeenNotifs(hasFilteredAnyNotifs)
-                seenNotificationsInteractor.setHasFilteredOutSeenNotifications(hasFilteredAnyNotifs)
-                hasFilteredAnyNotifs = false
-            }
+    val unseenNotifPromoter =
+        object : NotifPromoter(TAG) {
+            override fun shouldPromoteToTopLevel(child: NotificationEntry): Boolean =
+                if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) false
+                else if (!NotificationMinimalismPrototype.ungroupTopUnseen) false
+                else
+                    seenNotificationsInteractor.isTopOngoingNotification(child) ||
+                        seenNotificationsInteractor.isTopUnseenNotification(child)
         }
 
-    private fun shouldIgnoreUnseenCheck(entry: NotificationEntry): Boolean =
-        when {
-            entry.isMediaNotification -> true
-            entry.sbn.isOngoing -> true
-            else -> false
-        }
-
-    override fun dump(pw: PrintWriter, args: Array<out String>) =
-        with(pw.asIndenting()) {
-            println(
-                "notificationListInteractor.hasFilteredOutSeenNotifications.value=" +
-                    seenNotificationsInteractor.hasFilteredOutSeenNotifications.value
-            )
-            println("unseen notifications:")
-            indentIfPossible {
-                for (notification in unseenNotifications) {
-                    println(notification.key)
+    val topOngoingSectioner =
+        object : NotifSectioner("TopOngoing", BUCKET_TOP_ONGOING) {
+            override fun isInSection(entry: ListEntry): Boolean {
+                if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return false
+                return entry.anyEntry { notificationEntry ->
+                    seenNotificationsInteractor.isTopOngoingNotification(notificationEntry)
                 }
             }
         }
 
+    val topUnseenSectioner =
+        object : NotifSectioner("TopUnseen", BUCKET_TOP_UNSEEN) {
+            override fun isInSection(entry: ListEntry): Boolean {
+                if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return false
+                return entry.anyEntry { notificationEntry ->
+                    seenNotificationsInteractor.isTopUnseenNotification(notificationEntry)
+                }
+            }
+        }
+
+    private fun ListEntry.anyEntry(predicate: (NotificationEntry?) -> Boolean) =
+        when {
+            predicate(representativeEntry) -> true
+            this !is GroupEntry -> false
+            else -> children.any(predicate)
+        }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) =
+        with(pw.asIndenting()) {
+            seenNotificationsInteractor.dump(this)
+            printCollection("unseen notifications", unseenNotifications) { println(it.key) }
+        }
+
     companion object {
-        private const val TAG = "OriginalUnseenKeyguardCoordinator"
+        private const val TAG = "LockScreenMinimalismCoordinator"
         private val SEEN_TIMEOUT = 5.seconds
     }
 }

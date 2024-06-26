@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
+import android.util.IndentingPrintWriter
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.util.printSection
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
@@ -61,4 +63,22 @@ constructor(
     fun isTopUnseenNotification(entry: NotificationEntry?): Boolean =
         if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) false
         else entry != null && notificationListRepository.topUnseenNotificationKey.value == entry.key
+
+    fun dump(pw: IndentingPrintWriter) =
+        with(pw) {
+            printSection("SeenNotificationsInteractor") {
+                print(
+                    "hasFilteredOutSeenNotifications",
+                    notificationListRepository.hasFilteredOutSeenNotifications.value
+                )
+                print(
+                    "topOngoingNotificationKey",
+                    notificationListRepository.topOngoingNotificationKey.value
+                )
+                print(
+                    "topUnseenNotificationKey",
+                    notificationListRepository.topUnseenNotificationKey.value
+                )
+            }
+        }
 }
