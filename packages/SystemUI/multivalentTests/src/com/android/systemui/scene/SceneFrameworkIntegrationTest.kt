@@ -48,7 +48,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
@@ -152,8 +152,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = deviceEntryInteractor,
             communalInteractor = communalInteractor,
-            longPress =
-                KeyguardLongPressViewModel(
+            touchHandling =
+                KeyguardTouchHandlingViewModel(
                     interactor = mock(),
                 ),
             notifications = kosmos.notificationsPlaceholderViewModel,

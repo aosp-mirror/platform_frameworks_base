@@ -46,8 +46,8 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTouchHandlingInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
@@ -212,8 +212,8 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
                 dumpManager = mock(),
                 userHandle = UserHandle.SYSTEM,
             )
-        val keyguardLongPressInteractor =
-            KeyguardLongPressInteractor(
+        val keyguardTouchHandlingInteractor =
+            KeyguardTouchHandlingInteractor(
                 appContext = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
@@ -248,13 +248,13 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
                     ),
                 bottomAreaInteractor = KeyguardBottomAreaInteractor(repository = repository),
                 burnInHelperWrapper = burnInHelperWrapper,
-                longPressViewModel =
-                    KeyguardLongPressViewModel(
-                        interactor = keyguardLongPressInteractor,
+                keyguardTouchHandlingViewModel =
+                    KeyguardTouchHandlingViewModel(
+                        interactor = keyguardTouchHandlingInteractor,
                     ),
                 settingsMenuViewModel =
                     KeyguardSettingsMenuViewModel(
-                        interactor = keyguardLongPressInteractor,
+                        interactor = keyguardTouchHandlingInteractor,
                     ),
             )
     }

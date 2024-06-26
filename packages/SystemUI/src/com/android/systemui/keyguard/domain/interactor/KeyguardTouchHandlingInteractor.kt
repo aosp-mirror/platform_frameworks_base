@@ -52,11 +52,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/** Business logic for use-cases related to the keyguard long-press feature. */
+/** Business logic for use-cases related to top-level touch handling in the lock screen. */
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
-// TODO(b/344879669): now that it's more generic than long-press, rename it.
-class KeyguardLongPressInteractor
+class KeyguardTouchHandlingInteractor
 @Inject
 constructor(
     @Application private val appContext: Context,

@@ -265,8 +265,8 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = kosmos.deviceEntryInteractor,
             communalInteractor = kosmos.communalInteractor,
-            longPress =
-                KeyguardLongPressViewModel(
+            touchHandling =
+                KeyguardTouchHandlingViewModel(
                     interactor = mock(),
                 ),
             notifications = kosmos.notificationsPlaceholderViewModel,

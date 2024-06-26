@@ -54,14 +54,14 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class KeyguardLongPressInteractorTest : SysuiTestCase() {
+class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             this.accessibilityManagerWrapper = mock<AccessibilityManagerWrapper>()
             this.uiEventLogger = mock<UiEventLoggerFake>()
         }
 
-    private lateinit var underTest: KeyguardLongPressInteractor
+    private lateinit var underTest: KeyguardTouchHandlingInteractor
 
     private val logger = kosmos.uiEventLogger
     private val testScope = kosmos.testScope
@@ -210,7 +210,7 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
             underTest.onLongPress()
             assertThat(isMenuVisible).isTrue()
 
-            advanceTimeBy(KeyguardLongPressInteractor.DEFAULT_POPUP_AUTO_HIDE_TIMEOUT_MS)
+            advanceTimeBy(KeyguardTouchHandlingInteractor.DEFAULT_POPUP_AUTO_HIDE_TIMEOUT_MS)
 
             assertThat(isMenuVisible).isFalse()
         }
@@ -225,11 +225,11 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
             assertThat(isMenuVisible).isTrue()
             underTest.onMenuTouchGestureStarted()
 
-            advanceTimeBy(KeyguardLongPressInteractor.DEFAULT_POPUP_AUTO_HIDE_TIMEOUT_MS)
+            advanceTimeBy(KeyguardTouchHandlingInteractor.DEFAULT_POPUP_AUTO_HIDE_TIMEOUT_MS)
             assertThat(isMenuVisible).isTrue()
 
             underTest.onMenuTouchGestureEnded(/* isClick= */ false)
-            advanceTimeBy(KeyguardLongPressInteractor.DEFAULT_POPUP_AUTO_HIDE_TIMEOUT_MS)
+            advanceTimeBy(KeyguardTouchHandlingInteractor.DEFAULT_POPUP_AUTO_HIDE_TIMEOUT_MS)
             assertThat(isMenuVisible).isFalse()
         }
 
@@ -242,7 +242,7 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
             underTest.onLongPress()
 
             verify(logger)
-                .log(KeyguardLongPressInteractor.LogEvents.LOCK_SCREEN_LONG_PRESS_POPUP_SHOWN)
+                .log(KeyguardTouchHandlingInteractor.LogEvents.LOCK_SCREEN_LONG_PRESS_POPUP_SHOWN)
         }
 
     @Test
@@ -255,7 +255,7 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
             underTest.onMenuTouchGestureEnded(/* isClick= */ true)
 
             verify(logger)
-                .log(KeyguardLongPressInteractor.LogEvents.LOCK_SCREEN_LONG_PRESS_POPUP_CLICKED)
+                .log(KeyguardTouchHandlingInteractor.LogEvents.LOCK_SCREEN_LONG_PRESS_POPUP_CLICKED)
         }
 
     @Test
@@ -289,7 +289,7 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
         // This needs to be re-created for each test outside of kosmos since the flag values are
         // read during initialization to set up flows. Maybe there is a better way to handle that.
         underTest =
-            KeyguardLongPressInteractor(
+            KeyguardTouchHandlingInteractor(
                 appContext = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor = kosmos.keyguardTransitionInteractor,

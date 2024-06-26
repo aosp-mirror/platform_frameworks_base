@@ -26,9 +26,9 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.pulsingGestureListener
 
-val Kosmos.keyguardLongPressInteractor by
+val Kosmos.keyguardTouchHandlingInteractor by
     Kosmos.Fixture {
-        KeyguardLongPressInteractor(
+        KeyguardTouchHandlingInteractor(
             appContext = applicationContext,
             scope = applicationCoroutineScope,
             transitionInteractor = keyguardTransitionInteractor,
