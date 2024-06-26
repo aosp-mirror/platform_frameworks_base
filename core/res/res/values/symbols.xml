@@ -5540,4 +5540,10 @@
   <java-symbol type="drawable" name="ic_zen_mode_type_schedule_time" />
   <java-symbol type="drawable" name="ic_zen_mode_type_theater" />
   <java-symbol type="drawable" name="ic_zen_mode_type_unknown" />
+
+  <!-- System notification for background user sound -->
+  <java-symbol type="string" name="bg_user_sound_notification_title_alarm" />
+  <java-symbol type="string" name="bg_user_sound_notification_button_switch_user" />
+  <java-symbol type="string" name="bg_user_sound_notification_button_mute" />
+  <java-symbol type="string" name="bg_user_sound_notification_message" />
 </resources>
