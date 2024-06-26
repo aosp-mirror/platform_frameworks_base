@@ -28,6 +28,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteract
 import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.windowManagerLockscreenVisibilityInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -54,6 +55,7 @@ val Kosmos.sceneContainerStartable by Fixture {
         deviceUnlockedInteractor = deviceUnlockedInteractor,
         bouncerInteractor = bouncerInteractor,
         keyguardInteractor = keyguardInteractor,
+        keyguardTransitionInteractor = keyguardTransitionInteractor,
         sysUiState = sysUiState,
         displayId = displayTracker.defaultDisplayId,
         sceneLogger = sceneLogger,

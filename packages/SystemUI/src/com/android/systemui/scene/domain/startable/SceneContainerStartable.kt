@@ -41,6 +41,7 @@ import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor
 import com.android.systemui.model.SceneContainerPlugin
 import com.android.systemui.model.SysUiState
@@ -107,6 +108,7 @@ constructor(
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val bouncerInteractor: BouncerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val sysUiState: SysUiState,
     @DisplayId private val displayId: Int,
     private val sceneLogger: SceneLogger,
@@ -420,9 +422,9 @@ constructor(
             powerInteractor.isAsleep.collect { isAsleep ->
                 if (isAsleep) {
                     switchToScene(
-                        // TODO(b/336581871): add sceneState?
                         targetSceneKey = Scenes.Lockscreen,
                         loggingReason = "device is starting to sleep",
+                        sceneState = keyguardTransitionInteractor.asleepKeyguardState.value,
                     )
                 } else {
                     val canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value
@@ -702,10 +704,15 @@ constructor(
         }
     }
 
-    private fun switchToScene(targetSceneKey: SceneKey, loggingReason: String) {
+    private fun switchToScene(
+        targetSceneKey: SceneKey,
+        loggingReason: String,
+        sceneState: Any? = null
+    ) {
         sceneInteractor.changeScene(
             toScene = targetSceneKey,
             loggingReason = loggingReason,
+            sceneState = sceneState,
         )
     }
 

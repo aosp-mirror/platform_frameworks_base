@@ -48,8 +48,13 @@ import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepo
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeTrustRepository
+import com.android.systemui.keyguard.data.repository.keyguardRepository
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.scenetransition.lockscreenSceneTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
@@ -59,6 +64,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
+import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
@@ -391,6 +397,64 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
+    fun switchToAOD_whenAvailable_whenDeviceSleepsLocked() =
+        testScope.runTest {
+            kosmos.lockscreenSceneTransitionInteractor.start()
+            val asleepState by
+                collectLastValue(kosmos.keyguardTransitionInteractor.asleepKeyguardState)
+            val currentTransitionInfo by
+                collectLastValue(kosmos.keyguardTransitionRepository.currentTransitionInfoInternal)
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Shade,
+                )
+            kosmos.keyguardRepository.setAodAvailable(true)
+            runCurrent()
+            assertThat(asleepState).isEqualTo(KeyguardState.AOD)
+            underTest.start()
+            powerInteractor.setAsleepForTest()
+            runCurrent()
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Shade,
+                    toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Lockscreen),
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+
+            assertThat(currentTransitionInfo?.to).isEqualTo(KeyguardState.AOD)
+        }
+
+    @Test
+    fun switchToDozing_whenAodUnavailable_whenDeviceSleepsLocked() =
+        testScope.runTest {
+            kosmos.lockscreenSceneTransitionInteractor.start()
+            val asleepState by
+                collectLastValue(kosmos.keyguardTransitionInteractor.asleepKeyguardState)
+            val currentTransitionInfo by
+                collectLastValue(kosmos.keyguardTransitionRepository.currentTransitionInfoInternal)
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Shade,
+                )
+            kosmos.keyguardRepository.setAodAvailable(false)
+            runCurrent()
+            assertThat(asleepState).isEqualTo(KeyguardState.DOZING)
+            underTest.start()
+            powerInteractor.setAsleepForTest()
+            runCurrent()
+            transitionState.value = Transition(from = Scenes.Shade, to = Scenes.Lockscreen)
+            runCurrent()
+
+            assertThat(currentTransitionInfo?.to).isEqualTo(KeyguardState.DOZING)
+        }
+
+    @Test
     fun switchToGoneWhenDoubleTapPowerGestureIsTriggeredFromGone() =
         testScope.runTest {
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
@@ -409,15 +473,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 lastSleepReason = WakeSleepReason.POWER_BUTTON,
                 powerButtonLaunchGestureTriggered = false,
             )
-            transitionStateFlow.value =
-                ObservableTransitionState.Transition(
-                    fromScene = Scenes.Gone,
-                    toScene = Scenes.Lockscreen,
-                    currentScene = flowOf(Scenes.Lockscreen),
-                    progress = flowOf(0.5f),
-                    isInitiatedByUserInput = true,
-                    isUserInputOngoing = flowOf(false),
-                )
+            transitionStateFlow.value = Transition(from = Scenes.Shade, to = Scenes.Lockscreen)
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
 
             kosmos.fakePowerRepository.updateWakefulness(
