@@ -1251,7 +1251,7 @@
     <string name="dismiss_dialog" msgid="2195508495854675882">"Baztertu"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Konektatutako pantaila"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofonoa eta kamera"</string>
-    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Aplikazioen azken erabilera"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Aplikazioen azkenaldiko erabilera"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Ikusi azkenaldiko sarbidea"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Eginda"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Zabaldu eta erakutsi aukerak"</string>

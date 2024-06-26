@@ -342,7 +342,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Snimanje ekrana"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Započnite"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavite"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Snimite problem"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Zabilježite problem"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Pokrenite"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Zaustavite"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Koji dio uređaja je imao problem?"</string>
@@ -716,7 +716,7 @@
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"ili"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Brisanje upita za pretraživanje"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Prečice"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Pretraživanje prečica"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Pretražite prečice"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Nisu pronađene prečice"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistem"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Unos"</string>

@@ -129,7 +129,7 @@
     <string name="issuerecord_save_title" msgid="4161043023696751591">"Жаздырылган маселе сакталды"</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"Көрүү үчүн таптаңыз"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Жаздырылган маселе сакталган жок"</string>
-    <string name="issuerecord_start_error" msgid="3402782952722871190">"Маселени жаздыруу башталбай койду"</string>
+    <string name="issuerecord_start_error" msgid="3402782952722871190">"Башталбай койду"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Толук экран режимин көрүү"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"Чыгуу үчүн экранды ылдый сүрүп коюңуз."</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Түшүндүм"</string>
@@ -345,8 +345,8 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Маселени жаздыруу"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Баштоо"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Токтотуу"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Түзмөгүңүздүн кайсы бөлүгүнө кедергиси тийди?"</string>
-    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Маселенин түрүн тандоо"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Кандай маселеге кабылдыңыз?"</string>
+    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Маселенин түрүн тандаңыз"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Экрандан видео жаздырып алуу"</string>
   <string-array name="qs_record_issue_types">
     <item msgid="2947988124014085798">"Иштин майнаптуулугу"</item>

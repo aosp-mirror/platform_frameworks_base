@@ -103,7 +103,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processando gravação de tela"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação contínua para uma sessão de gravação de tela"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Iniciar gravação?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Enquanto você grava, o Android tem acesso a todas as informações na tela ou reproduzidas no dispositivo. Portanto, tenha cuidado com senhas, detalhes de pagamento, mensagens, fotos, áudios e vídeos."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Durante a gravação, o Android tem acesso às informações na tela ou reproduzidas no dispositivo. Portanto, tenha cuidado com senhas, detalhes de pagamento, mensagens, fotos, áudios e vídeos."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Enquanto você grava um app, o Android tem acesso a todas as informações visíveis ou reproduzidas nele. Tenha cuidado com senhas, detalhes de pagamento, mensagens fotos, áudios e vídeos."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Iniciar gravação"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Gravar áudio"</string>

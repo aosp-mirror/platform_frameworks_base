@@ -345,7 +345,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"ರೆಕಾರ್ಡ್ ದೋಷ"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"ನಿಲ್ಲಿಸಿ"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ಸಾಧನ ಬಳಸುವಾಗ ನೀವು ಯಾವ ರೀತಿಯ ಸಮಸ್ಯೆ ಎದುರಿಸುತ್ತೀರಿ?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ನಿಮ್ಮ ಸಾಧನದ ಯಾವ ಭಾಗದಲ್ಲಿ ಸಮಸ್ಯೆ ಉಂಟಾಗಿದೆ?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"ಸಮಸ್ಯೆಯ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡ್"</string>
   <string-array name="qs_record_issue_types">

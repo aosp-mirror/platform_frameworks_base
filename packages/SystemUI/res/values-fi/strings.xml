@@ -748,8 +748,8 @@
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Syöttötapa"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Vaihda seuraavaan kieleen"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Vaihda aiempaan kieleen"</string>
-    <string name="input_access_emoji" msgid="8105642858900406351">"Emojien käyttö"</string>
-    <string name="input_access_voice_typing" msgid="7291201476395326141">"Puhekirjoituksen käyttö"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"Käytä emojeja"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"Käytä puhekirjoitusta"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Sovellukset"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Assistant"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Selain"</string>

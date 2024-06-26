@@ -118,7 +118,7 @@
     <string name="screenrecord_stop_label" msgid="72699670052087989">"متوقف کردن"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"هم‌رسانی"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"قطعه ضبط‌شده از صفحه‌نمایش ذخیره شد"</string>
-    <string name="screenrecord_save_text" msgid="3008973099800840163">"برای مشاهده ضربه بزنید"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"برای مشاهده تک‌ضرب بزنید"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"خطا در ذخیره‌سازی ضبط صفحه‌نمایش"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"خطا هنگام شروع ضبط صفحه‌نمایش"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"ضبط‌کننده مشکل"</string>
@@ -127,7 +127,7 @@
     <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"درحال ضبط کردن مشکل"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"هم‌رسانی"</string>
     <string name="issuerecord_save_title" msgid="4161043023696751591">"ضبط مشکل ذخیره شد"</string>
-    <string name="issuerecord_save_text" msgid="1205985304551521495">"برای مشاهده ضربه بزنید"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"برای مشاهده تک‌ضرب بزنید"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"هنگام ذخیره کردن ضبط مشکل، خطایی پیش آمد"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"هنگام شروع ضبط مشکل، خطایی پیش آمد"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"درحال مشاهده در حالت تمام‌صفحه"</string>
@@ -151,12 +151,12 @@
     <string name="cancel" msgid="1089011503403416730">"لغو"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"تأیید"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"امتحان مجدد"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"برای لغو راستی‌آزمایی ضربه بزنید"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"برای لغو راستی‌آزمایی تک‌ضرب بزنید"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"لطفاً دوباره امتحان کنید"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"درحال جستجوی چهره"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"چهره اصالت‌سنجی شد"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تأیید شد"</string>
-    <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"برای تکمیل، روی تأیید ضربه بزنید"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"برای تکمیل، روی تأیید تک‌ضرب بزنید"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"قفل با چهره باز شد"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"قفلْ با چهره باز شد. برای ادامه، فشار دهید."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"چهره شناسایی شد. برای ادامه، فشار دهید."</string>
@@ -261,7 +261,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"مزاحم نشوید"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"بلوتوث"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"هیچ دستگاه مرتبط شده‌ای موجود نیست"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"برای اتصال یا قطع اتصال دستگاه، ضربه بزنید"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"برای اتصال یا قطع اتصال دستگاه، تک‌ضرب بزنید"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"جفت کردن دستگاه جدید"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"دیدن همه"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"استفاده از بلوتوث"</string>
@@ -391,8 +391,8 @@
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"سفارشی کردن"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"این کار «همه» صداها و لرزش‌ها (شامل هشدار، موسیقی، ویدیو و بازی) را مسدود می‌کند. همچنان می‌توانید تماس تلفنی برقرار کنید."</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"این کار «همه» صداها و لرزش‌ها از جمله هشدارها، موسیقی، ویدئوها و بازی‌ها را مسدود می‌کند."</string>
-    <string name="notification_tap_again" msgid="4477318164947497249">"دوباره ضربه بزنید تا باز شود"</string>
-    <string name="tap_again" msgid="1315420114387908655">"دوباره ضربه بزنید"</string>
+    <string name="notification_tap_again" msgid="4477318164947497249">"دوباره تک‌ضرب بزنید تا باز شود"</string>
+    <string name="tap_again" msgid="1315420114387908655">"دوباره تک‌ضرب بزنید"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"برای باز کردن، انگشتتان را تند به‌بالا بکشید"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"برای باز کردن، نماد قفل‌گشایی را فشار دهید"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"قفلْ با چهره باز شد. برای باز کردن، تند به‌بالا بکشید."</string>
@@ -577,13 +577,13 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"صامت"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"ارسال محتوا"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"دردسترس نیست، چون زنگ بی‌صدا شده است"</string>
-    <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"‏%1$s. برای باصدا کردن ضربه بزنید."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"‏%1$s. برای تنظیم روی لرزش ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
-    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. برای صامت کردن ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری صامت شود."</string>
-    <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. برای تنظیم روی لرزش، ضربه بزنید."</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. برای صامت کردن ضربه بزنید."</string>
+    <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"‏%1$s. برای باصدا کردن تک‌ضرب بزنید."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"‏%1$s. برای تنظیم روی لرزش تک‌ضرب بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
+    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. برای صامت کردن تک‌ضرب بزنید. ممکن است سرویس‌های دسترس‌پذیری صامت شود."</string>
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. برای تنظیم روی لرزش، تک‌ضرب بزنید."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. برای صامت کردن تک‌ضرب بزنید."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"کنترل صدای محیط"</string>
-    <string name="volume_ringer_change" msgid="3574969197796055532">"برای تغییر حالت زنگ، ضربه بزنید"</string>
+    <string name="volume_ringer_change" msgid="3574969197796055532">"برای تغییر حالت زنگ، تک‌ضرب بزنید"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"صامت کردن"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"باصدا کردن"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"لرزش"</string>
@@ -601,7 +601,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"کیف پول"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"برای خرید سریع‌تر و امن‌تر با تلفن، راه‌اندازی کنید"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"نمایش همه"</string>
-    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"برای باز کردن ضربه بزنید"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"برای باز کردن تک‌ضرب بزنید"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"درحال به‌روزرسانی"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"برای استفاده، قفل را باز کنید"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"هنگام دریافت کارت‌ها مشکلی پیش آمد، لطفاً بعداً دوباره امتحان کنید"</string>
@@ -867,7 +867,7 @@
     <string name="instant_apps" msgid="8337185853050247304">"برنامه‌های فوری"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"‫‫<xliff:g id="APP">%1$s</xliff:g> درحال اجرا"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"برنامه بدون نصب شدن باز شد."</string>
-    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"برنامه بدون نصب شدن باز شد. برای اطلاعات بیشتر ضربه بزنید."</string>
+    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"برنامه بدون نصب شدن باز شد. برای اطلاعات بیشتر تک‌ضرب بزنید."</string>
     <string name="app_info" msgid="5153758994129963243">"اطلاعات برنامه"</string>
     <string name="go_to_web" msgid="636673528981366511">"رفتن به مرورگر"</string>
     <string name="mobile_data" msgid="4564407557775397216">"داده تلفن همراه"</string>
@@ -881,7 +881,7 @@
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"برنامه‌ای (<xliff:g id="ID_1">%s</xliff:g>) «مزاحم نشوید» را روشن کرد."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"برنامه یا قانون خودکاری، «مزاحم نشوید» را روشن کرد."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"برنامه‌هایی که در پس‌زمینه اجرا می‌شوند"</string>
-    <string name="running_foreground_services_msg" msgid="3009459259222695385">"برای جزئیات مربوط به مصرف باتری و داده، ضربه بزنید"</string>
+    <string name="running_foreground_services_msg" msgid="3009459259222695385">"برای جزئیات مربوط به مصرف باتری و داده، تک‌ضرب بزنید"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"داده تلفن همراه خاموش شود؟"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"‏نمی‌توانید ازطریق <xliff:g id="CARRIER">%s</xliff:g> به داده یا اینترنت دسترسی داشته باشید. اینترنت فقط ازطریق Wi-Fi در دسترس خواهد بود."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"شرکت مخابراتی شما"</string>
@@ -896,7 +896,7 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"به <xliff:g id="APP">%1$s</xliff:g> اجازه داده شود تکه‌هایی از برنامه‌ها نشان دهد"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"اجازه دادن"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"مجاز نبودن"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"برای زمان‌بندی «بهینه‌سازی باتری» ضربه بزنید"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"برای زمان‌بندی «بهینه‌سازی باتری» تک‌ضرب بزنید"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"وقتی باتری روبه‌اتمام است، بهینه‌سازی باتری را روشن کنید"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"نه متشکرم"</string>
     <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"استفاده شده"</string>
@@ -956,11 +956,11 @@
     <string name="accessibility_magnification_done" msgid="263349129937348512">"تمام"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"ویرایش"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"تنظیمات پنجره ذره‌بین"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"برای باز کردن ویژگی‌های دسترس‌پذیری ضربه بزنید. در تنظیمات این دکمه را سفارشی یا جایگزین کنید\n\n"<annotation id="link">"تنظیمات"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"برای باز کردن ویژگی‌های دسترس‌پذیری تک‌ضرب بزنید. در تنظیمات این دکمه را سفارشی یا جایگزین کنید\n\n"<annotation id="link">"تنظیمات"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"برای پنهان کردن موقتی دکمه، آن را به لبه ببرید"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"واگرد"</string>
     <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"دکمه دسترس‌پذیری پنهان شده است"</string>
-    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"برای نمایش دکمه دسترس‌پذیری ضربه بزنید"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"برای نمایش دکمه دسترس‌پذیری تک‌ضرب بزنید"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"میان‌بر «<xliff:g id="FEATURE_NAME">%s</xliff:g>» برداشته شد"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{میان‌بر «#» برداشته شد}one{میان‌بر «#» برداشته شد}other{میان‌بر «#» برداشته شد}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"انتقال به بالا سمت راست"</string>
@@ -1061,7 +1061,7 @@
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"۱ دستگاه انتخاب شد"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> دستگاه انتخاب شد"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(اتصال قطع شد)"</string>
-    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"عوض نمی‌شود. برای تلاش مجدد ضربه بزنید."</string>
+    <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"عوض نمی‌شود. برای تلاش مجدد تک‌ضرب بزنید."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"متصل کردن دستگاه"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"برای ارسال محتوای این جلسه، لطفاً برنامه را باز کنید."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"برنامه ناشناس"</string>
@@ -1090,7 +1090,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"شماره ساخت در بریده‌دان کپی شد."</string>
     <string name="basic_status" msgid="2315371112182658176">"باز کردن مکالمه"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ابزارک‌های مکالمه"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"روی مکالمه‌ای ضربه بزنید تا به «صفحه اصلی» اضافه شود"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"روی مکالمه‌ای تک‌ضرب بزنید تا به «صفحه اصلی» اضافه شود"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"آخرین مکالمه‌های شما اینجا نشان داده می‌شود"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"مکالمه‌های اولویت‌دار"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"گفتگوهای اخیر"</string>
@@ -1125,7 +1125,7 @@
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> وضعیتش را به‌روزرسانی کرد: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
     <string name="person_available" msgid="2318599327472755472">"دردسترس"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"مشکلی در خواندن میزان باتری وجود دارد"</string>
-    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"برای اطلاعات بیشتر ضربه بزنید"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"برای اطلاعات بیشتر تک‌ضرب بزنید"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"هشداری تنظیم نشده"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"وارد کردن قفل صفحه"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"حسگر اثرانگشت"</string>
@@ -1144,7 +1144,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"شبکه دیگری وجود ندارد"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"شبکه‌ای در دسترس نیست"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"برای اتصال به شبکه روی آن ضربه بزنید"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"برای اتصال به شبکه روی آن تک‌ضرب بزنید"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"برای مشاهده شبکه‌ها، قفل صفحه را باز کنید"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"درحال جستجوی شبکه…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"اتصال به شبکه برقرار نشد"</string>
@@ -1170,7 +1170,7 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"ویرایش نوشتار کپی‌شده"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"ویرایش تصویر کپی‌شده"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ارسال به دستگاهی در اطراف"</string>
-    <string name="clipboard_text_hidden" msgid="7926899867471812305">"برای مشاهده، ضربه بزنید"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"برای مشاهده، تک‌ضرب بزنید"</string>
     <string name="clipboard_text_copied" msgid="5100836834278976679">"نوشتار کپی شد"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"تصویر کپی شد"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"محتوا کپی شد"</string>

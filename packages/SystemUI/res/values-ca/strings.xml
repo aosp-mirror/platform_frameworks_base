@@ -345,7 +345,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Registra el problema"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Inicia"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Atura"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"L\'experiència amb el dispositiu s\'ha vist afectada?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Quina part de l\'experiència s\'ha vist afectada?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Selecciona el tipus de problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Gravació de pantalla"</string>
   <string-array name="qs_record_issue_types">

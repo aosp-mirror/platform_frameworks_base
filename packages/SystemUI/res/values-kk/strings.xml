@@ -103,7 +103,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Экран жазғыш бейнесін өңдеу"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды бейнеге жазудың ағымдағы хабарландыруы"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Жазу басталсын ба?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Жазу кезінде Android жүйесі экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Жазу кезінде Android жүйесі экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерге, төлем туралы мәліметке, хабарларға, фотосуреттерге, аудиоконтент пен бейнелерге сақ болыңыз."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Қолданбаны жазу кезінде Android жүйесі қолданбада көрінетін не ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Жазуды бастау"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио жазу"</string>
@@ -346,7 +346,7 @@
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Бастау"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Тоқтату"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Құрылғы қызметінің қандай түріне әсер етті?"</string>
-    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Мәселе түрін таңдаңыз."</string>
+    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Ақау түрін таңдаңыз"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Экранды жазу"</string>
   <string-array name="qs_record_issue_types">
     <item msgid="2947988124014085798">"Өнімділік"</item>
