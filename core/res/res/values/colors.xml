@@ -590,7 +590,7 @@
     <color name="system_theme_app_light">#2F4578</color>
     <color name="system_on_theme_app_light">#D6DFFF</color>
     <color name="system_theme_app_ring_light">#94AAE4</color>
-    <color name="system_on_theme_app_ring_light">#FDD7FA</color>
+    <color name="system_theme_notif_light">#FDD7FA</color>
     <color name="system_brand_a_light">#3A5084</color>
     <color name="system_brand_b_light">#6E7488</color>
     <color name="system_brand_c_light">#6076AC</color>
@@ -611,7 +611,7 @@
     <color name="system_theme_app_dark">#D9E2FF</color>
     <color name="system_on_theme_app_dark">#304679</color>
     <color name="system_theme_app_ring_dark">#94AAE4</color>
-    <color name="system_on_theme_app_ring_dark">#E0BBDD</color>
+    <color name="system_theme_notif_dark">#E0BBDD</color>
     <color name="system_brand_a_dark">#90A6DF</color>
     <color name="system_brand_b_dark">#A4ABC1</color>
     <color name="system_brand_c_dark">#7A90C8</color>

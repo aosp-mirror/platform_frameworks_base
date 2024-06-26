@@ -5307,7 +5307,7 @@
   <java-symbol name="customColorThemeApp" type="attr"/>
   <java-symbol name="customColorOnThemeApp" type="attr"/>
   <java-symbol name="customColorThemeAppRing" type="attr"/>
-  <java-symbol name="customColorOnThemeAppRing" type="attr"/>
+  <java-symbol name="customColorThemeNotif" type="attr"/>
   <java-symbol name="customColorBrandA" type="attr"/>
   <java-symbol name="customColorBrandB" type="attr"/>
   <java-symbol name="customColorBrandC" type="attr"/>
@@ -5329,7 +5329,7 @@
   <java-symbol name="system_theme_app_light" type="color"/>
   <java-symbol name="system_on_theme_app_light" type="color"/>
   <java-symbol name="system_theme_app_ring_light" type="color"/>
-  <java-symbol name="system_on_theme_app_ring_light" type="color"/>
+  <java-symbol name="system_theme_notif_light" type="color"/>
   <java-symbol name="system_brand_a_light" type="color"/>
   <java-symbol name="system_brand_b_light" type="color"/>
   <java-symbol name="system_brand_c_light" type="color"/>
@@ -5350,7 +5350,7 @@
   <java-symbol name="system_theme_app_dark" type="color"/>
   <java-symbol name="system_on_theme_app_dark" type="color"/>
   <java-symbol name="system_theme_app_ring_dark" type="color"/>
-  <java-symbol name="system_on_theme_app_ring_dark" type="color"/>
+  <java-symbol name="system_theme_notif_dark" type="color"/>
   <java-symbol name="system_brand_a_dark" type="color"/>
   <java-symbol name="system_brand_b_dark" type="color"/>
   <java-symbol name="system_brand_c_dark" type="color"/>
