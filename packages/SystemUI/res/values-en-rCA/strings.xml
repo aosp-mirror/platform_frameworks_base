@@ -478,6 +478,9 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"select widget"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"remove widget"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"place selected widget"</string>
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Lock screen widgets"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"To open an app using a widget, you’ll need to verify it’s you. Also, keep in mind that anyone can view them, even when your tablet’s locked. Some widgets may not have been intended for your lock screen and may be unsafe to add here."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Got it"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Switch user"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"pulldown menu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"All apps and data in this session will be deleted."</string>
@@ -531,6 +534,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Start now"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"No notifications"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"No new notifications"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Adaptive notifications is on"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Your device now lowers the volume and reduces pop-ups on the screen for up to two minutes when you receive many notifications in a short time span."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Turn off"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Unlock to see older notifications"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"This device is managed by your parent"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Your organization owns this device and may monitor network traffic"</string>
@@ -1186,8 +1192,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tap for more information"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"No alarm set"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"enter screen lock"</string>
-    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
-    <skip />
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Touch the fingerprint sensor. It’s the shorter button on the side of the phone"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Fingerprint sensor"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"authenticate"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"enter device"</string>
@@ -1342,6 +1347,10 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Home gesture"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Action key"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Done"</string>
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Go back"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"To go back, swipe left or right using three fingers anywhere on the touchpad."</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Touchpad showing three fingers moving right and left"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Device screen showing animation for back gesture"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Keyboard backlight"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Level %1$d of %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Home Controls"</string>

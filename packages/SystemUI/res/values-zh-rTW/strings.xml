@@ -129,24 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"系統將停止錄製「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」的內容"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"系統將停止分享「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」的內容"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
-    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"系統將停止投放「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」的內容"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -386,7 +383,7 @@
     <string name="qs_record_issue_start" msgid="2979831312582567056">"開始"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"停止"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"錯誤報告"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"哪些裝置使用體驗受到影響？"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"哪方面的裝置使用體驗受到影響？"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"選取問題類型"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"螢幕錄影"</string>
     <string name="performance" msgid="6552785217174378320">"效能"</string>
@@ -493,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"選取小工具"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"移除小工具"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"放置所選小工具"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切換使用者"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉式選單"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會刪除。"</string>
@@ -546,6 +549,12 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即開始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"沒有通知"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"沒有新通知"</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (5720882373252389461) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (4260536236101821273) -->
+    <skip />
+    <!-- no translation found for go_to_adaptive_notification_settings (2423690125178298479) -->
+    <skip />
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"解鎖即可查看舊通知"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"這個裝置是由你的家長管理"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"貴機構擁有這部裝置，而且可能會監控網路流量"</string>
@@ -819,7 +828,7 @@
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"切換到下一個語言"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"切換到上一個語言"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"存取表情符號"</string>
-    <string name="input_access_voice_typing" msgid="7291201476395326141">"存取語音輸入內容"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"使用語音輸入功能"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"應用程式"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Google 助理"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"瀏覽器"</string>
@@ -1201,8 +1210,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"輕觸即可瞭解詳情"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"未設定鬧鐘"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"輸入螢幕鎖定憑證"</string>
-    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
-    <skip />
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"請輕觸指紋感應器，也就是手機側邊較短的按鈕"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"指紋感應器"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"驗證"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"進入裝置"</string>
@@ -1360,6 +1368,14 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_action_title (7199067250654332735) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_guidance (4222430588599527272) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_animation_content_description (2646107450922379918) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_screen_animation_content_description (4036267494237748710) -->
     <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"鍵盤背光"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"第 %1$d 級，共 %2$d 級"</string>
