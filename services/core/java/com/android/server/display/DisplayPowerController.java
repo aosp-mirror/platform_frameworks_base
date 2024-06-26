@@ -2096,7 +2096,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void onDisplayOffloadUnblockScreenOn(DisplayOffloadSession displayOffloadSession) {
         Message msg = mHandler.obtainMessage(MSG_OFFLOADING_SCREEN_ON_UNBLOCKED,
                 displayOffloadSession);
-        mHandler.sendMessage(msg);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     private void unblockScreenOnByDisplayOffload() {
@@ -2114,7 +2114,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mDisplayOffloadSession == null) {
             return;
         }
-        if (mPendingScreenOnUnblockerByDisplayOffload != null) {
+        if (mPendingScreenOnUnblockerByDisplayOffload == null) {
             // Already unblocked.
             return;
         }
@@ -2132,7 +2132,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // If the screen is turning on, give displayoffload a chance to do something before the
         // screen actually turns on.
-        // TODO(b/316941732): add tests for this displayoffload screen-on blocker.
         if (isOn && changed && !mScreenTurningOnWasBlockedByDisplayOffload) {
             blockScreenOnByDisplayOffload(mDisplayOffloadSession);
         } else if (!isOn && mScreenTurningOnWasBlockedByDisplayOffload) {
