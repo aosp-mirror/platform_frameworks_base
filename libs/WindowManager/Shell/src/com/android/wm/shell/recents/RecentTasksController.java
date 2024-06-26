@@ -65,9 +65,11 @@ import com.android.wm.shell.util.SplitBounds;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -394,6 +396,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         }
 
         ArrayList<ActivityManager.RecentTaskInfo> freeformTasks = new ArrayList<>();
+        Set<Integer> minimizedFreeformTasks = new HashSet<>();
 
         int mostRecentFreeformTaskIndex = Integer.MAX_VALUE;
 
@@ -414,6 +417,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
                     mostRecentFreeformTaskIndex = recentTasks.size();
                 }
                 freeformTasks.add(taskInfo);
+                if (mDesktopModeTaskRepository.get().isMinimizedTask(taskInfo.taskId)) {
+                    minimizedFreeformTasks.add(taskInfo.taskId);
+                }
                 continue;
             }
 
@@ -431,8 +437,10 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
         // Add a special entry for freeform tasks
         if (!freeformTasks.isEmpty()) {
-            recentTasks.add(mostRecentFreeformTaskIndex, GroupedRecentTaskInfo.forFreeformTasks(
-                    freeformTasks.toArray(new ActivityManager.RecentTaskInfo[0])));
+            recentTasks.add(mostRecentFreeformTaskIndex,
+                    GroupedRecentTaskInfo.forFreeformTasks(
+                            freeformTasks.toArray(new ActivityManager.RecentTaskInfo[0]),
+                            minimizedFreeformTasks));
         }
 
         return recentTasks;
