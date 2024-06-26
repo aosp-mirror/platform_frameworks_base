@@ -28,7 +28,7 @@ import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENT
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.AppCompatCapability.asLazy;
+import static com.android.server.wm.AppCompatOverrides.asLazy;
 
 import android.annotation.NonNull;
 import android.content.pm.ActivityInfo;
@@ -40,9 +40,14 @@ import com.android.server.wm.utils.OptPropFactory;
 import java.util.function.BooleanSupplier;
 import java.util.function.LongSupplier;
 
-class AppCompatOrientationCapability {
+/**
+ * Encapsulates all the configurations and overrides about orientation used by
+ * {@link AppCompatOrientationPolicy}.
+ */
+class AppCompatOrientationOverrides {
 
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "AppCompatCapability" : TAG_ATM;
+    private static final String TAG = TAG_WITH_CLASS_NAME
+            ? "AppCompatOrientationOverrides" : TAG_ATM;
 
     @NonNull
     private final ActivityRecord mActivityRecord;
@@ -53,13 +58,13 @@ class AppCompatOrientationCapability {
     private final OptPropFactory.OptProp mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp;
 
     @NonNull
-    final OrientationCapabilityState mOrientationCapabilityState;
+    final OrientationOverridesState mOrientationOverridesState;
 
-    AppCompatOrientationCapability(@NonNull OptPropFactory optPropBuilder,
+    AppCompatOrientationOverrides(@NonNull OptPropFactory optPropBuilder,
                                    @NonNull LetterboxConfiguration letterboxConfiguration,
                                    @NonNull ActivityRecord activityRecord) {
         mActivityRecord = activityRecord;
-        mOrientationCapabilityState = new OrientationCapabilityState(mActivityRecord,
+        mOrientationOverridesState = new OrientationOverridesState(mActivityRecord,
                 System::currentTimeMillis);
         final BooleanSupplier isPolicyForIgnoringRequestedOrientationEnabled = asLazy(
                 letterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled);
@@ -101,7 +106,7 @@ class AppCompatOrientationCapability {
             @ActivityInfo.ScreenOrientation int requestedOrientation) {
         if (mIgnoreRequestedOrientationOptProp.shouldEnableWithOverrideAndProperty(
                 isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION))) {
-            if (mOrientationCapabilityState.mIsRelaunchingAfterRequestedOrientationChanged) {
+            if (mOrientationOverridesState.mIsRelaunchingAfterRequestedOrientationChanged) {
                 Slog.w(TAG, "Ignoring orientation update to "
                         + screenOrientationToString(requestedOrientation)
                         + " due to relaunching after setRequestedOrientation for "
@@ -150,9 +155,9 @@ class AppCompatOrientationCapability {
                 .shouldEnableWithOptInOverrideAndOptOutProperty(loopDetectionEnabled)) {
             return false;
         }
-        mOrientationCapabilityState.updateOrientationRequestLoopState();
+        mOrientationOverridesState.updateOrientationRequestLoopState();
 
-        return mOrientationCapabilityState.shouldIgnoreRequestInLoop()
+        return mOrientationOverridesState.shouldIgnoreRequestInLoop()
                 && !mActivityRecord.isLetterboxedForFixedOrientationAndAspectRatio();
     }
 
@@ -161,17 +166,17 @@ class AppCompatOrientationCapability {
      * android.app.Activity#setRequestedOrientation}.
      */
     void setRelaunchingAfterRequestedOrientationChanged(boolean isRelaunching) {
-        mOrientationCapabilityState
+        mOrientationOverridesState
                 .mIsRelaunchingAfterRequestedOrientationChanged = isRelaunching;
     }
 
     boolean getIsRelaunchingAfterRequestedOrientationChanged() {
-        return mOrientationCapabilityState.mIsRelaunchingAfterRequestedOrientationChanged;
+        return mOrientationOverridesState.mIsRelaunchingAfterRequestedOrientationChanged;
     }
 
     @VisibleForTesting
     int getSetOrientationRequestCounter() {
-        return mOrientationCapabilityState.mSetOrientationRequestCounter;
+        return mOrientationOverridesState.mSetOrientationRequestCounter;
     }
 
     private boolean isCompatChangeEnabled(long overrideChangeId) {
@@ -192,7 +197,7 @@ class AppCompatOrientationCapability {
                 .isTreatmentEnabledForActivity(mActivityRecord);
     }
 
-    static class OrientationCapabilityState {
+    static class OrientationOverridesState {
         // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR
         final boolean mIsOverrideToNosensorOrientationEnabled;
         // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT
@@ -219,7 +224,7 @@ class AppCompatOrientationCapability {
         @VisibleForTesting
         LongSupplier mCurrentTimeMillisSupplier;
 
-        OrientationCapabilityState(@NonNull ActivityRecord activityRecord,
+        OrientationOverridesState(@NonNull ActivityRecord activityRecord,
                 @NonNull LongSupplier currentTimeMillisSupplier) {
             mCurrentTimeMillisSupplier = currentTimeMillisSupplier;
             mIsOverrideToNosensorOrientationEnabled =

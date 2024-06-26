@@ -23,8 +23,8 @@ import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTAT
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.AppCompatOrientationCapability.OrientationCapabilityState.MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP;
-import static com.android.server.wm.AppCompatOrientationCapability.OrientationCapabilityState.SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS;
+import static com.android.server.wm.AppCompatOrientationOverrides.OrientationOverridesState.MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP;
+import static com.android.server.wm.AppCompatOrientationOverrides.OrientationOverridesState.SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -49,14 +49,14 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
- * Test class for {@link AppCompatOrientationCapability}.
+ * Test class for {@link AppCompatOrientationOverrides}.
  * <p>
  * Build/Install/Run:
- * atest WmTests:AppCompatOrientationCapabilityTest
+ * atest WmTests:AppCompatOrientationOverridesTest
  */
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class AppCompatOrientationCapabilityTest extends WindowTestsBase {
+public class AppCompatOrientationOverridesTest extends WindowTestsBase {
 
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
@@ -257,19 +257,19 @@ public class AppCompatOrientationCapabilityTest extends WindowTestsBase {
     /**
      * Runs a test scenario providing a Robot.
      */
-    void runTestScenario(@NonNull Consumer<OrientationCapabilityRobotTest> consumer) {
+    void runTestScenario(@NonNull Consumer<OrientationOverridesRobotTest> consumer) {
         spyOn(mWm.mLetterboxConfiguration);
-        final OrientationCapabilityRobotTest robot =
-                new OrientationCapabilityRobotTest(mWm, mAtm, mSupervisor);
+        final OrientationOverridesRobotTest robot =
+                new OrientationOverridesRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);
     }
 
-    private static class OrientationCapabilityRobotTest extends AppCompatRobotBase {
+    private static class OrientationOverridesRobotTest extends AppCompatRobotBase {
 
         @NonNull
         private final CurrentTimeMillisSupplierFake mTestCurrentTimeMillisSupplier;
 
-        OrientationCapabilityRobotTest(@NonNull WindowManagerService wm,
+        OrientationOverridesRobotTest(@NonNull WindowManagerService wm,
                 @NonNull ActivityTaskManagerService atm,
                 @NonNull ActivityTaskSupervisor supervisor) {
             super(wm, atm, supervisor);
@@ -277,12 +277,12 @@ public class AppCompatOrientationCapabilityTest extends WindowTestsBase {
         }
 
         void prepareRelaunchingAfterRequestedOrientationChanged(boolean enabled) {
-            getTopOrientationCapability().setRelaunchingAfterRequestedOrientationChanged(enabled);
+            getTopOrientationOverrides().setRelaunchingAfterRequestedOrientationChanged(enabled);
         }
 
         // Useful to reduce timeout during tests
         void prepareMockedTime() {
-            getTopOrientationCapability().mOrientationCapabilityState.mCurrentTimeMillisSupplier =
+            getTopOrientationOverrides().mOrientationOverridesState.mCurrentTimeMillisSupplier =
                     mTestCurrentTimeMillisSupplier;
         }
 
@@ -292,21 +292,21 @@ public class AppCompatOrientationCapabilityTest extends WindowTestsBase {
 
         void checkShouldIgnoreRequestedOrientation(boolean expected,
                 @Configuration.Orientation int requestedOrientation) {
-            assertEquals(expected, getTopOrientationCapability()
+            assertEquals(expected, getTopOrientationOverrides()
                     .shouldIgnoreRequestedOrientation(requestedOrientation));
         }
 
         void checkExpectedLoopCount(int expectedCount) {
-            assertEquals(expectedCount, getTopOrientationCapability()
+            assertEquals(expectedCount, getTopOrientationOverrides()
                     .getSetOrientationRequestCounter());
         }
 
         void checkShouldNotIgnoreOrientationLoop() {
-            assertFalse(getTopOrientationCapability().shouldIgnoreOrientationRequestLoop());
+            assertFalse(getTopOrientationOverrides().shouldIgnoreOrientationRequestLoop());
         }
 
         void checkShouldIgnoreOrientationLoop() {
-            assertTrue(getTopOrientationCapability().shouldIgnoreOrientationRequestLoop());
+            assertTrue(getTopOrientationOverrides().shouldIgnoreOrientationRequestLoop());
         }
 
         void checkRequestLoop(IntConsumer consumer) {
@@ -321,9 +321,9 @@ public class AppCompatOrientationCapabilityTest extends WindowTestsBase {
             }
         }
 
-        private AppCompatOrientationCapability getTopOrientationCapability() {
-            return activity().top().mAppCompatController.getAppCompatCapability()
-                    .getAppCompatOrientationCapability();
+        private AppCompatOrientationOverrides getTopOrientationOverrides() {
+            return activity().top().mAppCompatController.getAppCompatOverrides()
+                    .getAppCompatOrientationOverrides();
         }
     }
 }
