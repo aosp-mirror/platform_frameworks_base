@@ -1498,6 +1498,37 @@ public final class AutofillManager {
     }
 
     /**
+     * Called to know whether authentication was pending.
+     * @hide
+     */
+    public boolean isAuthenticationPending() {
+        return mState == STATE_PENDING_AUTHENTICATION;
+    }
+
+    /**
+     * Called to check if we should retry fill.
+     * Useful for knowing whether to attempt refill after relayout.
+     *
+     * @hide
+     */
+    public boolean shouldRetryFill() {
+        // TODO: Implement in follow-up cl
+        return false;
+    }
+
+    /**
+     * Called when a potential relayout may have occurred.
+     *
+     * @return whether refill was done. True if refill was done partially or fully.
+     * @hide
+     */
+    public boolean attemptRefill() {
+        Log.i(TAG, "Attempting refill");
+        // TODO: Implement in follow-up cl
+        return false;
+    }
+
+    /**
      * Called when a {@link View} that supports autofill is entered.
      *
      * @param view {@link View} that was entered.

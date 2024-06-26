@@ -2214,6 +2214,9 @@ public class Activity extends ContextThemeWrapper
         notifyVoiceInteractionManagerServiceActivityEvent(
                 VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_RESUME);
 
+        // Notify autofill
+        getAutofillClientController().onActivityPostResumed();
+
         mCalled = true;
     }
 
