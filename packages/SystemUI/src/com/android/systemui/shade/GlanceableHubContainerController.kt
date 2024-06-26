@@ -37,7 +37,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.Flags.glanceableHubFullscreenSwipe
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.communal.dagger.Communal
@@ -309,13 +308,9 @@ constructor(
         )
         collectFlow(containerView, keyguardInteractor.isDreaming, { isDreaming = it })
 
-        if (glanceableHubFullscreenSwipe()) {
-            communalContainerWrapper = CommunalWrapper(containerView.context)
-            communalContainerWrapper?.addView(communalContainerView)
-            return communalContainerWrapper!!
-        } else {
-            return containerView
-        }
+        communalContainerWrapper = CommunalWrapper(containerView.context)
+        communalContainerWrapper?.addView(communalContainerView)
+        return communalContainerWrapper!!
     }
 
     /**
@@ -371,8 +366,7 @@ constructor(
         // and the touch is within the horizontal notification band on the screen, do not process
         // the touch.
         if (
-            glanceableHubFullscreenSwipe() &&
-                !hubShowing &&
+            !hubShowing &&
                 !notificationStackScrollLayoutController.isBelowLastNotification(ev.x, ev.y)
         ) {
             return false
@@ -389,17 +383,7 @@ constructor(
         val hubOccluded = anyBouncerShowing || shadeShowing
 
         if (isDown && !hubOccluded) {
-            if (glanceableHubFullscreenSwipe()) {
-                isTrackingHubTouch = true
-            } else {
-                val x = ev.rawX
-                val inOpeningSwipeRegion: Boolean = x >= view.width - rightEdgeSwipeRegionWidth
-                if (inOpeningSwipeRegion || hubShowing) {
-                    // Steal touch events when the hub is open, or if the touch started in the
-                    // opening gesture region.
-                    isTrackingHubTouch = true
-                }
-            }
+            isTrackingHubTouch = true
         }
 
         if (isTrackingHubTouch) {
@@ -419,20 +403,12 @@ constructor(
     private fun dispatchTouchEvent(view: View, ev: MotionEvent): Boolean {
         try {
             var handled = false
-            if (glanceableHubFullscreenSwipe()) {
-                communalContainerWrapper?.dispatchTouchEvent(ev) {
-                    if (it) {
-                        handled = true
-                    }
+            communalContainerWrapper?.dispatchTouchEvent(ev) {
+                if (it) {
+                    handled = true
                 }
-                return handled || hubShowing
-            } else {
-                view.dispatchTouchEvent(ev)
-                // Return true regardless of dispatch result as some touches at the start of a
-                // gesture
-                // may return false from dispatchTouchEvent.
-                return true
             }
+            return handled || hubShowing
         } finally {
             powerManager.userActivity(
                 SystemClock.uptimeMillis(),

@@ -1021,13 +1021,6 @@ flag {
 }
 
 flag {
-  name: "glanceable_hub_fullscreen_swipe"
-  namespace: "systemui"
-  description: "Increase swipe area for gestures to bring in glanceable hub"
-  bug: "339665673"
-}
-
-flag {
   name: "glanceable_hub_shortcut_button"
   namespace: "systemui"
   description: "Shows a button over the dream and lock screen to open the glanceable hub"
