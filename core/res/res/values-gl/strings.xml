@@ -614,7 +614,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Permite que a aplicación lea as localizacións da túa colección multimedia."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Utilizar desbloqueo biométrico"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Utilizar desbloqueo biométrico ou credencial do dispositivo"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifica que es ti"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifica a túa identidade"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Para continuar, utiliza o desbloqueo biométrico"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Para continuar, utiliza o desbloqueo biométrico ou o bloqueo de pantalla"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"O hardware biométrico non está dispoñible"</string>
