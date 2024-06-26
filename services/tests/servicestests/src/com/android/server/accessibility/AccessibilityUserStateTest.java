@@ -28,7 +28,9 @@ import static android.view.accessibility.AccessibilityManager.STATE_FLAG_ACCESSI
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED;
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
 
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -159,8 +161,8 @@ public class AccessibilityUserStateTest {
         mUserState.setInteractiveUiTimeoutLocked(30);
         mUserState.mEnabledServices.add(COMPONENT_NAME);
         mUserState.mTouchExplorationGrantedServices.add(COMPONENT_NAME);
-        mUserState.mAccessibilityShortcutKeyTargets.add(COMPONENT_NAME.flattenToString());
-        mUserState.mAccessibilityButtonTargets.add(COMPONENT_NAME.flattenToString());
+        mUserState.updateShortcutTargetsLocked(Set.of(COMPONENT_NAME.flattenToString()), HARDWARE);
+        mUserState.updateShortcutTargetsLocked(Set.of(COMPONENT_NAME.flattenToString()), SOFTWARE);
         mUserState.setTargetAssignedToAccessibilityButton(COMPONENT_NAME.flattenToString());
         mUserState.setTouchExplorationEnabledLocked(true);
         mUserState.setMagnificationSingleFingerTripleTapEnabledLocked(true);
@@ -182,8 +184,8 @@ public class AccessibilityUserStateTest {
         assertEquals(0, mUserState.getInteractiveUiTimeoutLocked());
         assertTrue(mUserState.mEnabledServices.isEmpty());
         assertTrue(mUserState.mTouchExplorationGrantedServices.isEmpty());
-        assertTrue(mUserState.mAccessibilityShortcutKeyTargets.isEmpty());
-        assertTrue(mUserState.mAccessibilityButtonTargets.isEmpty());
+        assertTrue(mUserState.getShortcutTargetsLocked(HARDWARE).isEmpty());
+        assertTrue(mUserState.getShortcutTargetsLocked(SOFTWARE).isEmpty());
         assertNull(mUserState.getTargetAssignedToAccessibilityButton());
         assertFalse(mUserState.isTouchExplorationEnabledLocked());
         assertFalse(mUserState.isMagnificationSingleFingerTripleTapEnabledLocked());

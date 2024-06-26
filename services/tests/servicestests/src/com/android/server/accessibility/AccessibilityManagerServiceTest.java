@@ -27,6 +27,7 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.server.accessibility.AccessibilityManagerService.ACTION_LAUNCH_HEARING_DEVICES_DIALOG;
 import static com.android.window.flags.Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER;
 
@@ -599,7 +600,7 @@ public class AccessibilityManagerServiceTest {
 
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
-        userState.mAccessibilityShortcutKeyTargets.add(MAGNIFICATION_CONTROLLER_NAME);
+        userState.updateShortcutTargetsLocked(Set.of(MAGNIFICATION_CONTROLLER_NAME), HARDWARE);
         userState.setMagnificationCapabilitiesLocked(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
 
@@ -799,8 +800,8 @@ public class AccessibilityManagerServiceTest {
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
         mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
-        userState.mAccessibilityShortcutKeyTargets.add(
-                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+        userState.updateShortcutTargetsLocked(
+                Set.of(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString()), HARDWARE);
 
         mA11yms.performAccessibilityShortcut(
                 Display.DEFAULT_DISPLAY, HARDWARE,
@@ -818,8 +819,8 @@ public class AccessibilityManagerServiceTest {
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
         mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
-        userState.mAccessibilityShortcutKeyTargets.add(
-                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+        userState.updateShortcutTargetsLocked(
+                Set.of(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString()), HARDWARE);
 
         mA11yms.performAccessibilityShortcut(
                 Display.DEFAULT_DISPLAY, HARDWARE,
@@ -875,9 +876,10 @@ public class AccessibilityManagerServiceTest {
         userState.mInstalledServices.clear();
         userState.mInstalledServices.add(info_a);
         userState.mInstalledServices.add(info_b);
-        userState.mAccessibilityButtonTargets.clear();
-        userState.mAccessibilityButtonTargets.add(info_a.getComponentName().flattenToString());
-        userState.mAccessibilityButtonTargets.add(info_b.getComponentName().flattenToString());
+        userState.updateShortcutTargetsLocked(Set.of(
+                        info_a.getComponentName().flattenToString(),
+                        info_b.getComponentName().flattenToString()),
+                SOFTWARE);
 
         // despite force stopping both packages, only the first service has the relevant flag,
         // so only the first should be removed.
@@ -891,11 +893,11 @@ public class AccessibilityManagerServiceTest {
 
         //Assert user state change
         userState = mA11yms.getCurrentUserState();
-        assertThat(userState.mAccessibilityButtonTargets).containsExactly(
+        assertThat(userState.getShortcutTargetsLocked(SOFTWARE)).containsExactly(
                 info_b.getComponentName().flattenToString());
         //Assert setting change
         final Set<String> targetsFromSetting = new ArraySet<>();
-        mA11yms.readColonDelimitedSettingToSet(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+        mA11yms.readColonDelimitedSettingToSet(ShortcutUtils.convertToKey(SOFTWARE),
                 userState.mUserId, str -> str, targetsFromSetting);
         assertThat(targetsFromSetting).containsExactly(info_b.getComponentName().flattenToString());
     }
@@ -996,10 +998,10 @@ public class AccessibilityManagerServiceTest {
         final AccessibilityServiceInfo info_c = mockAccessibilityServiceInfo(
                 new ComponentName("package_c", "class_c"));
         final AccessibilityUserState userState = mA11yms.getCurrentUserState();
-        userState.mAccessibilityButtonTargets.clear();
-        userState.mAccessibilityButtonTargets.add(info_b.getComponentName().flattenToString());
-        userState.mAccessibilityShortcutKeyTargets.clear();
-        userState.mAccessibilityShortcutKeyTargets.add(info_c.getComponentName().flattenToString());
+        userState.updateShortcutTargetsLocked(
+                Set.of(info_b.getComponentName().flattenToString()), SOFTWARE);
+        userState.updateShortcutTargetsLocked(
+                Set.of(info_c.getComponentName().flattenToString()), HARDWARE);
 
         assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_a)).isTrue();
         assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_b)).isFalse();
@@ -1560,8 +1562,8 @@ public class AccessibilityManagerServiceTest {
         mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
         setupShortcutTargetServices();
         final AccessibilityUserState userState = mA11yms.getCurrentUserState();
-        userState.mAccessibilityButtonTargets.clear();
-        userState.mAccessibilityButtonTargets.add(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString());
+        userState.updateShortcutTargetsLocked(
+                Set.of(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString()), SOFTWARE);
         ComponentName tile = new ComponentName(
                 TARGET_ALWAYS_ON_A11Y_SERVICE.getPackageName(),
                 TARGET_ALWAYS_ON_A11Y_SERVICE_TILE_CLASS);

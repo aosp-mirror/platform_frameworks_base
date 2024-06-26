@@ -849,14 +849,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     userState.mEnabledServices, userState.mUserId);
         }
 
-        boolean buttonTargetsChanged = userState.mAccessibilityButtonTargets.removeIf(
+        // Remove any button targets that match any stopped continuous services
+        Set<String> buttonTargets = userState.getShortcutTargetsLocked(SOFTWARE);
+        boolean buttonTargetsChanged = buttonTargets.removeIf(
                 target -> continuousServicePackages.stream().anyMatch(
                         pkg -> Objects.equals(target, pkg)));
         if (buttonTargetsChanged) {
+            userState.updateShortcutTargetsLocked(buttonTargets, SOFTWARE);
             persistColonDelimitedSetToSettingLocked(
-                    Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                    ShortcutUtils.convertToKey(SOFTWARE),
                     userState.mUserId,
-                    userState.mAccessibilityButtonTargets, str -> str);
+                    buttonTargets, str -> str);
         }
 
         return enabledServicesChanged || buttonTargetsChanged;
