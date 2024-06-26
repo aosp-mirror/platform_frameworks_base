@@ -23,7 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState
-import com.android.systemui.keyboard.shortcut.shortcutHelperRepository
+import com.android.systemui.keyboard.shortcut.shortcutHelperStateRepository
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
@@ -34,11 +34,11 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class ShortcutHelperRepositoryTest : SysuiTestCase() {
+class ShortcutHelperStateRepositoryTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
 
-    private val repo = kosmos.shortcutHelperRepository
+    private val repo = kosmos.shortcutHelperStateRepository
     private val helper = kosmos.shortcutHelperTestHelper
     private val testScope = kosmos.testScope
     private val fakeInputManager = kosmos.fakeInputManager

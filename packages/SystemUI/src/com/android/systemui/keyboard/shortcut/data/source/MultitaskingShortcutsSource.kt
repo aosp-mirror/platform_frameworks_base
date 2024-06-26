@@ -25,13 +25,28 @@ import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CTRL_ON
 import android.view.KeyEvent.META_META_ON
 import android.view.KeyEvent.META_SHIFT_ON
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MULTI_TASKING
 import com.android.systemui.keyboard.shortcut.shared.model.shortcut
+import com.android.systemui.keyboard.shortcut.shared.model.shortcutCategory
 import com.android.systemui.res.R
 import javax.inject.Inject
 
-class MultitaskingShortcutsSource @Inject constructor(private val resources: Resources) {
+class MultitaskingShortcutsSource @Inject constructor(@Main private val resources: Resources) {
 
-    fun splitScreenShortcuts() =
+    fun multitaskingShortcutCategory() =
+        shortcutCategory(MULTI_TASKING) {
+            subCategory(
+                resources.getString(R.string.shortcutHelper_category_recent_apps),
+                recentsShortcuts()
+            )
+            subCategory(
+                resources.getString(R.string.shortcutHelper_category_split_screen),
+                splitScreenShortcuts()
+            )
+        }
+
+    private fun splitScreenShortcuts() =
         listOf(
             //  Enter Split screen with current app to RHS:
             //   - Meta + Ctrl + Right arrow
@@ -60,7 +75,7 @@ class MultitaskingShortcutsSource @Inject constructor(private val resources: Res
             },
         )
 
-    fun recentsShortcuts() =
+    private fun recentsShortcuts() =
         listOf(
             // Cycle through recent apps (forward):
             //  - Alt + Tab
