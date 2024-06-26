@@ -567,7 +567,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             streamStateW(stream).levelMax = Math.max(1, getAudioManagerStreamMaxVolume(stream));
             updateStreamMuteW(stream, mAudio.isStreamMute(stream));
             final StreamState ss = streamStateW(stream);
-            ss.muteSupported = mAudio.isStreamAffectedByMute(stream);
+            ss.muteSupported = mAudio.isStreamMutableByUi(stream);
             ss.name = STREAMS.get(stream);
             checkRoutedToBluetoothW(stream);
         }

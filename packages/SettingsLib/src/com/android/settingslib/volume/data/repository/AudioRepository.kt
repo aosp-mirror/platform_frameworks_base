@@ -179,7 +179,7 @@ class AudioRepositoryImpl(
             minVolume = getMinVolume(audioStream),
             maxVolume = audioManager.getStreamMaxVolume(audioStream.value),
             volume = audioManager.getStreamVolume(audioStream.value),
-            isAffectedByMute = audioManager.isStreamAffectedByMute(audioStream.value),
+            isAffectedByMute = audioManager.isStreamMutableByUi(audioStream.value),
             isAffectedByRingerMode = audioManager.isStreamAffectedByRingerMode(audioStream.value),
             isMuted = audioManager.isStreamMute(audioStream.value),
         )
