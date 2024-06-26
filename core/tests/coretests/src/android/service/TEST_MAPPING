@@ -1,17 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {"include-filter": "android.service.controls"},
-        {"include-filter": "android.service.controls.actions"},
-        {"include-filter": "android.service.controls.templates"},
-        {"include-filter": "android.service.euicc"},
-        {"include-filter": "android.service.notification"},
-        {"include-filter": "android.service.quicksettings"},
-        {"include-filter": "android.service.settings.suggestions"},
-        {"exclude-annotation": "org.junit.Ignore"}
-      ]
+      "name": "FrameworksCoreTests_android_service"
     }
   ]
 }
