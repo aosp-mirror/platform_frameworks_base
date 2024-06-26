@@ -546,7 +546,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                 }
             } else {
                 CommunalContent(
-                    modifier = cardModifier.animateItemPlacement(),
+                    modifier = cardModifier.animateItem(),
                     model = list[index],
                     viewModel = viewModel,
                     size = size,
