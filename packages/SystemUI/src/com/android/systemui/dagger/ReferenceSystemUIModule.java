@@ -25,7 +25,9 @@ import android.hardware.SensorPrivacyManager;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.ScreenDecorationsModule;
+import com.android.systemui.accessibility.AccessibilityModule;
 import com.android.systemui.accessibility.SystemActionsModule;
+import com.android.systemui.accessibility.data.repository.AccessibilityRepositoryModule;
 import com.android.systemui.battery.BatterySaverModule;
 import com.android.systemui.display.ui.viewmodel.ConnectingDisplayViewModel;
 import com.android.systemui.dock.DockManager;
@@ -107,6 +109,8 @@ import javax.inject.Named;
  * SystemUI code that variants of SystemUI _must_ include to function correctly.
  */
 @Module(includes = {
+        AccessibilityModule.class,
+        AccessibilityRepositoryModule.class,
         AospPolicyModule.class,
         BatterySaverModule.class,
         CollapsedStatusBarFragmentStartableModule.class,

@@ -17,6 +17,7 @@
 package com.android.systemui.keyboard.shortcut
 
 import android.content.applicationContext
+import android.hardware.input.fakeInputManager
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperTestHelper
@@ -32,7 +33,15 @@ import com.android.systemui.model.sysUiState
 import com.android.systemui.settings.displayTracker
 
 val Kosmos.shortcutHelperRepository by
-    Kosmos.Fixture { ShortcutHelperRepository(fakeCommandQueue, broadcastDispatcher) }
+    Kosmos.Fixture {
+        ShortcutHelperRepository(
+            fakeCommandQueue,
+            broadcastDispatcher,
+            fakeInputManager.inputManager,
+            testScope,
+            testDispatcher
+        )
+    }
 
 val Kosmos.shortcutHelperTestHelper by
     Kosmos.Fixture {

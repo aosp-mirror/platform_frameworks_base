@@ -27,6 +27,7 @@ import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaLoadingModel
 import com.android.systemui.media.controls.util.MediaSmartspaceLogger
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_DISMISS_EVENT
 import com.android.systemui.media.controls.util.SmallHash
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.time.SystemClock
@@ -362,6 +363,77 @@ constructor(
         return _smartspaceMediaData.value.isActive
     }
 
+    /** Log user event on media card if smartspace logging is enabled. */
+    fun logSmartspaceCardUserEvent(
+        eventId: Int,
+        location: Int,
+        interactedSubCardRank: Int = 0,
+        interactedSubCardCardinality: Int = 0,
+        instanceId: InstanceId? = null,
+        isRec: Boolean = false
+    ) {
+        _currentMedia.value.forEachIndexed { index, mediaCommonModel ->
+            when (mediaCommonModel) {
+                is MediaCommonModel.MediaControl -> {
+                    if (mediaCommonModel.mediaLoadedModel.instanceId == instanceId) {
+                        if (isSmartspaceLoggingEnabled(mediaCommonModel, index)) {
+                            logSmartspaceMediaCardUserEvent(
+                                instanceId,
+                                index,
+                                eventId,
+                                location,
+                                mediaCommonModel.mediaLoadedModel.isSsReactivated,
+                                interactedSubCardRank,
+                                interactedSubCardCardinality
+                            )
+                        }
+                        return
+                    }
+                }
+                is MediaCommonModel.MediaRecommendations -> {
+                    if (isRec) {
+                        if (isSmartspaceLoggingEnabled(mediaCommonModel, index)) {
+                            logSmarspaceRecommendationCardUserEvent(
+                                eventId,
+                                location,
+                                index,
+                                interactedSubCardRank,
+                                interactedSubCardCardinality
+                            )
+                        }
+                        return
+                    }
+                }
+            }
+        }
+    }
+
+    /** Log media and recommendation cards dismissal if smartspace logging is enabled for each. */
+    fun logSmartspaceCardsOnSwipeToDismiss(location: Int) {
+        _currentMedia.value.forEachIndexed { index, mediaCommonModel ->
+            if (isSmartspaceLoggingEnabled(mediaCommonModel, index)) {
+                when (mediaCommonModel) {
+                    is MediaCommonModel.MediaControl ->
+                        logSmartspaceMediaCardUserEvent(
+                            mediaCommonModel.mediaLoadedModel.instanceId,
+                            index,
+                            SMARTSPACE_CARD_DISMISS_EVENT,
+                            location,
+                            mediaCommonModel.mediaLoadedModel.isSsReactivated,
+                            isSwipeToDismiss = true
+                        )
+                    is MediaCommonModel.MediaRecommendations ->
+                        logSmarspaceRecommendationCardUserEvent(
+                            SMARTSPACE_CARD_DISMISS_EVENT,
+                            location,
+                            index,
+                            isSwipeToDismiss = true
+                        )
+                }
+            }
+        }
+    }
+
     private fun canBeRemoved(data: MediaData): Boolean {
         return data.isPlaying?.let { !it } ?: data.isClearable && !data.active
     }
@@ -392,6 +464,54 @@ constructor(
                 }
             }
         }
+    }
+
+    private fun logSmartspaceMediaCardUserEvent(
+        instanceId: InstanceId,
+        index: Int,
+        eventId: Int,
+        location: Int,
+        isReactivated: Boolean,
+        interactedSubCardRank: Int = 0,
+        interactedSubCardCardinality: Int = 0,
+        isSwipeToDismiss: Boolean = false
+    ) {
+        _selectedUserEntries.value[instanceId]?.let {
+            smartspaceLogger.logSmartspaceCardUIEvent(
+                eventId,
+                it.smartspaceId,
+                it.appUid,
+                location,
+                _currentMedia.value.size,
+                isSsReactivated = isReactivated,
+                interactedSubcardRank = interactedSubCardRank,
+                interactedSubcardCardinality = interactedSubCardCardinality,
+                rank = index,
+                isSwipeToDismiss = isSwipeToDismiss,
+            )
+        }
+    }
+
+    private fun logSmarspaceRecommendationCardUserEvent(
+        eventId: Int,
+        location: Int,
+        index: Int,
+        interactedSubCardRank: Int = 0,
+        interactedSubCardCardinality: Int = 0,
+        isSwipeToDismiss: Boolean = false
+    ) {
+        smartspaceLogger.logSmartspaceCardUIEvent(
+            eventId,
+            SmallHash.hash(_smartspaceMediaData.value.targetId),
+            _smartspaceMediaData.value.getUid(applicationContext),
+            location,
+            _currentMedia.value.size,
+            isRecommendationCard = true,
+            interactedSubcardRank = interactedSubCardRank,
+            interactedSubcardCardinality = interactedSubCardCardinality,
+            rank = index,
+            isSwipeToDismiss = isSwipeToDismiss,
+        )
     }
 
     private fun isSmartspaceLoggingEnabled(commonModel: MediaCommonModel, index: Int): Boolean {

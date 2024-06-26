@@ -82,7 +82,6 @@ import android.app.IApplicationThread;
 import android.app.ResultInfo;
 import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityResultItem;
-import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
@@ -1604,9 +1603,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             try {
                 final IApplicationThread appThread = next.app.getThread();
-                final ClientTransaction transaction = Flags.bundleClientTransactionFlag()
-                        ? null
-                        : ClientTransaction.obtain(appThread);
                 // Deliver all pending results.
                 final ArrayList<ResultInfo> a = next.results;
                 if (a != null) {
@@ -1617,24 +1613,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         }
                         final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
                                 next.token, a);
-                        if (transaction == null) {
-                            mAtmService.getLifecycleManager().scheduleTransactionItem(
-                                    appThread, activityResultItem);
-                        } else {
-                            transaction.addTransactionItem(activityResultItem);
-                        }
+                        mAtmService.getLifecycleManager().scheduleTransactionItem(
+                                appThread, activityResultItem);
                     }
                 }
 
                 if (next.newIntents != null) {
                     final NewIntentItem newIntentItem = NewIntentItem.obtain(
                             next.token, next.newIntents, true /* resume */);
-                    if (transaction == null) {
-                        mAtmService.getLifecycleManager().scheduleTransactionItem(
-                                appThread, newIntentItem);
-                    } else {
-                        transaction.addTransactionItem(newIntentItem);
-                    }
+                    mAtmService.getLifecycleManager().scheduleTransactionItem(
+                            appThread, newIntentItem);
                 }
 
                 // Well the app will no longer be stopped.
@@ -1651,13 +1639,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(
                         next.token, topProcessState, dc.isNextTransitionForward(),
                         next.shouldSendCompatFakeFocus());
-                if (transaction == null) {
-                    mAtmService.getLifecycleManager().scheduleTransactionItem(
-                            appThread, resumeActivityItem);
-                } else {
-                    transaction.addTransactionItem(resumeActivityItem);
-                    mAtmService.getLifecycleManager().scheduleTransaction(transaction);
-                }
+                mAtmService.getLifecycleManager().scheduleTransactionItem(
+                        appThread, resumeActivityItem);
 
                 ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivity: Resumed %s", next);
             } catch (Exception e) {

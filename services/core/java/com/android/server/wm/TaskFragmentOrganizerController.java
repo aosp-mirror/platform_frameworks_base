@@ -171,11 +171,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
         TaskFragmentOrganizerState(@NonNull ITaskFragmentOrganizer organizer, int pid, int uid,
                 boolean isSystemOrganizer) {
-            if (Flags.bundleClientTransactionFlag()) {
-                mAppThread = getAppThread(pid, uid);
-            } else {
-                mAppThread = null;
-            }
+            mAppThread = getAppThread(pid, uid);
             mOrganizer = organizer;
             mOrganizerPid = pid;
             mOrganizerUid = uid;
@@ -431,13 +427,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return;
             }
             try {
-                if (Flags.bundleClientTransactionFlag()) {
-                    // Dispatch through IApplicationThread to ensure the binder call is in order
-                    // with ClientTransaction.
-                    mAppThread.scheduleTaskFragmentTransaction(mOrganizer, transaction);
-                } else {
-                    mOrganizer.onTransactionReady(transaction);
-                }
+                // Dispatch through IApplicationThread to ensure the binder call is in order
+                // with ClientTransaction.
+                mAppThread.scheduleTaskFragmentTransaction(mOrganizer, transaction);
             } catch (RemoteException e) {
                 Slog.d(TAG, "Exception sending TaskFragmentTransaction", e);
                 return;
