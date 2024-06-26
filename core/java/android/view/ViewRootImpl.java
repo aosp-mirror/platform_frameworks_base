@@ -1267,7 +1267,6 @@ public final class ViewRootImpl implements ViewParent,
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         mNoncompatDensity = context.getResources().getDisplayMetrics().noncompatDensityDpi;
         mFallbackEventHandler = new PhoneFallbackEventHandler(context);
-        // TODO(b/222696368): remove getSfInstance usage and use vsyncId for transactions
         mChoreographer = Choreographer.getInstance();
         mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
         mImeBackAnimationController = new ImeBackAnimationController(this, mInsetsController);
