@@ -24,6 +24,7 @@ import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.shade.pulsingGestureListener
 
 val Kosmos.keyguardLongPressInteractor by
     Kosmos.Fixture {
@@ -36,5 +37,6 @@ val Kosmos.keyguardLongPressInteractor by
             featureFlags = featureFlagsClassic,
             broadcastDispatcher = broadcastDispatcher,
             accessibilityManager = accessibilityManagerWrapper,
+            pulsingGestureListener = pulsingGestureListener,
         )
     }

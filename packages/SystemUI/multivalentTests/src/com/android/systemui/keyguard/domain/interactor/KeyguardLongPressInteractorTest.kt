@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.shade.pulsingGestureListener
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
@@ -300,7 +301,8 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
                         set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, isOpenWppDirectlyEnabled)
                     },
                 broadcastDispatcher = fakeBroadcastDispatcher,
-                accessibilityManager = kosmos.accessibilityManagerWrapper
+                accessibilityManager = kosmos.accessibilityManagerWrapper,
+                pulsingGestureListener = kosmos.pulsingGestureListener,
             )
         setUpState()
     }

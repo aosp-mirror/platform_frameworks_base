@@ -19,9 +19,10 @@
 package com.android.systemui.keyguard.ui.composable
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -33,10 +34,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.systemui.communal.ui.compose.extensions.detectLongPressGesture
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 
 /** Container for lockscreen content that handles long-press to bring up the settings menu. */
 @Composable
+// TODO(b/344879669): now that it's more generic than long-press, rename it.
 fun LockscreenLongPress(
     viewModel: KeyguardLongPressViewModel,
     modifier: Modifier = Modifier,
@@ -50,14 +53,17 @@ fun LockscreenLongPress(
     Box(
         modifier =
             modifier
-                .combinedClickable(
-                    enabled = isEnabled,
-                    onLongClick = viewModel::onLongPress,
-                    onClick = {},
-                    interactionSource = interactionSource,
-                    // Passing null for the indication removes the ripple effect.
-                    indication = null,
-                )
+                .pointerInput(isEnabled) {
+                    if (isEnabled) {
+                        detectLongPressGesture { viewModel.onLongPress() }
+                    }
+                }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = { viewModel.onClick(it.x, it.y) },
+                        onDoubleTap = { viewModel.onDoubleClick() },
+                    )
+                }
                 .pointerInput(settingsMenuBounds) {
                     awaitEachGesture {
                         val pointerInputChange = awaitFirstDown()
@@ -65,7 +71,9 @@ fun LockscreenLongPress(
                             viewModel.onTouchedOutside()
                         }
                     }
-                },
+                }
+                // Passing null for the indication removes the ripple effect.
+                .indication(interactionSource, null)
     ) {
         content(setSettingsMenuBounds)
     }

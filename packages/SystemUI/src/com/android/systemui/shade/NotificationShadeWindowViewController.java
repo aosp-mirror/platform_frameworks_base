@@ -369,7 +369,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 }
 
                 mFalsingCollector.onTouchEvent(ev);
-                mPulsingWakeupGestureHandler.onTouchEvent(ev);
+                if (!SceneContainerFlag.isEnabled()) {
+                    mPulsingWakeupGestureHandler.onTouchEvent(ev);
+                }
 
                 if (!SceneContainerFlag.isEnabled()
                         && mGlanceableHubContainerController.onTouchEvent(ev)) {

@@ -58,6 +58,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.pulsingGestureListener
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -221,6 +222,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
                 featureFlags = featureFlags,
                 broadcastDispatcher = broadcastDispatcher,
                 accessibilityManager = accessibilityManager,
+                pulsingGestureListener = kosmos.pulsingGestureListener,
             )
         underTest =
             KeyguardBottomAreaViewModel(

@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 
 /** Models UI state to support the lock screen long-press feature. */
 @SysUISingleton
+// TODO(b/344879669): now that it's more generic than long-press, rename it.
 class KeyguardLongPressViewModel
 @Inject
 constructor(
@@ -44,5 +45,15 @@ constructor(
      */
     fun onTouchedOutside() {
         interactor.onTouchedOutside()
+    }
+
+    /** Notifies that the lockscreen has been clicked at position [x], [y]. */
+    fun onClick(x: Float, y: Float) {
+        interactor.onClick(x, y)
+    }
+
+    /** Notifies that the lockscreen has been double clicked. */
+    fun onDoubleClick() {
+        interactor.onDoubleClick()
     }
 }
