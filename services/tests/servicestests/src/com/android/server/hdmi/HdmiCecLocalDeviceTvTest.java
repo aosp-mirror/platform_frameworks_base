@@ -2068,7 +2068,6 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mPowerManager.isInteractive()).isTrue();
     }
 
-
     @Test
     public void handleStandby_fromNonActiveSource_previousActiveSourceNotSet_Standby() {
         HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(ADDR_PLAYBACK_1,
@@ -2089,6 +2088,35 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mPowerManager.isInteractive()).isFalse();
         assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
                 .isFalse();
+    }
+
+    @Test
+    public void handleReportPhysicalAddress_DeviceDiscoveryActionInProgress_noNewDeviceAction() {
+        mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportPhysicalAddressFromPlayback1 =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_PLAYBACK_1, 0x1000, HdmiDeviceInfo.DEVICE_PLAYBACK);
+        HdmiCecMessage reportPhysicalAddressFromPlayback2 =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_PLAYBACK_2, 0x2000, HdmiDeviceInfo.DEVICE_PLAYBACK);
+        HdmiCecMessage giveOsdName = HdmiCecMessageBuilder.buildGiveOsdNameCommand(
+                ADDR_TV, ADDR_PLAYBACK_2);
+        // Skip state waiting for <Report Physical Address> for DeviceDiscoveryAction s.t. message
+        // can be dispatched to local device TV.
+        mNativeWrapper.onCecMessage(reportPhysicalAddressFromPlayback1);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.onCecMessage(reportPhysicalAddressFromPlayback2);
+        mTestLooper.dispatchAll();
+
+        // NewDeviceAction did not start and <Give OSD Name> was not sent.
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(giveOsdName);
     }
 
     protected static class MockTvDevice extends HdmiCecLocalDeviceTv {
