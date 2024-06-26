@@ -21,5 +21,5 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"تنظیم محل فضای ذخیره‌سازی"</string>
     <string name="wifi_softap_config_change" msgid="5688373762357941645">"تنظیمات نقطه اتصال تغییر کرده است"</string>
-    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"برای مشاهده جزئیات ضربه بزنید"</string>
+    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"برای مشاهده جزئیات تک‌ضرب بزنید"</string>
 </resources>
