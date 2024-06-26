@@ -2075,10 +2075,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             mContext, shortcutType, userState.mUserId))
                     : userState.getShortcutTargetsLocked(shortcutType);
 
-            // If dealing with the hardware shortcut,
-            // remove the default service if it wasn't present before restore,
-            // but only if the raw shortcut setting is not null (edge case during SUW).
-            // Otherwise, merge the old and new targets normally.
             if (Flags.clearDefaultFromA11yShortcutTargetServiceRestore()
                     && shortcutType == HARDWARE) {
                 final String defaultService =
@@ -2087,8 +2083,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         ? null : ComponentName.unflattenFromString(defaultService);
                 boolean shouldClearDefaultService = defaultServiceComponent != null
                         && !stringSetContainsComponentName(mergedTargets, defaultServiceComponent);
-                readColonDelimitedStringToSet(newValue, str -> str,
-                        mergedTargets, /*doMerge=*/true);
+                readColonDelimitedStringToSet(newValue, str -> str, mergedTargets,
+                        /* doMerge = */ true);
 
                 if (shouldClearDefaultService && stringSetContainsComponentName(
                         mergedTargets, defaultServiceComponent)) {
@@ -3889,7 +3885,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @EnforcePermission(MANAGE_ACCESSIBILITY)
     @Override
-    public void performAccessibilityShortcut(String targetName) {
+    public void performAccessibilityShortcut(
+            int displayId, @UserShortcutType int shortcutType, String targetName) {
         performAccessibilityShortcut_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".performAccessibilityShortcut",
@@ -3898,7 +3895,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::performAccessibilityShortcutInternal, this,
-                Display.DEFAULT_DISPLAY, HARDWARE, targetName));
+                displayId, shortcutType, targetName));
     }
 
     /**
