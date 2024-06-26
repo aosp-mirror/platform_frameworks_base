@@ -100,7 +100,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses rakaman skrin"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pemberitahuan breterusan untuk sesi rakaman skrin"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Mulakan Rakaman?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Apabila anda merakam, Android boleh mengakses apa-apa sahaja yang kelihatan pada skrin anda atau dimainkan pada peranti anda. Oleh hal yang demikian, berhati-hati apabila memasukkan kata laluan, butiran pembayaran, mesej, foto, audio dan video."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Semasa anda merakam, Android boleh mengakses apa-apa sahaja yang kelihatan pada skrin atau dimainkan pada peranti anda. Oleh hal yang demikian, berhati-hati apabila memasukkan kata laluan, butiran pembayaran, mesej, foto, audio dan video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Semasa anda merakam apl, Android boleh mengakses apa-apa sahaja yang ditunjukkan atau dimainkan pada apl itu. Oleh hal yang demikian, berhati-hati ketika memasukkan kata laluan, butiran pembayaran, mesej, foto, audio dan video."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Mulakan rakaman"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rakam audio"</string>

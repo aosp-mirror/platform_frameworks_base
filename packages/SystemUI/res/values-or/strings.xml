@@ -667,7 +667,7 @@
     <string name="system_multitasking_lhs" msgid="8839380725557952846">"LHSରେ ବର୍ତ୍ତମାନର ଆପ ସହ ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନକୁ ପ୍ରବେଶ କରାନ୍ତୁ"</string>
     <string name="system_multitasking_full_screen" msgid="1962084334200006297">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନରୁ ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନକୁ ସ୍ଵିଚ କରନ୍ତୁ"</string>
     <string name="system_multitasking_replace" msgid="844285282472557186">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ସମୟରେ: କୌଣସି ଆପକୁ ଗୋଟିଏରୁ ଅନ୍ୟ ଏକ ଆପରେ ବଦଳାନ୍ତୁ"</string>
-    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ଇନପୁଟ କରନ୍ତୁ"</string>
+    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ଇନପୁଟ"</string>
     <string name="input_switch_input_language_next" msgid="3394291576873633793">"ଇନପୁଟ ଭାଷା ସ୍ୱିଚ କରନ୍ତୁ (ପରବର୍ତ୍ତୀ ଭାଷା)"</string>
     <string name="input_switch_input_language_previous" msgid="8823659252918609216">"ଇନପୁଟ ଭାଷା ସ୍ୱିଚ କରନ୍ତୁ (ପୂର୍ବବର୍ତ୍ତୀ ଭାଷା)"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"ଇମୋଜି ଆକ୍ସେସ କରନ୍ତୁ"</string>

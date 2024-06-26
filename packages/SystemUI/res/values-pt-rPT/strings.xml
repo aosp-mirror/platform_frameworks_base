@@ -502,7 +502,7 @@
     <string name="stream_voice_call" msgid="7468348170702375660">"Chamada"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Toque"</string>
-    <string name="stream_music" msgid="2188224742361847580">"Suporte de dados"</string>
+    <string name="stream_music" msgid="2188224742361847580">"Multimédia"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarme"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notificação"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>

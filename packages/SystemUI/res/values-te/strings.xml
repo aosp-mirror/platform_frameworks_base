@@ -1135,7 +1135,7 @@
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"మడవగల పరికరం చుట్టూ తిప్పబడుతోంది"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> బ్యాటరీ మిగిలి ఉంది"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"మీ స్టైలస్‌ను ఛార్జర్‌కి కనెక్ట్ చేయండి"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"తక్కువ స్టైలస్ బ్యాటరీ"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"తక్కువ స్టయిలస్ బ్యాటరీ"</string>
     <string name="video_camera" msgid="7654002575156149298">"వీడియో కెమెరా"</string>
     <string name="call_from_work_profile_title" msgid="5418253516453177114">"వ్యక్తిగత యాప్ నుండి కాల్ చేయడం సాధ్యం కాదు"</string>
     <string name="call_from_work_profile_text" msgid="2856337395968118274">"మీ సంస్థ, వర్క్ యాప్‌ల నుండి మాత్రమే కాల్స్ చేయడానికి మిమ్మల్ని అనుమతిస్తుంది"</string>

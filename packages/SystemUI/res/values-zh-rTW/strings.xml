@@ -671,7 +671,7 @@
     <string name="input_switch_input_language_next" msgid="3394291576873633793">"切換輸入語言 (下一個語言)"</string>
     <string name="input_switch_input_language_previous" msgid="8823659252918609216">"切換輸入語言 (上一個語言)"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"存取表情符號"</string>
-    <string name="input_access_voice_typing" msgid="7291201476395326141">"存取語音輸入內容"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"使用語音輸入功能"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"應用程式"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"小幫手"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"瀏覽器 (預設為 Chrome)"</string>

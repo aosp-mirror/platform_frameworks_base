@@ -100,7 +100,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Inachakata rekodi ya skrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Arifa inayoendelea ya kipindi cha kurekodi skrini"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Ungependa kuanza kurekodi?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Unaporekodi, Android inaweza kufikia kitu chochote kitakachoonekana kwenye skrini yako au kuchezwa kwenye kifaa chako. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Unaporekodi, Android inaweza kufikia kitu chochote kitakachoonekana kwenye skrini yako au kuchezwa kwenye kifaa chako. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha, sauti na video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Unaporekodi programu, Android inaweza kufikia kitu chochote kitakachoonekana au kuchezwa kwenye programu hiyo. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Anza kurekodi"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rekodi sauti"</string>

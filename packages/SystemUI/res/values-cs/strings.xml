@@ -100,7 +100,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Záznam obrazovky se zpracovává"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Trvalé oznámení o relaci nahrávání"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Začít nahrávat?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Během nahrávání má Android přístup k veškerému obsahu, který je viditelný na obrazovce nebo se přehrává v zařízení. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Během nahrávání má Android přístup k veškerému obsahu, který je viditelný na obrazovce nebo se přehrává v zařízení. Dejte proto pozor na hesla, platební údaje, zprávy, fotografie, zvukové záznamy nebo videa."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Během nahrávání aplikace má Android přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s informacemi, jako jsou hesla, platební údaje, zprávy, fotky, zvukové záznamy nebo videa."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Začít nahrávat"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrávat zvuk"</string>
@@ -499,11 +499,11 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, děkuji"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikace byla připnuta"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikace byla odepnuta"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Hovor"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Hovory"</string>
     <string name="stream_system" msgid="7663148785370565134">"Systém"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Vyzvánění"</string>
     <string name="stream_music" msgid="2188224742361847580">"Média"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"Budík"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"Budíky"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Oznámení"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Tónová volba"</string>
