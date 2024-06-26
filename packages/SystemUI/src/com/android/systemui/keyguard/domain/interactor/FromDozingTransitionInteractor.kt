@@ -55,6 +55,7 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     val deviceEntryRepository: DeviceEntryRepository,
+    private val wakeToGoneInteractor: KeyguardWakeDirectlyToGoneInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DOZING,
@@ -181,7 +182,7 @@ constructor(
                 .sample(
                     communalInteractor.isIdleOnCommunal,
                     keyguardInteractor.biometricUnlockState,
-                    canTransitionToGoneOnWake,
+                    wakeToGoneInteractor.canWakeDirectlyToGone,
                     keyguardInteractor.primaryBouncerShowing,
                 )
                 .collect {
@@ -189,27 +190,14 @@ constructor(
                         _,
                         isIdleOnCommunal,
                         biometricUnlockState,
-                        canDismissLockscreen,
+                        canWakeDirectlyToGone,
                         primaryBouncerShowing) ->
                     if (
                         !maybeStartTransitionToOccludedOrInsecureCamera() &&
                             // Handled by dismissFromDozing().
                             !isWakeAndUnlock(biometricUnlockState.mode)
                     ) {
-                        if (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen) {
-                            if (SceneContainerFlag.isEnabled) {
-                                // TODO(b/336576536): Check if adaptation for scene framework is
-                                // needed
-                            } else {
-                                startTransitionTo(
-                                    KeyguardState.GONE,
-                                    ownerReason = "waking from dozing"
-                                )
-                            }
-                        } else if (
-                            KeyguardWmStateRefactor.isEnabled &&
-                                !deviceEntryRepository.isLockscreenEnabled()
-                        ) {
+                        if (canWakeDirectlyToGone) {
                             if (SceneContainerFlag.isEnabled) {
                                 // TODO(b/336576536): Check if adaptation for scene framework is
                                 // needed
