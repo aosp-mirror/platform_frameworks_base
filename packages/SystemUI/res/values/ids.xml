@@ -233,6 +233,7 @@
     <item type="id" name="smart_space_barrier_bottom" />
     <item type="id" name="small_clock_guideline_top" />
     <item type="id" name="weather_clock_date_and_icons_barrier_bottom" />
+    <item type="id" name="weather_clock_bc_smartspace_bottom" />
     <item type="id" name="accessibility_actions_view" />
 
     <!-- Privacy dialog -->
