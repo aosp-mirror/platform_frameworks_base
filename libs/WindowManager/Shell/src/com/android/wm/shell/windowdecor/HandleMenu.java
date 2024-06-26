@@ -53,7 +53,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer;
@@ -276,10 +275,8 @@ class HandleMenu {
                 // In a focused decor, we use global coordinates for handle menu. Therefore we
                 // need to account for other factors like split stage and menu/handle width to
                 // center the menu.
-                final DisplayLayout layout = mDisplayController
-                        .getDisplayLayout(mTaskInfo.displayId);
-                menuX = mGlobalMenuPosition.x + ((mMenuWidth - layout.width()) / 2);
-                menuY = mGlobalMenuPosition.y + ((mMenuHeight - layout.height()) / 2);
+                menuX = mGlobalMenuPosition.x;
+                menuY = mGlobalMenuPosition.y;
             } else {
                 menuX = (taskBounds.width() / 2) - (mMenuWidth / 2);
                 menuY = mMarginMenuTop;
@@ -295,7 +292,7 @@ class HandleMenu {
                     taskBounds.top + mMarginMenuTop);
         } else if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
             mGlobalMenuPosition.set(
-                    (taskBounds.width() / 2) - (mMenuWidth / 2) + mMarginMenuStart,
+                    (taskBounds.width() / 2) - (mMenuWidth / 2),
                     mMarginMenuTop
             );
         } else if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW) {
@@ -309,11 +306,11 @@ class HandleMenu {
             if (splitPosition == SPLIT_POSITION_BOTTOM_OR_RIGHT) {
                 mGlobalMenuPosition.set(leftOrTopStageBounds.width()
                                 + (rightOrBottomStageBounds.width() / 2)
-                                - (mMenuWidth / 2) + mMarginMenuStart,
+                                - (mMenuWidth / 2),
                         mMarginMenuTop);
             } else if (splitPosition == SPLIT_POSITION_TOP_OR_LEFT) {
                 mGlobalMenuPosition.set((leftOrTopStageBounds.width() / 2)
-                                - (mMenuWidth / 2) + mMarginMenuStart,
+                                - (mMenuWidth / 2),
                         mMarginMenuTop);
             }
         }
