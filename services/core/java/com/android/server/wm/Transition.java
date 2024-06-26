@@ -3519,10 +3519,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             Slog.e(TAG, "#" + mSyncId + " readiness timeout, used=" + mReadyTrackerOld.mUsed
                     + " deferReadyDepth=" + mReadyTrackerOld.mDeferReadyDepth
                     + " group=" + mReadyTrackerOld.mReadyGroups);
-            return;
+        } else {
+            Slog.e(TAG, "#" + mSyncId + " met conditions: " + mReadyTracker.mMet);
+            Slog.e(TAG, "#" + mSyncId + " unmet conditions: " + mReadyTracker.mConditions);
         }
-        Slog.e(TAG, "#" + mSyncId + " met conditions: " + mReadyTracker.mMet);
-        Slog.e(TAG, "#" + mSyncId + " unmet conditions: " + mReadyTracker.mConditions);
+        // Make sure the pending display change can be applied (especially DC#mWaitingForConfig)
+        // in case shell hasn't called WindowOrganizerController#startTransition yet.
+        if (mState < STATE_STARTED && this == mController.getCollectingTransition()) {
+            applyDisplayChangeIfNeeded(new ArraySet<>());
+        }
     }
 
     /**
