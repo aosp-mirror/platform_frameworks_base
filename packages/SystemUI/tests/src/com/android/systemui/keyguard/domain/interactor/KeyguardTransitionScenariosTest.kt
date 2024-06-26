@@ -30,7 +30,6 @@ import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepositor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.FakeFeatureFlags
@@ -124,7 +123,6 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     private val powerInteractor by lazy { kosmos.powerInteractor }
     private val communalInteractor by lazy { kosmos.communalInteractor }
-    private val dockManager by lazy { kosmos.fakeDockManager }
 
     companion object {
         @JvmStatic
@@ -583,6 +581,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun dozingToPrimaryBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to DOZING
@@ -597,8 +596,8 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
             assertThat(transitionRepository)
                 .startedTransition(
-                    to = KeyguardState.PRIMARY_BOUNCER,
                     from = KeyguardState.DOZING,
+                    to = KeyguardState.PRIMARY_BOUNCER,
                     animatorAssertion = { it.isNotNull() }
                 )
 
@@ -633,6 +632,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun dozingToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to DOZING
@@ -654,8 +654,8 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
             assertThat(transitionRepository)
                 .startedTransition(
-                    to = KeyguardState.GLANCEABLE_HUB,
                     from = KeyguardState.DOZING,
+                    to = KeyguardState.GLANCEABLE_HUB,
                     animatorAssertion = { it.isNotNull() }
                 )
 
@@ -1452,6 +1452,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun dreamingToPrimaryBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to DREAMING
