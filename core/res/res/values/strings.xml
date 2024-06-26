@@ -4853,11 +4853,11 @@
     <string name="accessibility_gesture_3finger_prompt_text">Choose a feature</string>
 
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
-    <string name="accessibility_button_instructional_text">The feature will open next time you tap the accessibility button.</string>
+    <string name="accessibility_button_instructional_text">The feature will open next time you tap the accessibility button</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_instructional_text">The feature will open next time you use this shortcut. Swipe up with two fingers from the bottom of your screen and release quickly.</string>
+    <string name="accessibility_gesture_instructional_text">The feature will open next time you use this shortcut. Swipe up with 2 fingers from the bottom of your screen and release quickly.</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_instructional_text">The feature will open next time you use this shortcut. Swipe up with three fingers from the bottom of your screen and release quickly.</string>
+    <string name="accessibility_gesture_3finger_instructional_text">The feature will open next time you use this shortcut. Swipe up with 3 fingers from the bottom of your screen and release quickly.</string>
 
     <!-- Text used to describe system navigation features, shown within a UI allowing a user to assign system magnification features to the Accessibility button in the navigation bar. -->
     <string name="accessibility_magnification_chooser_text">Magnification</string>
