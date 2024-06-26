@@ -231,6 +231,12 @@ java_device_for_host {
 }
 
 filegroup {
+    name: "ravenwood-framework-jarjar-rules",
+    srcs: ["texts/ravenwood-framework-jarjar-rules.txt"],
+    visibility: ["//frameworks/base"],
+}
+
+filegroup {
     name: "ravenwood-services-jarjar-rules",
     srcs: ["texts/ravenwood-services-jarjar-rules.txt"],
     visibility: ["//frameworks/base"],
