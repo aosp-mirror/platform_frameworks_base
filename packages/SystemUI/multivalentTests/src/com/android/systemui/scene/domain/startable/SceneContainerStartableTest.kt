@@ -26,14 +26,18 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.uiEventLoggerFake
+import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.classifier.falsingManager
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -44,6 +48,7 @@ import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepo
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeTrustRepository
+import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
@@ -486,6 +491,11 @@ class SceneContainerStartableTest : SysuiTestCase() {
                         QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING != 0L
                 )
                 .isFalse()
+            assertThat(
+                    sysUiState.flags and
+                        QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED != 0L
+                )
+                .isFalse()
 
             kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(false)
             runCurrent()
@@ -497,6 +507,11 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(
                     sysUiState.flags and
                         QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING != 0L
+                )
+                .isTrue()
+            assertThat(
+                    sysUiState.flags and
+                        QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED != 0L
                 )
                 .isTrue()
         }
@@ -1445,6 +1460,47 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(currentScene).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    fun notifyKeyguardDismissCallbacks_whenUnlocking_onDismissSucceeded() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            prepareState()
+            underTest.start()
+            val dismissCallback: IKeyguardDismissCallback = mock()
+            kosmos.dismissCallbackRegistry.addCallback(dismissCallback)
+
+            // Switch to bouncer and unlock device:
+            sceneInteractor.changeScene(Scenes.Bouncer, "")
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+            kosmos.authenticationInteractor.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            kosmos.fakeExecutor.runAllReady()
+
+            verify(dismissCallback).onDismissSucceeded()
+        }
+
+    @Test
+    fun notifyKeyguardDismissCallbacks_whenLeavingBouncer_onDismissCancelled() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            prepareState()
+            underTest.start()
+            val dismissCallback: IKeyguardDismissCallback = mock()
+            kosmos.dismissCallbackRegistry.addCallback(dismissCallback)
+
+            // Switch to bouncer:
+            sceneInteractor.changeScene(Scenes.Bouncer, "")
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+
+            // Return to lockscreen:
+            sceneInteractor.changeScene(Scenes.Lockscreen, "")
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            runCurrent()
+            kosmos.fakeExecutor.runAllReady()
+
+            verify(dismissCallback).onDismissCancelled()
         }
 
     private fun TestScope.emulateSceneTransition(
