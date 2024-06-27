@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
@@ -62,10 +63,20 @@ object QuickSettings {
 
     object SharedValues {
         val TilesSquishiness = ValueKey("QuickSettingsTileSquishiness")
+
         object SquishinessValues {
             val Default = 1f
             val LockscreenSceneStarting = 0f
             val GoneSceneStarting = 0.3f
+        }
+
+        val MediaLandscapeTopOffset = ValueKey("MediaLandscapeTopOffset")
+
+        object MediaOffset {
+            val InQQS = 0.dp
+            // Brightness + padding
+            val InQS = 92.dp
+            val Default = 0.dp
         }
     }
 }
@@ -77,8 +88,8 @@ private fun SceneScope.stateForQuickSettingsContent(
     return when (val transitionState = layoutState.transitionState) {
         is TransitionState.Idle -> {
             when (transitionState.currentScene) {
-                Scenes.Shade -> QSSceneAdapter.State.QQS.takeUnless { isSplitShade }
-                        ?: QSSceneAdapter.State.QS
+                Scenes.Shade ->
+                    QSSceneAdapter.State.QQS.takeUnless { isSplitShade } ?: QSSceneAdapter.State.QS
                 Scenes.QuickSettings -> QSSceneAdapter.State.QS
                 else -> QSSceneAdapter.State.CLOSED
             }

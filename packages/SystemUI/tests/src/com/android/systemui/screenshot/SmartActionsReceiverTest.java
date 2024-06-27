@@ -28,8 +28,8 @@ import static org.mockito.Mockito.when;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -40,7 +40,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SmartActionsReceiverTest extends SysuiTestCase {
 

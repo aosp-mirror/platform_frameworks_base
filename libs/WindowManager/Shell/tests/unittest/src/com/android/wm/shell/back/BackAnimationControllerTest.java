@@ -123,6 +123,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private DefaultCrossActivityBackAnimation mDefaultCrossActivityBackAnimation;
     private CrossTaskBackAnimation mCrossTaskBackAnimation;
     private ShellBackAnimationRegistry mShellBackAnimationRegistry;
+    private Rect mTouchableRegion;
 
     @Before
     public void setUp() throws Exception {
@@ -158,6 +159,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                         mShellCommandHandler);
         mShellInit.init();
         mShellExecutor.flushAll();
+        mTouchableRegion = new Rect(0, 0, 100, 100);
+        mController.mTouchableArea.set(mTouchableRegion);
     }
 
     private void createNavigationInfo(int backType,
@@ -169,7 +172,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                         .setOnBackNavigationDone(new RemoteCallback((bundle) -> {}))
                         .setOnBackInvokedCallback(mAppCallback)
                         .setPrepareRemoteAnimation(enableAnimation)
-                        .setAnimationCallback(isAnimationCallback);
+                        .setAnimationCallback(isAnimationCallback)
+                        .setTouchableRegion(mTouchableRegion);
 
         createNavigationInfo(builder);
     }
@@ -234,7 +238,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                     .setType(type)
                     .setOnBackInvokedCallback(mAppCallback)
                     .setPrepareRemoteAnimation(true)
-                    .setOnBackNavigationDone(new RemoteCallback(result)));
+                    .setOnBackNavigationDone(new RemoteCallback(result))
+                    .setTouchableRegion(mTouchableRegion));
             triggerBackGesture();
             simulateRemoteAnimationStart();
             mShellExecutor.flushAll();
@@ -512,7 +517,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                     .setType(type)
                     .setOnBackInvokedCallback(mAppCallback)
                     .setPrepareRemoteAnimation(true)
-                    .setOnBackNavigationDone(new RemoteCallback(result)));
+                    .setOnBackNavigationDone(new RemoteCallback(result))
+                    .setTouchableRegion(mTouchableRegion));
             triggerBackGesture();
             simulateRemoteAnimationStart();
             mShellExecutor.flushAll();
@@ -543,7 +549,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
         createNavigationInfo(new BackNavigationInfo.Builder()
                 .setType(type)
                 .setOnBackInvokedCallback(mAppCallback)
-                .setOnBackNavigationDone(new RemoteCallback(result)));
+                .setOnBackNavigationDone(new RemoteCallback(result))
+                .setTouchableRegion(mTouchableRegion)
+                .setAppProgressAllowed(true));
         triggerBackGesture();
         mShellExecutor.flushAll();
         releaseBackGesture();
@@ -570,7 +578,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
         createNavigationInfo(new BackNavigationInfo.Builder()
                 .setType(type)
                 .setOnBackInvokedCallback(mAppCallback)
-                .setOnBackNavigationDone(new RemoteCallback(result)));
+                .setOnBackNavigationDone(new RemoteCallback(result))
+                .setTouchableRegion(mTouchableRegion));
         doMotionEvent(MotionEvent.ACTION_CANCEL, 0);
         mShellExecutor.flushAll();
 

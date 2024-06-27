@@ -20,6 +20,7 @@ import android.content.ContentResolver
 import android.database.ContentObserver
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import android.media.AudioManager.AudioDeviceCategory
 import android.media.AudioManager.OnCommunicationDeviceChangedListener
 import android.provider.Settings
 import androidx.concurrent.futures.DirectExecutor
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
@@ -44,6 +46,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -84,6 +87,10 @@ interface AudioRepository {
     suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean
 
     suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode)
+
+    /** Gets audio device category. */
+    @AudioDeviceCategory
+    suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int
 }
 
 class AudioRepositoryImpl(
@@ -92,6 +99,7 @@ class AudioRepositoryImpl(
     private val contentResolver: ContentResolver,
     private val backgroundCoroutineContext: CoroutineContext,
     private val coroutineScope: CoroutineScope,
+    private val logger: Logger,
 ) : AudioRepository {
 
     private val streamSettingNames: Map<AudioStream, String> =
@@ -161,8 +169,10 @@ class AudioRepositoryImpl(
                 },
                 volumeSettingChanges(audioStream),
             )
+            .conflate()
             .map { getCurrentAudioStream(audioStream) }
             .onStart { emit(getCurrentAudioStream(audioStream)) }
+            .onEach { logger.onVolumeUpdateReceived(audioStream, it) }
             .flowOn(backgroundCoroutineContext)
     }
 
@@ -184,10 +194,12 @@ class AudioRepositoryImpl(
         }
     }
 
-    override suspend fun setVolume(audioStream: AudioStream, volume: Int) =
+    override suspend fun setVolume(audioStream: AudioStream, volume: Int) {
         withContext(backgroundCoroutineContext) {
+            logger.onSetVolumeRequested(audioStream, volume)
             audioManager.setStreamVolume(audioStream.value, volume, 0)
         }
+    }
 
     override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean {
         return withContext(backgroundCoroutineContext) {
@@ -206,6 +218,13 @@ class AudioRepositoryImpl(
 
     override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
         withContext(backgroundCoroutineContext) { audioManager.ringerMode = mode.value }
+    }
+
+    @AudioDeviceCategory
+    override suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int {
+        return withContext(backgroundCoroutineContext) {
+            audioManager.getBluetoothAudioDeviceCategory(bluetoothAddress)
+        }
     }
 
     private fun getMinVolume(stream: AudioStream): Int =
@@ -231,5 +250,12 @@ class AudioRepositoryImpl(
             contentResolver.registerContentObserver(uri, false, observer)
             awaitClose { contentResolver.unregisterContentObserver(observer) }
         }
+    }
+
+    interface Logger {
+
+        fun onSetVolumeRequested(audioStream: AudioStream, volume: Int)
+
+        fun onVolumeUpdateReceived(audioStream: AudioStream, model: AudioStreamModel)
     }
 }

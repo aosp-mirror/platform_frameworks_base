@@ -25,6 +25,8 @@ import static android.service.notification.NotificationListenerService.NOTIFICAT
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 
+import static androidx.test.ext.truth.content.IntentSubject.assertThat;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING;
 import static com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR;
@@ -169,6 +171,7 @@ import com.android.wm.shell.bubbles.BubbleViewInfoTask;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.bubbles.StackEducationView;
+import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.bubbles.properties.BubbleProperties;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -2016,6 +2019,31 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShowOrHideAppBubble_updateExistedBubbleInOverflow_updateIntentInBubble() {
+        String appBubbleKey = Bubble.getAppBubbleKeyForApp(mAppBubbleIntent.getPackage(), mUser0);
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+        // Collapse the stack so we don't need to wait for the dismiss animation in the test
+        mBubbleController.collapseStack();
+        // Dismiss the app bubble so it's in the overflow
+        mBubbleController.dismissBubble(appBubbleKey, Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNotNull();
+
+        // Modify the intent to include new extras.
+        Intent newAppBubbleIntent = new Intent(mContext, BubblesTestActivity.class)
+                .setPackage(mContext.getPackageName())
+                .putExtra("hello", "world");
+
+        // Calling this while collapsed will re-add and expand the app bubble
+        mBubbleController.showOrHideAppBubble(newAppBubbleIntent, mUser0, mAppBubbleIcon);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(appBubbleKey);
+        assertThat(mBubbleController.isStackExpanded()).isTrue();
+        assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
+        assertThat(mBubbleData.getBubbles().get(0).getAppBubbleIntent()).extras().string(
+                "hello").isEqualTo("world");
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNull();
+    }
+
+    @Test
     public void testCreateBubbleFromOngoingNotification() {
         NotificationEntry notif = new NotificationEntryBuilder()
                 .setFlag(mContext, Notification.FLAG_ONGOING_EVENT, true)
@@ -2106,6 +2134,33 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(mBubbleData.getBubbles()).hasSize(1);
         assertBubbleIsInflatedForStack(mBubbleData.getBubbles().get(0));
         assertBubbleIsInflatedForStack(mBubbleData.getOverflow());
+    }
+
+    @Test
+    public void registerBubbleBarListener_switchToBarWhileExpanded() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+
+        mEntryListener.onEntryAdded(mRow);
+        mBubbleController.updateBubble(mBubbleEntry);
+        BubbleStackView stackView = mBubbleController.getStackView();
+        spyOn(stackView);
+
+        mBubbleData.setExpanded(true);
+
+        assertStackMode();
+        assertThat(mBubbleData.isExpanded()).isTrue();
+        assertThat(stackView.isExpanded()).isTrue();
+
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        BubbleBarLayerView layerView = mBubbleController.getLayerView();
+        spyOn(layerView);
+
+        assertBarMode();
+        assertThat(mBubbleData.isExpanded()).isTrue();
+        assertThat(layerView.isExpanded()).isTrue();
     }
 
     @Test

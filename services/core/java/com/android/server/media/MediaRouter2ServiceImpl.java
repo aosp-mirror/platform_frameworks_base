@@ -70,6 +70,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.media.flags.Flags;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -118,6 +119,7 @@ class MediaRouter2ServiceImpl {
     private final UserManagerInternal mUserManagerInternal;
     private final Object mLock = new Object();
     private final AppOpsManager mAppOpsManager;
+    private final StatusBarManagerInternal mStatusBarManagerInternal;
     final AtomicInteger mNextRouterOrManagerId = new AtomicInteger(1);
     final ActivityManager mActivityManager;
     final PowerManager mPowerManager;
@@ -188,6 +190,7 @@ class MediaRouter2ServiceImpl {
         mPowerManager = mContext.getSystemService(PowerManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
+        mStatusBarManagerInternal = LocalServices.getService(StatusBarManagerInternal.class);
 
         IntentFilter screenOnOffIntentFilter = new IntentFilter();
         screenOnOffIntentFilter.addAction(ACTION_SCREEN_ON);
@@ -255,6 +258,17 @@ class MediaRouter2ServiceImpl {
                 }
             }
             return new ArrayList<>(systemRoutes);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    public boolean showMediaOutputSwitcherWithRouter2(@NonNull String packageName) {
+        UserHandle userHandle = Binder.getCallingUserHandle();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return showOutputSwitcher(packageName, userHandle);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -778,6 +792,31 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    public boolean showMediaOutputSwitcherWithProxyRouter(
+            @NonNull IMediaRouter2Manager proxyRouter) {
+        Objects.requireNonNull(proxyRouter, "Proxy router must not be null");
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                final IBinder binder = proxyRouter.asBinder();
+                ManagerRecord proxyRouterRecord = mAllManagerRecords.get(binder);
+
+                if (proxyRouterRecord.mTargetPackageName == null) {
+                    throw new UnsupportedOperationException(
+                            "Only proxy routers can show the Output Switcher.");
+                }
+
+                return showOutputSwitcher(
+                        proxyRouterRecord.mTargetPackageName,
+                        UserHandle.of(proxyRouterRecord.mUserRecord.mUserId));
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     // End of methods that implement MediaRouter2Manager operations.
 
     // Start of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.
@@ -932,6 +971,19 @@ class MediaRouter2ServiceImpl {
                     "Must hold INTERACT_ACROSS_USERS_FULL to control an app in a different"
                             + " userId.");
         }
+    }
+
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    private boolean showOutputSwitcher(
+            @NonNull String packageName, @NonNull UserHandle userHandle) {
+        if (mActivityManager.getPackageImportance(packageName) > IMPORTANCE_FOREGROUND) {
+            Slog.w(TAG, "showMediaOutputSwitcher only works when called from foreground");
+            return false;
+        }
+        synchronized (mLock) {
+            mStatusBarManagerInternal.showMediaOutputSwitcher(packageName, userHandle);
+        }
+        return true;
     }
 
     // End of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.

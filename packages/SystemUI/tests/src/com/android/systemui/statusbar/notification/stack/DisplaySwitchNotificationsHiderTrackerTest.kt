@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar.notification.stack
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.util.LatencyTracker.ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE
@@ -31,12 +32,14 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 class DisplaySwitchNotificationsHiderTrackerTest : SysuiTestCase() {
 
     private val testScope = TestScope()

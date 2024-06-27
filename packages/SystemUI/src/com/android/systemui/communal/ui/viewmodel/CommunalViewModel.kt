@@ -40,6 +40,7 @@ import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
@@ -76,9 +77,10 @@ constructor(
     @Main private val resources: Resources,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     keyguardInteractor: KeyguardInteractor,
+    private val keyguardIndicationController: KeyguardIndicationController,
     communalSceneInteractor: CommunalSceneInteractor,
     private val communalInteractor: CommunalInteractor,
-    private val communalSettingsInteractor: CommunalSettingsInteractor,
+    communalSettingsInteractor: CommunalSettingsInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
     private val shadeInteractor: ShadeInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
@@ -124,6 +126,8 @@ constructor(
                 frozenCommunalContent = models
                 logger.d({ "Content updated: $str1" }) { str1 = models.joinToString { it.key } }
             }
+
+    override val isCommunalContentVisible: Flow<Boolean> = MutableStateFlow(true)
 
     /**
      * Freeze the content flow, when an activity is about to show, like starting a timer via voice:
@@ -216,9 +220,8 @@ constructor(
     }
 
     override fun onOpenWidgetEditor(
-        preselectedKey: String?,
         shouldOpenWidgetPickerOnStart: Boolean,
-    ) = communalInteractor.showWidgetEditor(preselectedKey, shouldOpenWidgetPickerOnStart)
+    ) = communalInteractor.showWidgetEditor(selectedKey.value, shouldOpenWidgetPickerOnStart)
 
     override fun onDismissCtaTile() {
         scope.launch {
@@ -227,7 +230,11 @@ constructor(
         }
     }
 
-    override fun onShowCustomizeWidgetButton() {
+    fun onClick() {
+        keyguardIndicationController.showActionToUnlock()
+    }
+
+    override fun onLongClick() {
         setCurrentPopupType(PopupType.CustomizeWidgetButton)
     }
 
@@ -317,7 +324,7 @@ constructor(
 }
 
 sealed class PopupType {
-    object CtaTile : PopupType()
+    data object CtaTile : PopupType()
 
-    object CustomizeWidgetButton : PopupType()
+    data object CustomizeWidgetButton : PopupType()
 }

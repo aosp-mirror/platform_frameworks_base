@@ -6101,6 +6101,15 @@ public final class Settings {
         public static final String POINTER_SPEED = "pointer_speed";
 
         /**
+         * Pointer scale setting.
+         *
+         * <p>This float value represents the scale by which the size of the pointer increases.
+         * @hide
+         */
+        @Readable
+        public static final String POINTER_SCALE = "pointer_scale";
+
+        /**
          * Touchpad pointer speed setting.
          * This is an integer value in a range between -7 and +7, so there are 15 possible values.
          *   -7 = slowest
@@ -6145,6 +6154,15 @@ public final class Settings {
          * @hide
          */
         public static final String TOUCHPAD_RIGHT_CLICK_ZONE = "touchpad_right_click_zone";
+
+        /**
+         * Pointer fill style, specified by
+         * {@link android.view.PointerIcon.PointerIconVectorStyleFill} constants.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String POINTER_FILL_STYLE = "pointer_fill_style";
 
         /**
          * Whether lock-to-app will be triggered by long-press on recents.
@@ -6348,6 +6366,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SIP_ADDRESS_ONLY);
             PRIVATE_SETTINGS.add(SIP_ASK_ME_EACH_TIME);
             PRIVATE_SETTINGS.add(POINTER_SPEED);
+            PRIVATE_SETTINGS.add(POINTER_FILL_STYLE);
+            PRIVATE_SETTINGS.add(POINTER_SCALE);
             PRIVATE_SETTINGS.add(LOCK_TO_APP_ENABLED);
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
@@ -11026,6 +11046,12 @@ public final class Settings {
         public static final String BIOMETRIC_APP_ENABLED = "biometric_app_enabled";
 
         /**
+         * Whether or not mandatory biometrics is enabled.
+         * @hide
+         */
+        public static final String MANDATORY_BIOMETRICS = "mandatory_biometrics";
+
+        /**
          * Whether or not active unlock triggers on wake.
          * @hide
          */
@@ -11044,6 +11070,13 @@ public final class Settings {
          */
         public static final String ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL =
                 "active_unlock_on_biometric_fail";
+
+        /**
+         * Whether or not active unlock triggers on legacy unlock intents.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_UNLOCK_INTENT_LEGACY =
+                "active_unlock_on_unlock_intent_legacy";
 
         /**
          * If active unlock triggers on biometric failures, include the following error codes
@@ -12684,6 +12717,16 @@ public final class Settings {
          * @hide
          */
         public static final String CHARGE_OPTIMIZATION_MODE = "charge_optimization_mode";
+
+        /**
+         * String property which contains the package name of the contextual
+         * search provider supplied by individual OEM's
+         * R.string.config_defaultContextualSearchPackageName.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String CONTEXTUAL_SEARCH_PACKAGE = "contextual_search_package";
     }
 
     /**

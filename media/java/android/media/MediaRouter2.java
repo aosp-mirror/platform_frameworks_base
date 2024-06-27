@@ -2666,8 +2666,11 @@ public final class MediaRouter2 {
 
         @Override
         public boolean showSystemOutputSwitcher() {
-            throw new UnsupportedOperationException(
-                    "Cannot show system output switcher from a privileged router.");
+            try {
+                return mMediaRouterService.showMediaOutputSwitcherWithProxyRouter(mClient);
+            } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
+            }
         }
 
         /** Gets the list of all discovered routes. */
@@ -3539,7 +3542,7 @@ public final class MediaRouter2 {
         public boolean showSystemOutputSwitcher() {
             synchronized (mLock) {
                 try {
-                    return mMediaRouterService.showMediaOutputSwitcher(mImpl.getPackageName());
+                    return mMediaRouterService.showMediaOutputSwitcherWithRouter2(mPackageName);
                 } catch (RemoteException ex) {
                     ex.rethrowFromSystemServer();
                 }

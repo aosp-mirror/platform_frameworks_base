@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.policy.domain.interactor
 
 import android.provider.Settings
-import com.android.systemui.statusbar.policy.data.repository.ZenModeRepository
+import com.android.settingslib.statusbar.notification.data.repository.ZenModeRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -30,9 +30,9 @@ import kotlinx.coroutines.flow.map
  */
 class ZenModeInteractor @Inject constructor(repository: ZenModeRepository) {
     val isZenModeEnabled: Flow<Boolean> =
-        repository.zenMode
+        repository.globalZenMode
             .map {
-                when (it) {
+                when (it ?: Settings.Global.ZEN_MODE_OFF) {
                     Settings.Global.ZEN_MODE_ALARMS -> true
                     Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS -> true
                     Settings.Global.ZEN_MODE_NO_INTERRUPTIONS -> true

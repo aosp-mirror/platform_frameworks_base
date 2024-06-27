@@ -16,6 +16,7 @@
 package com.android.systemui
 
 import android.app.ActivityManager
+import android.app.DreamManager
 import android.app.admin.DevicePolicyManager
 import android.app.trust.TrustManager
 import android.os.UserManager
@@ -32,6 +33,7 @@ import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.ScreenLifecycle
@@ -93,6 +95,7 @@ data class TestMocksModule(
     @get:Provides val demoModeController: DemoModeController = mock(),
     @get:Provides val deviceProvisionedController: DeviceProvisionedController = mock(),
     @get:Provides val dozeParameters: DozeParameters = mock(),
+    @get:Provides val dreamManager: DreamManager = mock(),
     @get:Provides val dumpManager: DumpManager = mock(),
     @get:Provides val headsUpManager: HeadsUpManager = mock(),
     @get:Provides val guestResumeSessionReceiver: GuestResumeSessionReceiver = mock(),
@@ -130,6 +133,7 @@ data class TestMocksModule(
     @get:Provides val systemUIDialogManager: SystemUIDialogManager = mock(),
     @get:Provides val deviceEntryIconTransitions: Set<DeviceEntryIconTransition> = emptySet(),
     @get:Provides val communalInteractor: CommunalInteractor = mock(),
+    @get:Provides val communalSceneInteractor: CommunalSceneInteractor = mock(),
     @get:Provides val sceneLogger: SceneLogger = mock(),
     @get:Provides val trustManager: TrustManager = mock(),
     @get:Provides val primaryBouncerInteractor: PrimaryBouncerInteractor = mock(),

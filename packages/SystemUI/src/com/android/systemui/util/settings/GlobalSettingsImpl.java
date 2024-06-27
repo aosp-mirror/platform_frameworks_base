@@ -23,23 +23,16 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
-import com.android.systemui.dagger.qualifiers.Background;
-
-import kotlinx.coroutines.CoroutineDispatcher;
-
 import javax.inject.Inject;
 
 // use UserHandle.USER_SYSTEM everywhere
 @SuppressLint("StaticSettingsProvider")
 class GlobalSettingsImpl implements GlobalSettings {
     private final ContentResolver mContentResolver;
-    private final CoroutineDispatcher mBgDispatcher;
 
     @Inject
-    GlobalSettingsImpl(ContentResolver contentResolver,
-            @Background CoroutineDispatcher bgDispatcher) {
+    GlobalSettingsImpl(ContentResolver contentResolver) {
         mContentResolver = contentResolver;
-        mBgDispatcher = bgDispatcher;
     }
 
     @Override
@@ -50,11 +43,6 @@ class GlobalSettingsImpl implements GlobalSettings {
     @Override
     public Uri getUriFor(String name) {
         return Settings.Global.getUriFor(name);
-    }
-
-    @Override
-    public CoroutineDispatcher getBackgroundDispatcher() {
-        return mBgDispatcher;
     }
 
     @Override

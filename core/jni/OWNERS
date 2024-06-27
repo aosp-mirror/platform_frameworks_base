@@ -2,7 +2,7 @@
 per-file *Camera*,*camera* = file:platform/frameworks/av:/camera/OWNERS
 
 # Connectivity
-per-file android_net_* = codewiz@google.com, jchalard@google.com, lorenzo@google.com, reminv@google.com, satk@google.com
+per-file android_net_* = jchalard@google.com, lorenzo@google.com, reminv@google.com, satk@google.com
 
 # Choreographer
 per-file android_view_DisplayEventReceiver* = file:platform/frameworks/native:/services/surfaceflinger/OWNERS
@@ -84,7 +84,7 @@ per-file android_text_* = file:/core/java/android/text/OWNERS
 # These are highly common-use files
 per-file Android.bp = file:/graphics/java/android/graphics/OWNERS
 per-file AndroidRuntime.cpp = file:/graphics/java/android/graphics/OWNERS
-per-file AndroidRuntime.cpp = calin@google.com, ngeoffray@google.com, oth@google.com
+per-file AndroidRuntime.cpp = file:platform/art:main:/OWNERS
 # Although marked "view" this is mostly graphics stuff
 per-file android_view_* = file:/graphics/java/android/graphics/OWNERS
 # File used for Android Studio layoutlib

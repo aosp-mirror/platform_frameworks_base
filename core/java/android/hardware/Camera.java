@@ -347,7 +347,9 @@ public class Camera {
 
         VirtualDeviceManager virtualDeviceManager =
                 context.getSystemService(VirtualDeviceManager.class);
-        return virtualDeviceManager.getDevicePolicy(context.getDeviceId(), POLICY_TYPE_CAMERA);
+        return virtualDeviceManager == null
+                ? DEVICE_POLICY_DEFAULT
+                : virtualDeviceManager.getDevicePolicy(context.getDeviceId(), POLICY_TYPE_CAMERA);
     }
 
     /**

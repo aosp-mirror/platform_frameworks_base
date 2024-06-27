@@ -1170,9 +1170,9 @@ public class BubbleDataTest extends ShellTestCase {
         // Verify the update has the removals.
         BubbleData.Update update = mUpdateCaptor.getValue();
         assertThat(update.removedBubbles.get(0)).isEqualTo(
-                Pair.create(mBubbleA2, Bubbles.DISMISS_USER_REMOVED));
+                Pair.create(mBubbleA2, Bubbles.DISMISS_USER_ACCOUNT_REMOVED));
         assertThat(update.removedBubbles.get(1)).isEqualTo(
-                Pair.create(mBubbleA1, Bubbles.DISMISS_USER_REMOVED));
+                Pair.create(mBubbleA1, Bubbles.DISMISS_USER_ACCOUNT_REMOVED));
 
         // Verify no A bubbles in active or overflow.
         assertBubbleListContains(mBubbleC1, mBubbleB3);
@@ -1203,6 +1203,25 @@ public class BubbleDataTest extends ShellTestCase {
         assertThat(update.currentBubbleList.get(0).getKey()).isEqualTo(mEntryA2.getKey());
         assertThat(update.currentBubbleList.get(1).getKey()).isEqualTo(mEntryA1.getKey());
         assertThat(update.bubbleBarLocation).isEqualTo(BubbleBarLocation.LEFT);
+        assertThat(update.expandedChanged).isFalse();
+        assertThat(update.selectedBubbleKey).isEqualTo(mEntryA2.getKey());
+    }
+
+    @Test
+    public void test_getInitialStateForBubbleBar_includesExpandedState() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        mPositioner.setBubbleBarLocation(BubbleBarLocation.LEFT);
+        mBubbleData.setExpanded(true);
+
+        BubbleBarUpdate update = mBubbleData.getInitialStateForBubbleBar();
+        assertThat(update.currentBubbleList).hasSize(2);
+        assertThat(update.currentBubbleList.get(0).getKey()).isEqualTo(mEntryA2.getKey());
+        assertThat(update.currentBubbleList.get(1).getKey()).isEqualTo(mEntryA1.getKey());
+        assertThat(update.bubbleBarLocation).isEqualTo(BubbleBarLocation.LEFT);
+        assertThat(update.expandedChanged).isTrue();
+        assertThat(update.expanded).isTrue();
+        assertThat(update.selectedBubbleKey).isEqualTo(mEntryA2.getKey());
     }
 
     @Test

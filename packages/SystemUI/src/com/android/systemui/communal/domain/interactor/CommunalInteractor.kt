@@ -28,7 +28,6 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
-import com.android.systemui.communal.data.repository.CommunalPrefsRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
@@ -38,6 +37,7 @@ import com.android.systemui.communal.shared.model.CommunalContentSize.HALF
 import com.android.systemui.communal.shared.model.CommunalContentSize.THIRD
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
@@ -46,6 +46,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -97,7 +98,7 @@ constructor(
     @Background val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
     private val widgetRepository: CommunalWidgetRepository,
-    private val communalPrefsRepository: CommunalPrefsRepository,
+    private val communalPrefsInteractor: CommunalPrefsInteractor,
     private val mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
     keyguardInteractor: KeyguardInteractor,
@@ -164,7 +165,7 @@ constructor(
     /** Whether to start dreaming when returning from occluded */
     val dreamFromOccluded: Flow<Boolean> =
         keyguardTransitionInteractor
-            .transitionStepsToState(KeyguardState.OCCLUDED)
+            .transition(Edge.create(to = KeyguardState.OCCLUDED))
             .map { it.from == KeyguardState.DREAMING }
             .stateIn(scope = applicationScope, SharingStarted.Eagerly, false)
 
@@ -306,6 +307,7 @@ constructor(
         preselectedKey: String? = null,
         shouldOpenWidgetPickerOnStart: Boolean = false,
     ) {
+        communalSceneInteractor.setEditModeState(EditModeState.STARTING)
         editWidgetsActivityStarter.startActivity(preselectedKey, shouldOpenWidgetPickerOnStart)
     }
 
@@ -322,7 +324,7 @@ constructor(
     }
 
     /** Dismiss the CTA tile from the hub in view mode. */
-    suspend fun dismissCtaTile() = communalPrefsRepository.setCtaDismissedForCurrentUser()
+    suspend fun dismissCtaTile() = communalPrefsInteractor.setCtaDismissed()
 
     /** Add a widget at the specified position. */
     fun addWidget(
@@ -458,7 +460,7 @@ constructor(
 
     /** CTA tile to be displayed in the glanceable hub (view mode). */
     val ctaTileContent: Flow<List<CommunalContentModel.CtaTileInViewMode>> =
-        communalPrefsRepository.isCtaDismissed.map { isDismissed ->
+        communalPrefsInteractor.isCtaDismissed.map { isDismissed ->
             if (isDismissed) emptyList() else listOf(CommunalContentModel.CtaTileInViewMode())
         }
 

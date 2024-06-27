@@ -25,4 +25,10 @@ class FakeMediaProjectionRepository : MediaProjectionRepository {
 
     override val mediaProjectionState: MutableStateFlow<MediaProjectionState> =
         MutableStateFlow(MediaProjectionState.NotProjecting)
+
+    var stopProjectingInvoked = false
+
+    override suspend fun stopProjecting() {
+        stopProjectingInvoked = true
+    }
 }

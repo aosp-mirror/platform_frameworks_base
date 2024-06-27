@@ -30,6 +30,7 @@ import android.content.res.AssetManager;
 import android.content.res.CompatResources;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.content.res.Flags;
 import android.content.res.Resources;
 import android.content.res.ResourcesImpl;
 import android.content.res.ResourcesKey;
@@ -138,16 +139,22 @@ public class ResourcesManager {
     private final ArrayMap<String, SharedLibraryAssets> mSharedLibAssetsMap =
             new ArrayMap<>();
 
+    @VisibleForTesting
+    public ArrayMap<String, SharedLibraryAssets> getRegisteredResourcePaths() {
+        return mSharedLibAssetsMap;
+    }
+
     /**
      * The internal function to register the resources paths of a package (e.g. a shared library).
      * This will collect the package resources' paths from its ApplicationInfo and add them to all
      * existing and future contexts while the application is running.
      */
     public void registerResourcePaths(@NonNull String uniqueId, @NonNull ApplicationInfo appInfo) {
-        SharedLibraryAssets sharedLibAssets = new SharedLibraryAssets(appInfo.sourceDir,
-                appInfo.splitSourceDirs, appInfo.sharedLibraryFiles,
-                appInfo.resourceDirs, appInfo.overlayPaths);
+        if (!Flags.registerResourcePaths()) {
+            return;
+        }
 
+        final var sharedLibAssets = new SharedLibraryAssets(appInfo);
         synchronized (mLock) {
             if (mSharedLibAssetsMap.containsKey(uniqueId)) {
                 Slog.v(TAG, "Package resources' paths for uniqueId: " + uniqueId
@@ -155,18 +162,37 @@ public class ResourcesManager {
                 return;
             }
             mSharedLibAssetsMap.put(uniqueId, sharedLibAssets);
-            appendLibAssetsLocked(sharedLibAssets.getAllAssetPaths());
-            Slog.v(TAG, "The following resources' paths have been added: "
-                    + Arrays.toString(sharedLibAssets.getAllAssetPaths()));
+            appendLibAssetsLocked(sharedLibAssets);
+            Slog.v(TAG, "The following library key has been added: "
+                    + sharedLibAssets.getResourcesKey());
         }
     }
 
-    private static class ApkKey {
+    /**
+     * Apply the registered library paths to the passed impl object
+     * @return the hash code for the current version of the registered paths
+     */
+    public int updateResourceImplWithRegisteredLibs(@NonNull ResourcesImpl impl) {
+        if (!Flags.registerResourcePaths()) {
+            return 0;
+        }
+
+        final var collector = new PathCollector(null);
+        final int size = mSharedLibAssetsMap.size();
+        for (int i = 0; i < size; i++) {
+            final var libraryKey = mSharedLibAssetsMap.valueAt(i).getResourcesKey();
+            collector.appendKey(libraryKey);
+        }
+        impl.getAssets().addPresetApkKeys(extractApkKeys(collector.collectedKey()));
+        return size;
+    }
+
+    public static class ApkKey {
         public final String path;
         public final boolean sharedLib;
         public final boolean overlay;
 
-        ApkKey(String path, boolean sharedLib, boolean overlay) {
+        public ApkKey(String path, boolean sharedLib, boolean overlay) {
             this.path = path;
             this.sharedLib = sharedLib;
             this.overlay = overlay;
@@ -189,6 +215,12 @@ public class ResourcesManager {
             ApkKey other = (ApkKey) obj;
             return this.path.equals(other.path) && this.sharedLib == other.sharedLib
                     && this.overlay == other.overlay;
+        }
+
+        @Override
+        public String toString() {
+            return "ApkKey[" + (sharedLib ? "lib" : "app") + (overlay ? ", overlay" : "") + ": "
+                    + path + "]";
         }
     }
 
@@ -505,7 +537,10 @@ public class ResourcesManager {
         return "/data/resource-cache/" + path.substring(1).replace('/', '@') + "@idmap";
     }
 
-    private @NonNull ApkAssets loadApkAssets(@NonNull final ApkKey key) throws IOException {
+    /**
+     * Loads the ApkAssets object for the passed key, or picks the one from the cache if available.
+     */
+    public @NonNull ApkAssets loadApkAssets(@NonNull final ApkKey key) throws IOException {
         ApkAssets apkAssets;
 
         // Optimistically check if this ApkAssets exists somewhere else.
@@ -747,8 +782,8 @@ public class ResourcesManager {
     private @Nullable ResourcesImpl findOrCreateResourcesImplForKeyLocked(
             @NonNull ResourcesKey key, @Nullable ApkAssetsSupplier apkSupplier) {
         ResourcesImpl impl = findResourcesImplForKeyLocked(key);
-        // ResourcesImpl also need to be recreated if its shared library count is not up-to-date.
-        if (impl == null || impl.getSharedLibCount() != mSharedLibAssetsMap.size()) {
+        // ResourcesImpl also need to be recreated if its shared library hash is not up-to-date.
+        if (impl == null || impl.getAppliedSharedLibsHash() != mSharedLibAssetsMap.size()) {
             impl = createResourcesImpl(key, apkSupplier);
             if (impl != null) {
                 mResourceImpls.put(key, new WeakReference<>(impl));
@@ -1533,54 +1568,107 @@ public class ResourcesManager {
         }
     }
 
-    private void appendLibAssetsLocked(String[] libAssets) {
-        synchronized (mLock) {
-            // Record which ResourcesImpl need updating
-            // (and what ResourcesKey they should update to).
-            final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
+    /**
+     * A utility class to collect resources paths into a ResourcesKey object:
+     *  - Separates the libraries and the overlays into different sets as those are loaded in
+     *    different ways.
+     *  - Allows to start with an existing original key object, and copies all non-path related
+     *    properties into the final one.
+     *  - Preserves the path order while dropping all duplicates in an efficient manner.
+     */
+    private static class PathCollector {
+        public final ResourcesKey originalKey;
+        public final ArrayList<String> orderedLibs = new ArrayList<>();
+        public final ArraySet<String> libsSet = new ArraySet<>();
+        public final ArrayList<String> orderedOverlays = new ArrayList<>();
+        public final ArraySet<String> overlaysSet = new ArraySet<>();
 
-            final int implCount = mResourceImpls.size();
-            for (int i = 0; i < implCount; i++) {
-                final ResourcesKey key = mResourceImpls.keyAt(i);
-                final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
-                final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
-                if (impl == null) {
-                    Slog.w(TAG, "Found a ResourcesImpl which is null, skip it and continue to "
-                            + "append shared library assets for next ResourcesImpl.");
-                    continue;
-                }
+        static void appendNewPath(@NonNull String path,
+                @NonNull ArraySet<String> uniquePaths, @NonNull ArrayList<String> orderedPaths) {
+            if (uniquePaths.add(path)) {
+                orderedPaths.add(path);
+            }
+        }
 
-                var newDirs = new ArrayList<String>();
-                var dirsSet = new ArraySet<String>();
-                if (key.mLibDirs != null) {
-                    final int dirsLength = key.mLibDirs.length;
-                    for (int k = 0; k < dirsLength; k++) {
-                        newDirs.add(key.mLibDirs[k]);
-                        dirsSet.add(key.mLibDirs[k]);
-                    }
-                }
-                final int assetsLength = libAssets.length;
-                for (int j = 0; j < assetsLength; j++) {
-                    if (dirsSet.add(libAssets[j])) {
-                        newDirs.add(libAssets[j]);
-                    }
-                }
-                String[] newLibAssets = newDirs.toArray(new String[0]);
-                if (!Arrays.equals(newLibAssets, key.mLibDirs)) {
-                    updatedResourceKeys.put(impl, new ResourcesKey(
-                            key.mResDir,
-                            key.mSplitResDirs,
-                            key.mOverlayPaths,
-                            newLibAssets,
-                            key.mDisplayId,
-                            key.mOverrideConfiguration,
-                            key.mCompatInfo,
-                            key.mLoaders));
-                }
+        static void appendAllNewPaths(@Nullable String[] paths,
+                @NonNull ArraySet<String> uniquePaths, @NonNull ArrayList<String> orderedPaths) {
+            if (paths == null) return;
+            for (int i = 0, size = paths.length; i < size; i++) {
+                appendNewPath(paths[i], uniquePaths, orderedPaths);
+            }
+        }
+
+        PathCollector(@Nullable ResourcesKey original) {
+            originalKey = original;
+            if (originalKey != null) {
+                appendKey(originalKey);
+            }
+        }
+
+        public void appendKey(@NonNull ResourcesKey key) {
+            appendAllNewPaths(key.mLibDirs, libsSet, orderedLibs);
+            appendAllNewPaths(key.mOverlayPaths, overlaysSet, orderedOverlays);
+        }
+
+        boolean isSameAsOriginal() {
+            if (originalKey == null) {
+                return orderedLibs.isEmpty() && orderedOverlays.isEmpty();
+            }
+            return ((originalKey.mLibDirs == null && orderedLibs.isEmpty())
+                        || (originalKey.mLibDirs != null
+                            && originalKey.mLibDirs.length == orderedLibs.size()))
+                    && ((originalKey.mOverlayPaths == null && orderedOverlays.isEmpty())
+                        || (originalKey.mOverlayPaths != null
+                                && originalKey.mOverlayPaths.length == orderedOverlays.size()));
+        }
+
+        @NonNull ResourcesKey collectedKey() {
+            return new ResourcesKey(
+                    originalKey == null ? null : originalKey.mResDir,
+                    originalKey == null ? null : originalKey.mSplitResDirs,
+                    orderedOverlays.toArray(new String[0]), orderedLibs.toArray(new String[0]),
+                    originalKey == null ? 0 : originalKey.mDisplayId,
+                    originalKey == null ? null : originalKey.mOverrideConfiguration,
+                    originalKey == null ? null : originalKey.mCompatInfo,
+                    originalKey == null ? null : originalKey.mLoaders);
+        }
+    }
+
+    /**
+     * Takes the original resources key and the one containing a set of library paths and overlays
+     * to append, and combines them together. In case when the original key already contains all
+     * those paths this function returns null, otherwise it makes a new ResourcesKey object.
+     */
+    private @Nullable ResourcesKey createNewResourceKeyIfNeeded(
+            @NonNull ResourcesKey original, @NonNull ResourcesKey library) {
+        final var collector = new PathCollector(original);
+        collector.appendKey(library);
+        return collector.isSameAsOriginal() ? null : collector.collectedKey();
+    }
+
+    /**
+     * Append the newly registered shared library asset paths to all existing resources objects.
+     */
+    private void appendLibAssetsLocked(@NonNull SharedLibraryAssets libAssets) {
+        // Record the ResourcesImpl's that need updating, and what ResourcesKey they should
+        // update to.
+        final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
+        final int implCount = mResourceImpls.size();
+        for (int i = 0; i < implCount; i++) {
+            final ResourcesKey key = mResourceImpls.keyAt(i);
+            final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
+            final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
+            if (impl == null) {
+                Slog.w(TAG, "Found a null ResourcesImpl, skipped.");
+                continue;
             }
 
-            redirectAllResourcesToNewImplLocked(updatedResourceKeys);
+            final var newKey = createNewResourceKeyIfNeeded(key, libAssets.getResourcesKey());
+            if (newKey != null) {
+                updatedResourceKeys.put(impl, newKey);
+            }
         }
+        redirectAllResourcesToNewImplLocked(updatedResourceKeys);
     }
 
     private void applyNewResourceDirsLocked(@Nullable final String[] oldSourceDirs,
@@ -1718,8 +1806,9 @@ public class ResourcesManager {
         }
     }
 
-    // Another redirect function which will loop through all Resources and reload ResourcesImpl
-    // if it needs a shared library asset paths update.
+    // Another redirect function which will loop through all Resources in the process, even the ones
+    // the app created outside of the regular Android Runtime, and reload their ResourcesImpl if it
+    // needs a shared library asset paths update.
     private void redirectAllResourcesToNewImplLocked(
             @NonNull final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys) {
         cleanupReferences(mAllResourceReferences, mAllResourceReferencesQueue);
@@ -1745,10 +1834,15 @@ public class ResourcesManager {
                     if (r.getImpl() != null) {
                         final ResourcesImpl oldImpl = r.getImpl();
                         // ResourcesImpl constructor will help to append shared library asset paths.
-                        final ResourcesImpl newImpl = new ResourcesImpl(oldImpl.getAssets(),
-                                oldImpl.getMetrics(), oldImpl.getConfiguration(),
-                                oldImpl.getDisplayAdjustments());
-                        r.setImpl(newImpl);
+                        if (oldImpl.getAssets().isUpToDate()) {
+                            final ResourcesImpl newImpl = new ResourcesImpl(oldImpl.getAssets(),
+                                    oldImpl.getMetrics(), oldImpl.getConfiguration(),
+                                    oldImpl.getDisplayAdjustments());
+                            r.setImpl(newImpl);
+                        } else {
+                            Slog.w(TAG, "Skip appending shared library asset paths for the "
+                                    + "Resource as its assets are not up to date.");
+                        }
                     }
                 }
             }
@@ -1830,50 +1924,33 @@ public class ResourcesManager {
         }
     }
 
-    public static class SharedLibraryAssets{
-        private final String[] mAssetPaths;
+    @VisibleForTesting
+    public static class SharedLibraryAssets {
+        private final ResourcesKey mResourcesKey;
 
-        SharedLibraryAssets(String sourceDir, String[] splitSourceDirs, String[] sharedLibraryFiles,
-                String[] resourceDirs, String[] overlayPaths) {
-            mAssetPaths = collectAssetPaths(sourceDir, splitSourceDirs, sharedLibraryFiles,
-                    resourceDirs, overlayPaths);
-        }
-
-        private @NonNull String[] collectAssetPaths(String sourceDir, String[] splitSourceDirs,
-                String[] sharedLibraryFiles, String[] resourceDirs, String[] overlayPaths) {
-            final String[][] inputLists = {
-                    splitSourceDirs, sharedLibraryFiles, resourceDirs, overlayPaths
-            };
-
-            final ArraySet<String> assetPathSet = new ArraySet<>();
-            final List<String> assetPathList = new ArrayList<>();
-            if (sourceDir != null) {
-                assetPathSet.add(sourceDir);
-                assetPathList.add(sourceDir);
-            }
-
-            for (int i = 0; i < inputLists.length; i++) {
-                if (inputLists[i] != null) {
-                    for (int j = 0; j < inputLists[i].length; j++) {
-                        if (assetPathSet.add(inputLists[i][j])) {
-                            assetPathList.add(inputLists[i][j]);
-                        }
-                    }
-                }
-            }
-            return assetPathList.toArray(new String[0]);
+        private SharedLibraryAssets(ApplicationInfo appInfo) {
+            // We're loading all library's files as shared libs, regardless where they are in
+            // its own ApplicationInfo.
+            final var collector = new PathCollector(null);
+            PathCollector.appendNewPath(appInfo.sourceDir, collector.libsSet,
+                    collector.orderedLibs);
+            PathCollector.appendAllNewPaths(appInfo.splitSourceDirs, collector.libsSet,
+                    collector.orderedLibs);
+            PathCollector.appendAllNewPaths(appInfo.sharedLibraryFiles, collector.libsSet,
+                    collector.orderedLibs);
+            PathCollector.appendAllNewPaths(appInfo.resourceDirs, collector.overlaysSet,
+                    collector.orderedOverlays);
+            PathCollector.appendAllNewPaths(appInfo.overlayPaths, collector.overlaysSet,
+                    collector.orderedOverlays);
+            mResourcesKey = collector.collectedKey();
         }
 
         /**
-         * @return all the asset paths of this collected in this class.
+         * @return the resources key for this library assets.
          */
-        public @NonNull String[] getAllAssetPaths() {
-            return mAssetPaths;
+        public @NonNull ResourcesKey getResourcesKey() {
+            return mResourcesKey;
         }
-    }
-
-    public @NonNull ArrayMap<String, SharedLibraryAssets> getSharedLibAssetsMap() {
-        return new ArrayMap<>(mSharedLibAssetsMap);
     }
 
     /**

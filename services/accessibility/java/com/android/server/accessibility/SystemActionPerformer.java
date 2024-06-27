@@ -34,6 +34,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
+import android.view.accessibility.Flags;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.util.AccessibilityUtils;
@@ -327,6 +328,18 @@ public class SystemActionPerformer {
                 case AccessibilityService.GLOBAL_ACTION_DPAD_CENTER:
                     sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_CENTER,
                             InputDevice.SOURCE_KEYBOARD | InputDevice.SOURCE_DPAD);
+                    return true;
+                case AccessibilityService.GLOBAL_ACTION_MENU:
+                    if (Flags.globalActionMenu()) {
+                        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_MENU,
+                                InputDevice.SOURCE_KEYBOARD);
+                    }
+                    return true;
+                case AccessibilityService.GLOBAL_ACTION_MEDIA_PLAY_PAUSE:
+                    if (Flags.globalActionMediaPlayPause()) {
+                        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                                InputDevice.SOURCE_KEYBOARD);
+                    }
                     return true;
                 default:
                     Slog.e(TAG, "Invalid action id: " + actionId);

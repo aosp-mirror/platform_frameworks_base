@@ -22,7 +22,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
@@ -66,7 +65,6 @@ class CommunalDreamStartableTest : SysuiTestCase() {
                     powerInteractor = kosmos.powerInteractor,
                     keyguardInteractor = kosmos.keyguardInteractor,
                     keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
-                    communalInteractor = kosmos.communalInteractor,
                     dreamManager = dreamManager,
                     bgScope = kosmos.applicationCoroutineScope,
                 )

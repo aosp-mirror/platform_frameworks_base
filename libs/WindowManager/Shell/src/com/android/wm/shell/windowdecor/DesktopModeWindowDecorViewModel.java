@@ -73,6 +73,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.Cuj;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
@@ -81,6 +82,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.InteractionJankMonitorUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
@@ -103,6 +105,7 @@ import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionReg
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -152,6 +155,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final DisplayInsetsController mDisplayInsetsController;
     private final Region mExclusionRegion = Region.obtain();
     private boolean mInImmersiveMode;
+    private final String mSysUIPackageName;
 
     private final ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
@@ -247,6 +251,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mInputManager = mContext.getSystemService(InputManager.class);
         mWindowDecorByTaskId = windowDecorByTaskId;
+        mSysUIPackageName = mContext.getResources().getString(
+                com.android.internal.R.string.config_systemUi);
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -431,7 +437,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             SplitScreenController.EXIT_REASON_DESKTOP_MODE);
                 } else {
                     WindowContainerTransaction wct = new WindowContainerTransaction();
-                    mDesktopTasksController.onDesktopWindowClose(wct, mTaskId);
+                    mDesktopTasksController.onDesktopWindowClose(wct, mDisplayId, mTaskId);
                     mTaskOperations.closeTask(mTaskToken, wct);
                 }
             } else if (id == R.id.back_button) {
@@ -466,11 +472,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.collapse_menu_button) {
                 decoration.closeHandleMenu();
             } else if (id == R.id.maximize_window) {
+                InteractionJankMonitorUtils.beginTracing(
+                        Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, /* view= */ v,
+                        /* tag= */ "caption_bar_button");
                 final RunningTaskInfo taskInfo = decoration.mTaskInfo;
                 decoration.closeHandleMenu();
                 decoration.closeMaximizeMenu();
                 mDesktopTasksController.toggleDesktopTaskSize(taskInfo);
             } else if (id == R.id.maximize_menu_maximize_button) {
+                InteractionJankMonitorUtils.beginTracing(
+                        Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, /* view= */ v,
+                        /* tag= */ "maximize_menu_option");
                 final RunningTaskInfo taskInfo = decoration.mTaskInfo;
                 mDesktopTasksController.toggleDesktopTaskSize(taskInfo);
                 decoration.closeHandleMenu();
@@ -708,6 +720,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 return false;
             }
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+            InteractionJankMonitorUtils.beginTracing(
+                    Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, mContext,
+                    /* surface= */ decoration.mTaskSurface, /* tag= */ "double_tap");
             mDesktopTasksController.toggleDesktopTaskSize(decoration.mTaskInfo);
             return true;
         }
@@ -1035,8 +1050,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && taskInfo.isFocused) {
             return false;
         }
+        // TODO(b/347289970): Consider replacing with API
         if (Flags.enableDesktopWindowingModalsPolicy()
                 && isSingleTopActivityTranslucent(taskInfo)) {
+            return false;
+        }
+        if (isSystemUIApplication(taskInfo)) {
             return false;
         }
         return DesktopModeStatus.canEnterDesktopMode(mContext)
@@ -1107,6 +1126,14 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private boolean isTaskInSplitScreen(int taskId) {
         return mSplitScreenController != null
                 && mSplitScreenController.isTaskInSplitScreen(taskId);
+    }
+
+    // TODO(b/347289970): Consider replacing with API
+    private boolean isSystemUIApplication(RunningTaskInfo taskInfo) {
+        if (taskInfo.baseActivity != null) {
+            return (Objects.equals(taskInfo.baseActivity.getPackageName(), mSysUIPackageName));
+        }
+        return false;
     }
 
     private void dump(PrintWriter pw, String prefix) {

@@ -45,6 +45,11 @@ import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.windowdecor.MaximizeButtonView
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
+import com.android.wm.shell.windowdecor.common.OPACITY_100
+import com.android.wm.shell.windowdecor.common.OPACITY_11
+import com.android.wm.shell.windowdecor.common.OPACITY_15
+import com.android.wm.shell.windowdecor.common.OPACITY_55
+import com.android.wm.shell.windowdecor.common.OPACITY_65
 import com.android.wm.shell.windowdecor.common.Theme
 import com.android.wm.shell.windowdecor.extension.isLightCaptionBarAppearance
 import com.android.wm.shell.windowdecor.extension.isTransparentCaptionBarAppearance
@@ -491,11 +496,5 @@ internal class AppHeaderViewHolder(
         private const val DARK_THEME_UNFOCUSED_OPACITY = 140 // 55%
         private const val LIGHT_THEME_UNFOCUSED_OPACITY = 166 // 65%
         private const val FOCUSED_OPACITY = 255
-
-        private const val OPACITY_100 = 255
-        private const val OPACITY_11 = 28
-        private const val OPACITY_15 = 38
-        private const val OPACITY_55 = 140
-        private const val OPACITY_65 = 166
     }
 }

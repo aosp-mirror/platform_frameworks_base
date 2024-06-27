@@ -438,6 +438,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mFakeKeyguardRepository,
                 mKeyguardTransitionInteractor,
                 mPowerInteractor,
+                mShadeRepository,
                 new FakeUserSetupRepository(),
                 mock(UserSwitcherInteractor.class),
                 new ShadeInteractorLegacyImpl(
@@ -463,6 +464,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 () -> mShadeInteractor,
                 () -> mKosmos.getDeviceUnlockedInteractor(),
                 () -> mKosmos.getSceneInteractor(),
+                () -> mKosmos.getSceneContainerOcclusionInteractor(),
                 () -> mKosmos.getKeyguardClockInteractor());
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
@@ -620,6 +622,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                                 () -> mShadeInteractor,
                                 () -> mKosmos.getDeviceUnlockedInteractor(),
                                 () -> mKosmos.getSceneInteractor(),
+                                () -> mKosmos.getSceneContainerOcclusionInteractor(),
                                 () -> mKosmos.getKeyguardClockInteractor()),
                         mKeyguardBypassController,
                         mDozeParameters,

@@ -28,11 +28,14 @@ import androidx.compose.ui.unit.IntOffset
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.animateSceneDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.notifications.ui.composable.HeadsUpNotificationSpace
 import com.android.systemui.qs.ui.composable.QuickSettings
+import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
+import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.Default
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.viewmodel.GoneSceneViewModel
@@ -67,6 +70,7 @@ constructor(
             value = QuickSettings.SharedValues.SquishinessValues.GoneSceneStarting,
             key = QuickSettings.SharedValues.TilesSquishiness,
         )
+        animateSceneDpAsState(value = Default, key = MediaLandscapeTopOffset, canOverflow = false)
         Spacer(modifier.fillMaxSize())
         HeadsUpNotificationStack(
             stackScrollView = notificationStackScrolLView.get(),

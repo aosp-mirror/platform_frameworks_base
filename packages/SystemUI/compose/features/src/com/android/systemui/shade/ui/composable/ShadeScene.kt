@@ -25,7 +25,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.clipScrollableContainer
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,8 +34,8 @@ import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -54,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
@@ -65,6 +65,7 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.animateSceneDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
@@ -82,9 +83,13 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
+import com.android.systemui.notifications.ui.composable.NotificationStackCutoffGuideline
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.composable.BrightnessMirror
+import com.android.systemui.qs.ui.composable.QSMediaMeasurePolicy
 import com.android.systemui.qs.ui.composable.QuickSettings
+import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
+import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.InQQS
 import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
@@ -112,7 +117,7 @@ object Shade {
     object Dimensions {
         val ScrimCornerSize = 32.dp
         val HorizontalPadding = 16.dp
-        const val ScrimOverscrollLimit = 100f
+        val ScrimOverscrollLimit = 32.dp
         const val ScrimVisibilityThreshold = 5f
     }
 
@@ -241,6 +246,8 @@ private fun SceneScope.SingleShade(
     val mediaInRow =
         isMediaVisible &&
             LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Compact
+    val mediaOffset by
+        animateSceneDpAsState(value = InQQS, key = MediaLandscapeTopOffset, canOverflow = false)
 
     Box(
         modifier =
@@ -281,10 +288,10 @@ private fun SceneScope.SingleShade(
                                 statusBarIconController = statusBarIconController,
                             )
 
-                            val content: @Composable (Modifier) -> Unit = { modifier ->
+                            val content: @Composable () -> Unit = {
                                 Box(
                                     Modifier.element(QuickSettings.Elements.QuickQuickSettings)
-                                        .then(modifier)
+                                        .layoutId(QSMediaMeasurePolicy.LayoutId.QS)
                                 ) {
                                     QuickSettings(
                                         viewModel.qsSceneAdapter,
@@ -297,21 +304,25 @@ private fun SceneScope.SingleShade(
                                 MediaCarousel(
                                     isVisible = isMediaVisible,
                                     mediaHost = mediaHost,
-                                    modifier = Modifier.fillMaxWidth().then(modifier),
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .layoutId(QSMediaMeasurePolicy.LayoutId.Media),
                                     carouselController = mediaCarouselController,
                                 )
                             }
-
-                            if (!mediaInRow) {
-                                content(Modifier)
+                            val landscapeQsMediaMeasurePolicy = remember {
+                                QSMediaMeasurePolicy(
+                                    { viewModel.qsSceneAdapter.qqsHeight },
+                                    { mediaOffset.roundToPx() },
+                                )
+                            }
+                            if (mediaInRow) {
+                                Layout(
+                                    content = content,
+                                    measurePolicy = landscapeQsMediaMeasurePolicy,
+                                )
                             } else {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = spacedBy(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    content(Modifier.weight(1f))
-                                }
+                                content()
                             }
                         }
                     },
@@ -341,6 +352,11 @@ private fun SceneScope.SingleShade(
                 notificationsPlaceable.placeRelative(x = 0, y = maxNotifScrimTop.value.roundToInt())
             }
         }
+        NotificationStackCutoffGuideline(
+            stackScrollView = notificationStackScrollView,
+            viewModel = viewModel.notifications,
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
+        )
     }
 }
 
@@ -520,6 +536,7 @@ private fun SceneScope.SplitShade(
                     viewModel = viewModel.notifications,
                     maxScrimTop = { 0f },
                     shouldPunchHoleBehindScrim = false,
+                    shouldReserveSpaceForNavBar = false,
                     shadeMode = ShadeMode.Split,
                     modifier =
                         Modifier.weight(1f)
@@ -529,5 +546,10 @@ private fun SceneScope.SplitShade(
                 )
             }
         }
+        NotificationStackCutoffGuideline(
+            stackScrollView = notificationStackScrollView,
+            viewModel = viewModel.notifications,
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
+        )
     }
 }

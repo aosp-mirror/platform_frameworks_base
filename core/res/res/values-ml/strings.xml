@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"വയർലെസ് ഡീബഗ്ഗിംഗ് പ്രവർത്തനരഹിതമാക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"പരിശോധനാ സംവിധാനങ്ങൾ മോഡ് പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"പരിശോധനാ സംവിധാന മോഡ് പ്രവർത്തനരഹിതമാക്കാൻ ഫാക്‌ടറി പുനഃക്രമീകരണം നിർവഹിക്കുക."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"സീരിയൽ കൺസോൾ പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"പ്രകടനത്തെ ബാധിച്ചു. പ്രവർത്തനരഹിതമാക്കാൻ, ബൂട്ട് ലോഡർ പരിശോധിക്കുക."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"പരീക്ഷണാത്മക MTE പ്രവർത്തനക്ഷമമാക്കി"</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"വോളിയം കീകൾ പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കി."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"വോളിയം കീകൾ അമർത്തിപ്പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓഫാക്കി."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"വോളിയം കീകൾ വിടുക. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കാൻ, രണ്ട് വോളിയം കീകളും വീണ്ടും മൂന്ന് സെക്കൻഡ് അമർത്തിപ്പിടിക്കുക."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"നിങ്ങൾ ഉപയോഗസഹായി ബട്ടൺ ടാപ്പ് ചെയ്യുമ്പോൾ ഉപയോഗിക്കുന്നതിന് ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ഉപയോഗസഹായി വിരൽചലനത്തോടൊപ്പം ഉപയോഗിക്കാൻ ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക (രണ്ട് വിരലുകളുപയോഗിച്ച് സ്‌ക്രീനിന്റെ താഴെ നിന്ന് മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ഉപയോഗസഹായി വിരൽചലനത്തോടൊപ്പം ഉപയോഗിക്കാൻ ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക (മൂന്ന് വിരലുകളുപയോഗിച്ച് സ്‌ക്രീനിന്റെ താഴെ നിന്ന് മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"ഫീച്ചറുകൾക്കിടയിൽ മാറാൻ, ഉപയോഗസഹായി ബട്ടൺ സ്‌പർശിച്ച് പിടിക്കുക."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"ഫീച്ചറുകൾക്കിടയിൽ മാറാൻ, രണ്ട് വിരലുകളുപയോഗിച്ച് മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്‌ത് പിടിക്കുക."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ഫീച്ചറുകൾക്കിടയിൽ മാറാൻ, മൂന്ന് വിരലുകളുപയോഗിച്ച് മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്‌ത് പിടിക്കുക."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"മാഗ്നിഫിക്കേഷൻ"</string>
     <string name="user_switched" msgid="7249833311585228097">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="NAME">%1$s</xliff:g> ആണ്."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> എന്ന ഉപയോക്താവിലേക്ക് മാറുന്നു…"</string>
@@ -1883,7 +1893,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"പിൻ തീരെ ചെറുതാണ്. 4 അക്കമെങ്കിലും ഉണ്ടായിരിക്കണം."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"പിന്നീട് വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"പൂർണ്ണ സ്‌ക്രീനിൽ കാണുന്നു"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"അവസാനിപ്പിക്കാൻ, മുകളിൽ നിന്ന് താഴോട്ട് സ്വൈപ്പ് ചെയ്യുക."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"മനസ്സിലായി"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"മികച്ച കാഴ്‌ചയ്‌ക്കായി റൊട്ടേറ്റ് ചെയ്യുക"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"മികച്ച കാഴ്‌‌ചയ്ക്ക് പൂർണ്ണ സ്‌ക്രീനിൽ <xliff:g id="NAME">%s</xliff:g> തുറക്കുക"</string>
@@ -1975,6 +1986,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"സജീവമായ കോൾ"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"ഇൻകമിംഗ് കോൾ സ്‌ക്രീൻ ചെയ്യുന്നു"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"വർഗ്ഗീകരിച്ചിട്ടില്ലാത്ത"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"പ്രമോഷനുകൾ"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"സാമൂഹികം"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"വാർത്തകൾ"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"നിർദ്ദേശങ്ങൾ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ഈ അറിയിപ്പുകളുടെ പ്രാധാന്യം നിങ്ങൾ സജ്ജീകരിച്ചു."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ഉൾപ്പെട്ടിട്ടുള്ള ആളുകളെ കണക്കിലെടുക്കുമ്പോള്‍ ഇത് പ്രധാനപ്പെട്ടതാണ്‌."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ഇഷ്ടാനുസൃത ആപ്പ് അറിയിപ്പുകൾ"</string>
@@ -2191,6 +2206,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"സ്ക്രീനിലെ ഉപയോഗസഹായി കുറുക്കുവഴി ചൂസർ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ഉപയോഗസഹായി കുറുക്കുവഴി"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"അറിയിപ്പ് ഷെയ്‌ഡ് ഡിസ്‌മിസ് ചെയ്യുക"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"മെനു"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"മീഡിയ പ്ലേ ചെയ്യുക/താൽക്കാലികമായി നിർത്തുക"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad അപ്പ്"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad ഡൗൺ"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ലെഫ്റ്റ്"</string>
@@ -2407,6 +2424,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"സ്വകാര്യ സ്പേസ്"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ക്ലോൺ ചെയ്യുക"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"കമ്മ്യൂണൽ"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"സ്വകാര്യ സ്പേസ്"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട അറിയിപ്പ് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ആപ്പ് ഉള്ളടക്കം, അതിന്റെ സുരക്ഷയ്ക്കായി സ്ക്രീൻ പങ്കിടലിൽ നിന്ന് മറച്ചിരിക്കുന്നു"</string>

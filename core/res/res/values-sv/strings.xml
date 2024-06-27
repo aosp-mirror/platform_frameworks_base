@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Välj för att inaktivera trådlös felsökning."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Läget för testverktyg har aktiverats"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Inaktivera testverktygsläget genom att göra en återställning till standardinställningarna."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"Seriekonsolen är aktiverad"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Prestandan påverkas. Inaktivera via starthanteraren."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Experimentell MTE har aktiverats"</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har aktiverats."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har inaktiverats."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Släpp volymknapparna. Du kan aktivera <xliff:g id="SERVICE_NAME">%1$s</xliff:g> genom att hålla båda volymknapparna nedtryckta i tre sekunder igen."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Välj en funktion som ska användas när du trycker på tillgänglighetsknappen:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Välj en funktion som ska användas med tillgänglighetsrörelsen (svepa uppåt med två fingrar från skärmens nederkant):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Välj en funktion som ska användas med tillgänglighetsrörelsen (svepa uppåt med tre fingrar från skärmens nederkant):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Byt mellan funktionerna genom att trycka länge på tillgänglighetsknappen."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Byt funktion genom att svepa uppåt med två fingrar och hålla kvar dem."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Byt funktion genom att svepa uppåt med tre fingrar och hålla kvar dem."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Förstoring"</string>
     <string name="user_switched" msgid="7249833311585228097">"Nuvarande användare: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Byter till <xliff:g id="NAME">%1$s</xliff:g> …"</string>
@@ -1883,7 +1893,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Pinkoden är för kort. Måste vara minst fyra siffror."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Försök igen senare"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visar på fullskärm"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Svep nedåt från skärmens överkant för att avsluta."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotera för att få en bättre vy"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Öppna <xliff:g id="NAME">%s</xliff:g> i fullskärmsläget för att få en bättre vy"</string>
@@ -1975,6 +1986,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Pågående samtal"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Ett inkommande samtal filtreras"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Okategoriserad"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"Kampanjer"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"Socialt"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"Nyheter"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"Rekommendationer"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Du anger hur viktiga aviseringarna är."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Detta är viktigt på grund av personerna som deltar."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Anpassad appavisering"</string>
@@ -2038,7 +2053,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Fäst <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Lossa"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Lossa <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Info om appen"</string>
+    <string name="app_info" msgid="6113278084877079851">"Appinformation"</string>
     <string name="negative_duration" msgid="1938335096972945232">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo startas …"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Enheten återställs …"</string>
@@ -2191,6 +2206,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Valfunktion för tillgänglighetsgenväg på skärmen"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Aktivera tillgänglighet snabbt"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Stäng meddelandepanelen"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Meny"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Spela upp/pausa"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Styrkors, upp"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Styrkors, ned"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Styrkors, vänster"</string>
@@ -2407,6 +2424,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privat område"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klona"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Allmän"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privat område"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Känsligt aviseringsinnehåll dolt"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Av säkerhetsskäl döljs appinnehållet vid skärmdelning"</string>
