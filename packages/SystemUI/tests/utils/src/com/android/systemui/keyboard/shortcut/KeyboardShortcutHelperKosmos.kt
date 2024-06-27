@@ -94,7 +94,13 @@ val Kosmos.shortcutHelperCategoriesInteractor by
     Kosmos.Fixture { ShortcutHelperCategoriesInteractor(shortcutHelperCategoriesRepository) }
 
 val Kosmos.shortcutHelperViewModel by
-    Kosmos.Fixture { ShortcutHelperViewModel(testDispatcher, shortcutHelperStateInteractor) }
+    Kosmos.Fixture {
+        ShortcutHelperViewModel(
+            testDispatcher,
+            shortcutHelperStateInteractor,
+            shortcutHelperCategoriesInteractor
+        )
+    }
 
 val Kosmos.fakeShortcutHelperStartActivity by Kosmos.Fixture { FakeShortcutHelperStartActivity() }
 
