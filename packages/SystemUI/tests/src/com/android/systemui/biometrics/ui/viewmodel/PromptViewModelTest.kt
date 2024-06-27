@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui.kosmos.promptViewmodel
+package com.android.systemui.biometrics.ui.viewmodel
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.ComponentName
@@ -66,12 +66,6 @@ import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.biometrics.shared.model.toSensorStrength
 import com.android.systemui.biometrics.shared.model.toSensorType
 import com.android.systemui.biometrics.udfpsUtils
-import com.android.systemui.biometrics.ui.viewmodel.FingerprintStartMode
-import com.android.systemui.biometrics.ui.viewmodel.PromptMessage
-import com.android.systemui.biometrics.ui.viewmodel.PromptPosition
-import com.android.systemui.biometrics.ui.viewmodel.PromptSize
-import com.android.systemui.biometrics.ui.viewmodel.iconProvider
-import com.android.systemui.biometrics.ui.viewmodel.promptViewModel
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
