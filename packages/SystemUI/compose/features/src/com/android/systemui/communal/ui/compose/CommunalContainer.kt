@@ -155,7 +155,7 @@ fun CommunalContainer(
     val coroutineScope = rememberCoroutineScope()
     val currentSceneKey: SceneKey by
         viewModel.currentScene.collectAsStateWithLifecycle(CommunalScenes.Blank)
-    val touchesAllowed by viewModel.touchesAllowed.collectAsStateWithLifecycle(initialValue = false)
+    val touchesAllowed by viewModel.touchesAllowed.collectAsStateWithLifecycle()
     val showGestureIndicator by
         viewModel.showGestureIndicator.collectAsStateWithLifecycle(initialValue = false)
     val backgroundType by
