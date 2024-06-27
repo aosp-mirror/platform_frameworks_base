@@ -784,7 +784,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         decoration.setOnLeftSnapClickListener(l);
         decoration.setOnRightSnapClickListener(l);
         decoration.createMaximizeMenu();
-        verify(menu).show(any(), any(), any(), mOnMaxMenuHoverChangeListener.capture());
+        verify(menu).show(any(), any(), any(), mOnMaxMenuHoverChangeListener.capture(), any());
     }
 
     private void fillRoundedCornersResources(int fillValue) {
