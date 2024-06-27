@@ -203,6 +203,12 @@ final class SettingsState {
 
     private static final String NULL_VALUE = "null";
 
+    // TOBO(b/312444587): remove after Test Mission 2.
+    // Bulk sync names
+    private static final String BULK_SYNC_MARKER = "aconfigd_marker/bulk_synced";
+    private static final String BULK_SYNC_TRIGGER_COUNTER =
+        "core_experiments_team_internal/BulkSyncTriggerCounterFlag__bulk_sync_trigger_counter";
+
     private static final ArraySet<String> sSystemPackages = new ArraySet<>();
 
     private final Object mWriteLock = new Object();
@@ -409,8 +415,7 @@ final class SettingsState {
                     }
                 }
                 // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
-                if (mSettings.get("aconfigd_marker/bulk_synced").value.equals("true")
-                        && requests == null) {
+                if (requests == null) {
                     Map<String, AconfigdFlagInfo> aconfigdFlagMap =
                             AconfigdJavaUtils.listFlagsValueInNewStorage(localSocket);
                     compareFlagValueInNewStorage(
@@ -534,7 +539,7 @@ final class SettingsState {
             return null;
         }
         AconfigdFlagInfo flag = flagInfoDefault.get(fullFlagName);
-        if (flag == null) {
+        if (flag == null || !namespace.equals(flag.getNamespace())) {
             return null;
         }
 
@@ -553,15 +558,33 @@ final class SettingsState {
     public ProtoOutputStream handleBulkSyncToNewStorage(
             Map<String, AconfigdFlagInfo> aconfigFlagMap) {
         // get marker or add marker if it does not exist
-        final String bulkSyncMarkerName = new String("aconfigd_marker/bulk_synced");
-        Setting markerSetting = mSettings.get(bulkSyncMarkerName);
+        Setting markerSetting = mSettings.get(BULK_SYNC_MARKER);
+        int localCounter = 0;
         if (markerSetting == null) {
-            markerSetting = new Setting(bulkSyncMarkerName, "false", false, "aconfig", "aconfig");
-            mSettings.put(bulkSyncMarkerName, markerSetting);
+            markerSetting = new Setting(BULK_SYNC_MARKER, "0", false, "aconfig", "aconfig");
+            mSettings.put(BULK_SYNC_MARKER, markerSetting);
+        }
+        try {
+            localCounter = Integer.parseInt(markerSetting.value);
+        } catch(NumberFormatException e) {
+            // reset local counter
+            markerSetting.value = "0";
         }
 
         if (enableAconfigStorageDaemon()) {
-            if (markerSetting.value.equals("true")) {
+            Setting bulkSyncCounter = mSettings.get(BULK_SYNC_TRIGGER_COUNTER);
+            int serverCounter = 0;
+            if (bulkSyncCounter != null) {
+                try {
+                    serverCounter = Integer.parseInt(bulkSyncCounter.value);
+                } catch (NumberFormatException e) {
+                    // reset the local value of server counter
+                    bulkSyncCounter.value = "0";
+                }
+            }
+
+            boolean shouldSync = localCounter < serverCounter;
+            if (!shouldSync) {
                 // CASE 1, flag is on, bulk sync marker true, nothing to do
                 return null;
             } else {
@@ -600,20 +623,12 @@ final class SettingsState {
                 }
 
                 // mark sync has been done
-                markerSetting.value = "true";
+                markerSetting.value = String.valueOf(serverCounter);
                 scheduleWriteIfNeededLocked();
                 return requests;
             }
         } else {
-            if (markerSetting.value.equals("true")) {
-                // CASE 3, flag is off, bulk sync marker true, clear the marker
-                markerSetting.value = "false";
-                scheduleWriteIfNeededLocked();
-                return null;
-            } else {
-                // CASE 4, flag is off, bulk sync marker false, nothing to do
-                return null;
-            }
+            return null;
         }
     }
 
@@ -692,6 +707,7 @@ final class SettingsState {
                                     .setFlagName(flag.getName())
                                     .setDefaultFlagValue(flagValue)
                                     .setIsReadWrite(isReadWrite)
+                                    .setNamespace(flag.getNamespace())
                                     .build());
                 }
             }
