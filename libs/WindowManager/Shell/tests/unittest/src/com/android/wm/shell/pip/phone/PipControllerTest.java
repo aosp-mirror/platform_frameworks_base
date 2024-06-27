@@ -183,7 +183,7 @@ public class PipControllerTest extends ShellTestCase {
 
     @Test
     public void instantiatePipController_registersPipTransitionCallback() {
-        verify(mMockPipTransitionController).registerPipTransitionCallback(any());
+        verify(mMockPipTransitionController).registerPipTransitionCallback(any(), any());
     }
 
     @Test

@@ -106,6 +106,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -487,7 +488,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
                 INPUT_CONSUMER_PIP, mMainExecutor);
-        mPipTransitionController.registerPipTransitionCallback(this);
+        mPipTransitionController.registerPipTransitionCallback(this, mMainExecutor);
         mPipTaskOrganizer.registerOnDisplayIdChangeCallback((int displayId) -> {
             mPipDisplayLayoutState.setDisplayId(displayId);
             onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
@@ -1229,8 +1230,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public PipTransitionController getPipTransitionController() {
-            return mPipTransitionController;
+        public void registerPipTransitionCallback(
+                PipTransitionController.PipTransitionCallback callback,
+                Executor executor) {
+            mMainExecutor.execute(() -> mPipTransitionController.registerPipTransitionCallback(
+                    callback, executor));
         }
     }
 
