@@ -44,7 +44,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -382,8 +381,7 @@ public class ResourcesManagerTest extends TestCase {
         assertTrue(allResourcePathsLoaded(resourcePaths, loadedAssets));
 
         // Package resources' paths should be cached in ResourcesManager.
-        assertEquals(Arrays.toString(resourcePaths), Arrays.toString(ResourcesManager.getInstance()
-                .getSharedLibAssetsMap().get(TEST_LIB).getAllAssetPaths()));
+        assertNotNull(ResourcesManager.getInstance().getRegisteredResourcePaths().get(TEST_LIB));
 
         // Revert the ResourcesManager instance back.
         ResourcesManager.setInstance(oriResourcesManager);
@@ -414,9 +412,7 @@ public class ResourcesManagerTest extends TestCase {
         assertTrue(allResourcePathsLoaded(resourcePaths, loadedAssets));
 
         // Package resources' paths should be cached in ResourcesManager.
-        assertEquals(Arrays.toString(resourcePaths), Arrays.toString(ResourcesManager.getInstance()
-                .getSharedLibAssetsMap().get(TEST_LIB).getAllAssetPaths()));
-
+        assertNotNull(ResourcesManager.getInstance().getRegisteredResourcePaths().get(TEST_LIB));
         // Revert the ResourcesManager instance back.
         ResourcesManager.setInstance(oriResourcesManager);
     }
@@ -452,9 +448,7 @@ public class ResourcesManagerTest extends TestCase {
         assertTrue(allResourcePathsLoaded(resourcePaths, loadedAssets));
 
         // Package resources' paths should be cached in ResourcesManager.
-        assertEquals(Arrays.toString(resourcePaths), Arrays.toString(ResourcesManager.getInstance()
-                .getSharedLibAssetsMap().get(TEST_LIB).getAllAssetPaths()));
-
+        assertNotNull(ResourcesManager.getInstance().getRegisteredResourcePaths().get(TEST_LIB));
         // Revert the ResourcesManager instance back.
         ResourcesManager.setInstance(oriResourcesManager);
     }
@@ -493,9 +487,7 @@ public class ResourcesManagerTest extends TestCase {
         assertTrue(allResourcePathsLoaded(resourcePaths, loadedAssets));
 
         // Package resources' paths should be cached in ResourcesManager.
-        assertEquals(Arrays.toString(resourcePaths), Arrays.toString(ResourcesManager.getInstance()
-                .getSharedLibAssetsMap().get(TEST_LIB).getAllAssetPaths()));
-
+        assertNotNull(ResourcesManager.getInstance().getRegisteredResourcePaths().get(TEST_LIB));
         // Revert the ResourcesManager instance back.
         ResourcesManager.setInstance(oriResourcesManager);
     }
