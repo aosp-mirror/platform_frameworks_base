@@ -7312,6 +7312,10 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         protected int onProcess(QueuedInputEvent q) {
+            if (q.forPreImeOnly()) {
+                // this event is intended for the ViewPreImeInputStage only, let's forward
+                return FORWARD;
+            }
             if (q.mEvent instanceof KeyEvent) {
                 final KeyEvent keyEvent = (KeyEvent) q.mEvent;
 
