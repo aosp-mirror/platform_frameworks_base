@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.ui.viewmodel
+package android.hardware.display
 
-import com.android.systemui.keyguard.domain.interactor.keyguardTouchHandlingInteractor
+import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 
-val Kosmos.keyguardTouchHandlingViewModel by
-    Kosmos.Fixture {
-        KeyguardTouchHandlingViewModel(
-            interactor = keyguardTouchHandlingInteractor,
-        )
-    }
+val Kosmos.ambientDisplayConfiguration by Fixture {
+    FakeAmbientDisplayConfiguration(applicationContext)
+}

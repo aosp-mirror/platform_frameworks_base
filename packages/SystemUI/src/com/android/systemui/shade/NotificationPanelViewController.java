@@ -148,7 +148,7 @@ import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransition
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
@@ -775,7 +775,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             @Main CoroutineDispatcher mainDispatcher,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             DumpManager dumpManager,
-            KeyguardLongPressViewModel keyguardLongPressViewModel,
+            KeyguardTouchHandlingViewModel keyguardTouchHandlingViewModel,
             KeyguardInteractor keyguardInteractor,
             ActivityStarter activityStarter,
             SharedNotificationContainerInteractor sharedNotificationContainerInteractor,
@@ -970,7 +970,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardClockInteractor = keyguardClockInteractor;
         KeyguardLongPressViewBinder.bind(
                 mView.requireViewById(R.id.keyguard_long_press),
-                keyguardLongPressViewModel,
+                keyguardTouchHandlingViewModel,
                 () -> {
                     onEmptySpaceClick();
                     return Unit.INSTANCE;
