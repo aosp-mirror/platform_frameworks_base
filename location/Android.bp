@@ -39,6 +39,11 @@ java_sdk_library {
             "frameworks/base/core/java",
         ],
     },
+    lint: {
+        warning_checks: [
+            "FlaggedApi",
+        ],
+    },
 }
 
 platform_compat_config {
