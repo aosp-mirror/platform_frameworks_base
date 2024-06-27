@@ -227,7 +227,7 @@ private val ShortcutCategory.labelResId: Int
     get() =
         when (type) {
             ShortcutCategoryType.SYSTEM -> R.string.shortcut_helper_category_system
-            ShortcutCategoryType.MULTI_TASKING -> R.string.shortcut_helper_category_system
+            ShortcutCategoryType.MULTI_TASKING -> R.string.shortcut_helper_category_multitasking
             ShortcutCategoryType.IME -> R.string.shortcut_helper_category_input
         }
 
