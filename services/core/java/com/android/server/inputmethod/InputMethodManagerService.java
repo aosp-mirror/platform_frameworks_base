@@ -90,7 +90,6 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -1258,8 +1257,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 mIoHandler = Handler.createAsync(ioThread.getLooper());
             }
             SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mHandler);
-            mImeTrackerService = new ImeTrackerService(serviceThreadForTesting != null
-                    ? serviceThreadForTesting.getLooper() : Looper.getMainLooper());
+            mImeTrackerService = new ImeTrackerService(mHandler);
             // Note: SettingsObserver doesn't register observers in its constructor.
             mSettingsObserver = new SettingsObserver(mHandler);
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
