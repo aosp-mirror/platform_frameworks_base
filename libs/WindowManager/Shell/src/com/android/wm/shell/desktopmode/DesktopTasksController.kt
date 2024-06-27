@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityOptions
+import android.app.KeyguardManager
 import android.app.PendingIntent
 import android.app.TaskInfo
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
@@ -108,6 +109,7 @@ class DesktopTasksController(
     private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
     private val dragAndDropController: DragAndDropController,
     private val transitions: Transitions,
+    private val keyguardManager: KeyguardManager,
     private val enterDesktopTaskTransitionHandler: EnterDesktopTaskTransitionHandler,
     private val exitDesktopTaskTransitionHandler: ExitDesktopTaskTransitionHandler,
     private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler,
@@ -972,6 +974,12 @@ class DesktopTasksController(
         transition: IBinder
     ): WindowContainerTransaction? {
         KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: handleFreeformTaskLaunch")
+        if (keyguardManager.isKeyguardLocked) {
+            // Do NOT handle freeform task launch when locked.
+            // It will be launched in fullscreen windowing mode (Details: b/160925539)
+            KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: skip keyguard is locked")
+            return null
+        }
         if (!desktopModeTaskRepository.isDesktopModeShowing(task.displayId)) {
             KtProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
