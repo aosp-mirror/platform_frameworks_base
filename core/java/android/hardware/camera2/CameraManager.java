@@ -581,7 +581,9 @@ public final class CameraManager {
         if (mVirtualDeviceManager == null) {
             mVirtualDeviceManager = context.getSystemService(VirtualDeviceManager.class);
         }
-        return mVirtualDeviceManager.getDevicePolicy(context.getDeviceId(), POLICY_TYPE_CAMERA);
+        return mVirtualDeviceManager == null
+                ? DEVICE_POLICY_DEFAULT
+                : mVirtualDeviceManager.getDevicePolicy(context.getDeviceId(), POLICY_TYPE_CAMERA);
     }
 
     // TODO(b/147726300): Investigate how to support foldables/multi-display devices.

@@ -83,13 +83,13 @@ final class KillAppBlocker {
         }
     }
 
-    void waitAppProcessGone(ActivityManagerInternal mAmi, Computer snapshot,
+    void waitAppProcessGone(ActivityManagerInternal ami, Computer snapshot,
             UserManagerService userManager, String packageName) {
         if (!mRegistered) {
             return;
         }
         synchronized (this) {
-            if (mAmi != null) {
+            if (ami != null) {
                 int[] users = userManager.getUserIds();
 
                 for (int i = 0; i < users.length; i++) {
@@ -97,11 +97,15 @@ final class KillAppBlocker {
                     final int uid = snapshot.getPackageUidInternal(
                             packageName, MATCH_ALL, userId, Process.SYSTEM_UID);
                     if (uid != INVALID_UID) {
-                        if (mAmi.getUidProcessState(uid) != PROCESS_STATE_NONEXISTENT) {
+                        if (ami.getUidProcessState(uid) != PROCESS_STATE_NONEXISTENT) {
                             mActiveUids.add(uid);
                         }
                     }
                 }
+            }
+            if (mActiveUids.size() == 0) {
+                // no active uid
+                return;
             }
         }
 

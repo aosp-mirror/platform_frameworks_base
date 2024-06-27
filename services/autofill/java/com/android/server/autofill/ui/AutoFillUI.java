@@ -102,7 +102,7 @@ public final class AutoFillUI {
         void cancelSession();
         void requestShowSoftInput(AutofillId id);
         void requestFallbackFromFillDialog();
-        void onShown(int uiType);
+        void onShown(int uiType, int datasetSize);
     }
 
     public AutoFillUI(@NonNull Context context) {
@@ -246,9 +246,9 @@ public final class AutoFillUI {
                 }
 
                 @Override
-                public void onShown() {
+                public void onShown(int datasetSize) {
                     if (mCallback != null) {
-                        mCallback.onShown(UI_TYPE_MENU);
+                        mCallback.onShown(UI_TYPE_MENU, datasetSize);
                     }
                 }
 
@@ -425,7 +425,8 @@ public final class AutoFillUI {
             @Nullable String filterText, @Nullable String servicePackageName,
             @NonNull ComponentName componentName, @Nullable Drawable serviceIcon,
             @NonNull AutoFillUiCallback callback, int sessionId, boolean compatMode,
-            @Nullable PresentationStatsEventLogger mPresentationStatsEventLogger) {
+            @Nullable PresentationStatsEventLogger presentationStatsEventLogger,
+            @NonNull Object sessionLock) {
         if (sVerbose) {
             Slog.v(TAG, "showFillDialog for "
                     + componentName.toShortString() + ": " + response);
@@ -461,15 +462,17 @@ public final class AutoFillUI {
 
                         @Override
                         public void onShown() {
-                            callback.onShown(UI_TYPE_DIALOG);
+                            mCallback.onShown(UI_TYPE_DIALOG, response.getDatasets().size());
                         }
 
                         @Override
                         public void onDatasetPicked(Dataset dataset) {
                             log(MetricsEvent.TYPE_ACTION);
-                            if (mPresentationStatsEventLogger != null) {
-                                mPresentationStatsEventLogger.maybeSetPositiveCtaButtonClicked(
-                                    true);
+                            synchronized (sessionLock) {
+                                if (presentationStatsEventLogger != null) {
+                                    presentationStatsEventLogger.maybeSetPositiveCtaButtonClicked(
+                                            true);
+                                }
                             }
                             hideFillDialogUiThread(callback);
                             if (mCallback != null) {
@@ -482,8 +485,10 @@ public final class AutoFillUI {
                         @Override
                         public void onDismissed() {
                             log(MetricsEvent.TYPE_DISMISS);
-                            if (mPresentationStatsEventLogger != null) {
-                                mPresentationStatsEventLogger.maybeSetDialogDismissed(true);
+                            synchronized (sessionLock) {
+                                if (presentationStatsEventLogger != null) {
+                                    presentationStatsEventLogger.maybeSetDialogDismissed(true);
+                                }
                             }
                             hideFillDialogUiThread(callback);
                             callback.requestShowSoftInput(focusedId);
@@ -493,9 +498,11 @@ public final class AutoFillUI {
                         @Override
                         public void onCanceled() {
                             log(MetricsEvent.TYPE_CLOSE);
-                            if (mPresentationStatsEventLogger != null) {
-                                mPresentationStatsEventLogger.maybeSetNegativeCtaButtonClicked(
-                                    true);
+                            synchronized (sessionLock) {
+                                if (presentationStatsEventLogger != null) {
+                                    presentationStatsEventLogger.maybeSetNegativeCtaButtonClicked(
+                                            true);
+                                }
                             }
                             hideFillDialogUiThread(callback);
                             callback.requestShowSoftInput(focusedId);

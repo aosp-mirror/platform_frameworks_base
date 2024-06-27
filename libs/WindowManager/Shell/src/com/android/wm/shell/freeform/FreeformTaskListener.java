@@ -150,6 +150,10 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                                 "Adding active freeform task: #%d", taskInfo.taskId);
                     }
+                } else if (repository.isClosingTask(taskInfo.taskId)
+                        && repository.removeClosingTask(taskInfo.taskId)) {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                            "Removing closing freeform task: #%d", taskInfo.taskId);
                 }
                 repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId,
                         taskInfo.isVisible);

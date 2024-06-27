@@ -23,6 +23,7 @@ import static android.media.projection.IMediaProjectionManager.EXTRA_USER_REVIEW
 import static android.media.projection.MediaProjectionManager.OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CANCEL;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_DISPLAY;
+import static android.os.UserHandle.USER_SYSTEM;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import static com.android.systemui.mediaprojection.permission.ScreenShareOptionKt.ENTIRE_SCREEN;
@@ -31,7 +32,6 @@ import static com.android.systemui.mediaprojection.permission.ScreenShareOptionK
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityOptions.LaunchCookie;
 import android.app.AlertDialog;
 import android.app.StatusBarManager;
@@ -366,11 +366,11 @@ public class MediaProjectionPermissionActivity extends Activity
                 intent.putExtra(EXTRA_USER_REVIEW_GRANTED_CONSENT, mReviewGrantedConsentRequired);
                 intent.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
 
-                // Start activity from the current foreground user to avoid creating a separate
-                // SystemUI process without access to recent tasks because it won't have
-                // WM Shell running inside.
+                // Start activity as system user and manually show app selector to all users to
+                // avoid creating a separate SystemUI process without access to recent tasks
+                // because it won't have WM Shell running inside.
                 mUserSelectingTask = true;
-                startActivityAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
+                startActivityAsUser(intent, UserHandle.of(USER_SYSTEM));
                 // close shade if it's open
                 mStatusBarManager.collapsePanels();
             }

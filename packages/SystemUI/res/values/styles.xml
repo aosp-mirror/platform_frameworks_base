@@ -338,8 +338,11 @@
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="AuthCredentialPanelStyle">
+    <style name="AuthNonCredentialPanelStyle">
         <item name="android:background">?androidprv:attr/materialColorSurfaceBright</item>
+    </style>
+
+    <style name="AuthCredentialPanelStyle" parent="AuthNonCredentialPanelStyle">
         <item name="android:clickable">true</item>
         <item name="android:clipToOutline">true</item>
         <item name="android:importantForAccessibility">no</item>

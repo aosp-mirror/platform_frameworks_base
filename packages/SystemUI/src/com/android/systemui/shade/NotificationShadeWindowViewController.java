@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
+import com.android.keyguard.KeyguardUnfoldTransition;
 import com.android.keyguard.LockIconViewController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
@@ -72,6 +73,7 @@ import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.util.time.SystemClock;
 
@@ -138,6 +140,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
 
+    /**
+     * If {@code true}, an external touch sent in {@link #handleExternalTouch(MotionEvent)} has been
+     * intercepted and all future touch events for the gesture should be processed by this view.
+     */
+    private boolean mExternalTouchIntercepted = false;
     private boolean mIsTrackingBarGesture = false;
     private boolean mIsOcclusionTransitionRunning = false;
     private DisableSubpixelTextTransitionListener mDisableSubpixelTextTransitionListener;
@@ -169,6 +176,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
             DozeScrimController dozeScrimController,
             NotificationShadeWindowController controller,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider,
+            Optional<SysUIUnfoldComponent> unfoldComponent,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             NotificationInsetsController notificationInsetsController,
             AmbientState ambientState,
@@ -222,12 +230,20 @@ public class NotificationShadeWindowViewController implements Dumpable {
         bouncerViewBinder.bind(mView.findViewById(R.id.keyguard_bouncer_container));
 
         collectFlow(mView, keyguardTransitionInteractor.transition(
-                Edge.Companion.create(LOCKSCREEN, DREAMING)),
+                Edge.create(LOCKSCREEN, DREAMING)),
                 mLockscreenToDreamingTransition);
         collectFlow(
                 mView,
                 notificationLaunchAnimationInteractor.isLaunchAnimationRunning(),
                 this::setExpandAnimationRunning);
+
+        var keyguardUnfoldTransition = unfoldComponent.map(
+                SysUIUnfoldComponent::getKeyguardUnfoldTransition);
+        var notificationPanelUnfoldAnimationController = unfoldComponent.map(
+                SysUIUnfoldComponent::getNotificationPanelUnfoldAnimationController);
+
+        keyguardUnfoldTransition.ifPresent(KeyguardUnfoldTransition::setup);
+        notificationPanelUnfoldAnimationController.ifPresent(u -> u.setup(mView));
 
         mClock = clock;
         if (featureFlagsClassic.isEnabled(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION)) {
@@ -255,11 +271,28 @@ public class NotificationShadeWindowViewController implements Dumpable {
     }
 
     /**
-     * Handle a touch event while dreaming by forwarding the event to the content view.
+     * Handle a touch event while dreaming or on the hub by forwarding the event to the content
+     * view.
+     * <p>
+     * Since important logic for handling touches lives in the dispatch/intercept phases, we
+     * simulate going through all of these stages before sending onTouchEvent if intercepted.
+     *
      * @param event The event to forward.
      */
-    public void handleDreamTouch(MotionEvent event) {
-        mView.dispatchTouchEvent(event);
+    public void handleExternalTouch(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mExternalTouchIntercepted = false;
+        }
+
+        if (!mView.dispatchTouchEvent(event)) {
+            return;
+        }
+        if (!mExternalTouchIntercepted) {
+            mExternalTouchIntercepted = mView.onInterceptTouchEvent(event);
+        }
+        if (mExternalTouchIntercepted) {
+            mView.onTouchEvent(event);
+        }
     }
 
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
@@ -394,7 +427,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
                             } else {
                                 return logDownDispatch(ev, "hidden or hiding", true);
                             }
+                        } else {
+                            mShadeLogger.d("NSWVC: bouncer not showing");
                         }
+                    } else {
+                        mShadeLogger.d("NSWVC: touch not within view");
                     }
                 } else if (mIsTrackingBarGesture) {
                     final boolean sendToStatusBar = mStatusBarViewController.sendTouchToView(ev);
@@ -403,6 +440,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
                     }
                     return logDownDispatch(ev, "sending bar gesture to status bar",
                             sendToStatusBar);
+                }
+                if (isDown) {
+                    mShadeLogger.logNoTouchDispatch(mIsTrackingBarGesture, mExpandAnimationRunning);
                 }
                 return logDownDispatch(ev, "no custom touch dispatch of down event", null);
             }
@@ -665,12 +705,22 @@ public class NotificationShadeWindowViewController implements Dumpable {
 
     @Override
     public void dump(PrintWriter pw, String[] args) {
+        pw.print("  mExpandingBelowNotch=");
+        pw.println(mExpandingBelowNotch);
         pw.print("  mExpandAnimationRunning=");
         pw.println(mExpandAnimationRunning);
-        pw.print("  mTouchCancelled=");
-        pw.println(mTouchCancelled);
+        pw.print("  mExternalTouchIntercepted=");
+        pw.println(mExternalTouchIntercepted);
+        pw.print("  mIsOcclusionTransitionRunning=");
+        pw.println(mIsOcclusionTransitionRunning);
+        pw.print("  mIsTrackingBarGesture=");
+        pw.println(mIsTrackingBarGesture);
+        pw.print("  mLaunchAnimationTimeout=");
+        pw.println(mLaunchAnimationTimeout);
         pw.print("  mTouchActive=");
         pw.println(mTouchActive);
+        pw.print("  mTouchCancelled=");
+        pw.println(mTouchCancelled);
     }
 
     @VisibleForTesting

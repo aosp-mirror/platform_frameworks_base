@@ -4451,7 +4451,8 @@ public abstract class Context {
      * @see #DISPLAY_HASH_SERVICE
      * @see android.view.displayhash.DisplayHashManager
      */
-    public abstract @Nullable Object getSystemService(@ServiceName @NonNull String name);
+    // TODO(b/347269120): Re-add @Nullable
+    public abstract Object getSystemService(@ServiceName @NonNull String name);
 
     /**
      * Return the handle to a system-level service by class.
@@ -4495,7 +4496,8 @@ public abstract class Context {
      * <b>never</b> throw a {@link RuntimeException} if the name is not supported.
      */
     @SuppressWarnings("unchecked")
-    public final @Nullable <T> T getSystemService(@NonNull Class<T> serviceClass) {
+    // TODO(b/347269120): Re-add @Nullable
+    public final <T> T getSystemService(@NonNull Class<T> serviceClass) {
         // Because subclasses may override getSystemService(String) we cannot
         // perform a lookup by class alone.  We must first map the class to its
         // service name then invoke the string-based method.
@@ -7188,9 +7190,10 @@ public abstract class Context {
      * as the package remains in the foreground, or has any active manifest components (e.g. when
      * another app is accessing a content provider in the package).
      * <p>
-     * If you want to revoke the permissions right away, you could call {@code System.exit()}, but
-     * this could affect other apps that are accessing your app at the moment. For example, apps
-     * accessing a content provider in your app will all crash.
+     * If you want to revoke the permissions right away, you could call {@code System.exit()} in
+     * {@code Handler.postDelayed} with a delay to allow completion of async IPC, But
+     * {@code System.exit()} could affect other apps that are accessing your app at the moment.
+     * For example, apps accessing a content provider in your app will all crash.
      * <p>
      * Note that the settings UI shows a permission group as granted as long as at least one
      * permission in the group is granted. If you want the user to observe the revocation in the

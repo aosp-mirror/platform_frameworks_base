@@ -30,6 +30,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.ActivityRecord.State.STOPPED;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -158,7 +159,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         // reset drawing status to test translucent activity
         backNavigationInfo.onBackNavigationFinished(false);
-        mBackNavigationController.clearBackAnimations();
+        mBackNavigationController.clearBackAnimations(true);
         final ActivityRecord topActivity = topTask.getTopMostActivity();
         makeWindowVisibleAndDrawn(topActivity.findMainWindow());
         // simulate translucent
@@ -169,7 +170,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         // reset drawing status to test if previous task is translucent activity
         backNavigationInfo.onBackNavigationFinished(false);
-        mBackNavigationController.clearBackAnimations();
+        mBackNavigationController.clearBackAnimations(true);
+        makeWindowVisibleAndDrawn(topActivity.findMainWindow());
         // simulate translucent
         recordA.setOccludesParent(false);
         backNavigationInfo = startBackNavigation();
@@ -180,7 +182,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         topActivity.setOccludesParent(true);
         recordA.setOccludesParent(true);
         backNavigationInfo.onBackNavigationFinished(false);
-        mBackNavigationController.clearBackAnimations();
+        mBackNavigationController.clearBackAnimations(true);
         makeWindowVisibleAndDrawn(topActivity.findMainWindow());
         setupKeyguardOccluded();
         backNavigationInfo = startBackNavigation();
@@ -188,7 +190,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_CALLBACK));
 
         backNavigationInfo.onBackNavigationFinished(false);
-        mBackNavigationController.clearBackAnimations();
+        mBackNavigationController.clearBackAnimations(true);
         doReturn(true).when(recordA).canShowWhenLocked();
         backNavigationInfo = startBackNavigation();
         assertThat(typeToString(backNavigationInfo.getType()))
@@ -245,8 +247,9 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertTrue("Animation scheduled", backNavigationInfo.isPrepareRemoteAnimation());
 
         // reset drawing status
+        testCase.recordBack.setState(STOPPED, "stopped");
         backNavigationInfo.onBackNavigationFinished(false);
-        mBackNavigationController.clearBackAnimations();
+        mBackNavigationController.clearBackAnimations(true);
         makeWindowVisibleAndDrawn(testCase.recordFront.findMainWindow());
         setupKeyguardOccluded();
         backNavigationInfo = startBackNavigation();
@@ -255,7 +258,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         // reset drawing status, test if top activity is translucent
         backNavigationInfo.onBackNavigationFinished(false);
-        mBackNavigationController.clearBackAnimations();
+        mBackNavigationController.clearBackAnimations(true);
         makeWindowVisibleAndDrawn(testCase.recordFront.findMainWindow());
         // simulate translucent
         testCase.recordFront.setOccludesParent(false);
@@ -266,7 +269,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         // reset drawing status, test if bottom activity is translucent
         backNavigationInfo.onBackNavigationFinished(false);
-        mBackNavigationController.clearBackAnimations();
+        mBackNavigationController.clearBackAnimations(true);
         makeWindowVisibleAndDrawn(testCase.recordBack.findMainWindow());
         // simulate translucent
         testCase.recordBack.setOccludesParent(false);
@@ -277,7 +280,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         // reset drawing status, test canShowWhenLocked
         backNavigationInfo.onBackNavigationFinished(false);
-        mBackNavigationController.clearBackAnimations();
+        mBackNavigationController.clearBackAnimations(true);
         doReturn(true).when(testCase.recordBack).canShowWhenLocked();
         backNavigationInfo = startBackNavigation();
         assertThat(typeToString(backNavigationInfo.getType()))
@@ -480,7 +483,10 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_RETURN_TO_HOME));
 
         backNavigationInfo.onBackNavigationFinished(false);
-        mBackNavigationController.clearBackAnimations();
+        mBackNavigationController.clearBackAnimations(true);
+
+        final WindowState window = topTask.getTopVisibleAppMainWindow();
+        makeWindowVisibleAndDrawn(window);
         setupKeyguardOccluded();
         backNavigationInfo = startBackNavigation();
         assertThat(typeToString(backNavigationInfo.getType()))
@@ -550,7 +556,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         }).when(appWindow.mSession).setOnBackInvokedCallbackInfo(eq(appWindow.mClient), any());
 
         addToWindowMap(appWindow, true);
-        dispatcher.attachToWindow(appWindow.mSession, appWindow.mClient, null);
+        dispatcher.attachToWindow(appWindow.mSession, appWindow.mClient, null, null);
 
 
         OnBackInvokedCallback appCallback = createBackCallback(appLatch);
@@ -840,7 +846,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         toHomeBuilder.build();
         verify(mAtm.mTaskOrganizerController, never()).addWindowlessStartingSurface(
                 any(), any(), any(), any(), any(), any());
-        animationHandler.clearBackAnimateTarget();
+        animationHandler.clearBackAnimateTarget(true);
         openActivities.clear();
 
         // Back to ACTIVITY and TASK have the same logic, just with different target.
@@ -937,6 +943,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         testCase.recordFront = record2;
         testCase.windowBack = window1;
         testCase.windowFront = window2;
+        record1.setState(STOPPED, "stopped");
         return testCase;
     }
 

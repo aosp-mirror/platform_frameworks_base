@@ -799,12 +799,16 @@ public class MagnificationController implements MagnificationConnectionManager.C
                         this,
                         mScaleProvider,
                         mBackgroundExecutor,
-                        () -> (isMagnificationConnectionManagerInitialized()
-                                && getMagnificationConnectionManager().isConnected())
+                        () -> isMagnificationSystemUIConnectionReady()
                 );
             }
         }
         return mFullScreenMagnificationController;
+    }
+
+    private boolean isMagnificationSystemUIConnectionReady() {
+        return isMagnificationConnectionManagerInitialized()
+                && getMagnificationConnectionManager().waitConnectionWithTimeoutIfNeeded();
     }
 
     /**
@@ -828,8 +832,6 @@ public class MagnificationController implements MagnificationConnectionManager.C
                 mMagnificationConnectionManager = new MagnificationConnectionManager(mContext,
                         mLock, this, mAms.getTraceManager(),
                         mScaleProvider);
-                mMagnificationConnectionManager.mConnectionStateChangedCallback =
-                        mAms::notifyMagnificationSystemUIConnectionChanged;
             }
             return mMagnificationConnectionManager;
         }

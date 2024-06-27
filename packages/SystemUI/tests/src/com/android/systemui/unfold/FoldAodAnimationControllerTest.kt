@@ -19,9 +19,9 @@ package com.android.systemui.unfold
 import android.hardware.devicestate.DeviceStateManager
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener
 import android.os.PowerManager
-import android.testing.AndroidTestingRunner
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.SysuiTestCase
@@ -56,7 +56,7 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class FoldAodAnimationControllerTest : SysuiTestCase() {
 

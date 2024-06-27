@@ -68,7 +68,6 @@ import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -1178,6 +1177,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void goToFullShade(long delay) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.goToFullShade(delay);
     }
 
@@ -1320,7 +1320,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         updateAlpha();
     }
 
-    void setMaxAlphaFromView(float alpha) {
+    /**
+     * Max alpha from the containing view. Used by brightness slider as an example.
+     */
+    public void setMaxAlphaFromView(float alpha) {
         mMaxAlphaFromView = alpha;
         updateAlpha();
     }

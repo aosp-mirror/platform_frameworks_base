@@ -48,8 +48,15 @@ internal fun CoroutineScope.animateToScene(
     }
 
     return when (transitionState) {
-        is TransitionState.Idle ->
-            animate(layoutState, target, transitionKey, isInitiatedByUserInput = false)
+        is TransitionState.Idle -> {
+            animate(
+                layoutState,
+                target,
+                transitionKey,
+                isInitiatedByUserInput = false,
+                replacedTransition = null,
+            )
+        }
         is TransitionState.Transition -> {
             val isInitiatedByUserInput = transitionState.isInitiatedByUserInput
 
@@ -79,6 +86,7 @@ internal fun CoroutineScope.animateToScene(
                         isInitiatedByUserInput,
                         initialProgress = progress,
                         initialVelocity = transitionState.progressVelocity,
+                        replacedTransition = transitionState,
                     )
                 }
             } else if (transitionState.fromScene == target) {
@@ -101,6 +109,7 @@ internal fun CoroutineScope.animateToScene(
                         initialProgress = progress,
                         initialVelocity = transitionState.progressVelocity,
                         reversed = true,
+                        replacedTransition = transitionState,
                     )
                 }
             } else {
@@ -109,8 +118,7 @@ internal fun CoroutineScope.animateToScene(
                     layoutState.transitions.interruptionHandler.onInterruption(
                         transitionState,
                         target,
-                    )
-                        ?: DefaultInterruptionHandler.onInterruption(transitionState, target)
+                    ) ?: DefaultInterruptionHandler.onInterruption(transitionState, target)
 
                 val animateFrom = interruptionResult.animateFrom
                 if (
@@ -138,6 +146,7 @@ internal fun CoroutineScope.animateToScene(
                     isInitiatedByUserInput,
                     fromScene = animateFrom,
                     chain = chain,
+                    replacedTransition = null,
                 )
             }
         }
@@ -149,6 +158,7 @@ private fun CoroutineScope.animate(
     targetScene: SceneKey,
     transitionKey: TransitionKey?,
     isInitiatedByUserInput: Boolean,
+    replacedTransition: TransitionState.Transition?,
     initialProgress: Float = 0f,
     initialVelocity: Float = 0f,
     reversed: Boolean = false,
@@ -159,26 +169,30 @@ private fun CoroutineScope.animate(
     val transition =
         if (reversed) {
             OneOffTransition(
+                key = transitionKey,
                 fromScene = targetScene,
                 toScene = fromScene,
                 currentScene = targetScene,
                 isInitiatedByUserInput = isInitiatedByUserInput,
                 isUserInputOngoing = false,
+                replacedTransition = replacedTransition,
             )
         } else {
             OneOffTransition(
+                key = transitionKey,
                 fromScene = fromScene,
                 toScene = targetScene,
                 currentScene = targetScene,
                 isInitiatedByUserInput = isInitiatedByUserInput,
                 isUserInputOngoing = false,
+                replacedTransition = replacedTransition,
             )
         }
 
     // Change the current layout state to start this new transition. This will compute the
     // TransformationSpec associated to this transition, which we need to initialize the Animatable
     // that will actually animate it.
-    layoutState.startTransition(transition, transitionKey, chain)
+    layoutState.startTransition(transition, chain)
 
     // The transition now contains the transformation spec that we should use to instantiate the
     // Animatable.
@@ -207,12 +221,14 @@ private fun CoroutineScope.animate(
 }
 
 private class OneOffTransition(
+    override val key: TransitionKey?,
     fromScene: SceneKey,
     toScene: SceneKey,
     override val currentScene: SceneKey,
     override val isInitiatedByUserInput: Boolean,
     override val isUserInputOngoing: Boolean,
-) : TransitionState.Transition(fromScene, toScene) {
+    replacedTransition: TransitionState.Transition?,
+) : TransitionState.Transition(fromScene, toScene, replacedTransition) {
     /**
      * The animatable used to animate this transition.
      *

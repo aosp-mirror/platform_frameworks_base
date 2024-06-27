@@ -79,7 +79,10 @@ class PolicyRequestProcessor(
     }
 
     /** Produce a new [ScreenshotData] using [CaptureParameters] */
-    suspend fun modify(original: ScreenshotData, updates: CaptureParameters): ScreenshotData {
+    private suspend fun modify(
+        original: ScreenshotData,
+        updates: CaptureParameters,
+    ): ScreenshotData {
         // Update and apply bitmap capture depending on the parameters.
         val updated =
             when (val type = updates.type) {
@@ -117,7 +120,7 @@ class PolicyRequestProcessor(
         return replaceWithScreenshot(
             original = original,
             componentName = topMainRootTask?.topActivity ?: defaultComponent,
-            owner = topMainRootTask?.userId?.let { UserHandle.of(it) } ?: defaultOwner,
+            owner = defaultOwner,
             displayId = original.displayId
         )
     }

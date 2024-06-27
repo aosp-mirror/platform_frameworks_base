@@ -16,10 +16,10 @@
 package com.android.keyguard
 
 import android.animation.Animator
-import android.testing.AndroidTestingRunner
 import android.transition.TransitionValues
 import android.view.View
 import android.view.ViewGroup
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardStatusViewController.SplitShadeTransitionAdapter
 import com.android.systemui.SysuiTestCase
@@ -32,7 +32,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class SplitShadeTransitionAdapterTest : SysuiTestCase() {
 
     @Mock private lateinit var KeyguardClockSwitchController: KeyguardClockSwitchController

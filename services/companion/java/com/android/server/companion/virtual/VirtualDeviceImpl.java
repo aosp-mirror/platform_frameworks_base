@@ -77,6 +77,8 @@ import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualRotaryEncoderConfig;
+import android.hardware.input.VirtualRotaryEncoderScrollEvent;
 import android.hardware.input.VirtualStylusButtonEvent;
 import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualStylusMotionEvent;
@@ -812,6 +814,26 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void createVirtualRotaryEncoder(@NonNull VirtualRotaryEncoderConfig config,
+            @NonNull IBinder deviceToken) {
+        super.createVirtualRotaryEncoder_enforcePermission();
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(deviceToken);
+        checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInputController.createRotaryEncoder(config.getInputDeviceName(), config.getVendorId(),
+                    config.getProductId(), deviceToken,
+                    getTargetDisplayIdForInput(config.getAssociatedDisplayId()));
+        } catch (InputController.DeviceCreationException e) {
+            throw new IllegalArgumentException(e);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void unregisterInputDevice(IBinder token) {
         super.unregisterInputDevice_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
@@ -947,6 +969,19 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public boolean sendRotaryEncoderScrollEvent(@NonNull IBinder token,
+            @NonNull VirtualRotaryEncoderScrollEvent event) {
+        super.sendRotaryEncoderScrollEvent_enforcePermission();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mInputController.sendRotaryEncoderScrollEvent(token, event);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void setShowPointerIcon(boolean showPointerIcon) {
         super.setShowPointerIcon_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
@@ -1055,7 +1090,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public int getVirtualCameraId(@NonNull VirtualCameraConfig cameraConfig)
+    public String getVirtualCameraId(@NonNull VirtualCameraConfig cameraConfig)
             throws RemoteException {
         super.getVirtualCameraId_enforcePermission();
         Objects.requireNonNull(cameraConfig);

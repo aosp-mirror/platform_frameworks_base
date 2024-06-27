@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.shade.ui.viewmodel
 
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 
 val Kosmos.overlayShadeViewModel: OverlayShadeViewModel by
     Kosmos.Fixture {
         OverlayShadeViewModel(
             applicationScope = applicationCoroutineScope,
             sceneInteractor = sceneInteractor,
-            deviceEntryInteractor = deviceEntryInteractor,
+            shadeInteractor = shadeInteractor,
         )
     }

@@ -125,6 +125,29 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Nhấn để xem"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Có lỗi xảy ra khi lưu video ghi màn hình"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Lỗi khi bắt đầu ghi màn hình"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Bạn sẽ dừng ghi âm nội dung của &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Bạn sẽ dừng chia sẻ nội dung của &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Bạn sẽ dừng truyền nội dung của &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Trình ghi sự cố"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Đang xử lý bản ghi sự cố"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Thông báo hiển thị liên tục cho một phiên thu thập sự cố"</string>
@@ -135,7 +158,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Đã xảy ra lỗi khi lưu bản ghi sự cố"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Đã xảy ra lỗi khi bắt đầu ghi sự cố"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Xem toàn màn hình"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"Để thoát, hãy vuốt từ trên cùng xuống dưới."</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Tôi hiểu"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Quay lại"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Trang chủ"</string>
@@ -247,7 +271,7 @@
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Không làm phiền."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth bật."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Báo thức được đặt cho <xliff:g id="TIME">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Chuông báo được đặt cho <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Nhiều thời gian hơn."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Ít thời gian hơn."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Đã ngừng truyền màn hình."</string>
@@ -278,11 +302,12 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Đã lưu"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ngắt kết nối"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"kích hoạt"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Tự động bật lại vào ngày mai"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Các tính năng như Chia sẻ nhanh và Tìm thiết bị của tôi đều sử dụng Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth sẽ bật vào sáng mai"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Chia sẻ âm thanh"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Đang chia sẻ âm thanh"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Chia sẻ âm thanh"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Đang chia sẻ âm thanh"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> pin"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Âm thanh"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Tai nghe"</string>
@@ -361,13 +386,13 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Bạn gặp loại vấn đề gì khi dùng thiết bị?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Chọn loại vấn đề"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Ghi màn hình"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"Hiệu suất"</item>
-    <item msgid="1627504621139124393">"Giao diện người dùng"</item>
-    <item msgid="8309220355268900335">"Pin"</item>
-  </string-array>
+    <string name="performance" msgid="6552785217174378320">"Hiệu suất"</string>
+    <string name="user_interface" msgid="3712869377953950887">"Giao diện người dùng"</string>
+    <string name="thermal" msgid="6758074791325414831">"Nhiệt"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Chế độ một tay"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Thiết bị trợ thính"</string>
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Đang hoạt động"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Đã ngắt kết nối"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Thiết bị trợ thính"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Ghép nối thiết bị mới"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Nhấp để ghép nối thiết bị mới"</string>
@@ -465,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"chọn tiện ích"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"xoá tiện ích"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"đặt tiện ích đã chọn vào vị trí"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Chuyển đổi người dùng"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"trình đơn kéo xuống"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tất cả ứng dụng và dữ liệu trong phiên này sẽ bị xóa."</string>
@@ -518,6 +549,12 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Bắt đầu ngay"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Không có thông báo nào"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Không có thông báo mới"</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (5720882373252389461) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (4260536236101821273) -->
+    <skip />
+    <!-- no translation found for go_to_adaptive_notification_settings (2423690125178298479) -->
+    <skip />
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Mở khoá để xem thông báo cũ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Thiết bị này do cha mẹ của bạn quản lý"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Tổ chức của bạn sở hữu thiết bị này và có thể giám sát lưu lượng truy cập mạng"</string>
@@ -594,11 +631,11 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Không, cảm ơn"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Đã ghim ứng dụng"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Đã bỏ ghim ứng dụng"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Gọi"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Cuộc gọi"</string>
     <string name="stream_system" msgid="7663148785370565134">"Hệ thống"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Chuông"</string>
     <string name="stream_music" msgid="2188224742361847580">"Nội dung nghe nhìn"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"Báo thức"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"Chuông báo"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Thông báo"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Tần số đa chuông kép"</string>
@@ -642,7 +679,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"Bật chế độ trình diễn"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Hiển thị chế độ trình diễn"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Báo thức"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Chuông báo"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Ví"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Thiết lập để mua hàng nhanh hơn và an toàn hơn bằng điện thoại"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hiện tất cả"</string>
@@ -655,7 +692,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Đang cập nhật"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Hồ sơ công việc"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ trên máy bay"</string>
-    <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy báo thức tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
+    <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy chuông báo tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
     <string name="alarm_template" msgid="2234991538018805736">"lúc <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"vào <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Điểm phát sóng"</string>
@@ -727,11 +764,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Nút <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Quay lại"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Mũi tên lên"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Mũi tên xuống"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Mũi tên trái"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Mũi tên phải"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Giữa"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Dấu cách"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
@@ -761,7 +793,7 @@
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"hoặc"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Xoá cụm từ tìm kiếm"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Phím tắt"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Lối tắt tìm kiếm"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Tìm lối tắt"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Không tìm thấy lối tắt"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Hệ thống"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Đầu vào"</string>
@@ -933,7 +965,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Ứng dụng đang chạy trong nền"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Tắt dữ liệu di động?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Bạn sẽ không có quyền sử dụng dữ liệu hoặc truy cập Internet thông qua chế độ <xliff:g id="CARRIER">%s</xliff:g>. Bạn chỉ có thể truy cập Internet thông qua Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Bạn sẽ không có quyền sử dụng dữ liệu hoặc truy cập Internet thông qua mạng <xliff:g id="CARRIER">%s</xliff:g>. Bạn chỉ có thể truy cập Internet thông qua Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"nhà mạng của bạn"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Chuyển về <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Dữ liệu di động sẽ không tự động chuyển dựa trên tình trạng phủ sóng"</string>
@@ -1178,6 +1210,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Nhấn để biết thêm thông tin"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Chưa đặt chuông báo"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"nhập phương thức mở khoá màn hình"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Hãy chạm vào cảm biến vân tay. Đó là nút ngắn ở cạnh bên của điện thoại"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Cảm biến vân tay"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"xác thực"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"truy cập thiết bị"</string>
@@ -1275,7 +1308,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"gập"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"mở"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Còn <xliff:g id="PERCENTAGE">%s</xliff:g> pin"</string>
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"Mức pin bút cảm ứng <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Hãy kết nối bút cảm ứng với bộ sạc"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bút cảm ứng bị yếu pin"</string>
     <string name="video_camera" msgid="7654002575156149298">"Máy quay video"</string>
@@ -1318,23 +1351,31 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) đã dùng gần đây"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) đang dùng"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) đã dùng gần đây"</string>
-    <!-- no translation found for shortcut_helper_category_system (462110876978937359) -->
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"Hệ thống"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Đa nhiệm"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Phương thức nhập"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Lối tắt ứng dụng"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Hỗ trợ tiếp cận"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"Phím tắt"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Lối tắt tìm kiếm"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Biểu tượng Thu gọn"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Biểu tượng Mở rộng"</string>
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"hoặc"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
     <skip />
-    <!-- no translation found for shortcut_helper_category_multitasking (7413381961404090136) -->
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
     <skip />
-    <!-- no translation found for shortcut_helper_category_input (8674018654124839566) -->
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
-    <!-- no translation found for shortcut_helper_category_app_shortcuts (8010249408308587117) -->
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
-    <!-- no translation found for shortcut_helper_category_a11y (6314444792641773464) -->
+    <!-- no translation found for touchpad_back_gesture_action_title (7199067250654332735) -->
     <skip />
-    <!-- no translation found for shortcut_helper_title (8567500639300970049) -->
+    <!-- no translation found for touchpad_back_gesture_guidance (4222430588599527272) -->
     <skip />
-    <!-- no translation found for shortcut_helper_search_placeholder (5488547526269871819) -->
+    <!-- no translation found for touchpad_back_gesture_animation_content_description (2646107450922379918) -->
     <skip />
-    <!-- no translation found for shortcut_helper_content_description_collapse_icon (8028015738431664954) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_expand_icon (1084435697860417390) -->
+    <!-- no translation found for touchpad_back_gesture_screen_animation_content_description (4036267494237748710) -->
     <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Đèn nền bàn phím"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Độ sáng %1$d/%2$d"</string>

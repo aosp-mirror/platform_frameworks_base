@@ -31,11 +31,20 @@ import java.util.Date;
 public abstract class SystemConditionProviderService extends ConditionProviderService {
 
     abstract public void dump(PrintWriter pw, DumpFilter filter);
-    abstract public void attachBase(Context context);
-    abstract public IConditionProvider asInterface();
-    abstract public ComponentName getComponent();
     abstract public boolean isValidConditionId(Uri id);
     abstract public void onBootComplete();
+
+    final ComponentName getComponent() {
+        return new ComponentName("android", this.getClass().getName());
+    }
+
+    final IConditionProvider asInterface() {
+        return (IConditionProvider) onBind(null);
+    }
+
+    final void attachBase(Context context) {
+        attachBaseContext(context);
+    }
 
     protected static String ts(long time) {
         return new Date(time) + " (" + time + ")";

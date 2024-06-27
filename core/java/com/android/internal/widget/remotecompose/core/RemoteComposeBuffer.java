@@ -19,6 +19,7 @@ import com.android.internal.widget.remotecompose.core.operations.BitmapData;
 import com.android.internal.widget.remotecompose.core.operations.ClickArea;
 import com.android.internal.widget.remotecompose.core.operations.ClipPath;
 import com.android.internal.widget.remotecompose.core.operations.ClipRect;
+import com.android.internal.widget.remotecompose.core.operations.ColorExpression;
 import com.android.internal.widget.remotecompose.core.operations.DrawArc;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmap;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmapInt;
@@ -28,9 +29,12 @@ import com.android.internal.widget.remotecompose.core.operations.DrawOval;
 import com.android.internal.widget.remotecompose.core.operations.DrawPath;
 import com.android.internal.widget.remotecompose.core.operations.DrawRect;
 import com.android.internal.widget.remotecompose.core.operations.DrawRoundRect;
+import com.android.internal.widget.remotecompose.core.operations.DrawText;
+import com.android.internal.widget.remotecompose.core.operations.DrawTextAnchored;
 import com.android.internal.widget.remotecompose.core.operations.DrawTextOnPath;
-import com.android.internal.widget.remotecompose.core.operations.DrawTextRun;
 import com.android.internal.widget.remotecompose.core.operations.DrawTweenPath;
+import com.android.internal.widget.remotecompose.core.operations.FloatConstant;
+import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.Header;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRotate;
@@ -43,8 +47,12 @@ import com.android.internal.widget.remotecompose.core.operations.PathData;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.RootContentDescription;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
+import com.android.internal.widget.remotecompose.core.operations.TextFromFloat;
+import com.android.internal.widget.remotecompose.core.operations.TextMerge;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
+import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
+import com.android.internal.widget.remotecompose.core.operations.utilities.easing.FloatAnimation;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,9 +66,20 @@ import java.util.Arrays;
  * Provides an abstract buffer to encode/decode RemoteCompose operations
  */
 public class RemoteComposeBuffer {
+    public static final int EASING_CUBIC_STANDARD = FloatAnimation.CUBIC_STANDARD;
+    public static final int EASING_CUBIC_ACCELERATE = FloatAnimation.CUBIC_ACCELERATE;
+    public static final int EASING_CUBIC_DECELERATE = FloatAnimation.CUBIC_DECELERATE;
+    public static final int EASING_CUBIC_LINEAR = FloatAnimation.CUBIC_LINEAR;
+    public static final int EASING_CUBIC_ANTICIPATE = FloatAnimation.CUBIC_ANTICIPATE;
+    public static final int EASING_CUBIC_OVERSHOOT = FloatAnimation.CUBIC_OVERSHOOT;
+    public static final int EASING_CUBIC_CUSTOM = FloatAnimation.CUBIC_CUSTOM;
+    public static final int EASING_SPLINE_CUSTOM = FloatAnimation.SPLINE_CUSTOM;
+    public static final int EASING_EASE_OUT_BOUNCE = FloatAnimation.EASE_OUT_BOUNCE;
+    public static final int EASING_EASE_OUT_ELASTIC = FloatAnimation.EASE_OUT_ELASTIC;
     WireBuffer mBuffer = new WireBuffer();
     Platform mPlatform = null;
     RemoteComposeState mRemoteComposeState;
+    private static final boolean DEBUG = false;
 
     /**
      * Provides an abstract buffer to encode/decode RemoteCompose operations
@@ -171,7 +190,7 @@ public class RemoteComposeBuffer {
      *
      * @param text the string to inject in the buffer
      */
-    int addText(String text) {
+    public int addText(String text) {
         int id = mRemoteComposeState.dataGetId(text);
         if (id == -1) {
             id = mRemoteComposeState.cache(text);
@@ -350,7 +369,6 @@ public class RemoteComposeBuffer {
         addDrawPath(id);
     }
 
-
     /**
      * Draw the specified path
      *
@@ -426,9 +444,157 @@ public class RemoteComposeBuffer {
                                float y,
                                boolean rtl) {
         int textId = addText(text);
-        DrawTextRun.COMPANION.apply(
+        DrawText.COMPANION.apply(
                 mBuffer, textId, start, end,
                 contextStart, contextEnd, x, y, rtl);
+    }
+
+    /**
+     * Draw the text, with origin at (x,y). The origin is interpreted
+     * based on the Align setting in the paint.
+     *
+     * @param textId       The text to be drawn
+     * @param start        The index of the first character in text to draw
+     * @param end          (end - 1) is the index of the last character in text to draw
+     * @param contextStart
+     * @param contextEnd
+     * @param x            The x-coordinate of the origin of the text being drawn
+     * @param y            The y-coordinate of the baseline of the text being drawn
+     * @param rtl          Draw RTTL
+     */
+    public void addDrawTextRun(int textId,
+                               int start,
+                               int end,
+                               int contextStart,
+                               int contextEnd,
+                               float x,
+                               float y,
+                               boolean rtl) {
+        DrawText.COMPANION.apply(
+                mBuffer, textId, start, end,
+                contextStart, contextEnd, x, y, rtl);
+    }
+
+    /**
+     * Draw a text on canvas at relative to position (x, y),
+     * offset panX and panY.
+     * <br>
+     * The panning factors (panX, panY)  mapped to the
+     * resulting bounding box of the text, in such a way that a
+     * panning factor of (0.0, 0.0) would center the text at (x, y)
+     * <ul>
+     * <li> Panning of -1.0, -1.0 - the text above & right of x,y.</li>
+     * <li>Panning of  1.0,  1.0 - the text is below and to the left</li>
+     * <li>Panning of  1.0,  0.0 - the test is centered & to the right of x,y</li>
+     * </ul>
+     * Setting panY to NaN results in y being the baseline of the text.
+     *
+     * @param text  text to draw
+     * @param x     Coordinate of the Anchor
+     * @param y     Coordinate of the Anchor
+     * @param panX  justifies text -1.0=right, 0.0=center, 1.0=left
+     * @param panY  position text -1.0=above, 0.0=center, 1.0=below, Nan=baseline
+     * @param flags 1 = RTL
+     */
+    public void drawTextAnchored(String text,
+                                 float x,
+                                 float y,
+                                 float panX,
+                                 float panY,
+                                 int flags) {
+        int textId = addText(text);
+        DrawTextAnchored.COMPANION.apply(
+                mBuffer, textId,
+                x, y,
+                panX, panY,
+                flags);
+    }
+
+    /**
+     * Add a text and id so that it can be used
+     *
+     * @param text
+     * @return
+     */
+    public int createTextId(String text) {
+        return addText(text);
+    }
+
+    /**
+     * Merge two text (from id's) output one id
+     * @param id1 left id
+     * @param id2 right id
+     * @return new id that merges the two text
+     */
+    public int textMerge(int id1, int id2) {
+        int textId = addText(id1 + "+" + id2);
+        TextMerge.COMPANION.apply(mBuffer, textId, id1, id2);
+        return textId;
+    }
+
+    public static final int PAD_AFTER_SPACE = TextFromFloat.PAD_AFTER_SPACE;
+    public static final int PAD_AFTER_NONE = TextFromFloat.PAD_AFTER_NONE;
+    public static final int PAD_AFTER_ZERO = TextFromFloat.PAD_AFTER_ZERO;
+    public static final int PAD_PRE_SPACE = TextFromFloat.PAD_PRE_SPACE;
+    public static final int PAD_PRE_NONE = TextFromFloat.PAD_PRE_NONE;
+    public static final int PAD_PRE_ZERO = TextFromFloat.PAD_PRE_ZERO;
+
+    /**
+     * Create a TextFromFloat command which creates text from a Float.
+     *
+     * @param value        The value to convert
+     * @param digitsBefore the digits before the decimal point
+     * @param digitsAfter  the digits after the decimal point
+     * @param flags        configure the behaviour using PAD_PRE_* and PAD_AFTER* flags
+     * @return id of the string that can be passed to drawTextAnchored
+     */
+    public int createTextFromFloat(float value, short digitsBefore,
+                                   short digitsAfter, int flags) {
+        String placeHolder = Utils.floatToString(value)
+                + "(" + digitsBefore + "," + digitsAfter + "," + flags + ")";
+        int id = mRemoteComposeState.dataGetId(placeHolder);
+        if (id == -1) {
+            id = mRemoteComposeState.cache(placeHolder);
+            //   TextData.COMPANION.apply(mBuffer, id, text);
+        }
+        TextFromFloat.COMPANION.apply(mBuffer, id, value, digitsBefore,
+                digitsAfter, flags);
+        return id;
+    }
+
+    /**
+     * Draw a text on canvas at relative to position (x, y),
+     * offset panX and panY.
+     * <br>
+     * The panning factors (panX, panY)  mapped to the
+     * resulting bounding box of the text, in such a way that a
+     * panning factor of (0.0, 0.0) would center the text at (x, y)
+     * <ul>
+     * <li> Panning of -1.0, -1.0 - the text above & right of x,y.</li>
+     * <li>Panning of  1.0,  1.0 - the text is below and to the left</li>
+     * <li>Panning of  1.0,  0.0 - the test is centered & to the right of x,y</li>
+     * </ul>
+     * Setting panY to NaN results in y being the baseline of the text.
+     *
+     * @param textId text to draw
+     * @param x      Coordinate of the Anchor
+     * @param y      Coordinate of the Anchor
+     * @param panX   justifies text -1.0=right, 0.0=center, 1.0=left
+     * @param panY   position text -1.0=above, 0.0=center, 1.0=below, Nan=baseline
+     * @param flags  1 = RTL
+     */
+    public void drawTextAnchored(int textId,
+                                 float x,
+                                 float y,
+                                 float panX,
+                                 float panY,
+                                 int flags) {
+
+        DrawTextAnchored.COMPANION.apply(
+                mBuffer, textId,
+                x, y,
+                panX, panY,
+                flags);
     }
 
     /**
@@ -490,6 +656,10 @@ public class RemoteComposeBuffer {
         return id;
     }
 
+    /**
+     * Adds a paint Bundle to the doc
+     * @param paint
+     */
     public void addPaint(PaintBundle paint) {
         PaintData.COMPANION.apply(mBuffer, paint);
     }
@@ -499,7 +669,9 @@ public class RemoteComposeBuffer {
         mBuffer.setIndex(0);
         while (mBuffer.available()) {
             int opId = mBuffer.readByte();
-            System.out.println(">>> " + opId);
+            if (DEBUG) {
+                Utils.log(">> " + opId);
+            }
             CompanionOperation operation = Operations.map.get(opId);
             if (operation == null) {
                 throw new RuntimeException("Unknown operation encountered " + opId);
@@ -518,7 +690,6 @@ public class RemoteComposeBuffer {
     public void setTheme(int theme) {
         Theme.COMPANION.apply(mBuffer, theme);
     }
-
 
     static String version() {
         return "v1.0";
@@ -654,8 +825,8 @@ public class RemoteComposeBuffer {
     /**
      * Add a pre-concat of the current matrix with the specified scale.
      *
-     * @param scaleX  The amount to scale in X
-     * @param scaleY  The amount to scale in Y
+     * @param scaleX The amount to scale in X
+     * @param scaleY The amount to scale in Y
      */
     public void addMatrixScale(float scaleX, float scaleY) {
         MatrixScale.COMPANION.apply(mBuffer, scaleX, scaleY, Float.NaN, Float.NaN);
@@ -673,12 +844,174 @@ public class RemoteComposeBuffer {
         MatrixScale.COMPANION.apply(mBuffer, scaleX, scaleY, centerX, centerY);
     }
 
+    /**
+     * sets the clip based on clip id
+     * @param pathId 0 clears the clip
+     */
     public void addClipPath(int pathId) {
         ClipPath.COMPANION.apply(mBuffer, pathId);
     }
 
+    /**
+     * Sets the clip based on clip rec
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     */
     public void addClipRect(float left, float top, float right, float bottom) {
         ClipRect.COMPANION.apply(mBuffer, left, top, right, bottom);
     }
+
+    /**
+     * Add a float return a NaN number pointing to that float
+     * @param value
+     * @return
+     */
+    public float addFloat(float value) {
+        int id = mRemoteComposeState.cacheFloat(value);
+        FloatConstant.COMPANION.apply(mBuffer, id, value);
+        return Utils.asNan(id);
+    }
+
+    /**
+     * Add a float that is a computation based on variables
+     * @param value A RPN style float operation i.e. "4, 3, ADD" outputs 7
+     * @return NaN id of the result of the calculation
+     */
+    public float addAnimatedFloat(float... value) {
+        int id = mRemoteComposeState.cache(value);
+        FloatExpression.COMPANION.apply(mBuffer, id, value, null);
+        return Utils.asNan(id);
+    }
+
+    /**
+     * Add a float that is a computation based on variables.
+     * see packAnimation
+     * @param value A RPN style float operation i.e. "4, 3, ADD" outputs 7
+     * @param animation Array of floats that represents animation
+     * @return NaN id of the result of the calculation
+     */
+    public float addAnimatedFloat(float[] value, float[] animation) {
+        int id = mRemoteComposeState.cache(value);
+        FloatExpression.COMPANION.apply(mBuffer, id, value, animation);
+        return Utils.asNan(id);
+    }
+
+    /**
+     * Add a color that represents the tween between two colors
+     * @param color1
+     * @param color2
+     * @param tween
+     * @return id of the color (color ids are short)
+     */
+    public short addColorExpression(int color1, int color2, float tween) {
+        ColorExpression c = new ColorExpression(0, 0, color1, color2, tween);
+        short id = (short) mRemoteComposeState.cache(c);
+        c.mId = id;
+        c.write(mBuffer);
+        return id;
+    }
+
+    /**
+     * Add a color that represents the tween between two colors where color1
+     * is the id of a color
+     * @param color1
+     * @param color2
+     * @param tween
+     * @return id of the color (color ids are short)
+     */
+    public short addColorExpression(short color1, int color2, float tween) {
+        ColorExpression c = new ColorExpression(0, 1, color1, color2, tween);
+        short id = (short) mRemoteComposeState.cache(c);
+        c.mId = id;
+        c.write(mBuffer);
+        return id;
+    }
+
+    /**
+     * Add a color that represents the tween between two colors where color2
+     * is the id of a color
+     * @param color1
+     * @param color2
+     * @param tween
+     * @return id of the color (color ids are short)
+     */
+    public short addColorExpression(int color1, short color2, float tween) {
+        ColorExpression c = new ColorExpression(0, 2, color1, color2, tween);
+        short id = (short) mRemoteComposeState.cache(c);
+        c.mId = id;
+        c.write(mBuffer);
+        return id;
+    }
+
+    /**
+     * Add a color that represents the tween between two colors where color1 &
+     * color2 are the ids of colors
+     * @param color1
+     * @param color2
+     * @param tween
+     * @return id of the color (color ids are short)
+     */
+    public short addColorExpression(short color1, short color2, float tween) {
+        ColorExpression c = new ColorExpression(0, 3, color1, color2, tween);
+        short id = (short) mRemoteComposeState.cache(c);
+        c.mId = id;
+        c.write(mBuffer);
+        return id;
+    }
+
+    /**
+     *  Color calculated by Hue saturation and value.
+     *  (as floats they can be variables used to create color transitions)
+     * @param hue
+     * @param sat
+     * @param value
+     * @return id of the color (color ids are short)
+     */
+    public short addColorExpression(float hue, float sat, float value) {
+        ColorExpression c = new ColorExpression(0, hue, sat, value);
+        short id = (short) mRemoteComposeState.cache(c);
+        c.mId = id;
+        c.write(mBuffer);
+        return id;
+    }
+
+    /**
+     * Color calculated by Alpha, Hue saturation and value.
+     * (as floats they can be variables used to create color transitions)
+     * @param alpha
+     * @param hue
+     * @param sat
+     * @param value
+     * @return id of the color (color ids are short)
+     */
+    public short addColorExpression(int alpha, float hue, float sat, float value) {
+        ColorExpression c = new ColorExpression(0, alpha, hue, sat, value);
+        short id = (short) mRemoteComposeState.cache(c);
+        c.mId = id;
+        c.write(mBuffer);
+        return id;
+    }
+
+    /**
+     * create and animation based on description and return as an array of
+     * floats. see addAnimatedFloat
+     * @param duration
+     * @param type
+     * @param spec
+     * @param initialValue
+     * @param wrap
+     * @return
+     */
+    public static float[] packAnimation(float duration,
+                                        int type,
+                                        float[] spec,
+                                        float initialValue,
+                                        float wrap) {
+
+        return FloatAnimation.packToFloatArray(duration, type, spec, initialValue, wrap);
+    }
+
 }
 

@@ -274,7 +274,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             mVirtualDeviceManagerInternal =
                     LocalServices.getService(VirtualDeviceManagerInternal.class);
         }
-        return mVirtualDeviceManagerInternal.getPersistentIdForDevice(deviceId);
+        return mVirtualDeviceManagerInternal == null
+                ? VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT
+                : mVirtualDeviceManagerInternal.getPersistentIdForDevice(deviceId);
     }
 
     @Override

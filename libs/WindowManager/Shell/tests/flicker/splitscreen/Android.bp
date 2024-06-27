@@ -37,14 +37,48 @@ filegroup {
         "src/**/B*.kt",
         "src/**/C*.kt",
         "src/**/D*.kt",
-        "src/**/E*.kt",
     ],
 }
 
 filegroup {
     name: "WMShellFlickerTestsSplitScreenGroup2-src",
     srcs: [
+        "src/**/E*.kt",
+    ],
+}
+
+filegroup {
+    name: "WMShellFlickerTestsSplitScreenGroup3-src",
+    srcs: [
+        "src/**/S*.kt",
+    ],
+}
+
+filegroup {
+    name: "WMShellFlickerTestsSplitScreenGroupOther-src",
+    srcs: [
         "src/**/*.kt",
+    ],
+}
+
+java_library {
+    name: "WMShellFlickerTestsSplitScreenBase",
+    srcs: [
+        ":WMShellFlickerTestsSplitScreenBase-src",
+    ],
+    static_libs: [
+        "WMShellFlickerTestsBase",
+        "wm-shell-flicker-utils",
+        "androidx.test.ext.junit",
+        "flickertestapplib",
+        "flickerlib",
+        "flickerlib-helpers",
+        "flickerlib-trace_processor_shell",
+        "platform-test-annotations",
+        "wm-flicker-common-app-helpers",
+        "wm-flicker-common-assertions",
+        "launcher-helper-lib",
+        "launcher-aosp-tapl",
     ],
 }
 
@@ -56,25 +90,67 @@ android_test {
     instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
     test_config_template: "AndroidTestTemplate.xml",
     srcs: [
-        ":WMShellFlickerTestsSplitScreenBase-src",
         ":WMShellFlickerTestsSplitScreenGroup1-src",
     ],
-    static_libs: ["WMShellFlickerTestsBase"],
+    static_libs: [
+        "WMShellFlickerTestsBase",
+        "WMShellFlickerTestsSplitScreenBase",
+    ],
     data: ["trace_config/*"],
 }
 
 android_test {
     name: "WMShellFlickerTestsSplitScreenGroup2",
+    defaults: ["WMShellFlickerTestsDefault"],
     manifest: "AndroidManifest.xml",
     package_name: "com.android.wm.shell.flicker.splitscreen",
     instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: [
-        ":WMShellFlickerTestsSplitScreenBase-src",
-        ":WMShellFlickerTestsSplitScreenGroup2-src",
+        ":WMShellFlickerTestsSplitScreenGroup1-src",
+    ],
+    static_libs: [
+        "WMShellFlickerTestsBase",
+        "WMShellFlickerTestsSplitScreenBase",
+    ],
+    data: ["trace_config/*"],
+}
+
+android_test {
+    name: "WMShellFlickerTestsSplitScreenGroup3",
+    defaults: ["WMShellFlickerTestsDefault"],
+    manifest: "AndroidManifest.xml",
+    package_name: "com.android.wm.shell.flicker.splitscreen",
+    instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
+    test_config_template: "AndroidTestTemplate.xml",
+    srcs: [
+        ":WMShellFlickerTestsSplitScreenGroup1-src",
+    ],
+    static_libs: [
+        "WMShellFlickerTestsBase",
+        "WMShellFlickerTestsSplitScreenBase",
+    ],
+    data: ["trace_config/*"],
+}
+
+android_test {
+    name: "WMShellFlickerTestsSplitScreenGroupOther",
+    defaults: ["WMShellFlickerTestsDefault"],
+    manifest: "AndroidManifest.xml",
+    package_name: "com.android.wm.shell.flicker.splitscreen",
+    instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
+    test_config_template: "AndroidTestTemplate.xml",
+    srcs: [
+        ":WMShellFlickerTestsSplitScreenGroupOther-src",
     ],
     exclude_srcs: [
         ":WMShellFlickerTestsSplitScreenGroup1-src",
+        ":WMShellFlickerTestsSplitScreenGroup2-src",
+        ":WMShellFlickerTestsSplitScreenGroup3-src",
     ],
-    static_libs: ["WMShellFlickerTestsBase"],
+    static_libs: [
+        "WMShellFlickerTestsBase",
+        "WMShellFlickerTestsSplitScreenBase",
+    ],
     data: ["trace_config/*"],
 }

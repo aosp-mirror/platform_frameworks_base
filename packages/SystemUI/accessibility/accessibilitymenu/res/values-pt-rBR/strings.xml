@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Menu de acessibilidade"</string>
-    <string name="accessibility_menu_intro" msgid="3164193281544042394">"\"Acessibilidade\" é um menu grande mostrado na tela para controlar seu dispositivo. Você pode bloquear o dispositivo, controlar o volume e o brilho, fazer capturas de tela e muito mais."</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"Com este menu de tamanho grande na tela, você consegue bloquear o dispositivo, ajustar o volume e o brilho, fazer capturas de tela, entre outras funções de controle do aparelho."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistente"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Google Assistente"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Configurações de acessibilidade"</string>

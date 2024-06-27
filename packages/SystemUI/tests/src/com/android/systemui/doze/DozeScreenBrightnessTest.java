@@ -45,8 +45,8 @@ import android.content.Intent;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -71,7 +71,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Optional;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class DozeScreenBrightnessTest extends SysuiTestCase {
 
     private static final int DEFAULT_BRIGHTNESS = 10;

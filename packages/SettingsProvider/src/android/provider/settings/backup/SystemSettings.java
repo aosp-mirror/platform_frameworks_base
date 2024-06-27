@@ -79,6 +79,8 @@ public class SystemSettings {
                 Settings.System.SIP_CALL_OPTIONS,
                 Settings.System.SIP_RECEIVE_CALLS,
                 Settings.System.POINTER_SPEED,
+                Settings.System.POINTER_FILL_STYLE,
+                Settings.System.POINTER_SCALE,
                 Settings.System.VIBRATE_ON,
                 Settings.System.VIBRATE_WHEN_RINGING,
                 Settings.System.RINGTONE,

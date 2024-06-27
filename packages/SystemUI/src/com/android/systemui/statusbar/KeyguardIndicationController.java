@@ -20,6 +20,7 @@ import static android.adaptiveauth.Flags.enableAdaptiveAuth;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_MANAGEMENT_DISCLOSURE;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_START;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIMEOUT;
 import static android.hardware.biometrics.BiometricSourceType.FACE;
@@ -383,6 +384,11 @@ public class KeyguardIndicationController {
         mKeyguardStateController.addCallback(mKeyguardStateCallback);
 
         mStatusBarStateListener.onDozingChanged(mStatusBarStateController.isDozing());
+    }
+
+    @Nullable
+    public ViewGroup getIndicationArea() {
+        return mIndicationArea;
     }
 
     public void setIndicationArea(ViewGroup indicationArea) {
@@ -1296,6 +1302,12 @@ public class KeyguardIndicationController {
         @Override
         public void onBiometricAcquired(BiometricSourceType biometricSourceType, int acquireInfo) {
             if (biometricSourceType == FACE) {
+                if (acquireInfo == FACE_ACQUIRED_START) {
+                    // Let's hide any previous messages when authentication starts, otherwise
+                    // multiple auth attempts would overlap.
+                    hideBiometricMessage();
+                    mBiometricErrorMessageToShowOnScreenOn = null;
+                }
                 mFaceAcquiredMessageDeferral.processFrame(acquireInfo);
             }
         }
@@ -1485,13 +1497,6 @@ public class KeyguardIndicationController {
         @Override
         public void onBiometricRunningStateChanged(boolean running,
                 BiometricSourceType biometricSourceType) {
-            if (running && biometricSourceType == FACE) {
-                // Let's hide any previous messages when authentication starts, otherwise
-                // multiple auth attempts would overlap.
-                hideBiometricMessage();
-                mBiometricErrorMessageToShowOnScreenOn = null;
-            }
-
             if (!running && biometricSourceType == FACE) {
                 showTrustAgentErrorMessage(mTrustAgentErrorMessage);
             }
@@ -1630,6 +1635,7 @@ public class KeyguardIndicationController {
                         "skip showing FACE_ERROR_TIMEOUT due to co-ex logic");
             }
         } else if (deferredFaceMessage != null) {
+            mBouncerMessageInteractor.setFaceAcquisitionMessage(deferredFaceMessage.toString());
             // Face-only: The face timeout message is not very actionable, let's ask the
             // user to manually retry.
             showBiometricMessage(
@@ -1663,11 +1669,6 @@ public class KeyguardIndicationController {
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
-        @Override
-        public void onStateChanged(int newState) {
-            setVisible(newState == StatusBarState.KEYGUARD);
-        }
-
         @Override
         public void onDozingChanged(boolean dozing) {
             if (mDozing == dozing) {
