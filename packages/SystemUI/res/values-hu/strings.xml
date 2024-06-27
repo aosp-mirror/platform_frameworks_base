@@ -129,24 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Le fogja állítani a(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; rögzítését"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Le fogja állítani a(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; megosztását"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
-    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Le fogja állítani a(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; átküldését"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -309,10 +306,8 @@
     <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Egyes funkciók (például a Quick Share és a Készülékkereső) Bluetootht használnak"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"A Bluetooth holnap reggel bekapcsol"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Hang megosztása"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Hang megosztása…"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Akkumulátor: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Hang"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -331,7 +326,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Felhasználó"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Használhatók hálózatok"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Elérhető hálózatok"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nem használhatók hálózatok"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Nincs elérhető Wi-Fi-hálózat"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Bekapcsolás…"</string>
@@ -495,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"modul kiválasztása"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"modul törlése"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"kijelölt modul áthelyezése"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Felhasználóváltás"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"lehúzható menü"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"A munkamenetben található összes alkalmazás és adat törlődni fog."</string>
@@ -548,6 +549,12 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Indítás most"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nincs értesítés"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nincsenek új értesítések"</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (5720882373252389461) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (4260536236101821273) -->
+    <skip />
+    <!-- no translation found for go_to_adaptive_notification_settings (2423690125178298479) -->
+    <skip />
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"A régebbiek feloldás után láthatók"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Az eszközt a szülőd felügyeli"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Az eszköz az Ön szervezetének tulajdonában van, és lehetséges, hogy a hálózati forgalmat is figyelik"</string>
@@ -1203,8 +1210,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Koppintással további információkat érhet el."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nincs ébresztés"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"képernyőzár megadása"</string>
-    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
-    <skip />
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Érintse meg az ujjlenyomat-érzékelőt. Ez a rövidebb gomb a telefon oldalán."</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Ujjlenyomat-érzékelő"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"a hitelesítéshez"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"eszköz megadásához"</string>
@@ -1362,6 +1368,14 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_action_title (7199067250654332735) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_guidance (4222430588599527272) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_animation_content_description (2646107450922379918) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_screen_animation_content_description (4036267494237748710) -->
     <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"A billentyűzet háttérvilágítása"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Fényerő: %2$d/%1$d"</string>

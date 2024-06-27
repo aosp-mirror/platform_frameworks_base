@@ -18,16 +18,16 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTouchHandlingInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-/** Models UI state to support the lock screen long-press feature. */
+/** Models UI state to support top-level touch handling in the lock screen. */
 @SysUISingleton
-class KeyguardLongPressViewModel
+class KeyguardTouchHandlingViewModel
 @Inject
 constructor(
-    private val interactor: KeyguardLongPressInteractor,
+    private val interactor: KeyguardTouchHandlingInteractor,
 ) {
 
     /** Whether the long-press handling feature should be enabled. */
@@ -44,5 +44,15 @@ constructor(
      */
     fun onTouchedOutside() {
         interactor.onTouchedOutside()
+    }
+
+    /** Notifies that the lockscreen has been clicked at position [x], [y]. */
+    fun onClick(x: Float, y: Float) {
+        interactor.onClick(x, y)
+    }
+
+    /** Notifies that the lockscreen has been double clicked. */
+    fun onDoubleClick() {
+        interactor.onDoubleClick()
     }
 }

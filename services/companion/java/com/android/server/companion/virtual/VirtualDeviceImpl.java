@@ -185,8 +185,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final SparseIntArray mDevicePolicies;
     @GuardedBy("mVirtualDeviceLock")
     private final SparseArray<VirtualDisplayWrapper> mVirtualDisplays = new SparseArray<>();
-    private final IVirtualDeviceActivityListener mActivityListener;
-    private final IVirtualDeviceSoundEffectListener mSoundEffectListener;
+    private IVirtualDeviceActivityListener mActivityListener;
+    private IVirtualDeviceSoundEffectListener mSoundEffectListener;
     private final DisplayManagerGlobal mDisplayManager;
     private final DisplayManagerInternal mDisplayManagerInternal;
     @GuardedBy("mVirtualDeviceLock")
@@ -303,7 +303,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         UserHandle ownerUserHandle = UserHandle.getUserHandleForUid(attributionSource.getUid());
         mContext = context.createContextAsUser(ownerUserHandle, 0);
         mAssociationInfo = associationInfo;
-        mPersistentDeviceId = createPersistentDeviceId(associationInfo.getId());
+        mPersistentDeviceId = associationInfo == null
+                ? null
+                : createPersistentDeviceId(associationInfo.getId());
         mService = service;
         mPendingTrampolineCallback = pendingTrampolineCallback;
         mActivityListener = activityListener;
@@ -405,7 +407,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     /** Returns the device display name. */
     CharSequence getDisplayName() {
-        return mAssociationInfo.getDisplayName();
+        return mAssociationInfo == null ? mParams.getName() : mAssociationInfo.getDisplayName();
     }
 
     /** Returns the public representation of the device. */
@@ -418,6 +420,22 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         synchronized (mVirtualDeviceLock) {
             return mLocaleList;
         }
+    }
+
+    /**
+     * Setter for listeners that live in the client process, namely in
+     * {@link android.companion.virtual.VirtualDeviceInternal}.
+     *
+     * This is needed for virtual devices that are created by the system, as the VirtualDeviceImpl
+     * object is created before the returned VirtualDeviceInternal one.
+     */
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void setListeners(@NonNull IVirtualDeviceActivityListener activityListener,
+            @NonNull IVirtualDeviceSoundEffectListener soundEffectListener) {
+        super.setListeners_enforcePermission();
+        mActivityListener = Objects.requireNonNull(activityListener);
+        mSoundEffectListener = Objects.requireNonNull(soundEffectListener);
     }
 
     @Override  // Binder call
@@ -456,7 +474,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     public int getAssociationId() {
-        return mAssociationInfo.getId();
+        return mAssociationInfo == null
+                ? VirtualDeviceManagerService.CDM_ASSOCIATION_ID_NONE
+                : mAssociationInfo.getId();
     }
 
     @Override // Binder call
@@ -1140,7 +1160,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         String indent = "    ";
         fout.println("  VirtualDevice: ");
         fout.println(indent + "mDeviceId: " + mDeviceId);
-        fout.println(indent + "mAssociationId: " + mAssociationInfo.getId());
+        fout.println(indent + "mAssociationId: " + getAssociationId());
         fout.println(indent + "mOwnerPackageName: " + mOwnerPackageName);
         fout.println(indent + "mParams: ");
         mParams.dump(fout, indent + indent);
@@ -1286,8 +1306,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     private void onActivityBlocked(int displayId, ActivityInfo activityInfo) {
-        Intent intent = BlockedAppStreamingActivity.createIntent(
-                activityInfo, mAssociationInfo.getDisplayName());
+        Intent intent = BlockedAppStreamingActivity.createIntent(activityInfo, getDisplayName());
         mContext.startActivityAsUser(
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
                 ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle(),
@@ -1374,7 +1393,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @SuppressWarnings("AndroidFrameworkRequiresPermission")
     private void checkVirtualInputDeviceDisplayIdAssociation(int displayId) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.INJECT_EVENTS)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INJECT_EVENTS)
                     == PackageManager.PERMISSION_GRANTED) {
             // The INJECT_EVENTS permission allows for injecting input to any window / display.
             return;

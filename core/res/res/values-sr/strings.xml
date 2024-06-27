@@ -1412,6 +1412,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Изаберите да бисте онемогућили бежично отклањање грешака."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Омогућен је режим пробног коришћења"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Обавите ресетовање на фабричка подешавања да бисте онемогућили режим пробног коришћења."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"Серијска конзола је омогућена"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Перформансе су смањене. Да бисте онемогући конзолу, проверите покретачки програм."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Експериментални MTE је омогућен"</string>
@@ -1756,12 +1760,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Држали сте тастере за јачину звука. Услуга <xliff:g id="SERVICE_NAME">%1$s</xliff:g> је укључена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Држали сте тастере за јачину звука. Услуга <xliff:g id="SERVICE_NAME">%1$s</xliff:g> је искључена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Пустите тастере за јачину звука. Да бисте укључили <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, поново притисните и задржите оба тастера за јачину звука 3 секунде."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Изаберите функцију која ће се користити када додирнете дугме Приступачност:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Одаберите функцију која ће се користити помоћу покрета за приступачност (помоћу два прста превуците нагоре од дна екрана):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Одаберите функцију која ће се користити помоћу покрета за приступачност (помоћу три прста превуците нагоре од дна екрана):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Да бисте прелазили са једне функције на другу, додирните и задржите дугме Приступачност."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Да бисте прелазили са једне функције на другу, превуците нагоре помоћу два прста и задржите."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Да бисте прелазили са једне функције на другу, превуците нагоре помоћу три прста и задржите."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Увећање"</string>
     <string name="user_switched" msgid="7249833311585228097">"Актуелни корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Пребацивање на <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1977,6 +1987,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Позив је у току"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Проверава се долазни позив"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Некатегоризовано"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"Промоције"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"Друштвене мреже"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"Вести"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"Препоруке"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Ви подешавате важност ових обавештења."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Ово је важно због људи који учествују."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Прилагођено обавештење о апликацији"</string>
@@ -2193,6 +2207,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Алатка за бирање пречица за приступачност на екрану"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Пречица за приступачност"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Одбаци траку са обавештењима"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Мени"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Пусти/паузирај медије"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"нагоре на D-pad-у"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"надоле на D-pad-у"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"налево на D-pad-у"</string>

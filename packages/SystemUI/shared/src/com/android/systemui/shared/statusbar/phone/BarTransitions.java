@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.shared.statusbar.phone;
 
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -34,8 +36,6 @@ import android.util.Log;
 import android.view.View;
 
 import com.android.app.animation.Interpolators;
-import com.android.settingslib.Utils;
-import com.android.systemui.res.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,6 +43,11 @@ import java.lang.annotation.RetentionPolicy;
 public class BarTransitions {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_COLORS = false;
+
+    @ColorInt
+    private static final int SYSTEM_BAR_BACKGROUND_OPAQUE = Color.BLACK;
+    @ColorInt
+    private static final int SYSTEM_BAR_BACKGROUND_TRANSPARENT = Color.TRANSPARENT;
 
     public static final int MODE_TRANSPARENT = 0;
     public static final int MODE_SEMI_TRANSPARENT = 1;
@@ -183,11 +188,11 @@ public class BarTransitions {
                 mTransparent = 0x2f0000ff;
                 mWarning = 0xffff0000;
             } else {
-                mOpaque = context.getColor(R.color.system_bar_background_opaque);
+                mOpaque = SYSTEM_BAR_BACKGROUND_OPAQUE;
                 mSemiTransparent = context.getColor(
                         com.android.internal.R.color.system_bar_background_semi_transparent);
-                mTransparent = context.getColor(R.color.system_bar_background_transparent);
-                mWarning = Utils.getColorAttrDefaultColor(context, android.R.attr.colorError);
+                mTransparent = SYSTEM_BAR_BACKGROUND_TRANSPARENT;
+                mWarning = getColorAttrDefaultColor(context, android.R.attr.colorError, 0);
             }
             mGradient = context.getDrawable(gradientResourceId);
         }
@@ -226,7 +231,7 @@ public class BarTransitions {
         @Override
         public void setTint(int color) {
             PorterDuff.Mode targetMode = mTintFilter == null ? Mode.SRC_IN :
-                mTintFilter.getMode();
+                    mTintFilter.getMode();
             if (mTintFilter == null || mTintFilter.getColor() != color) {
                 mTintFilter = new PorterDuffColorFilter(color, targetMode);
             }
@@ -304,10 +309,13 @@ public class BarTransitions {
                             Interpolators.LINEAR.getInterpolation(t), 1));
                     mGradientAlpha = (int)(v * targetGradientAlpha + mGradientAlphaStart * (1 - v));
                     mColor = Color.argb(
-                          (int)(v * Color.alpha(targetColor) + Color.alpha(mColorStart) * (1 - v)),
-                          (int)(v * Color.red(targetColor) + Color.red(mColorStart) * (1 - v)),
-                          (int)(v * Color.green(targetColor) + Color.green(mColorStart) * (1 - v)),
-                          (int)(v * Color.blue(targetColor) + Color.blue(mColorStart) * (1 - v)));
+                            (int) (v * Color.alpha(targetColor) + Color.alpha(mColorStart) * (1
+                                    - v)),
+                            (int) (v * Color.red(targetColor) + Color.red(mColorStart) * (1 - v)),
+                            (int) (v * Color.green(targetColor) + Color.green(mColorStart) * (1
+                                    - v)),
+                            (int) (v * Color.blue(targetColor) + Color.blue(mColorStart) * (1
+                                    - v)));
                 }
             }
             if (mGradientAlpha > 0) {
@@ -331,5 +339,14 @@ public class BarTransitions {
                 invalidateSelf();  // keep going
             }
         }
+    }
+
+    /** Get color styled attribute {@code attr}, default to {@code defValue} if not found. */
+    @ColorInt
+    public static int getColorAttrDefaultColor(Context context, int attr, @ColorInt int defValue) {
+        TypedArray ta = context.obtainStyledAttributes(new int[] {attr});
+        @ColorInt int colorAccent = ta.getColor(0, defValue);
+        ta.recycle();
+        return colorAccent;
     }
 }
