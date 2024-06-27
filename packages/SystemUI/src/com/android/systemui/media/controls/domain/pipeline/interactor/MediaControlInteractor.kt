@@ -19,7 +19,6 @@ package com.android.systemui.media.controls.domain.pipeline.interactor
 import android.app.ActivityOptions
 import android.app.BroadcastOptions
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.media.session.MediaSession
 import android.provider.Settings
@@ -31,11 +30,11 @@ import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.bluetooth.BroadcastDialogController
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.MediaDataProcessor
 import com.android.systemui.media.controls.shared.model.MediaControlModel
 import com.android.systemui.media.controls.shared.model.MediaData
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger
 import com.android.systemui.media.dialog.MediaOutputDialogManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -50,9 +49,8 @@ import kotlinx.coroutines.flow.map
 class MediaControlInteractor
 @AssistedInject
 constructor(
-    @Application applicationContext: Context,
     @Assisted private val instanceId: InstanceId,
-    repository: MediaFilterRepository,
+    private val repository: MediaFilterRepository,
     private val mediaDataProcessor: MediaDataProcessor,
     private val keyguardStateController: KeyguardStateController,
     private val activityStarter: ActivityStarter,
@@ -72,8 +70,11 @@ constructor(
     fun removeMediaControl(
         token: MediaSession.Token?,
         instanceId: InstanceId,
-        delayMs: Long
+        delayMs: Long,
+        eventId: Int,
+        location: Int
     ): Boolean {
+        logSmartspaceUserEvent(eventId, location)
         val dismissed =
             mediaDataProcessor.dismissMediaData(instanceId, delayMs, userInitiated = true)
         if (!dismissed) {
@@ -114,7 +115,13 @@ constructor(
         activityStarter.startActivity(SETTINGS_INTENT, /* dismissShade= */ true)
     }
 
-    fun startClickIntent(expandable: Expandable, clickIntent: PendingIntent) {
+    fun startClickIntent(
+        expandable: Expandable,
+        clickIntent: PendingIntent,
+        eventId: Int,
+        location: Int
+    ) {
+        logSmartspaceUserEvent(eventId, location)
         if (!launchOverLockscreen(clickIntent)) {
             activityStarter.postStartActivityDismissingKeyguard(
                 clickIntent,
@@ -173,6 +180,14 @@ constructor(
             broadcastApp,
             packageName,
             expandable.dialogTransitionController()
+        )
+    }
+
+    fun logSmartspaceUserEvent(eventId: Int, location: Int) {
+        repository.logSmartspaceCardUserEvent(
+            eventId,
+            MediaSmartspaceLogger.getSurface(location),
+            instanceId = instanceId
         )
     }
 

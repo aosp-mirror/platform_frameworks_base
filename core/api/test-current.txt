@@ -46,6 +46,7 @@ package android {
     field public static final String REMAP_MODIFIER_KEYS = "android.permission.REMAP_MODIFIER_KEYS";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String REQUEST_UNIQUE_ID_ATTESTATION = "android.permission.REQUEST_UNIQUE_ID_ATTESTATION";
+    field public static final String RESERVED_FOR_TESTING_SIGNATURE = "android.permission.RESERVED_FOR_TESTING_SIGNATURE";
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
     field public static final String REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL = "android.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL";
     field public static final String SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS = "android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS";
@@ -281,6 +282,7 @@ package android.app {
     field public static final String OPSTR_ACTIVITY_RECOGNITION = "android:activity_recognition";
     field public static final String OPSTR_ACTIVITY_RECOGNITION_SOURCE = "android:activity_recognition_source";
     field public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
+    field @FlaggedApi("android.service.notification.redact_sensitive_notifications_from_untrusted_listeners") public static final String OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS = "android:receive_sensitive_notifications";
     field public static final String OPSTR_RECORD_AUDIO_HOTWORD = "android:record_audio_hotword";
     field public static final String OPSTR_RESERVED_FOR_TESTING = "android:reserved_for_testing";
     field public static final String OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER = "android:use_icc_auth_with_device_identifier";
@@ -377,6 +379,10 @@ package android.app {
     method public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
     method public void setUserVisibleTaskShown(boolean);
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String NEWS_ID = "android.app.news";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String PROMOTIONS_ID = "android.app.promotions";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String RECS_ID = "android.app.recs";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String SOCIAL_MEDIA_ID = "android.app.social";
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {
@@ -2755,21 +2761,24 @@ package android.os.vibrator {
 
 package android.os.vibrator.persistence {
 
-  public class ParsedVibration {
-    method @NonNull public java.util.List<android.os.VibrationEffect> getVibrationEffects();
-    method @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
+  @FlaggedApi("android.os.vibrator.vibration_xml_apis") public final class ParsedVibration {
+    ctor public ParsedVibration(@NonNull java.util.List<android.os.VibrationEffect>);
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
   }
 
-  public final class VibrationXmlParser {
-    method @Nullable public static android.os.vibrator.persistence.ParsedVibration parseDocument(@NonNull java.io.Reader) throws java.io.IOException;
-    method @Nullable public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.Reader) throws java.io.IOException;
+  @FlaggedApi("android.os.vibrator.vibration_xml_apis") public final class VibrationXmlParser {
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @NonNull public static android.os.vibrator.persistence.ParsedVibration parse(@NonNull java.io.InputStream) throws java.io.IOException;
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @NonNull public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.InputStream) throws java.io.IOException;
+  }
+
+  public static final class VibrationXmlParser.ParseFailedException extends java.io.IOException {
   }
 
   public final class VibrationXmlSerializer {
-    method public static void serialize(@NonNull android.os.VibrationEffect, @NonNull java.io.Writer) throws java.io.IOException, android.os.vibrator.persistence.VibrationXmlSerializer.SerializationFailedException;
+    method public static void serialize(@NonNull android.os.VibrationEffect, @NonNull java.io.Writer) throws java.io.IOException;
   }
 
-  public static final class VibrationXmlSerializer.SerializationFailedException extends java.lang.RuntimeException {
+  public static final class VibrationXmlSerializer.SerializationFailedException extends java.io.IOException {
   }
 
 }

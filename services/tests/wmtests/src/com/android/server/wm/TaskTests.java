@@ -69,6 +69,7 @@ import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.CameraCompatTaskInfo;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -1695,7 +1696,7 @@ public class TaskTests extends WindowTestsBase {
 
         // Decor surface should be created.
         clearInvocations(task);
-        task.moveOrCreateDecorSurfaceFor(fragment);
+        task.moveOrCreateDecorSurfaceFor(fragment, true /* visible */);
 
         assertNotNull(task.mDecorSurfaceContainer);
         assertNotNull(task.getDecorSurface());
@@ -1722,14 +1723,14 @@ public class TaskTests extends WindowTestsBase {
         final TaskFragment fragment2 = createTaskFragmentWithEmbeddedActivity(task, organizer);
         doNothing().when(task).sendTaskFragmentParentInfoChangedIfNeeded();
 
-        task.moveOrCreateDecorSurfaceFor(fragment1);
+        task.moveOrCreateDecorSurfaceFor(fragment1, true /* visible */);
 
         assertNotNull(task.mDecorSurfaceContainer);
         assertNotNull(task.getDecorSurface());
         assertEquals(fragment1, task.mDecorSurfaceContainer.mOwnerTaskFragment);
 
         // Transfer ownership
-        task.moveOrCreateDecorSurfaceFor(fragment2);
+        task.moveOrCreateDecorSurfaceFor(fragment2, true /* visible */);
 
         assertNotNull(task.mDecorSurfaceContainer);
         assertNotNull(task.getDecorSurface());
@@ -1775,7 +1776,7 @@ public class TaskTests extends WindowTestsBase {
         doReturn(true).when(fragment2).isAllowedToBeEmbeddedInTrustedMode();
         doReturn(true).when(fragment1).isVisible();
 
-        task.moveOrCreateDecorSurfaceFor(fragment1);
+        task.moveOrCreateDecorSurfaceFor(fragment1, true /* visible */);
         task.assignChildLayers(t);
 
         verify(unembeddedActivity).assignLayer(t, 0);
@@ -1880,7 +1881,7 @@ public class TaskTests extends WindowTestsBase {
         doReturn(false).when(fragment2).isAllowedToBeEmbeddedInTrustedMode();
         doReturn(true).when(fragment1).isVisible();
 
-        task.moveOrCreateDecorSurfaceFor(fragment1);
+        task.moveOrCreateDecorSurfaceFor(fragment1, true /* visible */);
 
         clearInvocations(t);
         clearInvocations(unembeddedActivity);
@@ -1889,7 +1890,8 @@ public class TaskTests extends WindowTestsBase {
 
         // The decor surface should be placed above all the windows when boosted and the cover
         // surface should show.
-        task.setDecorSurfaceBoosted(fragment1, true /* isBoosted */, clientTransaction);
+        task.requestDecorSurfaceBoosted(fragment1, true /* isBoosted */, clientTransaction);
+        task.commitDecorSurfaceBoostedState();
 
         verify(unembeddedActivity).assignLayer(t, 0);
         verify(fragment1).assignLayer(t, 1);
@@ -1906,8 +1908,9 @@ public class TaskTests extends WindowTestsBase {
 
         // The decor surface should be placed just above the owner TaskFragment and the cover
         // surface should hide.
-        task.moveOrCreateDecorSurfaceFor(fragment1);
-        task.setDecorSurfaceBoosted(fragment1, false /* isBoosted */, clientTransaction);
+        task.moveOrCreateDecorSurfaceFor(fragment1, true /* visible */);
+        task.requestDecorSurfaceBoosted(fragment1, false /* isBoosted */, clientTransaction);
+        task.commitDecorSurfaceBoostedState();
 
         verify(unembeddedActivity).assignLayer(t, 0);
         verify(fragment1).assignLayer(t, 1);
@@ -1982,6 +1985,17 @@ public class TaskTests extends WindowTestsBase {
         assertEquals(fragment1.getChildAt(0), task.getBottomMostActivity());
         assertEquals(activitySamePackage, task.getBottomMostActivityInSamePackage());
         assertNotEquals(activityDifferentPackage, task.getBottomMostActivityInSamePackage());
+    }
+
+    @Test
+    public void getTaskInfoPropagatesCameraCompatMode() {
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = task.getTopMostActivity();
+        activity.mLetterboxUiController
+                .setFreeformCameraCompatMode(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT);
+
+        assertEquals(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT,
+                task.getTaskInfo().appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode);
     }
 
     private Task getTestTask() {

@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.domain.interactor.TrustInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.Quad
+import com.android.systemui.utils.coroutines.flow.mapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -96,7 +98,16 @@ constructor(
             .filter { currentScene ->
                 currentScene == Scenes.Gone || currentScene == Scenes.Lockscreen
             }
-            .map { it == Scenes.Gone }
+            .mapLatestConflated { scene ->
+                if (scene == Scenes.Gone) {
+                    // Make sure device unlock status is definitely unlocked before we consider the
+                    // device "entered".
+                    deviceUnlockedInteractor.deviceUnlockStatus.first { it.isUnlocked }
+                    true
+                } else {
+                    false
+                }
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -200,6 +211,9 @@ constructor(
             }
         }
 
+    /** Whether the device is in lockdown mode, where bouncer input is required to unlock. */
+    val isInLockdown: Flow<Boolean> = deviceEntryRestrictionReason.map { it.isInLockdown() }
+
     /**
      * Attempt to enter the device and dismiss the lockscreen. If authentication is required to
      * unlock the device it will transition to bouncer.
@@ -246,6 +260,27 @@ constructor(
      */
     suspend fun isLockscreenEnabled(): Boolean {
         return repository.isLockscreenEnabled()
+    }
+
+    fun DeviceEntryRestrictionReason?.isInLockdown(): Boolean {
+        return when (this) {
+            DeviceEntryRestrictionReason.UserLockdown -> true
+            DeviceEntryRestrictionReason.PolicyLockdown -> true
+
+            // Add individual enum value instead of using "else" so new reasons are guaranteed
+            // to be added here at compile-time.
+            null -> false
+            DeviceEntryRestrictionReason.DeviceNotUnlockedSinceReboot -> false
+            DeviceEntryRestrictionReason.BouncerLockedOut -> false
+            DeviceEntryRestrictionReason.AdaptiveAuthRequest -> false
+            DeviceEntryRestrictionReason.NonStrongBiometricsSecurityTimeout -> false
+            DeviceEntryRestrictionReason.TrustAgentDisabled -> false
+            DeviceEntryRestrictionReason.StrongBiometricsLockedOut -> false
+            DeviceEntryRestrictionReason.SecurityTimeout -> false
+            DeviceEntryRestrictionReason.DeviceNotUnlockedSinceMainlineUpdate -> false
+            DeviceEntryRestrictionReason.UnattendedUpdate -> false
+            DeviceEntryRestrictionReason.NonStrongFaceLockedOut -> false
+        }
     }
 
     /**

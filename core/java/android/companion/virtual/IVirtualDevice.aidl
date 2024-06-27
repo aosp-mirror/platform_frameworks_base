@@ -35,6 +35,8 @@ import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
+import android.hardware.input.VirtualRotaryEncoderConfig;
+import android.hardware.input.VirtualRotaryEncoderScrollEvent;
 import android.hardware.input.VirtualStylusButtonEvent;
 import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualStylusMotionEvent;
@@ -158,6 +160,12 @@ interface IVirtualDevice {
     void createVirtualStylus(in VirtualStylusConfig config, IBinder token);
 
     /**
+     * Creates a new rotary encoder and registers it with the input framework with the given token.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void createVirtualRotaryEncoder(in VirtualRotaryEncoderConfig config, IBinder token);
+
+    /**
      * Removes the input device corresponding to the given token from the framework.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
@@ -216,6 +224,12 @@ interface IVirtualDevice {
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendStylusButtonEvent(IBinder token, in VirtualStylusButtonEvent event);
+
+    /**
+     * Injects a scroll event from the virtual rotary encoder corresponding to the given token.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    boolean sendRotaryEncoderScrollEvent(IBinder token, in VirtualRotaryEncoderScrollEvent event);
 
     /**
      * Returns all virtual sensors created for this device.
@@ -281,5 +295,5 @@ interface IVirtualDevice {
      * Returns the id of the virtual camera with given config.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    int getVirtualCameraId(in VirtualCameraConfig camera);
+    String getVirtualCameraId(in VirtualCameraConfig camera);
 }

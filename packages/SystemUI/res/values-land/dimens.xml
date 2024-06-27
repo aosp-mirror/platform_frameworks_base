@@ -34,7 +34,7 @@
     <dimen name="volume_row_slider_height">128dp</dimen>
 
     <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
-    <dimen name="immersive_mode_cling_width">380dp</dimen>
+    <dimen name="immersive_mode_cling_width">500dp</dimen>
 
     <dimen name="controls_activity_view_top_offset">25dp</dimen>
 

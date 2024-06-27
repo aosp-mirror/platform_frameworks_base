@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.panels.ui.compose
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +39,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.addOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -47,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.modifiers.background
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.PartitionedGridViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
@@ -57,9 +64,13 @@ import javax.inject.Inject
 
 @SysUISingleton
 class PartitionedGridLayout @Inject constructor(private val viewModel: PartitionedGridViewModel) :
-    GridLayout {
+    PaginatableGridLayout {
     @Composable
-    override fun TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
+    override fun TileGrid(
+        tiles: List<TileViewModel>,
+        modifier: Modifier,
+        editModeStart: () -> Unit,
+    ) {
         DisposableEffect(tiles) {
             val token = Any()
             tiles.forEach { it.startListening(token) }
@@ -161,6 +172,20 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 columns = columns,
             )
         }
+    }
+
+    override fun splitIntoPages(
+        tiles: List<TileViewModel>,
+        rows: Int,
+        columns: Int,
+    ): List<List<TileViewModel>> {
+        val (smallTiles, largeTiles) = tiles.partition { viewModel.isIconTile(it.spec) }
+
+        val sizedLargeTiles = largeTiles.map { SizedTile(it, 2) }
+        val sizedSmallTiles = smallTiles.map { SizedTile(it, 1) }
+        val largeTilesRows = PaginatableGridLayout.splitInRows(sizedLargeTiles, columns)
+        val smallTilesRows = PaginatableGridLayout.splitInRows(sizedSmallTiles, columns)
+        return (largeTilesRows + smallTilesRows).chunked(rows).map { it.flatten().map { it.tile } }
     }
 
     @Composable
@@ -268,10 +293,9 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
     private fun CurrentTilesContainer(content: @Composable () -> Unit) {
         Box(
             Modifier.fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    shape = RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius))
+                .dashedBorder(
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
+                    shape = Dimensions.ContainerShape,
                 )
                 .padding(dimensionResource(R.dimen.qs_tile_margin_vertical))
         ) {
@@ -284,9 +308,9 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         Box(
             Modifier.fillMaxWidth()
                 .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    color = MaterialTheme.colorScheme.background,
                     alpha = { 1f },
-                    shape = RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius))
+                    shape = Dimensions.ContainerShape,
                 )
                 .padding(dimensionResource(R.dimen.qs_tile_margin_vertical))
         ) {
@@ -304,5 +328,28 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         if (nTiles % columns != 0) {
             item(span = { GridItemSpan(maxCurrentLineSpan) }) { Spacer(Modifier) }
         }
+    }
+
+    private fun Modifier.dashedBorder(
+        color: Color,
+        shape: Shape,
+    ): Modifier {
+        return this.drawWithContent {
+            val outline = shape.createOutline(size, layoutDirection, this)
+            val path = Path()
+            path.addOutline(outline)
+            val stroke =
+                Stroke(
+                    width = 1.dp.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
+                )
+            this.drawContent()
+            drawPath(path = path, style = stroke, color = color)
+        }
+    }
+
+    private object Dimensions {
+        // Corner radius is half the height of a tile + padding
+        val ContainerShape = RoundedCornerShape(48.dp)
     }
 }

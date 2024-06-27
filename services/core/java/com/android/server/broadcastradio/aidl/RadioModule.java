@@ -38,6 +38,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -120,7 +121,7 @@ final class RadioModule {
         public void onCurrentProgramInfoChanged(ProgramInfo halProgramInfo) {
             fireLater(() -> {
                 RadioManager.ProgramInfo currentProgramInfo =
-                        ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
+                        ConversionUtils.tunedProgramInfoFromHalProgramInfo(halProgramInfo);
                 Objects.requireNonNull(currentProgramInfo,
                         "Program info from AIDL HAL is invalid");
                 synchronized (mLock) {
@@ -524,7 +525,7 @@ final class RadioModule {
         return BitmapFactory.decodeByteArray(rawImage, 0, rawImage.length);
     }
 
-    void dumpInfo(android.util.IndentingPrintWriter pw) {
+    void dumpInfo(IndentingPrintWriter pw) {
         pw.printf("RadioModule\n");
 
         pw.increaseIndent();

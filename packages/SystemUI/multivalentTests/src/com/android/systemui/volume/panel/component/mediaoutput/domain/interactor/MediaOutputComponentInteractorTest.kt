@@ -65,6 +65,7 @@ class MediaOutputComponentInteractorTest : SysuiTestCase() {
 
             with(context.orCreateTestableResources) {
                 addOverride(R.drawable.ic_smartphone, testIcon)
+                addOverride(R.drawable.ic_media_tablet, testIcon)
 
                 addOverride(R.string.media_transfer_this_device_name_tv, builtInDeviceName)
                 addOverride(R.string.media_transfer_this_device_name_tablet, builtInDeviceName)

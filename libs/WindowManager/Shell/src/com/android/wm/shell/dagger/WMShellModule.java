@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.UserManager;
 import android.view.Choreographer;
 import android.view.IWindowManager;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -121,9 +122,9 @@ import java.util.Optional;
  */
 @Module(
         includes = {
-            WMShellBaseModule.class,
-            PipModule.class,
-            ShellBackAnimationModule.class,
+                WMShellBaseModule.class,
+                PipModule.class,
+                ShellBackAnimationModule.class,
         })
 public abstract class WMShellModule {
 
@@ -400,7 +401,8 @@ public abstract class WMShellModule {
             Optional<RecentTasksController> recentTasksController,
             HomeTransitionObserver homeTransitionObserver) {
         return new RecentsTransitionHandler(shellInit, transitions,
-                recentTasksController.orElse(null), homeTransitionObserver);
+                recentTasksController.orElse(null), homeTransitionObserver,
+                SurfaceControl.Transaction::new);
     }
 
     //
@@ -664,7 +666,8 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
-            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional) {
+            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional
+    ) {
         return new Object();
     }
 }

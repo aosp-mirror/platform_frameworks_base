@@ -263,6 +263,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.RegionUtils;
 import com.android.server.wm.utils.RotationCache;
 import com.android.server.wm.utils.WmDisplayCutout;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -477,6 +478,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Nullable
     final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     @Nullable
+    final CameraCompatFreeformPolicy mCameraCompatFreeformPolicy;
+    @Nullable
     final CameraStateMonitor mCameraStateMonitor;
     @Nullable
     final ActivityRefresher mActivityRefresher;
@@ -682,7 +685,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * the case of the IME moving to a SurfaceControlViewHost backed EmbeddedWindow
      */
     private InputTarget mLastImeInputTarget;
-
 
     /**
      * Tracks the windowToken of the input method input target and the corresponding
@@ -1233,11 +1235,26 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // without the need to restart the device.
         final boolean shouldCreateDisplayRotationCompatPolicy =
                 mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
-        if (shouldCreateDisplayRotationCompatPolicy) {
+        final boolean shouldCreateCameraCompatFreeformPolicy = Flags.cameraCompatForFreeform()
+                && DesktopModeLaunchParamsModifier.canEnterDesktopMode(mWmService.mContext);
+        if (shouldCreateDisplayRotationCompatPolicy || shouldCreateCameraCompatFreeformPolicy) {
             mCameraStateMonitor = new CameraStateMonitor(this, mWmService.mH);
             mActivityRefresher = new ActivityRefresher(mWmService, mWmService.mH);
-            mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(
-                    this, mCameraStateMonitor, mActivityRefresher);
+            if (shouldCreateDisplayRotationCompatPolicy) {
+                mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(this,
+                        mCameraStateMonitor, mActivityRefresher);
+                mDisplayRotationCompatPolicy.start();
+            } else {
+                mDisplayRotationCompatPolicy = null;
+            }
+
+            if (shouldCreateCameraCompatFreeformPolicy) {
+                mCameraCompatFreeformPolicy = new CameraCompatFreeformPolicy(this,
+                        mCameraStateMonitor, mActivityRefresher);
+                mCameraCompatFreeformPolicy.start();
+            } else {
+                mCameraCompatFreeformPolicy = null;
+            }
 
             mCameraStateMonitor.startListeningToCameraState();
         } else {
@@ -1245,8 +1262,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mCameraStateMonitor = null;
             mActivityRefresher = null;
             mDisplayRotationCompatPolicy = null;
+            mCameraCompatFreeformPolicy = null;
         }
-
 
         mRotationReversionController = new DisplayRotationReversionController(this);
 
@@ -3350,6 +3367,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mDisplayRotationCompatPolicy != null) {
             mDisplayRotationCompatPolicy.dispose();
         }
+
+        if (mCameraCompatFreeformPolicy != null) {
+            mCameraCompatFreeformPolicy.dispose();
+        }
+
         if (mCameraStateMonitor != null) {
             mCameraStateMonitor.dispose();
         }
@@ -5025,9 +5047,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        if (!com.android.window.flags.Flags.removePrepareSurfaceInPlacement()) {
-            prepareSurfaces();
-        }
 
         // This should be called after the insets have been dispatched to clients and we have
         // committed finish drawing windows.
@@ -5719,15 +5738,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      */
     boolean supportsSystemDecorations() {
+        boolean forceDesktopModeOnDisplay = forceDesktopMode();
+
+        if (com.android.window.flags.Flags.rearDisplayDisableForceDesktopSystemDecorations()) {
+            // System decorations should not be forced on a rear display due to security policies.
+            forceDesktopModeOnDisplay =
+                    forceDesktopModeOnDisplay && ((mDisplay.getFlags() & Display.FLAG_REAR) == 0);
+        }
+
         return (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
                 || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
-                || forceDesktopMode())
+                || forceDesktopModeOnDisplay)
                 // VR virtual display will be used to run and render 2D app within a VR experience.
                 && mDisplayId != mWmService.mVr2dDisplayId
                 // Do not show system decorations on untrusted virtual display.
-                && isTrusted()
-                // No system decoration on rear display.
-                && (mDisplay.getFlags() & Display.FLAG_REAR) == 0;
+                && isTrusted();
     }
 
     /**

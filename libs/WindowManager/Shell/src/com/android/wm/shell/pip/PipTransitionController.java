@@ -311,6 +311,14 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /**
+     * Finish the current transition if possible.
+     *
+     * @param tx transaction to be applied with a potentially new draw after finishing.
+     */
+    public void finishTransition(@Nullable SurfaceControl.Transaction tx) {
+    }
+
+    /**
      * End the currently-playing PiP animation.
      *
      * @param onTransitionEnd callback to run upon finishing the playing transition.

@@ -18,13 +18,13 @@ package com.android.systemui.display.ui.view
 
 import android.app.Dialog
 import android.graphics.Insets
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.Window
 import android.view.WindowInsets
 import android.view.WindowInsetsAnimation
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.app.animation.Interpolators
 import com.android.systemui.SysuiTestCase
@@ -42,7 +42,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class MirroringConfirmationDialogDelegateTest : SysuiTestCase() {
 

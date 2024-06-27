@@ -32,6 +32,7 @@ import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SH
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.util.EventLog;
@@ -68,7 +69,6 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
     @NonNull
     private final ImeTargetVisibilityPolicy mImeTargetVisibilityPolicy;
 
-
     DefaultImeVisibilityApplier(InputMethodManagerService service) {
         mService = service;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
@@ -79,8 +79,9 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
     @Override
     public void performShowIme(IBinder showInputToken, @NonNull ImeTracker.Token statsToken,
             @InputMethod.ShowFlags int showFlags, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
-        final IInputMethodInvoker curMethod = mService.getCurMethodLocked();
+            @SoftInputShowHideReason int reason, @UserIdInt int userId) {
+        final var bindingController = mService.getInputMethodBindingController(userId);
+        final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         if (curMethod != null) {
             if (DEBUG) {
                 Slog.v(TAG, "Calling " + curMethod + ".showSoftInput(" + showInputToken
@@ -98,7 +99,7 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                                     mService.mImeBindingState.mFocusedWindowSoftInputMode));
                 }
                 mService.onShowHideSoftInputRequested(true /* show */, showInputToken, reason,
-                        statsToken);
+                        statsToken, userId);
             }
         }
     }
@@ -106,8 +107,10 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
     @GuardedBy("ImfLock.class")
     @Override
     public void performHideIme(IBinder hideInputToken, @NonNull ImeTracker.Token statsToken,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
-        final IInputMethodInvoker curMethod = mService.getCurMethodLocked();
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
+            @UserIdInt int userId) {
+        final var bindingController = mService.getInputMethodBindingController(userId);
+        final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         if (curMethod != null) {
             // The IME will report its visible state again after the following message finally
             // delivered to the IME process as an IPC.  Hence the inconsistency between
@@ -129,7 +132,7 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                                     mService.mImeBindingState.mFocusedWindowSoftInputMode));
                 }
                 mService.onShowHideSoftInputRequested(false /* show */, hideInputToken, reason,
-                        statsToken);
+                        statsToken, userId);
             }
         }
     }
@@ -137,15 +140,17 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
     @GuardedBy("ImfLock.class")
     @Override
     public void applyImeVisibility(IBinder windowToken, @NonNull ImeTracker.Token statsToken,
-            @ImeVisibilityStateComputer.VisibilityState int state) {
+            @ImeVisibilityStateComputer.VisibilityState int state, @UserIdInt int userId) {
         applyImeVisibility(windowToken, statsToken, state,
-                SoftInputShowHideReason.NOT_SET /* ignore reason */);
+                SoftInputShowHideReason.NOT_SET /* ignore reason */, userId);
     }
 
     @GuardedBy("ImfLock.class")
     void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
             @ImeVisibilityStateComputer.VisibilityState int state,
-            @SoftInputShowHideReason int reason) {
+            @SoftInputShowHideReason int reason, @UserIdInt int userId) {
+        final var bindingController = mService.getInputMethodBindingController(userId);
+        final int displayIdToShowIme = bindingController.getDisplayIdToShowIme();
         switch (state) {
             case STATE_SHOW_IME:
                 if (!Flags.refactorInsetsController()) {
@@ -165,8 +170,7 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                         // NOT_FOCUSABLE, ALT_FOCUSABLE_IM flags set and can the IME target.
                         // Send it to window manager to hide IME from the actual IME control target
                         // of the target display.
-                        mWindowManagerInternal.hideIme(windowToken,
-                                mService.getDisplayIdToShowImeLocked(), statsToken);
+                        mWindowManagerInternal.hideIme(windowToken, displayIdToShowIme, statsToken);
                     } else {
                         ImeTracker.forLogging().onFailed(statsToken,
                                 ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
@@ -178,7 +182,7 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                     setImeVisibilityOnFocusedWindowClient(false);
                 } else {
                     mService.hideCurrentInputLocked(windowToken, statsToken,
-                        0 /* flags */, null /* resultReceiver */, reason);
+                            0 /* flags */, null /* resultReceiver */, reason);
                 }
                 break;
             case STATE_HIDE_IME_NOT_ALWAYS:
@@ -197,14 +201,14 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                 } else {
                     mService.showCurrentInputLocked(windowToken, statsToken,
                             InputMethodManager.SHOW_IMPLICIT, MotionEvent.TOOL_TYPE_UNKNOWN,
-                        null /* resultReceiver */, reason);
+                            null /* resultReceiver */, reason);
                 }
                 break;
             case STATE_SHOW_IME_SNAPSHOT:
-                showImeScreenshot(windowToken, mService.getDisplayIdToShowImeLocked());
+                showImeScreenshot(windowToken, displayIdToShowIme, userId);
                 break;
             case STATE_REMOVE_IME_SNAPSHOT:
-                removeImeScreenshot(mService.getDisplayIdToShowImeLocked());
+                removeImeScreenshot(displayIdToShowIme, userId);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid IME visibility state: " + state);
@@ -213,10 +217,11 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
 
     @GuardedBy("ImfLock.class")
     @Override
-    public boolean showImeScreenshot(@NonNull IBinder imeTarget, int displayId) {
+    public boolean showImeScreenshot(@NonNull IBinder imeTarget, int displayId,
+            @UserIdInt int userId) {
         if (mImeTargetVisibilityPolicy.showImeScreenshot(imeTarget, displayId)) {
             mService.onShowHideSoftInputRequested(false /* show */, imeTarget,
-                    SHOW_IME_SCREENSHOT_FROM_IMMS, null /* statsToken */);
+                    SHOW_IME_SCREENSHOT_FROM_IMMS, null /* statsToken */, userId);
             return true;
         }
         return false;
@@ -224,11 +229,11 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
 
     @GuardedBy("ImfLock.class")
     @Override
-    public boolean removeImeScreenshot(int displayId) {
+    public boolean removeImeScreenshot(int displayId, @UserIdInt int userId) {
         if (mImeTargetVisibilityPolicy.removeImeScreenshot(displayId)) {
             mService.onShowHideSoftInputRequested(false /* show */,
                     mService.mImeBindingState.mFocusedWindow,
-                    REMOVE_IME_SCREENSHOT_FROM_IMMS, null /* statsToken */);
+                    REMOVE_IME_SCREENSHOT_FROM_IMMS, null /* statsToken */, userId);
             return true;
         }
         return false;

@@ -99,6 +99,12 @@ data class MediaData(
 
     /** Track progress (0 - 1) to display for players where [resumption] is true */
     val resumeProgress: Double? = null,
+
+    /** Smartspace Id, used for logging. */
+    var smartspaceId: Int = -1,
+
+    /** If media card was visible to user, used for logging. */
+    var isImpressed: Boolean = false,
 ) {
     companion object {
         /** Media is playing on the local device */

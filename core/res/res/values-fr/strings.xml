@@ -1412,6 +1412,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Sélectionnez cette option pour désactiver le débogage sans fil."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Mode Atelier de test activé"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Rétablissez la configuration d\'usine pour désactiver le mode Atelier de test."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"Console série activée"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Les performances sont affectées. Pour désactiver la console série, vérifiez le bootloader."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"MTE expérimentale activée"</string>
@@ -1756,12 +1760,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Touches de volume appuyées de manière prolongée. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activé."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Touches de volume appuyées de manière prolongée. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> désactivé."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Relâchez les boutons de volume. Pour activer <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, appuyez de nouveau sur les deux boutons de volume pendant trois secondes."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Choisissez une fonctionnalité à utiliser lorsque vous appuyez sur le bouton Accessibilité :"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Choisissez une fonctionnalité à utiliser avec le geste d\'accessibilité (balayez l\'écran de bas en haut avec deux doigts) :"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Choisissez une fonctionnalité à utiliser avec le geste d\'accessibilité (balayer l\'écran de bas en haut avec trois doigts) :"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Pour changer de fonctionnalité, appuyez de manière prolongée sur le bouton Accessibilité."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Pour changer de fonctionnement, balayez l\'écran vers le haut avec deux doigts et appuyez de manière prolongée."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour changer de fonctionnalité, balayez l\'écran vers le haut avec trois doigts et appuyez de manière prolongée."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Agrandissement"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Passage à <xliff:g id="NAME">%1$s</xliff:g>..."</string>
@@ -1884,7 +1894,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Le code PIN est trop court. Il doit comporter au moins 4 chiffres."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Veuillez réessayer ultérieurement."</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Affichage en plein écran"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Pour quitter, balayez l\'écran du haut vers le bas."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Faites pivoter pour mieux voir"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Ouvrez <xliff:g id="NAME">%s</xliff:g> en plein écran pour mieux voir"</string>
@@ -1976,6 +1987,14 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Appel en cours"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Filtrage d\'un appel entrant"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Sans catégorie"</string>
+    <!-- no translation found for promotional_notification_channel_label (7414844730492860233) -->
+    <skip />
+    <!-- no translation found for social_notification_channel_label (106520267132019945) -->
+    <skip />
+    <!-- no translation found for news_notification_channel_label (4299937455247883311) -->
+    <skip />
+    <!-- no translation found for recs_notification_channel_label (4945985121418684297) -->
+    <skip />
     <string name="importance_from_user" msgid="2782756722448800447">"Vous définissez l\'importance de ces notifications."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Ces notifications sont importantes en raison des participants."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notification d\'application personnalisée"</string>
@@ -2192,6 +2211,10 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Outil de sélection des raccourcis d\'accessibilité à l\'écran"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Raccourci d\'accessibilité"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Fermer le volet des notifications"</string>
+    <!-- no translation found for accessibility_system_action_menu_label (3385283204496447040) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_media_play_pause_label (1905647491347119748) -->
+    <skip />
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Pavé directionnel - Haut"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Pavé directionnel - Bas"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Pavé directionnel - Gauche"</string>
@@ -2408,6 +2431,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Espace privé"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clone"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Commun"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Espace privé"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Le contenu sensible de la notification a été masqué"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Le contenu de l\'appli est masqué lors du partage d\'écran pour des raisons de sécurité"</string>

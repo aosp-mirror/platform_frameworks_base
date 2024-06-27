@@ -200,9 +200,6 @@ public class PipTransition extends PipTransitionController {
             animator.cancel();
         }
         mExitTransition = mTransitions.startTransition(type, out, this);
-        if (mPipOrganizer.getOutPipWindowingMode() == WINDOWING_MODE_UNDEFINED) {
-            mHomeTransitionObserver.notifyHomeVisibilityChanged(false /* isVisible */);
-        }
     }
 
     @Override
@@ -659,6 +656,9 @@ public class PipTransition extends PipTransitionController {
             startTransaction.remove(mPipOrganizer.mPipOverlay);
             mPipOrganizer.clearContentOverlay();
         }
+        if (mPipOrganizer.getOutPipWindowingMode() == WINDOWING_MODE_UNDEFINED) {
+            mHomeTransitionObserver.notifyHomeVisibilityChanged(false /* isVisible */);
+        }
         if (pipChange == null) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: No window of exiting PIP is found. Can't play expand animation", TAG);
@@ -1004,8 +1004,11 @@ public class PipTransition extends PipTransitionController {
         final Rect currentBounds = pipChange.getStartAbsBounds();
 
         int rotationDelta = deltaRotation(startRotation, endRotation);
-        Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
-                taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
+        Rect sourceHintRect = mPipOrganizer.takeSwipeSourceRectHint();
+        if (sourceHintRect == null) {
+            sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
+                    taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
+        }
         if (rotationDelta != Surface.ROTATION_0
                 && endRotation != mPipDisplayLayoutState.getRotation()) {
             // Computes the destination bounds in new rotation.
@@ -1080,6 +1083,8 @@ public class PipTransition extends PipTransitionController {
             mSurfaceTransactionHelper
                     .crop(finishTransaction, leash, destinationBounds)
                     .round(finishTransaction, leash, true /* applyCornerRadius */);
+            // Always reset to bounds animation type afterwards.
+            setEnterAnimationType(ANIM_TYPE_BOUNDS);
         } else {
             throw new RuntimeException("Unrecognized animation type: " + enterAnimationType);
         }

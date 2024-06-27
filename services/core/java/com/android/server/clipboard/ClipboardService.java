@@ -30,7 +30,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.ActivityManagerInternal;
-import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IUriGrantsManager;
 import android.app.KeyguardManager;
@@ -48,9 +47,8 @@ import android.content.IClipboard;
 import android.content.IOnPrimaryClipChangedListener;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
@@ -253,7 +251,7 @@ public class ClipboardService extends SystemService {
     }
 
     private void registerVirtualDeviceListener() {
-        if (mVirtualDeviceListener != null) {
+        if (mVdm == null || mVirtualDeviceListener != null) {
             return;
         }
         mVirtualDeviceListener = new VirtualDeviceManager.VirtualDeviceListener() {
@@ -893,7 +891,8 @@ public class ClipboardService extends SystemService {
                 Slog.e(TAG, "RemoteException calling UserManager: " + e);
                 return null;
             }
-            if (deviceId != DEVICE_ID_DEFAULT && !mVdm.isValidVirtualDeviceId(deviceId)) {
+            if (deviceId != DEVICE_ID_DEFAULT
+                    && mVdm != null && !mVdm.isValidVirtualDeviceId(deviceId)) {
                 Slog.w(TAG, "getClipboardLocked called with invalid (possibly released) deviceId "
                         + deviceId);
                 return null;
@@ -1247,20 +1246,13 @@ public class ClipboardService extends SystemService {
 
     @GuardedBy("mLock")
     private void addActiveOwnerLocked(int uid, int deviceId, String pkg) {
-        final IPackageManager pm = AppGlobals.getPackageManager();
+        final PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
         final int targetUserHandle = UserHandle.getCallingUserId();
         final long oldIdentity = Binder.clearCallingIdentity();
         try {
-            PackageInfo pi = pm.getPackageInfo(pkg, 0, targetUserHandle);
-            if (pi == null) {
-                throw new IllegalArgumentException("Unknown package " + pkg);
+            if (!pm.isSameApp(pkg, 0, uid, targetUserHandle)) {
+                throw new SecurityException("Calling uid " + uid + " does not own package " + pkg);
             }
-            if (!UserHandle.isSameApp(pi.applicationInfo.uid, uid)) {
-                throw new SecurityException("Calling uid " + uid
-                        + " does not own package " + pkg);
-            }
-        } catch (RemoteException e) {
-            // Can't happen; the package manager is in the same process
         } finally {
             Binder.restoreCallingIdentity(oldIdentity);
         }
@@ -1476,8 +1468,8 @@ public class ClipboardService extends SystemService {
             return;
         }
         // Don't notify if this access is coming from the privileged app which owns the device.
-        if (clipboard.deviceId != DEVICE_ID_DEFAULT && mVdmInternal.getDeviceOwnerUid(
-                clipboard.deviceId) == uid) {
+        if (clipboard.deviceId != DEVICE_ID_DEFAULT && mVdmInternal != null
+                && mVdmInternal.getDeviceOwnerUid(clipboard.deviceId) == uid) {
             return;
         }
         // Don't notify if already notified for this uid and clip.
@@ -1528,7 +1520,7 @@ public class ClipboardService extends SystemService {
     private ArraySet<Context> getToastContexts(Clipboard clipboard) throws IllegalStateException {
         ArraySet<Context> contexts = new ArraySet<>();
 
-        if (clipboard.deviceId != DEVICE_ID_DEFAULT) {
+        if (mVdmInternal != null && clipboard.deviceId != DEVICE_ID_DEFAULT) {
             DisplayManager displayManager = getContext().getSystemService(DisplayManager.class);
 
             int topFocusedDisplayId = mWm.getTopFocusedDisplayId();

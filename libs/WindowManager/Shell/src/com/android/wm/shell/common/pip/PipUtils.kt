@@ -22,6 +22,7 @@ import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.os.RemoteException
 import android.os.SystemProperties
 import android.util.DisplayMetrics
@@ -33,6 +34,7 @@ import com.android.internal.protolog.common.ProtoLog
 import com.android.wm.shell.Flags
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /** A class that includes convenience methods.  */
 object PipUtils {
@@ -136,6 +138,30 @@ object PipUtils {
             Log.e(TAG, "Failed to get task snapshot, taskId=$taskId", e)
             null
         }
+    }
+
+
+    /**
+     * Returns a fake source rect hint for animation purposes when app-provided one is invalid.
+     * Resulting adjusted source rect hint lets the app icon in the content overlay to stay visible.
+     */
+    @JvmStatic
+    fun getEnterPipWithOverlaySrcRectHint(appBounds: Rect, aspectRatio: Float): Rect {
+        val appBoundsAspRatio = appBounds.width().toFloat() / appBounds.height()
+        val width: Int
+        val height: Int
+        var left = appBounds.left
+        var top = appBounds.top
+        if (appBoundsAspRatio < aspectRatio) {
+            width = appBounds.width()
+            height = (width / aspectRatio).roundToInt()
+            top = appBounds.top + (appBounds.height() - height) / 2
+        } else {
+            height = appBounds.height()
+            width = (height * aspectRatio).roundToInt()
+            left = appBounds.left + (appBounds.width() - width) / 2
+        }
+        return Rect(left, top, left + width, top + height)
     }
 
     private var isPip2ExperimentEnabled: Boolean? = null

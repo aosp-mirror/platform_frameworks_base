@@ -25,9 +25,6 @@
      (package/class)  -->
     <string name="config_recentsComponent" translatable="false">com.android.systemui.recents.OverviewProxyRecentsImpl</string>
 
-    <!-- Whether or not we show the number in the bar. -->
-    <bool name="config_statusBarShowNumber">false</bool>
-
     <!-- For how long the lock screen can be on before the display turns off. -->
     <integer name="config_lockScreenDisplayTimeout">10000</integer>
 
@@ -36,6 +33,9 @@
         <item>0</item>
         <item>400</item>
     </integer-array>
+
+    <!-- Whether to use deadzone with nav bar -->
+    <bool name="config_useDeadZone">true</bool>
 
     <!-- decay duration (from size_max -> size), in ms -->
     <integer name="navigation_bar_deadzone_hold">333</integer>
@@ -1046,4 +1046,7 @@
 
     <!-- The width of the shortcut helper container, as a fraction of the screen's width. -->
     <item name="shortcut_helper_screen_width_fraction" format="float" type="dimen">1.0</item>
+
+    <!-- Only applicable for dual shade - Allow Notifications/QS shade to anchor to the bottom. -->
+    <bool name="config_dualShadeAlignedToBottom">false</bool>
 </resources>

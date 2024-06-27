@@ -1969,11 +1969,6 @@ public final class UiAutomation {
                 }
 
                 @Override
-                public void onMagnificationSystemUIConnectionChanged(boolean connected) {
-                    /* do nothing */
-                }
-
-                @Override
                 public void onMagnificationChanged(int displayId, @NonNull Region region,
                         MagnificationConfig config) {
                     /* do nothing */

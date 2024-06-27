@@ -894,8 +894,19 @@ public class Bubble implements BubbleViewProvider {
     }
 
     @Nullable
-    Intent getAppBubbleIntent() {
+    @VisibleForTesting
+    public Intent getAppBubbleIntent() {
         return mAppIntent;
+    }
+
+    /**
+     * Sets the intent for a bubble that is an app bubble (one for which {@link #mIsAppBubble} is
+     * true).
+     *
+     * @param appIntent The intent to set for the app bubble.
+     */
+    void setAppBubbleIntent(Intent appIntent) {
+        mAppIntent = appIntent;
     }
 
     /**

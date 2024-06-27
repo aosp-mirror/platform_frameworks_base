@@ -36,6 +36,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.traceSection
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.Flags.mediaControlsLockscreenShadeBugFix
 import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -483,8 +484,7 @@ constructor(
             object : StatusBarStateController.StateListener {
                 override fun onStatePreChange(oldState: Int, newState: Int) {
                     // We're updating the location before the state change happens, since we want
-                    // the
-                    // location of the previous state to still be up to date when the animation
+                    // the location of the previous state to still be up to date when the animation
                     // starts
                     if (
                         newState == StatusBarState.SHADE_LOCKED &&
@@ -585,6 +585,17 @@ constructor(
             shadeInteractor.isQsBypassingShade.collect { isExpandImmediateEnabled ->
                 skipQqsOnExpansion = isExpandImmediateEnabled
                 updateDesiredLocation()
+            }
+        }
+
+        if (mediaControlsLockscreenShadeBugFix()) {
+            coroutineScope.launch {
+                shadeInteractor.shadeExpansion.collect { expansion ->
+                    if (expansion >= 1f || expansion <= 0f) {
+                        // Shade has fully expanded or collapsed: force transition amount update
+                        setTransitionToFullShadeAmount(expansion)
+                    }
+                }
             }
         }
 

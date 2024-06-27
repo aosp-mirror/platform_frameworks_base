@@ -157,7 +157,7 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Seguretat de xarxes mòbils"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Encriptació, notificacions de xarxes sense encriptació"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"S\'ha accedit a l\'identificador de dispositiu"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'identificador únic del teu dispositiu (IMSI or IMEI) mentre s\'utilitzava la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'ID únic del dispositiu (IMSI or IMEI) amb la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'identificador únic del teu dispositiu (IMSI or IMEI) mentre s\'utilitzava la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nAixò vol dir que s\'han registrat la teva ubicació, activitat o identitat. Tot i ser una pràctica habitual, pot suposar un problema per a aquelles persones preocupades per la privadesa."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"T\'has connectat a la xarxa encriptada <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"La connexió SIM de <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ara és més segura"</string>
@@ -1412,6 +1412,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Selecciona per desactivar la depuració sense fil."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"S\'ha activat el mode Agent de prova"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Si vols desactivar el mode Agent de prova, restableix les dades de fàbrica."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"S\'ha activat la consola de sèrie"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Afecta el rendiment. Per desactivar-la, comprova el bootloader."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"L\'MTE experimental s\'ha activat"</string>
@@ -1756,12 +1760,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"S\'han mantingut premudes les tecles de volum. S\'ha activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"S\'han mantingut premudes les tecles de volum. S\'ha desactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Deixa anar les tecles de volum. Per activar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, torna a mantenir premudes totes dues tecles de volum durant 3 segons."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Tria la funció que vols utilitzar quan toquis el botó d\'accessibilitat:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Tria la funció que vols utilitzar amb el gest d\'accessibilitat (llisca cap amunt amb dos dits des de la part inferior de la pantalla):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Tria la funció que vols utilitzar amb el gest d\'accessibilitat (fes lliscar tres dits cap amunt des de la part inferior de la pantalla):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Per canviar entre funcions, mantén premut el botó d\'accessibilitat."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Per canviar entre funcions, llisca cap amunt amb dos dits i mantén premut."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Per canviar entre funcions, llisca cap amunt amb tres dits i mantén premut."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ampliació"</string>
     <string name="user_switched" msgid="7249833311585228097">"Usuari actual: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"S\'està canviant a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1884,7 +1894,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"El PIN és massa curt. Ha de tenir quatre dígits com a mínim."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Torna-ho a provar més tard"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Mode de pantalla completa"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Per sortir, llisca cap avall des de la part superior."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entesos"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gira per a una millor visualització"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Obre <xliff:g id="NAME">%s</xliff:g> en pantalla completa per a una millor visualització"</string>
@@ -1976,6 +1987,14 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Trucada en curs"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"S\'està filtrant una trucada entrant"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Sense classificar"</string>
+    <!-- no translation found for promotional_notification_channel_label (7414844730492860233) -->
+    <skip />
+    <!-- no translation found for social_notification_channel_label (106520267132019945) -->
+    <skip />
+    <!-- no translation found for news_notification_channel_label (4299937455247883311) -->
+    <skip />
+    <!-- no translation found for recs_notification_channel_label (4945985121418684297) -->
+    <skip />
     <string name="importance_from_user" msgid="2782756722448800447">"Has definit la importància d\'aquestes notificacions."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Aquest missatge és important per les persones implicades."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notificació d\'aplicació personalitzada"</string>
@@ -2192,6 +2211,10 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Selector de dreceres d\'accessibilitat en pantalla"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Drecera d\'accessibilitat"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Ignora l\'àrea de notificacions"</string>
+    <!-- no translation found for accessibility_system_action_menu_label (3385283204496447040) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_media_play_pause_label (1905647491347119748) -->
+    <skip />
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Creu direccional: amunt"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Creu direccional: avall"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Creu direccional: esquerra"</string>
@@ -2408,6 +2431,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Espai privat"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Comunitari"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Espai privat"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"S\'ha amagat contingut sensible de les notificacions"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per motius de seguretat"</string>

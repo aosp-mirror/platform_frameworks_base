@@ -16,10 +16,9 @@
 
 package com.android.systemui.communal.ui.compose
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
@@ -34,13 +33,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
@@ -107,8 +103,7 @@ internal constructor(
         get() =
             draggingItemLayoutInfo?.let { item ->
                 draggingItemInitialOffset + draggingItemDraggedDelta - item.offset.toOffset()
-            }
-                ?: Offset.Zero
+            } ?: Offset.Zero
 
     private val draggingItemLayoutInfo: LazyGridItemInfo?
         get() = state.layoutInfo.visibleItemsInfo.firstOrNull { it.index == draggingItemIndex }
@@ -238,7 +233,6 @@ fun Modifier.dragContainer(
 }
 
 /** Wrap LazyGrid item with additional modifier needed for drag and drop. */
-@OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalFoundationApi
 @Composable
 fun LazyGridItemScope.DraggableItem(
@@ -267,25 +261,21 @@ fun LazyGridItemScope.DraggableItem(
                 alpha = itemAlpha
             }
         } else {
-            Modifier.animateItemPlacement()
+            Modifier.animateItem()
         }
 
+    // Animate the highlight alpha manually as alpha modifier (and AnimatedVisibility) clips the
+    // widget to bounds, which cuts off the highlight as we are drawing outside the widget bounds.
+    val alpha by
+        animateFloatAsState(
+            targetValue =
+                if ((dragging || selected) && !dragDropState.isDraggingToRemove) 1f else 0f,
+            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+            label = "Widget outline alpha"
+        )
+
     Box(modifier) {
+        HighlightedItem(Modifier.matchParentSize(), alpha = alpha)
         Box(draggingModifier) { content(dragging) }
-        AnimatedVisibility(
-            modifier =
-                Modifier.matchParentSize()
-                    // Avoid taking focus away from the content when using explore-by-touch with
-                    // accessibility tools.
-                    .clearAndSetSemantics {}
-                    // Do not consume motion events in the highlighted item and pass them down to
-                    // the content.
-                    .pointerInteropFilter { false },
-            visible = (dragging || selected) && !dragDropState.isDraggingToRemove,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            HighlightedItem(Modifier.matchParentSize())
-        }
     }
 }

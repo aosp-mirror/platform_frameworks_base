@@ -192,7 +192,8 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
             for (UserInfo user : aliveUsers) {
                 int userId = user.getUserHandle().getIdentifier();
                 int appUid = queryUidFromPackageName(userId, packageName);
-                if (mVirtualDeviceManagerInternal.isAppRunningOnAnyVirtualDevice(appUid)) {
+                if (mVirtualDeviceManagerInternal != null
+                        && mVirtualDeviceManagerInternal.isAppRunningOnAnyVirtualDevice(appUid)) {
                     if (data == null) {
                         data = new InjectionSessionData();
                         data.appUid = appUid;

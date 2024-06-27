@@ -40,6 +40,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -261,14 +262,17 @@ public class NotificationShelf extends ActivatableNotificationView {
             viewState.hasItemsInStableShelf = false;
         }
 
-        final float stackEnd = ambientState.getStackY() + ambientState.getStackHeight();
+        final float stackBottom = SceneContainerFlag.isEnabled()
+                ? ambientState.getStackTop() + ambientState.getStackHeight()
+                : ambientState.getStackY() + ambientState.getStackHeight();
+
         if (viewState.hidden) {
             // if the shelf is hidden, position it at the end of the stack (plus the clip
             // padding), such that when it appears animated, it will smoothly move in from the
             // bottom, without jump cutting any notifications
-            viewState.setYTranslation(stackEnd + mPaddingBetweenElements);
+            viewState.setYTranslation(stackBottom + mPaddingBetweenElements);
         } else {
-            viewState.setYTranslation(stackEnd - viewState.height);
+            viewState.setYTranslation(stackBottom - viewState.height);
         }
     }
 

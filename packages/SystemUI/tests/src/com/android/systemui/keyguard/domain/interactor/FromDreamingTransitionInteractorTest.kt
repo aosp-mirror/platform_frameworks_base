@@ -48,6 +48,7 @@ import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -77,6 +78,9 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
     @Before
     fun setup() {
         underTest.start()
+
+        kosmos.fakeKeyguardRepository.setDreaming(true)
+        kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(true)
 
         // Transition to DOZING and set the power interactor asleep.
         powerInteractor.setAsleepForTest()

@@ -85,7 +85,7 @@ public class DozeUiTest extends SysuiTestCase {
         mHandler = mHandlerThread.getThreadHandler();
         mFakeExecutor = new FakeExecutor(new FakeSystemClock());
         mDozeUi = new DozeUi(mContext, mAlarmManager, mWakeLock, mHost, mHandler,
-                mDozeParameters, mFakeExecutor, mDozeLog);
+                mHandler, mDozeParameters, mFakeExecutor, mDozeLog);
         mDozeUi.setDozeMachine(mMachine);
     }
 

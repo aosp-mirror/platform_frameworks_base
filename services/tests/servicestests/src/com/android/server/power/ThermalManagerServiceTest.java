@@ -68,7 +68,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -514,7 +513,7 @@ public class ThermalManagerServiceTest {
     @Test
     public void testTemperatureWatcherGetSlopeOf() throws RemoteException {
         TemperatureWatcher watcher = mService.mTemperatureWatcher;
-        List<TemperatureWatcher.Sample> samples = new LinkedList<>();
+        List<TemperatureWatcher.Sample> samples = new ArrayList<>();
         for (int i = 0; i < 30; ++i) {
             samples.add(watcher.createSampleForTesting(i, (float) (i / 2 * 2)));
         }
@@ -539,7 +538,7 @@ public class ThermalManagerServiceTest {
     public void testTemperatureWatcherGetForecast() throws RemoteException {
         TemperatureWatcher watcher = mService.mTemperatureWatcher;
 
-        LinkedList<TemperatureWatcher.Sample> samples = new LinkedList<>();
+        ArrayList<TemperatureWatcher.Sample> samples = new ArrayList<>();
 
         // Add a single sample
         samples.add(watcher.createSampleForTesting(0, 25.0f));

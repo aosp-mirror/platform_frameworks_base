@@ -53,7 +53,8 @@ final class UserDataRepository {
         }
     }
 
-    UserDataRepository(@NonNull Handler handler, @NonNull UserManagerInternal userManagerInternal,
+    UserDataRepository(
+            @NonNull Handler handler, @NonNull UserManagerInternal userManagerInternal,
             @NonNull IntFunction<InputMethodBindingController> bindingControllerFactory) {
         mBindingControllerFactory = bindingControllerFactory;
         userManagerInternal.addUserLifecycleListener(
@@ -88,6 +89,12 @@ final class UserDataRepository {
         @NonNull
         final InputMethodBindingController mBindingController;
 
+        @NonNull
+        final InputMethodSubtypeSwitchingController mSwitchingController;
+
+        @NonNull
+        final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController;
+
         /**
          * Intended to be instantiated only from this file.
          */
@@ -95,6 +102,8 @@ final class UserDataRepository {
                 @NonNull InputMethodBindingController bindingController) {
             mUserId = userId;
             mBindingController = bindingController;
+            mSwitchingController = new InputMethodSubtypeSwitchingController();
+            mHardwareKeyboardShortcutController = new HardwareKeyboardShortcutController();
         }
 
         @Override

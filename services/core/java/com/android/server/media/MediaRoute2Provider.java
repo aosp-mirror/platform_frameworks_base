@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRouter2;
+import android.media.MediaRouter2Utils;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
@@ -226,8 +227,23 @@ abstract class MediaRoute2Provider {
             return route2Info != null && mTargetOriginalRouteId.equals(route2Info.getOriginalId());
         }
 
-        public boolean isTargetRouteIdInList(@NonNull List<String> routeOriginalIdList) {
-            return routeOriginalIdList.stream().anyMatch(mTargetOriginalRouteId::equals);
+        /**
+         * Returns whether the given list of {@link MediaRoute2Info#getOriginalId() original ids}
+         * contains the {@link #mTargetOriginalRouteId target route id}.
+         */
+        public boolean isTargetRouteIdInRouteOriginalIdList(
+                @NonNull List<String> originalRouteIdList) {
+            return originalRouteIdList.stream().anyMatch(mTargetOriginalRouteId::equals);
+        }
+
+        /**
+         * Returns whether the given list of {@link MediaRoute2Info#getId() unique ids} contains the
+         * {@link #mTargetOriginalRouteId target route id}.
+         */
+        public boolean isTargetRouteIdInRouteUniqueIdList(@NonNull List<String> uniqueRouteIdList) {
+            return uniqueRouteIdList.stream()
+                    .map(MediaRouter2Utils::getOriginalId)
+                    .anyMatch(mTargetOriginalRouteId::equals);
         }
     }
 }

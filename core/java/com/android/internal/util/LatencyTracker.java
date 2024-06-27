@@ -28,6 +28,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPOR
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE_WITH_SHADE_OPEN;
+import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK;
@@ -227,7 +228,8 @@ public class LatencyTracker {
     public static final int ACTION_NOTIFICATION_BIG_PICTURE_LOADED = 23;
 
     /**
-     * Time it takes to unlock the device via udfps, until the whole launcher appears.
+     * Time it takes to unlock the device via fps,
+     * until either the launcher or the foreground app appears.
      */
     public static final int ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME = 24;
 
@@ -248,6 +250,12 @@ public class LatencyTracker {
      * when the notifications are hidden and when the shade is open or keyguard is visible.
      */
     public static final int ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE_WITH_SHADE_OPEN = 27;
+
+    /**
+     * Time it takes to unlock the device via face,
+     * until either the launcher or the foreground app appears.
+     */
+    public static final int ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME = 28;
 
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
@@ -278,6 +286,7 @@ public class LatencyTracker {
         ACTION_BACK_SYSTEM_ANIMATION,
         ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE,
         ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE_WITH_SHADE_OPEN,
+        ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME,
     };
 
     /** @hide */
@@ -310,6 +319,7 @@ public class LatencyTracker {
         ACTION_BACK_SYSTEM_ANIMATION,
         ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE,
         ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE_WITH_SHADE_OPEN,
+        ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -345,6 +355,7 @@ public class LatencyTracker {
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_BACK_SYSTEM_ANIMATION,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE_WITH_SHADE_OPEN,
+            UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME,
     };
 
     private final Object mLock = new Object();
@@ -539,6 +550,8 @@ public class LatencyTracker {
                 return "ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE";
             case UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE_WITH_SHADE_OPEN:
                 return "ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE_WITH_SHADE_OPEN";
+            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME:
+                return "ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }

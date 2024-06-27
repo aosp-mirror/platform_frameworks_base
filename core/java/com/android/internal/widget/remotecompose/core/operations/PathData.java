@@ -18,27 +18,50 @@ package com.android.internal.widget.remotecompose.core.operations;
 import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
-import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 
+import java.util.Arrays;
 import java.util.List;
 
-public class PathData implements Operation {
+public class PathData implements Operation, VariableSupport {
     public static final Companion COMPANION = new Companion();
     int mInstanceId;
-    float[] mRef;
     float[] mFloatPath;
-    float[] mRetFloats;
+    float[] mOutputPath;
 
     PathData(int instanceId, float[] floatPath) {
         mInstanceId = instanceId;
         mFloatPath = floatPath;
+        mOutputPath = Arrays.copyOf(mFloatPath, mFloatPath.length);
+    }
+
+    @Override
+    public void updateVariables(RemoteContext context) {
+        for (int i = 0; i < mFloatPath.length; i++) {
+            float v = mFloatPath[i];
+            if (Utils.isVariable(v)) {
+                mOutputPath[i] = (Float.isNaN(v))
+                        ? context.getFloat(Utils.idFromNan(v)) : v;
+            } else {
+                mOutputPath[i] = v;
+            }
+        }
+    }
+
+    @Override
+    public void registerListening(RemoteContext context) {
+        for (int i = 0; i < mFloatPath.length; i++) {
+            if (Float.isNaN(mFloatPath[i])) {
+                context.listensTo(Utils.idFromNan(mFloatPath[i]), this);
+            }
+        }
     }
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mInstanceId, mFloatPath);
+        COMPANION.apply(buffer, mInstanceId, mOutputPath);
     }
 
     @Override
@@ -46,29 +69,35 @@ public class PathData implements Operation {
         return pathString(mFloatPath);
     }
 
-    public float[] getFloatPath(PaintContext context) {
-        float[] ret = mRetFloats; // Assume retFloats is declared elsewhere
-        if (ret == null) {
-            return mFloatPath; // Assume floatPath is declared elsewhere
-        }
-        float[] localRef = mRef; // Assume ref is of type Float[]
-        if (localRef == null) {
-            for (int i = 0; i < mFloatPath.length; i++) {
-                ret[i] = mFloatPath[i];
-            }
-        } else {
-            for (int i = 0; i < mFloatPath.length; i++) {
-                float lr = localRef[i];
-                if (Float.isNaN(lr)) {
-                    ret[i] = Utils.getActualValue(lr);
-                } else {
-                    ret[i] = mFloatPath[i];
-                }
-            }
-        }
-        return ret;
+    @Override
+    public String toString() {
+        return "PathData[" + mInstanceId + "] = " + "\"" + deepToString(" ") + "\"";
     }
 
+    /**
+     * public float[] getFloatPath(PaintContext context) {
+     * float[] ret = mRetFloats; // Assume retFloats is declared elsewhere
+     * if (ret == null) {
+     * return mFloatPath; // Assume floatPath is declared elsewhere
+     * }
+     * float[] localRef = mRef; // Assume ref is of type Float[]
+     * if (localRef == null) {
+     * for (int i = 0; i < mFloatPath.length; i++) {
+     * ret[i] = mFloatPath[i];
+     * }
+     * } else {
+     * for (int i = 0; i < mFloatPath.length; i++) {
+     * float lr = localRef[i];
+     * if (Float.isNaN(lr)) {
+     * ret[i] = Utils.getActualValue(lr);
+     * } else {
+     * ret[i] = mFloatPath[i];
+     * }
+     * }
+     * }
+     * return ret;
+     * }
+     */
     public static final int MOVE = 10;
     public static final int LINE = 11;
     public static final int QUADRATIC = 12;
@@ -155,7 +184,7 @@ public class PathData implements Operation {
                             str.append(".");
                             break;
                         default:
-                            str.append("X");
+                            str.append("[" + id + "]");
                             break;
                     }
                 } else {
@@ -170,7 +199,7 @@ public class PathData implements Operation {
 
     @Override
     public void apply(RemoteContext context) {
-        context.loadPathData(mInstanceId, mFloatPath);
+        context.loadPathData(mInstanceId, mOutputPath);
     }
 
 }

@@ -39,6 +39,7 @@ import android.media.AudioSystem;
 import android.media.ISoundDose;
 import android.media.ISoundDoseCallback;
 import android.media.SoundDoseRecord;
+import android.media.VolumeInfo;
 import android.os.Binder;
 import android.os.Message;
 import android.os.RemoteException;
@@ -895,6 +896,8 @@ public class SoundDoseHelper {
 
         try {
             if (!isAbsoluteVolume) {
+                mLogger.enqueue(
+                        SoundDoseEvent.getAbsVolumeAttenuationEvent(/*attenuation=*/0.f, device));
                 // remove any possible previous attenuation
                 soundDose.updateAttenuation(/* attenuationDB= */0.f, device);
 
@@ -903,10 +906,11 @@ public class SoundDoseHelper {
 
             if (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC
                     && safeDevicesContains(device)) {
-                soundDose.updateAttenuation(
-                        -AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
-                                (newIndex + 5) / 10,
-                                device), device);
+                float attenuationDb = -AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
+                        (newIndex + 5) / 10, device);
+                mLogger.enqueue(
+                        SoundDoseEvent.getAbsVolumeAttenuationEvent(attenuationDb, device));
+                soundDose.updateAttenuation(attenuationDb, device);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Could not apply the attenuation for MEL calculation with volume index "
@@ -1313,22 +1317,30 @@ public class SoundDoseHelper {
 
     /** Called when handling MSG_LOWER_VOLUME_TO_RS1 */
     private void onLowerVolumeToRs1() {
-        mLogger.enqueue(SoundDoseEvent.getLowerVolumeToRs1Event());
         final ArrayList<AudioDeviceAttributes> devices = mAudioService.getDevicesForAttributesInt(
-                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build(), true);
-        final int nativeDeviceType;
-        final AudioDeviceAttributes ada;
-        if (!devices.isEmpty()) {
-            ada = devices.get(0);
-            nativeDeviceType = ada.getInternalType();
-        } else {
-            nativeDeviceType = AudioSystem.DEVICE_OUT_USB_HEADSET;
-            ada = new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_USB_HEADSET, "");
+                new AudioAttributes.Builder().setUsage(
+                        AudioAttributes.USAGE_MEDIA).build(), /*forVolume=*/true);
+        if (devices.isEmpty()) {
+            Log.e(TAG, "Cannot lower the volume to RS1, no devices registered for USAGE_MEDIA");
+            return;
         }
-        final int index = safeMediaVolumeIndex(nativeDeviceType);
-        mAudioService.setStreamVolumeWithAttributionInt(STREAM_MUSIC, index / 10, /*flags*/ 0, ada,
-                mContext.getOpPackageName(), /*attributionTag=*/null,
-                true /*canChangeMuteAndUpdateController*/);
+        final AudioDeviceAttributes ada = devices.get(0);
+        final int nativeDeviceType = ada.getInternalType();
+        final int index = safeMediaVolumeIndex(nativeDeviceType) / 10;
+        final VolumeInfo curVolume = mAudioService.getDeviceVolume(
+                new VolumeInfo.Builder(STREAM_MUSIC).build(), ada,
+                /*callingPackage=*/"sounddosehelper");
+
+        if (index < curVolume.getVolumeIndex()) {
+            mLogger.enqueue(SoundDoseEvent.getLowerVolumeToRs1Event());
+            mAudioService.setStreamVolumeWithAttributionInt(STREAM_MUSIC, index, /*flags*/ 0, ada,
+                    mContext.getOpPackageName(), /*attributionTag=*/null,
+                    /*canChangeMuteAndUpdateController=*/true);
+        } else {
+            Log.i(TAG, "The current volume " + curVolume.getVolumeIndex()
+                    + " for device type " + nativeDeviceType
+                    + " is already smaller or equal to the safe index volume " + index);
+        }
     }
 
     // StreamVolumeCommand contains the information needed to defer the process of

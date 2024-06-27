@@ -291,8 +291,9 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     private void updateMediaMetaData(MediaListener callback) {
-        callback.onPrimaryMetadataOrStateChanged(mMediaMetadata,
-                getMediaControllerPlaybackState(mMediaController));
+        int playbackState = getMediaControllerPlaybackState(mMediaController);
+        mHandler.post(
+                () -> callback.onPrimaryMetadataOrStateChanged(mMediaMetadata, playbackState));
     }
 
     public void removeCallback(MediaListener callback) {
@@ -303,7 +304,12 @@ public class NotificationMediaManager implements Dumpable {
         // TODO(b/169655907): get the semi-filtered notifications for current user
         Collection<NotificationEntry> allNotifications = mNotifPipeline.getAllNotifs();
         if (notificationMediaManagerBackgroundExecution()) {
-            mBackgroundExecutor.execute(() -> findPlayingMediaNotification(allNotifications));
+            // Create new sbn list to be accessed in background thread.
+            List<StatusBarNotification> statusBarNotifications = new ArrayList<>();
+            for (NotificationEntry entry: allNotifications) {
+                statusBarNotifications.add(entry.getSbn());
+            }
+            mBackgroundExecutor.execute(() -> findPlayingMediaNotification(statusBarNotifications));
         } else {
             findPlayingMediaNotification(allNotifications);
         }
@@ -341,6 +347,51 @@ public class NotificationMediaManager implements Dumpable {
             }
         }
 
+        StatusBarNotification statusBarNotification = null;
+        if (mediaNotification != null) {
+            statusBarNotification = mediaNotification.getSbn();
+        }
+        setUpControllerAndKey(controller, statusBarNotification);
+    }
+
+    /**
+     * Find a notification and media controller associated with the playing media session, and
+     * update this manager's internal state.
+     * This method must be called in background.
+     * TODO(b/273443374) check this method
+     */
+    void findPlayingMediaNotification(@NonNull List<StatusBarNotification> allNotifications) {
+        // Promote the media notification with a controller in 'playing' state, if any.
+        StatusBarNotification statusBarNotification = null;
+        MediaController controller = null;
+        for (StatusBarNotification sbn : allNotifications) {
+            Notification notif = sbn.getNotification();
+            if (notif.isMediaNotification()) {
+                final MediaSession.Token token =
+                        sbn.getNotification().extras.getParcelable(
+                                Notification.EXTRA_MEDIA_SESSION, MediaSession.Token.class);
+                if (token != null) {
+                    MediaController aController = new MediaController(mContext, token);
+                    if (PlaybackState.STATE_PLAYING
+                            == getMediaControllerPlaybackState(aController)) {
+                        if (DEBUG_MEDIA) {
+                            Log.v(TAG, "DEBUG_MEDIA: found mediastyle controller matching "
+                                    + sbn.getKey());
+                        }
+                        statusBarNotification = sbn;
+                        controller = aController;
+                        break;
+                    }
+                }
+            }
+        }
+
+        setUpControllerAndKey(controller, statusBarNotification);
+    }
+
+    private void setUpControllerAndKey(
+            MediaController controller,
+            StatusBarNotification mediaNotification) {
         if (controller != null && !sameSessions(mMediaController, controller)) {
             // We have a new media session
             clearCurrentMediaNotificationSession();
@@ -354,8 +405,8 @@ public class NotificationMediaManager implements Dumpable {
         }
 
         if (mediaNotification != null
-                && !mediaNotification.getSbn().getKey().equals(mMediaNotificationKey)) {
-            mMediaNotificationKey = mediaNotification.getSbn().getKey();
+                && !mediaNotification.getKey().equals(mMediaNotificationKey)) {
+            mMediaNotificationKey = mediaNotification.getKey();
             if (DEBUG_MEDIA) {
                 Log.v(TAG, "DEBUG_MEDIA: Found new media notification: key="
                         + mMediaNotificationKey);
@@ -387,9 +438,11 @@ public class NotificationMediaManager implements Dumpable {
 
     private void updateMediaMetaData(List<MediaListener> callbacks) {
         @PlaybackState.State int state = getMediaControllerPlaybackState(mMediaController);
-        for (int i = 0; i < callbacks.size(); i++) {
-            callbacks.get(i).onPrimaryMetadataOrStateChanged(mMediaMetadata, state);
-        }
+        mHandler.post(() -> {
+            for (int i = 0; i < callbacks.size(); i++) {
+                callbacks.get(i).onPrimaryMetadataOrStateChanged(mMediaMetadata, state);
+            }
+        });
     }
 
     @Override

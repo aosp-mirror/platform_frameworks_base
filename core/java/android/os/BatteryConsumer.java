@@ -197,6 +197,11 @@ public abstract class BatteryConsumer {
             POWER_COMPONENT_MOBILE_RADIO,
             POWER_COMPONENT_WIFI,
             POWER_COMPONENT_BLUETOOTH,
+            POWER_COMPONENT_AUDIO,
+            POWER_COMPONENT_VIDEO,
+            POWER_COMPONENT_FLASHLIGHT,
+            POWER_COMPONENT_CAMERA,
+            POWER_COMPONENT_GNSS,
     };
 
     static final int COLUMN_INDEX_BATTERY_CONSUMER_TYPE = 0;
@@ -880,6 +885,13 @@ public abstract class BatteryConsumer {
         @NonNull
         public T setConsumedPowerForCustomComponent(int componentId, double componentPower) {
             mPowerComponentsBuilder.setConsumedPowerForCustomComponent(componentId, componentPower);
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @NonNull
+        public T addConsumedPowerForCustomComponent(int componentId, double componentPower) {
+            mPowerComponentsBuilder.addConsumedPowerForCustomComponent(componentId, componentPower);
             return (T) this;
         }
 
