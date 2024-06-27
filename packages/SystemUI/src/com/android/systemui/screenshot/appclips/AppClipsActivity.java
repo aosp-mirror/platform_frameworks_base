@@ -51,6 +51,9 @@ import android.widget.TextView;
 
 import androidx.activity.ComponentActivity;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.android.internal.logging.UiEventLogger;
@@ -157,6 +160,14 @@ public class AppClipsActivity extends ComponentActivity {
         mLayout = getLayoutInflater().inflate(R.layout.app_clips_screenshot, null);
         mRoot = mLayout.findViewById(R.id.root);
 
+        // Manually handle window insets post Android V to support edge-to-edge display.
+        ViewCompat.setOnApplyWindowInsetsListener(mRoot, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
+
         mSave = mLayout.findViewById(R.id.save);
         mCancel = mLayout.findViewById(R.id.cancel);
         mSave.setOnClickListener(this::onClick);
@@ -238,6 +249,9 @@ public class AppClipsActivity extends ComponentActivity {
 
         // Screenshot is now available so set content view.
         setContentView(mLayout);
+
+        // Request view to apply insets as it is added late and not when activity was first created.
+        mRoot.requestApplyInsets();
     }
 
     private void onClick(View view) {
@@ -289,7 +303,7 @@ public class AppClipsActivity extends ComponentActivity {
             mResultReceiver.send(Activity.RESULT_OK, data);
             logUiEvent(SCREENSHOT_FOR_NOTE_ACCEPTED);
         } catch (Exception e) {
-            // Do nothing.
+            Log.e(TAG, "Error while returning data to trampoline activity", e);
         }
 
         // Nullify the ResultReceiver before finishing to avoid resending the result.
