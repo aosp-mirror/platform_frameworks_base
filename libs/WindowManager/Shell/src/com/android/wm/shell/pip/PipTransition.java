@@ -1173,6 +1173,7 @@ public class PipTransition extends PipTransitionController {
                     .setLayer(swipePipToHomeOverlay, Integer.MAX_VALUE);
         }
 
+        sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
         // Both Shell and Launcher calculate their own "adjusted" source-rect-hint values based on
         // appBounds being source bounds when entering PiP.
         final Rect sourceBounds = swipePipToHomeOverlay == null
