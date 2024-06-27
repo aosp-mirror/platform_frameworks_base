@@ -21,6 +21,7 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.common.shared.model.NotificationContainerBounds
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
@@ -53,6 +54,7 @@ import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTrans
 import com.android.systemui.keyguard.ui.viewmodel.GoneToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDozingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.GoneToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGoneTransitionViewModel
@@ -74,6 +76,7 @@ import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -120,6 +123,7 @@ constructor(
     private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
     private val goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
     private val goneToDreamingTransitionViewModel: GoneToDreamingTransitionViewModel,
+    private val goneToLockscreenTransitionViewModel: GoneToLockscreenTransitionViewModel,
     private val lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
     private val lockscreenToGlanceableHubTransitionViewModel:
         LockscreenToGlanceableHubTransitionViewModel,
@@ -134,6 +138,7 @@ constructor(
     private val primaryBouncerToLockscreenTransitionViewModel:
         PrimaryBouncerToLockscreenTransitionViewModel,
     private val aodBurnInViewModel: AodBurnInViewModel,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) : FlowDumperImpl(dumpManager) {
     private val statesForConstrainedNotifications: Set<KeyguardState> =
@@ -441,7 +446,7 @@ constructor(
                     anyOf(
                             *toFlowArray(statesForHiddenKeyguard) { state ->
                                 keyguardTransitionInteractor
-                                    .transitionStepsToState(state)
+                                    .transition(Edge.create(to = state))
                                     .map { it.value > 0f && it.transitionState == RUNNING }
                                     .onStart { emit(false) }
                             }
@@ -468,11 +473,27 @@ constructor(
             }
             .dumpWhileCollecting("isTransitioningToHiddenKeyguard")
 
+    val panelAlpha = keyguardInteractor.panelAlpha
+
+    private fun bouncerToGoneNotificationAlpha(viewState: ViewStateAccessor): Flow<Float> =
+        merge(
+                primaryBouncerToGoneTransitionViewModel.notificationAlpha,
+                alternateBouncerToGoneTransitionViewModel.notificationAlpha(viewState),
+            )
+            .sample(communalSceneInteractor.isCommunalVisible) { alpha, isCommunalVisible ->
+                // when glanceable hub is visible, hide notifications during the transition to GONE
+                if (isCommunalVisible) 0f else alpha
+            }
+            .dumpWhileCollecting("bouncerToGoneNotificationAlpha")
+
     fun keyguardAlpha(viewState: ViewStateAccessor): Flow<Float> {
         // All transition view models are mututally exclusive, and safe to merge
         val alphaTransitions =
             merge(
-                alternateBouncerToGoneTransitionViewModel.notificationAlpha(viewState),
+                keyguardInteractor.dismissAlpha.dumpWhileCollecting(
+                    "keyguardInteractor.dismissAlpha"
+                ),
+                bouncerToGoneNotificationAlpha(viewState),
                 aodToGoneTransitionViewModel.notificationAlpha(viewState),
                 aodToLockscreenTransitionViewModel.notificationAlpha,
                 aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
@@ -481,7 +502,8 @@ constructor(
                 dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
                 goneToAodTransitionViewModel.notificationAlpha,
                 goneToDreamingTransitionViewModel.lockscreenAlpha,
-                goneToDozingTransitionViewModel.lockscreenAlpha,
+                goneToDozingTransitionViewModel.notificationAlpha,
+                goneToLockscreenTransitionViewModel.lockscreenAlpha,
                 lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
                 lockscreenToGoneTransitionViewModel.notificationAlpha(viewState),
                 lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
@@ -489,8 +511,9 @@ constructor(
                 occludedToAodTransitionViewModel.lockscreenAlpha,
                 occludedToGoneTransitionViewModel.notificationAlpha(viewState),
                 occludedToLockscreenTransitionViewModel.lockscreenAlpha,
-                primaryBouncerToGoneTransitionViewModel.notificationAlpha,
                 primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha,
+                glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
+                lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
             )
 
         return merge(
@@ -498,24 +521,10 @@ constructor(
                 // These remaining cases handle alpha changes within an existing state, such as
                 // shade expansion or swipe to dismiss
                 combineTransform(
-                    isOnLockscreenWithoutShade,
                     isTransitioningToHiddenKeyguard,
-                    shadeCollapseFadeIn,
                     alphaForShadeAndQsExpansion,
-                    keyguardInteractor.dismissAlpha.dumpWhileCollecting(
-                        "keyguardInteractor.keyguardAlpha"
-                    ),
-                ) {
-                    isOnLockscreenWithoutShade,
-                    isTransitioningToHiddenKeyguard,
-                    shadeCollapseFadeIn,
-                    alphaForShadeAndQsExpansion,
-                    dismissAlpha ->
-                    if (isOnLockscreenWithoutShade) {
-                        if (!shadeCollapseFadeIn && dismissAlpha != null) {
-                            emit(dismissAlpha)
-                        }
-                    } else if (!isTransitioningToHiddenKeyguard) {
+                ) { isTransitioningToHiddenKeyguard, alphaForShadeAndQsExpansion ->
+                    if (!isTransitioningToHiddenKeyguard) {
                         emit(alphaForShadeAndQsExpansion)
                     }
                 },

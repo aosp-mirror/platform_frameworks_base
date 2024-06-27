@@ -7,4 +7,5 @@ import android.hardware.location.ISignificantPlaceProviderManager;
  */
 oneway interface ISignificantPlaceProvider {
     void setSignificantPlaceProviderManager(in ISignificantPlaceProviderManager manager);
+    void onSignificantPlaceCheck();
 }

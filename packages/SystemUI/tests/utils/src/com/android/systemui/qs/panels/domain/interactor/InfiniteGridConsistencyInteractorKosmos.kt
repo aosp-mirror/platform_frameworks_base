@@ -20,5 +20,5 @@ import com.android.systemui.kosmos.Kosmos
 
 val Kosmos.infiniteGridConsistencyInteractor by
     Kosmos.Fixture {
-        InfiniteGridConsistencyInteractor(iconTilesInteractor, infiniteGridSizeInteractor)
+        InfiniteGridConsistencyInteractor(iconTilesInteractor, fixedColumnsSizeInteractor)
     }

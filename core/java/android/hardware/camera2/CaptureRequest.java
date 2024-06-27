@@ -57,7 +57,7 @@ import java.util.Set;
  *
  * <p>CaptureRequests can be created by using a {@link Builder} instance,
  * obtained by calling {@link CameraDevice#createCaptureRequest} or {@link
- * CameraManager#createCaptureRequest}</p>
+ * CameraDevice.CameraDeviceSetup#createCaptureRequest}</p>
  *
  * <p>CaptureRequests are given to {@link CameraCaptureSession#capture} or
  * {@link CameraCaptureSession#setRepeatingRequest} to capture images from a camera.</p>
@@ -84,7 +84,7 @@ import java.util.Set;
  * @see CameraCaptureSession#setRepeatingBurst
  * @see CameraDevice#createCaptureRequest
  * @see CameraDevice#createReprocessCaptureRequest
- * @see CameraManager#createCaptureRequest
+ * @see CameraDevice.CameraDeviceSetup#createCaptureRequest
  */
 public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         implements Parcelable {
@@ -812,8 +812,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * A builder for capture requests.
      *
      * <p>To obtain a builder instance, use the
-     * {@link CameraDevice#createCaptureRequest} or {@link CameraManager#createCaptureRequest}
-     * method, which initializes the request fields to one of the templates defined in
+     * {@link CameraDevice#createCaptureRequest} or
+     * {@link CameraDevice.CameraDeviceSetup#createCaptureRequest} method, which
+     * initializes the request fields to one of the templates defined in
      * {@link CameraDevice}.
      *
      * @see CameraDevice#createCaptureRequest
@@ -822,7 +823,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CameraDevice#TEMPLATE_STILL_CAPTURE
      * @see CameraDevice#TEMPLATE_VIDEO_SNAPSHOT
      * @see CameraDevice#TEMPLATE_MANUAL
-     * @see CameraManager#createCaptureRequest
+     * @see CameraDevice.CameraDeviceSetup#createCaptureRequest
      */
     public final static class Builder {
 
@@ -2683,27 +2684,27 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>Flash strength level to be used when manual flash control is active.</p>
      * <p>Flash strength level to use in capture mode i.e. when the applications control
-     * flash with either SINGLE or TORCH mode.</p>
+     * flash with either <code>SINGLE</code> or <code>TORCH</code> mode.</p>
      * <p>Use {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} and
      * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} to check whether the device supports
      * flash strength control or not.
-     * If the values of android.flash.info.singleStrengthMaxLevel and
+     * If the values of {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} and
      * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} are greater than 1,
      * then the device supports manual flash strength control.</p>
-     * <p>If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> TORCH the value must be &gt;= 1
+     * <p>If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> <code>TORCH</code> the value must be &gt;= 1
      * and &lt;= {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel}.
      * If the application doesn't set the key and
      * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} &gt; 1,
      * then the flash will be fired at the default level set by HAL in
      * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_DEFAULT_LEVEL android.flash.torchStrengthDefaultLevel}.
-     * If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> SINGLE, then the value must be &gt;= 1
+     * If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> <code>SINGLE</code>, then the value must be &gt;= 1
      * and &lt;= {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel}.
      * If the application does not set this key and
      * {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} &gt; 1,
      * then the flash will be fired at the default level set by HAL
      * in {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_DEFAULT_LEVEL android.flash.singleStrengthDefaultLevel}.
-     * If {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to any of ON_AUTO_FLASH, ON_ALWAYS_FLASH,
-     * ON_AUTO_FLASH_REDEYE, ON_EXTERNAL_FLASH values, then the strengthLevel will be ignored.</p>
+     * If {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to any of <code>ON_AUTO_FLASH</code>, <code>ON_ALWAYS_FLASH</code>,
+     * <code>ON_AUTO_FLASH_REDEYE</code>, <code>ON_EXTERNAL_FLASH</code> values, then the strengthLevel will be ignored.</p>
      * <p><b>Range of valid values:</b><br>
      * <code>[1-{@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel}]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
      * set to TORCH;

@@ -27,14 +27,6 @@ flag {
 }
 
 flag {
-    name: "fix_unlocked_device_required_keys_v2"
-    namespace: "hardware_backed_security"
-    description: "Fix bugs in behavior of UnlockedDeviceRequired keystore keys"
-    bug: "296464083"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "keyinfo_unlocked_device_required"
     is_exported: true
     namespace: "hardware_backed_security"

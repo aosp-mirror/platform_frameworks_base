@@ -44,6 +44,8 @@ import java.util.WeakHashMap;
  */
 public class SurfaceControlRegistry {
     private static final String TAG = "SurfaceControlRegistry";
+    // Special constant for identifying the Transaction#apply() calls
+    static final String APPLY = "apply";
 
     /**
      * An interface for processing the registered SurfaceControls when the threshold is exceeded.
@@ -134,6 +136,10 @@ public class SurfaceControlRegistry {
     // sCallStackDebuggingEnabled is true.  Can be combined with the match name.
     private static String sCallStackDebuggingMatchCall;
 
+    // When set, all calls on a SurfaceControl.Transaction will be stored and logged when the
+    // transaction is applied.
+    static boolean sLogAllTxCallsOnApply;
+
     // Mapping of the active SurfaceControls to the elapsed time when they were registered
     @GuardedBy("sLock")
     private final WeakHashMap<SurfaceControl, Long> mSurfaceControls;
@@ -185,6 +191,7 @@ public class SurfaceControlRegistry {
     public void setCallStackDebuggingParams(String matchName, String matchCall) {
         sCallStackDebuggingMatchName = matchName.toLowerCase();
         sCallStackDebuggingMatchCall = matchCall.toLowerCase();
+        sLogAllTxCallsOnApply = sCallStackDebuggingMatchCall.contains("apply");
     }
 
     /**
@@ -294,13 +301,15 @@ public class SurfaceControlRegistry {
         sCallStackDebuggingMatchName =
                 SystemProperties.get("persist.wm.debug.sc.tx.log_match_name", null)
                         .toLowerCase();
+        sLogAllTxCallsOnApply = sCallStackDebuggingMatchCall.contains("apply");
         // Only enable stack debugging if any of the match filters are set
-        sCallStackDebuggingEnabled = (!sCallStackDebuggingMatchCall.isEmpty()
-                || !sCallStackDebuggingMatchName.isEmpty());
+        sCallStackDebuggingEnabled = !sCallStackDebuggingMatchCall.isEmpty()
+                || !sCallStackDebuggingMatchName.isEmpty();
         if (sCallStackDebuggingEnabled) {
             Log.d(TAG, "Enabling transaction call stack debugging:"
                     + " matchCall=" + sCallStackDebuggingMatchCall
-                    + " matchName=" + sCallStackDebuggingMatchName);
+                    + " matchName=" + sCallStackDebuggingMatchName
+                    + " logCallsWithApply=" + sLogAllTxCallsOnApply);
         }
     }
 
@@ -319,15 +328,31 @@ public class SurfaceControlRegistry {
         if (!sCallStackDebuggingEnabled) {
             return;
         }
-        if (!matchesForCallStackDebugging(sc != null ? sc.getName() : null, call)) {
-            return;
-        }
-        final String txMsg = tx != null ? "tx=" + tx.getId() + " ": "";
-        final String scMsg = sc != null ? " sc=" + sc.getName() + "": "";
+
+        final String txMsg = tx != null ? "tx=" + tx.getId() + " " : "";
+        final String scMsg = sc != null ? " sc=" + sc.getName() + "" : "";
         final String msg = details != null
                 ? call + " (" + txMsg + scMsg + ") " + details
                 : call + " (" + txMsg + scMsg + ")";
-        Log.e(TAG, msg, new Throwable());
+        if (sLogAllTxCallsOnApply && tx != null) {
+            if (call == APPLY) {
+                // Log the apply and dump the calls on that transaction
+                Log.e(TAG, msg, new Throwable());
+                for (int i = 0; i < tx.mCalls.size(); i++) {
+                    Log.d(TAG, "        " + tx.mCalls.get(i));
+                }
+            } else if (matchesForCallStackDebugging(sc != null ? sc.getName() : null, call)) {
+                // Otherwise log this call to the transaction if it matches the tracked calls
+                Log.e(TAG, msg, new Throwable());
+                tx.mCalls.add(msg);
+            }
+        } else {
+            // Log this call if it matches the tracked calls
+            if (!matchesForCallStackDebugging(sc != null ? sc.getName() : null, call)) {
+                return;
+            }
+            Log.e(TAG, msg, new Throwable());
+        }
     }
 
     /**
@@ -342,12 +367,14 @@ public class SurfaceControlRegistry {
             return false;
         }
         final boolean matchName = !sCallStackDebuggingMatchName.isEmpty();
-        if (matchName && (name == null
-                || !sCallStackDebuggingMatchName.contains(name.toLowerCase()))) {
-            // Skip if target surface doesn't match requested surface
+        if (!matchName) {
+            return true;
+        }
+        if (name == null) {
             return false;
         }
-        return true;
+        return sCallStackDebuggingMatchName.contains(name.toLowerCase()) ||
+                        name.toLowerCase().contains(sCallStackDebuggingMatchName);
     }
 
     /**
@@ -386,6 +413,7 @@ public class SurfaceControlRegistry {
                 pw.println("sCallStackDebuggingEnabled=" + sCallStackDebuggingEnabled);
                 pw.println("sCallStackDebuggingMatchName=" + sCallStackDebuggingMatchName);
                 pw.println("sCallStackDebuggingMatchCall=" + sCallStackDebuggingMatchCall);
+                pw.println("sLogAllTxCallsOnApply=" + sLogAllTxCallsOnApply);
             }
         }
     }

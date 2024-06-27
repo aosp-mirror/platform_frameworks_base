@@ -150,7 +150,7 @@ public class WallpaperCropper {
                 Rect landscapeCrop = getCrop(rotatedDisplaySize, bitmapSize, suggestedCrops, rtl);
                 landscapeCrop = noParallax(landscapeCrop, rotatedDisplaySize, bitmapSize, rtl);
                 // compute the crop on portrait at the center of the landscape crop
-                crop = getAdjustedCrop(landscapeCrop, bitmapSize, displaySize, false, ADD);
+                crop = getAdjustedCrop(landscapeCrop, bitmapSize, displaySize, false, rtl, ADD);
 
                 // add some parallax (until the border of the landscape crop without parallax)
                 if (rtl) {
@@ -160,7 +160,7 @@ public class WallpaperCropper {
                 }
             }
 
-            return getAdjustedCrop(crop, bitmapSize, displaySize, true, ADD);
+            return getAdjustedCrop(crop, bitmapSize, displaySize, true, rtl, ADD);
         }
 
         // If any suggested crop is invalid, fallback to case 1
@@ -176,7 +176,7 @@ public class WallpaperCropper {
         // Case 2: if the orientation exists in the suggested crops, adjust the suggested crop
         Rect suggestedCrop = suggestedCrops.get(orientation);
         if (suggestedCrop != null) {
-            return getAdjustedCrop(suggestedCrop, bitmapSize, displaySize, true, ADD);
+            return getAdjustedCrop(suggestedCrop, bitmapSize, displaySize, true, rtl, ADD);
         }
 
         // Case 3: if we have the 90° rotated orientation in the suggested crops, reuse it and
@@ -188,7 +188,7 @@ public class WallpaperCropper {
         if (suggestedCrop != null) {
             // only keep the visible part (without parallax)
             Rect adjustedCrop = noParallax(suggestedCrop, suggestedDisplaySize, bitmapSize, rtl);
-            return getAdjustedCrop(adjustedCrop, bitmapSize, displaySize, false, BALANCE);
+            return getAdjustedCrop(adjustedCrop, bitmapSize, displaySize, false, rtl, BALANCE);
         }
 
         // Case 4: if the device is a foldable, if we're looking for a folded orientation and have
@@ -200,13 +200,13 @@ public class WallpaperCropper {
             // compute the visible part (without parallax) of the unfolded screen
             Rect adjustedCrop = noParallax(suggestedCrop, suggestedDisplaySize, bitmapSize, rtl);
             // compute the folded crop, at the center of the crop of the unfolded screen
-            Rect res = getAdjustedCrop(adjustedCrop, bitmapSize, displaySize, false, REMOVE);
+            Rect res = getAdjustedCrop(adjustedCrop, bitmapSize, displaySize, false, rtl, REMOVE);
             // if we removed some width, add it back to add a parallax effect
             if (res.width() < adjustedCrop.width()) {
                 if (rtl) res.left = Math.min(res.left, adjustedCrop.left);
                 else res.right = Math.max(res.right, adjustedCrop.right);
                 // use getAdjustedCrop(parallax=true) to make sure we don't exceed MAX_PARALLAX
-                res = getAdjustedCrop(res, bitmapSize, displaySize, true, ADD);
+                res = getAdjustedCrop(res, bitmapSize, displaySize, true, rtl, ADD);
             }
             return res;
         }
@@ -220,7 +220,7 @@ public class WallpaperCropper {
         if (suggestedCrop != null) {
             // only keep the visible part (without parallax)
             Rect adjustedCrop = noParallax(suggestedCrop, suggestedDisplaySize, bitmapSize, rtl);
-            return getAdjustedCrop(adjustedCrop, bitmapSize, displaySize, false, ADD);
+            return getAdjustedCrop(adjustedCrop, bitmapSize, displaySize, false, rtl, ADD);
         }
 
         // Case 6: for a foldable device, try to combine case 3 + case 4 or 5:
@@ -255,7 +255,7 @@ public class WallpaperCropper {
     @VisibleForTesting
     static Rect noParallax(Rect crop, Point displaySize, Point bitmapSize, boolean rtl) {
         if (displaySize == null) return crop;
-        Rect adjustedCrop = getAdjustedCrop(crop, bitmapSize, displaySize, true, ADD);
+        Rect adjustedCrop = getAdjustedCrop(crop, bitmapSize, displaySize, true, rtl, ADD);
         // only keep the visible part (without parallax)
         float suggestedDisplayRatio = 1f * displaySize.x / displaySize.y;
         int widthToRemove = (int) (adjustedCrop.width()
@@ -272,7 +272,7 @@ public class WallpaperCropper {
      * Adjust a given crop:
      * <ul>
      *     <li>If parallax = true, make sure we have a parallax of at most {@link #MAX_PARALLAX},
-     *     by removing content from both sides if necessary.
+     *     by removing content from the right (or left if RTL) if necessary.
      *     <li>If parallax = false, make sure we do not have additional width for parallax. If we
      *     have additional width for parallax, remove half of the additional width on both sides.
      *     <li>Make sure the crop fills the screen, i.e. that the width/height ratio of the crop
@@ -282,7 +282,7 @@ public class WallpaperCropper {
      */
     @VisibleForTesting
     static Rect getAdjustedCrop(Rect crop, Point bitmapSize, Point screenSize,
-            boolean parallax, int mode) {
+            boolean parallax, boolean rtl, int mode) {
         Rect adjustedCrop = new Rect(crop);
         float cropRatio = ((float) crop.width()) / crop.height();
         float screenRatio = ((float) screenSize.x) / screenSize.y;
@@ -297,7 +297,8 @@ public class WallpaperCropper {
                 Rect rotatedCrop = new Rect(newLeft, newTop, newRight, newBottom);
                 Point rotatedBitmap = new Point(bitmapSize.y, bitmapSize.x);
                 Point rotatedScreen = new Point(screenSize.y, screenSize.x);
-                Rect rect = getAdjustedCrop(rotatedCrop, rotatedBitmap, rotatedScreen, false, mode);
+                Rect rect = getAdjustedCrop(
+                        rotatedCrop, rotatedBitmap, rotatedScreen, false, rtl, mode);
                 int resultLeft = rect.top;
                 int resultRight = resultLeft + rect.height();
                 int resultTop = rotatedBitmap.x - rect.right;
@@ -308,8 +309,11 @@ public class WallpaperCropper {
             if (additionalWidthForParallax > MAX_PARALLAX) {
                 int widthToRemove = (int) Math.ceil(
                         (additionalWidthForParallax - MAX_PARALLAX) * screenRatio * crop.height());
-                adjustedCrop.left += widthToRemove / 2;
-                adjustedCrop.right -= widthToRemove / 2 + widthToRemove % 2;
+                if (rtl) {
+                    adjustedCrop.left += widthToRemove;
+                } else {
+                    adjustedCrop.right -= widthToRemove;
+                }
             }
         } else {
             // Note: the third case when MODE == BALANCE, -W + sqrt(W * H * R), is the width to add

@@ -28,6 +28,7 @@ import com.android.systemui.scene.shared.model.SceneDataSource
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -51,7 +52,7 @@ interface CommunalSceneRepository {
     fun changeScene(toScene: SceneKey, transitionKey: TransitionKey? = null)
 
     /** Immediately snaps to the desired scene. */
-    fun snapToScene(toScene: SceneKey)
+    fun snapToScene(toScene: SceneKey, delayMillis: Long = 0)
 
     /**
      * Updates the transition state of the hub [SceneTransitionLayout].
@@ -92,10 +93,11 @@ constructor(
         }
     }
 
-    override fun snapToScene(toScene: SceneKey) {
+    override fun snapToScene(toScene: SceneKey, delayMillis: Long) {
         applicationScope.launch {
             // SceneTransitionLayout state updates must be triggered on the thread the STL was
             // created on.
+            delay(delayMillis)
             sceneDataSource.snapToScene(toScene)
         }
     }

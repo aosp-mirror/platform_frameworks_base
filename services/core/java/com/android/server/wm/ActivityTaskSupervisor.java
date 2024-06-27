@@ -952,7 +952,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // Schedule transaction.
                 if (shouldDispatchLaunchActivityItemIndependently(r.info.packageName, r.getUid())) {
                     // LaunchActivityItem has @UnsupportedAppUsage usages.
-                    // Guard the bundleClientTransactionFlag feature with targetSDK on Android 15+.
+                    // Guard with targetSDK on Android 15+.
                     // To not bundle the transaction, dispatch the pending before schedule new
                     // transaction.
                     mService.getLifecycleManager().dispatchPendingTransaction(proc.getThread());
@@ -2062,21 +2062,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         if (mService.mShuttingDown) {
             mService.mGlobalLock.notifyAll();
         }
-    }
-
-    boolean reportResumedActivityLocked(ActivityRecord r) {
-        // A resumed activity cannot be stopping. remove from list
-        mStoppingActivities.remove(r);
-
-        final Task rootTask = r.getRootTask();
-        if (rootTask.getDisplayArea().allResumedActivitiesComplete()) {
-            mRootWindowContainer.ensureActivitiesVisible();
-            // Make sure activity & window visibility should be identical
-            // for all displays in this stage.
-            mRootWindowContainer.executeAppTransitionForAllDisplay();
-            return true;
-        }
-        return false;
     }
 
     // Called when WindowManager has finished animating the launchingBehind activity to the back.

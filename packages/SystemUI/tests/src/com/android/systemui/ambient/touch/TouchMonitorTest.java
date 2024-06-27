@@ -36,7 +36,6 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.GestureDetector;
 import android.view.IWindowManager;
@@ -50,6 +49,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -79,7 +79,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class TouchMonitorTest extends SysuiTestCase {
     private KosmosJavaAdapter mKosmos;
@@ -212,6 +212,40 @@ public class TouchMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSessionResetOnLifecycle() {
+        final TouchHandler touchHandler = createTouchHandler();
+        final Rect touchArea = new Rect(4, 4, 8 , 8);
+
+        doAnswer(invocation -> {
+            final Region region = (Region) invocation.getArguments()[1];
+            region.set(touchArea);
+            return null;
+        }).when(touchHandler).getTouchInitiationRegion(any(), any(), any());
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
+
+        // Ensure touch outside specified region is not delivered.
+        final MotionEvent initialEvent = Mockito.mock(MotionEvent.class);
+
+        // Make sure touch inside region causes session start.
+        when(initialEvent.getX()).thenReturn(5.0f);
+        when(initialEvent.getY()).thenReturn(5.0f);
+        environment.publishInputEvent(initialEvent);
+        verify(touchHandler).onSessionStart(any());
+
+        Mockito.clearInvocations(touchHandler);
+
+        // Reset lifecycle, forcing monitoring to be reset
+        environment.updateLifecycle(Lifecycle.State.STARTED);
+        environment.updateLifecycle(Lifecycle.State.RESUMED);
+        environment.executeAll();
+
+        environment.publishInputEvent(initialEvent);
+        verify(touchHandler).onSessionStart(any());
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_AMBIENT_TOUCH_MONITOR_LISTEN_TO_DISPLAY_CHANGES)
     public void testConfigurationListenerUpdatesBounds() {
         final TouchHandler touchHandler = createTouchHandler();
@@ -331,7 +365,6 @@ public class TouchMonitorTest extends SysuiTestCase {
             touchSession.pop();
         }
     }
-
 
     @Test
     public void testNoActiveSessionWhenHandlerDisabled() {

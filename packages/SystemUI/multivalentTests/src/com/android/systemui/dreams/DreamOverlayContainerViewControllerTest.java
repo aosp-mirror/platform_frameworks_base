@@ -17,6 +17,7 @@
 package com.android.systemui.dreams;
 
 import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -47,6 +48,7 @@ import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController;
 import com.android.systemui.ambient.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
@@ -55,6 +57,7 @@ import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.touch.TouchInsetManager;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
@@ -80,7 +83,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     ViewTreeObserver mViewTreeObserver;
 
     @Mock
-    DreamOverlayStatusBarViewController mDreamOverlayStatusBarViewController;
+    AmbientStatusBarViewController mAmbientStatusBarViewController;
 
     @Mock
     LowLightTransitionCoordinator mLowLightTransitionCoordinator;
@@ -131,6 +134,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     CommunalInteractor mCommunalInteractor;
     @Mock
     private DreamManager mDreamManager;
+    @Mock
+    private TouchInsetManager.TouchInsetSession mTouchInsetSession;
 
     DreamOverlayContainerViewController mController;
 
@@ -144,14 +149,17 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         when(mDreamOverlayContainerView.getRootSurfaceControl())
                 .thenReturn(mAttachedSurfaceControl);
         when(mKeyguardTransitionInteractor.isFinishedInStateWhere(any())).thenReturn(emptyFlow());
+        when(mShadeInteractor.isAnyExpanded()).thenReturn(MutableStateFlow(false));
+        when(mCommunalInteractor.isCommunalShowing()).thenReturn(MutableStateFlow(false));
 
         mController = new DreamOverlayContainerViewController(
                 mDreamOverlayContainerView,
                 mComplicationHostViewController,
                 mDreamOverlayContentView,
                 mHubGestureIndicatorView,
-                mDreamOverlayStatusBarViewController,
+                mAmbientStatusBarViewController,
                 mLowLightTransitionCoordinator,
+                mTouchInsetSession,
                 mBlurUtils,
                 mHandler,
                 mDispatcher,
@@ -190,7 +198,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     @Test
     public void testDreamOverlayStatusBarViewControllerInitialized() {
         mController.init();
-        verify(mDreamOverlayStatusBarViewController).init();
+        verify(mAmbientStatusBarViewController).init();
     }
 
     @Test
@@ -324,5 +332,13 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     public void onViewDetached_removesScrimExpansionCallback() {
         mController.onViewDetached();
         verify(mBouncerlessScrimController).removeCallback(any());
+    }
+
+    @EnableFlags(android.service.dreams.Flags.FLAG_DREAM_HANDLES_BEING_OBSCURED)
+    @Test
+    public void testOnViewAttachedSucceedsWhenDreamHandlesBeingObscuredFlagEnabled() {
+        // This test will catch failures in presubmit when the dream_handles_being_obscured flag is
+        // enabled.
+        mController.onViewAttached();
     }
 }

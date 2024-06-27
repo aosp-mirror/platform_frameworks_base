@@ -17,6 +17,8 @@ package com.android.wm.shell.windowdecor
 
 import android.app.ActivityManager
 import android.app.WindowConfiguration
+import android.content.Context
+import android.content.res.Resources
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.IBinder
@@ -98,6 +100,10 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     private lateinit var mockFinishCallback: TransitionFinishCallback
     @Mock
     private lateinit var mockTransitions: Transitions
+    @Mock
+    private lateinit var mockContext: Context
+    @Mock
+    private lateinit var mockResources: Resources
 
     private lateinit var taskPositioner: VeiledResizeTaskPositioner
 
@@ -105,6 +111,9 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        mockDesktopWindowDecoration.mDisplay = mockDisplay
+        mockDesktopWindowDecoration.mDecorWindowContext = mockContext
+        whenever(mockContext.getResources()).thenReturn(mockResources)
         whenever(taskToken.asBinder()).thenReturn(taskBinder)
         whenever(mockDisplayController.getDisplayLayout(DISPLAY_ID)).thenReturn(mockDisplayLayout)
         whenever(mockDisplayLayout.densityDpi()).thenReturn(DENSITY_DPI)

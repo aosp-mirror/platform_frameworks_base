@@ -152,8 +152,14 @@ public class PipSurfaceTransactionHelper {
             scale = Math.max((float) destinationBounds.width() / sourceBounds.width(),
                     (float) destinationBounds.height() / sourceBounds.height());
         }
-        final float left = destinationBounds.left - insets.left * scale;
-        final float top = destinationBounds.top - insets.top * scale;
+        float left = destinationBounds.left - insets.left * scale;
+        float top = destinationBounds.top - insets.top * scale;
+        if (scale == 1) {
+            // Work around the 1 pixel off error by rounding the position down at very beginning.
+            // We noticed such error from flicker tests, not visually.
+            left = sourceBounds.left;
+            top = sourceBounds.top;
+        }
         mTmpTransform.setScale(scale, scale);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
                 .setCrop(leash, mTmpDestinationRect)

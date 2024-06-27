@@ -125,6 +125,29 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Հպեք՝ դիտելու համար"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Չհաջողվեց պահել էկրանի տեսագրությունը"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Չհաջողվեց սկսել տեսագրումը"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Դուք կկանգնեցնեք &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածից բովանդակության տեսագրումը"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Դուք կկանգնեցնեք &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածից բովանդակության փոխանցումը"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Դուք կկանգնեցնեք &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածից բովանդակության հեռարձակումը"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Խնդիրների տեսագրիչ"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Մշակում ենք տեսագրությունը"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Խնդրի տեսագրման մասին ընթացիկ ծանուցում"</string>
@@ -135,7 +158,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Չհաջողվեց պահել տեսագրությունը"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Չհաջողվեց սկսել տեսագրումը"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Լիաէկրան դիտակերպ"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"Դուրս գալու համար վերևից մատը սահեցրեք դեպի ներքև։"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Եղավ"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Հետ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Տուն"</string>
@@ -278,11 +302,12 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Պահված է"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"անջատել"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ակտիվացնել"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Վաղը նորից ավտոմատ միացնել"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Bluetooth-ն օգտագործում են, օրինակ, Quick Share և «Գտնել իմ սարքը» գործառույթները"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth-ը կմիանա վաղն առավոտյան"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Աուդիոյի փոխանցում"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Աուդիոն փոխանցվում է"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Փոխանցել աուդիո"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Աուդիոյի փոխանցում"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Աուդիո"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Ականջակալ"</string>
@@ -361,13 +386,13 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Սարքի ո՞ր մասի հետ է կապված խնդիրը։"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Ընտրեք խնդրի տեսակը"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Էկրանի տեսագրում"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"Աշխատանք"</item>
-    <item msgid="1627504621139124393">"Միջերես"</item>
-    <item msgid="8309220355268900335">"Մարտկոց"</item>
-  </string-array>
+    <string name="performance" msgid="6552785217174378320">"Արդյունավետություն"</string>
+    <string name="user_interface" msgid="3712869377953950887">"Օգտատիրական ինտերֆեյս"</string>
+    <string name="thermal" msgid="6758074791325414831">"Ջերմատեսիլ"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Մեկ ձեռքի ռեժիմ"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Լսողական սարքեր"</string>
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Ակտիվ է"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Անջատված է"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Լսողական սարքեր"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Նոր սարքի զուգակցում"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Սեղմեք՝ նոր սարք զուգակցելու համար"</string>
@@ -465,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"ընտրել վիջեթ"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"հեռացնել վիջեթը"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"տեղադրել ընտրված վիջեթը"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Անջատել օգտվողին"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"իջնող ընտրացանկ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր հավելվածներն ու տվյալները կջնջվեն:"</string>
@@ -518,6 +549,12 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Սկսել հիմա"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ծանուցումներ չկան"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Նոր ծանուցումներ չկան"</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (5720882373252389461) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (4260536236101821273) -->
+    <skip />
+    <!-- no translation found for go_to_adaptive_notification_settings (2423690125178298479) -->
+    <skip />
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Ապակողպեք՝ տեսնելու հին ծանուցումները"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Այս սարքը կառավարում է ձեր ծնողը"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ձեր կազմակերպությունը այս սարքի սեփականատերն է և կարող է վերահսկել ցանցային թրաֆիկը"</string>
@@ -594,9 +631,9 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ոչ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Հավելվածն ամրացվեց"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Հավելվածն ապամրացվեց"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Զանգ"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Զանգելը"</string>
     <string name="stream_system" msgid="7663148785370565134">"Համակարգ"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Զանգ"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Զանգ ստանալը"</string>
     <string name="stream_music" msgid="2188224742361847580">"Մեդիա"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Զարթուցիչ"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Ծանուցում"</string>
@@ -727,11 +764,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> կոճակ"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Գլխավոր էջ"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Հետ"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Վերև սլաք"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Ներքև սլաք"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Ձախ սլաք"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Աջ սլաք"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Կենտրոն"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Բացատ"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Մուտք"</string>
@@ -1178,6 +1210,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Հպեք՝ ավելին իմանալու համար"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Զարթուցիչ դրված չէ"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"ապակողպել էկրանը"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Հպեք մատնահետքի սկաներին։ Այն հեռախոսի կողքի ավելի կարճ կոճակն է"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Մատնահետքի սկաներ"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"նույնականացնել"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"նշել սարքը"</string>
@@ -1275,7 +1308,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ծալված"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"բացված"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Մարտկոցի լիցքը՝ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"Ստիլուսի մարտկոցի լիցքը՝ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Ձեր ստիլուսը միացրեք լիցքավորիչի"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Ստիլուսի մարտկոցի լիցքի ցածր մակարդակ"</string>
     <string name="video_camera" msgid="7654002575156149298">"Տեսախցիկ"</string>
@@ -1318,23 +1351,31 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Վերջերս օգտագործվել է <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի կողմից (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Օգտագործվում է <xliff:g id="APP_NAME">%1$s</xliff:g>ի կողմից (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Վերջերս օգտագործվել է <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի կողմից (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
-    <!-- no translation found for shortcut_helper_category_system (462110876978937359) -->
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"Համակարգ"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Բազմախնդրություն"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Ներածում"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Հավելվածի դյուրանցումներ"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Հատուկ գործառույթներ"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"Ստեղնային դյուրանցումներ"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Դյուրանցումների որոնում"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ծալել պատկերակը"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ծավալել պատկերակը"</string>
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"կամ"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
     <skip />
-    <!-- no translation found for shortcut_helper_category_multitasking (7413381961404090136) -->
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
     <skip />
-    <!-- no translation found for shortcut_helper_category_input (8674018654124839566) -->
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
-    <!-- no translation found for shortcut_helper_category_app_shortcuts (8010249408308587117) -->
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
-    <!-- no translation found for shortcut_helper_category_a11y (6314444792641773464) -->
+    <!-- no translation found for touchpad_back_gesture_action_title (7199067250654332735) -->
     <skip />
-    <!-- no translation found for shortcut_helper_title (8567500639300970049) -->
+    <!-- no translation found for touchpad_back_gesture_guidance (4222430588599527272) -->
     <skip />
-    <!-- no translation found for shortcut_helper_search_placeholder (5488547526269871819) -->
+    <!-- no translation found for touchpad_back_gesture_animation_content_description (2646107450922379918) -->
     <skip />
-    <!-- no translation found for shortcut_helper_content_description_collapse_icon (8028015738431664954) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_expand_icon (1084435697860417390) -->
+    <!-- no translation found for touchpad_back_gesture_screen_animation_content_description (4036267494237748710) -->
     <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Հետին լուսավորությամբ ստեղնաշար"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d՝ %2$d-ից"</string>

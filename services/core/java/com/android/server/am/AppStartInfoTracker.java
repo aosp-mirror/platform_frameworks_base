@@ -89,6 +89,14 @@ public final class AppStartInfoTracker {
 
     @VisibleForTesting static final int APP_START_INFO_HISTORY_LIST_SIZE = 16;
 
+    /**
+     * The max number of records that can be present in {@link mInProgressRecords}.
+     *
+     * The magic number of 5 records is expected to be enough because this covers in progress
+     * activity starts only, of which more than a 1-2 at a time is very uncommon/unlikely.
+     */
+    @VisibleForTesting static final int MAX_IN_PROGRESS_RECORDS = 5;
+
     private static final int APP_START_INFO_MONITORING_MODE_LIST_SIZE = 100;
 
     @VisibleForTesting static final String APP_START_STORE_DIR = "procstartstore";
@@ -147,7 +155,6 @@ public final class AppStartInfoTracker {
     /** The path to the historical proc start info file, persisted in the storage. */
     @VisibleForTesting File mProcStartInfoFile;
 
-
     /**
      * Temporary list of records that have not been completed.
      *
@@ -155,7 +162,12 @@ public final class AppStartInfoTracker {
      */
     @GuardedBy("mLock")
     @VisibleForTesting
-    final ArrayMap<Long, ApplicationStartInfo> mInProgRecords = new ArrayMap<>();
+    final ArrayMap<Long, ApplicationStartInfo> mInProgressRecords = new ArrayMap<>();
+
+    /** Temporary list of keys present in {@link mInProgressRecords} for sorting. */
+    @GuardedBy("mLock")
+    @VisibleForTesting
+    final ArrayList<Integer> mTemporaryInProgressIndexes = new ArrayList<>();
 
     AppStartInfoTracker() {
         mCallbacks = new SparseArray<>();
@@ -193,6 +205,60 @@ public final class AppStartInfoTracker {
         });
     }
 
+    /**
+     * Trim in progress records structure to acceptable size. To be called after each time a new
+     * record is added.
+     *
+     * This is necessary both for robustness, as well as because the call to
+     * {@link onReportFullyDrawn} which triggers the removal in the success case is not guaranteed.
+     *
+     * <p class="note"> Note: this is the expected path for removal of in progress records for
+     * successful activity triggered starts that don't report fully drawn. It is *not* only an edge
+     * case.</p>
+     */
+    @GuardedBy("mLock")
+    private void maybeTrimInProgressRecordsLocked() {
+        if (mInProgressRecords.size() <= MAX_IN_PROGRESS_RECORDS) {
+            // Size is acceptable, do nothing.
+            return;
+        }
+
+        // Make sure the temporary list is empty.
+        mTemporaryInProgressIndexes.clear();
+
+        // Populate the list with indexes for size of {@link mInProgressRecords}.
+        for (int i = 0; i < mInProgressRecords.size(); i++) {
+            mTemporaryInProgressIndexes.add(i, i);
+        }
+
+        // Sort the index collection by value of the corresponding key in {@link mInProgressRecords}
+        // from smallest to largest.
+        Collections.sort(mTemporaryInProgressIndexes, (a, b) -> Long.compare(
+                mInProgressRecords.keyAt(a), mInProgressRecords.keyAt(b)));
+
+        if (mTemporaryInProgressIndexes.size() == MAX_IN_PROGRESS_RECORDS + 1) {
+            // Only removing a single record so don't bother sorting again as we don't have to worry
+            // about indexes changing.
+            mInProgressRecords.removeAt(mTemporaryInProgressIndexes.get(0));
+        } else {
+            // Removing more than 1 record, remove the records we want to keep from the list and
+            // then sort again so we can remove in reverse order of indexes.
+            mTemporaryInProgressIndexes.subList(
+                    mTemporaryInProgressIndexes.size() - MAX_IN_PROGRESS_RECORDS,
+                    mTemporaryInProgressIndexes.size()).clear();
+            Collections.sort(mTemporaryInProgressIndexes);
+
+            // Remove all remaining record indexes in reverse order to avoid changing the already
+            // calculated indexes.
+            for (int i = mTemporaryInProgressIndexes.size() - 1; i >= 0; i--) {
+                mInProgressRecords.removeAt(mTemporaryInProgressIndexes.get(i));
+            }
+        }
+
+        // Clear the temorary list.
+        mTemporaryInProgressIndexes.clear();
+    }
+
     void onIntentStarted(@NonNull Intent intent, long timestampNanos) {
         synchronized (mLock) {
             if (!mEnabled) {
@@ -211,7 +277,8 @@ public final class AppStartInfoTracker {
             } else {
                 start.setReason(ApplicationStartInfo.START_REASON_START_ACTIVITY);
             }
-            mInProgRecords.put(timestampNanos, start);
+            mInProgressRecords.put(timestampNanos, start);
+            maybeTrimInProgressRecordsLocked();
         }
     }
 
@@ -220,17 +287,17 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            int index = mInProgRecords.indexOfKey(id);
+            int index = mInProgressRecords.indexOfKey(id);
             if (index < 0) {
                 return;
             }
-            ApplicationStartInfo info = mInProgRecords.valueAt(index);
+            ApplicationStartInfo info = mInProgressRecords.valueAt(index);
             if (info == null) {
-                mInProgRecords.removeAt(index);
+                mInProgressRecords.removeAt(index);
                 return;
             }
             info.setStartupState(ApplicationStartInfo.STARTUP_STATE_ERROR);
-            mInProgRecords.removeAt(index);
+            mInProgressRecords.removeAt(index);
         }
     }
 
@@ -239,13 +306,13 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            int index = mInProgRecords.indexOfKey(id);
+            int index = mInProgressRecords.indexOfKey(id);
             if (index < 0) {
                 return;
             }
-            ApplicationStartInfo info = mInProgRecords.valueAt(index);
+            ApplicationStartInfo info = mInProgressRecords.valueAt(index);
             if (info == null || app == null) {
-                mInProgRecords.removeAt(index);
+                mInProgressRecords.removeAt(index);
                 return;
             }
             info.setStartType((int) temperature);
@@ -254,9 +321,9 @@ public final class AppStartInfoTracker {
             if (newInfo == null) {
                 // newInfo can be null if records are added before load from storage is
                 // complete. In this case the newly added record will be lost.
-                mInProgRecords.removeAt(index);
+                mInProgressRecords.removeAt(index);
             } else {
-                mInProgRecords.setValueAt(index, newInfo);
+                mInProgressRecords.setValueAt(index, newInfo);
             }
         }
     }
@@ -266,17 +333,17 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            int index = mInProgRecords.indexOfKey(id);
+            int index = mInProgressRecords.indexOfKey(id);
             if (index < 0) {
                 return;
             }
-            ApplicationStartInfo info = mInProgRecords.valueAt(index);
+            ApplicationStartInfo info = mInProgressRecords.valueAt(index);
             if (info == null) {
-                mInProgRecords.removeAt(index);
+                mInProgressRecords.removeAt(index);
                 return;
             }
             info.setStartupState(ApplicationStartInfo.STARTUP_STATE_ERROR);
-            mInProgRecords.removeAt(index);
+            mInProgressRecords.removeAt(index);
         }
     }
 
@@ -286,13 +353,13 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            int index = mInProgRecords.indexOfKey(id);
+            int index = mInProgressRecords.indexOfKey(id);
             if (index < 0) {
                 return;
             }
-            ApplicationStartInfo info = mInProgRecords.valueAt(index);
+            ApplicationStartInfo info = mInProgressRecords.valueAt(index);
             if (info == null) {
-                mInProgRecords.removeAt(index);
+                mInProgressRecords.removeAt(index);
                 return;
             }
             info.setLaunchMode(launchMode);
@@ -308,18 +375,18 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            int index = mInProgRecords.indexOfKey(id);
+            int index = mInProgressRecords.indexOfKey(id);
             if (index < 0) {
                 return;
             }
-            ApplicationStartInfo info = mInProgRecords.valueAt(index);
+            ApplicationStartInfo info = mInProgressRecords.valueAt(index);
             if (info == null) {
-                mInProgRecords.removeAt(index);
+                mInProgressRecords.removeAt(index);
                 return;
             }
             info.addStartupTimestamp(ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN,
                     timestampNanos);
-            mInProgRecords.removeAt(index);
+            mInProgressRecords.removeAt(index);
         }
     }
 
@@ -964,7 +1031,7 @@ public final class AppStartInfoTracker {
                 mProcStartInfoFile.delete();
             }
             mData.getMap().clear();
-            mInProgRecords.clear();
+            mInProgressRecords.clear();
         }
     }
 
@@ -1128,21 +1195,8 @@ public final class AppStartInfoTracker {
 
             // Records are sorted newest to oldest, grab record at index 0.
             ApplicationStartInfo startInfo = mInfos.get(0);
-            int startupState = startInfo.getStartupState();
 
-            // If startup state is error then don't accept any further timestamps.
-            if (startupState == ApplicationStartInfo.STARTUP_STATE_ERROR) {
-                if (DEBUG) Slog.d(TAG, "Startup state is error, not accepting new timestamps.");
-                return;
-            }
-
-            // If startup state is first frame drawn then only accept fully drawn timestamp.
-            if (startupState == ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN
-                    && key != ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Startup state is first frame drawn and timestamp is not fully "
-                            + "drawn, not accepting new timestamps.");
-                }
+            if (!isAddTimestampAllowed(startInfo, key, timestampNs)) {
                 return;
             }
 
@@ -1153,6 +1207,55 @@ public final class AppStartInfoTracker {
                 startInfo.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
                 checkCompletenessAndCallback(startInfo);
             }
+        }
+
+        private boolean isAddTimestampAllowed(ApplicationStartInfo startInfo, int key,
+                long timestampNs) {
+            int startupState = startInfo.getStartupState();
+
+            // If startup state is error then don't accept any further timestamps.
+            if (startupState == ApplicationStartInfo.STARTUP_STATE_ERROR) {
+                if (DEBUG) Slog.d(TAG, "Startup state is error, not accepting new timestamps.");
+                return false;
+            }
+
+            Map<Integer, Long> timestamps = startInfo.getStartupTimestamps();
+
+            if (startupState == ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN) {
+                switch (key) {
+                    case ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN:
+                        // Allowed, continue to confirm it's not already added.
+                        break;
+                    case ApplicationStartInfo.START_TIMESTAMP_INITIAL_RENDERTHREAD_FRAME:
+                        Long firstFrameTimeNs = timestamps
+                                .get(ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME);
+                        if (firstFrameTimeNs == null) {
+                            // This should never happen. State can't be first frame drawn if first
+                            // frame timestamp was not provided.
+                            return false;
+                        }
+
+                        if (timestampNs > firstFrameTimeNs) {
+                            // Initial renderthread frame has to occur before first frame.
+                            return false;
+                        }
+
+                        // Allowed, continue to confirm it's not already added.
+                        break;
+                    case ApplicationStartInfo.START_TIMESTAMP_SURFACEFLINGER_COMPOSITION_COMPLETE:
+                        // Allowed, continue to confirm it's not already added.
+                        break;
+                    default:
+                        return false;
+                }
+            }
+
+            if (timestamps.get(key) != null) {
+                // Timestamp should not occur more than once for a given start.
+                return false;
+            }
+
+            return true;
         }
 
         @GuardedBy("mLock")

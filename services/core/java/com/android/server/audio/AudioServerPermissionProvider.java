@@ -16,10 +16,20 @@
 
 package com.android.server.audio;
 
+import static android.Manifest.permission.ACCESS_ULTRASOUND;
+import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.CALL_AUDIO_INTERCEPTION;
+import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.CAPTURE_AUDIO_OUTPUT;
+import static android.Manifest.permission.CAPTURE_MEDIA_OUTPUT;
+import static android.Manifest.permission.CAPTURE_TUNER_AUDIO_INPUT;
+import static android.Manifest.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT;
 import static android.Manifest.permission.MODIFY_AUDIO_ROUTING;
+import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS;
+import static android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS;
 import static android.Manifest.permission.MODIFY_PHONE_STATE;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.annotation.Nullable;
 import android.os.RemoteException;
@@ -52,10 +62,21 @@ public class AudioServerPermissionProvider {
     static final String[] MONITORED_PERMS = new String[PermissionEnum.ENUM_SIZE];
 
     static {
-        MONITORED_PERMS[PermissionEnum.MODIFY_AUDIO_ROUTING] = MODIFY_AUDIO_ROUTING;
-        MONITORED_PERMS[PermissionEnum.MODIFY_PHONE_STATE] = MODIFY_PHONE_STATE;
         MONITORED_PERMS[PermissionEnum.RECORD_AUDIO] = RECORD_AUDIO;
+        MONITORED_PERMS[PermissionEnum.MODIFY_AUDIO_ROUTING] = MODIFY_AUDIO_ROUTING;
+        MONITORED_PERMS[PermissionEnum.MODIFY_AUDIO_SETTINGS] = MODIFY_AUDIO_SETTINGS;
+        MONITORED_PERMS[PermissionEnum.MODIFY_PHONE_STATE] = MODIFY_PHONE_STATE;
+        MONITORED_PERMS[PermissionEnum.MODIFY_DEFAULT_AUDIO_EFFECTS] = MODIFY_DEFAULT_AUDIO_EFFECTS;
+        MONITORED_PERMS[PermissionEnum.WRITE_SECURE_SETTINGS] = WRITE_SECURE_SETTINGS;
         MONITORED_PERMS[PermissionEnum.CALL_AUDIO_INTERCEPTION] = CALL_AUDIO_INTERCEPTION;
+        MONITORED_PERMS[PermissionEnum.ACCESS_ULTRASOUND] = ACCESS_ULTRASOUND;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_AUDIO_OUTPUT] = CAPTURE_AUDIO_OUTPUT;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_MEDIA_OUTPUT] = CAPTURE_MEDIA_OUTPUT;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_AUDIO_HOTWORD] = CAPTURE_AUDIO_HOTWORD;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_TUNER_AUDIO_INPUT] = CAPTURE_TUNER_AUDIO_INPUT;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_VOICE_COMMUNICATION_OUTPUT] =
+                CAPTURE_VOICE_COMMUNICATION_OUTPUT;
+        MONITORED_PERMS[PermissionEnum.BLUETOOTH_CONNECT] = BLUETOOTH_CONNECT;
     }
 
     private final Object mLock = new Object();

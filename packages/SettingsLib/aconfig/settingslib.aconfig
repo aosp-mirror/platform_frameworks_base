@@ -79,3 +79,23 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_determining_spatial_audio_attributes_by_profile"
+    namespace: "cross_device_experiences"
+    description: "Use bluetooth profile connection policy to determine spatial audio attributes"
+    bug: "341005211"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "volume_panel_broadcast_fix"
+    namespace: "systemui"
+    description: "Make the volume panel's repository listen for the new ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED broadcast instead of ACTION_NOTIFICATION_POLICY_CHANGED"
+    bug: "347707024"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

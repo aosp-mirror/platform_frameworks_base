@@ -23,6 +23,7 @@ import android.telephony.satellite.NtnSignalStrengthCallback
 import android.telephony.satellite.SatelliteManager
 import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS
 import android.telephony.satellite.SatelliteModemStateCallback
+import android.telephony.satellite.SatelliteProvisionStateCallback
 import android.telephony.satellite.SatelliteSupportedStateCallback
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -333,6 +334,78 @@ constructor(
                     if (registered) {
                         satelliteManager.unregisterForSupportedStateChanged(callback)
                     }
+                }
+            }
+        }
+
+    override val isSatelliteProvisioned: StateFlow<Boolean> =
+        satelliteSupport
+            .whenSupported(
+                supported = ::satelliteProvisioned,
+                orElse = flowOf(false),
+                retrySignal = telephonyProcessCrashedEvent,
+            )
+            .stateIn(scope, SharingStarted.Eagerly, false)
+
+    private fun satelliteProvisioned(sm: SupportedSatelliteManager): Flow<Boolean> =
+        conflatedCallbackFlow {
+                // TODO(b/347992038): SatelliteManager should be sending the current provisioned
+                // status when we register a callback. Until then, we have to manually query here.
+
+                // First, check to see what the current status is, and send the result to the output
+                trySend(queryIsSatelliteProvisioned(sm))
+
+                val callback = SatelliteProvisionStateCallback { provisioned ->
+                    logBuffer.i {
+                        "onSatelliteProvisionStateChanged: " +
+                            if (provisioned) "provisioned" else "not provisioned"
+                    }
+                    trySend(provisioned)
+                }
+
+                var registered = false
+                try {
+                    logBuffer.i { "registerForProvisionStateChanged" }
+                    sm.registerForProvisionStateChanged(
+                        bgDispatcher.asExecutor(),
+                        callback,
+                    )
+                    registered = true
+                } catch (e: Exception) {
+                    logBuffer.e("error registering for provisioning state callback", e)
+                }
+
+                awaitClose {
+                    if (registered) {
+                        sm.unregisterForProvisionStateChanged(callback)
+                    }
+                }
+            }
+            .flowOn(bgDispatcher)
+
+    /** Check the current satellite provisioning status. */
+    private suspend fun queryIsSatelliteProvisioned(sm: SupportedSatelliteManager): Boolean =
+        withContext(bgDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                val receiver =
+                    object : OutcomeReceiver<Boolean, SatelliteManager.SatelliteException> {
+                        override fun onResult(result: Boolean) {
+                            logBuffer.i { "requestIsProvisioned.onResult: $result" }
+                            continuation.resume(result)
+                        }
+
+                        override fun onError(exception: SatelliteManager.SatelliteException) {
+                            logBuffer.e("requestIsProvisioned.onError:", exception)
+                            continuation.resume(false)
+                        }
+                    }
+
+                logBuffer.i { "Query for current satellite provisioned state." }
+                try {
+                    sm.requestIsProvisioned(bgDispatcher.asExecutor(), receiver)
+                } catch (e: Exception) {
+                    logBuffer.e("Exception while calling SatelliteManager.requestIsProvisioned:", e)
+                    continuation.resume(false)
                 }
             }
         }

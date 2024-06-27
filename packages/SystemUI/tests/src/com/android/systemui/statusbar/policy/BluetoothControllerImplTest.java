@@ -14,6 +14,10 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
+
+import static com.android.settingslib.flags.Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -21,6 +25,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -30,10 +35,15 @@ import static org.mockito.Mockito.when;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
-import android.testing.AndroidTestingRunner;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.bluetooth.BluetoothEventManager;
@@ -55,15 +65,30 @@ import com.android.systemui.util.time.FakeSystemClock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-@RunWith(AndroidTestingRunner.class)
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+@RunWith(ParameterizedAndroidJunit4.class)
 @RunWithLooper
 @SmallTest
 public class BluetoothControllerImplTest extends SysuiTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return allCombinationsOf(FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE);
+    }
+
+    private static final String TEST_EXCLUSIVE_MANAGER = "com.test.manager";
+
+    @Mock
+    private PackageManager mPackageManager;
 
     private UserTracker mUserTracker;
     private LocalBluetoothManager mMockBluetoothManager;
@@ -77,14 +102,21 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
 
     private FakeExecutor mBackgroundExecutor;
 
+    public BluetoothControllerImplTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
+
     @Before
     public void setup() throws Exception {
+        MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
         mMockBluetoothManager = mDependency.injectMockDependency(LocalBluetoothManager.class);
         mDevices = new ArrayList<>();
         mUserTracker = mock(UserTracker.class);
         mMockDeviceManager = mock(CachedBluetoothDeviceManager.class);
         mMockAdapter = mock(BluetoothAdapter.class);
+        mContext.setMockPackageManager(mPackageManager);
         when(mMockDeviceManager.getCachedDevicesCopy()).thenReturn(mDevices);
         when(mMockBluetoothManager.getCachedDeviceManager()).thenReturn(mMockDeviceManager);
         mMockLocalAdapter = mock(LocalBluetoothAdapter.class);
@@ -114,6 +146,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
         when(device.isConnected()).thenReturn(true);
         when(device.getMaxConnectionState()).thenReturn(BluetoothProfile.STATE_CONNECTED);
+        when(device.getDevice()).thenReturn(mock(BluetoothDevice.class));
 
         mDevices.add(device);
         when(mMockLocalAdapter.getConnectionState())
@@ -139,10 +172,12 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
     public void getConnectedDevices_onlyReturnsConnected() {
         CachedBluetoothDevice device1Disconnected = mock(CachedBluetoothDevice.class);
         when(device1Disconnected.isConnected()).thenReturn(false);
+        when(device1Disconnected.getDevice()).thenReturn(mock(BluetoothDevice.class));
         mDevices.add(device1Disconnected);
 
         CachedBluetoothDevice device2Connected = mock(CachedBluetoothDevice.class);
         when(device2Connected.isConnected()).thenReturn(true);
+        when(device2Connected.getDevice()).thenReturn(mock(BluetoothDevice.class));
         mDevices.add(device2Connected);
 
         mBluetoothControllerImpl.onDeviceAdded(device1Disconnected);
@@ -151,6 +186,46 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         assertThat(mBluetoothControllerImpl.getConnectedDevices()).hasSize(1);
         assertThat(mBluetoothControllerImpl.getConnectedDevices().get(0))
                 .isEqualTo(device2Connected);
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    public void getConnectedDevice_exclusivelyManagedDevice_doNotReturn()
+            throws PackageManager.NameNotFoundException {
+        CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
+        when(cachedDevice.isConnected()).thenReturn(true);
+        BluetoothDevice device = mock(BluetoothDevice.class);
+        when(device.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
+                TEST_EXCLUSIVE_MANAGER.getBytes());
+        when(cachedDevice.getDevice()).thenReturn(device);
+        doReturn(new ApplicationInfo()).when(mPackageManager).getApplicationInfo(
+                TEST_EXCLUSIVE_MANAGER, 0);
+
+        mDevices.add(cachedDevice);
+        mBluetoothControllerImpl.onDeviceAdded(cachedDevice);
+
+        assertThat(mBluetoothControllerImpl.getConnectedDevices()).isEmpty();
+    }
+
+    @Test
+    @DisableFlags(FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    public void getConnectedDevice_exclusivelyManagedDevice_returnsConnected()
+            throws PackageManager.NameNotFoundException {
+        CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
+        when(cachedDevice.isConnected()).thenReturn(true);
+        BluetoothDevice device = mock(BluetoothDevice.class);
+        when(device.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
+                TEST_EXCLUSIVE_MANAGER.getBytes());
+        when(cachedDevice.getDevice()).thenReturn(device);
+        doReturn(new ApplicationInfo()).when(mPackageManager).getApplicationInfo(
+                TEST_EXCLUSIVE_MANAGER, 0);
+
+        mDevices.add(cachedDevice);
+        mBluetoothControllerImpl.onDeviceAdded(cachedDevice);
+
+        assertThat(mBluetoothControllerImpl.getConnectedDevices()).hasSize(1);
+        assertThat(mBluetoothControllerImpl.getConnectedDevices().get(0))
+                .isEqualTo(cachedDevice);
     }
 
     @Test
@@ -184,6 +259,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
 
         assertFalse(mBluetoothControllerImpl.isBluetoothConnected());
         CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
+        when(device.getDevice()).thenReturn(mock(BluetoothDevice.class));
         mDevices.add(device);
         when(device.isConnected()).thenReturn(true);
         when(device.getMaxConnectionState()).thenReturn(BluetoothProfile.STATE_CONNECTED);
@@ -402,6 +478,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
     private CachedBluetoothDevice createBluetoothDevice(
             int profile, boolean isConnected, boolean isActive) {
         CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
+        when(device.getDevice()).thenReturn(mock(BluetoothDevice.class));
         mDevices.add(device);
         when(device.isActiveDevice(profile)).thenReturn(isActive);
 

@@ -26,6 +26,8 @@
     <dimen name="status_bar_icons_padding_start">3dp</dimen>
     <dimen name="status_bar_icons_padding_bottom">2dp</dimen>
     <dimen name="status_bar_icons_padding_top">2dp</dimen>
+    <dimen name="status_bar_battery_end_padding">4dp</dimen>
+
 
     <dimen name="status_bar_padding_end">0dp</dimen>
 
@@ -56,7 +58,7 @@
     <dimen name="navigation_key_padding">25dp</dimen>
 
     <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
-    <dimen name="immersive_mode_cling_width">380dp</dimen>
+    <dimen name="immersive_mode_cling_width">600dp</dimen>
 
     <!-- Keyboard shortcuts helper -->
     <dimen name="ksh_layout_width">488dp</dimen>

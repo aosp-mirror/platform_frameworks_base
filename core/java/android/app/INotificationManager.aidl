@@ -42,6 +42,7 @@ import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenPolicy;
 import android.app.AutomaticZenRule;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenDeviceEffects;
 
 /** {@hide} */
 interface INotificationManager
@@ -121,6 +122,7 @@ interface INotificationManager
     boolean onlyHasDefaultChannel(String pkg, int uid);
     boolean areChannelsBypassingDnd();
     ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int uid);
+    List<String> getPackagesBypassingDnd(int userId, boolean includeConversationChannels);
     boolean isPackagePaused(String pkg);
     void deleteNotificationHistoryItem(String pkg, int uid, long postedTime);
     boolean isPermissionFixed(String pkg, int userId);
@@ -227,6 +229,7 @@ interface INotificationManager
     int getRuleInstanceCount(in ComponentName owner);
     int getAutomaticZenRuleState(String id);
     void setAutomaticZenRuleState(String id, in Condition condition);
+    void setManualZenRuleDeviceEffects(in ZenDeviceEffects effects);
 
     byte[] getBackupPayload(int user);
     void applyRestore(in byte[] payload, int user);

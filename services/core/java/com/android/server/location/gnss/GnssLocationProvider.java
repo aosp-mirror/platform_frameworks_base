@@ -68,7 +68,6 @@ import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.location.LocationResult;
 import android.location.LocationResult.BadLocationException;
-import android.location.flags.Flags;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
@@ -1050,22 +1049,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 stopBatching();
 
                 if (mStarted && mGnssNative.getCapabilities().hasScheduling()) {
-                    if (Flags.gnssCallStopBeforeSetPositionMode()) {
-                        GnssPositionMode positionMode = new GnssPositionMode(mPositionMode,
-                                GNSS_POSITION_RECURRENCE_PERIODIC, mFixInterval,
-                                /* preferredAccuracy= */ 0,
-                                /* preferredTime= */ 0,
-                                mProviderRequest.isLowPower());
-                        if (!positionMode.equals(mLastPositionMode)) {
-                            stopNavigating();
-                            startNavigating();
-                        }
-                    } else {
-                        // change period and/or lowPowerMode
-                        if (!setPositionMode(mPositionMode, GNSS_POSITION_RECURRENCE_PERIODIC,
-                                mFixInterval, mProviderRequest.isLowPower())) {
-                            Log.e(TAG, "set_position_mode failed in updateRequirements");
-                        }
+                    // change period and/or lowPowerMode
+                    if (!setPositionMode(mPositionMode, GNSS_POSITION_RECURRENCE_PERIODIC,
+                            mFixInterval, mProviderRequest.isLowPower())) {
+                        Log.e(TAG, "set_position_mode failed in updateRequirements");
                     }
                 } else if (!mStarted) {
                     // start GPS
@@ -1248,32 +1235,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             }
 
             int interval = mGnssNative.getCapabilities().hasScheduling() ? mFixInterval : 1000;
-
-            if (Flags.gnssCallStopBeforeSetPositionMode()) {
-                boolean success = mGnssNative.setPositionMode(mPositionMode,
-                        GNSS_POSITION_RECURRENCE_PERIODIC, interval,
-                        /* preferredAccuracy= */ 0,
-                        /* preferredTime= */ 0,
-                        mProviderRequest.isLowPower());
-                if (success) {
-                    mLastPositionMode = new GnssPositionMode(mPositionMode,
-                            GNSS_POSITION_RECURRENCE_PERIODIC, interval,
-                            /* preferredAccuracy= */ 0,
-                            /* preferredTime= */ 0,
-                            mProviderRequest.isLowPower());
-                } else {
-                    mLastPositionMode = null;
-                    setStarted(false);
-                    Log.e(TAG, "set_position_mode failed in startNavigating()");
-                    return;
-                }
-            } else {
-                if (!setPositionMode(mPositionMode, GNSS_POSITION_RECURRENCE_PERIODIC,
-                        interval, mProviderRequest.isLowPower())) {
-                    setStarted(false);
-                    Log.e(TAG, "set_position_mode failed in startNavigating()");
-                    return;
-                }
+            if (!setPositionMode(mPositionMode, GNSS_POSITION_RECURRENCE_PERIODIC,
+                    interval, mProviderRequest.isLowPower())) {
+                setStarted(false);
+                Log.e(TAG, "set_position_mode failed in startNavigating()");
+                return;
             }
             if (!mGnssNative.start()) {
                 setStarted(false);

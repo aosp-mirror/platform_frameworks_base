@@ -66,7 +66,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -203,7 +202,7 @@ constructor(
         combine(
                 communalInteractor.isIdleOnCommunal,
                 keyguardTransitionInteractor
-                    .transitionValue(GONE)
+                    .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
                     .map { it == 1f }
                     .onStart { emit(false) },
                 keyguardTransitionInteractor
@@ -236,7 +235,7 @@ constructor(
                 // value emitted by any of them. Do not add flows that cannot make this guarantee.
                 merge(
                         alphaOnShadeExpansion,
-                        keyguardInteractor.dismissAlpha.filterNotNull(),
+                        keyguardInteractor.dismissAlpha,
                         alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
@@ -252,6 +251,7 @@ constructor(
                         goneToDreamingTransitionViewModel.lockscreenAlpha,
                         goneToLockscreenTransitionViewModel.lockscreenAlpha,
                         lockscreenToAodTransitionViewModel.lockscreenAlpha(viewState),
+                        lockscreenToAodTransitionViewModel.lockscreenAlphaOnFold,
                         lockscreenToDozingTransitionViewModel.lockscreenAlpha,
                         lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
                         lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,

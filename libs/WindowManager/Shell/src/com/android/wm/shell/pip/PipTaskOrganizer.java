@@ -63,7 +63,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.util.Rational;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.Surface;
@@ -127,8 +126,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private static final int EXTRA_CONTENT_OVERLAY_FADE_OUT_DELAY_MS =
             SystemProperties.getInt(
                     "persist.wm.debug.extra_content_overlay_fade_out_delay_ms", 400);
-
-    private static final float PIP_ASPECT_RATIO_MISMATCH_THRESHOLD = 0.005f;
 
     private final Context mContext;
     private final SyncTransactionQueue mSyncTransactionQueue;
@@ -373,6 +370,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     @NonNull
     final Rect mAppBounds = new Rect();
 
+    /** The source rect hint from stopSwipePipToHome(). */
+    @Nullable
+    private Rect mSwipeSourceRectHint;
+
     public PipTaskOrganizer(Context context,
             @NonNull SyncTransactionQueue syncTransactionQueue,
             @NonNull PipTransitionState pipTransitionState,
@@ -504,7 +505,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Expect {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)} afterwards.
      */
     public void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
-            SurfaceControl overlay, Rect appBounds) {
+            SurfaceControl overlay, Rect appBounds, Rect sourceRectHint) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "stopSwipePipToHome: %s, stat=%s", componentName, mPipTransitionState);
         // do nothing if there is no startSwipePipToHome being called before
@@ -513,6 +514,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
         mPipBoundsState.setBounds(destinationBounds);
         setContentOverlay(overlay, appBounds);
+        mSwipeSourceRectHint = sourceRectHint;
         if (ENABLE_SHELL_TRANSITIONS && overlay != null) {
             // With Shell transition, the overlay was attached to the remote transition leash, which
             // will be removed when the current transition is finished, so we need to reparent it
@@ -527,6 +529,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // We want to make sure the overlay passed from Launcher gets removed eventually.
             mayRemoveContentOverlay(overlay);
         }
+    }
+
+    /**
+     * Returns non-null Rect if the pip is entering from swipe-to-home with a specified source hint.
+     * This also consumes the rect hint.
+     */
+    @Nullable
+    Rect takeSwipeSourceRectHint() {
+        final Rect sourceRectHint = mSwipeSourceRectHint;
+        if (sourceRectHint == null || sourceRectHint.isEmpty()) {
+            return null;
+        }
+        mSwipeSourceRectHint = null;
+        return mPipTransitionState.getInSwipePipToHomeTransition() ? sourceRectHint : null;
     }
 
     private void mayRemoveContentOverlay(SurfaceControl overlay) {
@@ -589,6 +605,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void exitPip(int animationDurationMs, boolean requestEnterSplit) {
         if (!mPipTransitionState.isInPip()
                 || mPipTransitionState.getTransitionState() == PipTransitionState.EXITING_PIP
+                || mPipTransitionState.getInSwipePipToHomeTransition()
                 || mToken == null) {
             ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Not allowed to exitPip in current state"
@@ -603,6 +620,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // the end of the enter animation and reschedule exitPip to run after enter-PiP
             // has finished its transition and allowed the client to draw in PiP mode.
             mPipTransitionController.end(() -> {
+                // TODO(341627042): force set to entered state to avoid potential stack overflow.
+                mPipTransitionState.setTransitionState(PipTransitionState.ENTERED_PIP);
                 exitPip(animationDurationMs, requestEnterSplit);
             });
             return;
@@ -800,37 +819,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     mPictureInPictureParams.getTitle());
             mPipParamsChangedForwarder.notifySubtitleChanged(
                     mPictureInPictureParams.getSubtitle());
-
-            if (mPictureInPictureParams.hasSourceBoundsHint()
-                    && mPictureInPictureParams.hasSetAspectRatio()) {
-                Rational sourceRectHintAspectRatio = new Rational(
-                        mPictureInPictureParams.getSourceRectHint().width(),
-                        mPictureInPictureParams.getSourceRectHint().height());
-                if (sourceRectHintAspectRatio.compareTo(
-                        mPictureInPictureParams.getAspectRatio()) != 0) {
-                    ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                            "Aspect ratio of source rect hint (%d/%d) does not match the provided "
-                                    + "aspect ratio value (%d/%d). Consider matching them for "
-                                    + "improved animation. Future releases might override the "
-                                    + "value to match.",
-                            mPictureInPictureParams.getSourceRectHint().width(),
-                            mPictureInPictureParams.getSourceRectHint().height(),
-                            mPictureInPictureParams.getAspectRatio().getNumerator(),
-                            mPictureInPictureParams.getAspectRatio().getDenominator());
-                }
-                if (Math.abs(sourceRectHintAspectRatio.floatValue()
-                        - mPictureInPictureParams.getAspectRatioFloat())
-                        > PIP_ASPECT_RATIO_MISMATCH_THRESHOLD) {
-                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                            "Aspect ratio of source rect hint (%f) does not match the provided "
-                                    + "aspect ratio value (%f) and is above threshold of %f. "
-                                    + "Consider matching them for improved animation. Future "
-                                    + "releases might override the value to match.",
-                            sourceRectHintAspectRatio.floatValue(),
-                            mPictureInPictureParams.getAspectRatioFloat(),
-                            PIP_ASPECT_RATIO_MISMATCH_THRESHOLD);
-                }
-            }
         }
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
@@ -978,7 +966,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void onEndOfSwipePipToHomeTransition() {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mPipTransitionController.setEnterAnimationType(ANIM_TYPE_BOUNDS);
             return;
         }
 

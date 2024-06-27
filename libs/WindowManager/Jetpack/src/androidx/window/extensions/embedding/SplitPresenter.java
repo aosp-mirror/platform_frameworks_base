@@ -374,7 +374,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         updateTaskFragmentWindowingModeIfRegistered(wct, secondaryContainer, windowingMode);
         updateAnimationParams(wct, primaryContainer.getTaskFragmentToken(), splitAttributes);
         updateAnimationParams(wct, secondaryContainer.getTaskFragmentToken(), splitAttributes);
-        mController.updateDivider(wct, taskContainer);
+        mController.updateDivider(wct, taskContainer, false /* isTaskFragmentVanished */);
     }
 
     private void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
@@ -757,7 +757,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     void expandTaskFragment(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container) {
         super.expandTaskFragment(wct, container);
-        mController.updateDivider(wct, container.getTaskContainer());
+        mController.updateDivider(
+                wct, container.getTaskContainer(), false /* isTaskFragmentVanished */);
     }
 
     static boolean shouldShowSplit(@NonNull SplitContainer splitContainer) {

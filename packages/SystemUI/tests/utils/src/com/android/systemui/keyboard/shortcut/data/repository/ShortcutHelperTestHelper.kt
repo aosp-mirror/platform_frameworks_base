@@ -22,7 +22,7 @@ import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 
 class ShortcutHelperTestHelper(
-    repo: ShortcutHelperRepository,
+    repo: ShortcutHelperStateRepository,
     private val context: Context,
     private val fakeBroadcastDispatcher: FakeBroadcastDispatcher,
     private val fakeCommandQueue: FakeCommandQueue,
@@ -30,6 +30,13 @@ class ShortcutHelperTestHelper(
 
     init {
         repo.start()
+    }
+
+    fun hideThroughCloseSystemDialogs() {
+        fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+            context,
+            Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        )
     }
 
     fun hideFromActivity() {

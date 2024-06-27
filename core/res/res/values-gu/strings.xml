@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"વાયરલેસ ડિબગીંગ બંધ કરવા માટે પસંદ કરો."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"ટેસ્ટ હાર્નેસ મોડ ચાલુ કર્યો"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"ટેસ્ટ હાર્નેસ મોડ બંધ કરવા માટે ફૅક્ટરી રીસેટ કરો."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"સિરીયલ કન્સોલ ચાલુ થયો"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"કાર્યપ્રદર્શનને અસર થાય છે. બંધ કરવા માટે, બૂટલોડર ચેક કરો."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"પ્રયોગાત્મક MTE ચાલુ કર્યું"</string>
@@ -1433,7 +1437,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ભાષા અને લેઆઉટ પસંદ કરવા માટે ટૅપ કરો"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"અન્ય ઍપથી ઉપર બતાવો"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"અન્ય ઍપની ઉપર ડિસ્પ્લે કરો"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનોની ઉપર પ્રદર્શિત થઈ રહ્યું છે"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનો પર દેખાઈ છે"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"વૉલ્યૂમ કી દબાવી રાખો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ચાલુ કરી."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"વૉલ્યૂમ કી દબાવી રાખો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> બંધ કરી."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"વૉલ્યૂમ કી છોડી દો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ને ચાલુ કરવા માટે, 3 સેકન્ડ માટે બન્ને વૉલ્યૂમ કીને ફરીથી દબાવી રાખો."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"જ્યારે તમે ઍક્સેસિબિલિટી બટન પર ટૅપ કરો, ત્યારે ઉપયોગ કરવાની સુવિધા પસંદ કરો:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ઍક્સેસિબિલિટી સંકેત સાથે ઉપયોગ કરવાની સુવિધા પસંદ કરો (બે આંગળીઓ વડે સ્ક્રીનના નીચેના ભાગથી ઉપરની તરફ સ્વાઇપ કરવા માટે):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ઍક્સેસિબિલિટી સંકેત સાથે ઉપયોગ કરવાની સુવિધા પસંદ કરો (ત્રણ આંગળીઓ વડે સ્ક્રીનના નીચેના ભાગથી ઉપરની તરફ સ્વાઇપ કરવા માટે):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"કોઈ એક સુવિધાથી બીજી સુવિધા પર સ્વિચ કરવા માટે, ઍક્સેસિબિલિટી બટનને ટચ કરીને થોડીવાર દબાવી રાખો."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"કોઈ એક સુવિધાથી બીજી સુવિધા પર સ્વિચ કરવા માટે, બે આંગળીઓ વડે સ્ક્રીનની ઉપરની તરફ સ્વાઇપ કરીને દબાવી રાખો."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"કોઈ એક સુવિધાથી બીજી સુવિધા પર સ્વિચ કરવા માટે, ત્રણ આંગળીઓ વડે સ્ક્રીનની ઉપરની તરફ સ્વાઇપ કરીને દબાવી રાખો."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"મોટું કરવું"</string>
     <string name="user_switched" msgid="7249833311585228097">"વર્તમાન વપરાશકર્તા <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> પર સ્વિચ કરી રહ્યાં છે…"</string>
@@ -1883,7 +1893,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"પિન ખૂબ નાનો છે. ઓછામાં ઓછો 4 અંકનો હોવો આવશ્યક છે."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"પછી ફરી પ્રયાસ કરો"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"પૂર્ણ સ્ક્રીન પર જુઓ"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"બહાર નીકળવા માટે, ટોચ પરથી નીચે સ્વાઇપ કરો."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"સમજાઈ ગયું"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"બહેતર વ્યૂ માટે ફેરવો"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"બહેતર વ્યૂ માટે, પૂર્ણ સ્ક્રીનમાં <xliff:g id="NAME">%s</xliff:g> ખોલો"</string>
@@ -1975,6 +1986,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"ચાલુ કૉલ"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"ઇનકમિંગ કૉલનું સ્ક્રીનિંગ થાય છે"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"અવર્ગીકૃત"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"પ્રમોશન"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"સામાજિક"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"ન્યૂઝ"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"સુઝાવો"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"તમે આ સૂચનાઓનું મહત્વ સેટ કર્યું છે."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"શામેલ થયેલ લોકોને કારણે આ મહત્વપૂર્ણ છે."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ઍપનું કસ્ટમ નોટિફિકેશન"</string>
@@ -2191,6 +2206,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"સ્ક્રીન પરના ઍક્સેસિબિલિટી શૉર્ટકટના પસંદકર્તા"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ઍક્સેસિબિલિટી શૉર્ટકટ"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"નોટિફિકેશન શેડ છોડી દો"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"મેનૂ"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"મીડિયા ચલાવો/થોભાવો"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"ડી-પૅડ ઉપર"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"ડી-પૅડ નીચે"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"ડી-પૅડ ડાબે"</string>
@@ -2407,6 +2424,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ખાનગી સ્પેસ"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ક્લોન"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"કૉમ્યુનલ"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"ખાનગી સ્પેસ"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"સંવેદનશીલ માહિતીવાળા નોટિફિકેશનનું કન્ટેન્ટ છુપાવ્યું"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"સુરક્ષા માટે સ્ક્રીન શેર કરતી વખતે ઍપનું કન્ટેન્ટ છુપાવેલું છે"</string>

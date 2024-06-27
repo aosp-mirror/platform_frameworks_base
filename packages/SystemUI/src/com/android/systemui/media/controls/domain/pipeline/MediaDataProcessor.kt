@@ -86,6 +86,7 @@ import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
+import com.android.systemui.media.controls.util.SmallHash
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.res.R
@@ -107,6 +108,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -371,6 +373,7 @@ class MediaDataProcessor(
             .onStart { emit(Unit) }
             .map { allowMediaRecommendations() }
             .distinctUntilChanged()
+            .flowOn(backgroundDispatcher)
             // only track the most recent emission
             .collectLatest {
                 allowMediaRecommendations = it
@@ -719,6 +722,7 @@ class MediaDataProcessor(
                     appUid = appUid,
                     isExplicit = isExplicit,
                     resumeProgress = progress,
+                    smartspaceId = SmallHash.hash(appUid + systemClock.currentTimeMillis().toInt()),
                 )
             )
         }
@@ -900,6 +904,7 @@ class MediaDataProcessor(
                     instanceId = instanceId,
                     appUid = appUid,
                     isExplicit = isExplicit,
+                    smartspaceId = SmallHash.hash(appUid + systemClock.currentTimeMillis().toInt()),
                 )
             )
         }

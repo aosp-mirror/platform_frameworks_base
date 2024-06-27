@@ -17,6 +17,7 @@
 package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.view.inputmethod.ImeTracker;
@@ -32,38 +33,45 @@ interface ImeVisibilityApplier {
     /**
      * Performs showing IME on top of the given window.
      *
-     * @param showInputToken A token that represents the requester to show IME.
-     * @param statsToken     The token tracking the current IME request.
-     * @param resultReceiver If non-null, this will be called back to the caller when
-     *                       it has processed request to tell what it has done.
-     * @param reason         The reason for requesting to show IME.
+     * @param showInputToken a token that represents the requester to show IME
+     * @param statsToken     the token tracking the current IME request
+     * @param resultReceiver if non-null, this will be called back to the caller when
+     *                       it has processed request to tell what it has done
+     * @param reason         yhe reason for requesting to show IME
+     * @param userId         the target user when performing show IME
      */
     default void performShowIme(IBinder showInputToken, @NonNull ImeTracker.Token statsToken,
             @InputMethod.ShowFlags int showFlags, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {}
+            @SoftInputShowHideReason int reason, @UserIdInt int userId) {
+    }
 
     /**
      * Performs hiding IME to the given window
      *
-     * @param hideInputToken A token that represents the requester to hide IME.
-     * @param statsToken     The token tracking the current IME request.
-     * @param resultReceiver If non-null, this will be called back to the caller when
-     *                       it has processed request to tell what it has done.
-     * @param reason         The reason for requesting to hide IME.
+     * @param hideInputToken a token that represents the requester to hide IME
+     * @param statsToken     the token tracking the current IME request
+     * @param resultReceiver if non-null, this will be called back to the caller when
+     *                       it has processed request to tell what it has done
+     * @param reason         the reason for requesting to hide IME
+     * @param userId         the target user when performing hide IME
      */
     default void performHideIme(IBinder hideInputToken, @NonNull ImeTracker.Token statsToken,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {}
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
+            @UserIdInt int userId) {
+    }
 
     /**
      * Applies the IME visibility from {@link android.inputmethodservice.InputMethodService} with
      * according to the given visibility state.
      *
-     * @param windowToken The token of a window for applying the IME visibility
-     * @param statsToken  The token tracking the current IME request.
-     * @param state       The new IME visibility state for the applier to handle
+     * @param windowToken the token of a window for applying the IME visibility
+     * @param statsToken  the token tracking the current IME request
+     * @param state       the new IME visibility state for the applier to handle
+     * @param userId      the target user when applying the IME visibility state
      */
     default void applyImeVisibility(IBinder windowToken, @NonNull ImeTracker.Token statsToken,
-            @ImeVisibilityStateComputer.VisibilityState int state) {}
+            @ImeVisibilityStateComputer.VisibilityState int state, @UserIdInt int userId) {
+    }
 
     /**
      * Updates the IME Z-ordering relative to the given window.
@@ -71,7 +79,7 @@ interface ImeVisibilityApplier {
      * This used to adjust the IME relative layer of the window during
      * {@link InputMethodManagerService} is in switching IME clients.
      *
-     * @param windowToken The token of a window to update the Z-ordering relative to the IME.
+     * @param windowToken the token of a window to update the Z-ordering relative to the IME
      */
     default void updateImeLayeringByTarget(IBinder windowToken) {
         // TODO: add a method in WindowManagerInternal to call DC#updateImeInputAndControlTarget
@@ -81,21 +89,24 @@ interface ImeVisibilityApplier {
     /**
      * Shows the IME screenshot and attach it to the given IME target window.
      *
-     * @param windowToken The token of a window to show the IME screenshot.
-     * @param displayId The unique id to identify the display
-     * @return {@code true} if success, {@code false} otherwise.
+     * @param windowToken the token of a window to show the IME screenshot
+     * @param displayId   the unique id to identify the display
+     * @param userId      the target user when when showing the IME screenshot
+     * @return {@code true} if success, {@code false} otherwise
      */
-    default boolean showImeScreenshot(@NonNull IBinder windowToken, int displayId) {
+    default boolean showImeScreenshot(@NonNull IBinder windowToken, int displayId,
+            @UserIdInt int userId) {
         return false;
     }
 
     /**
      * Removes the IME screenshot on the given display.
      *
-     * @param displayId The target display of showing IME screenshot.
-     * @return {@code true} if success, {@code false} otherwise.
+     * @param displayId the target display of showing IME screenshot
+     * @param userId    the target user of showing IME screenshot
+     * @return {@code true} if success, {@code false} otherwise
      */
-    default boolean removeImeScreenshot(int displayId) {
+    default boolean removeImeScreenshot(int displayId, @UserIdInt int userId) {
         return false;
     }
 }

@@ -136,6 +136,7 @@ import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.rotation.RotationButtonController;
+import com.android.systemui.shared.rotation.RotationPolicyUtil;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -366,9 +367,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 }
 
                 @Override
-                public void updateRotationWatcherState(int rotation) {
+                public void updateRotationWatcherState(
+                        int rotation, @Nullable Boolean isRotationLocked) {
                     if (mIsOnDefaultDisplay && mView != null) {
-                        mView.getRotationButtonController().onRotationWatcherChanged(rotation);
+                        RotationButtonController controller = mView.getRotationButtonController();
+                        controller.onRotationWatcherChanged(rotation, isRotationLocked);
                         if (mView.needsReorient(rotation)) {
                             repositionNavigationBar(rotation);
                         }
@@ -819,8 +822,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
             // Reset user rotation pref to match that of the WindowManager if starting in locked
             // mode. This will automatically happen when switching from auto-rotate to locked mode.
-            if (display != null && rotationButtonController.isRotationLocked()) {
-                rotationButtonController.setRotationLockedAtAngle(
+            @Nullable Boolean isRotationLocked = RotationPolicyUtil.isRotationLocked(mContext);
+            if (display != null && isRotationLocked) {
+                rotationButtonController.setRotationLockedAtAngle(isRotationLocked,
                         display.getRotation(), /* caller= */ "NavigationBar#onViewAttached");
             }
         } else {
@@ -2028,12 +2032,15 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                     getBarTransitions().setBackgroundOverrideAlpha(1f);
                 }
             }
-            updateScreenPinningGestures();
+
+            // Update the window layout params when the nav mode changes as that will affect the
+            // system gesture insets
+            setNavBarMode(mode);
+            repositionNavigationBar(mCurrentRotation);
 
             if (!canShowSecondaryHandle()) {
                 resetSecondaryHandle();
             }
-            setNavBarMode(mode);
             mView.setShouldShowSwipeUpUi(mOverviewProxyService.shouldShowSwipeUpUI());
         }
     };

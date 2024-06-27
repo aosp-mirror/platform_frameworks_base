@@ -74,7 +74,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -544,7 +543,7 @@ public class ThermalManagerService extends SystemService {
             if (!mHalReady.get()) {
                 FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED, getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__HAL_NOT_READY,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                 return Float.NaN;
             }
 
@@ -554,7 +553,7 @@ public class ThermalManagerService extends SystemService {
                 }
                 FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED, getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__INVALID_ARGUMENT,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                 return Float.NaN;
             }
 
@@ -1610,7 +1609,7 @@ public class ThermalManagerService extends SystemService {
         /** Map of skin temperature sensor name to a corresponding list of samples */
         @GuardedBy("mSamples")
         @VisibleForTesting
-        final ArrayMap<String, LinkedList<Sample>> mSamples = new ArrayMap<>();
+        final ArrayMap<String, ArrayList<Sample>> mSamples = new ArrayMap<>();
 
         /** Map of skin temperature sensor name to the corresponding SEVERE temperature threshold */
         @GuardedBy("mSamples")
@@ -1707,8 +1706,8 @@ public class ThermalManagerService extends SystemService {
                         continue;
                     }
 
-                    LinkedList<Sample> samples = mSamples.computeIfAbsent(temperature.getName(),
-                            k -> new LinkedList<>());
+                    ArrayList<Sample> samples = mSamples.computeIfAbsent(temperature.getName(),
+                            k -> new ArrayList<>(RING_BUFFER_SIZE));
                     if (samples.size() == RING_BUFFER_SIZE) {
                         samples.removeFirst();
                     }
@@ -1725,7 +1724,8 @@ public class ThermalManagerService extends SystemService {
         float getSlopeOf(List<Sample> samples) {
             long sumTimes = 0L;
             float sumTemperatures = 0.0f;
-            for (final Sample sample : samples) {
+            for (int s = 0; s < samples.size(); ++s) {
+                Sample sample = samples.get(s);
                 sumTimes += sample.time;
                 sumTemperatures += sample.temperature;
             }
@@ -1734,7 +1734,8 @@ public class ThermalManagerService extends SystemService {
 
             long sampleVariance = 0L;
             float sampleCovariance = 0.0f;
-            for (final Sample sample : samples) {
+            for (int s = 0; s < samples.size(); ++s) {
+                Sample sample = samples.get(s);
                 long timeDelta = sample.time - meanTime;
                 float temperatureDelta = sample.temperature - meanTemperature;
                 sampleVariance += timeDelta * timeDelta;
@@ -1777,7 +1778,7 @@ public class ThermalManagerService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                     return Float.NaN;
                 }
 
@@ -1788,15 +1789,15 @@ public class ThermalManagerService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE_THRESHOLD,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                     return Float.NaN;
                 }
 
                 float maxNormalized = Float.NaN;
                 int noThresholdSampleCount = 0;
-                for (Map.Entry<String, LinkedList<Sample>> entry : mSamples.entrySet()) {
+                for (Map.Entry<String, ArrayList<Sample>> entry : mSamples.entrySet()) {
                     String name = entry.getKey();
-                    LinkedList<Sample> samples = entry.getValue();
+                    ArrayList<Sample> samples = entry.getValue();
 
                     Float threshold = mSevereThresholds.get(name);
                     if (threshold == null) {
@@ -1827,12 +1828,12 @@ public class ThermalManagerService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE_THRESHOLD,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                 } else {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__SUCCESS,
-                            maxNormalized);
+                            maxNormalized, forecastSeconds);
                 }
                 return maxNormalized;
             }

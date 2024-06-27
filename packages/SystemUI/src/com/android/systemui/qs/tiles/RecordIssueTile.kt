@@ -46,13 +46,13 @@ import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.recordissue.IssueRecordingService
 import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
+import com.android.systemui.recordissue.RecordIssueModule.Companion.TILE_SPEC
 import com.android.systemui.recordissue.TraceurMessageSender
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.traceur.TraceUtils.PresetTraceType
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -131,15 +131,11 @@ constructor(
         }
     }
 
-    private fun startIssueRecordingService(screenRecord: Boolean, traceType: PresetTraceType) =
+    private fun startIssueRecordingService() =
         PendingIntent.getForegroundService(
                 userContextProvider.userContext,
                 RecordingService.REQUEST_CODE,
-                IssueRecordingService.getStartIntent(
-                    userContextProvider.userContext,
-                    screenRecord,
-                    traceType
-                ),
+                IssueRecordingService.getStartIntent(userContextProvider.userContext),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
@@ -157,7 +153,7 @@ constructor(
         val dialog: AlertDialog =
             delegateFactory
                 .create {
-                    startIssueRecordingService(it.screenRecord, it.traceType)
+                    startIssueRecordingService()
                     dialogTransitionAnimator.disableAllCurrentDialogsExitAnimations()
                     panelInteractor.collapsePanels()
                 }
@@ -169,8 +165,7 @@ constructor(
                 if (expandable != null && !keyguardStateController.isShowing) {
                     expandable
                         .dialogTransitionController(DialogCuj(CUJ_SHADE_DIALOG_OPEN, TILE_SPEC))
-                        ?.let { dialogTransitionAnimator.show(dialog, it) }
-                        ?: dialog.show()
+                        ?.let { dialogTransitionAnimator.show(dialog, it) } ?: dialog.show()
                 } else {
                     dialog.show()
                 }
@@ -202,9 +197,5 @@ constructor(
                 if (TextUtils.isEmpty(secondaryLabel)) label else "$label, $secondaryLabel"
             expandedAccessibilityClassName = Switch::class.java.name
         }
-    }
-
-    companion object {
-        const val TILE_SPEC = "record_issue"
     }
 }
