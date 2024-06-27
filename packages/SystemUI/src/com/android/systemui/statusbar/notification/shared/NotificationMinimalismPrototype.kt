@@ -45,7 +45,7 @@ object NotificationMinimalismPrototype {
             else
                 SystemProperties.getBoolean(
                     "persist.notification_minimalism_prototype.ungroup_top_unseen",
-                    true
+                    false
                 )
 
     /**

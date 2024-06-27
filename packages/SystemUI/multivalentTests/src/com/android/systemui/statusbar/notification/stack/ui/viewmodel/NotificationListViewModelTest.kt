@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.notification.data.repository.setActiveNoti
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
-import com.android.systemui.statusbar.notification.stack.data.repository.setNotifications
 import com.android.systemui.statusbar.policy.data.repository.fakeUserSetupRepository
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 import com.android.systemui.statusbar.policy.fakeConfigurationController

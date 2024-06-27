@@ -25,13 +25,9 @@ import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.expansionChanges
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -40,12 +36,11 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
 import com.android.systemui.statusbar.notification.stack.BUCKET_TOP_ONGOING
 import com.android.systemui.statusbar.notification.stack.BUCKET_TOP_UNSEEN
-import com.android.systemui.statusbar.policy.HeadsUpManager
-import com.android.systemui.statusbar.policy.headsUpEvents
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.printCollection
 import com.android.systemui.util.settings.SecureSettings
@@ -55,21 +50,17 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 
 /**
  * If the setting is enabled, this will track seen notifications and ensure that they only show in
@@ -84,19 +75,17 @@ class LockScreenMinimalismCoordinator
 constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val dumpManager: DumpManager,
-    private val headsUpManager: HeadsUpManager,
-    private val keyguardRepository: KeyguardRepository,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    private val logger: KeyguardCoordinatorLogger,
+    private val headsUpInteractor: HeadsUpNotificationInteractor,
+    private val logger: LockScreenMinimalismCoordinatorLogger,
     @Application private val scope: CoroutineScope,
     private val secureSettings: SecureSettings,
     private val seenNotificationsInteractor: SeenNotificationsInteractor,
     private val statusBarStateController: StatusBarStateController,
+    private val shadeInteractor: ShadeInteractor,
 ) : Coordinator, Dumpable {
 
     private val unseenNotifications = mutableSetOf<NotificationEntry>()
-    private val unseenEntryAdded = MutableSharedFlow<NotificationEntry>(extraBufferCapacity = 1)
-    private val unseenEntryRemoved = MutableSharedFlow<NotificationEntry>(extraBufferCapacity = 1)
+    private var isShadeVisible = false
     private var unseenFilterEnabled = false
 
     override fun attach(pipeline: NotifPipeline) {
@@ -111,130 +100,6 @@ constructor(
     }
 
     private suspend fun trackSeenNotifications() {
-        // Whether or not keyguard is visible (or occluded).
-        @Suppress("DEPRECATION")
-        val isKeyguardPresentFlow: Flow<Boolean> =
-            keyguardTransitionInteractor
-                .transitionValue(
-                    scene = Scenes.Gone,
-                    stateWithoutSceneContainer = KeyguardState.GONE,
-                )
-                .map { it == 0f }
-                .distinctUntilChanged()
-                .onEach { trackingUnseen -> logger.logTrackingUnseen(trackingUnseen) }
-
-        // Separately track seen notifications while the device is locked, applying once the device
-        // is unlocked.
-        val notificationsSeenWhileLocked = mutableSetOf<NotificationEntry>()
-
-        // Use [collectLatest] to cancel any running jobs when [trackingUnseen] changes.
-        isKeyguardPresentFlow.collectLatest { isKeyguardPresent: Boolean ->
-            if (isKeyguardPresent) {
-                // Keyguard is not gone, notifications need to be visible for a certain threshold
-                // before being marked as seen
-                trackSeenNotificationsWhileLocked(notificationsSeenWhileLocked)
-            } else {
-                // Mark all seen-while-locked notifications as seen for real.
-                if (notificationsSeenWhileLocked.isNotEmpty()) {
-                    unseenNotifications.removeAll(notificationsSeenWhileLocked)
-                    logger.logAllMarkedSeenOnUnlock(
-                        seenCount = notificationsSeenWhileLocked.size,
-                        remainingUnseenCount = unseenNotifications.size
-                    )
-                    notificationsSeenWhileLocked.clear()
-                }
-                unseenNotifPromoter.invalidateList("keyguard no longer showing")
-                // Keyguard is gone, notifications can be immediately marked as seen when they
-                // become visible.
-                trackSeenNotificationsWhileUnlocked()
-            }
-        }
-    }
-
-    /**
-     * Keep [notificationsSeenWhileLocked] updated to represent which notifications have actually
-     * been "seen" while the device is on the keyguard.
-     */
-    private suspend fun trackSeenNotificationsWhileLocked(
-        notificationsSeenWhileLocked: MutableSet<NotificationEntry>,
-    ) = coroutineScope {
-        // Remove removed notifications from the set
-        launch {
-            unseenEntryRemoved.collect { entry ->
-                if (notificationsSeenWhileLocked.remove(entry)) {
-                    logger.logRemoveSeenOnLockscreen(entry)
-                }
-            }
-        }
-        // Use collectLatest so that the timeout delay is cancelled if the device enters doze, and
-        // is restarted when doze ends.
-        keyguardRepository.isDozing.collectLatest { isDozing ->
-            if (!isDozing) {
-                trackSeenNotificationsWhileLockedAndNotDozing(notificationsSeenWhileLocked)
-            }
-        }
-    }
-
-    /**
-     * Keep [notificationsSeenWhileLocked] updated to represent which notifications have actually
-     * been "seen" while the device is on the keyguard and not dozing. Any new and existing unseen
-     * notifications are not marked as seen until they are visible for the [SEEN_TIMEOUT] duration.
-     */
-    private suspend fun trackSeenNotificationsWhileLockedAndNotDozing(
-        notificationsSeenWhileLocked: MutableSet<NotificationEntry>
-    ) = coroutineScope {
-        // All child tracking jobs will be cancelled automatically when this is cancelled.
-        val trackingJobsByEntry = mutableMapOf<NotificationEntry, Job>()
-
-        /**
-         * Wait for the user to spend enough time on the lock screen before removing notification
-         * from unseen set upon unlock.
-         */
-        suspend fun trackSeenDurationThreshold(entry: NotificationEntry) {
-            if (notificationsSeenWhileLocked.remove(entry)) {
-                logger.logResetSeenOnLockscreen(entry)
-            }
-            delay(SEEN_TIMEOUT)
-            notificationsSeenWhileLocked.add(entry)
-            trackingJobsByEntry.remove(entry)
-            logger.logSeenOnLockscreen(entry)
-        }
-
-        /** Stop any unseen tracking when a notification is removed. */
-        suspend fun stopTrackingRemovedNotifs(): Nothing =
-            unseenEntryRemoved.collect { entry ->
-                trackingJobsByEntry.remove(entry)?.let {
-                    it.cancel()
-                    logger.logStopTrackingLockscreenSeenDuration(entry)
-                }
-            }
-
-        /** Start tracking new notifications when they are posted. */
-        suspend fun trackNewUnseenNotifs(): Nothing = coroutineScope {
-            unseenEntryAdded.collect { entry ->
-                logger.logTrackingLockscreenSeenDuration(entry)
-                // If this is an update, reset the tracking.
-                trackingJobsByEntry[entry]?.let {
-                    it.cancel()
-                    logger.logResetSeenOnLockscreen(entry)
-                }
-                trackingJobsByEntry[entry] = launch { trackSeenDurationThreshold(entry) }
-            }
-        }
-
-        // Start tracking for all notifications that are currently unseen.
-        logger.logTrackingLockscreenSeenDuration(unseenNotifications)
-        unseenNotifications.forEach { entry ->
-            trackingJobsByEntry[entry] = launch { trackSeenDurationThreshold(entry) }
-        }
-
-        launch { trackNewUnseenNotifs() }
-        launch { stopTrackingRemovedNotifs() }
-    }
-
-    // Track "seen" notifications, marking them as such when either shade is expanded or the
-    // notification becomes heads up.
-    private suspend fun trackSeenNotificationsWhileUnlocked() {
         coroutineScope {
             launch { clearUnseenNotificationsWhenShadeIsExpanded() }
             launch { markHeadsUpNotificationsAsSeen() }
@@ -242,27 +107,38 @@ constructor(
     }
 
     private suspend fun clearUnseenNotificationsWhenShadeIsExpanded() {
-        statusBarStateController.expansionChanges.collectLatest { isExpanded ->
+        shadeInteractor.isShadeFullyExpanded.collectLatest { isExpanded ->
             // Give keyguard events time to propagate, in case this expansion is part of the
             // keyguard transition and not the user expanding the shade
-            yield()
+            delay(SHADE_VISIBLE_SEEN_TIMEOUT)
+            isShadeVisible = isExpanded
             if (isExpanded) {
-                logger.logShadeExpanded()
+                logger.logShadeVisible(unseenNotifications.size)
                 unseenNotifications.clear()
+                // no need to invalidateList; filtering is inactive while shade is open
+            } else {
+                logger.logShadeHidden()
             }
         }
     }
 
     private suspend fun markHeadsUpNotificationsAsSeen() {
-        headsUpManager.allEntries
-            .filter { it.isRowPinned }
-            .forEach { unseenNotifications.remove(it) }
-        headsUpManager.headsUpEvents.collect { (entry, isHun) ->
-            if (isHun) {
-                logger.logUnseenHun(entry.key)
-                unseenNotifications.remove(entry)
+        headsUpInteractor.topHeadsUpRowIfPinned
+            .map { it?.let { headsUpInteractor.notificationKey(it) } }
+            .collectLatest { key ->
+                if (key == null) {
+                    logger.logTopHeadsUpRow(key = null, wasUnseenWhenPinned = false)
+                } else {
+                    val wasUnseenWhenPinned = unseenNotifications.any { it.key == key }
+                    logger.logTopHeadsUpRow(key, wasUnseenWhenPinned)
+                    if (wasUnseenWhenPinned) {
+                        delay(HEADS_UP_SEEN_TIMEOUT)
+                        val wasUnseenAfterDelay = unseenNotifications.removeIf { it.key == key }
+                        logger.logHunHasBeenSeen(key, wasUnseenAfterDelay)
+                        // no need to invalidateList; nothing should change until after heads up
+                    }
+                }
             }
-        }
     }
 
     private fun unseenFeatureEnabled(): Flow<Boolean> {
@@ -297,14 +173,15 @@ constructor(
     }
 
     private suspend fun trackUnseenFilterSettingChanges() {
-        unseenFeatureEnabled().collectLatest { setting ->
+        unseenFeatureEnabled().collectLatest { isSettingEnabled ->
             // update local field and invalidate if necessary
-            if (setting != unseenFilterEnabled) {
-                unseenFilterEnabled = setting
+            if (isSettingEnabled != unseenFilterEnabled) {
+                unseenFilterEnabled = isSettingEnabled
                 unseenNotifPromoter.invalidateList("unseen setting changed")
             }
             // if the setting is enabled, then start tracking and filtering unseen notifications
-            if (setting) {
+            logger.logTrackingUnseen(isSettingEnabled)
+            if (isSettingEnabled) {
                 trackSeenNotifications()
             }
         }
@@ -313,29 +190,22 @@ constructor(
     private val collectionListener =
         object : NotifCollectionListener {
             override fun onEntryAdded(entry: NotificationEntry) {
-                if (
-                    keyguardRepository.isKeyguardShowing() || !statusBarStateController.isExpanded
-                ) {
+                if (!isShadeVisible) {
                     logger.logUnseenAdded(entry.key)
                     unseenNotifications.add(entry)
-                    unseenEntryAdded.tryEmit(entry)
                 }
             }
 
             override fun onEntryUpdated(entry: NotificationEntry) {
-                if (
-                    keyguardRepository.isKeyguardShowing() || !statusBarStateController.isExpanded
-                ) {
+                if (!isShadeVisible) {
                     logger.logUnseenUpdated(entry.key)
                     unseenNotifications.add(entry)
-                    unseenEntryAdded.tryEmit(entry)
                 }
             }
 
             override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
                 if (unseenNotifications.remove(entry)) {
                     logger.logUnseenRemoved(entry.key)
-                    unseenEntryRemoved.tryEmit(entry)
                 }
             }
         }
@@ -376,11 +246,12 @@ constructor(
     val unseenNotifPromoter =
         object : NotifPromoter(TAG) {
             override fun shouldPromoteToTopLevel(child: NotificationEntry): Boolean =
-                if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) false
-                else if (!NotificationMinimalismPrototype.ungroupTopUnseen) false
-                else
-                    seenNotificationsInteractor.isTopOngoingNotification(child) ||
-                        seenNotificationsInteractor.isTopUnseenNotification(child)
+                when {
+                    NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode() -> false
+                    seenNotificationsInteractor.isTopOngoingNotification(child) -> true
+                    !NotificationMinimalismPrototype.ungroupTopUnseen -> false
+                    else -> seenNotificationsInteractor.isTopUnseenNotification(child)
+                }
         }
 
     val topOngoingSectioner =
@@ -418,6 +289,7 @@ constructor(
 
     companion object {
         private const val TAG = "LockScreenMinimalismCoordinator"
-        private val SEEN_TIMEOUT = 5.seconds
+        private val SHADE_VISIBLE_SEEN_TIMEOUT = 0.25.seconds
+        private val HEADS_UP_SEEN_TIMEOUT = 0.75.seconds
     }
 }
