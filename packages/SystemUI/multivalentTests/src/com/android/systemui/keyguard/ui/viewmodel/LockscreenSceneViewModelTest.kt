@@ -19,6 +19,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.platform.test.annotations.EnableFlags
+import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.SceneKey
@@ -61,6 +62,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
+@RunWithLooper
 @EnableSceneContainer
 class LockscreenSceneViewModelTest : SysuiTestCase() {
 
