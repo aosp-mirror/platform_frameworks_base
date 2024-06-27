@@ -9025,6 +9025,10 @@ public abstract class BatteryStats {
 
             final int uid = consumer.getUid();
             final Uid u = uidStats.get(uid);
+            if (u == null) {
+                continue;
+            }
+
             final long rxPackets = u.getNetworkActivityPackets(
                     BatteryStats.NETWORK_MOBILE_RX_DATA, STATS_SINCE_CHARGED);
             final long txPackets = u.getNetworkActivityPackets(
