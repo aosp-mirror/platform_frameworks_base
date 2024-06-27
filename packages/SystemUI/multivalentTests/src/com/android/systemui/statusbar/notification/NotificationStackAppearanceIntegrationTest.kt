@@ -171,6 +171,22 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         }
 
     @Test
+    fun shadeExpansion_idleOnQs() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(currentScene = Scenes.QuickSettings)
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            val expandFraction by collectLastValue(scrollViewModel.expandFraction)
+            assertThat(expandFraction).isEqualTo(1f)
+
+            fakeSceneDataSource.changeScene(toScene = Scenes.QuickSettings)
+            val isScrollable by collectLastValue(scrollViewModel.isScrollable)
+            assertThat(isScrollable).isFalse()
+        }
+
+    @Test
     fun shadeExpansion_shadeToQs() =
         testScope.runTest {
             val transitionState =
