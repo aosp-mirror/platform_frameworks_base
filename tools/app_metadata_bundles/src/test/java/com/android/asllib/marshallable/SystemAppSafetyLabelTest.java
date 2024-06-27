@@ -16,15 +16,27 @@
 
 package com.android.asllib.marshallable;
 
+import static org.junit.Assert.assertThrows;
+
 import com.android.asllib.testutils.TestUtils;
+import com.android.asllib.util.MalformedXmlException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.nio.file.Paths;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 @RunWith(JUnit4.class)
 public class SystemAppSafetyLabelTest {
+    private static final long DEFAULT_VERSION = 2L;
+
     private static final String SYSTEM_APP_SAFETY_LABEL_HR_PATH =
             "com/android/asllib/systemappsafetylabel/hr";
     private static final String SYSTEM_APP_SAFETY_LABEL_OD_PATH =
@@ -57,31 +69,49 @@ public class SystemAppSafetyLabelTest {
         odToHrExpectException(MISSING_BOOL_FILE_NAME);
     }
 
-    private void hrToOdExpectException(String fileName) {
-        TestUtils.hrToOdExpectException(
-                new SystemAppSafetyLabelFactory(), SYSTEM_APP_SAFETY_LABEL_HR_PATH, fileName);
+    private void hrToOdExpectException(String fileName)
+            throws ParserConfigurationException, IOException, SAXException {
+        var ele =
+                TestUtils.getElementFromResource(
+                        Paths.get(SYSTEM_APP_SAFETY_LABEL_HR_PATH, fileName));
+        assertThrows(
+                MalformedXmlException.class,
+                () -> new SystemAppSafetyLabelFactory().createFromHrElement(ele, DEFAULT_VERSION));
     }
 
-    private void odToHrExpectException(String fileName) {
-        TestUtils.odToHrExpectException(
-                new SystemAppSafetyLabelFactory(), SYSTEM_APP_SAFETY_LABEL_OD_PATH, fileName);
+    private void odToHrExpectException(String fileName)
+            throws ParserConfigurationException, IOException, SAXException {
+        var ele =
+                TestUtils.getElementFromResource(
+                        Paths.get(SYSTEM_APP_SAFETY_LABEL_OD_PATH, fileName));
+        assertThrows(
+                MalformedXmlException.class,
+                () -> new SystemAppSafetyLabelFactory().createFromOdElement(ele, DEFAULT_VERSION));
     }
 
     private void testHrToOdSystemAppSafetyLabel(String fileName) throws Exception {
-        TestUtils.testHrToOd(
-                TestUtils.document(),
-                new SystemAppSafetyLabelFactory(),
-                SYSTEM_APP_SAFETY_LABEL_HR_PATH,
-                SYSTEM_APP_SAFETY_LABEL_OD_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        SystemAppSafetyLabel systemAppSafetyLabel =
+                new SystemAppSafetyLabelFactory()
+                        .createFromHrElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(SYSTEM_APP_SAFETY_LABEL_HR_PATH, fileName)),
+                                DEFAULT_VERSION);
+        Element resultingEle = systemAppSafetyLabel.toOdDomElement(doc);
+        doc.appendChild(resultingEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(SYSTEM_APP_SAFETY_LABEL_OD_PATH, fileName));
     }
 
     private void testOdToHrSystemAppSafetyLabel(String fileName) throws Exception {
-        TestUtils.testOdToHr(
-                TestUtils.document(),
-                new SystemAppSafetyLabelFactory(),
-                SYSTEM_APP_SAFETY_LABEL_OD_PATH,
-                SYSTEM_APP_SAFETY_LABEL_HR_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        SystemAppSafetyLabel systemAppSafetyLabel =
+                new SystemAppSafetyLabelFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(SYSTEM_APP_SAFETY_LABEL_OD_PATH, fileName)),
+                                DEFAULT_VERSION);
+        Element resultingEle = systemAppSafetyLabel.toHrDomElement(doc);
+        doc.appendChild(resultingEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(SYSTEM_APP_SAFETY_LABEL_HR_PATH, fileName));
     }
 }

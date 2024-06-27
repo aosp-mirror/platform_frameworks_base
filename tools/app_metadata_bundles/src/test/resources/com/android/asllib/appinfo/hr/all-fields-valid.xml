@@ -1,6 +1,6 @@
 <app-info
     apsCompliant="false"
-    privacyPolicy="www.example.com">
+    privacyPolicy="www.example.com" developerId="dev1" applicationId="app1">
     <first-party-endpoints>
         <item>url1</item>
     </first-party-endpoints>
