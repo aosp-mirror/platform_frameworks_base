@@ -3940,7 +3940,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
             final var statsToken = createStatsTokenForFocusedClient(isShow, imeVisRes.getReason());
             mVisibilityApplier.applyImeVisibility(mImeBindingState.mFocusedWindow, statsToken,
-                    imeVisRes.getState(), imeVisRes.getReason());
+                    imeVisRes.getState(), imeVisRes.getReason(), bindingController.mUserId);
             if (imeVisRes.getReason() == SoftInputShowHideReason.HIDE_UNSPECIFIED_WINDOW) {
                 // If focused display changed, we should unbind current method
                 // to make app window in previous display relayout after Ime
@@ -4828,7 +4828,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @NonNull ImeVisibilityResult result) {
         synchronized (ImfLock.class) {
             mVisibilityApplier.applyImeVisibility(windowToken, statsToken, result.getState(),
-                    result.getReason());
+                    result.getReason(), mCurrentUserId);
         }
     }
 
@@ -5112,7 +5112,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (imeVisRes != null) {
                     // Pass in a null statsToken as the IME snapshot is not tracked by ImeTracker.
                     mVisibilityApplier.applyImeVisibility(mImeBindingState.mFocusedWindow,
-                            null /* statsToken */, imeVisRes.getState(), imeVisRes.getReason());
+                            null /* statsToken */, imeVisRes.getState(), imeVisRes.getReason(),
+                            mCurrentUserId);
                 }
                 // Eligible IME processes use new "setInteractive" protocol.
                 mCurClient.mClient.setInteractive(mIsInteractive, mInFullscreenMode);
