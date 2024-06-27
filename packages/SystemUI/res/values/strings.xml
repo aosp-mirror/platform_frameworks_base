@@ -1188,6 +1188,8 @@
     <string name="popup_on_dismiss_cta_tile_text">Long press to customize widgets</string>
     <!-- Text for the button to configure widgets after long press. [CHAR LIMIT=50] -->
     <string name="button_to_configure_widgets_text">Customize widgets</string>
+    <!-- Text for unlock reason on the bouncer before customizing widgets. [CHAR LIMIT=NONE] -->
+    <string name="unlock_reason_to_customize_widgets">Unlock to customize widgets</string>
     <!-- Description for the App icon of disabled widget. [CHAR LIMIT=NONE] -->
     <string name="icon_description_for_disabled_widget">App icon for disabled widget</string>
     <!-- Description for the App icon of a package that is currently being installed. [CHAR LIMIT=NONE] -->
