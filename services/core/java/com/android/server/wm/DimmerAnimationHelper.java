@@ -29,7 +29,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.io.PrintWriter;
 

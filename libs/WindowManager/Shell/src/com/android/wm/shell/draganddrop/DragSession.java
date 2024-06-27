@@ -30,7 +30,7 @@ import android.content.pm.ActivityInfo;
 
 import androidx.annotation.Nullable;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 

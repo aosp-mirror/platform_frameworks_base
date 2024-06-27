@@ -59,7 +59,7 @@ import android.window.IBackAnimationRunner;
 import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.wm.shell.R;

@@ -55,7 +55,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManagerGlobal;
 import android.window.InputTransferToken;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 

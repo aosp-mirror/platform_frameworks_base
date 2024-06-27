@@ -29,7 +29,7 @@ import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.LogLevel;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import org.junit.After;
 import org.junit.Ignore;

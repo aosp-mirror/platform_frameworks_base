@@ -27,7 +27,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 
 import java.io.PrintWriter;

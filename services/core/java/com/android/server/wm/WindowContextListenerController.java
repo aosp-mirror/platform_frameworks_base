@@ -39,7 +39,7 @@ import android.view.WindowManager.LayoutParams.WindowType;
 import android.window.WindowContext;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.util.Objects;
 

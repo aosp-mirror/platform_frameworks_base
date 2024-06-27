@@ -48,7 +48,7 @@ import android.window.SnapshotDrawerUtils;
 import android.window.StartingWindowInfo;
 import android.window.TaskSnapshot;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.view.BaseIWindow;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;

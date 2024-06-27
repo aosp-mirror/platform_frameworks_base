@@ -36,7 +36,7 @@ import android.view.LayoutInflater;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.split.SplitScreenConstants;

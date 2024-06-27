@@ -36,7 +36,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.WindowContentFrameStats;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.io.PrintWriter;
 

@@ -33,7 +33,7 @@ import android.view.ContentRecordingSession;
 import android.window.IScreenRecordingCallback;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

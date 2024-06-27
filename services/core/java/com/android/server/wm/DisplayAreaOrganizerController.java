@@ -33,7 +33,7 @@ import android.window.IDisplayAreaOrganizer;
 import android.window.IDisplayAreaOrganizerController;
 import android.window.WindowContainerToken;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
