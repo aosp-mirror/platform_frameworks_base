@@ -13618,7 +13618,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setBackwardCompatibleUserRestriction(
                     caller, admin, key, enabledFromThisOwner, parent);
         }
-        logUserRestrictionCall(key, enabledFromThisOwner, parent, caller);
+        logUserRestrictionCall(key, enabledFromThisOwner, parent, caller, affectedUserId);
+    }
+
+    @Override
+    public void setUserRestrictionForUser(
+            @NonNull String systemEntity, String key, boolean enabled, @UserIdInt int targetUser) {
+        Objects.requireNonNull(systemEntity);
+
+        CallerIdentity caller = getCallerIdentity();
+        if (caller.getUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only system services can call setUserRestrictionForUser"
+                    + " on a target user: " + targetUser);
+        }
+        if (VERBOSE_LOG) {
+            Slogf.v(LOG_TAG, "Creating SystemEnforcingAdmin %s for calling package %s",
+                    systemEntity, caller.getPackageName());
+        }
+        EnforcingAdmin admin = EnforcingAdmin.createSystemEnforcingAdmin(systemEntity);
+
+        setLocalUserRestrictionInternal(admin, key, enabled, targetUser);
+
+        logUserRestrictionCall(key, enabled, /* parent= */ false, caller, targetUser);
     }
 
     private void checkAdminCanSetRestriction(CallerIdentity caller, boolean parent, String key) {
@@ -13739,7 +13760,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         setGlobalUserRestrictionInternal(admin, key, /* enabled= */ true);
 
-        logUserRestrictionCall(key, /* enabled= */ true, /* parent= */ false, caller);
+        logUserRestrictionCall(key, /* enabled= */ true, /* parent= */ false, caller,
+                UserHandle.USER_ALL);
     }
     private void setLocalUserRestrictionInternal(
             EnforcingAdmin admin, String key, boolean enabled, int userId) {
@@ -13775,7 +13797,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void logUserRestrictionCall(
-            String key, boolean enabled, boolean parent, CallerIdentity caller) {
+            String key, boolean enabled, boolean parent, CallerIdentity caller, int targetUserId) {
         final int eventId = enabled
                 ? DevicePolicyEnums.ADD_USER_RESTRICTION
                 : DevicePolicyEnums.REMOVE_USER_RESTRICTION;
@@ -13791,8 +13813,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             SecurityLog.writeEvent(eventTag, caller.getPackageName(), caller.getUserId(), key);
         }
 
-        Slogf.i(LOG_TAG, "Changing user restriction %s to: %b caller: %s",
-                key, enabled, caller.toString());
+        Slogf.i(LOG_TAG, "Changing user restriction %s on %s to: %b caller: %s",
+                key, (targetUserId == UserHandle.USER_ALL ? "all users" : ("user " + targetUserId)),
+                enabled, caller.toString());
     }
 
     @Override
