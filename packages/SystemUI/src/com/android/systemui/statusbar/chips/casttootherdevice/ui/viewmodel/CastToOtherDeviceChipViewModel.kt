@@ -85,7 +85,13 @@ constructor(
             icon =
                 Icon.Resource(
                     CAST_TO_OTHER_DEVICE_ICON,
-                    ContentDescription.Resource(R.string.accessibility_casting),
+                    // Note: This string is "Casting screen", which is okay right now because this
+                    // chip does not currently support audio-only casting. If the chip starts
+                    // supporting audio-only casting (see b/342169876), update the content
+                    // description to just "Casting".
+                    ContentDescription.Resource(
+                        R.string.cast_to_other_device_chip_accessibility_label,
+                    ),
                 ),
             colors = ColorsModel.Red,
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.

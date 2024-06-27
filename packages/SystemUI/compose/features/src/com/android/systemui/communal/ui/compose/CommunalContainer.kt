@@ -32,15 +32,12 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.CommunalSwipeDetector
-import com.android.compose.animation.scene.DefaultSwipeDetector
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.FixedSizeEdgeDetector
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
@@ -52,7 +49,6 @@ import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.Flags
-import com.android.systemui.Flags.glanceableHubFullscreenSwipe
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
@@ -61,7 +57,6 @@ import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_DURATION
-import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.SceneTransitionLayoutDataSource
 import kotlin.time.DurationUnit
@@ -191,25 +186,11 @@ fun CommunalContainer(
         onDispose { viewModel.setTransitionState(null) }
     }
 
-    val swipeSourceDetector =
-        if (glanceableHubFullscreenSwipe()) {
-            detector
-        } else {
-            FixedSizeEdgeDetector(dimensionResource(id = R.dimen.communal_gesture_initiation_width))
-        }
-
-    val swipeDetector =
-        if (glanceableHubFullscreenSwipe()) {
-            detector
-        } else {
-            DefaultSwipeDetector
-        }
-
     SceneTransitionLayout(
         state = state,
         modifier = modifier.fillMaxSize(),
-        swipeSourceDetector = swipeSourceDetector,
-        swipeDetector = swipeDetector,
+        swipeSourceDetector = detector,
+        swipeDetector = detector,
     ) {
         scene(
             CommunalScenes.Blank,

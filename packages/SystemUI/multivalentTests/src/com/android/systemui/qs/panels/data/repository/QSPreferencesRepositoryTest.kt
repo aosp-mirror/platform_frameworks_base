@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.data
+package com.android.systemui.qs.panels.data.repository
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -24,8 +24,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.qs.panels.data.repository.QSPreferencesRepository
-import com.android.systemui.qs.panels.data.repository.qsPreferencesRepository
 import com.android.systemui.settings.userFileManager
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository

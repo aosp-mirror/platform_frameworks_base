@@ -427,7 +427,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
                             } else {
                                 return logDownDispatch(ev, "hidden or hiding", true);
                             }
+                        } else {
+                            mShadeLogger.d("NSWVC: bouncer not showing");
                         }
+                    } else {
+                        mShadeLogger.d("NSWVC: touch not within view");
                     }
                 } else if (mIsTrackingBarGesture) {
                     final boolean sendToStatusBar = mStatusBarViewController.sendTouchToView(ev);
@@ -436,6 +440,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
                     }
                     return logDownDispatch(ev, "sending bar gesture to status bar",
                             sendToStatusBar);
+                }
+                if (isDown) {
+                    mShadeLogger.logNoTouchDispatch(mIsTrackingBarGesture, mExpandAnimationRunning);
                 }
                 return logDownDispatch(ev, "no custom touch dispatch of down event", null);
             }
@@ -698,12 +705,22 @@ public class NotificationShadeWindowViewController implements Dumpable {
 
     @Override
     public void dump(PrintWriter pw, String[] args) {
+        pw.print("  mExpandingBelowNotch=");
+        pw.println(mExpandingBelowNotch);
         pw.print("  mExpandAnimationRunning=");
         pw.println(mExpandAnimationRunning);
-        pw.print("  mTouchCancelled=");
-        pw.println(mTouchCancelled);
+        pw.print("  mExternalTouchIntercepted=");
+        pw.println(mExternalTouchIntercepted);
+        pw.print("  mIsOcclusionTransitionRunning=");
+        pw.println(mIsOcclusionTransitionRunning);
+        pw.print("  mIsTrackingBarGesture=");
+        pw.println(mIsTrackingBarGesture);
+        pw.print("  mLaunchAnimationTimeout=");
+        pw.println(mLaunchAnimationTimeout);
         pw.print("  mTouchActive=");
         pw.println(mTouchActive);
+        pw.print("  mTouchCancelled=");
+        pw.println(mTouchCancelled);
     }
 
     @VisibleForTesting

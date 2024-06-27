@@ -263,16 +263,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         doAnswer((InvocationOnMock invocationOnMock) -> {
             final ClientTransaction transaction = invocationOnMock.getArgument(0);
             final List<ClientTransactionItem> items = transaction.getTransactionItems();
-            if (items != null) {
-                for (ClientTransactionItem item : items) {
-                    if (item instanceof PauseActivityItem) {
-                        pauseFound.value = true;
-                        break;
-                    }
-                }
-            } else {
-                if (transaction.getLifecycleStateRequest() instanceof PauseActivityItem) {
+            for (ClientTransactionItem item : items) {
+                if (item instanceof PauseActivityItem) {
                     pauseFound.value = true;
+                    break;
                 }
             }
             return null;

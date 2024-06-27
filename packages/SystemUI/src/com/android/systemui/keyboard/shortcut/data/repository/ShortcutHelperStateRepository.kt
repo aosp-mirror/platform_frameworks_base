@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
-class ShortcutHelperRepository
+class ShortcutHelperStateRepository
 @Inject
 constructor(
     private val commandQueue: CommandQueue,

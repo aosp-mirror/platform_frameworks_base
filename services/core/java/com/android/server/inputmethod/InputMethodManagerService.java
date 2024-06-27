@@ -1274,7 +1274,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             mShowOngoingImeSwitcherForPhones = false;
 
-            // InputMethodSettingsRepository should be initialized before buildInputMethodListLocked
+            // Executing InputMethodSettingsRepository.initialize() does not mean that it
+            // immediately becomes ready to return the up-to-date InputMethodSettings for each
+            // running user, because we want to return from the constructor as early as possible so
+            // as not to delay the system boot process.
+            // Search for InputMethodSettingsRepository.put() to find where and when it's actually
+            // being updated. In general IMMS should refrain from exposing the existence of IMEs
+            // until systemReady().
             InputMethodSettingsRepository.initialize(mHandler, mContext);
             AdditionalSubtypeMapRepository.initialize(mHandler, mContext);
 
@@ -1282,17 +1288,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @SuppressWarnings("GuardedBy") final IntFunction<InputMethodBindingController>
                     bindingControllerFactory = userId -> new InputMethodBindingController(userId,
                     InputMethodManagerService.this);
-            mUserDataRepository = new UserDataRepository(mContext, mHandler, mUserManagerInternal,
+            mUserDataRepository = new UserDataRepository(mHandler, mUserManagerInternal,
                     bindingControllerForTesting != null ? bindingControllerForTesting
                             : bindingControllerFactory);
             for (int id : mUserManagerInternal.getUserIds()) {
                 getUserData(id);
             }
 
-            final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
-            final var userData = getUserData(mCurrentUserId);
-            userData.mSwitchingController.resetCircularListLocked(settings);
-            userData.mHardwareKeyboardShortcutController.update(settings);
             mMenuController = new InputMethodMenuController(this);
             mVisibilityStateComputer = new ImeVisibilityStateComputer(this);
             mVisibilityApplier = new DefaultImeVisibilityApplier(this);
@@ -2957,7 +2959,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         final var userData = getUserData(userId);
-        userData.mSwitchingController.resetCircularListLocked(settings);
+        userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
     }
 
@@ -3035,7 +3037,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         final var userData = getUserData(userId);
-        userData.mSwitchingController.resetCircularListLocked(settings);
+        userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
         sendOnNavButtonFlagsChangedLocked();
     }
@@ -5300,7 +5302,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         updateDefaultVoiceImeIfNeededLocked();
 
         final var userData = getUserData(userId);
-        userData.mSwitchingController.resetCircularListLocked(settings);
+        userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
 
         sendOnNavButtonFlagsChangedLocked();

@@ -140,10 +140,12 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -1236,8 +1238,8 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * @hide
      */
-    public CompletableFuture<Void> collectAllIntents() {
-        return mCollectionCache.collectAllIntentsNoComplete(this);
+    public CompletableFuture<Void> collectAllIntents(int bitmapSizeLimit) {
+        return mCollectionCache.collectAllIntentsNoComplete(this, bitmapSizeLimit);
     }
 
     private class RemoteCollectionCache {
@@ -1286,7 +1288,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         public @NonNull CompletableFuture<Void> collectAllIntentsNoComplete(
-                @NonNull RemoteViews inViews) {
+                @NonNull RemoteViews inViews, int bitmapSizeLimit) {
             SparseArray<Intent> idToIntentMapping = new SparseArray<>();
             // Collect the number of uinque Intent (which is equal to the number of new connections
             // to make) for size allocation and exclude certain collections from being written to
@@ -1314,7 +1316,11 @@ public class RemoteViews implements Parcelable, Filter {
                     ? 0
                     : remainingSize / numOfIntents;
 
-            return connectAllUniqueIntents(individualSize, idToIntentMapping);
+            int individualBitmapSizeLimit = (bitmapSizeLimit - getBitmapMemoryUsedByActions())
+                    / numOfIntents;
+
+            return connectAllUniqueIntents(individualSize, individualBitmapSizeLimit,
+                    idToIntentMapping);
         }
 
         private void collectAllIntentsInternal(@NonNull RemoteViews inViews,
@@ -1380,13 +1386,13 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         private @NonNull CompletableFuture<Void> connectAllUniqueIntents(int individualSize,
-                @NonNull SparseArray<Intent> idToIntentMapping) {
+                int individualBitmapSize, @NonNull SparseArray<Intent> idToIntentMapping) {
             List<CompletableFuture<Void>> intentFutureList = new ArrayList<>();
             for (int i = 0; i < idToIntentMapping.size(); i++) {
                 String currentIntentUri = mIdToUriMapping.get(idToIntentMapping.keyAt(i));
                 Intent currentIntent = idToIntentMapping.valueAt(i);
                 intentFutureList.add(getItemsFutureFromIntentWithTimeout(currentIntent,
-                        individualSize)
+                        individualSize, individualBitmapSize)
                         .thenAccept(items -> {
                             items.setHierarchyRootData(getHierarchyRootData());
                             mUriToCollectionMapping.put(currentIntentUri, items);
@@ -1397,7 +1403,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         private static CompletableFuture<RemoteCollectionItems> getItemsFutureFromIntentWithTimeout(
-                Intent intent, int individualSize) {
+                Intent intent, int individualSize, int individualBitmapSize) {
             if (intent == null) {
                 Log.e(LOG_TAG, "Null intent received when generating adapter future");
                 return CompletableFuture.completedFuture(new RemoteCollectionItems
@@ -1415,7 +1421,8 @@ public class RemoteViews implements Parcelable, Filter {
                             RemoteCollectionItems items;
                             try {
                                 items = IRemoteViewsFactory.Stub.asInterface(iBinder)
-                                        .getRemoteCollectionItems(individualSize);
+                                        .getRemoteCollectionItems(individualSize,
+                                                individualBitmapSize);
                             } catch (RemoteException re) {
                                 items = new RemoteCollectionItems.Builder().build();
                                 Log.e(LOG_TAG, "Error getting collection items from the"
@@ -2007,7 +2014,14 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private static class BitmapCache {
+    /**
+     * @hide
+     */
+    @NonNull BitmapCache getBitmapCache() {
+        return mBitmapCache;
+    }
+
+    static class BitmapCache {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ArrayList<Bitmap> mBitmaps;
         SparseIntArray mBitmapHashes;
@@ -2027,6 +2041,11 @@ public class RemoteViews implements Parcelable, Filter {
                     mBitmapHashes.put(b.hashCode(), i);
                 }
             }
+        }
+
+        BitmapCache(BitmapCache other) {
+            mBitmaps = new ArrayList<>(other.mBitmaps);
+            mBitmapHashes = other.mBitmapHashes.clone();
         }
 
         public int getBitmapId(Bitmap b) {
@@ -2070,6 +2089,12 @@ public class RemoteViews implements Parcelable, Filter {
                 }
             }
             return mBitmapMemory;
+        }
+
+        public void mergeWithCache(BitmapCache other) {
+            for (int i = 0; i < other.mBitmaps.size(); i++) {
+                getBitmapId(other.mBitmaps.get(i));
+            }
         }
     }
 
@@ -7341,6 +7366,38 @@ public class RemoteViews implements Parcelable, Filter {
             return false;
         }
         return true;
+    }
+
+    private int getBitmapMemoryUsedByActions() {
+        Set<Integer> bitmapIdSet = getBitmapIdsUsedByActions(new HashSet<>());
+        int result = 0;
+        for (int bitmapId: bitmapIdSet) {
+            result += mBitmapCache.getBitmapForId(bitmapId).getAllocationByteCount();
+        }
+
+        return result;
+    }
+
+    private Set<Integer> getBitmapIdsUsedByActions(@NonNull Set<Integer> intSet) {
+        if (hasSizedRemoteViews()) {
+            for (RemoteViews views: mSizedRemoteViews) {
+                views.getBitmapIdsUsedByActions(intSet);
+            }
+        } else if (hasLandscapeAndPortraitLayouts()) {
+            mLandscape.getBitmapIdsUsedByActions(intSet);
+            mPortrait.getBitmapIdsUsedByActions(intSet);
+        } else if (mActions != null) {
+            for (Action action: mActions) {
+                if (action instanceof ViewGroupActionAdd vgaa
+                        && vgaa.mNestedViews != null) {
+                    vgaa.mNestedViews.getBitmapIdsUsedByActions(intSet);
+                } else if (action instanceof BitmapReflectionAction bitmapAction) {
+                    intSet.add(bitmapAction.mBitmapId);
+                }
+            }
+        }
+
+        return intSet;
     }
 
     /** Representation of a fixed list of items to be displayed in a RemoteViews collection. */

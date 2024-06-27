@@ -18,7 +18,6 @@ package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.util.SparseArray;
@@ -36,15 +35,12 @@ final class UserDataRepository {
 
     private final IntFunction<InputMethodBindingController> mBindingControllerFactory;
 
-    @NonNull
-    private final Context mContext;
-
     @GuardedBy("ImfLock.class")
     @NonNull
     UserData getOrCreate(@UserIdInt int userId) {
         UserData userData = mUserData.get(userId);
         if (userData == null) {
-            userData = new UserData(userId, mBindingControllerFactory.apply(userId), mContext);
+            userData = new UserData(userId, mBindingControllerFactory.apply(userId));
             mUserData.put(userId, userData);
         }
         return userData;
@@ -58,10 +54,8 @@ final class UserDataRepository {
     }
 
     UserDataRepository(
-            @NonNull Context context,
             @NonNull Handler handler, @NonNull UserManagerInternal userManagerInternal,
             @NonNull IntFunction<InputMethodBindingController> bindingControllerFactory) {
-        mContext = context;
         mBindingControllerFactory = bindingControllerFactory;
         userManagerInternal.addUserLifecycleListener(
                 new UserManagerInternal.UserLifecycleListener() {
@@ -105,14 +99,11 @@ final class UserDataRepository {
          * Intended to be instantiated only from this file.
          */
         private UserData(@UserIdInt int userId,
-                @NonNull InputMethodBindingController bindingController, @NonNull Context context) {
+                @NonNull InputMethodBindingController bindingController) {
             mUserId = userId;
             mBindingController = bindingController;
-            final var emptySettings = InputMethodSettings.createEmptyMap(userId);
-            mSwitchingController = new InputMethodSubtypeSwitchingController(context,
-                    emptySettings);
-            mHardwareKeyboardShortcutController = new HardwareKeyboardShortcutController(
-                    emptySettings);
+            mSwitchingController = new InputMethodSubtypeSwitchingController();
+            mHardwareKeyboardShortcutController = new HardwareKeyboardShortcutController();
         }
 
         @Override

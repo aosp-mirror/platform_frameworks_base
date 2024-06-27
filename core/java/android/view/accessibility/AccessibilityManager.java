@@ -19,6 +19,8 @@ package android.view.accessibility;
 import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_ACCESSIBILITY_VOLUME;
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -62,6 +64,7 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.IWindow;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -69,6 +72,7 @@ import android.view.accessibility.AccessibilityEvent.EventType;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.common.ShortcutConstants;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 
@@ -1565,7 +1569,7 @@ public final class AccessibilityManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     public void performAccessibilityShortcut() {
-        performAccessibilityShortcut(null);
+        performAccessibilityShortcut(Display.DEFAULT_DISPLAY, HARDWARE, null);
     }
 
     /**
@@ -1577,7 +1581,8 @@ public final class AccessibilityManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
-    public void performAccessibilityShortcut(@Nullable String targetName) {
+    public void performAccessibilityShortcut(
+            int displayId, @UserShortcutType int shortcutType, @Nullable String targetName) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -1586,7 +1591,7 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.performAccessibilityShortcut(targetName);
+            service.performAccessibilityShortcut(displayId, shortcutType, targetName);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error performing accessibility shortcut. ", re);
         }
@@ -1602,7 +1607,7 @@ public final class AccessibilityManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     public void enableShortcutsForTargets(boolean enable,
-            @ShortcutConstants.UserShortcutType int shortcutTypes, @NonNull Set<String> targets,
+            @UserShortcutType int shortcutTypes, @NonNull Set<String> targets,
             @UserIdInt int userId) {
         final IAccessibilityManager service;
         synchronized (mLock) {
@@ -1817,7 +1822,7 @@ public final class AccessibilityManager {
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     @NonNull
     public List<String> getAccessibilityShortcutTargets(
-            @ShortcutConstants.UserShortcutType int shortcutType) {
+            @UserShortcutType int shortcutType) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();

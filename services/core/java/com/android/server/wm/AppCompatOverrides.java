@@ -57,22 +57,15 @@ import java.util.function.BooleanSupplier;
 /**
  * Encapsulate logic related to operations guarded by an app override.
  */
-public class AppCompatCapability {
+public class AppCompatOverrides {
 
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "AppCompatCapability" : TAG_ATM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "AppCompatOverrides" : TAG_ATM;
 
     @NonNull
     private final LetterboxConfiguration mLetterboxConfiguration;
 
     @NonNull
     private final ActivityRecord mActivityRecord;
-
-    // Corresponds to OVERRIDE_ANY_ORIENTATION_TO_USER
-    private final boolean mIsSystemOverrideToFullscreenEnabled;
-    // Corresponds to OVERRIDE_RESPECT_REQUESTED_ORIENTATION
-    private final boolean mIsOverrideRespectRequestedOrientationEnabled;
-    // Corresponds to OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA
-    private final boolean mIsOverrideOrientationOnlyForCameraEnabled;
 
     @NonNull
     private final OptPropFactory.OptProp mFakeFocusOptProp;
@@ -95,9 +88,9 @@ public class AppCompatCapability {
     @NonNull
     private final OptPropFactory.OptProp mAllowUserAspectRatioFullscreenOverrideOptProp;
 
-    private final AppCompatOrientationCapability mAppCompatOrientationCapability;
+    private final AppCompatOrientationOverrides mAppCompatOrientationOverrides;
 
-    AppCompatCapability(@NonNull WindowManagerService wmService,
+    AppCompatOverrides(@NonNull WindowManagerService wmService,
                         @NonNull ActivityRecord activityRecord,
                         @NonNull LetterboxConfiguration letterboxConfiguration) {
         mLetterboxConfiguration = letterboxConfiguration;
@@ -107,8 +100,8 @@ public class AppCompatCapability {
         final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
                 activityRecord.packageName);
 
-        mAppCompatOrientationCapability =
-                new AppCompatOrientationCapability(optPropBuilder, mLetterboxConfiguration,
+        mAppCompatOrientationOverrides =
+                new AppCompatOrientationOverrides(optPropBuilder, mLetterboxConfiguration,
                         mActivityRecord);
 
         mFakeFocusOptProp = optPropBuilder.create(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS,
@@ -149,13 +142,6 @@ public class AppCompatCapability {
         mAllowUserAspectRatioFullscreenOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
                 mLetterboxConfiguration::isUserAppAspectRatioFullscreenEnabled);
-
-        mIsSystemOverrideToFullscreenEnabled =
-                isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION_TO_USER);
-        mIsOverrideRespectRequestedOrientationEnabled =
-                isCompatChangeEnabled(OVERRIDE_RESPECT_REQUESTED_ORIENTATION);
-        mIsOverrideOrientationOnlyForCameraEnabled =
-                isCompatChangeEnabled(OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA);
     }
 
     /**
@@ -172,8 +158,8 @@ public class AppCompatCapability {
     }
 
     @NonNull
-    AppCompatOrientationCapability getAppCompatOrientationCapability() {
-        return mAppCompatOrientationCapability;
+    AppCompatOrientationOverrides getAppCompatOrientationOverrides() {
+        return mAppCompatOrientationOverrides;
     }
 
     /**
@@ -245,7 +231,7 @@ public class AppCompatCapability {
     }
 
     boolean isSystemOverrideToFullscreenEnabled(int userAspectRatio) {
-        return mIsSystemOverrideToFullscreenEnabled
+        return isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION_TO_USER)
                 && !mAllowOrientationOverrideOptProp.isFalse()
                 && (userAspectRatio == USER_MIN_ASPECT_RATIO_UNSET
                     || userAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
@@ -273,11 +259,11 @@ public class AppCompatCapability {
     }
 
     boolean isOverrideRespectRequestedOrientationEnabled() {
-        return mIsOverrideRespectRequestedOrientationEnabled;
+        return isCompatChangeEnabled(OVERRIDE_RESPECT_REQUESTED_ORIENTATION);
     }
 
     boolean isOverrideOrientationOnlyForCameraEnabled() {
-        return mIsOverrideOrientationOnlyForCameraEnabled;
+        return isCompatChangeEnabled(OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA);
     }
 
     /**

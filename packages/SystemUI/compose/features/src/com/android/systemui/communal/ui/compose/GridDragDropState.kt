@@ -261,7 +261,7 @@ fun LazyGridItemScope.DraggableItem(
                 alpha = itemAlpha
             }
         } else {
-            Modifier.animateItemPlacement()
+            Modifier.animateItem()
         }
 
     // Animate the highlight alpha manually as alpha modifier (and AnimatedVisibility) clips the

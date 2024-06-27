@@ -18,7 +18,7 @@ package com.android.systemui.keyboard.shortcut.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperRepository
+import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState
 import com.android.systemui.model.SysUiState
 import com.android.systemui.settings.DisplayTracker
@@ -29,13 +29,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-class ShortcutHelperInteractor
+class ShortcutHelperStateInteractor
 @Inject
 constructor(
     private val displayTracker: DisplayTracker,
     @Background private val backgroundScope: CoroutineScope,
     private val sysUiState: SysUiState,
-    private val repository: ShortcutHelperRepository
+    private val repository: ShortcutHelperStateRepository
 ) {
 
     val state: Flow<ShortcutHelperState> = repository.state

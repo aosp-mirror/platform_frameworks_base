@@ -31,13 +31,28 @@ import android.view.KeyEvent.KEYCODE_SLASH
 import android.view.KeyEvent.KEYCODE_TAB
 import android.view.KeyEvent.META_CTRL_ON
 import android.view.KeyEvent.META_META_ON
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.SYSTEM
 import com.android.systemui.keyboard.shortcut.shared.model.shortcut
+import com.android.systemui.keyboard.shortcut.shared.model.shortcutCategory
 import com.android.systemui.res.R
 import javax.inject.Inject
 
-class SystemShortcutsSource @Inject constructor(private val resources: Resources) {
+class SystemShortcutsSource @Inject constructor(@Main private val resources: Resources) {
 
-    fun generalShortcuts() =
+    fun systemShortcutsCategory() =
+        shortcutCategory(SYSTEM) {
+            subCategory(
+                resources.getString(R.string.shortcut_helper_category_system_controls),
+                systemControlsShortcuts()
+            )
+            subCategory(
+                resources.getString(R.string.shortcut_helper_category_system_apps),
+                systemAppsShortcuts()
+            )
+        }
+
+    private fun systemControlsShortcuts() =
         listOf(
             // Access list of all apps and search (i.e. Search/Launcher):
             //  - Meta
@@ -87,7 +102,7 @@ class SystemShortcutsSource @Inject constructor(private val resources: Resources
             },
         )
 
-    fun systemAppsShortcuts() =
+    private fun systemAppsShortcuts() =
         listOf(
             // Pull up Notes app for quick memo:
             //  - Meta + Ctrl + N

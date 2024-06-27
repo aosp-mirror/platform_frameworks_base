@@ -26,7 +26,6 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 import static android.app.servertransaction.TransactionExecutorHelper.getShortActivityName;
 import static android.app.servertransaction.TransactionExecutorHelper.getStateName;
-import static android.app.servertransaction.TransactionExecutorHelper.lastCallbackRequestingState;
 import static android.app.servertransaction.TransactionExecutorHelper.shouldExcludeLastLifecycleState;
 import static android.app.servertransaction.TransactionExecutorHelper.tId;
 import static android.app.servertransaction.TransactionExecutorHelper.transactionToString;
@@ -77,13 +76,7 @@ public class TransactionExecutor {
 
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "clientTransactionExecuted");
         try {
-            if (transaction.getTransactionItems() != null) {
-                executeTransactionItems(transaction);
-            } else {
-                // TODO(b/260873529): cleanup after launch.
-                executeCallbacks(transaction);
-                executeLifecycleState(transaction);
-            }
+            executeTransactionItems(transaction);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to execute the transaction: "
                     + transactionToString(transaction, mTransactionHandler));
@@ -109,41 +102,6 @@ public class TransactionExecutor {
                 executeNonLifecycleItem(transaction, item,
                         shouldExcludeLastLifecycleState(items, i));
             }
-        }
-    }
-
-    /**
-     * Cycle through all states requested by callbacks and execute them at proper times.
-     * @deprecated use {@link #executeTransactionItems} instead.
-     */
-    @VisibleForTesting
-    @Deprecated
-    public void executeCallbacks(@NonNull ClientTransaction transaction) {
-        final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
-        if (callbacks == null || callbacks.isEmpty()) {
-            // No callbacks to execute, return early.
-            return;
-        }
-        if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callbacks in transaction");
-
-        // In case when post-execution state of the last callback matches the final state requested
-        // for the activity in this transaction, we won't do the last transition here and do it when
-        // moving to final state instead (because it may contain additional parameters from server).
-        final ActivityLifecycleItem finalStateRequest = transaction.getLifecycleStateRequest();
-        final int finalState = finalStateRequest != null ? finalStateRequest.getTargetState()
-                : UNDEFINED;
-        // Index of the last callback that requests some post-execution state.
-        final int lastCallbackRequestingState = lastCallbackRequestingState(transaction);
-
-        final int size = callbacks.size();
-        for (int i = 0; i < size; ++i) {
-            final ClientTransactionItem item = callbacks.get(i);
-
-            // Skip the very last transition and perform it by explicit state request instead.
-            final int postExecutionState = item.getPostExecutionState();
-            final boolean shouldExcludeLastLifecycleState = postExecutionState != UNDEFINED
-                    && i == lastCallbackRequestingState && finalState == postExecutionState;
-            executeNonLifecycleItem(transaction, item, shouldExcludeLastLifecycleState);
         }
     }
 
@@ -182,21 +140,6 @@ public class TransactionExecutor {
         if (postExecutionState != UNDEFINED && r != null) {
             cycleToPath(r, postExecutionState, shouldExcludeLastLifecycleState, transaction);
         }
-    }
-
-    /**
-     * Transition to the final state if requested by the transaction.
-     * @deprecated use {@link #executeTransactionItems} instead
-     */
-    @Deprecated
-    private void executeLifecycleState(@NonNull ClientTransaction transaction) {
-        final ActivityLifecycleItem lifecycleItem = transaction.getLifecycleStateRequest();
-        if (lifecycleItem == null) {
-            // No lifecycle request, return early.
-            return;
-        }
-
-        executeLifecycleItem(transaction, lifecycleItem);
     }
 
     private void executeLifecycleItem(@NonNull ClientTransaction transaction,

@@ -590,15 +590,9 @@ final class ConversionUtils {
                 || isVendorIdentifierType(id.type);
     }
 
-    private static boolean isValidHalProgramInfo(ProgramInfo info) {
-        return isValidHalProgramSelector(info.selector)
-                && isValidLogicallyTunedTo(info.logicallyTunedTo)
-                && isValidPhysicallyTunedTo(info.physicallyTunedTo);
-    }
-
     @Nullable
     static RadioManager.ProgramInfo programInfoFromHalProgramInfo(ProgramInfo info) {
-        if (!isValidHalProgramInfo(info)) {
+        if (!isValidHalProgramSelector(info.selector)) {
             return null;
         }
         Collection<ProgramSelector.Identifier> relatedContent = new ArrayList<>();
@@ -622,6 +616,15 @@ final class ConversionUtils {
                 radioMetadataFromHalMetadata(info.metadata),
                 vendorInfoFromHalVendorKeyValues(info.vendorInfo)
         );
+    }
+
+    @Nullable
+    static RadioManager.ProgramInfo tunedProgramInfoFromHalProgramInfo(ProgramInfo info) {
+        if (!isValidLogicallyTunedTo(info.logicallyTunedTo)
+                || !isValidPhysicallyTunedTo(info.physicallyTunedTo)) {
+            return null;
+        }
+        return programInfoFromHalProgramInfo(info);
     }
 
     static ProgramFilter filterToHalProgramFilter(@Nullable ProgramList.Filter filter) {
@@ -686,8 +689,10 @@ final class ConversionUtils {
         if (!programSelectorMeetsSdkVersionRequirement(info.getSelector(), uid)) {
             return false;
         }
-        if (!identifierMeetsSdkVersionRequirement(info.getLogicallyTunedTo(), uid)
-                || !identifierMeetsSdkVersionRequirement(info.getPhysicallyTunedTo(), uid)) {
+        if ((info.getLogicallyTunedTo() != null
+                && !identifierMeetsSdkVersionRequirement(info.getLogicallyTunedTo(), uid))
+                || (info.getPhysicallyTunedTo() != null
+                && !identifierMeetsSdkVersionRequirement(info.getPhysicallyTunedTo(), uid))) {
             return false;
         }
         Iterator<ProgramSelector.Identifier> relatedContentIt = info.getRelatedContent().iterator();
