@@ -41,6 +41,7 @@ import com.android.systemui.authentication.data.repository.fakeAuthenticationRep
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
@@ -54,6 +55,9 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.data.repository.Transition
+import com.android.systemui.scene.data.repository.setSceneTransition
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -208,6 +212,7 @@ class KeyguardOcclusionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun showWhenLockedActivityLaunchedFromPowerGesture_falseIfReturningToGone() =
         testScope.runTest {
             val values by collectValues(underTest.showWhenLockedActivityLaunchedFromPowerGesture)
@@ -234,6 +239,42 @@ class KeyguardOcclusionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.AOD,
                 to = KeyguardState.GONE,
+                testScope = testScope,
+            )
+
+            assertThat(values)
+                .containsExactly(
+                    false,
+                )
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun showWhenLockedActivityLaunchedFromPowerGesture_falseIfReturningToGone_scene_container() =
+        testScope.runTest {
+            val values by collectValues(underTest.showWhenLockedActivityLaunchedFromPowerGesture)
+            powerInteractor.setAwakeForTest()
+            kosmos.setSceneTransition(Transition(Scenes.Lockscreen, Scenes.Gone))
+
+            powerInteractor.setAsleepForTest()
+
+            kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Lockscreen))
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.UNDEFINED,
+                to = KeyguardState.AOD,
+                testScope = testScope,
+                throughTransitionState = TransitionState.RUNNING
+            )
+
+            powerInteractor.onCameraLaunchGestureDetected()
+            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true)
+            powerInteractor.setAwakeForTest()
+            runCurrent()
+
+            kosmos.setSceneTransition(Transition(Scenes.Lockscreen, Scenes.Gone))
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.UNDEFINED,
                 testScope = testScope,
             )
 
