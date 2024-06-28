@@ -23,9 +23,9 @@ import android.content.pm.PackageManager
 import android.os.UserHandle
 import android.view.WindowManager.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI
 import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL
-import com.android.wm.shell.util.KtProtoLog
 import java.util.Arrays
 
 /**
@@ -52,7 +52,7 @@ class MultiInstanceHelper @JvmOverloads constructor(
         val packageName = componentName.packageName
         for (pkg in staticAppsSupportingMultiInstance) {
             if (pkg == packageName) {
-                KtProtoLog.v(WM_SHELL, "application=%s in allowlist supports multi-instance",
+                ProtoLog.v(WM_SHELL, "application=%s in allowlist supports multi-instance",
                     packageName)
                 return true
             }
@@ -70,10 +70,10 @@ class MultiInstanceHelper @JvmOverloads constructor(
             // If the above call doesn't throw a NameNotFoundException, then the activity property
             // should override the application property value
             if (activityProp.isBoolean) {
-                KtProtoLog.v(WM_SHELL, "activity=%s supports multi-instance", componentName)
+                ProtoLog.v(WM_SHELL, "activity=%s supports multi-instance", componentName)
                 return activityProp.boolean
             } else {
-                KtProtoLog.w(WM_SHELL, "Warning: property=%s for activity=%s has non-bool type=%d",
+                ProtoLog.w(WM_SHELL, "Warning: property=%s for activity=%s has non-bool type=%d",
                     PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI, packageName, activityProp.type)
             }
         } catch (nnfe: PackageManager.NameNotFoundException) {
@@ -85,10 +85,10 @@ class MultiInstanceHelper @JvmOverloads constructor(
             val appProp = packageManager.getProperty(
                 PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI, packageName)
             if (appProp.isBoolean) {
-                KtProtoLog.v(WM_SHELL, "application=%s supports multi-instance", packageName)
+                ProtoLog.v(WM_SHELL, "application=%s supports multi-instance", packageName)
                 return appProp.boolean
             } else {
-                KtProtoLog.w(WM_SHELL,
+                ProtoLog.w(WM_SHELL,
                     "Warning: property=%s for application=%s has non-bool type=%d",
                     PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI, packageName, appProp.type)
             }

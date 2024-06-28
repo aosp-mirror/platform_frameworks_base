@@ -50,7 +50,6 @@ import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
-import com.android.wm.shell.util.KtProtoLog
 
 /**
  * A [Transitions.TransitionObserver] that observes transitions and the proposed changes to log
@@ -106,7 +105,7 @@ class DesktopModeLoggerTransitionObserver(
     ) {
         // this was a new recents animation
         if (info.isExitToRecentsTransition() && tasksSavedForRecents.isEmpty()) {
-            KtProtoLog.v(
+            ProtoLog.v(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopModeLogger: Recents animation running, saving tasks for later"
             )
@@ -132,7 +131,7 @@ class DesktopModeLoggerTransitionObserver(
                 info.flags == 0 &&
                 tasksSavedForRecents.isNotEmpty()
         ) {
-            KtProtoLog.v(
+            ProtoLog.v(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopModeLogger: Canceled recents animation, restoring tasks"
             )
@@ -202,7 +201,7 @@ class DesktopModeLoggerTransitionObserver(
             }
         }
 
-        KtProtoLog.v(
+        ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: taskInfo map after processing changes %s",
             postTransitionFreeformTasks.size()
