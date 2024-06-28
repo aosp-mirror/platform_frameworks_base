@@ -1537,6 +1537,11 @@ public class StatsPullAtomService extends SystemService {
         final long bucketDuration = Settings.Global.getLong(mContext.getContentResolver(),
                 NETSTATS_UID_BUCKET_DURATION, NETSTATS_UID_DEFAULT_BUCKET_DURATION_MS);
 
+        // Set startTime before boot so that NetworkStats includes at least one full bucket.
+        // Set endTime in the future so that NetworkStats includes everything in the active bucket.
+        final long startTime = currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration;
+        final long endTime = currentTimeInMillis + bucketDuration;
+
         // TODO (b/156313635): This is short-term hack to allow perfd gets updated networkStats
         //  history when query in every second in order to show realtime statistics. However,
         //  this is not a good long-term solution since NetworkStatsService will make frequent
@@ -1547,9 +1552,7 @@ public class StatsPullAtomService extends SystemService {
         }
 
         final android.app.usage.NetworkStats queryNonTaggedStats =
-                getNetworkStatsManager().querySummary(
-                        template, currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration,
-                        currentTimeInMillis);
+                getNetworkStatsManager().querySummary(template, startTime, endTime);
 
         final NetworkStats nonTaggedStats =
                 NetworkStatsUtils.fromPublicNetworkStats(queryNonTaggedStats);
@@ -1557,9 +1560,7 @@ public class StatsPullAtomService extends SystemService {
         if (!includeTags) return nonTaggedStats;
 
         final android.app.usage.NetworkStats queryTaggedStats =
-                getNetworkStatsManager().queryTaggedSummary(template,
-                        currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration,
-                        currentTimeInMillis);
+                getNetworkStatsManager().queryTaggedSummary(template, startTime, endTime);
         final NetworkStats taggedStats =
                 NetworkStatsUtils.fromPublicNetworkStats(queryTaggedStats);
         queryTaggedStats.close();
