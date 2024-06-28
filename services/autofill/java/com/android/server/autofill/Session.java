@@ -6902,17 +6902,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return mPendingSaveUi != null && mPendingSaveUi.getState() == PendingUi.STATE_PENDING;
     }
 
+    // Return latest response index in mResponses SparseArray.
     @GuardedBy("mLock")
     private int getLastResponseIndexLocked() {
-        if (mResponses != null) {
-            List<Integer> requestIdList = new ArrayList<>();
-            final int responseCount = mResponses.size();
-            for (int i = 0; i < responseCount; i++) {
-                requestIdList.add(mResponses.keyAt(i));
-            }
-            return mRequestId.getLastRequestIdIndex(requestIdList);
+        if (mResponses == null  || mResponses.size() == 0) {
+          return -1;
         }
-        return -1;
+        List<Integer> requestIdList = new ArrayList<>();
+        final int responseCount = mResponses.size();
+        for (int i = 0; i < responseCount; i++) {
+            requestIdList.add(mResponses.keyAt(i));
+        }
+        return mRequestId.getLastRequestIdIndex(requestIdList);
     }
 
     private LogMaker newLogMaker(int category) {
