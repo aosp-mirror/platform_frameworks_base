@@ -1631,10 +1631,12 @@ final class DefaultPermissionGrantPolicy {
     private boolean isSystemOrCertificateMatchingPackage(PackageInfo pi, String cert) {
         if (cert == null) {
             return pi.applicationInfo.isSystemApp();
+        } else if (Objects.equals(cert, "platform")) {
+            return mServiceInternal.isPlatformSigned(pi.packageName);
+        } else {
+            return mContext.getPackageManager().hasSigningCertificate(pi.packageName, HexEncoding.
+                    decode(cert.replace(":", "")), PackageManager.CERT_INPUT_SHA256);
         }
-
-        return mContext.getPackageManager().hasSigningCertificate(pi.packageName, HexEncoding.
-                decode(cert.replace(":", "")), PackageManager.CERT_INPUT_SHA256);
     }
 
     private static boolean doesPackageSupportRuntimePermissions(PackageInfo pkg) {
