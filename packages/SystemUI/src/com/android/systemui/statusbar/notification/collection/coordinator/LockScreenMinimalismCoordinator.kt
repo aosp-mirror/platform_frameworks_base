@@ -18,12 +18,9 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
-import android.os.UserHandle
-import android.provider.Settings
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -43,23 +40,16 @@ import com.android.systemui.statusbar.notification.stack.BUCKET_TOP_ONGOING
 import com.android.systemui.statusbar.notification.stack.BUCKET_TOP_UNSEEN
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.printCollection
-import com.android.systemui.util.settings.SecureSettings
-import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 /**
@@ -73,12 +63,10 @@ import kotlinx.coroutines.launch
 class LockScreenMinimalismCoordinator
 @Inject
 constructor(
-    @Background private val bgDispatcher: CoroutineDispatcher,
     private val dumpManager: DumpManager,
     private val headsUpInteractor: HeadsUpNotificationInteractor,
     private val logger: LockScreenMinimalismCoordinatorLogger,
     @Application private val scope: CoroutineScope,
-    private val secureSettings: SecureSettings,
     private val seenNotificationsInteractor: SeenNotificationsInteractor,
     private val statusBarStateController: StatusBarStateController,
     private val shadeInteractor: ShadeInteractor,
@@ -147,29 +135,7 @@ constructor(
         if (NotificationMinimalismPrototype.isEnabled) {
             return flowOf(true)
         }
-        return secureSettings
-            // emit whenever the setting has changed
-            .observerFlow(
-                UserHandle.USER_ALL,
-                Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-            )
-            // perform a query immediately
-            .onStart { emit(Unit) }
-            // for each change, lookup the new value
-            .map {
-                secureSettings.getIntForUser(
-                    name = Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                    def = 0,
-                    userHandle = UserHandle.USER_CURRENT,
-                ) == 1
-            }
-            // don't emit anything if nothing has changed
-            .distinctUntilChanged()
-            // perform lookups on the bg thread pool
-            .flowOn(bgDispatcher)
-            // only track the most recent emission, if events are happening faster than they can be
-            // consumed
-            .conflate()
+        return seenNotificationsInteractor.isLockScreenShowOnlyUnseenNotificationsEnabled()
     }
 
     private suspend fun trackUnseenFilterSettingChanges() {
@@ -177,6 +143,7 @@ constructor(
             // update local field and invalidate if necessary
             if (isSettingEnabled != unseenFilterEnabled) {
                 unseenFilterEnabled = isSettingEnabled
+                unseenNotifications.clear()
                 unseenNotifPromoter.invalidateList("unseen setting changed")
             }
             // if the setting is enabled, then start tracking and filtering unseen notifications
@@ -190,21 +157,21 @@ constructor(
     private val collectionListener =
         object : NotifCollectionListener {
             override fun onEntryAdded(entry: NotificationEntry) {
-                if (!isShadeVisible) {
+                if (unseenFilterEnabled && !isShadeVisible) {
                     logger.logUnseenAdded(entry.key)
                     unseenNotifications.add(entry)
                 }
             }
 
             override fun onEntryUpdated(entry: NotificationEntry) {
-                if (!isShadeVisible) {
+                if (unseenFilterEnabled && !isShadeVisible) {
                     logger.logUnseenUpdated(entry.key)
                     unseenNotifications.add(entry)
                 }
             }
 
             override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
-                if (unseenNotifications.remove(entry)) {
+                if (unseenFilterEnabled && unseenNotifications.remove(entry)) {
                     logger.logUnseenRemoved(entry.key)
                 }
             }
@@ -212,6 +179,7 @@ constructor(
 
     private fun pickOutTopUnseenNotifs(list: List<ListEntry>) {
         if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return
+        if (!unseenFilterEnabled) return
         // Only ever elevate a top unseen notification on keyguard, not even locked shade
         if (statusBarStateController.state != StatusBarState.KEYGUARD) {
             seenNotificationsInteractor.setTopOngoingNotification(null)
