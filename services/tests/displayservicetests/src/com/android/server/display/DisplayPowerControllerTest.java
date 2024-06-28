@@ -1707,7 +1707,8 @@ public final class DisplayPowerControllerTest {
         int initState = Display.STATE_OFF;
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
-        when(mDisplayOffloadSession.blockScreenOn(any())).thenReturn(true);
+        ArgumentCaptor<Runnable> argumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        when(mDisplayOffloadSession.blockScreenOn(argumentCaptor.capture())).thenReturn(true);
 
         // Start with OFF.
         when(mHolder.displayPowerState.getScreenState()).thenReturn(initState);
@@ -1721,8 +1722,7 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        ArgumentCaptor<Runnable> argumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(mDisplayOffloadSession).blockScreenOn(argumentCaptor.capture());
+        verify(mDisplayOffloadSession).blockScreenOn(any());
 
         // Unblocked
         argumentCaptor.getValue().run();
