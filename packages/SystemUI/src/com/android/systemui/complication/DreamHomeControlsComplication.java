@@ -18,7 +18,6 @@ package com.android.systemui.complication;
 
 import static com.android.systemui.complication.dagger.DreamHomeControlsComplicationComponent.DreamHomeControlsModule.DREAM_HOME_CONTROLS_CHIP_VIEW;
 import static com.android.systemui.complication.dagger.RegisteredComplicationsModule.DREAM_HOME_CONTROLS_CHIP_LAYOUT_PARAMS;
-import static com.android.systemui.complication.dagger.RegisteredComplicationsModule.OPEN_HUB_CHIP_REPLACE_HOME_CONTROLS;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.UNAVAILABLE;
@@ -90,7 +89,6 @@ public class DreamHomeControlsComplication implements Complication {
         private final DreamHomeControlsComplication mComplication;
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final ControlsComponent mControlsComponent;
-        private final boolean mReplacedByOpenHub;
 
         private boolean mOverlayActive = false;
 
@@ -118,13 +116,11 @@ public class DreamHomeControlsComplication implements Complication {
         public Registrant(DreamHomeControlsComplication complication,
                 DreamOverlayStateController dreamOverlayStateController,
                 ControlsComponent controlsComponent,
-                @SystemUser Monitor monitor,
-                @Named(OPEN_HUB_CHIP_REPLACE_HOME_CONTROLS) boolean replacedByOpenHub) {
+                @SystemUser Monitor monitor) {
             super(monitor);
             mComplication = complication;
             mControlsComponent = controlsComponent;
             mDreamOverlayStateController = dreamOverlayStateController;
-            mReplacedByOpenHub = replacedByOpenHub;
         }
 
         @Override
