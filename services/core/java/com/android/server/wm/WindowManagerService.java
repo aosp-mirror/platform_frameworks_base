@@ -9226,7 +9226,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 isTrustedOverlay);
 
         final int sanitizedLpFlags =
-                (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE))
+                (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE
+                    | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH))
                 | LayoutParams.FLAG_NOT_TOUCH_MODAL;
         h.layoutParamsType = type;
         h.layoutParamsFlags = sanitizedLpFlags;
