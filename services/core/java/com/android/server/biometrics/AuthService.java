@@ -369,6 +369,10 @@ public class AuthService extends SystemService {
                 checkPermission();
             }
 
+            if ((authenticators & Authenticators.MANDATORY_BIOMETRICS) != 0) {
+                checkBiometricAdvancedPermission();
+            }
+
             final long identity = Binder.clearCallingIdentity();
             try {
                 final int result = mBiometricService.canAuthenticate(
