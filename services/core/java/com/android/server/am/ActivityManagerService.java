@@ -5483,9 +5483,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         // without even solving the underlying issue (it merely hits the timeout).
         // This feature is disabled on TV since the ThemeOverlayController is currently not present
         // and therefore we do not want to wait unnecessarily.
+        // This feature is currently disabled in WearOS to avoid extreme boot regressions
         return enableHomeDelay()
                 && !mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
-                && !mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
+                && !mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                && !mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
     }
 
     final void ensureBootCompleted() {
