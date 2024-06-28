@@ -222,7 +222,8 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            InteractionJankMonitor interactionJankMonitor) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -239,7 +240,8 @@ public abstract class WMShellModule {
                     syncQueue,
                     transitions,
                     desktopTasksController,
-                    rootTaskDisplayAreaOrganizer);
+                    rootTaskDisplayAreaOrganizer,
+                    interactionJankMonitor);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -577,8 +579,8 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static ToggleResizeDesktopTaskTransitionHandler provideToggleResizeDesktopTaskTransitionHandler(
-            Transitions transitions) {
-        return new ToggleResizeDesktopTaskTransitionHandler(transitions);
+            Transitions transitions, InteractionJankMonitor interactionJankMonitor) {
+        return new ToggleResizeDesktopTaskTransitionHandler(transitions, interactionJankMonitor);
     }
 
     @WMSingleton
