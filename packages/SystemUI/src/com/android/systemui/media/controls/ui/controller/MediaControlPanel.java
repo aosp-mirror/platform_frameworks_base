@@ -585,7 +585,8 @@ public class MediaControlPanel {
                                 /* intentSentUiThreadCallback = */ null,
                                 buildLaunchAnimatorController(mMediaViewHolder.getPlayer()),
                                 /* fillIntent = */ null,
-                                /* extraOptions = */ null);
+                                /* extraOptions = */ null,
+                                /* customMessage */ null);
                     } else {
                         try {
                             ActivityOptions opts = ActivityOptions.makeBasic();
