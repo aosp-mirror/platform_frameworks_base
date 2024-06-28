@@ -51,6 +51,7 @@ import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
@@ -216,6 +217,10 @@ public class StatusBarStateControllerImpl implements
                         mSceneInteractorLazy.get().getCurrentScene(),
                         this::calculateStateFromSceneFramework),
                     this::onStatusBarStateChanged);
+
+            mJavaAdapter.alwaysCollectFlow(
+                    mKeyguardTransitionInteractorLazy.get().transitionValue(KeyguardState.AOD),
+                    this::onAodKeyguardStateTransitionValueChanged);
         }
     }
 
@@ -683,6 +688,14 @@ public class StatusBarStateControllerImpl implements
         }
 
         updateStateAndNotifyListeners(newState);
+    }
+
+    private void onAodKeyguardStateTransitionValueChanged(float value) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+
+        setDozeAmountInternal(value);
     }
 
     private static final Map<SceneKey, Integer> sStatusBarStateByLockedSceneKey = Map.of(
