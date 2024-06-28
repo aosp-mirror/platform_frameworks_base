@@ -84,7 +84,10 @@ public class DragAndDropPolicy {
     private static final String TAG = DragAndDropPolicy.class.getSimpleName();
 
     private final Context mContext;
-    private final Starter mStarter;
+    // Used only for launching a fullscreen task (or as a fallback if there is no split starter)
+    private final Starter mFullscreenStarter;
+    // Used for launching tasks into splitscreen
+    private final Starter mSplitscreenStarter;
     private final SplitScreenController mSplitScreen;
     private final ArrayList<DragAndDropPolicy.Target> mTargets = new ArrayList<>();
     private final RectF mDisallowHitRegion = new RectF();
@@ -97,10 +100,12 @@ public class DragAndDropPolicy {
     }
 
     @VisibleForTesting
-    DragAndDropPolicy(Context context, SplitScreenController splitScreen, Starter starter) {
+    DragAndDropPolicy(Context context, SplitScreenController splitScreen,
+            Starter fullscreenStarter) {
         mContext = context;
         mSplitScreen = splitScreen;
-        mStarter = mSplitScreen != null ? mSplitScreen : starter;
+        mFullscreenStarter = fullscreenStarter;
+        mSplitscreenStarter = splitScreen;
     }
 
     /**
@@ -245,17 +250,20 @@ public class DragAndDropPolicy {
             mSplitScreen.onDroppedToSplit(position, mLoggerSessionId);
         }
 
+        final Starter starter = target.type == TYPE_FULLSCREEN
+                ? mFullscreenStarter
+                : mSplitscreenStarter;
         if (mSession.appData != null) {
-            launchApp(mSession, position);
+            launchApp(mSession, starter, position);
         } else {
-            launchIntent(mSession, position);
+            launchIntent(mSession, starter, position);
         }
     }
 
     /**
      * Launches an app provided by SysUI.
      */
-    private void launchApp(DragSession session, @SplitPosition int position) {
+    private void launchApp(DragSession session, Starter starter, @SplitPosition int position) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Launching app data at position=%d",
                 position);
         final ClipDescription description = session.getClipDescription();
@@ -275,11 +283,11 @@ public class DragAndDropPolicy {
 
         if (isTask) {
             final int taskId = session.appData.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID);
-            mStarter.startTask(taskId, position, opts);
+            starter.startTask(taskId, position, opts);
         } else if (isShortcut) {
             final String packageName = session.appData.getStringExtra(EXTRA_PACKAGE_NAME);
             final String id = session.appData.getStringExtra(EXTRA_SHORTCUT_ID);
-            mStarter.startShortcut(packageName, id, position, opts, user);
+            starter.startShortcut(packageName, id, position, opts, user);
         } else {
             final PendingIntent launchIntent =
                     session.appData.getParcelableExtra(EXTRA_PENDING_INTENT);
@@ -288,7 +296,7 @@ public class DragAndDropPolicy {
                     Log.e(TAG, "Expected app intent's EXTRA_USER to match pending intent user");
                 }
             }
-            mStarter.startIntent(launchIntent, user.getIdentifier(), null /* fillIntent */,
+            starter.startIntent(launchIntent, user.getIdentifier(), null /* fillIntent */,
                     position, opts);
         }
     }
@@ -296,7 +304,7 @@ public class DragAndDropPolicy {
     /**
      * Launches an intent sender provided by an application.
      */
-    private void launchIntent(DragSession session, @SplitPosition int position) {
+    private void launchIntent(DragSession session, Starter starter, @SplitPosition int position) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Launching intent at position=%d",
                 position);
         final ActivityOptions baseActivityOpts = ActivityOptions.makeBasic();
@@ -309,7 +317,7 @@ public class DragAndDropPolicy {
                 | FLAG_ACTIVITY_MULTIPLE_TASK);
 
         final Bundle opts = baseActivityOpts.toBundle();
-        mStarter.startIntent(session.launchableIntent,
+        starter.startIntent(session.launchableIntent,
                 session.launchableIntent.getCreatorUserHandle().getIdentifier(),
                 null /* fillIntent */, position, opts);
     }
@@ -420,7 +428,7 @@ public class DragAndDropPolicy {
 
         @Override
         public String toString() {
-            return "Target {hit=" + hitRegion + " draw=" + drawRegion + "}";
+            return "Target {type=" + type + " hit=" + hitRegion + " draw=" + drawRegion + "}";
         }
     }
 }

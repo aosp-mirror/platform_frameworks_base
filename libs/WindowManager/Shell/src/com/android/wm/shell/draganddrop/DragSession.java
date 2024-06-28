@@ -30,7 +30,9 @@ import android.content.pm.ActivityInfo;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.List;
 
@@ -79,17 +81,27 @@ public class DragSession {
     }
 
     /**
-     * Updates the session data based on the current state of the system.
+     * Updates the running task for this drag session.
      */
-    void update() {
-        List<ActivityManager.RunningTaskInfo> tasks =
+    void updateRunningTask() {
+        final List<ActivityManager.RunningTaskInfo> tasks =
                 mActivityTaskManager.getTasks(1, false /* filterOnlyVisibleRecents */);
         if (!tasks.isEmpty()) {
             final ActivityManager.RunningTaskInfo task = tasks.get(0);
             runningTaskInfo = task;
             runningTaskWinMode = task.getWindowingMode();
             runningTaskActType = task.getActivityType();
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                    "Running task: id=%d component=%s", task.taskId,
+                    task.baseIntent != null ? task.baseIntent.getComponent() : "null");
         }
+    }
+
+    /**
+     * Updates the session data based on the current state of the system at the start of the drag.
+     */
+    void initialize() {
+        updateRunningTask();
 
         activityInfo = mInitialDragData.getItemAt(0).getActivityInfo();
         // TODO: This should technically check & respect config_supportsNonResizableMultiWindow
