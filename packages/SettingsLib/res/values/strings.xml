@@ -1361,6 +1361,9 @@
     <!-- Keywords for setting screen for controlling apps that can schedule alarms [CHAR LIMIT=100] -->
     <string name="keywords_alarms_and_reminders">schedule, alarm, reminder, clock</string>
 
+    <!-- Sound: Title for the Do not Disturb option and associated settings page. [CHAR LIMIT=50]-->
+    <string name="zen_mode_settings_title">Do Not Disturb</string>
+
     <!--  Do not disturb: Label for button in enable zen dialog that will turn on zen mode. [CHAR LIMIT=30] -->
     <string name="zen_mode_enable_dialog_turn_on">Turn on</string>
     <!-- Do not disturb: Title for the Do not Disturb dialog to turn on Do not disturb. [CHAR LIMIT=50]-->
@@ -1386,6 +1389,9 @@
     <string name="zen_mode_duration_always_prompt_title">Ask every time</string>
     <!-- Do not disturb: Duration option to always have DND on until it is manually turned off [CHAR LIMIT=60] -->
     <string name="zen_mode_forever">Until you turn off</string>
+
+    <!-- [CHAR LIMIT=50] Zen mode settings: placeholder for a Contact name when the name is empty -->
+    <string name="zen_mode_starred_contacts_empty_name">(No name)</string>
 
     <!-- time label for event have that happened very recently [CHAR LIMIT=60] -->
     <string name="time_unit_just_now">Just now</string>

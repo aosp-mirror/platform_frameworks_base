@@ -217,7 +217,11 @@ public class TileServiceManager {
             Log.e(TAG, "Service already bound");
             return;
         }
-        mPendingBind = true;
+        if (!mStateManager.isBound()) {
+            // If we are bound, we don't need to set a pending bind. There's either one already or
+            // we are fully bound.
+            mPendingBind = true;
+        }
         mBound = true;
         mJustBound = true;
         mHandler.postDelayed(mJustBoundOver, MIN_BIND_TIME);

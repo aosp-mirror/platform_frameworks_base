@@ -598,10 +598,11 @@ public final class DisplayManagerService extends SystemService {
         FoldSettingProvider foldSettingProvider = new FoldSettingProvider(context,
                 new SettingsWrapper(),
                 new FoldLockSettingAvailabilityProvider(context.getResources()));
+        Looper displayThreadLooper = DisplayThread.get().getLooper();
         mInjector = injector;
         mContext = context;
         mFlags = injector.getFlags();
-        mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
+        mHandler = new DisplayManagerHandler(displayThreadLooper);
         mUiHandler = UiThread.getHandler();
         mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mPersistentDataStore);
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContext,
@@ -609,7 +610,7 @@ public final class DisplayManagerService extends SystemService {
                 mDisplayDeviceRepo, new LogicalDisplayListener(), mSyncRoot, mHandler, mFlags);
         mDisplayModeDirector = new DisplayModeDirector(
                 context, mHandler, mFlags, mDisplayDeviceConfigProvider);
-        mBrightnessSynchronizer = new BrightnessSynchronizer(mContext,
+        mBrightnessSynchronizer = new BrightnessSynchronizer(mContext, displayThreadLooper,
                 mFlags.isBrightnessIntRangeUserPerceptionEnabled());
         Resources resources = mContext.getResources();
         mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(
@@ -1548,16 +1549,20 @@ public final class DisplayManagerService extends SystemService {
         int flags = virtualDisplayConfig.getFlags();
         if (virtualDevice != null) {
             final VirtualDeviceManager vdm = mContext.getSystemService(VirtualDeviceManager.class);
-            try {
-                if (!vdm.isValidVirtualDeviceId(virtualDevice.getDeviceId())) {
-                    throw new SecurityException("Invalid virtual device");
+            if (vdm != null) {
+                try {
+                    if (!vdm.isValidVirtualDeviceId(virtualDevice.getDeviceId())) {
+                        throw new SecurityException("Invalid virtual device");
+                    }
+                } catch (RemoteException ex) {
+                    throw new SecurityException("Unable to validate virtual device");
                 }
-            } catch (RemoteException ex) {
-                throw new SecurityException("Unable to validate virtual device");
+                final VirtualDeviceManagerInternal localVdm =
+                        getLocalService(VirtualDeviceManagerInternal.class);
+                if (localVdm != null) {
+                    flags |= localVdm.getBaseVirtualDisplayFlags(virtualDevice);
+                }
             }
-            final VirtualDeviceManagerInternal localVdm =
-                    getLocalService(VirtualDeviceManagerInternal.class);
-            flags |= localVdm.getBaseVirtualDisplayFlags(virtualDevice);
         }
 
         if (surface != null && surface.isSingleBuffered()) {

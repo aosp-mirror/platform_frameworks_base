@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.chips.casttootherdevice.ui.view.EndCastToO
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractor
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
@@ -69,7 +70,8 @@ constructor(
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            // See b/347726238.
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden)
 
     /** Stops the currently active projection. */
     private fun stopProjecting() {
@@ -79,12 +81,19 @@ constructor(
     private fun createCastToOtherDeviceChip(
         state: ProjectionChipModel.Projecting,
     ): OngoingActivityChipModel.Shown {
-        return OngoingActivityChipModel.Shown(
+        return OngoingActivityChipModel.Shown.Timer(
             icon =
                 Icon.Resource(
                     CAST_TO_OTHER_DEVICE_ICON,
-                    ContentDescription.Resource(R.string.accessibility_casting),
+                    // Note: This string is "Casting screen", which is okay right now because this
+                    // chip does not currently support audio-only casting. If the chip starts
+                    // supporting audio-only casting (see b/342169876), update the content
+                    // description to just "Casting".
+                    ContentDescription.Resource(
+                        R.string.cast_to_other_device_chip_accessibility_label,
+                    ),
                 ),
+            colors = ColorsModel.Red,
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),
             createDialogLaunchOnClickListener(

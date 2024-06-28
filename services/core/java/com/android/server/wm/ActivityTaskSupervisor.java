@@ -952,7 +952,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // Schedule transaction.
                 if (shouldDispatchLaunchActivityItemIndependently(r.info.packageName, r.getUid())) {
                     // LaunchActivityItem has @UnsupportedAppUsage usages.
-                    // Guard the bundleClientTransactionFlag feature with targetSDK on Android 15+.
+                    // Guard with targetSDK on Android 15+.
                     // To not bundle the transaction, dispatch the pending before schedule new
                     // transaction.
                     mService.getLifecycleManager().dispatchPendingTransaction(proc.getThread());

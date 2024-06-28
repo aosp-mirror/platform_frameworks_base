@@ -269,6 +269,7 @@
     <string name="screenshot_detected_multiple_template"><xliff:g id="appName" example="Google Chrome">%1$s</xliff:g> and other open apps detected this screenshot.</string>
     <!-- Add to note button used in App Clips flow to return the saved screenshot image to notes app. [CHAR LIMIT=NONE] -->
     <string name="app_clips_save_add_to_note">Add to note</string>
+    <string name="backlinks_include_link">Include link</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_title">Screen Recorder</string>
@@ -328,6 +329,8 @@
     <!-- Button to stop a screen recording [CHAR LIMIT=35] -->
     <string name="screenrecord_stop_dialog_button">Stop recording</string>
 
+    <!-- Content description for the status bar chip shown to the user when they're sharing their screen to another app on the device [CHAR LIMIT=NONE] -->
+    <string name="share_to_app_chip_accessibility_label">Sharing screen</string>
     <!-- Title for a dialog shown to the user that will let them stop sharing their screen to another app on the device [CHAR LIMIT=50] -->
     <string name="share_to_app_stop_dialog_title">Stop sharing screen?</string>
     <!-- Text telling a user that they will stop sharing their screen if they click the "Stop sharing" button [CHAR LIMIT=100] -->
@@ -337,6 +340,8 @@
     <!-- Button to stop screen sharing [CHAR LIMIT=35] -->
     <string name="share_to_app_stop_dialog_button">Stop sharing</string>
 
+    <!-- Content description for the status bar chip shown to the user when they're casting their screen to a different device [CHAR LIMIT=NONE] -->
+    <string name="cast_to_other_device_chip_accessibility_label">Casting screen</string>
     <!-- Title for a dialog shown to the user that will let them stop casting their screen to a different device [CHAR LIMIT=50] -->
     <string name="cast_to_other_device_stop_dialog_title">Stop casting screen?</string>
     <!-- Text telling a user that they will stop casting their screen to a different device if they click the "Stop casting" button [CHAR LIMIT=100] -->
@@ -441,6 +446,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2">Face recognized. Press to continue.</string>
     <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
     <string name="biometric_dialog_tap_confirm_with_face_alt_3">Face recognized. Press the unlock icon to continue.</string>
+    <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication with SFPS [CHAR LIMIT=60]-->
+    <string name="biometric_dialog_tap_confirm_with_face_sfps">Unlocked by face. Tap to continue.</string>
     <!-- Talkback string when a biometric is authenticated [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_authenticated">Authenticated</string>
     <!-- Talkback string when a canceling authentication [CHAR LIMIT=NONE] -->
@@ -1222,6 +1229,12 @@
     <string name="accessibility_action_label_remove_widget">remove widget</string>
     <!-- Label for accessibility action to place a widget in edit mode after selecting move widget. [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_label_place_widget">place selected widget</string>
+    <!-- Title shown above information regarding lock screen widgets. [CHAR LIMIT=50] -->
+    <string name="communal_widgets_disclaimer_title">Lock screen widgets</string>
+    <!-- Information about lock screen widgets presented to the user. [CHAR LIMIT=NONE] -->
+    <string name="communal_widgets_disclaimer_text">To open an app using a widget, you\u2019ll need to verify it\u2019s you. Also, keep in mind that anyone can view them, even when your tablet\u2019s locked. Some widgets may not have been intended for your lock screen and may be unsafe to add here.</string>
+    <!-- Button for user to verify they understand the information presented. [CHAR LIMIT=50] -->
+    <string name="communal_widgets_disclaimer_button">Got it</string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -1379,6 +1392,15 @@
 
     <!-- Text which is shown in the expanded notification shade when there are currently no notifications visible that the user hasn't already seen. [CHAR LIMIT=30] -->
     <string name="no_unseen_notif_text">No new notifications</string>
+
+    <!-- Title of heads up notification for adaptive notifications user education. [CHAR LIMIT=30] -->
+    <string name="adaptive_notification_edu_hun_title">Adaptive notifications is on</string>
+
+    <!-- Text of heads up notification for adaptive notifications user education. [CHAR LIMIT=100] -->
+    <string name="adaptive_notification_edu_hun_text">Your device now lowers the volume and reduces pop-ups on the screen for up to two minutes when you receive many notifications in a short time span.</string>
+
+    <!-- Action label for going to adaptive notification settings [CHAR LIMIT=20] -->
+    <string name="go_to_adaptive_notification_settings">Turn off</string>
 
     <!-- Text which is shown in the locked notification shade when there are currently no notifications, but if the user were to unlock, notifications would appear. [CHAR LIMIT=40] -->
     <string name="unlock_to_see_notif_text">Unlock to see older notifications</string>
@@ -3526,10 +3548,26 @@
          shows the user which keyboard shortcuts they can use. The "System" shortcuts are for
          example "Take a screenshot" or "Go back". [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_category_system">System</string>
+    <!-- Title of the keyboard shortcut helper category "System controls". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "System controls" shortcuts
+         are for example "Go to home screen" or "App apps search". [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_system_controls">System controls</string>
+    <!-- Title of the keyboard shortcut helper category "System apps". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "System apps" shortcuts
+         are for example "Settings" or "Take a note". [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_system_apps">System apps</string>
     <!-- Title of the keyboard shortcut helper category "Multitasking". The helper is a component
          that shows the user which keyboard shortcuts they can use. The "Multitasking" shortcuts are
          for example "Enter split screen". [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_category_multitasking">Multitasking</string>
+    <!-- Title of the keyboard shortcut helper category "Recent apps". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "Recent apps" shortcuts are
+         for example "Cycle through recent apps". [CHAR LIMIT=NONE] -->
+    <string name="shortcutHelper_category_recent_apps">Recent apps</string>
+    <!-- Title of the keyboard shortcut helper category "Split screen". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "Split screen" shortcuts are
+         for example "Move current app to left split". [CHAR LIMIT=NONE] -->
+    <string name="shortcutHelper_category_split_screen">Split screen</string>
     <!-- Title of the keyboard shortcut helper category "Input". The helper is a component
          that shows the user which keyboard shortcuts they can use. The "Input" shortcuts are
          the ones provided by the keyboard. Examples are "Access emoji" or "Switch to next language"

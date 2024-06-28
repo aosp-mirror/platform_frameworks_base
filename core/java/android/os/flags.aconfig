@@ -201,3 +201,10 @@ flag {
      description: "Tracing using Perfetto SDK."
      bug: "303199244"
 }
+
+flag {
+    name: "allow_consentless_bugreport_delegated_consent"
+    namespace: "crumpet"
+    description: "Allow privileged apps to call bugreport generation without enforcing user consent and delegate it to the calling app instead"
+    bug: "324046728"
+}

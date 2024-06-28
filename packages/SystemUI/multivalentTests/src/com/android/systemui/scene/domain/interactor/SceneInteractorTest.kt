@@ -26,6 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.Idle
@@ -449,5 +450,17 @@ class SceneInteractorTest : SysuiTestCase() {
             )
             progress.value = 0.9f
             assertThat(transitionValue).isEqualTo(0f)
+        }
+
+    @Test
+    fun changeScene_toGone_whenKeyguardDisabled_doesNotThrow() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
+
+            underTest.changeScene(Scenes.Gone, "")
+
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
         }
 }

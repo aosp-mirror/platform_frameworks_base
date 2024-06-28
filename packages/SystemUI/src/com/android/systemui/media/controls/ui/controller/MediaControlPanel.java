@@ -19,6 +19,7 @@ package com.android.systemui.media.controls.ui.controller;
 import static android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS;
 
 import static com.android.settingslib.flags.Flags.legacyLeAudioSharing;
+import static com.android.systemui.Flags.mediaLockscreenLaunchAnimation;
 import static com.android.systemui.media.controls.shared.model.SmartspaceMediaDataKt.NUM_REQUIRED_RECOMMENDATIONS;
 
 import android.animation.Animator;
@@ -577,13 +578,23 @@ public class MediaControlPanel {
                         && mActivityIntentHelper.wouldPendingShowOverLockscreen(clickIntent,
                         mLockscreenUserManager.getCurrentUserId());
                 if (showOverLockscreen) {
-                    try {
-                        ActivityOptions opts = ActivityOptions.makeBasic();
-                        opts.setPendingIntentBackgroundActivityStartMode(
-                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-                        clickIntent.send(opts.toBundle());
-                    } catch (PendingIntent.CanceledException e) {
-                        Log.e(TAG, "Pending intent for " + key + " was cancelled");
+                    if (mediaLockscreenLaunchAnimation()) {
+                        mActivityStarter.startPendingIntentMaybeDismissingKeyguard(
+                                clickIntent,
+                                /* dismissShade = */ true,
+                                /* intentSentUiThreadCallback = */ null,
+                                buildLaunchAnimatorController(mMediaViewHolder.getPlayer()),
+                                /* fillIntent = */ null,
+                                /* extraOptions = */ null);
+                    } else {
+                        try {
+                            ActivityOptions opts = ActivityOptions.makeBasic();
+                            opts.setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                            clickIntent.send(opts.toBundle());
+                        } catch (PendingIntent.CanceledException e) {
+                            Log.e(TAG, "Pending intent for " + key + " was cancelled");
+                        }
                     }
                 } else {
                     mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,

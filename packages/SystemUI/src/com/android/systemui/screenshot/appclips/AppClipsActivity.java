@@ -16,10 +16,13 @@
 
 package com.android.systemui.screenshot.appclips;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_ACCEPTED;
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_CANCELLED;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.ACTION_FINISH_FROM_TRAMPOLINE;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_NAME;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_TASK_ID;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_RESULT_RECEIVER;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.PERMISSION_SELF;
@@ -42,18 +45,26 @@ import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.ComponentActivity;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLogger.UiEventEnum;
 import com.android.settingslib.Utils;
+import com.android.systemui.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.screenshot.scroll.CropView;
 import com.android.systemui.settings.UserTracker;
+
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -73,8 +84,6 @@ import javax.inject.Inject;
  *
  * <p>This {@link Activity} runs in its own separate process to isolate memory intensive image
  * editing from SysUI process.
- *
- * TODO(b/267309532): Polish UI and animations.
  */
 public class AppClipsActivity extends ComponentActivity {
 
@@ -94,6 +103,8 @@ public class AppClipsActivity extends ComponentActivity {
     private CropView mCropView;
     private Button mSave;
     private Button mCancel;
+    private CheckBox mBacklinksIncludeDataCheckBox;
+    private TextView mBacklinksDataTextView;
     private AppClipsViewModel mViewModel;
 
     private ResultReceiver mResultReceiver;
@@ -149,26 +160,47 @@ public class AppClipsActivity extends ComponentActivity {
         mLayout = getLayoutInflater().inflate(R.layout.app_clips_screenshot, null);
         mRoot = mLayout.findViewById(R.id.root);
 
+        // Manually handle window insets post Android V to support edge-to-edge display.
+        ViewCompat.setOnApplyWindowInsetsListener(mRoot, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
+
         mSave = mLayout.findViewById(R.id.save);
         mCancel = mLayout.findViewById(R.id.cancel);
         mSave.setOnClickListener(this::onClick);
         mCancel.setOnClickListener(this::onClick);
-
-
         mCropView = mLayout.findViewById(R.id.crop_view);
-
         mPreview = mLayout.findViewById(R.id.preview);
         mPreview.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
                         updateImageDimensions());
 
+        mBacklinksDataTextView = mLayout.findViewById(R.id.backlinks_data);
+        mBacklinksIncludeDataCheckBox = mLayout.findViewById(R.id.backlinks_include_data);
+        mBacklinksIncludeDataCheckBox.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        mBacklinksDataTextView.setVisibility(isChecked ? View.VISIBLE : View.GONE));
+
         mViewModel = new ViewModelProvider(this, mViewModelFactory).get(AppClipsViewModel.class);
         mViewModel.getScreenshot().observe(this, this::setScreenshot);
         mViewModel.getResultLiveData().observe(this, this::setResultThenFinish);
         mViewModel.getErrorLiveData().observe(this, this::setErrorThenFinish);
+        mViewModel.getBacklinksLiveData().observe(this, this::setBacklinksData);
 
         if (savedInstanceState == null) {
-            mViewModel.performScreenshot();
+            int displayId = getDisplayId();
+            mViewModel.performScreenshot(displayId);
+
+            if (Flags.appClipsBacklinks()) {
+                int appClipsTaskId = getTaskId();
+                int callingPackageTaskId = intent.getIntExtra(EXTRA_CALLING_PACKAGE_TASK_ID,
+                        INVALID_TASK_ID);
+                Set<Integer> taskIdsToIgnore = Set.of(appClipsTaskId, callingPackageTaskId);
+                mViewModel.triggerBacklinks(taskIdsToIgnore, displayId);
+            }
         }
     }
 
@@ -217,6 +249,9 @@ public class AppClipsActivity extends ComponentActivity {
 
         // Screenshot is now available so set content view.
         setContentView(mLayout);
+
+        // Request view to apply insets as it is added late and not when activity was first created.
+        mRoot.requestApplyInsets();
     }
 
     private void onClick(View view) {
@@ -268,7 +303,7 @@ public class AppClipsActivity extends ComponentActivity {
             mResultReceiver.send(Activity.RESULT_OK, data);
             logUiEvent(SCREENSHOT_FOR_NOTE_ACCEPTED);
         } catch (Exception e) {
-            // Do nothing.
+            Log.e(TAG, "Error while returning data to trampoline activity", e);
         }
 
         // Nullify the ResultReceiver before finishing to avoid resending the result.
@@ -279,6 +314,20 @@ public class AppClipsActivity extends ComponentActivity {
     private void setErrorThenFinish(int errorCode) {
         setError(errorCode);
         finish();
+    }
+
+    private void setBacklinksData(InternalBacklinksData backlinksData) {
+        mBacklinksIncludeDataCheckBox.setVisibility(View.VISIBLE);
+        mBacklinksDataTextView.setVisibility(
+                mBacklinksIncludeDataCheckBox.isChecked() ? View.VISIBLE : View.GONE);
+
+        mBacklinksDataTextView.setText(backlinksData.getClipData().getDescription().getLabel());
+
+        Drawable appIcon = backlinksData.getAppIcon();
+        int size = getResources().getDimensionPixelSize(R.dimen.appclips_backlinks_icon_size);
+        appIcon.setBounds(/* left= */ 0, /* top= */ 0, /* right= */ size, /* bottom= */ size);
+        mBacklinksDataTextView.setCompoundDrawablesRelative(/* start= */ appIcon, /* top= */
+                null, /* end= */ null, /* bottom= */ null);
     }
 
     private void setError(int errorCode) {

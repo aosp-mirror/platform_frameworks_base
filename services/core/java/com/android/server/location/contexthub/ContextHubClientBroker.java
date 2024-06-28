@@ -1126,7 +1126,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         }
     }
 
-    private void sendHostEndpointConnectedEvent() {
+    void sendHostEndpointConnectedEvent() {
         HostEndpointInfo info = new HostEndpointInfo();
         info.hostEndpointId = (char) mHostEndPointId;
         info.packageName = mPackage;

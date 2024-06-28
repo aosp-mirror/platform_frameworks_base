@@ -56,6 +56,8 @@ import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualNavigationTouchpad;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualRotaryEncoder;
+import android.hardware.input.VirtualRotaryEncoderConfig;
 import android.hardware.input.VirtualStylus;
 import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualTouchscreen;
@@ -573,6 +575,12 @@ public final class VirtualDeviceManager {
                     new VirtualDeviceInternal(service, context, associationId, params);
         }
 
+        /** @hide */
+        public VirtualDevice(IVirtualDeviceManager service, Context context,
+                IVirtualDevice virtualDevice) {
+            mVirtualDeviceInternal = new VirtualDeviceInternal(service, context, virtualDevice);
+        }
+
         /**
          * Returns the unique ID of this virtual device.
          */
@@ -944,6 +952,23 @@ public final class VirtualDeviceManager {
         public VirtualStylus createVirtualStylus(
                 @NonNull VirtualStylusConfig config) {
             return mVirtualDeviceInternal.createVirtualStylus(config);
+        }
+
+        /**
+         * Creates a virtual rotary encoder.
+         *
+         * @param config the configuration for the virtual rotary encoder.
+         * @see android.view.InputDevice#SOURCE_ROTARY_ENCODER
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_VIRTUAL_ROTARY)
+        public VirtualRotaryEncoder createVirtualRotaryEncoder(
+                @NonNull VirtualRotaryEncoderConfig config) {
+            if (!android.companion.virtualdevice.flags.Flags.virtualRotary()) {
+                throw new UnsupportedOperationException("Virtual rotary support not enabled");
+            }
+            return mVirtualDeviceInternal.createVirtualRotaryEncoder(config);
         }
 
         /**

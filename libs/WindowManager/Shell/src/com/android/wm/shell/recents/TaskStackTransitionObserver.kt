@@ -76,21 +76,40 @@ class TaskStackTransitionObserver(
                     continue
                 }
 
+                // Filter out changes that we care about
                 if (change.mode == WindowManager.TRANSIT_OPEN) {
                     change.taskInfo?.let { taskInfoList.add(it) }
                     transitionTypeList.add(change.mode)
                 }
             }
-            transitionToTransitionChanges.put(
-                transition,
-                TransitionChanges(taskInfoList, transitionTypeList)
-            )
+            // Only add the transition to map if it has a change we care about
+            if (taskInfoList.isNotEmpty()) {
+                transitionToTransitionChanges.put(
+                    transition,
+                    TransitionChanges(taskInfoList, transitionTypeList)
+                )
+            }
         }
     }
 
     override fun onTransitionStarting(transition: IBinder) {}
 
-    override fun onTransitionMerged(merged: IBinder, playing: IBinder) {}
+    override fun onTransitionMerged(merged: IBinder, playing: IBinder) {
+        val mergedTransitionChanges =
+            transitionToTransitionChanges.get(merged)
+                ?:
+                // We are adding changes of the merged transition to changes of the playing
+                // transition so if there is no changes nothing to do.
+                return
+
+        transitionToTransitionChanges.remove(merged)
+        val playingTransitionChanges = transitionToTransitionChanges.get(playing)
+        if (playingTransitionChanges != null) {
+            playingTransitionChanges.merge(mergedTransitionChanges)
+        } else {
+            transitionToTransitionChanges.put(playing, mergedTransitionChanges)
+        }
+    }
 
     override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {
         val taskInfoList =
@@ -138,6 +157,11 @@ class TaskStackTransitionObserver(
 
     private data class TransitionChanges(
         val taskInfoList: MutableList<RunningTaskInfo> = ArrayList(),
-        val transitionTypeList: MutableList<Int> = ArrayList()
-    )
+        val transitionTypeList: MutableList<Int> = ArrayList(),
+    ) {
+        fun merge(transitionChanges: TransitionChanges) {
+            taskInfoList.addAll(transitionChanges.taskInfoList)
+            transitionTypeList.addAll(transitionChanges.transitionTypeList)
+        }
+    }
 }

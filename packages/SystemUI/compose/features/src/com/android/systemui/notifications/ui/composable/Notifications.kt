@@ -21,6 +21,7 @@ import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -94,6 +95,7 @@ object Notifications {
         val HeadsUpNotificationPlaceholder =
             ElementKey("HeadsUpNotificationPlaceholder", scenePicker = LowestZIndexScenePicker)
         val ShelfSpace = ElementKey("ShelfSpace")
+        val NotificationStackCutoffGuideline = ElementKey("NotificationStackCutoffGuideline")
     }
 
     // Expansion fraction thresholds (between 0-1f) at which the corresponding value should be
@@ -232,6 +234,8 @@ fun SceneScope.NotificationScrollingStack(
     // The height of the scrim visible on screen when it is in its resting (collapsed) state.
     val minVisibleScrimHeight: () -> Float = { screenHeight - maxScrimTop() }
 
+    val isClickable by viewModel.isClickable.collectAsStateWithLifecycle()
+
     // we are not scrolled to the top unless the scrim is at its maximum offset.
     LaunchedEffect(viewModel, scrimOffset) {
         snapshotFlow { scrimOffset.value >= 0f }
@@ -327,6 +331,9 @@ fun SceneScope.NotificationScrollingStack(
                         )
                     )
                 }
+                .thenIf(isClickable) {
+                    Modifier.clickable(onClick = { viewModel.onEmptySpaceClicked() })
+                }
     ) {
         // Creates a cutout in the background scrim in the shape of the notifications scrim.
         // Only visible when notif scrim alpha < 1, during shade expansion.
@@ -410,18 +417,22 @@ fun SceneScope.NotificationShelfSpace(
  * the notification contents (stack, footer, shelf) should be drawn.
  */
 @Composable
-fun NotificationStackCutoffGuideline(
+fun SceneScope.NotificationStackCutoffGuideline(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
 ) {
     Spacer(
         modifier =
-            modifier.fillMaxWidth().height(0.dp).onGloballyPositioned { coordinates ->
-                val positionY = coordinates.positionInWindow().y
-                debugLog(viewModel) { "STACK cutoff onGloballyPositioned: y=$positionY" }
-                stackScrollView.setStackCutoff(positionY)
-            }
+            modifier
+                .element(key = Notifications.Elements.NotificationStackCutoffGuideline)
+                .fillMaxWidth()
+                .height(0.dp)
+                .onGloballyPositioned { coordinates ->
+                    val positionY = coordinates.positionInWindow().y
+                    debugLog(viewModel) { "STACK cutoff onGloballyPositioned: y=$positionY" }
+                    stackScrollView.setStackCutoff(positionY)
+                }
     )
 }
 

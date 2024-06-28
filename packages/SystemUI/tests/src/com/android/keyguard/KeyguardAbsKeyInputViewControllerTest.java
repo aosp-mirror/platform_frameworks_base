@@ -28,10 +28,10 @@ import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.KeyEvent;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.LatencyTracker;
@@ -54,7 +54,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
 

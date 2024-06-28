@@ -47,6 +47,11 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.USER_SHORTCUT_TYPES;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TRIPLETAP;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TWOFINGER_DOUBLETAP;
 import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logAccessibilityShortcutActivated;
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
@@ -844,14 +849,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     userState.mEnabledServices, userState.mUserId);
         }
 
-        boolean buttonTargetsChanged = userState.mAccessibilityButtonTargets.removeIf(
+        // Remove any button targets that match any stopped continuous services
+        Set<String> buttonTargets = userState.getShortcutTargetsLocked(SOFTWARE);
+        boolean buttonTargetsChanged = buttonTargets.removeIf(
                 target -> continuousServicePackages.stream().anyMatch(
                         pkg -> Objects.equals(target, pkg)));
         if (buttonTargetsChanged) {
+            userState.updateShortcutTargetsLocked(buttonTargets, SOFTWARE);
             persistColonDelimitedSetToSettingLocked(
-                    Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                    ShortcutUtils.convertToKey(SOFTWARE),
                     userState.mUserId,
-                    userState.mAccessibilityButtonTargets, str -> str);
+                    buttonTargets, str -> str);
         }
 
         return enabledServicesChanged || buttonTargetsChanged;
@@ -923,25 +931,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                         newValue, restoredFromSdk);
                             }
                         }
-                        case Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS -> {
-                            synchronized (mLock) {
-                                restoreAccessibilityButtonTargetsLocked(
-                                        previousValue, newValue);
-                            }
-                        }
-                        case Settings.Secure.ACCESSIBILITY_QS_TARGETS -> {
-                            if (!android.view.accessibility.Flags.a11yQsShortcut()) {
-                                return;
-                            }
-                            restoreAccessibilityQsTargets(newValue);
-                        }
-                        case Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE -> {
-                            if (!android.view.accessibility.Flags
-                                    .restoreA11yShortcutTargetService()) {
-                                return;
-                            }
-                            restoreAccessibilityShortcutTargetService(previousValue, newValue);
-                        }
+                        case Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                                Settings.Secure.ACCESSIBILITY_QS_TARGETS,
+                                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE ->
+                                restoreShortcutTargets(newValue,
+                                        ShortcutUtils.convertToType(which));
                     }
                 }
             }
@@ -1040,7 +1034,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         persistColonDelimitedSetToSettingLocked(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 userState.mUserId, targetsFromSetting, str -> str);
-        readAccessibilityButtonTargetsLocked(userState);
+        readAccessibilityShortcutTargetsLocked(userState, SOFTWARE);
         onUserStateChangedLocked(userState);
     }
 
@@ -1615,7 +1609,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::performAccessibilityShortcutInternal, this,
-                displayId, UserShortcutType.SOFTWARE, targetName));
+                displayId, SOFTWARE, targetName));
     }
 
     /**
@@ -1720,12 +1714,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         // Turn on/off a11y qs shortcut for the a11y features based on the change in QS Panel
         if (!a11yFeaturesToEnable.isEmpty()) {
-            enableShortcutForTargets(/* enable= */ true, UserShortcutType.QUICK_SETTINGS,
+            enableShortcutForTargets(/* enable= */ true, QUICK_SETTINGS,
                     a11yFeaturesToEnable, userId);
         }
 
         if (!a11yFeaturesToRemove.isEmpty()) {
-            enableShortcutForTargets(/* enable= */ false, UserShortcutType.QUICK_SETTINGS,
+            enableShortcutForTargets(/* enable= */ false, QUICK_SETTINGS,
                     a11yFeaturesToRemove, userId);
         }
     }
@@ -2057,99 +2051,73 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
-     * User could enable accessibility services and configure accessibility button during the SUW.
-     * Merges current value of accessibility button settings into the restored one to make sure
-     * user's preferences of accessibility button updated in SUW are not lost.
-     *
-     * Called only during settings restore; currently supports only the owner user
-     * TODO: http://b/22388012
-     */
-    void restoreAccessibilityButtonTargetsLocked(String oldSetting, String newSetting) {
-        final Set<String> targetsFromSetting = new ArraySet<>();
-        readColonDelimitedStringToSet(oldSetting, str -> str, targetsFromSetting,
-                /* doMerge = */false);
-        readColonDelimitedStringToSet(newSetting, str -> str, targetsFromSetting,
-                /* doMerge = */true);
-
-        final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
-        userState.mAccessibilityButtonTargets.clear();
-        userState.mAccessibilityButtonTargets.addAll(targetsFromSetting);
-        persistColonDelimitedSetToSettingLocked(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                UserHandle.USER_SYSTEM, userState.mAccessibilityButtonTargets, str -> str);
-
-        scheduleNotifyClientsOfServicesStateChangeLocked(userState);
-        onUserStateChangedLocked(userState);
-    }
-
-    /**
      * User could configure accessibility shortcut during the SUW before restoring user data.
      * Merges the current value and the new value to make sure we don't lost the setting the user's
-     * preferences of accessibility qs shortcut updated in SUW are not lost.
-     *
-     * Called only during settings restore; currently supports only the owner user
+     * preferences of accessibility shortcut updated in SUW are not lost.
+     * Called only during settings restore; currently supports only the owner user.
+     * <P>
+     * Throws an exception if used with {@code TRIPLETAP} or {@code TWOFINGER_DOUBLETAP}.
+     * </P>
      * TODO: http://b/22388012
      */
-    private void restoreAccessibilityQsTargets(String newValue) {
+    private void restoreShortcutTargets(String newValue,
+            @UserShortcutType int shortcutType) {
+        assertNoTapShortcut(shortcutType);
+        if (shortcutType == QUICK_SETTINGS && !android.view.accessibility.Flags.a11yQsShortcut()) {
+            return;
+        }
+        if (shortcutType == HARDWARE
+                && !android.view.accessibility.Flags.restoreA11yShortcutTargetService()) {
+            return;
+        }
+
         synchronized (mLock) {
             final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
-            final Set<String> mergedTargets = userState.getA11yQsTargets();
-            readColonDelimitedStringToSet(newValue, str -> str, mergedTargets,
-                    /* doMerge = */ true);
+            final Set<String> mergedTargets = (shortcutType == HARDWARE)
+                    ? new ArraySet<>(ShortcutUtils.getShortcutTargetsFromSettings(
+                            mContext, shortcutType, userState.mUserId))
+                    : userState.getShortcutTargetsLocked(shortcutType);
 
-            userState.updateA11yQsTargetLocked(mergedTargets);
-            persistColonDelimitedSetToSettingLocked(Settings.Secure.ACCESSIBILITY_QS_TARGETS,
+            if (Flags.clearDefaultFromA11yShortcutTargetServiceRestore()
+                    && shortcutType == HARDWARE) {
+                final String defaultService =
+                        mContext.getString(R.string.config_defaultAccessibilityService);
+                final ComponentName defaultServiceComponent = TextUtils.isEmpty(defaultService)
+                        ? null : ComponentName.unflattenFromString(defaultService);
+                boolean shouldClearDefaultService = defaultServiceComponent != null
+                        && !stringSetContainsComponentName(mergedTargets, defaultServiceComponent);
+                readColonDelimitedStringToSet(newValue, str -> str, mergedTargets,
+                        /* doMerge = */ true);
+
+                if (shouldClearDefaultService && stringSetContainsComponentName(
+                        mergedTargets, defaultServiceComponent)) {
+                    Slog.i(LOG_TAG, "Removing default service " + defaultService
+                            + " from restore of "
+                            + Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
+                    mergedTargets.removeIf(str ->
+                            defaultServiceComponent.equals(ComponentName.unflattenFromString(str)));
+                }
+                if (mergedTargets.isEmpty()) {
+                    return;
+                }
+            } else {
+                readColonDelimitedStringToSet(newValue, str -> str, mergedTargets,
+                        /* doMerge = */ true);
+            }
+
+            userState.updateShortcutTargetsLocked(mergedTargets, shortcutType);
+            persistColonDelimitedSetToSettingLocked(ShortcutUtils.convertToKey(shortcutType),
                     UserHandle.USER_SYSTEM, mergedTargets, str -> str);
             scheduleNotifyClientsOfServicesStateChangeLocked(userState);
             onUserStateChangedLocked(userState);
         }
     }
 
-    /**
-     * Merges the old and restored value of
-     * {@link Settings.Secure#ACCESSIBILITY_SHORTCUT_TARGET_SERVICE}.
-     *
-     * <p>Also clears out {@link R.string#config_defaultAccessibilityService} from
-     * the merged set if it was not present before restoring.
-     */
-    private void restoreAccessibilityShortcutTargetService(
-            String oldValue, String restoredValue) {
-        final Set<String> targetsFromSetting = new ArraySet<>();
-        readColonDelimitedStringToSet(oldValue, str -> str,
-                targetsFromSetting, /*doMerge=*/false);
-        final String defaultService =
-                mContext.getString(R.string.config_defaultAccessibilityService);
-        final ComponentName defaultServiceComponent = TextUtils.isEmpty(defaultService)
-                ? null : ComponentName.unflattenFromString(defaultService);
-        boolean shouldClearDefaultService = defaultServiceComponent != null
-                && !stringSetContainsComponentName(targetsFromSetting, defaultServiceComponent);
-        readColonDelimitedStringToSet(restoredValue, str -> str,
-                targetsFromSetting, /*doMerge=*/true);
-        if (Flags.clearDefaultFromA11yShortcutTargetServiceRestore()) {
-            if (shouldClearDefaultService && stringSetContainsComponentName(
-                    targetsFromSetting, defaultServiceComponent)) {
-                Slog.i(LOG_TAG, "Removing default service " + defaultService
-                        + " from restore of "
-                        + Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
-                targetsFromSetting.removeIf(str ->
-                        defaultServiceComponent.equals(ComponentName.unflattenFromString(str)));
-            }
-            if (targetsFromSetting.isEmpty()) {
-                return;
-            }
-        }
-        synchronized (mLock) {
-            final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
-            final Set<String> shortcutTargets =
-                    userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
-            shortcutTargets.clear();
-            shortcutTargets.addAll(targetsFromSetting);
-            persistColonDelimitedSetToSettingLocked(
-                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
-                    UserHandle.USER_SYSTEM, targetsFromSetting, str -> str);
-            scheduleNotifyClientsOfServicesStateChangeLocked(userState);
-            onUserStateChangedLocked(userState);
-        }
+    private String getRawShortcutSetting(int userId, @UserShortcutType int shortcutType) {
+        return Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                ShortcutUtils.convertToKey(shortcutType), userId);
     }
+
 
     /**
      * Returns {@code true} if the set contains the provided non-null {@link ComponentName}.
@@ -2263,7 +2231,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void showAccessibilityTargetsSelection(int displayId,
             @UserShortcutType int shortcutType) {
         final Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
-        final String chooserClassName = (shortcutType == UserShortcutType.HARDWARE)
+        final String chooserClassName = (shortcutType == HARDWARE)
                 ? AccessibilityShortcutChooserActivity.class.getName()
                 : AccessibilityButtonChooserActivity.class.getName();
         intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
@@ -3116,9 +3084,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         scheduleUpdateInputFilter(userState);
         updateRelevantEventsLocked(userState);
         scheduleUpdateClientsIfNeededLocked(userState, forceUpdate);
-        updateAccessibilityShortcutKeyTargetsLocked(userState);
-        updateAccessibilityButtonTargetsLocked(userState);
-        updateAccessibilityQsTargetsLocked(userState);
+        updateAccessibilityShortcutTargetsLocked(userState, HARDWARE);
+        updateAccessibilityShortcutTargetsLocked(userState, SOFTWARE);
+        updateAccessibilityShortcutTargetsLocked(userState, QUICK_SETTINGS);
         // Update the capabilities before the mode because we will check the current mode is
         // invalid or not..
         updateMagnificationCapabilitiesSettingsChangeLocked(userState);
@@ -3236,9 +3204,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         somethingChanged |= readAudioDescriptionEnabledSettingLocked(userState);
         somethingChanged |= readMagnificationEnabledSettingsLocked(userState);
         somethingChanged |= readAutoclickEnabledSettingLocked(userState);
-        somethingChanged |= readAccessibilityShortcutKeySettingLocked(userState);
-        somethingChanged |= readAccessibilityQsTargetsLocked(userState);
-        somethingChanged |= readAccessibilityButtonTargetsLocked(userState);
+        somethingChanged |= readAccessibilityShortcutTargetsLocked(userState, HARDWARE);
+        somethingChanged |= readAccessibilityShortcutTargetsLocked(userState, QUICK_SETTINGS);
+        somethingChanged |= readAccessibilityShortcutTargetsLocked(userState, SOFTWARE);
         somethingChanged |= readAccessibilityButtonTargetComponentLocked(userState);
         somethingChanged |= readUserRecommendedUiTimeoutSettingsLocked(userState);
         somethingChanged |= readMagnificationModeForDefaultDisplayLocked(userState);
@@ -3386,60 +3354,34 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         userState.setSendMotionEventsEnabled(sendMotionEvents);
     }
 
-    private boolean readAccessibilityShortcutKeySettingLocked(AccessibilityUserState userState) {
-        final String settingValue = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userState.mUserId);
+    /**
+     * Throws an exception for {@code TRIPLETAP} or {@code TWOFINGER_DOUBLETAP} types.
+     */
+    private boolean readAccessibilityShortcutTargetsLocked(AccessibilityUserState userState,
+            @UserShortcutType int shortcutType) {
+        assertNoTapShortcut(shortcutType);
+        final String settingValue = getRawShortcutSetting(userState.mUserId, shortcutType);
         final Set<String> targetsFromSetting = new ArraySet<>();
-        readColonDelimitedStringToSet(settingValue, str -> str, targetsFromSetting, false);
-        // Fall back to device's default a11y service, only when setting is never updated.
-        if (settingValue == null) {
+        // If dealing with an empty hardware shortcut, fall back to the default value.
+        if (shortcutType == HARDWARE && settingValue == null) {
             final String defaultService = mContext.getString(
                     R.string.config_defaultAccessibilityService);
             if (!TextUtils.isEmpty(defaultService)) {
-                targetsFromSetting.add(defaultService);
+                // Convert to component name to reformat the target if it has a relative path.
+                ComponentName name = ComponentName.unflattenFromString(defaultService);
+                if (name != null) {
+                    targetsFromSetting.add(name.flattenToString());
+                }
             }
+        } else {
+            readColonDelimitedStringToSet(settingValue, str -> str, targetsFromSetting, false);
         }
 
-        final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
-        if (targetsFromSetting.equals(currentTargets)) {
-            return false;
+        if (userState.updateShortcutTargetsLocked(targetsFromSetting, shortcutType)) {
+            scheduleNotifyClientsOfServicesStateChangeLocked(userState);
+            return true;
         }
-        currentTargets.clear();
-        currentTargets.addAll(targetsFromSetting);
-        scheduleNotifyClientsOfServicesStateChangeLocked(userState);
-        return true;
-    }
-
-    private boolean readAccessibilityQsTargetsLocked(AccessibilityUserState userState) {
-        final Set<String> targetsFromSetting = new ArraySet<>();
-        readColonDelimitedSettingToSet(Settings.Secure.ACCESSIBILITY_QS_TARGETS,
-                userState.mUserId, str -> str, targetsFromSetting);
-
-        final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(UserShortcutType.QUICK_SETTINGS);
-        if (targetsFromSetting.equals(currentTargets)) {
-            return false;
-        }
-        userState.updateA11yQsTargetLocked(targetsFromSetting);
-        scheduleNotifyClientsOfServicesStateChangeLocked(userState);
-        return true;
-    }
-
-    private boolean readAccessibilityButtonTargetsLocked(AccessibilityUserState userState) {
-        final Set<String> targetsFromSetting = new ArraySet<>();
-        readColonDelimitedSettingToSet(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                userState.mUserId, str -> str, targetsFromSetting);
-
-        final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(UserShortcutType.SOFTWARE);
-        if (targetsFromSetting.equals(currentTargets)) {
-            return false;
-        }
-        currentTargets.clear();
-        currentTargets.addAll(targetsFromSetting);
-        scheduleNotifyClientsOfServicesStateChangeLocked(userState);
-        return true;
+        return false;
     }
 
     private boolean readAccessibilityButtonTargetComponentLocked(AccessibilityUserState userState) {
@@ -3478,31 +3420,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return true;
         }
         return false;
-    }
-
-    /**
-     * Check if the target that will be enabled by the accessibility shortcut key is installed.
-     * If it isn't, remove it from the list and associated setting so a side loaded service can't
-     * spoof the package name of the default service.
-     */
-    private void updateAccessibilityShortcutKeyTargetsLocked(AccessibilityUserState userState) {
-        final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
-        final int lastSize = currentTargets.size();
-        if (lastSize == 0) {
-            return;
-        }
-        currentTargets.removeIf(
-                name -> !userState.isShortcutTargetInstalledLocked(name));
-        if (lastSize == currentTargets.size()) {
-            return;
-        }
-
-        // Update setting key with new value.
-        persistColonDelimitedSetToSettingLocked(
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
-                userState.mUserId, currentTargets, str -> str);
-        scheduleNotifyClientsOfServicesStateChangeLocked(userState);
     }
 
     private boolean canRequestAndRequestsTouchExplorationLocked(
@@ -3663,35 +3580,56 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
-     * 1) Update accessibility button availability to accessibility services.
-     * 2) Check if the target that will be enabled by the accessibility button is installed.
-     *    If it isn't, remove it from the list and associated setting so a side loaded service can't
-     *    spoof the package name of the default service.
+     * Adds or removes shortcut targets based on other attributes in the UserState.
+     * <P></P>
+     * Any target is removed if it is no longer installed on device.
+     * For software shortcuts,
+     * the function also updates the availability of the a11y button for services that request it.
+     * For quick settings shortcuts,
+     * targets are added if their service is enabled and has a corresponding QS panel.
      */
-    private void updateAccessibilityButtonTargetsLocked(AccessibilityUserState userState) {
-        // Update accessibility button availability.
-        for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
-            final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
-            if (service.mRequestAccessibilityButton) {
-                service.notifyAccessibilityButtonAvailabilityChangedLocked(
-                        service.isAccessibilityButtonAvailableLocked(userState));
+    private void updateAccessibilityShortcutTargetsLocked(
+            AccessibilityUserState userState, @UserShortcutType int shortcutType) {
+        if (shortcutType == QUICK_SETTINGS && !android.view.accessibility.Flags.a11yQsShortcut()) {
+            return;
+        }
+        if (shortcutType == SOFTWARE) {
+            // Update accessibility button availability.
+            for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
+                final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
+                if (service.mRequestAccessibilityButton) {
+                    service.notifyAccessibilityButtonAvailabilityChangedLocked(
+                            service.isAccessibilityButtonAvailableLocked(userState));
+                }
             }
         }
 
+        // Remove targets that are no longer installed on device.
         final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(UserShortcutType.SOFTWARE);
-        final int lastSize = currentTargets.size();
-        if (lastSize == 0) {
-            return;
-        }
+                userState.getShortcutTargetsLocked(shortcutType);
         currentTargets.removeIf(
                 name -> !userState.isShortcutTargetInstalledLocked(name));
-        if (lastSize == currentTargets.size()) {
+
+        if (shortcutType == QUICK_SETTINGS) {
+            // Add the target if the a11y service is enabled and the tile exist in QS panel
+            Set<ComponentName> enabledServices = userState.getEnabledServicesLocked();
+            Map<ComponentName, ComponentName> a11yFeatureToTileService =
+                    userState.getA11yFeatureToTileService();
+            Set<ComponentName> currentA11yTilesInQsPanel = userState.getA11yQsTilesInQsPanel();
+            for (ComponentName enabledService : enabledServices) {
+                ComponentName tileService =
+                        a11yFeatureToTileService.getOrDefault(enabledService, null);
+                if (tileService != null && currentA11yTilesInQsPanel.contains(tileService)) {
+                    currentTargets.add(enabledService.flattenToString());
+                }
+            }
+        }
+        // Update targets in userState
+        if (!userState.updateShortcutTargetsLocked(currentTargets, shortcutType)) {
             return;
         }
-
-        // Update setting key with new value.
-        persistColonDelimitedSetToSettingLocked(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+        // If there was a change to the targets in userState, save the new targets to Settings.
+        persistColonDelimitedSetToSettingLocked(ShortcutUtils.convertToKey(shortcutType),
                 userState.mUserId, currentTargets, str -> str);
         scheduleNotifyClientsOfServicesStateChangeLocked(userState);
     }
@@ -3719,8 +3657,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
         final Set<String> buttonTargets =
-                userState.getShortcutTargetsLocked(UserShortcutType.SOFTWARE);
-        int lastSize = buttonTargets.size();
+                userState.getShortcutTargetsLocked(SOFTWARE);
         buttonTargets.removeIf(name -> {
             if (packageName != null && name != null && !name.contains(packageName)) {
                 return false;
@@ -3752,13 +3689,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             return false;
         });
-        boolean changed = (lastSize != buttonTargets.size());
-        lastSize = buttonTargets.size();
 
         final Set<String> shortcutKeyTargets =
-                userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
+                userState.getShortcutTargetsLocked(HARDWARE);
         final Set<String> qsShortcutTargets =
-                userState.getShortcutTargetsLocked(UserShortcutType.QUICK_SETTINGS);
+                userState.getShortcutTargetsLocked(QUICK_SETTINGS);
         userState.mEnabledServices.forEach(componentName -> {
             if (packageName != null && componentName != null
                     && !packageName.equals(componentName.getPackageName())) {
@@ -3790,58 +3725,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     + " should be assign to the button or shortcut.");
             buttonTargets.add(serviceName);
         });
-        changed |= (lastSize != buttonTargets.size());
-        if (!changed) {
+        if (!userState.updateShortcutTargetsLocked(buttonTargets, SOFTWARE)) {
             return;
         }
 
         // Update setting key with new value.
         persistColonDelimitedSetToSettingLocked(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 userState.mUserId, buttonTargets, str -> str);
-        scheduleNotifyClientsOfServicesStateChangeLocked(userState);
-    }
-
-    /**
-     * Update the Settings.Secure.ACCESSIBILITY_QS_TARGETS so that it only contains valid content,
-     * and a side loaded service can't spoof the package name of the default service.
-     * <p>
-     * 1. Remove the target if the target is no longer installed on the device <br/>
-     * 2. Add the target if the target is enabled and the target's tile is in the QS Panel <br/>
-     * </p>
-     */
-    private void updateAccessibilityQsTargetsLocked(AccessibilityUserState userState) {
-        if (!android.view.accessibility.Flags.a11yQsShortcut()) {
-            return;
-        }
-
-        final Set<String> targets =
-                userState.getShortcutTargetsLocked(UserShortcutType.QUICK_SETTINGS);
-
-        // Removes the targets that are no longer installed on the device.
-        boolean somethingChanged = targets.removeIf(
-                name -> !userState.isShortcutTargetInstalledLocked(name));
-        // Add the target if the a11y service is enabled and the tile exist in QS panel
-        Set<ComponentName> enabledServices = userState.getEnabledServicesLocked();
-        Map<ComponentName, ComponentName> a11yFeatureToTileService =
-                userState.getA11yFeatureToTileService();
-        Set<ComponentName> currentA11yTilesInQsPanel = userState.getA11yQsTilesInQsPanel();
-        for (ComponentName enabledService : enabledServices) {
-            ComponentName tileService =
-                    a11yFeatureToTileService.getOrDefault(enabledService, null);
-            if (tileService != null && currentA11yTilesInQsPanel.contains(tileService)) {
-                somethingChanged |= targets.add(enabledService.flattenToString());
-            }
-        }
-
-        if (!somethingChanged) {
-            return;
-        }
-        userState.updateA11yQsTargetLocked(targets);
-
-        // Update setting key with new value.
-        persistColonDelimitedSetToSettingLocked(
-                Settings.Secure.ACCESSIBILITY_QS_TARGETS,
-                userState.mUserId, targets, str -> str);
         scheduleNotifyClientsOfServicesStateChangeLocked(userState);
     }
 
@@ -3862,14 +3752,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         final List<Pair<Integer, String>> shortcutTypeAndShortcutSetting = new ArrayList<>(3);
         shortcutTypeAndShortcutSetting.add(
-                new Pair<>(UserShortcutType.HARDWARE,
+                new Pair<>(HARDWARE,
                         Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE));
         shortcutTypeAndShortcutSetting.add(
-                new Pair<>(UserShortcutType.SOFTWARE,
+                new Pair<>(SOFTWARE,
                         Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS));
         if (android.view.accessibility.Flags.a11yQsShortcut()) {
             shortcutTypeAndShortcutSetting.add(
-                    new Pair<>(UserShortcutType.QUICK_SETTINGS,
+                    new Pair<>(QUICK_SETTINGS,
                             Settings.Secure.ACCESSIBILITY_QS_TARGETS));
         }
 
@@ -3883,7 +3773,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         shortcutSettingName,
                         userState.mUserId, currentTargets, str -> str);
 
-                if (shortcutType != UserShortcutType.QUICK_SETTINGS) {
+                if (shortcutType != QUICK_SETTINGS) {
                     continue;
                 }
 
@@ -3959,7 +3849,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @EnforcePermission(MANAGE_ACCESSIBILITY)
     @Override
-    public void performAccessibilityShortcut(String targetName) {
+    public void performAccessibilityShortcut(
+            int displayId, @UserShortcutType int shortcutType, String targetName) {
         performAccessibilityShortcut_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".performAccessibilityShortcut",
@@ -3968,7 +3859,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::performAccessibilityShortcutInternal, this,
-                Display.DEFAULT_DISPLAY, UserShortcutType.HARDWARE, targetName));
+                displayId, shortcutType, targetName));
     }
 
     /**
@@ -4115,7 +4006,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final boolean requestA11yButton = (installedServiceInfo.flags
                     & FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
             // Turns on / off the accessibility service
-            if ((targetSdk <= Build.VERSION_CODES.Q && shortcutType == UserShortcutType.HARDWARE)
+            if ((targetSdk <= Build.VERSION_CODES.Q && shortcutType == HARDWARE)
                     || (targetSdk > Build.VERSION_CODES.Q && !requestA11yButton)) {
                 if (serviceConnection == null) {
                     logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
@@ -4129,7 +4020,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
                 return true;
             }
-            if (shortcutType == UserShortcutType.HARDWARE && targetSdk > Build.VERSION_CODES.Q
+            if (shortcutType == HARDWARE && targetSdk > Build.VERSION_CODES.Q
                     && requestA11yButton) {
                 if (!userState.getEnabledServicesLocked().contains(assignedTarget)) {
                     enableAccessibilityServiceLocked(assignedTarget, mCurrentUserId);
@@ -4222,7 +4113,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             validNewTargets = newTargets;
 
             // filter out targets that doesn't have qs shortcut
-            if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
+            if (shortcutType == QUICK_SETTINGS) {
                 validNewTargets = newTargets.stream().filter(target -> {
                     ComponentName targetComponent = ComponentName.unflattenFromString(target);
                     return featureToTileMap.containsKey(targetComponent);
@@ -4240,10 +4131,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     /* defaultEmptyString= */ ""
             );
 
-            if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
+            if (shortcutType == QUICK_SETTINGS) {
                 int numOfFeatureChanged = Math.abs(currentTargets.size() - validNewTargets.size());
                 logMetricForQsShortcutConfiguration(enable, numOfFeatureChanged);
-                userState.updateA11yQsTargetLocked(validNewTargets);
+                userState.updateShortcutTargetsLocked(validNewTargets, QUICK_SETTINGS);
                 scheduleNotifyClientsOfServicesStateChangeLocked(userState);
                 onUserStateChangedLocked(userState);
             }
@@ -4257,7 +4148,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         // Add or Remove tile in QS Panel
-        if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
+        if (shortcutType == QUICK_SETTINGS) {
             mMainHandler.sendMessage(obtainMessage(
                     AccessibilityManagerService::updateA11yTileServicesInQuickSettingsPanel,
                     this, validNewTargets, currentTargets, userId));
@@ -4266,7 +4157,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (!enable) {
             return;
         }
-        if (shortcutType == UserShortcutType.HARDWARE) {
+        if (shortcutType == HARDWARE) {
             skipVolumeShortcutDialogTimeoutRestriction(userId);
             if (com.android.server.accessibility.Flags.enableHardwareShortcutDisablesWarning()) {
                 persistIntToSetting(
@@ -4275,7 +4166,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         AccessibilityShortcutController.DialogStatus.SHOWN
                 );
             }
-        } else if (shortcutType == UserShortcutType.SOFTWARE) {
+        } else if (shortcutType == SOFTWARE) {
             // Update the A11y FAB size to large when the Magnification shortcut is
             // enabled and the user hasn't changed the floating button size
             if (shortcutTargets.contains(MAGNIFICATION_CONTROLLER_NAME)
@@ -4445,7 +4336,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final AccessibilityUserState userState = getCurrentUserStateLocked();
             final ArrayList<String> shortcutTargets = new ArrayList<>(
                     userState.getShortcutTargetsLocked(shortcutType));
-            if (shortcutType != UserShortcutType.SOFTWARE) {
+            if (shortcutType != SOFTWARE) {
                 return shortcutTargets;
             }
             // Adds legacy a11y services requesting a11y button into the list.
@@ -4461,6 +4352,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     shortcutTargets.add(serviceName);
                 }
             }
+            userState.updateShortcutTargetsLocked(Set.copyOf(shortcutTargets), shortcutType);
             return shortcutTargets;
         }
     }
@@ -5672,7 +5564,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         || mShowImeWithHardKeyboardUri.equals(uri)) {
                     userState.reconcileSoftKeyboardModeWithSettingsLocked();
                 } else if (mAccessibilityShortcutServiceIdUri.equals(uri)) {
-                    if (readAccessibilityShortcutKeySettingLocked(userState)) {
+                    if (readAccessibilityShortcutTargetsLocked(userState, HARDWARE)) {
                         onUserStateChangedLocked(userState);
                     }
                 } else if (mAccessibilityButtonComponentIdUri.equals(uri)) {
@@ -5680,7 +5572,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         onUserStateChangedLocked(userState);
                     }
                 } else if (mAccessibilityButtonTargetsUri.equals(uri)) {
-                    if (readAccessibilityButtonTargetsLocked(userState)) {
+                    if (readAccessibilityShortcutTargetsLocked(userState, SOFTWARE)) {
                         onUserStateChangedLocked(userState);
                     }
                 } else if (mUserNonInteractiveUiTimeoutUri.equals(uri)
@@ -6504,5 +6396,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         String metricId = enable ? METRIC_ID_QS_SHORTCUT_ADD : METRIC_ID_QS_SHORTCUT_REMOVE;
         Counter.logIncrementWithUid(metricId, Binder.getCallingUid(), numOfFeatures);
+    }
+
+    private void assertNoTapShortcut(@UserShortcutType int shortcutType) {
+        if ((shortcutType & (TRIPLETAP | TWOFINGER_DOUBLETAP)) != 0) {
+            throw new IllegalArgumentException("Tap shortcuts are not supported.");
+        }
     }
 }

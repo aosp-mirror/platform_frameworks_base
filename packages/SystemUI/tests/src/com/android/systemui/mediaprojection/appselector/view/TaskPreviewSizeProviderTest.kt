@@ -27,6 +27,7 @@ import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.core.view.WindowInsetsCompat.Type
 import androidx.lifecycle.LifecycleOwner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider.TaskPreviewSizeListener
@@ -38,8 +39,10 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.math.min
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class TaskPreviewSizeProviderTest : SysuiTestCase() {
 
     private val lifecycleOwner = mock<LifecycleOwner>()

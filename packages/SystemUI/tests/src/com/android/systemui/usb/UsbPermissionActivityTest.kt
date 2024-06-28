@@ -20,9 +20,9 @@ import android.content.Intent
 import android.hardware.usb.IUsbSerialReader
 import android.hardware.usb.UsbAccessory
 import android.hardware.usb.UsbManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
 import com.android.systemui.SysuiTestCase
@@ -40,7 +40,7 @@ import org.junit.runner.RunWith
 /**
  * UsbPermissionActivityTest
  */
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper
 class UsbPermissionActivityTest : SysuiTestCase() {

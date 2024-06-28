@@ -121,3 +121,20 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_taskbar_on_phones"
+    namespace: "multitasking"
+    description: "Enables taskbar on phones"
+    bug: "348007377"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_bubble_bar_in_persistent_task_bar"
+    namespace: "multitasking"
+    description: "Enable bubble bar to be shown in the persistent task bar"
+    bug: "346391377"
+}

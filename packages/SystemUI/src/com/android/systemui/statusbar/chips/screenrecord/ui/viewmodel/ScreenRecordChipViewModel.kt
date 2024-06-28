@@ -19,14 +19,17 @@ package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 import android.app.ActivityManager
 import androidx.annotation.DrawableRes
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel.Starting.Companion.toCountdownSeconds
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
 import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
 import com.android.systemui.statusbar.chips.screenrecord.ui.view.EndScreenRecordingDialogDelegate
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
@@ -54,12 +57,22 @@ constructor(
             .map { state ->
                 when (state) {
                     is ScreenRecordChipModel.DoingNothing -> OngoingActivityChipModel.Hidden
-                    // TODO(b/332662551): Implement the 3-2-1 countdown chip.
-                    is ScreenRecordChipModel.Starting -> OngoingActivityChipModel.Hidden
+                    is ScreenRecordChipModel.Starting -> {
+                        OngoingActivityChipModel.Shown.Countdown(
+                            colors = ColorsModel.Red,
+                            secondsUntilStarted = state.millisUntilStarted.toCountdownSeconds(),
+                        )
+                    }
                     is ScreenRecordChipModel.Recording -> {
-                        OngoingActivityChipModel.Shown(
-                            // TODO(b/332662551): Also provide a content description.
-                            icon = Icon.Resource(ICON, contentDescription = null),
+                        OngoingActivityChipModel.Shown.Timer(
+                            icon =
+                                Icon.Resource(
+                                    ICON,
+                                    ContentDescription.Resource(
+                                        R.string.screenrecord_ongoing_screen_only,
+                                    ),
+                                ),
+                            colors = ColorsModel.Red,
                             startTimeMs = systemClock.elapsedRealtime(),
                             createDialogLaunchOnClickListener(
                                 createDelegate(state.recordedTask),
@@ -69,7 +82,8 @@ constructor(
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            // See b/347726238.
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden)
 
     private fun createDelegate(
         recordedTask: ActivityManager.RunningTaskInfo?

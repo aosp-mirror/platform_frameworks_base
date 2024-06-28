@@ -42,7 +42,7 @@ class KeyguardBottomAreaViewController
     }
 
     override fun onViewAttached() {
-        if (!smartspaceRelocateToBottom() || !smartspaceController.isEnabled()) {
+        if (!smartspaceRelocateToBottom() || !smartspaceController.isEnabled) {
             return
         }
 

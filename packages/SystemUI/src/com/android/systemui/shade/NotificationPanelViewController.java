@@ -148,7 +148,7 @@ import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransition
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
@@ -775,7 +775,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             @Main CoroutineDispatcher mainDispatcher,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             DumpManager dumpManager,
-            KeyguardLongPressViewModel keyguardLongPressViewModel,
+            KeyguardTouchHandlingViewModel keyguardTouchHandlingViewModel,
             KeyguardInteractor keyguardInteractor,
             ActivityStarter activityStarter,
             SharedNotificationContainerInteractor sharedNotificationContainerInteractor,
@@ -970,7 +970,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardClockInteractor = keyguardClockInteractor;
         KeyguardLongPressViewBinder.bind(
                 mView.requireViewById(R.id.keyguard_long_press),
-                keyguardLongPressViewModel,
+                keyguardTouchHandlingViewModel,
                 () -> {
                     onEmptySpaceClick();
                     return Unit.INSTANCE;
@@ -1044,6 +1044,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                                 mView.setTranslationY(0f);
                             })
                             .start();
+                } else {
+                    mView.postDelayed(() -> {
+                        instantCollapse();
+                    }, unlockAnimationStartDelay);
                 }
             }
         }
@@ -3047,7 +3051,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
                     if (mDeviceEntryFaceAuthInteractor.canFaceAuthRun()) {
                         mUpdateMonitor.requestActiveUnlock(
-                                ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
+                                ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT_LEGACY,
                                 "lockScreenEmptySpaceTap");
                     } else {
                         mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
@@ -3390,7 +3394,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         /** Updates the views to the initial state for the fold to AOD animation. */
         @Override
         public void prepareFoldToAodAnimation() {
-            if (!MigrateClocksToBlueprint.isEnabled()) {
+            if (MigrateClocksToBlueprint.isEnabled()) {
+                setDozing(true /* dozing */, false /* animate */);
+            } else {
                 // Force show AOD UI even if we are not locked
                 showAodUi();
             }

@@ -63,7 +63,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.util.Rational;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.Surface;
@@ -127,8 +126,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private static final int EXTRA_CONTENT_OVERLAY_FADE_OUT_DELAY_MS =
             SystemProperties.getInt(
                     "persist.wm.debug.extra_content_overlay_fade_out_delay_ms", 400);
-
-    private static final float PIP_ASPECT_RATIO_MISMATCH_THRESHOLD = 0.005f;
 
     private final Context mContext;
     private final SyncTransactionQueue mSyncTransactionQueue;
@@ -608,6 +605,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void exitPip(int animationDurationMs, boolean requestEnterSplit) {
         if (!mPipTransitionState.isInPip()
                 || mPipTransitionState.getTransitionState() == PipTransitionState.EXITING_PIP
+                || mPipTransitionState.getInSwipePipToHomeTransition()
                 || mToken == null) {
             ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Not allowed to exitPip in current state"
@@ -821,37 +819,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     mPictureInPictureParams.getTitle());
             mPipParamsChangedForwarder.notifySubtitleChanged(
                     mPictureInPictureParams.getSubtitle());
-
-            if (mPictureInPictureParams.hasSourceBoundsHint()
-                    && mPictureInPictureParams.hasSetAspectRatio()) {
-                Rational sourceRectHintAspectRatio = new Rational(
-                        mPictureInPictureParams.getSourceRectHint().width(),
-                        mPictureInPictureParams.getSourceRectHint().height());
-                if (sourceRectHintAspectRatio.compareTo(
-                        mPictureInPictureParams.getAspectRatio()) != 0) {
-                    ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                            "Aspect ratio of source rect hint (%d/%d) does not match the provided "
-                                    + "aspect ratio value (%d/%d). Consider matching them for "
-                                    + "improved animation. Future releases might override the "
-                                    + "value to match.",
-                            mPictureInPictureParams.getSourceRectHint().width(),
-                            mPictureInPictureParams.getSourceRectHint().height(),
-                            mPictureInPictureParams.getAspectRatio().getNumerator(),
-                            mPictureInPictureParams.getAspectRatio().getDenominator());
-                }
-                if (Math.abs(sourceRectHintAspectRatio.floatValue()
-                        - mPictureInPictureParams.getAspectRatioFloat())
-                        > PIP_ASPECT_RATIO_MISMATCH_THRESHOLD) {
-                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                            "Aspect ratio of source rect hint (%f) does not match the provided "
-                                    + "aspect ratio value (%f) and is above threshold of %f. "
-                                    + "Consider matching them for improved animation. Future "
-                                    + "releases might override the value to match.",
-                            sourceRectHintAspectRatio.floatValue(),
-                            mPictureInPictureParams.getAspectRatioFloat(),
-                            PIP_ASPECT_RATIO_MISMATCH_THRESHOLD);
-                }
-            }
         }
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);

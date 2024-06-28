@@ -24,9 +24,9 @@ class PartitionedGridViewModel
 @Inject
 constructor(
     iconTilesViewModel: IconTilesViewModel,
-    gridSizeViewModel: InfiniteGridSizeViewModel,
+    gridSizeViewModel: FixedColumnsSizeViewModel,
     iconLabelVisibilityViewModel: IconLabelVisibilityViewModel,
 ) :
     IconTilesViewModel by iconTilesViewModel,
-    InfiniteGridSizeViewModel by gridSizeViewModel,
+    FixedColumnsSizeViewModel by gridSizeViewModel,
     IconLabelVisibilityViewModel by iconLabelVisibilityViewModel

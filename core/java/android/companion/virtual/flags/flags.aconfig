@@ -47,6 +47,14 @@ flag {
 }
 
 flag {
+    name: "virtual_rotary"
+    is_exported: true
+    namespace: "virtual_devices"
+    description: "Enable virtual rotary input"
+    bug: "320328752"
+}
+
+flag {
     namespace: "virtual_devices"
     name: "device_aware_drm"
     description: "Makes MediaDrm APIs device-aware"
