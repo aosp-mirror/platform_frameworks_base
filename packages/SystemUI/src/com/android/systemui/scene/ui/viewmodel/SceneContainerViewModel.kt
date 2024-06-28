@@ -26,17 +26,12 @@ import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state for the scene container. */
 @SysUISingleton
@@ -46,7 +41,6 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
-    scenes: Set<@JvmSuppressWildcards Scene>,
 ) {
     /**
      * Keys of all scenes in the container.
@@ -61,25 +55,6 @@ constructor(
 
     /** Whether the container is visible. */
     val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
-
-    private val destinationScenesBySceneKey =
-        scenes.associate { scene ->
-            scene.key to scene.destinationScenes.flatMapLatestConflated { replaceSceneFamilies(it) }
-        }
-
-    fun currentDestinationScenes(
-        scope: CoroutineScope,
-    ): StateFlow<Map<UserAction, UserActionResult>> {
-        return currentScene
-            .flatMapLatestConflated { currentSceneKey ->
-                checkNotNull(destinationScenesBySceneKey[currentSceneKey])
-            }
-            .stateIn(
-                scope = scope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = emptyMap(),
-            )
-    }
 
     /**
      * Binds the given flow so the system remembers it.

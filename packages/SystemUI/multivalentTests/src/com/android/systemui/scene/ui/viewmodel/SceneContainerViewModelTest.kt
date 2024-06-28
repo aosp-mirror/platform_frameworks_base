@@ -28,10 +28,8 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.fakeScenes
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
-import com.android.systemui.scene.scenes
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
@@ -66,7 +64,6 @@ class SceneContainerViewModelTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
                 powerInteractor = kosmos.powerInteractor,
-                scenes = kosmos.scenes,
             )
     }
 
@@ -216,24 +213,5 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             )
 
             assertThat(isVisible).isFalse()
-        }
-
-    @Test
-    fun currentDestinationScenes_onlyTheCurrentSceneIsCollected() =
-        testScope.runTest {
-            val unused by collectLastValue(underTest.currentDestinationScenes(backgroundScope))
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
-            kosmos.fakeScenes.forEach { scene ->
-                fakeSceneDataSource.changeScene(toScene = scene.key)
-                runCurrent()
-                assertThat(currentScene).isEqualTo(scene.key)
-
-                assertThat(scene.isDestinationScenesBeingCollected).isTrue()
-                kosmos.fakeScenes
-                    .filter { it.key != scene.key }
-                    .forEach { otherScene ->
-                        assertThat(otherScene.isDestinationScenesBeingCollected).isFalse()
-                    }
-            }
         }
 }
