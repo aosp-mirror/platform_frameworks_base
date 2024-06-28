@@ -37,10 +37,6 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.clocks.AodClockBurnInModel
 import com.android.systemui.plugins.clocks.ClockController
-import com.android.systemui.util.ui.value
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 object KeyguardClockViewBinder {
@@ -103,20 +99,15 @@ object KeyguardClockViewBinder {
 
                 launch {
                     if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    combine(
-                            viewModel.hasAodIcons,
-                            rootViewModel.isNotifIconContainerVisible.map { it.value }
-                        ) { hasIcon, isVisible ->
-                            hasIcon && isVisible
-                        }
-                        .distinctUntilChanged()
-                        .collect { _ ->
-                            viewModel.currentClock.value?.let {
-                                if (it.config.useCustomClockScene) {
-                                    blueprintInteractor.refreshBlueprint(Type.DefaultTransition)
-                                }
+                    viewModel.isAodIconsVisible.collect {
+                        viewModel.currentClock.value?.let {
+                            if (
+                                viewModel.isLargeClockVisible.value && it.config.useCustomClockScene
+                            ) {
+                                blueprintInteractor.refreshBlueprint(Type.DefaultTransition)
                             }
                         }
+                    }
                 }
 
                 launch {
