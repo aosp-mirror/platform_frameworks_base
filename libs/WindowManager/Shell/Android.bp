@@ -88,7 +88,7 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--protolog-class com.android.internal.protolog.ProtoLog " +
         "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
         "--loggroups-jar $(location :wm_shell_protolog-groups) " +
         "--viewer-config-file-path /system_ext/etc/wmshell.protolog.pb " +
@@ -107,7 +107,7 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--protolog-class com.android.internal.protolog.ProtoLog " +
         "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
         "--loggroups-jar $(location :wm_shell_protolog-groups) " +
         "--viewer-config-type json " +
@@ -124,7 +124,7 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--protolog-class com.android.internal.protolog.ProtoLog " +
         "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
         "--loggroups-jar $(location :wm_shell_protolog-groups) " +
         "--viewer-config-type proto " +
