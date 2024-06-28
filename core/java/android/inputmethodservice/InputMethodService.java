@@ -101,6 +101,7 @@ import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.InputType;
 import android.text.Layout;
@@ -4338,6 +4339,16 @@ public class InputMethodService extends AbstractInputMethodService {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     public final boolean isImeNavigationBarShownForTesting() {
         return mNavigationBarController.isShown();
+    }
+
+    /**
+     * Called when the IME switch button was clicked from the client. This will show the input
+     * method picker dialog.
+     *
+     * @hide
+     */
+    final void onImeSwitchButtonClickFromClient() {
+        mPrivOps.onImeSwitchButtonClickFromClient(getDisplayId(), UserHandle.myUserId());
     }
 
     /**

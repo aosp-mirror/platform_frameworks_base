@@ -3994,6 +3994,29 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
+    @BinderThread
+    private void onImeSwitchButtonClickFromClient(@NonNull IBinder token, int displayId,
+            @UserIdInt int userId) {
+        userId = mActivityManagerInternal.handleIncomingUser(
+                Binder.getCallingPid(), Binder.getCallingUid(), userId, false,
+                ActivityManagerInternal.ALLOW_FULL_ONLY, "onImeSwitchButtonClickFromClient", null);
+
+        synchronized (ImfLock.class) {
+            if (!calledWithValidTokenLocked(token, userId)) {
+                return;
+            }
+            showInputMethodPickerFromSystem(
+                    InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES, displayId);
+        }
+    }
+
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @Override
+    public void onImeSwitchButtonClickFromSystem(int displayId) {
+        showInputMethodPickerFromSystem(
+                InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES, displayId);
+    }
+
     @NonNull
     private static IllegalArgumentException getExceptionForUnknownImeId(
             @Nullable String imeId) {
@@ -6927,6 +6950,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             } catch (Throwable e) {
                 typedFuture.completeExceptionally(e);
             }
+        }
+
+        @BinderThread
+        @Override
+        public void onImeSwitchButtonClickFromClient(int displayId, @UserIdInt int userId) {
+            mImms.onImeSwitchButtonClickFromClient(mToken, displayId, userId);
         }
 
         @BinderThread

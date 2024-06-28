@@ -112,6 +112,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         @UiEvent(doc = "The overview button was long-pressed in the navigation bar.")
         NAVBAR_OVERVIEW_BUTTON_LONGPRESS(538),
 
+        @UiEvent(doc = "The ime switcher button was long-pressed in the navigation bar.")
+        NAVBAR_IME_SWITCHER_BUTTON_LONGPRESS(1799),
+
         NONE(0);  // an event we should not log
 
         private final int mId;
