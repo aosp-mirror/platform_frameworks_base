@@ -209,7 +209,7 @@ public final class MessageQueue {
     private volatile long mNextInsertSeqValue = 0;
     /*
      * The exception to the FIFO order rule is sendMessageAtFrontOfQueue().
-     * Those messages must be in LIFO order - SIGH.
+     * Those messages must be in LIFO order.
      * Decrements on each front of queue insert.
      */
     private static final VarHandle sNextFrontInsertSeq;
