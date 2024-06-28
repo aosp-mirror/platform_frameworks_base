@@ -20,25 +20,18 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 
-/** Repository for checking if a tile should be displayed as an icon. */
-interface IconTilesRepository {
-    fun isIconTile(spec: TileSpec): Boolean
+/** Repository for the default set of [TileSpec] that should be displayed as large tiles. */
+interface DefaultLargeTilesRepository {
+    val defaultLargeTiles: Set<TileSpec>
 }
 
 @SysUISingleton
-class IconTilesRepositoryImpl @Inject constructor() : IconTilesRepository {
-
-    override fun isIconTile(spec: TileSpec): Boolean {
-        return !LARGE_TILES.contains(spec)
-    }
-
-    companion object {
-        private val LARGE_TILES =
-            setOf(
-                TileSpec.create("internet"),
-                TileSpec.create("bt"),
-                TileSpec.create("dnd"),
-                TileSpec.create("cast"),
-            )
-    }
+class DefaultLargeTilesRepositoryImpl @Inject constructor() : DefaultLargeTilesRepository {
+    override val defaultLargeTiles =
+        setOf(
+            TileSpec.create("internet"),
+            TileSpec.create("bt"),
+            TileSpec.create("dnd"),
+            TileSpec.create("cast"),
+        )
 }

@@ -149,11 +149,13 @@ fun Modifier.dragAndDropTileList(
 fun Modifier.dragAndDropTileSource(
     tileSpec: TileSpec,
     onTap: (TileSpec) -> Unit,
+    onDoubleTap: (TileSpec) -> Unit,
     dragAndDropState: DragAndDropState
 ): Modifier {
     return dragAndDropSource {
         detectTapGestures(
             onTap = { onTap(tileSpec) },
+            onDoubleTap = { onDoubleTap(tileSpec) },
             onLongPress = {
                 dragAndDropState.onStarted(tileSpec)
 
