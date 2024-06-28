@@ -184,7 +184,8 @@ public class MixedTransitionHelper {
 
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             TransitionInfo.Change change = info.getChanges().get(i);
-            if (change == pipChange || !isOpeningMode(change.getMode())) {
+            if (change == pipChange || !isOpeningMode(change.getMode()) ||
+                    change.getTaskInfo() == null) {
                 // Ignore the change/task that's going into Pip or not opening
                 continue;
             }
