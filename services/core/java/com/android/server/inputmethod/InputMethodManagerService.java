@@ -2625,6 +2625,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
+        return hasMultipleSubtypesForSwitcher(false /* nonAuxOnly */, settings);
+    }
+
+    /**
+     * Checks whether there at least two subtypes that should be shown for the IME switcher menu,
+     * across all enabled IMEs for the given user.
+     *
+     * @param nonAuxOnly whether to check only for non auxiliary subtypes.
+     * @param settings   the input method settings under the given user ID.
+     */
+    private static boolean hasMultipleSubtypesForSwitcher(boolean nonAuxOnly,
+            @NonNull InputMethodSettings settings) {
         List<InputMethodInfo> imes = settings.getEnabledInputMethodListWithFilter(
                 InputMethodInfo::shouldShowInInputMethodPicker);
         final int numImes = imes.size();
@@ -2654,7 +2666,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
             }
         }
-        if (nonAuxCount > 1 || auxCount > 1) {
+        if (Flags.imeSwitcherRevamp() && nonAuxOnly) {
+            return nonAuxCount > 1;
+        } else if (nonAuxCount > 1 || auxCount > 1) {
             return true;
         } else if (nonAuxCount == 1 && auxCount == 1) {
             if (nonAuxSubtype != null && auxSubtype != null
@@ -3976,16 +3990,45 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (!calledWithValidTokenLocked(token, userData)) {
                 return;
             }
-            showInputMethodPickerFromSystem(
-                    InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES, displayId);
+            onImeSwitchButtonClickLocked(token, displayId, userData);
         }
     }
 
     @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void onImeSwitchButtonClickFromSystem(int displayId) {
-        showInputMethodPickerFromSystem(
-                InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES, displayId);
+        synchronized (ImfLock.class) {
+            final int userId = mCurrentUserId;
+            final var userData = getUserData(userId);
+            final var bindingController = userData.mBindingController;
+            final var curToken = bindingController.getCurToken();
+            if (curToken == null) {
+                return;
+            }
+
+            onImeSwitchButtonClickLocked(curToken, displayId, userData);
+        }
+    }
+
+    /**
+     * Handles a click on the IME switch button. Depending on the number of enabled IME subtypes,
+     * this will either switch to the next IME/subtype, or show the input method picker dialog.
+     *
+     * @param token     The token identifying the input method that triggered this.
+     * @param displayId The ID of the display where the input method picker dialog should be shown.
+     * @param userData  The data of the user for which to switch IMEs or show the picker dialog.
+     */
+    @GuardedBy("ImfLock.class")
+    private void onImeSwitchButtonClickLocked(@NonNull IBinder token, int displayId,
+            @NonNull UserData userData) {
+        final int userId = userData.mUserId;
+        final var settings = InputMethodSettingsRepository.get(userId);
+        if (hasMultipleSubtypesForSwitcher(true /* nonAuxOnly */, settings)) {
+            switchToNextInputMethodLocked(token, false /* onlyCurrentIme */, userData);
+        } else {
+            showInputMethodPickerFromSystem(
+                    InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES, displayId);
+        }
     }
 
     @NonNull
