@@ -32,6 +32,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.res.R
+import com.android.systemui.shade.PulsingGestureListener
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -51,10 +52,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/** Business logic for use-cases related to the keyguard long-press feature. */
+/** Business logic for use-cases related to top-level touch handling in the lock screen. */
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
-class KeyguardLongPressInteractor
+class KeyguardTouchHandlingInteractor
 @Inject
 constructor(
     @Application private val appContext: Context,
@@ -65,6 +66,7 @@ constructor(
     private val featureFlags: FeatureFlags,
     broadcastDispatcher: BroadcastDispatcher,
     private val accessibilityManager: AccessibilityManagerWrapper,
+    private val pulsingGestureListener: PulsingGestureListener,
 ) {
     /** Whether the long-press handling feature should be enabled. */
     val isLongPressHandlingEnabled: StateFlow<Boolean> =
@@ -164,6 +166,16 @@ constructor(
     /** Notifies that the settings UI has been shown, consuming the event to show it. */
     fun onSettingsShown() {
         _shouldOpenSettings.value = false
+    }
+
+    /** Notifies that the lockscreen has been clicked at position [x], [y]. */
+    fun onClick(x: Float, y: Float) {
+        pulsingGestureListener.onSingleTapUp(x, y)
+    }
+
+    /** Notifies that the lockscreen has been double clicked. */
+    fun onDoubleClick() {
+        pulsingGestureListener.onDoubleTapEvent()
     }
 
     private fun showSettings() {

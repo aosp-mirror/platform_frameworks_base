@@ -36,28 +36,20 @@ import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
-import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
-import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
 import com.android.systemui.media.controls.shared.model.MediaData
-import com.android.systemui.qs.footerActionsController
-import com.android.systemui.qs.footerActionsViewModelFactory
-import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
+import com.android.systemui.qs.ui.adapter.fakeQSSceneAdapter
+import com.android.systemui.qs.ui.adapter.qsSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
-import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.domain.startable.shadeStartable
 import com.android.systemui.shade.shared.model.ShadeMode
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
-import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -66,11 +58,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -83,32 +72,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val shadeRepository by lazy { kosmos.shadeRepository }
+    private val qsSceneAdapter by lazy { kosmos.fakeQSSceneAdapter }
 
-    private val qsSceneAdapter = FakeQSSceneAdapter({ mock() })
-
-    private lateinit var underTest: ShadeSceneViewModel
-
-    @Mock private lateinit var mediaDataManager: MediaDataManager
-
-    @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
-        underTest =
-            ShadeSceneViewModel(
-                applicationScope = testScope.backgroundScope,
-                shadeHeaderViewModel = kosmos.shadeHeaderViewModel,
-                qsSceneAdapter = qsSceneAdapter,
-                notifications = kosmos.notificationsPlaceholderViewModel,
-                brightnessMirrorViewModel = kosmos.brightnessMirrorViewModel,
-                mediaCarouselInteractor = kosmos.mediaCarouselInteractor,
-                shadeInteractor = kosmos.shadeInteractor,
-                footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
-                footerActionsController = kosmos.footerActionsController,
-                sceneInteractor = kosmos.sceneInteractor,
-                unfoldTransitionInteractor = kosmos.unfoldTransitionInteractor,
-            )
-    }
+    private val underTest: ShadeSceneViewModel by lazy { kosmos.shadeSceneViewModel }
 
     @Test
     fun upTransitionSceneKey_deviceLocked_lockScreen() =

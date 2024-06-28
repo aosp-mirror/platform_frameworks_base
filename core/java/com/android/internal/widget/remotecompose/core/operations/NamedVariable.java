@@ -32,7 +32,9 @@ public class NamedVariable implements Operation {
     public int mVarType;
     public static final Companion COMPANION = new Companion();
     public static final int MAX_STRING_SIZE = 4000;
-
+    public static final int COLOR_TYPE = 2;
+    public static final int FLOAT_TYPE = 1;
+    public static final int STRING_TYPE = 0;
     public NamedVariable(int varId, int varType, String name) {
         this.mVarId = varId;
         this.mVarType = varType;
@@ -72,7 +74,7 @@ public class NamedVariable implements Operation {
          * @param text
          */
         public void apply(WireBuffer buffer, int varId, int varType, String text) {
-            buffer.start(Operations.DATA_TEXT);
+            buffer.start(Operations.NAMED_VARIABLE);
             buffer.writeInt(varId);
             buffer.writeInt(varType);
             buffer.writeUTF8(text);

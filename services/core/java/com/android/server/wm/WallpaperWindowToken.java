@@ -32,6 +32,7 @@ import android.os.RemoteException;
 import android.util.SparseArray;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.window.flags.Flags;
 
 import java.util.function.Consumer;
 
@@ -78,6 +79,20 @@ class WallpaperWindowToken extends WindowToken {
     void setExiting(boolean animateExit) {
         super.setExiting(animateExit);
         mDisplayContent.mWallpaperController.removeWallpaperToken(this);
+    }
+
+    @Override
+    public void prepareSurfaces() {
+        super.prepareSurfaces();
+
+        if (Flags.ensureWallpaperInTransitions()) {
+            // Similar to Task.prepareSurfaces, outside of transitions we need to apply visibility
+            // changes directly. In transitions the transition player will take care of applying the
+            // visibility change.
+            if (!mTransitionController.inTransition(this)) {
+                getSyncTransaction().setVisibility(mSurfaceControl, isVisible());
+            }
+        }
     }
 
     /**

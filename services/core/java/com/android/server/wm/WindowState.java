@@ -3695,7 +3695,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void fillInsetsSourceControls(@NonNull InsetsSourceControl.Array outArray,
             boolean copyControls) {
-        final int lastSeq = mLastReportedInsetsState.getSeq();
+        final int lastSeq = mLastReportedActiveControls.getSeq();
         final InsetsSourceControl[] controls =
                 getDisplayContent().getInsetsStateController().getControlsForDispatch(this);
         outArray.set(controls, copyControls);

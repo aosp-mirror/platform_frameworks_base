@@ -160,8 +160,20 @@ public class Cuj {
      */
     public static final int CUJ_DESKTOP_MODE_RESIZE_WINDOW = 106;
 
+    /** Track entering desktop mode interaction. */
+    public static final int CUJ_DESKTOP_MODE_ENTER_MODE = 107;
+
+    /** Track exiting desktop mode interaction. */
+    public static final int CUJ_DESKTOP_MODE_EXIT_MODE = 108;
+
+    /** Track minimize window interaction in desktop mode. */
+    public static final int CUJ_DESKTOP_MODE_MINIMIZE_WINDOW = 109;
+
+    /** Track window drag interaction in desktop mode. */
+    public static final int CUJ_DESKTOP_MODE_DRAG_WINDOW = 110;
+
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_RESIZE_WINDOW;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_DRAG_WINDOW;
 
     /** @hide */
     @IntDef({
@@ -259,7 +271,11 @@ public class Cuj {
             CUJ_LAUNCHER_PRIVATE_SPACE_UNLOCK,
             CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW,
             CUJ_FOLD_ANIM,
-            CUJ_DESKTOP_MODE_RESIZE_WINDOW
+            CUJ_DESKTOP_MODE_RESIZE_WINDOW,
+            CUJ_DESKTOP_MODE_ENTER_MODE,
+            CUJ_DESKTOP_MODE_EXIT_MODE,
+            CUJ_DESKTOP_MODE_MINIMIZE_WINDOW,
+            CUJ_DESKTOP_MODE_DRAG_WINDOW
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
@@ -368,6 +384,10 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_MAXIMIZE_WINDOW;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_FOLD_ANIM] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__FOLD_ANIM;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_RESIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_RESIZE_WINDOW;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_MODE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_MODE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_EXIT_MODE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_EXIT_MODE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_MINIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_MINIMIZE_WINDOW;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_DRAG_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_DRAG_WINDOW;
     }
 
     private Cuj() {
@@ -576,6 +596,14 @@ public class Cuj {
                 return "FOLD_ANIM";
             case CUJ_DESKTOP_MODE_RESIZE_WINDOW:
                 return "DESKTOP_MODE_RESIZE_WINDOW";
+            case CUJ_DESKTOP_MODE_ENTER_MODE:
+                return "DESKTOP_MODE_ENTER_MODE";
+            case CUJ_DESKTOP_MODE_EXIT_MODE:
+                return "DESKTOP_MODE_EXIT_MODE";
+            case CUJ_DESKTOP_MODE_MINIMIZE_WINDOW:
+                return "DESKTOP_MODE_MINIMIZE_WINDOW";
+            case CUJ_DESKTOP_MODE_DRAG_WINDOW:
+                return "DESKTOP_MODE_DRAG_WINDOW";
         }
         return "UNKNOWN";
     }

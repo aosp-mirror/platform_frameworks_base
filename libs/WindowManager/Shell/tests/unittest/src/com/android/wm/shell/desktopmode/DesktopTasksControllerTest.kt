@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RecentTaskInfo
 import android.app.ActivityManager.RunningTaskInfo
+import android.app.KeyguardManager
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
@@ -149,6 +150,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock lateinit var syncQueue: SyncTransactionQueue
   @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
   @Mock lateinit var transitions: Transitions
+  @Mock lateinit var keyguardManager: KeyguardManager
   @Mock lateinit var exitDesktopTransitionHandler: ExitDesktopTaskTransitionHandler
   @Mock lateinit var enterDesktopTransitionHandler: EnterDesktopTaskTransitionHandler
   @Mock
@@ -233,6 +235,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         rootTaskDisplayAreaOrganizer,
         dragAndDropController,
         transitions,
+        keyguardManager,
         enterDesktopTransitionHandler,
         exitDesktopTransitionHandler,
         toggleResizeDesktopTaskTransitionHandler,
@@ -1298,6 +1301,17 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val result =
         controller.handleRequest(freeformTask2.token.asBinder(), createTransition(freeformTask2))
     assertTrue(result.anyDensityConfigChange(freeformTask2.token))
+  }
+
+  @Test
+  fun handleRequest_freeformTask_keyguardLocked_returnNull() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    whenever(keyguardManager.isKeyguardLocked).thenReturn(true)
+    val freeformTask = createFreeformTask(displayId = DEFAULT_DISPLAY)
+
+    val result = controller.handleRequest(Binder(), createTransition(freeformTask))
+
+    assertNull(result, "Should NOT handle request")
   }
 
   @Test
