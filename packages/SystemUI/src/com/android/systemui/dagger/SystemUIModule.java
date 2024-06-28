@@ -63,6 +63,7 @@ import com.android.systemui.display.DisplayModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.education.dagger.ContextualEducationModule;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagDependenciesModule;
 import com.android.systemui.flags.FlagsModule;
@@ -261,7 +262,8 @@ import javax.inject.Named;
         UserModule.class,
         UtilModule.class,
         NoteTaskModule.class,
-        WalletModule.class
+        WalletModule.class,
+        ContextualEducationModule.class
         },
         subcomponents = {
             ComplicationComponent.class,
