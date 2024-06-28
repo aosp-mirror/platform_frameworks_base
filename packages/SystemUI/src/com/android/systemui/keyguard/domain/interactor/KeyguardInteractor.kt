@@ -189,7 +189,7 @@ constructor(
      * Whether the system is dreaming. [isDreaming] will be always be true when [isDozing] is true,
      * but not vice-versa.
      */
-    val isDreaming: Flow<Boolean> = repository.isDreaming
+    val isDreaming: StateFlow<Boolean> = repository.isDreaming
 
     /** Whether the system is dreaming with an overlay active */
     val isDreamingWithOverlay: Flow<Boolean> = repository.isDreamingWithOverlay
@@ -206,7 +206,8 @@ constructor(
                         trySendWithFailureLogging(
                             cameraLaunchSourceIntToModel(source),
                             TAG,
-                            "updated onCameraLaunchGestureDetected")
+                            "updated onCameraLaunchGestureDetected"
+                        )
                     }
                 }
 

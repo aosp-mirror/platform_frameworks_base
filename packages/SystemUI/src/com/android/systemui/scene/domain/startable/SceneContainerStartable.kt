@@ -186,7 +186,6 @@ constructor(
         applicationScope.launch {
             // TODO(b/296114544): Combine with some global hun state to make it visible!
             deviceProvisioningInteractor.isDeviceProvisioned
-                .distinctUntilChanged()
                 .flatMapLatest { isAllowedToBeVisible ->
                     if (isAllowedToBeVisible) {
                         combine(
