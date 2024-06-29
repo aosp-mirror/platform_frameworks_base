@@ -33,7 +33,6 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -83,7 +82,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class LocalDisplayAdapterTest {
@@ -126,7 +124,7 @@ public class LocalDisplayAdapterTest {
 
     private DisplayOffloadSessionImpl mDisplayOffloadSession;
 
-    private DisplayOffloader mDisplayOffloader;
+    @Mock DisplayOffloader mDisplayOffloader;
 
     private TestListener mListener = new TestListener();
 
@@ -1249,24 +1247,8 @@ public class LocalDisplayAdapterTest {
     }
 
     private void initDisplayOffloadSession() {
-        mDisplayOffloader = spy(new DisplayOffloader() {
-            @Override
-            public boolean startOffload() {
-                return true;
-            }
-
-            @Override
-            public void stopOffload() {}
-
-            @Override
-            public void onBlockingScreenOn(Runnable unblocker) {}
-
-            @Override
-            public boolean allowAutoBrightnessInDoze() {
-                return true;
-            }
-        });
-
+        when(mDisplayOffloader.startOffload()).thenReturn(true);
+        when(mDisplayOffloader.allowAutoBrightnessInDoze()).thenReturn(true);
         mDisplayOffloadSession = new DisplayOffloadSessionImpl(mDisplayOffloader,
                 mMockedDisplayPowerController);
     }

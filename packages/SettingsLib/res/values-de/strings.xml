@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Debug-Apps das Laden von GPU-Debug-Ebenen erlauben"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ausführliche Protokollierung aktivieren"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Schließt zusätzliche gerätespezifische Anbieterprotokolle in Fehlerberichten ein, die private Informationen enthalten, den Akkuverbrauch erhöhen und/oder zusätzlichen Speicher benötigen können."</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Fensteranimationsfaktor"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Übergangsanimationsfaktor"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animationsdauerfaktor"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wecker und Erinnerungen"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Dieser App erlauben, Wecker zu stellen und zeitgebundene Aktionen zu planen. Dadurch läuft die App im Hintergrund. Dies kann den Akkuverbrauch erhöhen. \n\nWenn diese Berechtigung deaktiviert ist, funktionieren bereits gestellte Wecker und zeitgebundene Ereignisse, die von dieser App geplant sind, nicht wie erwartet."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"planen, Wecker, Erinnerung, Uhr"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"Bitte nicht stören"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivieren"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"„Bitte nicht stören“ aktivieren"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nie"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Dauer"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Jedes Mal fragen"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Bis zur Deaktivierung"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(Kein Name)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Gerade eben"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Dieses Smartphone"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Dieses Tablet"</string>
@@ -708,7 +722,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Physische Tastatur"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Tastaturlayout wählen"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Standard"</string>
-    <string name="turn_screen_on_title" msgid="2662312432042116026">"Steuerelement zum Aktivieren des Displays"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Berechtigung zum Aktivieren des Displays"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Aktivieren des Displays erlauben"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Einer App erlauben, das Display zu aktivieren. Wenn du diese Erlaubnis erteilst, kann die App jederzeit das Display aktivieren – auch ohne dass du dies beabsichtigst."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> nicht mehr streamen?"</string>

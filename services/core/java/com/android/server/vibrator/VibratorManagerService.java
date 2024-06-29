@@ -2494,9 +2494,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             try {
                 ParsedVibration parsedVibration =
                         VibrationXmlParser.parseDocument(new StringReader(xml));
-                if (parsedVibration == null) {
-                    throw new IllegalArgumentException("Error parsing vibration XML " + xml);
-                }
                 VibratorInfo combinedVibratorInfo = getCombinedVibratorInfo();
                 if (combinedVibratorInfo == null) {
                     throw new IllegalStateException(

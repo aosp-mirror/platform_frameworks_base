@@ -22,6 +22,7 @@ import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.tileGridViewModel
 import com.android.systemui.qs.ui.adapter.qsSceneAdapter
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneViewModel
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 
 val Kosmos.quickSettingsShadeSceneViewModel: QuickSettingsShadeSceneViewModel by
     Kosmos.Fixture {
@@ -31,5 +32,6 @@ val Kosmos.quickSettingsShadeSceneViewModel: QuickSettingsShadeSceneViewModel by
             tileGridViewModel = tileGridViewModel,
             editModeViewModel = editModeViewModel,
             qsSceneAdapter = qsSceneAdapter,
+            shadeInteractor = shadeInteractor,
         )
     }

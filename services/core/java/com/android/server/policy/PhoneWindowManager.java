@@ -2090,8 +2090,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     "Home - Long Press");
             switch (mLongPressOnHomeBehavior) {
                 case LONG_PRESS_HOME_ALL_APPS:
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
-                    launchAllAppsAction();
+                    if (mHasFeatureLeanback) {
+                        launchAllAppsAction();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
+                    } else {
+                        launchAllAppsViaA11y();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ACCESSIBILITY_ALL_APPS);
+                    }
                     break;
                 case LONG_PRESS_HOME_ASSIST:
                     logKeyboardSystemsEvent(event, KeyboardLogEvent.LAUNCH_ASSISTANT);
@@ -3683,12 +3688,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_ALL_APPS:
-                if (!down) {
-                    mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
-                    Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
-                    msg.setAsynchronous(true);
-                    msg.sendToTarget();
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
+                if (firstDown) {
+                    if (mHasFeatureLeanback) {
+                        mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
+                        Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
+                        msg.setAsynchronous(true);
+                        msg.sendToTarget();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
+                    } else {
+                        launchAllAppsViaA11y();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ACCESSIBILITY_ALL_APPS);
+                    }
                 }
                 return true;
             case KeyEvent.KEYCODE_NOTIFICATION:

@@ -274,7 +274,9 @@ android.telephony.CellSignalStrength
 android.telephony.ModemActivityInfo
 android.telephony.ServiceState
 
+android.os.connectivity.CellularBatteryStats
 android.os.connectivity.WifiActivityEnergyInfo
+android.os.connectivity.WifiBatteryStats
 
 com.android.server.LocalServices
 

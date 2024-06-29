@@ -88,29 +88,76 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_startingState_isHidden() =
+    fun chip_startingState_isShownAsCountdownWithoutIconOrClickListener() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Starting(400)
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Countdown::class.java)
+            assertThat((latest as OngoingActivityChipModel.Shown).icon).isNull()
+            assertThat((latest as OngoingActivityChipModel.Shown).onClickListener).isNull()
+        }
+
+    // The millis we typically get from [ScreenRecordRepository] are around 2995, 1995, and 995.
+    @Test
+    fun chip_startingState_millis2995_is3() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Starting(2995)
+
+            assertThat((latest as OngoingActivityChipModel.Shown.Countdown).secondsUntilStarted)
+                .isEqualTo(3)
         }
 
     @Test
-    fun chip_recordingState_isShownWithIcon() =
+    fun chip_startingState_millis1995_is2() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Starting(1995)
+
+            assertThat((latest as OngoingActivityChipModel.Shown.Countdown).secondsUntilStarted)
+                .isEqualTo(2)
+        }
+
+    @Test
+    fun chip_startingState_millis995_is1() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Starting(995)
+
+            assertThat((latest as OngoingActivityChipModel.Shown.Countdown).secondsUntilStarted)
+                .isEqualTo(1)
+        }
+
+    @Test
+    fun chip_recordingState_isShownAsTimerWithIcon() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
             val icon = (latest as OngoingActivityChipModel.Shown).icon
             assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_screenrecord)
+            assertThat(icon.contentDescription).isNotNull()
         }
 
     @Test
-    fun chip_colorsAreRed() =
+    fun chip_startingState_colorsAreRed() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Starting(2000L)
+
+            assertThat((latest as OngoingActivityChipModel.Shown).colors).isEqualTo(ColorsModel.Red)
+        }
+
+    @Test
+    fun chip_recordingState_colorsAreRed() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
@@ -128,7 +175,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).startTimeMs).isEqualTo(1234)
+            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs).isEqualTo(1234)
 
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.DoingNothing
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
@@ -137,7 +184,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).startTimeMs).isEqualTo(5678)
+            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs).isEqualTo(5678)
         }
 
     @Test
@@ -148,8 +195,9 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value = MediaProjectionState.NotProjecting
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            assertThat(clickListener).isNotNull()
 
-            clickListener.onClick(chipView)
+            clickListener!!.onClick(chipView)
             // EndScreenRecordingDialogDelegate will test that the dialog has the right message
             verify(kosmos.mockDialogTransitionAnimator)
                 .showFromView(
@@ -169,8 +217,9 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
                 MediaProjectionState.Projecting.EntireScreen("host.package")
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            assertThat(clickListener).isNotNull()
 
-            clickListener.onClick(chipView)
+            clickListener!!.onClick(chipView)
             // EndScreenRecordingDialogDelegate will test that the dialog has the right message
             verify(kosmos.mockDialogTransitionAnimator)
                 .showFromView(
@@ -193,8 +242,9 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
                 )
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            assertThat(clickListener).isNotNull()
 
-            clickListener.onClick(chipView)
+            clickListener!!.onClick(chipView)
             // EndScreenRecordingDialogDelegate will test that the dialog has the right message
             verify(kosmos.mockDialogTransitionAnimator)
                 .showFromView(

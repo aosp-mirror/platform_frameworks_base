@@ -131,3 +131,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_bubble_bar_in_persistent_task_bar"
+    namespace: "multitasking"
+    description: "Enable bubble bar to be shown in the persistent task bar"
+    bug: "346391377"
+}

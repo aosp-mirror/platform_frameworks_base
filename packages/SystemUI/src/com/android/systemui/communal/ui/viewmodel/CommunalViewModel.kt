@@ -27,6 +27,7 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -40,6 +41,7 @@ import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
@@ -54,6 +56,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -63,6 +67,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** The default view model used for showing the communal hub. */
@@ -73,12 +78,14 @@ class CommunalViewModel
 constructor(
     @Main val mainDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
+    @Background private val bgScope: CoroutineScope,
     @Main private val resources: Resources,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     keyguardInteractor: KeyguardInteractor,
+    private val keyguardIndicationController: KeyguardIndicationController,
     communalSceneInteractor: CommunalSceneInteractor,
     private val communalInteractor: CommunalInteractor,
-    private val communalSettingsInteractor: CommunalSettingsInteractor,
+    communalSettingsInteractor: CommunalSettingsInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
     private val shadeInteractor: ShadeInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
@@ -218,9 +225,8 @@ constructor(
     }
 
     override fun onOpenWidgetEditor(
-        preselectedKey: String?,
         shouldOpenWidgetPickerOnStart: Boolean,
-    ) = communalInteractor.showWidgetEditor(preselectedKey, shouldOpenWidgetPickerOnStart)
+    ) = communalInteractor.showWidgetEditor(selectedKey.value, shouldOpenWidgetPickerOnStart)
 
     override fun onDismissCtaTile() {
         scope.launch {
@@ -229,7 +235,11 @@ constructor(
         }
     }
 
-    override fun onShowCustomizeWidgetButton() {
+    fun onClick() {
+        keyguardIndicationController.showActionToUnlock()
+    }
+
+    override fun onLongClick() {
         setCurrentPopupType(PopupType.CustomizeWidgetButton)
     }
 
@@ -298,8 +308,12 @@ constructor(
      *
      * This is needed because the notification shade does not block touches in blank areas and these
      * fall through to the glanceable hub, which we don't want.
+     *
+     * Using a StateFlow as the value does not necessarily change when hub becomes available.
      */
-    val touchesAllowed: Flow<Boolean> = not(shadeInteractor.isAnyFullyExpanded)
+    val touchesAllowed: StateFlow<Boolean> =
+        not(shadeInteractor.isAnyFullyExpanded)
+            .stateIn(bgScope, SharingStarted.Eagerly, initialValue = false)
 
     // TODO(b/339667383): remove this temporary swipe gesture handle
     /**
@@ -319,7 +333,7 @@ constructor(
 }
 
 sealed class PopupType {
-    object CtaTile : PopupType()
+    data object CtaTile : PopupType()
 
-    object CustomizeWidgetButton : PopupType()
+    data object CustomizeWidgetButton : PopupType()
 }

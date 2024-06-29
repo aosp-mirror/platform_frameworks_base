@@ -27,6 +27,8 @@ import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.core.animation.addListener
+import com.android.internal.jank.Cuj
+import com.android.wm.shell.common.InteractionJankMonitorUtils
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
@@ -103,6 +105,8 @@ class ToggleResizeDesktopTaskTransitionHandler(
                             onTaskResizeAnimationListener.onAnimationEnd(taskId)
                             finishCallback.onTransitionFinished(null)
                             boundsAnimator = null
+                            InteractionJankMonitorUtils.endTracing(
+                                Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
                         }
                     )
                     addUpdateListener { anim ->

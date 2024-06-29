@@ -18,10 +18,10 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.flags.featureFlagsClassic
-import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.ui.viewmodel.shadeSceneViewModel
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackAppearanceInteractor
 
 val Kosmos.notificationsPlaceholderViewModel by Fixture {
@@ -29,7 +29,7 @@ val Kosmos.notificationsPlaceholderViewModel by Fixture {
         dumpManager = dumpManager,
         interactor = notificationStackAppearanceInteractor,
         shadeInteractor = shadeInteractor,
+        shadeSceneViewModel = shadeSceneViewModel,
         featureFlags = featureFlagsClassic,
-        keyguardInteractor = keyguardInteractor,
     )
 }

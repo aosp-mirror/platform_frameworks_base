@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Leyfa villuleit skjákorts fyrir villuleit forrita"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Nákvæm skráning söluaðila"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Taka með viðbótarannála söluaðila fyrir tiltekin tæki í villutilkynningum, sem gætu innihaldið viðkvæmar upplýsingar, notað meiri rafhlöðuorku og/eða þurft meira geymslupláss."</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Kvarði gluggahreyfinga"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Lengd hreyfiumbreytinga"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Tímalengd hreyfiáhrifa"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Vekjarar og áminningar"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Leyfa þessu forriti að stilla vekjara og áætla aðgerðir sem þurfa að eiga sér stað innan ákveðins tímaramma. Þetta leyfir forritinu að keyra í bakgrunninum sem getur notað meiri rafhlöðuorku.\n\nEf slökkt er á þessari heimild munu núverandi vekjarar og tímasettir viðburðir sem þetta forrit stillir ekki virka."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"áætlun, vekjari, áminning, klukka"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"Ónáðið ekki"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Kveikja"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Kveikja á „Ónáðið ekki“"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Aldrei"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Lengd"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Spyrja í hvert skipti"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Þar til þú slekkur"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(Nafn vantar)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Rétt í þessu"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Þessi sími"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Þessi spjaldtölva"</string>

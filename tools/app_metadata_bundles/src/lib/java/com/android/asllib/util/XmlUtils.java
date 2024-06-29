@@ -25,6 +25,7 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class XmlUtils {
     public static final String DATA_TYPE_SEPARATOR = "_data_type_";
@@ -131,7 +132,9 @@ public class XmlUtils {
     /** Gets the top-level children with the tag name.. */
     public static List<Element> getChildrenByTagName(Node parentEle, String tagName) {
         var elements = XmlUtils.asElementList(parentEle.getChildNodes());
-        return elements.stream().filter(e -> e.getTagName().equals(tagName)).toList();
+        return elements.stream()
+                .filter(e -> e.getTagName().equals(tagName))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -286,7 +289,8 @@ public class XmlUtils {
     /** Gets a pipeline-split attribute. */
     public static List<String> getPipelineSplitAttr(Element ele, String attrName, boolean required)
             throws MalformedXmlException {
-        List<String> list = Arrays.stream(ele.getAttribute(attrName).split("\\|")).toList();
+        List<String> list =
+                Arrays.stream(ele.getAttribute(attrName).split("\\|")).collect(Collectors.toList());
         if ((list.isEmpty() || list.get(0).isEmpty()) && required) {
             throw new MalformedXmlException(
                     String.format(
@@ -315,7 +319,7 @@ public class XmlUtils {
         List<Element> boolEles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_BOOLEAN).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (boolEles.size() > 1) {
             throw new MalformedXmlException(
                     String.format(
@@ -346,7 +350,7 @@ public class XmlUtils {
         List<Element> longEles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_LONG).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (longEles.size() > 1) {
             throw new MalformedXmlException(
                     String.format(
@@ -377,7 +381,7 @@ public class XmlUtils {
         List<Element> eles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_STRING).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (eles.size() > 1) {
             throw new MalformedXmlException(
                     String.format(
@@ -405,7 +409,7 @@ public class XmlUtils {
         List<Element> eles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_PBUNDLE_AS_MAP).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (eles.size() > 1) {
             throw new MalformedXmlException(
                     String.format(
@@ -449,7 +453,7 @@ public class XmlUtils {
         List<Element> intArrayEles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_INT_ARRAY).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (intArrayEles.size() > 1) {
             throw new MalformedXmlException(
                     String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
@@ -502,7 +506,7 @@ public class XmlUtils {
         List<Element> arrayEles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_STRING_ARRAY).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (arrayEles.size() > 1) {
             throw new MalformedXmlException(
                     String.format(

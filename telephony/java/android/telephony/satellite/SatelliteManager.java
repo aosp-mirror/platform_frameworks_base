@@ -371,6 +371,24 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_MODEM_TIMEOUT = 24;
 
+    /**
+     * Telephony framework needs to access the current location of the device to perform the
+     * request. However, location in the settings is disabled by users.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_RESULT_LOCATION_DISABLED = 25;
+
+    /**
+     * Telephony framework needs to access the current location of the device to perform the
+     * request. However, Telephony fails to fetch the current location from location service.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_RESULT_LOCATION_NOT_AVAILABLE = 26;
+
     /** @hide */
     @IntDef(prefix = {"SATELLITE_RESULT_"}, value = {
             SATELLITE_RESULT_SUCCESS,
@@ -397,7 +415,9 @@ public final class SatelliteManager {
             SATELLITE_RESULT_REQUEST_IN_PROGRESS,
             SATELLITE_RESULT_MODEM_BUSY,
             SATELLITE_RESULT_ILLEGAL_STATE,
-            SATELLITE_RESULT_MODEM_TIMEOUT
+            SATELLITE_RESULT_MODEM_TIMEOUT,
+            SATELLITE_RESULT_LOCATION_DISABLED,
+            SATELLITE_RESULT_LOCATION_NOT_AVAILABLE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteResult {}

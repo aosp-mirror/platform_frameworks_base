@@ -129,24 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Prestante zaznamenávať obsah aplikácie &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Prestanete zdieľať obsah aplikácie &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
-    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Prestanete prenášať obsah aplikácie &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -382,8 +379,8 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Rekordér obrazovky"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Začať"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ukončiť"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Problém s nahrávaním"</string>
-    <string name="qs_record_issue_start" msgid="2979831312582567056">"Začnite"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Nahrať problém"</string>
+    <string name="qs_record_issue_start" msgid="2979831312582567056">"Začať"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Zastavte"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Hlásenie chyby"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Čo v zariadení bolo ovplyvnené?"</string>
@@ -493,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"vybrať miniaplikáciu"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"odstrániť miniaplikáciu"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"prepnúť vybranú miniaplikáciu"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Prepnutie používateľa"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rozbaľovacia ponuka"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Všetky aplikácie a údaje v tejto relácii budú odstránené."</string>
@@ -546,6 +549,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Spustiť"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Žiadne upozornenia"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Žiadne nové upozornenia"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Adaptívne upozornenia sú zap."</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Zariadenie teraz zníži hlasitosť a zredukuje vyskakovacie okná na obrazovke na dve až štyri minúty, keď dostanete veľa upozornení v krátkom čase."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Vypnúť"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Odomknutím zobrazíte staršie upozornenia"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Toto zariadenie spravuje tvoj rodič"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Vaša organizácia spravuje toto zariadenie a môže sledovať sieťovú premávku"</string>
@@ -1201,8 +1207,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Klepnutím si zobrazíte ďalšie informácie"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Žiadny budík"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"zadať zámku obrazovky"</string>
-    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
-    <skip />
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Dotknite sa senzora odtlačkov prstov. Ide o kratšie tlačidlo na boku telefónu."</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Senzor odtlačkov prstov"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"overte"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"vstúpte do zariadenia"</string>
@@ -1361,6 +1366,10 @@
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Prejsť späť"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Ak chcete prejsť späť, potiahnite doľava alebo doprava troma prstami kdekoľvek na touchpade."</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Tri prsty na touchpade pohybujúce sa doprava a doľava"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Obrazovka zariadenia, na ktorej je animácia gesta späť"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Podsvietenie klávesnice"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. úroveň z %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Ovládanie domácnosti"</string>

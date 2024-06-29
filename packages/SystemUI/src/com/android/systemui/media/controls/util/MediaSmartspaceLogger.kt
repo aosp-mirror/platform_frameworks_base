@@ -18,6 +18,8 @@ package com.android.systemui.media.controls.util
 
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shared.system.SysUiStatsLog
 import javax.inject.Inject
 
@@ -69,7 +71,7 @@ class MediaSmartspaceLogger @Inject constructor() {
      * @param eventId id of the event. eg: dismiss, click, or seen.
      * @param instanceId id to uniquely identify a card.
      * @param uid uid for the application that media comes from.
-     * @param location location of media carousel holding media card.
+     * @param surface location of media carousel holding media card.
      * @param cardinality number of card in carousel.
      * @param isRecommendationCard whether media card being logged is a recommendations card.
      * @param isSsReactivated indicates resume media card is reactivated by Smartspace
@@ -81,10 +83,12 @@ class MediaSmartspaceLogger @Inject constructor() {
         eventId: Int,
         instanceId: Int,
         uid: Int,
-        location: Int,
+        surface: Int,
         cardinality: Int,
         isRecommendationCard: Boolean = false,
         isSsReactivated: Boolean = false,
+        interactedSubcardRank: Int = 0,
+        interactedSubcardCardinality: Int = 0,
         rank: Int = 0,
         isSwipeToDismiss: Boolean = false,
     ) {
@@ -92,10 +96,12 @@ class MediaSmartspaceLogger @Inject constructor() {
             eventId,
             instanceId,
             uid,
-            surfaces = intArrayOf(location),
+            surfaces = intArrayOf(surface),
             cardinality,
             isRecommendationCard,
             isSsReactivated,
+            interactedSubcardRank,
+            interactedSubcardCardinality,
             rank = rank,
             isSwipeToDismiss = isSwipeToDismiss,
         )
@@ -187,5 +193,27 @@ class MediaSmartspaceLogger @Inject constructor() {
         const val SMARTSPACE_CARD_CLICK_EVENT = 760
         const val SMARTSPACE_CARD_DISMISS_EVENT = 761
         const val SMARTSPACE_CARD_SEEN_EVENT = 800
+
+        /**
+         * Get the location of media view given [currentEndLocation]
+         *
+         * @return location used for Smartspace logging
+         */
+        fun getSurface(location: Int): Int {
+            SceneContainerFlag.isUnexpectedlyInLegacyMode()
+            return when (location) {
+                MediaHierarchyManager.LOCATION_QQS,
+                MediaHierarchyManager.LOCATION_QS -> {
+                    SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE
+                }
+                MediaHierarchyManager.LOCATION_LOCKSCREEN -> {
+                    SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN
+                }
+                MediaHierarchyManager.LOCATION_DREAM_OVERLAY -> {
+                    SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY
+                }
+                else -> SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DEFAULT_SURFACE
+            }
+        }
     }
 }

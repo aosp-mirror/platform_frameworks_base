@@ -24,6 +24,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.app.AutomaticZenRule;
 import android.net.Uri;
+import android.service.notification.Condition;
+import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 
 import org.junit.Test;
@@ -37,6 +39,7 @@ public class ZenModeTest {
 
     private static final AutomaticZenRule ZEN_RULE =
             new AutomaticZenRule.Builder("Driving", Uri.parse("drive"))
+                    .setPackage("com.some.driving.thing")
                     .setType(AutomaticZenRule.TYPE_DRIVING)
                     .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
                     .setZenPolicy(ZEN_POLICY)
@@ -44,7 +47,7 @@ public class ZenModeTest {
 
     @Test
     public void testBasicMethods() {
-        ZenMode zenMode = new ZenMode("id", ZEN_RULE, true);
+        ZenMode zenMode = new ZenMode("id", ZEN_RULE, zenConfigRuleFor(ZEN_RULE, true));
 
         assertThat(zenMode.getId()).isEqualTo("id");
         assertThat(zenMode.getRule()).isEqualTo(ZEN_RULE);
@@ -60,21 +63,63 @@ public class ZenModeTest {
     }
 
     @Test
+    public void constructor_enabledRule_statusEnabled() {
+        AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(true).build();
+        ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, false);
+
+        ZenMode mode = new ZenMode("id", azr, configZenRule);
+        assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.ENABLED);
+        assertThat(mode.isActive()).isFalse();
+    }
+
+    @Test
+    public void constructor_activeRule_statusActive() {
+        AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(true).build();
+        ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, true);
+
+        ZenMode mode = new ZenMode("id", azr, configZenRule);
+        assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.ENABLED_AND_ACTIVE);
+        assertThat(mode.isActive()).isTrue();
+    }
+
+    @Test
+    public void constructor_disabledRuleByUser_statusDisabledByUser() {
+        AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(false).build();
+        ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, false);
+        configZenRule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_USER;
+
+        ZenMode mode = new ZenMode("id", azr, configZenRule);
+        assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.DISABLED_BY_USER);
+    }
+
+    @Test
+    public void constructor_disabledRuleByOther_statusDisabledByOther() {
+        AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(false).build();
+        ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, false);
+        configZenRule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_APP;
+
+        ZenMode mode = new ZenMode("id", azr, configZenRule);
+        assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.DISABLED_BY_OTHER);
+    }
+
+    @Test
     public void getPolicy_interruptionFilterPriority_returnsZenPolicy() {
-        ZenMode zenMode = new ZenMode("id", new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+        AutomaticZenRule azr = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
                 .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
                 .setZenPolicy(ZEN_POLICY)
-                .build(), false);
+                .build();
+        ZenMode zenMode = new ZenMode("id", azr, zenConfigRuleFor(azr, false));
 
         assertThat(zenMode.getPolicy()).isEqualTo(ZEN_POLICY);
     }
 
     @Test
     public void getPolicy_interruptionFilterAlarms_returnsPolicyAllowingAlarms() {
-        ZenMode zenMode = new ZenMode("id", new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+        AutomaticZenRule azr = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
                 .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
                 .setZenPolicy(ZEN_POLICY) // should be ignored
-                .build(), false);
+                .build();
+        ZenMode zenMode = new ZenMode("id", azr, zenConfigRuleFor(azr, false));
 
         assertThat(zenMode.getPolicy()).isEqualTo(
                 new ZenPolicy.Builder()
@@ -87,10 +132,11 @@ public class ZenModeTest {
 
     @Test
     public void getPolicy_interruptionFilterNone_returnsPolicyAllowingNothing() {
-        ZenMode zenMode = new ZenMode("id", new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+        AutomaticZenRule azr = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
                 .setInterruptionFilter(INTERRUPTION_FILTER_NONE)
                 .setZenPolicy(ZEN_POLICY) // should be ignored
-                .build(), false);
+                .build();
+        ZenMode zenMode = new ZenMode("id", azr, zenConfigRuleFor(azr, false));
 
         assertThat(zenMode.getPolicy()).isEqualTo(
                 new ZenPolicy.Builder()
@@ -102,9 +148,10 @@ public class ZenModeTest {
 
     @Test
     public void setPolicy_setsInterruptionFilterPriority() {
-        ZenMode zenMode = new ZenMode("id", new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+        AutomaticZenRule azr = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
                 .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
-                .build(), false);
+                .build();
+        ZenMode zenMode = new ZenMode("id", azr, zenConfigRuleFor(azr, false));
 
         zenMode.setPolicy(ZEN_POLICY);
 
@@ -112,5 +159,16 @@ public class ZenModeTest {
                 INTERRUPTION_FILTER_PRIORITY);
         assertThat(zenMode.getPolicy()).isEqualTo(ZEN_POLICY);
         assertThat(zenMode.getRule().getZenPolicy()).isEqualTo(ZEN_POLICY);
+    }
+
+    private static ZenModeConfig.ZenRule zenConfigRuleFor(AutomaticZenRule azr, boolean isActive) {
+        ZenModeConfig.ZenRule zenRule = new ZenModeConfig.ZenRule();
+        zenRule.pkg = azr.getPackageName();
+        zenRule.conditionId = azr.getConditionId();
+        zenRule.enabled = azr.isEnabled();
+        if (isActive) {
+            zenRule.condition = new Condition(azr.getConditionId(), "active", Condition.STATE_TRUE);
+        }
+        return zenRule;
     }
 }

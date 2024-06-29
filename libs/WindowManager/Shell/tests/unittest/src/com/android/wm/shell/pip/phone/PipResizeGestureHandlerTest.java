@@ -114,8 +114,8 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
         final PipBoundsAlgorithm pipBoundsAlgorithm = new PipBoundsAlgorithm(mContext,
                 mPipBoundsState, pipSnapAlgorithm, pipKeepClearAlgorithm, mPipDisplayLayoutState,
                 mSizeSpecSource);
-        final PipMotionHelper motionHelper = new PipMotionHelper(mContext, mPipBoundsState,
-                mPipTaskOrganizer, mPhonePipMenuController, pipSnapAlgorithm,
+        final PipMotionHelper motionHelper = new PipMotionHelper(mContext, mMainExecutor,
+                mPipBoundsState, mPipTaskOrganizer, mPhonePipMenuController, pipSnapAlgorithm,
                 mMockPipTransitionController, mFloatingContentCoordinator,
                 Optional.empty() /* pipPerfHintControllerOptional */);
 

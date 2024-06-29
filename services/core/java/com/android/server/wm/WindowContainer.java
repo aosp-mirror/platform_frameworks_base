@@ -3986,6 +3986,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * Returns {@code true} if this window container belongs to a different sync group than the
+     * given group.
+     */
+    boolean isDifferentSyncGroup(@Nullable BLASTSyncEngine.SyncGroup group) {
+        if (group == null) return false;
+        final BLASTSyncEngine.SyncGroup thisGroup = getSyncGroup();
+        if (thisGroup == null || group == thisGroup) return false;
+        Slog.d(TAG, this + " uses a different SyncGroup, current=" + thisGroup.mSyncId
+                + " given=" + group.mSyncId);
+        return true;
+    }
+
+    /**
      * Recursively finishes/cleans-up sync state of this subtree and collects all the sync
      * transactions into `outMergedTransaction`.
      * @param outMergedTransaction A transaction to merge all the recorded sync operations into.
@@ -3994,10 +4007,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     void finishSync(Transaction outMergedTransaction, @Nullable BLASTSyncEngine.SyncGroup group,
             boolean cancel) {
-        if (mSyncState == SYNC_STATE_NONE) return;
-        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
-        // If it's null, then we need to clean-up anyways.
-        if (syncGroup != null && group != syncGroup) return;
+        if (mSyncState == SYNC_STATE_NONE) {
+            if (mSyncGroup != null) {
+                Slog.e(TAG, "finishSync: stale group " + mSyncGroup.mSyncId + " of " + this);
+                mSyncGroup = null;
+            }
+            return;
+        }
+        if (isDifferentSyncGroup(group)) return;
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "finishSync cancel=%b for %s", cancel, this);
         outMergedTransaction.merge(mSyncTransaction);
         for (int i = mChildren.size() - 1; i >= 0; --i) {

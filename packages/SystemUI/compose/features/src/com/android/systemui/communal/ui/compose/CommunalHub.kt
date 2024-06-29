@@ -25,7 +25,6 @@ import android.widget.FrameLayout
 import android.widget.RemoteViews
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -71,7 +70,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -99,14 +97,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
@@ -126,13 +126,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.animation.Easings.Emphasized
@@ -143,7 +141,6 @@ import com.android.internal.R.dimen.system_app_widget_background_radius
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.ui.compose.Dimensions.CardOutlineWidth
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.compose.extensions.detectLongPressGesture
 import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
@@ -151,7 +148,6 @@ import com.android.systemui.communal.ui.compose.extensions.observeTaps
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
-import com.android.systemui.communal.ui.viewmodel.PopupType
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
@@ -171,7 +167,6 @@ fun CommunalHub(
 ) {
     val communalContent by
         viewModel.communalContent.collectAsStateWithLifecycle(initialValue = emptyList())
-    val currentPopup by viewModel.currentPopup.collectAsStateWithLifecycle(initialValue = null)
     var removeButtonCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     var toolbarSize: IntSize? by remember { mutableStateOf(null) }
     var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
@@ -213,43 +208,29 @@ fun CommunalHub(
                 }
                 .thenIf(!viewModel.isEditMode && !isEmptyState) {
                     Modifier.pointerInput(
-                            gridState,
-                            contentOffset,
-                            communalContent,
-                            gridCoordinates
-                        ) {
-                            detectLongPressGesture { offset ->
-                                // Deduct both grid offset relative to its container and content
-                                // offset.
-                                val adjustedOffset =
-                                    gridCoordinates?.let {
-                                        offset - it.positionInWindow() - contentOffset
-                                    }
-                                val index =
-                                    adjustedOffset?.let { firstIndexAtOffset(gridState, it) }
-                                // Display the button only when the gesture initiates from widgets,
-                                // the CTA tile, or an empty area on the screen. UMO/smartspace have
-                                // their own long-press handlers. To prevent user confusion, we
-                                // should
-                                // not display this button.
-                                if (
-                                    index == null ||
-                                        communalContent[index].isWidgetContent() ||
-                                        communalContent[index] is
-                                            CommunalContentModel.CtaTileInViewMode
-                                ) {
-                                    viewModel.onShowCustomizeWidgetButton()
+                        gridState,
+                        contentOffset,
+                        communalContent,
+                        gridCoordinates
+                    ) {
+                        detectLongPressGesture { offset ->
+                            // Deduct both grid offset relative to its container and content
+                            // offset.
+                            val adjustedOffset =
+                                gridCoordinates?.let {
+                                    offset - it.positionInWindow() - contentOffset
                                 }
-                                val key =
-                                    index?.let { keyAtIndexIfEditable(communalContent, index) }
+                            val index = adjustedOffset?.let { firstIndexAtOffset(gridState, it) }
+                            val key = index?.let { keyAtIndexIfEditable(communalContent, index) }
+                            // Handle long-click on widgets and set the selected index
+                            // correctly. We only handle widgets here because long click on
+                            // empty spaces is handled by CommunalPopupSection.
+                            if (key != null) {
+                                viewModel.onLongClick()
                                 viewModel.setSelectedKey(key)
                             }
                         }
-                        .onPreviewKeyEvent {
-                            onKeyEvent(viewModel)
-                            false
-                        }
-                        .motionEventSpy { onMotionEvent(viewModel) }
+                    }
                 },
     ) {
         AccessibilityContainer(viewModel) {
@@ -342,22 +323,6 @@ fun CommunalHub(
                 )
             }
         }
-        if (currentPopup == PopupType.CtaTile) {
-            PopupOnDismissCtaTile(viewModel::onHidePopup)
-        }
-
-        AnimatedVisibility(
-            visible = currentPopup == PopupType.CustomizeWidgetButton,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            ButtonToEditWidgets(
-                onClick = {
-                    viewModel.onHidePopup()
-                    viewModel.onOpenWidgetEditor(selectedKey.value)
-                },
-                onHide = { viewModel.onHidePopup() }
-            )
-        }
 
         if (viewModel is CommunalViewModel && dialogFactory != null) {
             val isEnableWidgetDialogShowing by
@@ -411,14 +376,6 @@ fun CommunalHub(
             }
         }
     }
-}
-
-private fun onKeyEvent(viewModel: BaseCommunalViewModel) {
-    viewModel.signalUserInteraction()
-}
-
-private fun onMotionEvent(viewModel: BaseCommunalViewModel) {
-    viewModel.signalUserInteraction()
 }
 
 @Composable
@@ -527,6 +484,7 @@ private fun BoxScope.CommunalHubLazyGrid(
             rememberDragAndDropTargetState(
                 gridState = gridState,
                 contentListState = contentListState,
+                contentOffset = contentOffset,
                 updateDragPositionForRemove = updateDragPositionForRemove
             )
 
@@ -589,7 +547,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                 }
             } else {
                 CommunalContent(
-                    modifier = cardModifier.animateItemPlacement(),
+                    modifier = cardModifier.animateItem(),
                     model = list[index],
                     viewModel = viewModel,
                     size = size,
@@ -821,107 +779,6 @@ private fun ToolbarButton(
 }
 
 @Composable
-private fun AnimatedVisibilityScope.ButtonToEditWidgets(
-    onClick: () -> Unit,
-    onHide: () -> Unit,
-) {
-    Popup(
-        alignment = Alignment.TopCenter,
-        offset = IntOffset(0, 40),
-        onDismissRequest = onHide,
-    ) {
-        val colors = LocalAndroidColorScheme.current
-        Button(
-            modifier =
-                Modifier.height(56.dp)
-                    .graphicsLayer { transformOrigin = TransformOrigin(0f, 0f) }
-                    .animateEnterExit(
-                        enter =
-                            fadeIn(
-                                initialAlpha = 0f,
-                                animationSpec = tween(durationMillis = 83, easing = LinearEasing)
-                            ),
-                        exit =
-                            fadeOut(
-                                animationSpec =
-                                    tween(
-                                        durationMillis = 83,
-                                        delayMillis = 167,
-                                        easing = LinearEasing
-                                    )
-                            )
-                    )
-                    .background(colors.secondary, RoundedCornerShape(50.dp)),
-            onClick = onClick,
-        ) {
-            Row(
-                modifier =
-                    Modifier.animateEnterExit(
-                        enter =
-                            fadeIn(
-                                animationSpec =
-                                    tween(
-                                        durationMillis = 167,
-                                        delayMillis = 83,
-                                        easing = LinearEasing
-                                    )
-                            ),
-                        exit =
-                            fadeOut(
-                                animationSpec = tween(durationMillis = 167, easing = LinearEasing)
-                            )
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Widgets,
-                    contentDescription = stringResource(R.string.button_to_configure_widgets_text),
-                    tint = colors.onSecondary,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = stringResource(R.string.button_to_configure_widgets_text),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = colors.onSecondary
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun PopupOnDismissCtaTile(onHidePopup: () -> Unit) {
-    Popup(
-        alignment = Alignment.TopCenter,
-        offset = IntOffset(0, 40),
-        onDismissRequest = onHidePopup
-    ) {
-        val colors = LocalAndroidColorScheme.current
-        Row(
-            modifier =
-                Modifier.height(56.dp)
-                    .background(colors.secondary, RoundedCornerShape(50.dp))
-                    .padding(16.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.TouchApp,
-                contentDescription = stringResource(R.string.popup_on_dismiss_cta_tile_text),
-                tint = colors.onSecondary,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                text = stringResource(R.string.popup_on_dismiss_cta_tile_text),
-                style = MaterialTheme.typography.titleSmall,
-                color = colors.onSecondary,
-            )
-        }
-    }
-}
-
-@Composable
 private fun filledButtonColors(): ButtonColors {
     val colors = LocalAndroidColorScheme.current
     return ButtonDefaults.buttonColors(
@@ -968,13 +825,26 @@ private fun CommunalContent(
 
 /** Creates an empty card used to highlight a particular spot on the grid. */
 @Composable
-fun HighlightedItem(modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(CardOutlineWidth, LocalAndroidColorScheme.current.tertiaryFixed),
-        shape = RoundedCornerShape(16.dp)
-    ) {}
+fun HighlightedItem(modifier: Modifier = Modifier, alpha: Float = 1.0f) {
+    val brush = SolidColor(LocalAndroidColorScheme.current.primaryFixed)
+    Box(
+        modifier =
+            // drawBehind lets us draw outside the bounds of the widgets so that we don't need to
+            // resize grid items to account for the border.
+            modifier.drawBehind {
+                // 8dp of padding between the widget and the highlight on every side.
+                val padding = 8.dp.toPx()
+                drawRoundRect(
+                    brush,
+                    alpha = alpha,
+                    topLeft = Offset(-padding, -padding),
+                    size =
+                        Size(width = size.width + padding * 2, height = size.height + padding * 2),
+                    cornerRadius = CornerRadius(37.dp.toPx()),
+                    style = Stroke(width = 3.dp.toPx())
+                )
+            }
+    )
 }
 
 /** Presents a CTA tile at the end of the grid, to customize the hub. */
