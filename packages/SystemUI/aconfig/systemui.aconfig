@@ -611,3 +611,13 @@ flag {
     description: "Refactors media code to follow the recommended architecture"
     bug: "326408371"
 }
+
+flag {
+    name: "enforce_brightness_base_user_restriction"
+    namespace: "systemui"
+    description: "Enforce BaseUserRestriction for DISALLOW_CONFIG_BRIGHTNESS."
+    bug: "329205638"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
