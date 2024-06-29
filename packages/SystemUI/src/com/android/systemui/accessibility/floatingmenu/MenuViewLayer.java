@@ -469,6 +469,7 @@ class MenuViewLayer extends FrameLayout implements
 
     private void onSpringAnimationsEndAction() {
         if (mShouldShowDockTooltip) {
+            mEduTooltipView.ifPresent(this::removeTooltip);
             mEduTooltipView = Optional.of(new MenuEduTooltipView(mContext, mMenuViewAppearance));
             mEduTooltipView.ifPresent(view -> addTooltipView(view,
                     getContext().getText(R.string.accessibility_floating_button_docking_tooltip),

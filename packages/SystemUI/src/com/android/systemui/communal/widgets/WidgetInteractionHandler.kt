@@ -34,17 +34,17 @@ constructor(
     private val activityStarter: ActivityStarter,
 ) : RemoteViews.InteractionHandler {
 
-    private val delegate = InteractionHandlerDelegate(
-        findViewToAnimate = { view -> view is CommunalAppWidgetHostView },
-        intentStarter = this::startIntent,
-    )
+    private val delegate =
+        InteractionHandlerDelegate(
+            findViewToAnimate = { view -> view is CommunalAppWidgetHostView },
+            intentStarter = this::startIntent,
+        )
 
     override fun onInteraction(
         view: View,
         pendingIntent: PendingIntent,
         response: RemoteViews.RemoteResponse
     ): Boolean = delegate.onInteraction(view, pendingIntent, response)
-
 
     private fun startIntent(
         pendingIntent: PendingIntent,
@@ -59,6 +59,8 @@ constructor(
             controller,
             fillInIntent,
             extraOptions.toBundle(),
+            // TODO(b/325110448): UX to provide copy
+            /* customMessage = */ null,
         )
         return true
     }

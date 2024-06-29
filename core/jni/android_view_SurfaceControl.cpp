@@ -22,6 +22,7 @@
 #include <android/graphics/properties.h>
 #include <android/graphics/region.h>
 #include <android/gui/BnWindowInfosReportedListener.h>
+#include <android/gui/JankData.h>
 #include <android/hardware/display/IDeviceProductInfoConstants.h>
 #include <android/os/IInputConstants.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -2062,11 +2063,13 @@ public:
         env->DeleteWeakGlobalRef(mOnJankDataListenerWeak);
     }
 
-    void onJankDataAvailable(const std::vector<JankData>& jankData) {
+    bool onJankDataAvailable(const std::vector<gui::JankData>& jankData) override {
         JNIEnv* env = getEnv();
 
         jobject target = env->NewLocalRef(mOnJankDataListenerWeak);
-        if (target == nullptr) return;
+        if (target == nullptr) {
+            return false;
+        }
 
         jobjectArray jJankDataArray = env->NewObjectArray(jankData.size(),
                 gJankDataClassInfo.clazz, nullptr);
@@ -2082,6 +2085,8 @@ public:
                 jJankDataArray);
         env->DeleteLocalRef(jJankDataArray);
         env->DeleteLocalRef(target);
+
+        return true;
     }
 
 private:
@@ -2096,29 +2101,49 @@ private:
     jobject mOnJankDataListenerWeak;
 };
 
-static void nativeAddJankDataListener(JNIEnv* env, jclass clazz,
-                                       jlong jankDataCallbackListenerPtr,
-                                       jlong nativeSurfaceControl) {
+static jlong nativeCreateJankDataListenerWrapper(JNIEnv* env, jclass clazz,
+                                                 jlong nativeSurfaceControl, jobject listener) {
     sp<SurfaceControl> surface(reinterpret_cast<SurfaceControl *>(nativeSurfaceControl));
     if (surface == nullptr) {
+        return 0;
+    }
+
+    sp<JankDataListenerWrapper> wrapper = sp<JankDataListenerWrapper>::make(env, listener);
+    if (wrapper->addListener(std::move(surface)) != OK) {
+        return 0;
+    }
+
+    wrapper->incStrong((void*)nativeCreateJankDataListenerWrapper);
+    return reinterpret_cast<jlong>(wrapper.get());
+}
+
+static void destroyJankDatalistenerWrapper(void* ptr) {
+    JankDataListenerWrapper* wrapper = reinterpret_cast<JankDataListenerWrapper*>(ptr);
+    if (wrapper == nullptr) {
         return;
     }
-    sp<JankDataListenerWrapper> wrapper =
-            reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
-    TransactionCompletedListener::getInstance()->addJankListener(wrapper, surface);
+    wrapper->decStrong((void*)nativeCreateJankDataListenerWrapper);
 }
 
-static void nativeRemoveJankDataListener(JNIEnv* env, jclass clazz,
-                                          jlong jankDataCallbackListenerPtr) {
-    sp<JankDataListenerWrapper> wrapper =
-            reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
-    TransactionCompletedListener::getInstance()->removeJankListener(wrapper);
+static jlong nativeGetJankDataListenerWrapperFinalizer() {
+    return reinterpret_cast<jlong>(&destroyJankDatalistenerWrapper);
 }
 
-static jlong nativeCreateJankDataListenerWrapper(JNIEnv* env, jclass clazz,
-                                                 jobject jankDataListenerObject) {
-    return reinterpret_cast<jlong>(
-            new JankDataListenerWrapper(env, jankDataListenerObject));
+static void nativeFlushJankData(JNIEnv* env, jclass clazz, jlong listener) {
+    sp<JankDataListenerWrapper> wrapper = reinterpret_cast<JankDataListenerWrapper*>(listener);
+    if (wrapper == nullptr) {
+        return;
+    }
+    wrapper->flushJankData();
+}
+
+static void nativeRemoveJankDataListener(JNIEnv* env, jclass clazz, jlong listener,
+                                         jlong afterVsync) {
+    sp<JankDataListenerWrapper> wrapper = reinterpret_cast<JankDataListenerWrapper*>(listener);
+    if (wrapper == nullptr) {
+        return;
+    }
+    wrapper->removeListener(afterVsync);
 }
 
 static jint nativeGetGPUContextPriority(JNIEnv* env, jclass clazz) {
@@ -2436,12 +2461,14 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeRemoveCurrentInputFocus},
     {"nativeSetFrameTimelineVsync", "(JJ)V",
             (void*)nativeSetFrameTimelineVsync },
-    {"nativeAddJankDataListener", "(JJ)V",
-            (void*)nativeAddJankDataListener },
-    {"nativeRemoveJankDataListener", "(J)V",
+    {"nativeFlushJankData", "(J)V",
+            (void*)nativeFlushJankData },
+    {"nativeRemoveJankDataListener", "(JJ)V",
             (void*)nativeRemoveJankDataListener },
-    {"nativeCreateJankDataListenerWrapper", "(Landroid/view/SurfaceControl$OnJankDataListener;)J",
+    {"nativeCreateJankDataListenerWrapper", "(JLandroid/view/SurfaceControl$OnJankDataListener;)J",
             (void*)nativeCreateJankDataListenerWrapper },
+    {"nativeGetJankDataListenerWrapperFinalizer", "()J",
+            (void*)nativeGetJankDataListenerWrapperFinalizer },
     {"nativeGetGPUContextPriority", "()I",
             (void*)nativeGetGPUContextPriority },
     {"nativeSetTransformHint", "(JI)V",
