@@ -22,7 +22,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.PictureInPictureParams;
-import android.content.ComponentName;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Matrix;
@@ -323,19 +322,6 @@ class PinnedTaskController {
         mDeferOrientationChanging = false;
         mDestRotatedBounds = null;
         mPipTransaction = null;
-    }
-
-    /**
-     * Activity is hidden (either stopped or removed), resets the last saved snap fraction
-     * so that the default bounds will be returned for the next session.
-     */
-    void onActivityHidden(ComponentName componentName) {
-        if (mPinnedTaskListener == null) return;
-        try {
-            mPinnedTaskListener.onActivityHidden(componentName);
-        } catch (RemoteException e) {
-            Slog.e(TAG_WM, "Error delivering reset reentry fraction event.", e);
-        }
     }
 
     /**

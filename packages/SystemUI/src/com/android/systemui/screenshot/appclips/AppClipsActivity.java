@@ -23,12 +23,14 @@ import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.ACTION_FINISH_FROM_TRAMPOLINE;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_NAME;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_TASK_ID;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CLIP_DATA;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_RESULT_RECEIVER;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.PERMISSION_SELF;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -299,6 +301,14 @@ public class AppClipsActivity extends ComponentActivity {
         data.putInt(Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE,
                 Intent.CAPTURE_CONTENT_FOR_NOTE_SUCCESS);
         data.putParcelable(EXTRA_SCREENSHOT_URI, uri);
+
+        if (mBacklinksIncludeDataCheckBox.getVisibility() == View.VISIBLE
+                && mBacklinksIncludeDataCheckBox.isChecked()
+                && mViewModel.getBacklinksLiveData().getValue() != null) {
+            ClipData backlinksData = mViewModel.getBacklinksLiveData().getValue().getClipData();
+            data.putParcelable(EXTRA_CLIP_DATA, backlinksData);
+        }
+
         try {
             mResultReceiver.send(Activity.RESULT_OK, data);
             logUiEvent(SCREENSHOT_FOR_NOTE_ACCEPTED);

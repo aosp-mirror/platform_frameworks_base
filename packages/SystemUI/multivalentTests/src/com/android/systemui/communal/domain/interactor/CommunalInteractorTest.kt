@@ -36,7 +36,6 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
-import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalPrefsRepository
 import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
@@ -81,7 +80,6 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -915,14 +913,6 @@ class CommunalInteractorTest : SysuiTestCase() {
             )
             runCurrent()
 
-            // Keyguard widgets are allowed.
-            kosmos.fakeSettings.putIntForUser(
-                CommunalSettingsRepositoryImpl.GLANCEABLE_HUB_CONTENT_SETTING,
-                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
-                mainUser.id
-            )
-            runCurrent()
-
             // When work profile is paused.
             whenever(userManager.isQuietModeEnabled(eq(UserHandle.of(USER_INFO_WORK.id))))
                 .thenReturn(true)
@@ -953,93 +943,6 @@ class CommunalInteractorTest : SysuiTestCase() {
                     (widgetContent!![2] as CommunalContentModel.WidgetContent.Widget).inQuietMode
                 )
                 .isFalse()
-        }
-
-    @Test
-    fun widgetContent_containsDisabledWidgets_whenCategoryNotAllowed() =
-        testScope.runTest {
-            // Communal available, and tutorial completed.
-            keyguardRepository.setKeyguardShowing(true)
-            keyguardRepository.setKeyguardOccluded(false)
-            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-
-            val userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK)
-            userRepository.setUserInfos(userInfos)
-            userTracker.set(
-                userInfos = userInfos,
-                selectedUserIndex = 0,
-            )
-            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
-            runCurrent()
-
-            // Widgets available.
-            val widget1 =
-                createWidgetWithCategory(1, AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
-            val widget2 =
-                createWidgetWithCategory(2, AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
-            val widget3 =
-                createWidgetWithCategory(3, AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
-
-            val widgetContent by collectLastValue(underTest.widgetContent)
-            kosmos.fakeSettings.putIntForUser(
-                CommunalSettingsRepositoryImpl.GLANCEABLE_HUB_CONTENT_SETTING,
-                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
-                mainUser.id
-            )
-
-            // Only the keyguard widget is enabled.
-            assertThat(widgetContent).hasSize(3)
-            assertThat(widgetContent!!.get(0))
-                .isInstanceOf(CommunalContentModel.WidgetContent.DisabledWidget::class.java)
-            assertThat(widgetContent!!.get(1))
-                .isInstanceOf(CommunalContentModel.WidgetContent.Widget::class.java)
-            assertThat(widgetContent!!.get(2))
-                .isInstanceOf(CommunalContentModel.WidgetContent.DisabledWidget::class.java)
-        }
-
-    @Test
-    fun widgetContent_allEnabled_whenCategoryAllowed() =
-        testScope.runTest {
-            // Communal available, and tutorial completed.
-            keyguardRepository.setKeyguardShowing(true)
-            keyguardRepository.setKeyguardOccluded(false)
-            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-
-            val userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK)
-            userRepository.setUserInfos(userInfos)
-            userTracker.set(
-                userInfos = userInfos,
-                selectedUserIndex = 0,
-            )
-            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
-            runCurrent()
-
-            // Widgets available.
-            val widget1 =
-                createWidgetWithCategory(1, AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
-            val widget2 =
-                createWidgetWithCategory(2, AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
-            val widget3 =
-                createWidgetWithCategory(3, AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
-
-            val widgetContent by collectLastValue(underTest.widgetContent)
-            kosmos.fakeSettings.putIntForUser(
-                CommunalSettingsRepositoryImpl.GLANCEABLE_HUB_CONTENT_SETTING,
-                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD or
-                    AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
-                mainUser.id
-            )
-
-            // All widgets are enabled.
-            assertThat(widgetContent).hasSize(3)
-            widgetContent!!.forEach { model ->
-                assertThat(model)
-                    .isInstanceOf(CommunalContentModel.WidgetContent.Widget::class.java)
-            }
         }
 
     @Test

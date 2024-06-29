@@ -2783,17 +2783,17 @@ public class SubscriptionManager {
         return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getActiveModemCount();
     }
 
-    /** @hide */
+    /**
+     * Puts phone ID and subscription ID into the {@code intent}.
+     *
+     * <p>If the subscription ID is not valid, only puts phone ID into the {@code intent}.
+     *
+     * @hide
+     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId) {
         int subId = SubscriptionManager.getSubscriptionId(phoneId);
-        if (isValidSubscriptionId(subId)) {
-            putPhoneIdAndSubIdExtra(intent, phoneId, subId);
-        } else {
-            logd("putPhoneIdAndSubIdExtra: no valid subs");
-            intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
-            intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
-        }
+        putPhoneIdAndMaybeSubIdExtra(intent, phoneId, subId);
     }
 
     /** @hide */
@@ -2803,6 +2803,23 @@ public class SubscriptionManager {
         intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
         putSubscriptionIdExtra(intent, subId);
+    }
+
+    /**
+     * Puts phone ID and subscription ID into the {@code intent}.
+     *
+     * <p>If the subscription ID is not valid, only puts phone ID into the {@code intent}.
+     *
+     * @hide
+     */
+    public static void putPhoneIdAndMaybeSubIdExtra(Intent intent, int phoneId, int subId) {
+        if (isValidSubscriptionId(subId)) {
+            putPhoneIdAndSubIdExtra(intent, phoneId, subId);
+        } else {
+            if (VDBG) logd("putPhoneIdAndMaybeSubIdExtra: invalid subId");
+            intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
+            intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
+        }
     }
 
     /**

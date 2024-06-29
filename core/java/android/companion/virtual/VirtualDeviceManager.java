@@ -1126,7 +1126,7 @@ public final class VirtualDeviceManager {
     }
 
     /**
-     * Listener for activity changes in this virtual device.
+     * Listener for activity changes and other activity events on a virtual device.
      *
      * @hide
      */
@@ -1167,6 +1167,20 @@ public final class VirtualDeviceManager {
          * @param displayId The display ID that became empty.
          */
         void onDisplayEmpty(int displayId);
+
+        /**
+         * Called when an activity launch was blocked due to a policy violation.
+         *
+         * @param displayId The display ID on which the activity tried to launch.
+         * @param componentName The component name of the blocked activity.
+         * @param userId The user ID associated with the blocked activity.
+         *
+         * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
+         * @see VirtualDevice#addActivityPolicyExemption(ComponentName)
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        default void onActivityLaunchBlocked(int displayId, @NonNull ComponentName componentName,
+                @UserIdInt int userId) {}
     }
 
     /**

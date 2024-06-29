@@ -2869,14 +2869,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public boolean isExpanded(boolean allowOnKeyguard) {
-        // System expanded should be ignored in heads up state
         final boolean isHeadsUpState = ExpandHeadsUpOnInlineReply.isEnabled()
                 && canShowHeadsUp() && isHeadsUpState();
+        // System expanded should be ignored in pinned heads up state
+        final boolean isPinned = isHeadsUpState && isPinned();
         // Heads Up Notification can be expanded when it is pinned.
         final boolean isPinnedAndExpanded =
                 isHeadsUpState && isPinnedAndExpanded();
+
         return (!shouldShowPublic()) && (!mOnKeyguard || allowOnKeyguard)
-                && (!hasUserChangedExpansion() && !isHeadsUpState
+                && (!hasUserChangedExpansion() && !isPinned
                 && (isSystemExpanded() || isSystemChildExpanded())
                 || isUserExpanded() || isPinnedAndExpanded);
     }

@@ -484,6 +484,7 @@ private fun BoxScope.CommunalHubLazyGrid(
             rememberDragAndDropTargetState(
                 gridState = gridState,
                 contentListState = contentListState,
+                contentOffset = contentOffset,
                 updateDragPositionForRemove = updateDragPositionForRemove
             )
 

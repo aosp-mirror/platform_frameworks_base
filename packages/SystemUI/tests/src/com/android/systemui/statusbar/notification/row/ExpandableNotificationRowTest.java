@@ -862,11 +862,12 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
-    public void isExpanded_systemExpandedTrueForHeadsUp_notExpanded() throws Exception {
+    public void isExpanded_HUNsystemExpandedTrueForPinned_notExpanded() throws Exception {
         // GIVEN
         final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
         row.setOnKeyguard(false);
         row.setSystemExpanded(true);
+        row.setPinned(true);
         row.setHeadsUp(true);
 
         // THEN
@@ -875,16 +876,46 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
-    public void isExpanded_systemExpandedTrueForHeadsUpDisappearRunning_notExpanded()
+    public void isExpanded_HUNsystemExpandedTrueForNotPinned_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setPinned(false);
+        row.setHeadsUp(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void isExpanded_HUNDisappearingsystemExpandedTrueForPinned_notExpanded()
             throws Exception {
         // GIVEN
         final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
         row.setOnKeyguard(false);
         row.setSystemExpanded(true);
+        row.setPinned(true);
         row.setHeadsUpAnimatingAway(true);
 
         // THEN
         assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void isExpanded_HUNDisappearingsystemExpandedTrueForNotPinned_expanded()
+            throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setPinned(false);
+        row.setHeadsUpAnimatingAway(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
     }
 
     @Test
