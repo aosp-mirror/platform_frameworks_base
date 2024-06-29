@@ -41,6 +41,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.view.InsetsFrameProvider;
+import android.view.InsetsSource;
 import android.view.SurfaceControl;
 import android.view.WindowInsets.Type.InsetsType;
 
@@ -711,14 +712,16 @@ public final class WindowContainerTransaction implements Parcelable {
     @NonNull
     public WindowContainerTransaction addInsetsSource(
             @NonNull WindowContainerToken receiver,
-            IBinder owner, int index, @InsetsType int type, Rect frame, Rect[] boundingRects) {
+            IBinder owner, int index, @InsetsType int type, Rect frame, Rect[] boundingRects,
+            @InsetsSource.Flags int flags) {
         final HierarchyOp hierarchyOp =
                 new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER)
                         .setContainer(receiver.asBinder())
                         .setInsetsFrameProvider(new InsetsFrameProvider(owner, index, type)
                                 .setSource(InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE)
                                 .setArbitraryRectangle(frame)
-                                .setBoundingRects(boundingRects))
+                                .setBoundingRects(boundingRects)
+                                .setFlags(flags))
                         .setInsetsFrameOwner(owner)
                         .build();
         mHierarchyOps.add(hierarchyOp);
