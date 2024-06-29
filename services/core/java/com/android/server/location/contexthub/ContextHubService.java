@@ -225,19 +225,20 @@ public class ContextHubService extends IContextHubService.Stub {
         @Override
         public void handleNanoappMessage(short hostEndpointId, NanoAppMessage message,
                 List<String> nanoappPermissions, List<String> messagePermissions) {
-            if (Flags.reliableMessageImplementation()
+            // Only process the message normally if not using test mode manager or if
+            // the test mode manager call returned false as this indicates it did not
+            // process the message.
+            boolean useTestModeManager = Flags.reliableMessageImplementation()
                     && Flags.reliableMessageTestModeBehavior()
-                    && mIsTestModeEnabled.get()
-                    && mTestModeManager.handleNanoappMessage(() -> {
-                        handleClientMessageCallback(mContextHubId, hostEndpointId, message,
-                                nanoappPermissions, messagePermissions);
+                    && mIsTestModeEnabled.get();
+            if (!useTestModeManager
+                    || !mTestModeManager.handleNanoappMessage(() -> {
+                        handleClientMessageCallback(mContextHubId, hostEndpointId,
+                                message, nanoappPermissions, messagePermissions);
                     }, message)) {
-                // The ContextHubTestModeManager handled the nanoapp message, so return here.
-                return;
+                handleClientMessageCallback(mContextHubId, hostEndpointId,
+                        message, nanoappPermissions, messagePermissions);
             }
-
-            handleClientMessageCallback(mContextHubId, hostEndpointId, message,
-                    nanoappPermissions, messagePermissions);
         }
 
         @Override

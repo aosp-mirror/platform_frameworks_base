@@ -32,6 +32,8 @@ import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.transition.ScrimShadeTransitionController
+import com.android.systemui.statusbar.PulseExpansionHandler
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 import javax.inject.Provider
@@ -56,6 +58,8 @@ constructor(
     private val sceneInteractorProvider: Provider<SceneInteractor>,
     private val panelExpansionInteractorProvider: Provider<PanelExpansionInteractor>,
     private val shadeExpansionStateManager: ShadeExpansionStateManager,
+    private val pulseExpansionHandler: PulseExpansionHandler,
+    private val nsslc: NotificationStackScrollLayoutController,
 ) : CoreStartable {
 
     override fun start() {
@@ -63,6 +67,7 @@ constructor(
         hydrateShadeExpansionStateManager()
         logTouchesTo(touchLog)
         scrimShadeTransitionController.init()
+        pulseExpansionHandler.setUp(nsslc)
     }
 
     private fun hydrateShadeExpansionStateManager() {

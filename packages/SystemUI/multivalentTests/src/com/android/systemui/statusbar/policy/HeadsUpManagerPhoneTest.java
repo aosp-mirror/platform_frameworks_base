@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.Handler;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper;
 
@@ -85,6 +86,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Mock private DumpManager dumpManager;
     private AvalancheController mAvalancheController;
 
+    @Mock private Handler mBgHandler;
+
     private static final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
         TestableHeadsUpManagerPhone(
                 Context context,
@@ -101,7 +104,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                 UiEventLogger uiEventLogger,
                 JavaAdapter javaAdapter,
                 ShadeInteractor shadeInteractor,
-                AvalancheController avalancheController
+                AvalancheController avalancheController,
+                Handler bgHandler
         ) {
             super(
                     context,
@@ -119,7 +123,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                     uiEventLogger,
                     javaAdapter,
                     shadeInteractor,
-                    avalancheController
+                    avalancheController,
+                    bgHandler
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
@@ -142,7 +147,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                 mUiEventLogger,
                 mJavaAdapter,
                 mShadeInteractor,
-                mAvalancheController
+                mAvalancheController,
+                mBgHandler
         );
     }
 

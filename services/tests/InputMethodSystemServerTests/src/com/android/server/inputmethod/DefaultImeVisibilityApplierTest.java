@@ -217,8 +217,8 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
             final int displayIdToShowIme = bindingController.getDisplayIdToShowIme();
             mInputMethodManagerService.hideCurrentInputLocked(mWindowToken,
                     statsToken, 0 /* flags */, null /* resultReceiver */,
-                    HIDE_SWITCH_USER);
-            mInputMethodManagerService.onUnbindCurrentMethodByReset();
+                    HIDE_SWITCH_USER, mUserId);
+            mInputMethodManagerService.onUnbindCurrentMethodByReset(mUserId);
 
             // Expects applyImeVisibility() -> hideIme() will be called to notify WM for syncing
             // the IME hidden state.
