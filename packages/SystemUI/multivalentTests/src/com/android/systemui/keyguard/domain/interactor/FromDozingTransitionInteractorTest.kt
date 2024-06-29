@@ -34,12 +34,14 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.os.PowerManager
 import android.platform.test.annotations.EnableFlags
+import android.service.dream.dreamManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
+import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -64,8 +66,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -111,6 +115,66 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // Under default conditions, we should transition to LOCKSCREEN when waking up.
+            assertThat(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.DOZING,
+                    to = KeyguardState.LOCKSCREEN,
+                )
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionToLockscreen_onWakeup_canDream_glanceableHubAvailable() =
+        testScope.runTest {
+            whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            powerInteractor.setAwakeForTest()
+            runCurrent()
+
+            // If dreaming is possible and communal is available, then we should transition to
+            // GLANCEABLE_HUB when waking up.
+            assertThat(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.DOZING,
+                    to = KeyguardState.GLANCEABLE_HUB,
+                )
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionToLockscreen_onWakeup_canNotDream_glanceableHubAvailable() =
+        testScope.runTest {
+            whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(false)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            powerInteractor.setAwakeForTest()
+            runCurrent()
+
+            // If dreaming is NOT possible but communal is available, then we should transition to
+            // LOCKSCREEN when waking up.
+            assertThat(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.DOZING,
+                    to = KeyguardState.LOCKSCREEN,
+                )
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionToLockscreen_onWakeup_canNDream_glanceableHubNotAvailable() =
+        testScope.runTest {
+            whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
+            kosmos.setCommunalAvailable(false)
+            runCurrent()
+
+            powerInteractor.setAwakeForTest()
+            runCurrent()
+
+            // If dreaming is possible but communal is NOT available, then we should transition to
+            // LOCKSCREEN when waking up.
             assertThat(transitionRepository)
                 .startedTransition(
                     from = KeyguardState.DOZING,

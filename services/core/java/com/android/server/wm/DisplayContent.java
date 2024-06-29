@@ -5047,9 +5047,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        if (!com.android.window.flags.Flags.removePrepareSurfaceInPlacement()) {
-            prepareSurfaces();
-        }
 
         // This should be called after the insets have been dispatched to clients and we have
         // committed finish drawing windows.

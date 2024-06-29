@@ -65,6 +65,7 @@ public final class UserDataRepositoryTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         SecureSettingsWrapper.startTestMode();
+
         mHandler = new Handler(Looper.getMainLooper());
         mBindingControllerFactory = new IntFunction<InputMethodBindingController>() {
 
@@ -85,8 +86,8 @@ public final class UserDataRepositoryTest {
         // Create UserDataRepository and capture the user lifecycle listener
         final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
         final var bindingControllerFactorySpy = spy(mBindingControllerFactory);
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
-                bindingControllerFactorySpy);
+        final var repository = new UserDataRepository(mHandler,
+                mMockUserManagerInternal, bindingControllerFactorySpy);
 
         verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
         final var listener = captor.getValue();
@@ -112,7 +113,8 @@ public final class UserDataRepositoryTest {
     public void testUserDataRepository_removesUserInfoOnUserRemovedEvent() {
         // Create UserDataRepository and capture the user lifecycle listener
         final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
+        final var repository = new UserDataRepository(mHandler,
+                mMockUserManagerInternal,
                 userId -> new InputMethodBindingController(userId, mMockInputMethodManagerService));
 
         verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
@@ -134,8 +136,8 @@ public final class UserDataRepositoryTest {
 
     @Test
     public void testGetOrCreate() {
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
-                mBindingControllerFactory);
+        final var repository = new UserDataRepository(mHandler,
+                mMockUserManagerInternal, mBindingControllerFactory);
 
         synchronized (ImfLock.class) {
             final var userData = repository.getOrCreate(ANY_USER_ID);

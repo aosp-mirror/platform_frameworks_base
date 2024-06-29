@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Simple container for recent tasks.  May contain either a single or pair of tasks.
@@ -50,6 +51,9 @@ public class GroupedRecentTaskInfo implements Parcelable {
     private final SplitBounds mSplitBounds;
     @GroupType
     private final int mType;
+    // TODO(b/348332802): move isMinimized inside each Task object instead once we have a
+    //  replacement for RecentTaskInfo
+    private final int[] mMinimizedTaskIds;
 
     /**
      * Create new for a single task
@@ -57,7 +61,7 @@ public class GroupedRecentTaskInfo implements Parcelable {
     public static GroupedRecentTaskInfo forSingleTask(
             @NonNull ActivityManager.RecentTaskInfo task) {
         return new GroupedRecentTaskInfo(new ActivityManager.RecentTaskInfo[]{task}, null,
-                TYPE_SINGLE);
+                TYPE_SINGLE, null /* minimizedFreeformTasks */);
     }
 
     /**
@@ -66,28 +70,51 @@ public class GroupedRecentTaskInfo implements Parcelable {
     public static GroupedRecentTaskInfo forSplitTasks(@NonNull ActivityManager.RecentTaskInfo task1,
             @NonNull ActivityManager.RecentTaskInfo task2, @Nullable SplitBounds splitBounds) {
         return new GroupedRecentTaskInfo(new ActivityManager.RecentTaskInfo[]{task1, task2},
-                splitBounds, TYPE_SPLIT);
+                splitBounds, TYPE_SPLIT, null /* minimizedFreeformTasks */);
     }
 
     /**
      * Create new for a group of freeform tasks
      */
     public static GroupedRecentTaskInfo forFreeformTasks(
-            @NonNull ActivityManager.RecentTaskInfo... tasks) {
-        return new GroupedRecentTaskInfo(tasks, null, TYPE_FREEFORM);
+            @NonNull ActivityManager.RecentTaskInfo[] tasks,
+            @NonNull Set<Integer> minimizedFreeformTasks) {
+        return new GroupedRecentTaskInfo(
+                tasks,
+                null /* splitBounds */,
+                TYPE_FREEFORM,
+                minimizedFreeformTasks.stream().mapToInt(i -> i).toArray());
     }
 
-    private GroupedRecentTaskInfo(@NonNull ActivityManager.RecentTaskInfo[] tasks,
-            @Nullable SplitBounds splitBounds, @GroupType int type) {
+    private GroupedRecentTaskInfo(
+            @NonNull ActivityManager.RecentTaskInfo[] tasks,
+            @Nullable SplitBounds splitBounds,
+            @GroupType int type,
+            @Nullable int[] minimizedFreeformTaskIds) {
         mTasks = tasks;
         mSplitBounds = splitBounds;
         mType = type;
+        mMinimizedTaskIds = minimizedFreeformTaskIds;
+        ensureAllMinimizedIdsPresent(tasks, minimizedFreeformTaskIds);
+    }
+
+    private static void ensureAllMinimizedIdsPresent(
+            @NonNull ActivityManager.RecentTaskInfo[] tasks,
+            @Nullable int[] minimizedFreeformTaskIds) {
+        if (minimizedFreeformTaskIds == null) {
+            return;
+        }
+        if (!Arrays.stream(minimizedFreeformTaskIds).allMatch(
+                taskId -> Arrays.stream(tasks).anyMatch(task -> task.taskId == taskId))) {
+            throw new IllegalArgumentException("Minimized task IDs contain non-existent Task ID.");
+        }
     }
 
     GroupedRecentTaskInfo(Parcel parcel) {
         mTasks = parcel.createTypedArray(ActivityManager.RecentTaskInfo.CREATOR);
         mSplitBounds = parcel.readTypedObject(SplitBounds.CREATOR);
         mType = parcel.readInt();
+        mMinimizedTaskIds = parcel.createIntArray();
     }
 
     /**
@@ -135,6 +162,10 @@ public class GroupedRecentTaskInfo implements Parcelable {
         return mType;
     }
 
+    public int[] getMinimizedTaskIds() {
+        return mMinimizedTaskIds;
+    }
+
     @Override
     public String toString() {
         StringBuilder taskString = new StringBuilder();
@@ -161,6 +192,8 @@ public class GroupedRecentTaskInfo implements Parcelable {
                 taskString.append("TYPE_FREEFORM");
                 break;
         }
+        taskString.append(", Minimized Task IDs: ");
+        taskString.append(Arrays.toString(mMinimizedTaskIds));
         return taskString.toString();
     }
 
@@ -181,6 +214,7 @@ public class GroupedRecentTaskInfo implements Parcelable {
         parcel.writeTypedArray(mTasks, flags);
         parcel.writeTypedObject(mSplitBounds, flags);
         parcel.writeInt(mType);
+        parcel.writeIntArray(mMinimizedTaskIds);
     }
 
     @Override

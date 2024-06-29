@@ -185,7 +185,11 @@ private fun SceneScope.QuickSettingsScene(
 
     BrightnessMirror(
         viewModel = viewModel.brightnessMirrorViewModel,
-        qsSceneAdapter = viewModel.qsSceneAdapter
+        qsSceneAdapter = viewModel.qsSceneAdapter,
+        modifier =
+            Modifier.thenIf(cutoutLocation != CutoutLocation.CENTER) {
+                Modifier.displayCutoutPadding()
+            }
     )
 
     val shouldPunchHoleBehindScrim =

@@ -22,6 +22,7 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.Flags
@@ -92,6 +93,8 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                         chipView.requireViewById(R.id.ongoing_activity_chip_icon)
                     val chipTimeView: ChipChronometer =
                         chipView.requireViewById(R.id.ongoing_activity_chip_time)
+                    val chipTextView: TextView =
+                        chipView.requireViewById(R.id.ongoing_activity_chip_text)
                     val chipBackgroundView =
                         chipView.requireViewById<ChipBackgroundContainer>(
                             R.id.ongoing_activity_chip_background
@@ -101,22 +104,29 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                             when (chipModel) {
                                 is OngoingActivityChipModel.Shown -> {
                                     // Data
-                                    IconViewBinder.bind(chipModel.icon, chipIconView)
-                                    ChipChronometerBinder.bind(chipModel.startTimeMs, chipTimeView)
+                                    IconViewBinder.bindNullable(chipModel.icon, chipIconView)
+                                    setChipMainContent(chipModel, chipTextView, chipTimeView)
                                     chipView.setOnClickListener(chipModel.onClickListener)
+
+                                    // Accessibility
+                                    setChipAccessibility(chipModel, chipView)
 
                                     // Colors
                                     val textColor = chipModel.colors.text(chipContext)
                                     chipIconView.imageTintList = ColorStateList.valueOf(textColor)
                                     chipTimeView.setTextColor(textColor)
+                                    chipTextView.setTextColor(textColor)
                                     (chipBackgroundView.background as GradientDrawable).color =
                                         chipModel.colors.background(chipContext)
 
+                                    // Notify listeners
                                     listener.onOngoingActivityStatusChanged(
                                         hasOngoingActivity = true
                                     )
                                 }
                                 is OngoingActivityChipModel.Hidden -> {
+                                    // The Chronometer should be stopped to prevent leaks -- see
+                                    // b/192243808 and [Chronometer.start].
                                     chipTimeView.stop()
                                     listener.onOngoingActivityStatusChanged(
                                         hasOngoingActivity = false
@@ -126,6 +136,81 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun setChipMainContent(
+        chipModel: OngoingActivityChipModel.Shown,
+        chipTextView: TextView,
+        chipTimeView: ChipChronometer,
+    ) {
+        when (chipModel) {
+            is OngoingActivityChipModel.Shown.Countdown -> {
+                chipTextView.text = chipModel.secondsUntilStarted.toString()
+                chipTextView.visibility = View.VISIBLE
+
+                // The Chronometer should be stopped to prevent leaks -- see b/192243808 and
+                // [Chronometer.start].
+                chipTimeView.stop()
+                chipTimeView.visibility = View.GONE
+            }
+            is OngoingActivityChipModel.Shown.Timer -> {
+                ChipChronometerBinder.bind(chipModel.startTimeMs, chipTimeView)
+                chipTimeView.visibility = View.VISIBLE
+
+                chipTextView.visibility = View.GONE
+            }
+            is OngoingActivityChipModel.Shown.IconOnly -> {
+                chipTextView.visibility = View.GONE
+                // The Chronometer should be stopped to prevent leaks -- see b/192243808 and
+                // [Chronometer.start].
+                chipTimeView.stop()
+                chipTimeView.visibility = View.GONE
+            }
+        }
+        updateChipTextPadding(chipModel, chipTextView, chipTimeView)
+    }
+
+    private fun updateChipTextPadding(
+        chipModel: OngoingActivityChipModel.Shown,
+        chipTextView: TextView,
+        chipTimeView: ChipChronometer,
+    ) {
+        val requiresPadding = chipModel.icon != null
+        if (requiresPadding) {
+            chipTextView.addChipTextPaddingStart()
+            chipTimeView.addChipTextPaddingStart()
+        } else {
+            chipTextView.removeChipTextPaddingStart()
+            chipTimeView.removeChipTextPaddingStart()
+        }
+    }
+
+    private fun View.addChipTextPaddingStart() {
+        this.setPaddingRelative(
+            this.context.resources.getDimensionPixelSize(
+                R.dimen.ongoing_activity_chip_icon_text_padding
+            ),
+            paddingTop,
+            paddingEnd,
+            paddingBottom,
+        )
+    }
+
+    private fun View.removeChipTextPaddingStart() {
+        this.setPaddingRelative(/* start= */ 0, paddingTop, paddingEnd, paddingBottom)
+    }
+
+    private fun setChipAccessibility(chipModel: OngoingActivityChipModel.Shown, chipView: View) {
+        when (chipModel) {
+            is OngoingActivityChipModel.Shown.Countdown -> {
+                // Set as assertive so talkback will announce the countdown
+                chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
+            }
+            is OngoingActivityChipModel.Shown.Timer,
+            is OngoingActivityChipModel.Shown.IconOnly -> {
+                chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE
             }
         }
     }

@@ -133,6 +133,12 @@ object KeyguardIndicationAreaBinder {
                             configurationBasedDimensions.value = loadFromResources(view)
                         }
                     }
+
+                    launch("$TAG#viewModel.visible") {
+                        viewModel.visible.collect { visible ->
+                            indicationController.setVisible(visible)
+                        }
+                    }
                 }
             }
         return disposables

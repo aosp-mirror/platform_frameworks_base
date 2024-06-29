@@ -16,8 +16,11 @@
 
 package com.android.systemui.media.controls.domain.pipeline
 
+import android.R
 import android.app.smartspace.SmartspaceAction
+import android.graphics.drawable.Icon
 import android.os.Bundle
+import android.os.Process
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -36,7 +39,11 @@ import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaLoadingModel
 import com.android.systemui.media.controls.ui.controller.MediaPlayerData
 import com.android.systemui.media.controls.util.MediaFlags
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger
 import com.android.systemui.media.controls.util.MediaUiEventLogger
+import com.android.systemui.media.controls.util.SmallHash
+import com.android.systemui.media.controls.util.mediaSmartspaceLogger
+import com.android.systemui.media.controls.util.mockMediaSmartspaceLogger
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.testKosmos
@@ -101,7 +108,12 @@ class MediaDataFilterImplTest : SysuiTestCase() {
     private lateinit var dataGuest: MediaData
     private lateinit var dataPrivateProfile: MediaData
     private val clock = FakeSystemClock()
-    private val repository: MediaFilterRepository = kosmos.mediaFilterRepository
+    private val smartspaceLogger = kosmos.mockMediaSmartspaceLogger
+    private val repository: MediaFilterRepository =
+        with(kosmos) {
+            mediaSmartspaceLogger = mockMediaSmartspaceLogger
+            mediaFilterRepository
+        }
     private val mediaLoadingLogger = kosmos.mockMediaLoadingLogger
 
     @Before
@@ -146,6 +158,8 @@ class MediaDataFilterImplTest : SysuiTestCase() {
         whenever(smartspaceData.packageName).thenReturn(SMARTSPACE_PACKAGE)
         whenever(smartspaceData.recommendations)
             .thenReturn(listOf(smartspaceMediaRecommendationItem))
+        whenever(smartspaceMediaRecommendationItem.icon)
+            .thenReturn(Icon.createWithResource(context, R.drawable.ic_media_play))
         whenever(smartspaceData.headphoneConnectionTimeMillis)
             .thenReturn(clock.currentTimeMillis() - 100)
         whenever(smartspaceData.instanceId).thenReturn(SMARTSPACE_INSTANCE_ID)
@@ -533,8 +547,22 @@ class MediaDataFilterImplTest : SysuiTestCase() {
     @Test
     fun onSwipeToDismiss_setsTimedOut() {
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
-        mediaDataFilter.onSwipeToDismiss()
+        mediaDataFilter.onSwipeToDismiss(1)
 
+        verify(smartspaceLogger, never())
+            .logSmartspaceCardUIEvent(
+                eq(MediaSmartspaceLogger.SMARTSPACE_CARD_DISMISS_EVENT),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                anyBoolean(),
+                anyBoolean(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                eq(true)
+            )
         verify(mediaDataProcessor).setInactive(eq(KEY), eq(true), eq(true))
     }
 
@@ -1053,11 +1081,27 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                 targetId = SMARTSPACE_KEY,
                 isActive = true,
                 packageName = SMARTSPACE_PACKAGE,
-                recommendations = listOf(smartspaceMediaRecommendationItem),
+                recommendations =
+                    listOf(
+                        smartspaceMediaRecommendationItem,
+                        smartspaceMediaRecommendationItem,
+                        smartspaceMediaRecommendationItem
+                    ),
             )
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, data)
-        mediaDataFilter.onSwipeToDismiss()
 
+        mediaDataFilter.onSwipeToDismiss(1)
+
+        verify(smartspaceLogger)
+            .logSmartspaceCardUIEvent(
+                MediaSmartspaceLogger.SMARTSPACE_CARD_DISMISS_EVENT,
+                SmallHash.hash(data.targetId),
+                Process.INVALID_UID,
+                surface = 1,
+                cardinality = 1,
+                isRecommendationCard = true,
+                isSwipeToDismiss = true
+            )
         verify(mediaDataProcessor).setRecommendationInactive(eq(SMARTSPACE_KEY))
         verify(mediaDataProcessor, never())
             .dismissSmartspaceRecommendation(eq(SMARTSPACE_KEY), anyLong())

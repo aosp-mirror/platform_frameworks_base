@@ -89,7 +89,6 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.TouchLogger;
@@ -620,8 +619,6 @@ public class NotificationStackScrollLayout
 
     @Nullable
     private OnClickListener mManageButtonClickListener;
-    @Nullable
-    private OnNotificationRemovedListener mOnNotificationRemovedListener;
 
     public NotificationStackScrollLayout(Context context, AttributeSet attrs) {
         super(context, attrs, 0, 0);
@@ -771,10 +768,6 @@ public class NotificationStackScrollLayout
                 && (mQsExpansionFraction != 1 || !mQsFullScreen)
                 && !mScreenOffAnimationController.shouldHideNotificationsFooter()
                 && !mIsRemoteInputActive;
-    }
-
-    public NotificationSwipeActionHelper getSwipeActionHelper() {
-        return mSwipeHelper;
     }
 
     void updateBgColor() {
@@ -1507,6 +1500,7 @@ public class NotificationStackScrollLayout
      * needed.
      */
     void setOnStackYChanged(Consumer<Boolean> onStackYChanged) {
+        SceneContainerFlag.assertInLegacyMode();
         mOnStackYChanged = onStackYChanged;
     }
 
@@ -1980,17 +1974,6 @@ public class NotificationStackScrollLayout
         return insets;
     }
 
-    private final Runnable mReclamp = new Runnable() {
-        @Override
-        public void run() {
-            int range = getScrollRange();
-            mScroller.startScroll(mScrollX, mOwnScrollY, 0, range - mOwnScrollY);
-            mDontReportNextOverScroll = true;
-            mDontClampNextScroll = true;
-            animateScroll();
-        }
-    };
-
     public void setExpandingEnabled(boolean enable) {
         mExpandHelper.setEnabled(enable);
     }
@@ -2288,6 +2271,7 @@ public class NotificationStackScrollLayout
 
     public void setOverscrollTopChangedListener(
             OnOverscrollTopChangedListener overscrollTopChangedListener) {
+        SceneContainerFlag.assertInLegacyMode();
         mOverscrollTopChangedListener = overscrollTopChangedListener;
     }
 
@@ -2439,17 +2423,6 @@ public class NotificationStackScrollLayout
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE && child != mShelf) {
                 return (ExpandableView) child;
-            }
-        }
-        return null;
-    }
-
-    private ExpandableNotificationRow getLastRowNotGone() {
-        int childCount = getChildCount();
-        for (int i = childCount - 1; i >= 0; i--) {
-            View child = getChildAt(i);
-            if (child instanceof ExpandableNotificationRow && child.getVisibility() != View.GONE) {
-                return (ExpandableNotificationRow) child;
             }
         }
         return null;
@@ -2702,10 +2675,6 @@ public class NotificationStackScrollLayout
     public float getTopPaddingOverflow() {
         SceneContainerFlag.assertInLegacyMode();
         return mTopPaddingOverflow;
-    }
-
-    private int clampPadding(int desiredPadding) {
-        return Math.max(desiredPadding, mIntrinsicPadding);
     }
 
     private float getRubberBandFactor(boolean onTop) {
@@ -4474,6 +4443,7 @@ public class NotificationStackScrollLayout
     }
 
     void goToFullShade(long delay) {
+        SceneContainerFlag.assertInLegacyMode();
         mGoToFullShadeNeedsAnimation = true;
         mGoToFullShadeDelay = delay;
         mNeedsAnimation = true;
@@ -5737,6 +5707,7 @@ public class NotificationStackScrollLayout
      * Set a listener to when scrolling changes.
      */
     public void setOnScrollListener(Consumer<Integer> listener) {
+        SceneContainerFlag.assertInLegacyMode();
         mScrollListener = listener;
     }
 
@@ -6581,17 +6552,5 @@ public class NotificationStackScrollLayout
     interface ClearAllAnimationListener {
         void onAnimationEnd(
                 List<ExpandableNotificationRow> viewsToRemove, @SelectedRows int selectedRows);
-    }
-
-    /**
-     *
-     */
-    public interface OnNotificationRemovedListener {
-        /**
-         *
-         * @param child
-         * @param isTransferInProgress
-         */
-        void onNotificationRemoved(ExpandableView child, boolean isTransferInProgress);
     }
 }

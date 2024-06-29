@@ -180,7 +180,8 @@ public class PhoneCallPowerStatsProcessorTest {
         aggregatedPowerStats.setDeviceState(STATE_POWER, POWER_STATE_OTHER, 0);
         aggregatedPowerStats.setDeviceState(STATE_SCREEN, SCREEN_STATE_ON, 0);
 
-        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector);
+        MobileRadioPowerStatsCollector collector =
+                new MobileRadioPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
 
         // Initial empty ModemActivityInfo.

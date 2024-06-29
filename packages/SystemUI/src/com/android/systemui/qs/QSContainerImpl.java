@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.LargeScreenHeaderHelper;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.util.LargeScreenUtils;
@@ -300,7 +301,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
                 // QS panel lays out some of its content full width
                 qsPanelController.setContentMargins(mContentHorizontalPadding,
                         mContentHorizontalPadding);
-                qsPanelController.setPageMargin(mTilesPageMargin);
+                setPageMargins(qsPanelController);
             } else if (view == mHeader) {
                 quickStatusBarHeaderController.setContentMargins(mContentHorizontalPadding,
                         mContentHorizontalPadding);
@@ -315,6 +316,18 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
                             view.getPaddingBottom());
                 }
             }
+        }
+    }
+
+    private void setPageMargins(QSPanelController qsPanelController) {
+        if (SceneContainerFlag.isEnabled()) {
+            if (mHorizontalMargins == mTilesPageMargin * 2 + 1) {
+                qsPanelController.setPageMargin(mTilesPageMargin, mTilesPageMargin + 1);
+            } else {
+                qsPanelController.setPageMargin(mTilesPageMargin, mTilesPageMargin);
+            }
+        } else {
+            qsPanelController.setPageMargin(mTilesPageMargin, mTilesPageMargin);
         }
     }
 

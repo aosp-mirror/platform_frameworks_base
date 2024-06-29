@@ -73,13 +73,10 @@ flag {
 }
 
 flag {
-    name: "redesign_magnifier_window_size"
+    name: "redesign_magnification_window_size"
     namespace: "accessibility"
     description: "Redesigns the window magnification magnifier sizes provided in the settings panel."
     bug: "288056772"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
 }
 
 flag {

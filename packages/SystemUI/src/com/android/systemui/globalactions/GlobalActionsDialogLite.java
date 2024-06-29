@@ -51,10 +51,14 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.Flags;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -857,6 +861,29 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             if (ActivityManager.isUserAMonkey()) {
                 return;
             }
+            if (Flags.mandatoryBiometrics()
+                    && requestBiometricAuthenticationForMandatoryBiometrics()) {
+                launchBiometricPromptForMandatoryBiometrics(
+                        new BiometricPrompt.AuthenticationCallback() {
+                            @Override
+                            public void onAuthenticationError(int errorCode,
+                                    CharSequence errString) {
+                                super.onAuthenticationError(errorCode, errString);
+                            }
+
+                            @Override
+                            public void onAuthenticationSucceeded(
+                                    BiometricPrompt.AuthenticationResult result) {
+                                super.onAuthenticationSucceeded(result);
+                                shutDown();
+                            }
+                        });
+            } else {
+                shutDown();
+            }
+        }
+
+        private void shutDown() {
             mUiEventLogger.log(GlobalActionsEvent.GA_SHUTDOWN_PRESS);
             // shutdown by making sure radio and power are handled accordingly.
             mWindowManagerFuncs.shutdown();
@@ -2258,6 +2285,35 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     @Override
     public Lifecycle getLifecycle() {
         return mLifecycle;
+    }
+
+    @VisibleForTesting
+    void launchBiometricPromptForMandatoryBiometrics(
+            BiometricPrompt.AuthenticationCallback authenticationCallback) {
+        final CancellationSignal cancellationSignal = new CancellationSignal();
+        final BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(mContext)
+                .setAllowedAuthenticators(BiometricManager.Authenticators.MANDATORY_BIOMETRICS)
+                .setUseDefaultTitle()
+                .setDescription(mContext.getString(
+                        R.string.identity_check_biometric_prompt_description))
+                .setNegativeButton(mContext.getString(R.string.cancel), mContext.getMainExecutor(),
+                        (dialog, which) -> cancellationSignal.cancel())
+                .setAllowBackgroundAuthentication(true)
+                .build();
+        biometricPrompt.authenticate(cancellationSignal, mContext.getMainExecutor(),
+                authenticationCallback);
+    }
+
+    private boolean requestBiometricAuthenticationForMandatoryBiometrics() {
+        final BiometricManager biometricManager =
+                (BiometricManager) mContext.getSystemService(Context.BIOMETRIC_SERVICE);
+        if (biometricManager == null) {
+            Log.e(TAG, "Biometric Manager is null.");
+            return false;
+        }
+        final int status = biometricManager.canAuthenticate(
+                BiometricManager.Authenticators.MANDATORY_BIOMETRICS);
+        return status == BiometricManager.BIOMETRIC_SUCCESS;
     }
 
     @VisibleForTesting

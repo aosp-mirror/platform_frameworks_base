@@ -18,6 +18,7 @@
 
 package com.android.systemui.statusbar.notification
 
+import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -48,6 +49,7 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@RunWithLooper
 @EnableSceneContainer
 class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
 
@@ -168,6 +170,22 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             fakeSceneDataSource.changeScene(toScene = Scenes.Lockscreen)
             val isScrollable by collectLastValue(scrollViewModel.isScrollable)
             assertThat(isScrollable).isTrue()
+        }
+
+    @Test
+    fun shadeExpansion_idleOnQs() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(currentScene = Scenes.QuickSettings)
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            val expandFraction by collectLastValue(scrollViewModel.expandFraction)
+            assertThat(expandFraction).isEqualTo(1f)
+
+            fakeSceneDataSource.changeScene(toScene = Scenes.QuickSettings)
+            val isScrollable by collectLastValue(scrollViewModel.isScrollable)
+            assertThat(isScrollable).isFalse()
         }
 
     @Test

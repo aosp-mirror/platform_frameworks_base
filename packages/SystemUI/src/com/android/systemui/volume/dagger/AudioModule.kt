@@ -32,6 +32,7 @@ import com.android.settingslib.volume.shared.AudioManagerEventsReceiverImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.volume.shared.VolumeLogger
 import dagger.Module
 import dagger.Provides
 import kotlin.coroutines.CoroutineContext
@@ -58,6 +59,7 @@ interface AudioModule {
             contentResolver: ContentResolver,
             @Background coroutineContext: CoroutineContext,
             @Application coroutineScope: CoroutineScope,
+            volumeLogger: VolumeLogger,
         ): AudioRepository =
             AudioRepositoryImpl(
                 intentsReceiver,
@@ -65,6 +67,7 @@ interface AudioModule {
                 contentResolver,
                 coroutineContext,
                 coroutineScope,
+                volumeLogger,
             )
 
         @Provides

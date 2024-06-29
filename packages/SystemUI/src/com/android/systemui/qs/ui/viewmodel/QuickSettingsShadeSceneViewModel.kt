@@ -26,6 +26,8 @@ import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.shared.model.SceneFamilies
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeAlignment
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +39,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class QuickSettingsShadeSceneViewModel
 @Inject
 constructor(
+    shadeInteractor: ShadeInteractor,
     val overlayShadeViewModel: OverlayShadeViewModel,
     val brightnessSliderViewModel: BrightnessSliderViewModel,
     val tileGridViewModel: TileGridViewModel,
@@ -46,7 +49,11 @@ constructor(
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         MutableStateFlow(
                 mapOf(
-                    Swipe.Up to SceneFamilies.Home,
+                    if (shadeInteractor.shadeAlignment == ShadeAlignment.Top) {
+                        Swipe.Up
+                    } else {
+                        Swipe.Down
+                    } to SceneFamilies.Home,
                     Back to SceneFamilies.Home,
                 )
             )

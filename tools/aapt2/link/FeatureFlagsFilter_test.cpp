@@ -48,7 +48,7 @@ TEST(FeatureFlagsFilterTest, NoFeatureFlagAttributes) {
     <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android">
       <permission android:name="FOO" />
     </manifest>)EOF",
-                    {{"flag", false}});
+                    {{"flag", FeatureFlagProperties{false, false}}});
   ASSERT_THAT(doc, NotNull());
   auto root = doc->root.get();
   ASSERT_THAT(root, NotNull());
@@ -60,7 +60,7 @@ TEST(FeatureFlagsFilterTest, RemoveElementWithDisabledFlag) {
     <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android">
       <permission android:name="FOO" android:featureFlag="flag" />
     </manifest>)EOF",
-                    {{"flag", false}});
+                    {{"flag", FeatureFlagProperties{false, false}}});
   ASSERT_THAT(doc, NotNull());
   auto root = doc->root.get();
   ASSERT_THAT(root, NotNull());
@@ -73,7 +73,7 @@ TEST(FeatureFlagsFilterTest, RemoveElementWithNegatedEnabledFlag) {
     <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android">
       <permission android:name="FOO" android:featureFlag="!flag" />
     </manifest>)EOF",
-                    {{"flag", true}});
+                    {{"flag", FeatureFlagProperties{false, true}}});
   ASSERT_THAT(doc, NotNull());
   auto root = doc->root.get();
   ASSERT_THAT(root, NotNull());
@@ -86,7 +86,7 @@ TEST(FeatureFlagsFilterTest, KeepElementWithEnabledFlag) {
     <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android">
       <permission android:name="FOO" android:featureFlag="flag" />
     </manifest>)EOF",
-                    {{"flag", true}});
+                    {{"flag", FeatureFlagProperties{false, true}}});
   ASSERT_THAT(doc, NotNull());
   auto root = doc->root.get();
   ASSERT_THAT(root, NotNull());
@@ -102,7 +102,7 @@ TEST(FeatureFlagsFilterTest, SideBySideEnabledAndDisabled) {
       <permission android:name="FOO" android:featureFlag="flag"
                   android:protectionLevel="dangerous" />
     </manifest>)EOF",
-                    {{"flag", true}});
+                    {{"flag", FeatureFlagProperties{false, true}}});
   ASSERT_THAT(doc, NotNull());
   auto root = doc->root.get();
   ASSERT_THAT(root, NotNull());
@@ -123,7 +123,7 @@ TEST(FeatureFlagsFilterTest, RemoveDeeplyNestedElement) {
         </activity>
       </application>
     </manifest>)EOF",
-                    {{"flag", true}});
+                    {{"flag", FeatureFlagProperties{false, true}}});
   ASSERT_THAT(doc, NotNull());
   auto root = doc->root.get();
   ASSERT_THAT(root, NotNull());
@@ -145,7 +145,7 @@ TEST(FeatureFlagsFilterTest, KeepDeeplyNestedElement) {
         </activity>
       </application>
     </manifest>)EOF",
-                    {{"flag", true}});
+                    {{"flag", FeatureFlagProperties{false, true}}});
   ASSERT_THAT(doc, NotNull());
   auto root = doc->root.get();
   ASSERT_THAT(root, NotNull());
@@ -162,7 +162,7 @@ TEST(FeatureFlagsFilterTest, FailOnEmptyFeatureFlagAttribute) {
     <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android">
       <permission android:name="FOO" android:featureFlag=" " />
     </manifest>)EOF",
-                    {{"flag", false}});
+                    {{"flag", FeatureFlagProperties{false, false}}});
   ASSERT_THAT(doc, IsNull());
 }
 
@@ -171,7 +171,7 @@ TEST(FeatureFlagsFilterTest, FailOnFlagWithNoGivenValue) {
     <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android">
       <permission android:name="FOO" android:featureFlag="flag" />
     </manifest>)EOF",
-                    {{"flag", std::nullopt}});
+                    {{"flag", FeatureFlagProperties{false, std::nullopt}}});
   ASSERT_THAT(doc, IsNull());
 }
 
@@ -180,7 +180,7 @@ TEST(FeatureFlagsFilterTest, FailOnUnrecognizedFlag) {
     <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android">
       <permission android:name="FOO" android:featureFlag="unrecognized" />
     </manifest>)EOF",
-                    {{"flag", true}});
+                    {{"flag", FeatureFlagProperties{false, true}}});
   ASSERT_THAT(doc, IsNull());
 }
 
@@ -190,7 +190,7 @@ TEST(FeatureFlagsFilterTest, FailOnMultipleValidationErrors) {
       <permission android:name="FOO" android:featureFlag="bar" />
       <permission android:name="FOO" android:featureFlag="unrecognized" />
     </manifest>)EOF",
-                    {{"flag", std::nullopt}});
+                    {{"flag", FeatureFlagProperties{false, std::nullopt}}});
   ASSERT_THAT(doc, IsNull());
 }
 
@@ -199,7 +199,8 @@ TEST(FeatureFlagsFilterTest, OptionRemoveDisabledElementsIsFalse) {
     <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android">
       <permission android:name="FOO" android:featureFlag="flag" />
     </manifest>)EOF",
-                               {{"flag", false}}, {.remove_disabled_elements = false});
+                               {{"flag", FeatureFlagProperties{false, false}}},
+                               {.remove_disabled_elements = false});
   ASSERT_THAT(doc, NotNull());
   auto root = doc->root.get();
   ASSERT_THAT(root, NotNull());
@@ -212,7 +213,8 @@ TEST(FeatureFlagsFilterTest, OptionFlagsMustHaveValueIsFalse) {
     <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android">
       <permission android:name="FOO" android:featureFlag="flag" />
     </manifest>)EOF",
-                               {{"flag", std::nullopt}}, {.flags_must_have_value = false});
+                               {{"flag", FeatureFlagProperties{false, std::nullopt}}},
+                               {.flags_must_have_value = false});
   ASSERT_THAT(doc, NotNull());
   auto root = doc->root.get();
   ASSERT_THAT(root, NotNull());
@@ -225,7 +227,8 @@ TEST(FeatureFlagsFilterTest, OptionFailOnUnrecognizedFlagsIsFalse) {
     <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android">
       <permission android:name="FOO" android:featureFlag="unrecognized" />
     </manifest>)EOF",
-                               {{"flag", true}}, {.fail_on_unrecognized_flags = false});
+                               {{"flag", FeatureFlagProperties{false, true}}},
+                               {.fail_on_unrecognized_flags = false});
   ASSERT_THAT(doc, NotNull());
   auto root = doc->root.get();
   ASSERT_THAT(root, NotNull());

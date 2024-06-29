@@ -111,7 +111,7 @@ import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransition
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
@@ -334,7 +334,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected PrimaryBouncerToGoneTransitionViewModel
             mPrimaryBouncerToGoneTransitionViewModel;
     @Mock protected KeyguardTransitionInteractor mKeyguardTransitionInteractor;
-    @Mock protected KeyguardLongPressViewModel mKeyuardLongPressViewModel;
+    @Mock protected KeyguardTouchHandlingViewModel mKeyuardTouchHandlingViewModel;
     @Mock protected AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock protected MotionEvent mDownMotionEvent;
     @Mock protected CoroutineDispatcher mMainDispatcher;
@@ -464,6 +464,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 () -> mShadeInteractor,
                 () -> mKosmos.getDeviceUnlockedInteractor(),
                 () -> mKosmos.getSceneInteractor(),
+                () -> mKosmos.getSceneContainerOcclusionInteractor(),
                 () -> mKosmos.getKeyguardClockInteractor());
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
@@ -621,6 +622,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                                 () -> mShadeInteractor,
                                 () -> mKosmos.getDeviceUnlockedInteractor(),
                                 () -> mKosmos.getSceneInteractor(),
+                                () -> mKosmos.getSceneContainerOcclusionInteractor(),
                                 () -> mKosmos.getKeyguardClockInteractor()),
                         mKeyguardBypassController,
                         mDozeParameters,
@@ -753,7 +755,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mMainDispatcher,
                 mKeyguardTransitionInteractor,
                 mDumpManager,
-                mKeyuardLongPressViewModel,
+                mKeyuardTouchHandlingViewModel,
                 mKeyguardInteractor,
                 mActivityStarter,
                 mSharedNotificationContainerInteractor,

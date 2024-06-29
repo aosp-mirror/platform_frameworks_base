@@ -16,6 +16,8 @@
 
 package com.android.systemui.volume.panel.component.spatial.domain
 
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothProfile
 import android.media.AudioDeviceAttributes
 import android.media.AudioDeviceInfo
 import android.media.session.MediaSession
@@ -24,12 +26,14 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
+import com.android.settingslib.bluetooth.LeAudioProfile
 import com.android.settingslib.media.BluetoothMediaDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.spatializerRepository
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.volume.localMediaController
@@ -56,8 +60,15 @@ class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
     @Before
     fun setup() {
         with(kosmos) {
+            val leAudioProfile =
+                mock<LeAudioProfile> {
+                    whenever(profileId).thenReturn(BluetoothProfile.LE_AUDIO)
+                    whenever(isEnabled(any())).thenReturn(true)
+                }
             val cachedBluetoothDevice: CachedBluetoothDevice = mock {
                 whenever(address).thenReturn("test_address")
+                whenever(profiles).thenReturn(listOf(leAudioProfile))
+                whenever(device).thenReturn(mock<BluetoothDevice> {})
             }
             localMediaRepository.updateCurrentConnectedDevice(
                 mock<BluetoothMediaDevice> {

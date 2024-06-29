@@ -125,6 +125,14 @@ flag {
 }
 
 flag {
+    name: "trace_update_app_freeze_state_lsp"
+    namespace: "backstage_power"
+    description: "Output process oom adj and other metadata to trace in updateAppFreezeStateLSP"
+    bug: "345547733"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "simplify_process_traversal"
     namespace: "backstage_power"
     description: "Simplify the OomAdjuster's process traversal mechanism."
@@ -151,4 +159,12 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "collect_logcat_on_run_synchronously"
+    namespace: "dropbox"
+    description: "Allow logcat collection on synchronous dropbox collection"
+    bug: "324222683"
+    is_fixed_read_only: true
 }
