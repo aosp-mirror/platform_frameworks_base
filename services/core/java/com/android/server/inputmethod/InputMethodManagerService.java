@@ -90,7 +90,6 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -509,16 +508,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     @SharedByAllUsersField
     private final WeakHashMap<IBinder, Boolean> mFocusedWindowPerceptible = new WeakHashMap<>();
-
-    /**
-     * The token we have made for the currently active input method, to
-     * identify it in the future.
-     */
-    @GuardedBy("ImfLock.class")
-    @Nullable
-    IBinder getCurTokenLocked() {
-        return getInputMethodBindingController(mCurrentUserId).getCurToken();
-    }
 
     /**
      * The displayId of current active input method.
@@ -1169,8 +1158,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 mIoHandler = Handler.createAsync(ioThread.getLooper());
             }
             SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mHandler);
-            mImeTrackerService = new ImeTrackerService(serviceThreadForTesting != null
-                    ? serviceThreadForTesting.getLooper() : Looper.getMainLooper());
+            mImeTrackerService = new ImeTrackerService(mHandler);
             // Note: SettingsObserver doesn't register observers in its constructor.
             mSettingsObserver = new SettingsObserver(mHandler);
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
@@ -1493,14 +1481,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * Returns true iff the caller is identified to be the current input method with the token.
      *
      * @param token the window token given to the input method when it was started
+     * @param userId userId of the calling IME process
      * @return true if and only if non-null valid token is specified
      */
     @GuardedBy("ImfLock.class")
-    private boolean calledWithValidTokenLocked(@NonNull IBinder token) {
+    private boolean calledWithValidTokenLocked(@NonNull IBinder token, @UserIdInt int userId) {
         if (token == null) {
             throw new InvalidParameterException("token must not be null.");
         }
-        if (token != getCurTokenLocked()) {
+        final var bindingController = getInputMethodBindingController(userId);
+        if (token != bindingController.getCurToken()) {
             Slog.e(TAG, "Ignoring " + Debug.getCaller() + " due to an invalid token."
                     + " uid:" + Binder.getCallingUid() + " token:" + token);
             return false;
@@ -2599,9 +2589,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @BinderThread
     private void updateStatusIcon(@NonNull IBinder token, String packageName,
-            @DrawableRes int iconId) {
+            @DrawableRes int iconId, @UserIdInt int userId) {
         synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
+            if (!calledWithValidTokenLocked(token, userId)) {
                 return;
             }
             final long ident = Binder.clearCallingIdentity();
@@ -2743,24 +2733,26 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @BinderThread
     @SuppressWarnings("deprecation")
-    private void setImeWindowStatus(@NonNull IBinder token, int vis, int backDisposition) {
+    private void setImeWindowStatus(@NonNull IBinder token, int vis, int backDisposition,
+            @UserIdInt int userId) {
         final int topFocusedDisplayId = mWindowManagerInternal.getTopFocusedDisplayId();
 
         synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
+            if (!calledWithValidTokenLocked(token, userId)) {
                 return;
             }
+            final var bindingController = getInputMethodBindingController(userId);
             // Skip update IME status when current token display is not same as focused display.
             // Note that we still need to update IME status when focusing external display
             // that does not support system decoration and fallback to show IME on default
             // display since it is intentional behavior.
-            final int tokenDisplayId = getCurTokenDisplayIdLocked();
+            final int tokenDisplayId = bindingController.getCurTokenDisplayId();
             if (tokenDisplayId != topFocusedDisplayId && tokenDisplayId != FALLBACK_DISPLAY_ID) {
                 return;
             }
             mImeWindowVis = vis;
             mBackDisposition = backDisposition;
-            updateSystemUiLocked(vis, backDisposition);
+            updateSystemUiLocked(vis, backDisposition, userId);
         }
 
         final boolean dismissImeOnBackKeyPressed;
@@ -2780,9 +2772,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @BinderThread
-    private void reportStartInput(@NonNull IBinder token, IBinder startInputToken) {
+    private void reportStartInput(@NonNull IBinder token, IBinder startInputToken,
+            @UserIdInt int userId) {
         synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
+            if (!calledWithValidTokenLocked(token, userId)) {
                 return;
             }
             final IBinder targetWindow = mImeTargetWindowMap.get(startInputToken);
@@ -4048,7 +4041,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private void setInputMethod(@NonNull IBinder token, String id, @UserIdInt int userId) {
         final int callingUid = Binder.getCallingUid();
         synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
+            if (!calledWithValidTokenLocked(token, userId)) {
                 return;
             }
             final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
@@ -4066,7 +4059,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             InputMethodSubtype subtype, @UserIdInt int userId) {
         final int callingUid = Binder.getCallingUid();
         synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
+            if (!calledWithValidTokenLocked(token, userId)) {
                 return;
             }
             final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
@@ -4087,7 +4080,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @BinderThread
     private boolean switchToPreviousInputMethod(@NonNull IBinder token, @UserIdInt int userId) {
         synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
+            if (!calledWithValidTokenLocked(token, userId)) {
                 return false;
             }
             final var bindingController = getInputMethodBindingController(userId);
@@ -4169,7 +4162,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private boolean switchToNextInputMethod(@NonNull IBinder token, boolean onlyCurrentIme,
             @UserIdInt int userId) {
         synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
+            if (!calledWithValidTokenLocked(token, userId)) {
                 return false;
             }
             return switchToNextInputMethodLocked(token, onlyCurrentIme, userId);
@@ -4196,7 +4189,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private boolean shouldOfferSwitchingToNextInputMethod(@NonNull IBinder token,
             @UserIdInt int userId) {
         synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
+            if (!calledWithValidTokenLocked(token, userId)) {
                 return false;
             }
             final var bindingController = getInputMethodBindingController(userId);
@@ -4658,7 +4651,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.applyImeVisibility");
             synchronized (ImfLock.class) {
-                if (!calledWithValidTokenLocked(token)) {
+                if (!calledWithValidTokenLocked(token, userId)) {
                     ImeTracker.forLogging().onFailed(statsToken,
                             ImeTracker.PHASE_SERVER_CURRENT_ACTIVE_IME);
                     return;
@@ -4757,7 +4750,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInput");
             synchronized (ImfLock.class) {
-                if (!calledWithValidTokenLocked(token)) {
+                if (!calledWithValidTokenLocked(token, userId)) {
                     ImeTracker.forLogging().onFailed(statsToken,
                             ImeTracker.PHASE_SERVER_CURRENT_ACTIVE_IME);
                     return;
@@ -4796,7 +4789,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showMySoftInput");
             synchronized (ImfLock.class) {
-                if (!calledWithValidTokenLocked(token)) {
+                if (!calledWithValidTokenLocked(token, userId)) {
                     ImeTracker.forLogging().onFailed(statsToken,
                             ImeTracker.PHASE_SERVER_CURRENT_ACTIVE_IME);
                     return;
@@ -6012,7 +6005,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private void reportFullscreenMode(@NonNull IBinder token, boolean fullscreen,
             @UserIdInt int userId) {
         synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
+            if (!calledWithValidTokenLocked(token, userId)) {
                 return;
             }
             final var userData = getUserData(userId);
@@ -6842,13 +6835,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @BinderThread
         @Override
         public void setImeWindowStatusAsync(int vis, int backDisposition) {
-            mImms.setImeWindowStatus(mToken, vis, backDisposition);
+            mImms.setImeWindowStatus(mToken, vis, backDisposition, mUserId);
         }
 
         @BinderThread
         @Override
         public void reportStartInputAsync(IBinder startInputToken) {
-            mImms.reportStartInput(mToken, startInputToken);
+            mImms.reportStartInput(mToken, startInputToken, mUserId);
         }
 
         @BinderThread
@@ -6932,7 +6925,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @BinderThread
         @Override
         public void updateStatusIconAsync(String packageName, @DrawableRes int iconId) {
-            mImms.updateStatusIcon(mToken, packageName, iconId);
+            mImms.updateStatusIcon(mToken, packageName, iconId, mUserId);
         }
 
         @BinderThread
@@ -6999,7 +6992,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void switchKeyboardLayoutAsync(int direction) {
             synchronized (ImfLock.class) {
-                if (!mImms.calledWithValidTokenLocked(mToken)) {
+                if (!mImms.calledWithValidTokenLocked(mToken, mUserId)) {
                     return;
                 }
                 final long ident = Binder.clearCallingIdentity();
