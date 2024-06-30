@@ -58,8 +58,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 /**
- * Test the behavior of {@link ImeVisibilityStateComputer} and {@link ImeVisibilityApplier} when
- * requesting the IME visibility.
+ * Test the behavior of {@link ImeVisibilityStateComputer} and {@link DefaultImeVisibilityApplier}
+ * when requesting the IME visibility.
  *
  * <p> Build/Install/Run:
  * atest FrameworksInputMethodSystemServerTests:ImeVisibilityStateComputerTest

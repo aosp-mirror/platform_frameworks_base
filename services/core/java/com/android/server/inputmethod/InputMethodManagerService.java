@@ -4824,11 +4824,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
+    @GuardedBy("ImfLock.class")
     @VisibleForTesting
-    ImeVisibilityApplier getVisibilityApplier() {
-        synchronized (ImfLock.class) {
-            return mVisibilityApplier;
-        }
+    DefaultImeVisibilityApplier getVisibilityApplierLocked() {
+        return mVisibilityApplier;
     }
 
     void onApplyImeVisibilityFromComputer(IBinder windowToken, @NonNull ImeTracker.Token statsToken,
