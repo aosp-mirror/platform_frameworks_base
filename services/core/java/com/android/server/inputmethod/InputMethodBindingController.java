@@ -70,7 +70,7 @@ final class InputMethodBindingController {
     /** Time in milliseconds that the IME service has to bind before it is reconnected. */
     static final long TIME_TO_RECONNECT = 3 * 1000;
 
-    @UserIdInt final int mUserId;
+    @UserIdInt private final int mUserId;
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
     @NonNull private final AutofillSuggestionsController mAutofillController;
@@ -656,5 +656,10 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class")
     int getDeviceIdToShowIme() {
         return mDeviceIdToShowIme;
+    }
+
+    @UserIdInt
+    int getUserId() {
+        return mUserId;
     }
 }
