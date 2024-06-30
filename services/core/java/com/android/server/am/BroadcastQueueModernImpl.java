@@ -2296,7 +2296,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         ipw.println();
 
         if (dumpConstants) {
-            mConstants.dump(ipw);
+            mFgConstants.dump(ipw);
+            mBgConstants.dump(ipw);
         }
 
         if (dumpHistory) {
