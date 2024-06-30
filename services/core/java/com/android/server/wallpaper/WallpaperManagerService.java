@@ -131,6 +131,9 @@ import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wallpaper.WallpaperData.BindSource;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.tools.r8.keepanno.annotations.KeepItemKind;
+import com.android.tools.r8.keepanno.annotations.KeepTarget;
+import com.android.tools.r8.keepanno.annotations.UsesReflection;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -166,6 +169,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         @Override
+        @UsesReflection(
+                value = {
+                    @KeepTarget(
+                            kind = KeepItemKind.CLASS_AND_MEMBERS,
+                            instanceOfClassConstantExclusive = IWallpaperManagerService.class,
+                            methodName = "<init>")
+                })
         public void onStart() {
             try {
                 final Class<? extends IWallpaperManagerService> klass =
@@ -629,9 +639,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             synchronized (mLock) {
                 if (mLastWallpaper != null) {
                     WallpaperData targetWallpaper = null;
-                    if (mLastWallpaper.connection.containsDisplay(displayId)) {
+                    if (mLastWallpaper.connection != null &&
+                            mLastWallpaper.connection.containsDisplay(displayId)) {
                         targetWallpaper = mLastWallpaper;
-                    } else if (mFallbackWallpaper.connection.containsDisplay(displayId)) {
+                    } else if (mFallbackWallpaper != null &&
+                            mFallbackWallpaper.connection != null &&
+                            mFallbackWallpaper.connection.containsDisplay(displayId)) {
                         targetWallpaper = mFallbackWallpaper;
                     }
                     if (targetWallpaper == null) return;

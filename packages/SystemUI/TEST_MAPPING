@@ -59,7 +59,7 @@
       ]
     }
   ],
-  
+
   "auto-end-to-end-postsubmit": [
     {
       "name": "AndroidAutomotiveHomeTests",
@@ -78,7 +78,7 @@
       ]
     }
   ],
-  
+
   "postsubmit": [
     {
       // Permission indicators
@@ -90,7 +90,7 @@
       ]
     }
   ],
-  
+
   // v2/sysui/suite/test-mapping-sysui-screenshot-test
   "sysui-screenshot-test": [
     {
@@ -128,7 +128,7 @@
       ]
     }
   ],
-  
+
   // v2/sysui/suite/test-mapping-sysui-screenshot-test-staged
   "sysui-screenshot-test-staged": [
     {
@@ -152,6 +152,14 @@
           "include-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    }
+  ],
+  "sysui-robo-test": [
+    {
+      "name": "SystemUIGoogleRoboRNGTests"
+    },
+    {
+      "name": "SystemUIGoogleRobo2RNGTests"
     }
   ]
 }
