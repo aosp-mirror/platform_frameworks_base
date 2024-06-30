@@ -31,6 +31,7 @@ import com.android.settingslib.R;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -64,25 +65,27 @@ public class ZenModesBackend {
     }
 
     public List<ZenMode> getModes() {
-        ArrayList<ZenMode> modes = new ArrayList<>();
+        Map<String, AutomaticZenRule> zenRules = mNotificationManager.getAutomaticZenRules();
         ZenModeConfig currentConfig = mNotificationManager.getZenModeConfig();
+
+        ArrayList<ZenMode> modes = new ArrayList<>();
         modes.add(getManualDndMode(currentConfig));
 
-        Map<String, AutomaticZenRule> zenRules = mNotificationManager.getAutomaticZenRules();
         for (Map.Entry<String, AutomaticZenRule> zenRuleEntry : zenRules.entrySet()) {
             String ruleId = zenRuleEntry.getKey();
-            modes.add(new ZenMode(ruleId, zenRuleEntry.getValue(),
-                    isRuleActive(ruleId, currentConfig)));
+            ZenModeConfig.ZenRule extraData = currentConfig.automaticRules.get(ruleId);
+            if (extraData != null) {
+                modes.add(new ZenMode(ruleId, zenRuleEntry.getValue(), extraData));
+            } else {
+                Log.w(TAG, "Found AZR " + zenRuleEntry.getValue()
+                        + " but no corresponding entry in ZenModeConfig (" + currentConfig
+                        + "). Skipping");
+            }
         }
 
-        modes.sort((l, r) -> {
-            if (l.isManualDnd()) {
-                return -1;
-            } else if (r.isManualDnd()) {
-                return 1;
-            }
-            return l.getRule().getName().compareTo(r.getRule().getName());
-        });
+        // Manual DND first, then alphabetically.
+        modes.sort(Comparator.comparing(ZenMode::isManualDnd).reversed()
+                .thenComparing(ZenMode::getName));
 
         return modes;
     }
@@ -94,10 +97,11 @@ public class ZenModesBackend {
             return getManualDndMode(currentConfig);
         } else {
             AutomaticZenRule rule = mNotificationManager.getAutomaticZenRule(id);
-            if (rule == null) {
+            ZenModeConfig.ZenRule extraData = currentConfig.automaticRules.get(id);
+            if (rule == null || extraData == null) {
                 return null;
             }
-            return new ZenMode(id, rule, isRuleActive(id, currentConfig));
+            return new ZenMode(id, rule, extraData);
         }
     }
 
@@ -115,15 +119,6 @@ public class ZenModesBackend {
                 .build();
 
         return ZenMode.manualDndMode(manualDndRule, config != null && config.isManualActive());
-    }
-
-    private static boolean isRuleActive(String id, ZenModeConfig config) {
-        if (config == null) {
-            // shouldn't happen if the config is coming from NM, but be safe
-            return false;
-        }
-        ZenModeConfig.ZenRule configRule = config.automaticRules.get(id);
-        return configRule != null && configRule.isAutomaticActive();
     }
 
     public void updateMode(ZenMode mode) {

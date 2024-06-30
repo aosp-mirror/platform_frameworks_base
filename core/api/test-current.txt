@@ -2608,6 +2608,18 @@ package android.os {
 
 }
 
+package android.os.connectivity {
+
+  public final class CellularBatteryStats implements android.os.Parcelable {
+    ctor @FlaggedApi("com.android.server.power.optimization.streamlined_connectivity_battery_stats") public CellularBatteryStats(long, long, long, long, long, long, long, long, long, long, @NonNull long[], @NonNull long[], @NonNull long[], long);
+  }
+
+  public final class WifiBatteryStats implements android.os.Parcelable {
+    ctor @FlaggedApi("com.android.server.power.optimization.streamlined_connectivity_battery_stats") public WifiBatteryStats(long, long, long, long, long, long, long, long, long, long, long, long, long, @NonNull long[], @NonNull long[], @NonNull long[], long);
+  }
+
+}
+
 package android.os.health {
 
   public class HealthKeys {
@@ -2761,21 +2773,24 @@ package android.os.vibrator {
 
 package android.os.vibrator.persistence {
 
-  public class ParsedVibration {
-    method @NonNull public java.util.List<android.os.VibrationEffect> getVibrationEffects();
-    method @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
+  @FlaggedApi("android.os.vibrator.vibration_xml_apis") public final class ParsedVibration {
+    ctor public ParsedVibration(@NonNull java.util.List<android.os.VibrationEffect>);
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
   }
 
-  public final class VibrationXmlParser {
-    method @Nullable public static android.os.vibrator.persistence.ParsedVibration parseDocument(@NonNull java.io.Reader) throws java.io.IOException;
-    method @Nullable public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.Reader) throws java.io.IOException;
+  @FlaggedApi("android.os.vibrator.vibration_xml_apis") public final class VibrationXmlParser {
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @NonNull public static android.os.vibrator.persistence.ParsedVibration parse(@NonNull java.io.InputStream) throws java.io.IOException;
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @NonNull public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.InputStream) throws java.io.IOException;
+  }
+
+  public static final class VibrationXmlParser.ParseFailedException extends java.io.IOException {
   }
 
   public final class VibrationXmlSerializer {
-    method public static void serialize(@NonNull android.os.VibrationEffect, @NonNull java.io.Writer) throws java.io.IOException, android.os.vibrator.persistence.VibrationXmlSerializer.SerializationFailedException;
+    method public static void serialize(@NonNull android.os.VibrationEffect, @NonNull java.io.Writer) throws java.io.IOException;
   }
 
-  public static final class VibrationXmlSerializer.SerializationFailedException extends java.lang.RuntimeException {
+  public static final class VibrationXmlSerializer.SerializationFailedException extends java.io.IOException {
   }
 
 }

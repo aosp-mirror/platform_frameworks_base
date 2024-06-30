@@ -15,6 +15,8 @@
  */
 package com.android.server.display.brightness.strategy;
 
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 
@@ -133,14 +135,20 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
         // We are still in the process of updating the power state, so there's no need to trigger
         // an update again
         switchMode(targetDisplayState, /* sendUpdate= */ false);
-        final boolean autoBrightnessEnabledInDoze =
-                allowAutoBrightnessWhileDozingConfig && Display.isDozeState(targetDisplayState);
+
+        // If the policy is POLICY_DOZE and the display state is STATE_ON, auto-brightness should
+        // only be enabled if the config allows it
+        final boolean autoBrightnessEnabledInDoze = allowAutoBrightnessWhileDozingConfig
+                && policy == POLICY_DOZE && targetDisplayState != Display.STATE_OFF;
+
         mIsAutoBrightnessEnabled = shouldUseAutoBrightness()
-                && (targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze)
+                && ((targetDisplayState == Display.STATE_ON && policy != POLICY_DOZE)
+                || autoBrightnessEnabledInDoze)
                 && brightnessReason != BrightnessReason.REASON_OVERRIDE
                 && mAutomaticBrightnessController != null;
         mAutoBrightnessDisabledDueToDisplayOff = shouldUseAutoBrightness()
-                && !(targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze);
+                && !((targetDisplayState == Display.STATE_ON && policy != POLICY_DOZE)
+                || autoBrightnessEnabledInDoze);
         final int autoBrightnessState = mIsAutoBrightnessEnabled
                 && brightnessReason != BrightnessReason.REASON_FOLLOWER
                 ? AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED

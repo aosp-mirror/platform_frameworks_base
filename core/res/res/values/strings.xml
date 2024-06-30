@@ -722,6 +722,9 @@
     <!-- label for screenshot item in power menu [CHAR LIMIT=24]-->
     <string name="global_action_screenshot">Screenshot</string>
 
+    <!-- description for mandatory biometrics prompt -->
+    <string name="identity_check_biometric_prompt_description">This is needed since Identity Check is on</string>
+
     <!-- Take bug report menu title [CHAR LIMIT=30] -->
     <string name="bugreport_title">Bug report</string>
     <!-- Message in bugreport dialog describing what it does [CHAR LIMIT=NONE] -->
@@ -4853,11 +4856,11 @@
     <string name="accessibility_gesture_3finger_prompt_text">Choose a feature</string>
 
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
-    <string name="accessibility_button_instructional_text">The feature will open next time you tap the accessibility button.</string>
+    <string name="accessibility_button_instructional_text">The feature will open next time you tap the accessibility button</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_instructional_text">The feature will open next time you use this shortcut. Swipe up with two fingers from the bottom of your screen and release quickly.</string>
+    <string name="accessibility_gesture_instructional_text">The feature will open next time you use this shortcut. Swipe up with 2 fingers from the bottom of your screen and release quickly.</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_instructional_text">The feature will open next time you use this shortcut. Swipe up with three fingers from the bottom of your screen and release quickly.</string>
+    <string name="accessibility_gesture_3finger_instructional_text">The feature will open next time you use this shortcut. Swipe up with 3 fingers from the bottom of your screen and release quickly.</string>
 
     <!-- Text used to describe system navigation features, shown within a UI allowing a user to assign system magnification features to the Accessibility button in the navigation bar. -->
     <string name="accessibility_magnification_chooser_text">Magnification</string>
@@ -6523,4 +6526,15 @@ ul.</string>
     <string name="biometric_dangling_notification_action_set_up">Set up</string>
     <!-- Biometric dangling notification "Not now" action button -->
     <string name="biometric_dangling_notification_action_not_now">Not now</string>
+
+
+    <!-- Background user sound notification related messages -->
+    <!-- Notification title when sound comes from an alarm or timer on background user [CHAR LIMIT=NOTIF_TITLE]-->
+    <string name="bg_user_sound_notification_title_alarm">Alarm for <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
+    <!-- Notification action button to prompt user switch to the background user [CHAR LIMIT=NONE] -->
+    <string name="bg_user_sound_notification_button_switch_user">Switch user</string>
+    <!-- Notification action button to mute the sound from the background user [CHAR LIMIT=NONE] -->
+    <string name="bg_user_sound_notification_button_mute">Mute</string>
+    <!-- Notification text to mute the sound from the background user [CHAR LIMIT=NOTIF_BODY]-->
+    <string name="bg_user_sound_notification_message">Tap to mute sound</string>
 </resources>

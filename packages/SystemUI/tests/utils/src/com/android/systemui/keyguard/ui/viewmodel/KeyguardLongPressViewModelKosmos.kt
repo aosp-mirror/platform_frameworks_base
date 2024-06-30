@@ -16,12 +16,12 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.keyguard.domain.interactor.keyguardLongPressInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTouchHandlingInteractor
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.keyguardLongPressViewModel by
+val Kosmos.keyguardTouchHandlingViewModel by
     Kosmos.Fixture {
-        KeyguardLongPressViewModel(
-            interactor = keyguardLongPressInteractor,
+        KeyguardTouchHandlingViewModel(
+            interactor = keyguardTouchHandlingInteractor,
         )
     }

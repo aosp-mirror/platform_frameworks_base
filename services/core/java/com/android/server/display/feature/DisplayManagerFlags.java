@@ -179,6 +179,11 @@ public class DisplayManagerFlags {
             Flags::offloadDozeOverrideHoldsWakelock
     );
 
+    private final FlagState mOffloadSessionCancelBlockScreenOn =
+            new FlagState(
+                    Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON,
+                    Flags::offloadSessionCancelBlockScreenOn);
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -352,6 +357,10 @@ public class DisplayManagerFlags {
         return mOffloadDozeOverrideHoldsWakelock.isEnabled();
     }
 
+    public boolean isOffloadSessionCancelBlockScreenOnEnabled() {
+        return mOffloadSessionCancelBlockScreenOn.isEnabled();
+    }
+
     /**
      * @return Whether to ignore preferredRefreshRate app request conversion to display mode or not
      */
@@ -399,6 +408,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mIgnoreAppPreferredRefreshRate);
         pw.println(" " + mSynthetic60hzModes);
         pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
+        pw.println(" " + mOffloadSessionCancelBlockScreenOn);
     }
 
     private static class FlagState {

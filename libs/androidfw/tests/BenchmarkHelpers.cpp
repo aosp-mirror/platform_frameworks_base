@@ -28,7 +28,7 @@ void GetResourceBenchmarkOld(const std::vector<std::string>& paths, const ResTab
   for (const std::string& path : paths) {
     if (!assetmanager.addAssetPath(String8(path.c_str()), nullptr /* cookie */,
                                    false /* appAsLib */, false /* isSystemAssets */)) {
-      state.SkipWithError(base::StringPrintf("Failed to load assets %s", path.c_str()).c_str());
+      state.SkipWithError(base::StringPrintf("Failed to old-load assets %s", path.c_str()).c_str());
       return;
     }
   }
@@ -57,7 +57,7 @@ void GetResourceBenchmark(const std::vector<std::string>& paths, const ResTable_
   for (const std::string& path : paths) {
     auto apk = ApkAssets::Load(path);
     if (apk == nullptr) {
-      state.SkipWithError(base::StringPrintf("Failed to load assets %s", path.c_str()).c_str());
+      state.SkipWithError(base::StringPrintf("Failed to new-load assets %s", path.c_str()).c_str());
       return;
     }
     apk_assets.push_back(std::move(apk));

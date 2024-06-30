@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -98,6 +99,7 @@ class AudioRepositoryImpl(
     private val contentResolver: ContentResolver,
     private val backgroundCoroutineContext: CoroutineContext,
     private val coroutineScope: CoroutineScope,
+    private val logger: Logger,
 ) : AudioRepository {
 
     private val streamSettingNames: Map<AudioStream, String> =
@@ -170,6 +172,7 @@ class AudioRepositoryImpl(
             .conflate()
             .map { getCurrentAudioStream(audioStream) }
             .onStart { emit(getCurrentAudioStream(audioStream)) }
+            .onEach { logger.onVolumeUpdateReceived(audioStream, it) }
             .flowOn(backgroundCoroutineContext)
     }
 
@@ -193,6 +196,7 @@ class AudioRepositoryImpl(
 
     override suspend fun setVolume(audioStream: AudioStream, volume: Int) {
         withContext(backgroundCoroutineContext) {
+            logger.onSetVolumeRequested(audioStream, volume)
             audioManager.setStreamVolume(audioStream.value, volume, 0)
         }
     }
@@ -246,5 +250,12 @@ class AudioRepositoryImpl(
             contentResolver.registerContentObserver(uri, false, observer)
             awaitClose { contentResolver.unregisterContentObserver(observer) }
         }
+    }
+
+    interface Logger {
+
+        fun onSetVolumeRequested(audioStream: AudioStream, volume: Int)
+
+        fun onVolumeUpdateReceived(audioStream: AudioStream, model: AudioStreamModel)
     }
 }

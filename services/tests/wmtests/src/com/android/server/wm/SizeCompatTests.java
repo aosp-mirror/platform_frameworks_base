@@ -1315,6 +1315,47 @@ public class SizeCompatTests extends WindowTestsBase {
 
     @Test
     @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_SMALL})
+    public void testOverrideMinAspectRatioSmall_overridden() {
+        final int dh = 1200;
+        final int dw = 1000;
+        setUpDisplaySizeWithApp(dw, dh);
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = getActivityBuilderOnSameTask()
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+
+        final Rect bounds = activity.getBounds();
+        assertEquals(dh, bounds.height());
+        assertEquals(dh / ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_SMALL_VALUE,
+                bounds.width(), 0.5f);
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_SMALL})
+    public void testOverrideMinAspectRatioSmall_notOverridden() {
+        final int dh = 1200;
+        final int dw = 1000;
+        setUpDisplaySizeWithApp(dw, dh);
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = getActivityBuilderOnSameTask()
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .setMinAspectRatio(OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE)
+                .build();
+
+        // Activity's requested aspect ratio is larger than OVERRIDE_MIN_ASPECT_RATIO_SMALL,
+        // so OVERRIDE_MIN_ASPECT_RATIO_SMALL is ignored.
+        final Rect bounds = activity.getBounds();
+        assertEquals(dh, bounds.height());
+        assertEquals(dh / OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
+                bounds.width(), 0.5f);
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
             ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM})
     public void testOverrideMinAspectRatioMedium() {
         setUpDisplaySizeWithApp(1000, 1200);

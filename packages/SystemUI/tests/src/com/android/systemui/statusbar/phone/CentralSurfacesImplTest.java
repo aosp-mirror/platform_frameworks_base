@@ -53,6 +53,7 @@ import static java.util.Collections.emptySet;
 
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
+import android.app.NotificationManager;
 import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
@@ -339,6 +340,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private KeyboardShortcuts mKeyboardShortcuts;
     @Mock private KeyboardShortcutListSearch mKeyboardShortcutListSearch;
     @Mock private PackageManager mPackageManager;
+    @Mock private NotificationManager mNotificationManager;
     @Mock private GlanceableHubContainerController mGlanceableHubContainerController;
     @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
 
@@ -399,7 +401,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mAvalancheProvider,
                         mSystemSettings,
                         mPackageManager,
-                        Optional.of(mBubbles));
+                        Optional.of(mBubbles),
+                        mContext,
+                        mNotificationManager);
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));

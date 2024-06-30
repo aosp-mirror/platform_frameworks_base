@@ -27,6 +27,7 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.smartspace.SmartspaceInteractionHandler
 import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
+import com.android.systemui.communal.ui.compose.section.CommunalPopupSection
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
@@ -44,81 +45,86 @@ constructor(
     private val lockSection: LockSection,
     private val bottomAreaSection: BottomAreaSection,
     private val ambientStatusBarSection: AmbientStatusBarSection,
+    private val communalPopupSection: CommunalPopupSection,
 ) {
 
     @Composable
     fun SceneScope.Content(modifier: Modifier = Modifier) {
-        Layout(
-            modifier = modifier.fillMaxSize(),
-            content = {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    with(ambientStatusBarSection) {
-                        AmbientStatusBar(modifier = Modifier.fillMaxWidth())
+        CommunalTouchableSurface(viewModel = viewModel, modifier = modifier) {
+            Layout(
+                modifier = Modifier.fillMaxSize(),
+                content = {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        with(communalPopupSection) { Popup() }
+                        with(ambientStatusBarSection) {
+                            AmbientStatusBar(modifier = Modifier.fillMaxWidth())
+                        }
+                        CommunalHub(
+                            viewModel = viewModel,
+                            interactionHandler = interactionHandler,
+                            dialogFactory = dialogFactory,
+                            modifier = Modifier.element(Communal.Elements.Grid)
+                        )
                     }
-                    CommunalHub(
-                        viewModel = viewModel,
-                        interactionHandler = interactionHandler,
-                        dialogFactory = dialogFactory,
-                        modifier = Modifier.element(Communal.Elements.Grid)
+                    with(lockSection) {
+                        LockIcon(
+                            overrideColor = LocalAndroidColorScheme.current.onPrimaryContainer,
+                            modifier = Modifier.element(Communal.Elements.LockIcon)
+                        )
+                    }
+                    with(bottomAreaSection) {
+                        IndicationArea(
+                            Modifier.element(Communal.Elements.IndicationArea).fillMaxWidth()
+                        )
+                    }
+                }
+            ) { measurables, constraints ->
+                val communalGridMeasurable = measurables[0]
+                val lockIconMeasurable = measurables[1]
+                val bottomAreaMeasurable = measurables[2]
+
+                val noMinConstraints =
+                    constraints.copy(
+                        minWidth = 0,
+                        minHeight = 0,
+                    )
+
+                val lockIconPlaceable = lockIconMeasurable.measure(noMinConstraints)
+                val lockIconBounds =
+                    IntRect(
+                        left = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Left],
+                        top = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Top],
+                        right = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Right],
+                        bottom = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Bottom],
+                    )
+
+                val bottomAreaPlaceable =
+                    bottomAreaMeasurable.measure(
+                        noMinConstraints.copy(
+                            maxHeight =
+                                (constraints.maxHeight - lockIconBounds.bottom).coerceAtLeast(0)
+                        )
+                    )
+
+                val communalGridPlaceable =
+                    communalGridMeasurable.measure(
+                        noMinConstraints.copy(maxHeight = lockIconBounds.top)
+                    )
+
+                layout(constraints.maxWidth, constraints.maxHeight) {
+                    communalGridPlaceable.place(
+                        x = 0,
+                        y = 0,
+                    )
+                    lockIconPlaceable.place(
+                        x = lockIconBounds.left,
+                        y = lockIconBounds.top,
+                    )
+                    bottomAreaPlaceable.place(
+                        x = 0,
+                        y = constraints.maxHeight - bottomAreaPlaceable.height,
                     )
                 }
-                with(lockSection) {
-                    LockIcon(
-                        overrideColor = LocalAndroidColorScheme.current.onPrimaryContainer,
-                        modifier = Modifier.element(Communal.Elements.LockIcon)
-                    )
-                }
-                with(bottomAreaSection) {
-                    IndicationArea(
-                        Modifier.element(Communal.Elements.IndicationArea).fillMaxWidth()
-                    )
-                }
-            }
-        ) { measurables, constraints ->
-            val communalGridMeasurable = measurables[0]
-            val lockIconMeasurable = measurables[1]
-            val bottomAreaMeasurable = measurables[2]
-
-            val noMinConstraints =
-                constraints.copy(
-                    minWidth = 0,
-                    minHeight = 0,
-                )
-
-            val lockIconPlaceable = lockIconMeasurable.measure(noMinConstraints)
-            val lockIconBounds =
-                IntRect(
-                    left = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Left],
-                    top = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Top],
-                    right = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Right],
-                    bottom = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Bottom],
-                )
-
-            val bottomAreaPlaceable =
-                bottomAreaMeasurable.measure(
-                    noMinConstraints.copy(
-                        maxHeight = (constraints.maxHeight - lockIconBounds.bottom).coerceAtLeast(0)
-                    )
-                )
-
-            val communalGridPlaceable =
-                communalGridMeasurable.measure(
-                    noMinConstraints.copy(maxHeight = lockIconBounds.top)
-                )
-
-            layout(constraints.maxWidth, constraints.maxHeight) {
-                communalGridPlaceable.place(
-                    x = 0,
-                    y = 0,
-                )
-                lockIconPlaceable.place(
-                    x = lockIconBounds.left,
-                    y = lockIconBounds.top,
-                )
-                bottomAreaPlaceable.place(
-                    x = 0,
-                    y = constraints.maxHeight - bottomAreaPlaceable.height,
-                )
             }
         }
     }

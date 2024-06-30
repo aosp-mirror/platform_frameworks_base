@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Սեղմեք՝ անլար վրիպազերծումն անջատելու համար:"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Թեստային ռեժիմը միացված է"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Թեստային ռեժիմն անջատելու համար զրոյացրեք կարգավորումները։"</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"Սերիական վահանակը միացված է"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Աշխատանքի արդյունավետությունը նվազում է։ Վահանակն անջատելու համար ստուգեք օպերացիոն համակարգի բեռնիչը։"</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Միացված է փորձնական MTE գործառույթը"</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացավ։"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունն անջատվեց։"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Բաց թողեք ձայնի ուժգնության կոճակները։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացնելու համար սեղմեք և 3 վայրկյան պահեք ձայնի ուժգնության երկու կոճակը։"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Ընտրեք գործառույթը, որը կգործարկվի «Հատուկ գործառույթներ» կոճակին հպելու դեպքում՝"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Ընտրեք գործառույթը, որը կգործարկվի հատուկ գործառույթների ժեստը (երկու մատը էկրանի ներքևից սահեցրեք վերև) անելու դեպքում՝"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Ընտրեք գործառույթը, որը կգործարկվի հատուկ գործառույթների ժեստը (երեք մատը էկրանի ներքևից սահեցրեք վերև) անելու դեպքում՝"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Մի գործառույթից մյուսին անցնելու համար հպեք «Հատուկ գործառույթներ» կոճակին և պահեք։"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Մի գործառույթից մյուսին անցնելու համար երկու մատը սահեցրեք վերև և պահեք։"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Մի գործառույթից մյուսին անցնելու համար երեք մատը սահեցրեք վերև և պահեք։"</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Խոշորացում"</string>
     <string name="user_switched" msgid="7249833311585228097">"Ներկայիս օգտատերը <xliff:g id="NAME">%1$s</xliff:g>:"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Անցում <xliff:g id="NAME">%1$s</xliff:g> պրոֆիլին..."</string>
@@ -1976,6 +1986,14 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Ընթացիկ զանգ"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Մուտքային զանգի զտում"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Չդասակարգված"</string>
+    <!-- no translation found for promotional_notification_channel_label (7414844730492860233) -->
+    <skip />
+    <!-- no translation found for social_notification_channel_label (106520267132019945) -->
+    <skip />
+    <!-- no translation found for news_notification_channel_label (4299937455247883311) -->
+    <skip />
+    <!-- no translation found for recs_notification_channel_label (4945985121418684297) -->
+    <skip />
     <string name="importance_from_user" msgid="2782756722448800447">"Դուք սահմանել եք այս ծանուցումների կարևորությունը:"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Կարևոր է, քանի որ որոշակի մարդիկ են ներգրավված:"</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Հատուկ հավելվածի ծանուցում"</string>
@@ -2192,6 +2210,10 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Հատուկ գործառույթների դյուրանցման ընտրիչ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Հատուկ գործառույթների դյուրանցում"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Փակել ծանուցումների վահանակը"</string>
+    <!-- no translation found for accessibility_system_action_menu_label (3385283204496447040) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_media_play_pause_label (1905647491347119748) -->
+    <skip />
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad-ի «Վերև» կոճակ"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad-ի «Ներքև» կոճակ"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad-ի «Ձախ» կոճակ"</string>

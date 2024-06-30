@@ -16,4 +16,4 @@
 
 package com.android.systemui.keyboard.shortcut.shared.model
 
-class ShortcutCommand(val keyCodes: List<Int>)
+data class ShortcutCommand(val keyCodes: List<Int>)

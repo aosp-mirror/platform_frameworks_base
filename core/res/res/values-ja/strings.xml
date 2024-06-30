@@ -157,7 +157,7 @@
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"暗号化、暗号化されていないネットワークに関する通知"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"デバイス ID へのアクセスが発生しました"</string>
     <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に付近のネットワークでお使いのデバイスの一意の ID（IMSI または IMEI）が記録されました"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に付近のネットワークでお使いのデバイスの一意の ID（IMSI または IMEI）が記録されました。\n\nつまり、あなたの位置情報、アクティビティ、身元などが記録されことになります。これはよくある事象ですが、プライバシーに不安を持たれている人にとっては問題になる可能性があります。"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に、お使いのデバイスの一意の ID（IMSI または IMEI）が付近のネットワークで記録されました。\n\nつまり、あなたの位置情報、アクティビティ、身元などが記録されたことになります。これはよくある事象ですが、プライバシーを保護したいユーザーにとっては問題となる可能性があります。"</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"暗号化されたネットワーク（<xliff:g id="NETWORK_NAME">%1$s</xliff:g>）に接続しました"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> の SIM 接続のセキュリティが強化されました"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"接続先のネットワークが暗号化されていません"</string>
@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ワイヤレス デバッグを無効にするには選択します。"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"テストハーネス モード有効"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"出荷時設定にリセットしてテストハーネス モードを無効にしてください。"</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"シリアル コンソールは有効です"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"シリアル コンソールを有効にすると、パフォーマンスに影響します。無効にするには、ブートローダーをチェックしてください。"</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"試験運用版 MTE を有効にしました"</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が ON になりました。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が OFF になりました。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"音量ボタンを離してください。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を有効にするには音量大と音量小の両方のボタンを 3 秒ほど長押ししてください。"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ユーザー補助機能ボタンをタップした場合に使用する機能を選択してください。"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ユーザー補助操作（2 本の指で画面の下から上にスワイプ）で使用する機能を選択してください。"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ユーザー補助操作（3 本の指で画面の下から上にスワイプ）で使用する機能を選択してください。"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"機能を切り替えるには、ユーザー補助機能ボタンを長押しします。"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"機能を切り替えるには、2 本の指で上にスワイプしたまま長押しします。"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"機能を切り替えるには、3 本の指で上にスワイプしたまま長押しします。"</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"拡大"</string>
     <string name="user_switched" msgid="7249833311585228097">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>に切り替えています…"</string>
@@ -1976,6 +1986,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"通話中"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"着信をスクリーニング中"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"カテゴリなし"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"プロモーション"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"ソーシャル"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"ニュース"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"推奨事項"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"このような通知の重要度を設定します。"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"関係するユーザーのため、この設定は重要です。"</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"カスタムアプリ通知"</string>
@@ -2192,6 +2206,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助機能のショートカットの選択メニュー"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助のショートカット"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"通知シェードを閉じる"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"メニュー"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"メディアの再生 / 一時停止"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"D-pad: 上"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"D-pad: 下"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"D-pad: 左"</string>

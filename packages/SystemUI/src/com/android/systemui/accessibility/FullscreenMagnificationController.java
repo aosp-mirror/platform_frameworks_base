@@ -56,7 +56,7 @@ import com.android.systemui.util.leak.RotationUtils;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
-class FullscreenMagnificationController implements ComponentCallbacks {
+public class FullscreenMagnificationController implements ComponentCallbacks {
 
     private static final String TAG = "FullscreenMagnificationController";
     private final Context mContext;
@@ -87,7 +87,7 @@ class FullscreenMagnificationController implements ComponentCallbacks {
     };
     private final long mLongAnimationTimeMs;
 
-    FullscreenMagnificationController(
+    public FullscreenMagnificationController(
             @UiContext Context context,
             @Main Handler handler,
             @Main Executor executor,
@@ -157,7 +157,7 @@ class FullscreenMagnificationController implements ComponentCallbacks {
      * there is an activation change.
      */
     @UiThread
-    void onFullscreenMagnificationActivationChanged(boolean activated) {
+    public void onFullscreenMagnificationActivationChanged(boolean activated) {
         final boolean changed = (mFullscreenMagnificationActivated != activated);
         if (changed) {
             mFullscreenMagnificationActivated = activated;

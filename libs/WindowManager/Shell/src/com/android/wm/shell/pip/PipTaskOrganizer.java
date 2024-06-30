@@ -423,7 +423,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             });
             mPipTransitionController.setPipOrganizer(this);
             displayController.addDisplayWindowListener(this);
-            pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
+            pipTransitionController.registerPipTransitionCallback(
+                    mPipTransitionCallback, mMainExecutor);
         }
     }
 

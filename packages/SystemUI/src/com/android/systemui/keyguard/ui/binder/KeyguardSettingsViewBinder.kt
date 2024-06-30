@@ -26,9 +26,9 @@ import com.android.app.tracing.coroutines.launch
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.common.ui.binder.TextViewBinder
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel
 import com.android.systemui.keyguard.util.WallpaperPickerIntentUtils
 import com.android.systemui.keyguard.util.WallpaperPickerIntentUtils.LAUNCH_SOURCE_KEYGUARD
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -44,7 +44,7 @@ object KeyguardSettingsViewBinder {
     fun bind(
         view: View,
         viewModel: KeyguardSettingsMenuViewModel,
-        longPressViewModel: KeyguardLongPressViewModel,
+        touchHandlingViewModel: KeyguardTouchHandlingViewModel,
         rootViewModel: KeyguardRootViewModel?,
         vibratorHelper: VibratorHelper,
         activityStarter: ActivityStarter
@@ -97,7 +97,7 @@ object KeyguardSettingsViewBinder {
                                 val hitRect = Rect()
                                 view.getHitRect(hitRect)
                                 if (!hitRect.contains(point.x, point.y)) {
-                                    longPressViewModel.onTouchedOutside()
+                                    touchHandlingViewModel.onTouchedOutside()
                                 }
                             }
                         }

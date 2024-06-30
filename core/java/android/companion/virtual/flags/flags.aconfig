@@ -41,9 +41,24 @@ flag {
 
 flag {
      namespace: "virtual_devices"
+     name: "activity_control_api"
+     description: "Enable APIs for fine grained activity policy, fallback and callbacks"
+     bug: "333443509"
+}
+
+flag {
+     namespace: "virtual_devices"
      name: "camera_device_awareness"
      description: "Enable device awareness in camera service"
      bug: "305170199"
+}
+
+flag {
+    name: "virtual_rotary"
+    is_exported: true
+    namespace: "virtual_devices"
+    description: "Enable virtual rotary input"
+    bug: "320328752"
 }
 
 flag {
