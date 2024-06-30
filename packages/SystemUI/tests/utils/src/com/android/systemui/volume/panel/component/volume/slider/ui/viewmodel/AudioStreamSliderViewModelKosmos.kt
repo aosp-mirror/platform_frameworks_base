@@ -20,6 +20,7 @@ import android.content.applicationContext
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.volume.domain.interactor.audioVolumeInteractor
+import com.android.systemui.volume.shared.volumePanelLogger
 import kotlinx.coroutines.CoroutineScope
 
 val Kosmos.audioStreamSliderViewModelFactory by
@@ -36,6 +37,7 @@ val Kosmos.audioStreamSliderViewModelFactory by
                     applicationContext,
                     audioVolumeInteractor,
                     uiEventLogger,
+                    volumePanelLogger,
                 )
             }
         }

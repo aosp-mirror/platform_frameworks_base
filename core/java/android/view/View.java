@@ -13859,6 +13859,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     })
     @ResolvedLayoutDir
     public int getLayoutDirection() {
+        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED;
+            return LAYOUT_DIRECTION_RESOLVED_DEFAULT;
+        }
         return ((mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ==
                 PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ? LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR;
     }
@@ -33933,6 +33938,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         float velocity = mFrameContentVelocity;
         final float frameRate = mPreferredFrameRate;
         ViewParent parent = mParent;
+        boolean isInputMethodWindowType = false;
+        if (mAttachInfo != null && mAttachInfo.mViewRootImpl != null) {
+            isInputMethodWindowType =
+                    mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD;
+        }
         if (velocity <= 0 && Float.isNaN(frameRate)) {
             // The most common case is when nothing is set, so this special case is called
             // often.
@@ -33942,7 +33952,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     || mLastFrameTop != mTop)
                     && viewRootImpl.shouldCheckFrameRate(false)
                     && parent instanceof View
-                    && ((View) parent).mFrameContentVelocity <= 0) {
+                    && ((View) parent).mFrameContentVelocity <= 0
+                    && !isInputMethodWindowType) {
                 viewRootImpl.votePreferredFrameRate(MAX_FRAME_RATE, FRAME_RATE_COMPATIBILITY_GTE);
             }
             if (viewRootImpl.shouldCheckFrameRateCategory()) {
@@ -33965,6 +33976,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         || mLastFrameTop != mTop)
                         && mParent instanceof View
                         && ((View) mParent).mFrameContentVelocity <= 0
+                        && !isInputMethodWindowType
                 ) {
                     // This current calculation is very simple. If something on the screen
                     // moved, then it votes for the highest velocity.

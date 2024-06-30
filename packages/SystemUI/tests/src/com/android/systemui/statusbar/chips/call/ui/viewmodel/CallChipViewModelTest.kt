@@ -69,7 +69,27 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_inCall_isShownAsTimer() =
+    fun chip_inCall_zeroStartTime_isShownAsIconOnly() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 0, intent = null))
+
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+        }
+
+    @Test
+    fun chip_inCall_negativeStartTime_isShownAsIconOnly() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = -2, intent = null))
+
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+        }
+
+    @Test
+    fun chip_inCall_positiveStartTime_isShownAsTimer() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
@@ -97,7 +117,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_iconIsPhone() =
+    fun chip_positiveStartTime_iconIsPhone() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
@@ -105,14 +125,40 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             assertThat(((latest as OngoingActivityChipModel.Shown).icon as Icon.Resource).res)
                 .isEqualTo(com.android.internal.R.drawable.ic_phone)
+            assertThat((latest as OngoingActivityChipModel.Shown).icon!!.contentDescription)
+                .isNotNull()
         }
 
     @Test
-    fun chip_colorsAreThemed() =
+    fun chip_zeroStartTime_iconIsPhone() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 0, intent = null))
+
+            assertThat(((latest as OngoingActivityChipModel.Shown).icon as Icon.Resource).res)
+                .isEqualTo(com.android.internal.R.drawable.ic_phone)
+            assertThat((latest as OngoingActivityChipModel.Shown).icon!!.contentDescription)
+                .isNotNull()
+        }
+
+    @Test
+    fun chip_positiveStartTime_colorsAreThemed() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
             repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 1000, intent = null))
+
+            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+                .isEqualTo(ColorsModel.Themed)
+        }
+
+    @Test
+    fun chip_zeroStartTime_colorsAreThemed() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 0, intent = null))
 
             assertThat((latest as OngoingActivityChipModel.Shown).colors)
                 .isEqualTo(ColorsModel.Themed)
@@ -157,12 +203,27 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_inCall_validIntent_clickListenerLaunchesIntent() =
+    fun chip_inCall_positiveStartTime_validIntent_clickListenerLaunchesIntent() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
             val intent = mock<PendingIntent>()
             repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 1000, intent = intent))
+            val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListener
+            assertThat(clickListener).isNotNull()
+
+            clickListener!!.onClick(chipView)
+
+            verify(kosmos.activityStarter).postStartActivityDismissingKeyguard(intent, null)
+        }
+
+    @Test
+    fun chip_inCall_zeroStartTime_validIntent_clickListenerLaunchesIntent() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            val intent = mock<PendingIntent>()
+            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 0, intent = intent))
             val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListener
             assertThat(clickListener).isNotNull()
 

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
+import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Back
@@ -32,6 +33,7 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
@@ -64,6 +66,7 @@ import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@RunWithLooper
 @EnableSceneContainer
 class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
@@ -157,6 +160,37 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                     )
                 )
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun destinations_whenNotCustomizing_withPreviousSceneLockscreen_butLockscreenDisabled() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, false)
+            qsFlexiglassAdapter.setCustomizing(false)
+            val destinations by collectLastValue(underTest.destinationScenes)
+
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val backScene by collectLastValue(sceneBackInteractor.backScene)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
+            sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
+            sceneInteractor.changeScene(Scenes.QuickSettings, "reason")
+
+            kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
+
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(backScene).isNull()
+            assertThat(destinations)
+                .isEqualTo(
+                    mapOf(
+                        Back to UserActionResult(Scenes.Shade),
+                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
+                        Swipe(
+                            fromSource = Edge.Bottom,
+                            direction = SwipeDirection.Up,
+                        ) to UserActionResult(SceneFamilies.Home)
+                    )
+                )
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 
     @Test

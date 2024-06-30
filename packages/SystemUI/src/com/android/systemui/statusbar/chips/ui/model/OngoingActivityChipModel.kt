@@ -36,6 +36,14 @@ sealed class OngoingActivityChipModel {
          */
         open val onClickListener: View.OnClickListener?,
     ) : OngoingActivityChipModel() {
+
+        /** This chip shows only an icon and nothing else. */
+        data class IconOnly(
+            override val icon: Icon,
+            override val colors: ColorsModel,
+            override val onClickListener: View.OnClickListener?,
+        ) : Shown(icon, colors, onClickListener)
+
         /** The chip shows a timer, counting up from [startTimeMs]. */
         data class Timer(
             override val icon: Icon,

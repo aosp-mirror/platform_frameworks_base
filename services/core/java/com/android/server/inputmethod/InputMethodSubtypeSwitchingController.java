@@ -16,10 +16,8 @@
 
 package com.android.server.inputmethod;
 
-import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.Context;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -479,26 +477,10 @@ final class InputMethodSubtypeSwitchingController {
     }
 
     @NonNull
-    private final Context mContext;
-    @UserIdInt
-    private final int mUserId;
-    @NonNull
     private ControllerImpl mController;
 
-    InputMethodSubtypeSwitchingController(@NonNull Context context,
-            @NonNull InputMethodSettings settings) {
-        mContext = context;
-        mUserId = settings.getUserId();
-        mController = ControllerImpl.createFrom(null,
-                getSortedInputMethodAndSubtypeList(
-                        false /* includeAuxiliarySubtypes */, false /* isScreenLocked */,
-                        false /* forImeMenu */, context, settings));
-    }
-
-    @AnyThread
-    @UserIdInt
-    int getUserId() {
-        return mUserId;
+    InputMethodSubtypeSwitchingController() {
+        mController = ControllerImpl.createFrom(null, Collections.emptyList());
     }
 
     public void onUserActionLocked(@NonNull InputMethodInfo imi,
@@ -506,11 +488,12 @@ final class InputMethodSubtypeSwitchingController {
         mController.onUserActionLocked(imi, subtype);
     }
 
-    public void resetCircularListLocked(@NonNull InputMethodSettings settings) {
+    public void resetCircularListLocked(@NonNull Context context,
+            @NonNull InputMethodSettings settings) {
         mController = ControllerImpl.createFrom(mController,
                 getSortedInputMethodAndSubtypeList(
                         false /* includeAuxiliarySubtypes */, false /* isScreenLocked */,
-                        false /* forImeMenu */, mContext, settings));
+                        false /* forImeMenu */, context, settings));
     }
 
     @Nullable

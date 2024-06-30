@@ -21,6 +21,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
@@ -68,6 +70,7 @@ constructor(
      */
     val showKeyguardWhenReenabled: Flow<Boolean> =
         repository.isKeyguardEnabled
+            .onEach { SceneContainerFlag.assertInLegacyMode() }
             // Whenever the keyguard is disabled...
             .filter { enabled -> !enabled }
             .sampleCombine(
@@ -102,5 +105,13 @@ constructor(
 
     fun notifyKeyguardEnabled(enabled: Boolean) {
         repository.setKeyguardEnabled(enabled)
+    }
+
+    fun setShowKeyguardWhenReenabled(isShowKeyguardWhenReenabled: Boolean) {
+        repository.setShowKeyguardWhenReenabled(isShowKeyguardWhenReenabled)
+    }
+
+    fun isShowKeyguardWhenReenabled(): Boolean {
+        return repository.isShowKeyguardWhenReenabled()
     }
 }

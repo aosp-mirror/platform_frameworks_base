@@ -7,6 +7,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.model.SysUiState
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.shared.system.TaskStackChangeListeners
@@ -70,6 +71,8 @@ class TaskbarDelegateTest : SysuiTestCase() {
     lateinit var mCurrentSysUiState: NavBarHelper.CurrentSysuiState
     @Mock
     lateinit var mStatusBarKeyguardViewManager: StatusBarKeyguardViewManager
+    @Mock
+    lateinit var mStatusBarStateController: StatusBarStateController
 
     @Before
     fun setup() {
@@ -80,7 +83,7 @@ class TaskbarDelegateTest : SysuiTestCase() {
         `when`(mSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mSysUiState)
         mTaskStackChangeListeners = TaskStackChangeListeners.getTestInstance()
         mTaskbarDelegate = TaskbarDelegate(context, mLightBarControllerFactory,
-            mStatusBarKeyguardViewManager)
+            mStatusBarKeyguardViewManager, mStatusBarStateController)
         mTaskbarDelegate.setDependencies(mCommandQueue, mOverviewProxyService, mNavBarHelper,
         mNavigationModeController, mSysUiState, mDumpManager, mAutoHideController,
                 mLightBarController, mOptionalPip, mBackAnimation, mTaskStackChangeListeners)

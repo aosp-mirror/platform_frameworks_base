@@ -17,7 +17,6 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
-import android.annotation.DrawableRes
 import android.annotation.RawRes
 import android.content.res.Configuration
 import android.graphics.Rect
@@ -267,7 +266,7 @@ constructor(
                 }
         }
 
-    @DrawableRes
+    @RawRes
     private fun getFaceIconViewAsset(
         authState: PromptAuthState,
         isAuthenticating: Boolean,
@@ -275,17 +274,17 @@ constructor(
         showingError: Boolean
     ): Int =
         if (authState.isAuthenticated && isPendingConfirmation) {
-            R.drawable.face_dialog_wink_from_dark
+            R.raw.face_dialog_wink_from_dark
         } else if (authState.isAuthenticated) {
-            R.drawable.face_dialog_dark_to_checkmark
+            R.raw.face_dialog_dark_to_checkmark
         } else if (isAuthenticating) {
             R.raw.face_dialog_authenticating
         } else if (showingError) {
-            R.drawable.face_dialog_dark_to_error
+            R.raw.face_dialog_dark_to_error
         } else if (_previousIconWasError.value) {
-            R.drawable.face_dialog_error_to_idle
+            R.raw.face_dialog_error_to_idle
         } else {
-            R.drawable.face_dialog_idle_static
+            R.raw.face_dialog_idle_static
         }
 
     @RawRes

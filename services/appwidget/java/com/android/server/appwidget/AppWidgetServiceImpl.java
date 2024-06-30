@@ -345,6 +345,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         LocalServices.addService(AppWidgetManagerInternal.class, new AppWidgetManagerLocal());
     }
 
+    @Override
+    public int getMaxBitmapMemory() {
+        return mMaxWidgetBitmapMemory;
+    }
+
     void systemServicesReady() {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAppOpsManagerInternal = LocalServices.getService(AppOpsManagerInternal.class);

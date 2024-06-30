@@ -27,7 +27,9 @@ import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.panelExpansionInteractor
 import com.android.systemui.shade.transition.ScrimShadeTransitionController
+import com.android.systemui.statusbar.notification.stack.notificationStackScrollLayoutController
 import com.android.systemui.statusbar.policy.splitShadeStateController
+import com.android.systemui.statusbar.pulseExpansionHandler
 import com.android.systemui.util.mockito.mock
 
 @Deprecated("ShadeExpansionStateManager is deprecated. Remove your dependency on it instead.")
@@ -45,5 +47,7 @@ val Kosmos.shadeStartable by Fixture {
         sceneInteractorProvider = { sceneInteractor },
         panelExpansionInteractorProvider = { panelExpansionInteractor },
         shadeExpansionStateManager = shadeExpansionStateManager,
+        pulseExpansionHandler = pulseExpansionHandler,
+        nsslc = notificationStackScrollLayoutController,
     )
 }

@@ -23,6 +23,7 @@ import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.ACTION_FINISH_FROM_TRAMPOLINE;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_NAME;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_TASK_ID;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CLIP_DATA;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_RESULT_RECEIVER;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.PERMISSION_SELF;
@@ -46,11 +47,15 @@ import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.ComponentActivity;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.android.internal.logging.UiEventLogger;
@@ -100,7 +105,8 @@ public class AppClipsActivity extends ComponentActivity {
     private CropView mCropView;
     private Button mSave;
     private Button mCancel;
-    private TextView mBacklinksData;
+    private CheckBox mBacklinksIncludeDataCheckBox;
+    private TextView mBacklinksDataTextView;
     private AppClipsViewModel mViewModel;
 
     private ResultReceiver mResultReceiver;
@@ -156,17 +162,29 @@ public class AppClipsActivity extends ComponentActivity {
         mLayout = getLayoutInflater().inflate(R.layout.app_clips_screenshot, null);
         mRoot = mLayout.findViewById(R.id.root);
 
+        // Manually handle window insets post Android V to support edge-to-edge display.
+        ViewCompat.setOnApplyWindowInsetsListener(mRoot, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
+
         mSave = mLayout.findViewById(R.id.save);
         mCancel = mLayout.findViewById(R.id.cancel);
         mSave.setOnClickListener(this::onClick);
         mCancel.setOnClickListener(this::onClick);
         mCropView = mLayout.findViewById(R.id.crop_view);
-        mBacklinksData = mLayout.findViewById(R.id.backlinks_data);
         mPreview = mLayout.findViewById(R.id.preview);
-
         mPreview.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
                         updateImageDimensions());
+
+        mBacklinksDataTextView = mLayout.findViewById(R.id.backlinks_data);
+        mBacklinksIncludeDataCheckBox = mLayout.findViewById(R.id.backlinks_include_data);
+        mBacklinksIncludeDataCheckBox.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        mBacklinksDataTextView.setVisibility(isChecked ? View.VISIBLE : View.GONE));
 
         mViewModel = new ViewModelProvider(this, mViewModelFactory).get(AppClipsViewModel.class);
         mViewModel.getScreenshot().observe(this, this::setScreenshot);
@@ -233,6 +251,9 @@ public class AppClipsActivity extends ComponentActivity {
 
         // Screenshot is now available so set content view.
         setContentView(mLayout);
+
+        // Request view to apply insets as it is added late and not when activity was first created.
+        mRoot.requestApplyInsets();
     }
 
     private void onClick(View view) {
@@ -280,11 +301,19 @@ public class AppClipsActivity extends ComponentActivity {
         data.putInt(Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE,
                 Intent.CAPTURE_CONTENT_FOR_NOTE_SUCCESS);
         data.putParcelable(EXTRA_SCREENSHOT_URI, uri);
+
+        if (mBacklinksIncludeDataCheckBox.getVisibility() == View.VISIBLE
+                && mBacklinksIncludeDataCheckBox.isChecked()
+                && mViewModel.getBacklinksLiveData().getValue() != null) {
+            ClipData backlinksData = mViewModel.getBacklinksLiveData().getValue().getClipData();
+            data.putParcelable(EXTRA_CLIP_DATA, backlinksData);
+        }
+
         try {
             mResultReceiver.send(Activity.RESULT_OK, data);
             logUiEvent(SCREENSHOT_FOR_NOTE_ACCEPTED);
         } catch (Exception e) {
-            // Do nothing.
+            Log.e(TAG, "Error while returning data to trampoline activity", e);
         }
 
         // Nullify the ResultReceiver before finishing to avoid resending the result.
@@ -297,13 +326,18 @@ public class AppClipsActivity extends ComponentActivity {
         finish();
     }
 
-    private void setBacklinksData(ClipData clipData) {
-        if (mBacklinksData.getVisibility() == View.GONE) {
-            mBacklinksData.setVisibility(View.VISIBLE);
-        }
+    private void setBacklinksData(InternalBacklinksData backlinksData) {
+        mBacklinksIncludeDataCheckBox.setVisibility(View.VISIBLE);
+        mBacklinksDataTextView.setVisibility(
+                mBacklinksIncludeDataCheckBox.isChecked() ? View.VISIBLE : View.GONE);
 
-        mBacklinksData.setText(String.format(getString(R.string.backlinks_string),
-                clipData.getDescription().getLabel()));
+        mBacklinksDataTextView.setText(backlinksData.getClipData().getDescription().getLabel());
+
+        Drawable appIcon = backlinksData.getAppIcon();
+        int size = getResources().getDimensionPixelSize(R.dimen.appclips_backlinks_icon_size);
+        appIcon.setBounds(/* left= */ 0, /* top= */ 0, /* right= */ size, /* bottom= */ size);
+        mBacklinksDataTextView.setCompoundDrawablesRelative(/* start= */ appIcon, /* top= */
+                null, /* end= */ null, /* bottom= */ null);
     }
 
     private void setError(int errorCode) {

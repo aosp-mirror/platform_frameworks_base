@@ -65,6 +65,7 @@ public final class UserDataRepositoryTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         SecureSettingsWrapper.startTestMode();
+
         mHandler = new Handler(Looper.getMainLooper());
         mBindingControllerFactory = new IntFunction<InputMethodBindingController>() {
 
@@ -85,8 +86,8 @@ public final class UserDataRepositoryTest {
         // Create UserDataRepository and capture the user lifecycle listener
         final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
         final var bindingControllerFactorySpy = spy(mBindingControllerFactory);
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
-                bindingControllerFactorySpy);
+        final var repository = new UserDataRepository(mHandler,
+                mMockUserManagerInternal, bindingControllerFactorySpy);
 
         verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
         final var listener = captor.getValue();
@@ -105,14 +106,15 @@ public final class UserDataRepositoryTest {
 
         // Assert UserDataRepository called the InputMethodBindingController creator function.
         verify(bindingControllerFactorySpy).apply(ANY_USER_ID);
-        assertThat(allUserData.get(0).mBindingController.mUserId).isEqualTo(ANY_USER_ID);
+        assertThat(allUserData.get(0).mBindingController.getUserId()).isEqualTo(ANY_USER_ID);
     }
 
     @Test
     public void testUserDataRepository_removesUserInfoOnUserRemovedEvent() {
         // Create UserDataRepository and capture the user lifecycle listener
         final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
+        final var repository = new UserDataRepository(mHandler,
+                mMockUserManagerInternal,
                 userId -> new InputMethodBindingController(userId, mMockInputMethodManagerService));
 
         verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
@@ -134,8 +136,8 @@ public final class UserDataRepositoryTest {
 
     @Test
     public void testGetOrCreate() {
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
-                mBindingControllerFactory);
+        final var repository = new UserDataRepository(mHandler,
+                mMockUserManagerInternal, mBindingControllerFactory);
 
         synchronized (ImfLock.class) {
             final var userData = repository.getOrCreate(ANY_USER_ID);
@@ -147,7 +149,7 @@ public final class UserDataRepositoryTest {
         assertThat(allUserData.get(0).mUserId).isEqualTo(ANY_USER_ID);
 
         // Assert UserDataRepository called the InputMethodBindingController creator function.
-        assertThat(allUserData.get(0).mBindingController.mUserId).isEqualTo(ANY_USER_ID);
+        assertThat(allUserData.get(0).mBindingController.getUserId()).isEqualTo(ANY_USER_ID);
     }
 
     private List<UserDataRepository.UserData> collectUserData(UserDataRepository repository) {

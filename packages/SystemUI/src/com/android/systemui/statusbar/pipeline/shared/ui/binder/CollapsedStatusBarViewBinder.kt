@@ -108,6 +108,9 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                                     setChipMainContent(chipModel, chipTextView, chipTimeView)
                                     chipView.setOnClickListener(chipModel.onClickListener)
 
+                                    // Accessibility
+                                    setChipAccessibility(chipModel, chipView)
+
                                     // Colors
                                     val textColor = chipModel.colors.text(chipContext)
                                     chipIconView.imageTintList = ColorStateList.valueOf(textColor)
@@ -116,6 +119,7 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                                     (chipBackgroundView.background as GradientDrawable).color =
                                         chipModel.colors.background(chipContext)
 
+                                    // Notify listeners
                                     listener.onOngoingActivityStatusChanged(
                                         hasOngoingActivity = true
                                     )
@@ -157,6 +161,13 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
 
                 chipTextView.visibility = View.GONE
             }
+            is OngoingActivityChipModel.Shown.IconOnly -> {
+                chipTextView.visibility = View.GONE
+                // The Chronometer should be stopped to prevent leaks -- see b/192243808 and
+                // [Chronometer.start].
+                chipTimeView.stop()
+                chipTimeView.visibility = View.GONE
+            }
         }
         updateChipTextPadding(chipModel, chipTextView, chipTimeView)
     }
@@ -189,6 +200,19 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
 
     private fun View.removeChipTextPaddingStart() {
         this.setPaddingRelative(/* start= */ 0, paddingTop, paddingEnd, paddingBottom)
+    }
+
+    private fun setChipAccessibility(chipModel: OngoingActivityChipModel.Shown, chipView: View) {
+        when (chipModel) {
+            is OngoingActivityChipModel.Shown.Countdown -> {
+                // Set as assertive so talkback will announce the countdown
+                chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
+            }
+            is OngoingActivityChipModel.Shown.Timer,
+            is OngoingActivityChipModel.Shown.IconOnly -> {
+                chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE
+            }
+        }
     }
 
     private fun animateLightsOutView(view: View, visible: Boolean) {
