@@ -1868,7 +1868,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var statsToken = createStatsTokenForFocusedClient(false /* show */,
                     SoftInputShowHideReason.UNBIND_CURRENT_METHOD, userId);
             mVisibilityApplier.applyImeVisibility(userData.mImeBindingState.mFocusedWindow,
-                    statsToken, STATE_HIDE_IME, userId);
+                    statsToken, STATE_HIDE_IME, SoftInputShowHideReason.NOT_SET /* ignore reason */,
+                    userId);
         }
     }
 
@@ -4662,7 +4663,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         windowToken, userId);
                 mVisibilityApplier.applyImeVisibility(requestToken, statsToken,
                         setVisible ? ImeVisibilityStateComputer.STATE_SHOW_IME
-                                : ImeVisibilityStateComputer.STATE_HIDE_IME, userId);
+                                : ImeVisibilityStateComputer.STATE_HIDE_IME,
+                        SoftInputShowHideReason.NOT_SET /* ignore reason */, userId);
             }
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
