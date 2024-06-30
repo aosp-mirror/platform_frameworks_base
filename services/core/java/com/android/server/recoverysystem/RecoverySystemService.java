@@ -52,6 +52,7 @@ import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.sysprop.ApexProperties;
+import android.security.AndroidKeyStoreMaintenance;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.FastImmutableArraySet;
@@ -66,6 +67,7 @@ import com.android.internal.widget.RebootEscrowListener;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.ApexManager;
+import com.android.server.utils.Slogf;
 
 import libcore.io.IoUtils;
 
@@ -116,6 +118,8 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
 
     static final String LSKF_CAPTURED_TIMESTAMP_PREF = "lskf_captured_timestamp";
     static final String LSKF_CAPTURED_COUNT_PREF = "lskf_captured_count";
+
+    static final String RECOVERY_WIPE_DATA_COMMAND = "--wipe_data";
 
     private final Injector mInjector;
     private final Context mContext;
@@ -511,14 +515,29 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     @Override // Binder call
     public void rebootRecoveryWithCommand(String command) {
         if (DEBUG) Slog.d(TAG, "rebootRecoveryWithCommand: [" + command + "]");
+
+        boolean isForcedWipe = command != null && command.contains(RECOVERY_WIPE_DATA_COMMAND);
         synchronized (sRequestLock) {
             if (!setupOrClearBcb(true, command)) {
                 return;
             }
 
+            if (isForcedWipe) {
+                deleteSecrets();
+            }
+
             // Having set up the BCB, go ahead and reboot.
             PowerManager pm = mInjector.getPowerManager();
             pm.reboot(PowerManager.REBOOT_RECOVERY);
+        }
+    }
+
+    private static void deleteSecrets() {
+        Slogf.w(TAG, "deleteSecrets");
+        try {
+            AndroidKeyStoreMaintenance.deleteAllKeys();
+        } catch (android.security.KeyStoreException e) {
+            Log.wtf(TAG, "Failed to delete all keys from keystore.", e);
         }
     }
 
