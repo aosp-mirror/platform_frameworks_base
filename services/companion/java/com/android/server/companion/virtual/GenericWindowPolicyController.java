@@ -87,15 +87,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         void onSecureWindowShown(int displayId, int uid);
     }
 
-    /**
-     * For communicating when activities are blocked from entering PIP on the display by this
-     * policy controller.
-     */
-    public interface PipBlockedCallback {
-        /** Called when an activity is blocked from entering PIP. */
-        void onEnteringPipBlocked(int uid);
-    }
-
     /** Interface to listen for interception of intents. */
     public interface IntentListenerCallback {
         /** Returns true when an intent should be intercepted */
@@ -136,7 +127,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @GuardedBy("mGenericWindowPolicyControllerLock")
     private final ArraySet<Integer> mRunningUids = new ArraySet<>();
     @Nullable private final ActivityListener mActivityListener;
-    @Nullable private final PipBlockedCallback mPipBlockedCallback;
     @Nullable private final IntentListenerCallback mIntentListenerCallback;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     @NonNull
@@ -190,7 +180,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull Set<ComponentName> crossTaskNavigationExemptions,
             @Nullable ComponentName permissionDialogComponent,
             @Nullable ActivityListener activityListener,
-            @Nullable PipBlockedCallback pipBlockedCallback,
             @Nullable ActivityBlockedCallback activityBlockedCallback,
             @Nullable SecureWindowCallback secureWindowCallback,
             @Nullable IntentListenerCallback intentListenerCallback,
@@ -208,7 +197,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         mActivityBlockedCallback = activityBlockedCallback;
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
-        mPipBlockedCallback = pipBlockedCallback;
         mSecureWindowCallback = secureWindowCallback;
         mIntentListenerCallback = intentListenerCallback;
         mDisplayCategories = displayCategories;
@@ -346,6 +334,10 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         }
         final UserHandle activityUser =
                 UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid);
+        if (!activityUser.isSystem() && !mAllowedUsers.contains(activityUser)) {
+            logActivityLaunchBlocked("Activity launch disallowed from user " + activityUser);
+            return false;
+        }
         final ComponentName activityComponent = activityInfo.getComponentName();
         if (BLOCKED_APP_STREAMING_COMPONENT.equals(activityComponent) && activityUser.isSystem()) {
             // The error dialog alerting users that streaming is blocked is always allowed.
@@ -464,18 +456,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             return mShowTasksInHostDeviceRecents;
         }
     }
-
-    @Override
-    public boolean isEnteringPipAllowed(int uid) {
-        if (super.isEnteringPipAllowed(uid)) {
-            return true;
-        }
-        if (mPipBlockedCallback != null) {
-            mHandler.post(() -> mPipBlockedCallback.onEnteringPipBlocked(uid));
-        }
-        return false;
-    }
-
     @Override
     public @Nullable ComponentName getCustomHomeComponent() {
         return mCustomHomeComponent;
@@ -512,7 +492,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
                     "virtual_devices.value_activity_blocked_count",
                     mAttributionSource.getUid());
         }
-
     }
 
     private static boolean isAllowedByPolicy(boolean allowedByDefault,

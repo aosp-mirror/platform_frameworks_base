@@ -348,6 +348,11 @@ class BLASTSyncEngine {
                 wc.setSyncGroup(this);
             }
             wc.prepareSync();
+            if (wc.mSyncState == WindowContainer.SYNC_STATE_NONE && wc.mSyncGroup != null) {
+                Slog.w(TAG, "addToSync: unset SyncGroup " + wc.mSyncGroup.mSyncId
+                        + " for non-sync " + wc);
+                wc.mSyncGroup = null;
+            }
             if (mReady) {
                 mWm.mWindowPlacerLocked.requestTraversal();
             }

@@ -27,18 +27,18 @@ class AppCompatController {
     @NonNull
     private final AppCompatOrientationPolicy mOrientationPolicy;
     @NonNull
-    private final AppCompatCapability mAppCompatCapability;
+    private final AppCompatOverrides mAppCompatOverrides;
 
     AppCompatController(@NonNull WindowManagerService wmService,
                         @NonNull ActivityRecord activityRecord) {
         mTransparentPolicy = new TransparentPolicy(activityRecord,
                 wmService.mLetterboxConfiguration);
-        mAppCompatCapability = new AppCompatCapability(wmService, activityRecord,
+        mAppCompatOverrides = new AppCompatOverrides(wmService, activityRecord,
                 wmService.mLetterboxConfiguration);
         // TODO(b/341903757) Remove BooleanSuppliers after fixing dependency with aspectRatio.
         final LetterboxUiController tmpController = activityRecord.mLetterboxUiController;
         mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord,
-                mAppCompatCapability, tmpController::shouldApplyUserFullscreenOverride,
+                mAppCompatOverrides, tmpController::shouldApplyUserFullscreenOverride,
                 tmpController::shouldApplyUserMinAspectRatioOverride,
                 tmpController::isSystemOverrideToFullscreenEnabled);
     }
@@ -54,7 +54,7 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatCapability getAppCompatCapability() {
-        return mAppCompatCapability;
+    AppCompatOverrides getAppCompatOverrides() {
+        return mAppCompatOverrides;
     }
 }

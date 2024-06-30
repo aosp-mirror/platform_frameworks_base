@@ -40,12 +40,12 @@ constructor(
     smartspaceInteractor: KeyguardSmartspaceInteractor,
 ) {
     /** Whether the smartspace section is available in the build. */
-    val isSmartspaceEnabled: Boolean = smartspaceController.isEnabled()
+    val isSmartspaceEnabled: Boolean = smartspaceController.isEnabled
     /** Whether the weather area is available in the build. */
     private val isWeatherEnabled: StateFlow<Boolean> = smartspaceInteractor.isWeatherEnabled
 
     /** Whether the data and weather areas are decoupled in the build. */
-    val isDateWeatherDecoupled: Boolean = smartspaceController.isDateWeatherDecoupled()
+    val isDateWeatherDecoupled: Boolean = smartspaceController.isDateWeatherDecoupled
 
     /** Whether the date area should be visible. */
     val isDateVisible: StateFlow<Boolean> =

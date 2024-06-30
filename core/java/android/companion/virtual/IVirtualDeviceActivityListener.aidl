@@ -32,7 +32,7 @@ oneway interface IVirtualDeviceActivityListener {
      * @param topActivity The component name of the top activity.
      * @param userId The user ID associated with the top activity.
      */
-    void onTopActivityChanged(int displayId, in ComponentName topActivity, in int userId);
+    void onTopActivityChanged(int displayId, in ComponentName topActivity, int userId);
 
     /**
      * Called when the display becomes empty (e.g. if the user hits back on the last
@@ -41,4 +41,13 @@ oneway interface IVirtualDeviceActivityListener {
      * @param displayId The display ID that became empty.
      */
     void onDisplayEmpty(int displayId);
+
+    /**
+     * Called when an activity launch was blocked due to a policy violation.
+     *
+     * @param displayId The display ID on which the activity tried to launch.
+     * @param componentName The component name of the blocked activity.
+     * @param userId The user ID associated with the blocked activity.
+     */
+    void onActivityLaunchBlocked(int displayId, in ComponentName componentName, int userId);
 }

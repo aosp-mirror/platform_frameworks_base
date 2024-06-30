@@ -211,6 +211,9 @@ constructor(
             }
         }
 
+    /** Whether the device is in lockdown mode, where bouncer input is required to unlock. */
+    val isInLockdown: Flow<Boolean> = deviceEntryRestrictionReason.map { it.isInLockdown() }
+
     /**
      * Attempt to enter the device and dismiss the lockscreen. If authentication is required to
      * unlock the device it will transition to bouncer.
@@ -257,6 +260,27 @@ constructor(
      */
     suspend fun isLockscreenEnabled(): Boolean {
         return repository.isLockscreenEnabled()
+    }
+
+    fun DeviceEntryRestrictionReason?.isInLockdown(): Boolean {
+        return when (this) {
+            DeviceEntryRestrictionReason.UserLockdown -> true
+            DeviceEntryRestrictionReason.PolicyLockdown -> true
+
+            // Add individual enum value instead of using "else" so new reasons are guaranteed
+            // to be added here at compile-time.
+            null -> false
+            DeviceEntryRestrictionReason.DeviceNotUnlockedSinceReboot -> false
+            DeviceEntryRestrictionReason.BouncerLockedOut -> false
+            DeviceEntryRestrictionReason.AdaptiveAuthRequest -> false
+            DeviceEntryRestrictionReason.NonStrongBiometricsSecurityTimeout -> false
+            DeviceEntryRestrictionReason.TrustAgentDisabled -> false
+            DeviceEntryRestrictionReason.StrongBiometricsLockedOut -> false
+            DeviceEntryRestrictionReason.SecurityTimeout -> false
+            DeviceEntryRestrictionReason.DeviceNotUnlockedSinceMainlineUpdate -> false
+            DeviceEntryRestrictionReason.UnattendedUpdate -> false
+            DeviceEntryRestrictionReason.NonStrongFaceLockedOut -> false
+        }
     }
 
     /**

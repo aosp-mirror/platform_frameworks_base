@@ -47,8 +47,6 @@ import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -3586,15 +3584,29 @@ class Task extends TaskFragment {
                 ? null : new PictureInPictureParams(top.pictureInPictureArgs);
     }
 
-    Rect getDisplayCutoutInsets() {
-        if (mDisplayContent == null || getDisplayInfo().displayCutout == null) return null;
+    /** @return The display cutout insets where the main window is not allowed to extend to. */
+    @NonNull Rect getDisplayCutoutInsets() {
+        final Rect displayCutoutInsets = new Rect();
+        if (mDisplayContent == null || getDisplayInfo().displayCutout == null) {
+            return displayCutoutInsets;
+        }
         final WindowState w = getTopVisibleAppMainWindow();
-        final int displayCutoutMode = w == null
-                ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-                : w.getAttrs().layoutInDisplayCutoutMode;
-        return (displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-                || displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)
-                ? null : getDisplayInfo().displayCutout.getSafeInsets();
+        final Rect displayFrame;
+        if (w != null && w.mHaveFrame) {
+            displayFrame = w.getDisplayFrame();
+        } else {
+            displayFrame = mDisplayContent.getBounds();
+            displayFrame.inset(getDisplayInfo().displayCutout.getSafeInsets());
+        }
+        final Rect taskBounds = getBounds();
+        if (displayCutoutInsets.setIntersect(taskBounds, displayFrame)) {
+            displayCutoutInsets.set(
+                    displayCutoutInsets.left - taskBounds.left,
+                    displayCutoutInsets.top - taskBounds.top,
+                    taskBounds.right - displayCutoutInsets.right,
+                    taskBounds.bottom - displayCutoutInsets.bottom);
+        }
+        return displayCutoutInsets;
     }
 
     /**
@@ -4792,8 +4804,7 @@ class Task extends TaskFragment {
                     // task is still updated by core. Otherwise if the task is collected (e.g.
                     // rotation change) after leaving this scope, the visibility operation will be
                     // put in sync transaction, then it is not synced with reparent.
-                    if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()
-                            && lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
+                    if (lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
                         lastParentBeforePip.prepareSurfaces();
                         // If the moveToFront is a part of finishing transition, then make sure
                         // the z-order of tasks are up-to-date.

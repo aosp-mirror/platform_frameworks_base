@@ -72,6 +72,7 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
                 /* animationController = */ notNull(),
                 /* fillInIntent = */ refEq(fillInIntent),
                 /* extraOptions = */ refEq(activityOptions.toBundle()),
+                /* customMessage */ isNull(),
             )
     }
 
@@ -93,6 +94,7 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
                 /* animationController = */ isNull(),
                 /* fillInIntent = */ refEq(fillInIntent),
                 /* extraOptions = */ refEq(activityOptions.toBundle()),
+                /* customMessage */ isNull(),
             )
     }
 }

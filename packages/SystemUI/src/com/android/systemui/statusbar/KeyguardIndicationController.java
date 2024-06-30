@@ -1276,7 +1276,7 @@ public class KeyguardIndicationController {
             mPowerPluggedInWired = status.isPluggedInWired() && isChargingOrFull;
             mPowerPluggedInWireless = status.isPluggedInWireless() && isChargingOrFull;
             mPowerPluggedInDock = status.isPluggedInDock() && isChargingOrFull;
-            mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
+            mPowerPluggedIn = isPowerPluggedIn(status, isChargingOrFull);
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mContext);
@@ -1562,6 +1562,11 @@ public class KeyguardIndicationController {
         return status.isBatteryDefender();
     }
 
+    /** Return true if the device has power plugged in. */
+    protected boolean isPowerPluggedIn(BatteryStatus status, boolean isChargingOrFull) {
+        return status.isPluggedIn() && isChargingOrFull;
+    }
+
     private boolean isCurrentUser(int userId) {
         return getCurrentUser() == userId;
     }
@@ -1669,11 +1674,6 @@ public class KeyguardIndicationController {
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
-        @Override
-        public void onStateChanged(int newState) {
-            setVisible(newState == StatusBarState.KEYGUARD);
-        }
-
         @Override
         public void onDozingChanged(boolean dozing) {
             if (mDozing == dozing) {

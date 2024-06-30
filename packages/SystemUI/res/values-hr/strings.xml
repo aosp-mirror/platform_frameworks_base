@@ -129,24 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Zaustavit ćete snimanje aplikacije &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Zaustavit ćete dijeljenje aplikacije &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
-    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Zaustavit ćete emitiranje aplikacije &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -382,11 +379,11 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Snimanje zaslona"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Početak"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavi"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Zabilježi poteškoću"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Zabilježite poteškoću"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Pokreni"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Zaustavi"</string>
-    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Izvješće o pogrešci"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Na koji dio doživljaja na uređaju to utjecalo?"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Izvješće o programskim pogreškama"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Na koji je dio doživljaja na uređaju to utjecalo?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Odaberite vrstu problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Snimanje zaslona"</string>
     <string name="performance" msgid="6552785217174378320">"Izvedba"</string>
@@ -493,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"odaberi widget"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ukloni widget"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"postavi odabrani widget"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Promjena korisnika"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"padajući izbornik"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Izbrisat će se sve aplikacije i podaci u ovoj sesiji."</string>
@@ -546,6 +549,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Pokreni"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nema obavijesti"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nema novih obavijesti"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Prilagodljive obavijesti uklj."</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Uređaj sada stišava zvuk i smanjuje broj skočnih prozora na zaslonu na 2 minute kada primite jako puno obavijesti u kratkom vremenskom razdoblju."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Isključi"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Otključajte za starije obavijesti"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Ovim uređajem upravlja tvoj roditelj"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Vaša je organizacija vlasnik ovog uređaja i može nadzirati mrežni promet"</string>
@@ -1201,8 +1207,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nema nijednog alarma"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"unesite zaključavanje zaslona"</string>
-    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
-    <skip />
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Dodirnite senzor otiska prsta. To je kraća tipka s bočne strane telefona"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Senzor otiska prsta"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentificirali"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"pristupili uređaju"</string>
@@ -1361,6 +1366,10 @@
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Natrag"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Za povratak trima prstima prijeđite ulijevo ili udesno bilo gdje na dodirnoj podlozi."</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Dodirna podloga prikazuje tri prsta koji se kreću udesno i ulijevo"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Na zaslonu uređaja prikazuje se animacija za pokret za povratak"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Pozadinsko osvjetljenje tipkovnice"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Razina %1$d od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Upravljanje uređajima"</string>

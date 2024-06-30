@@ -48,7 +48,6 @@ import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-
 /**
  * Test class for {@link TaskStackTransitionObserver}
  *
@@ -168,6 +167,80 @@ class TaskStackTransitionObserverTest {
             .isEqualTo(freeformOpenChange.taskInfo?.windowingMode)
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    fun transitionMerged_withChange_onlyOpenChangeIsNotified() {
+        val listener = TestListener()
+        val executor = TestShellExecutor()
+        transitionObserver.addTaskStackTransitionObserverListener(listener, executor)
+
+        // Create open transition
+        val change =
+            createChange(
+                WindowManager.TRANSIT_OPEN,
+                createTaskInfo(1, WindowConfiguration.WINDOWING_MODE_FREEFORM)
+            )
+        val transitionInfo =
+            TransitionInfoBuilder(WindowManager.TRANSIT_OPEN, 0).addChange(change).build()
+
+        // create change transition to be merged to above transition
+        val mergedChange =
+            createChange(
+                WindowManager.TRANSIT_CHANGE,
+                createTaskInfo(2, WindowConfiguration.WINDOWING_MODE_FREEFORM)
+            )
+        val mergedTransitionInfo =
+            TransitionInfoBuilder(WindowManager.TRANSIT_CHANGE, 0).addChange(mergedChange).build()
+        val mergedTransition = Mockito.mock(IBinder::class.java)
+
+        callOnTransitionReady(transitionInfo)
+        callOnTransitionReady(mergedTransitionInfo, mergedTransition)
+        callOnTransitionMerged(mergedTransition)
+        callOnTransitionFinished()
+        executor.flushAll()
+
+        assertThat(listener.taskInfoToBeNotified.taskId).isEqualTo(change.taskInfo?.taskId)
+        assertThat(listener.taskInfoToBeNotified.windowingMode)
+            .isEqualTo(change.taskInfo?.windowingMode)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    fun transitionMerged_withOpen_lastOpenChangeIsNotified() {
+        val listener = TestListener()
+        val executor = TestShellExecutor()
+        transitionObserver.addTaskStackTransitionObserverListener(listener, executor)
+
+        // Create open transition
+        val change =
+            createChange(
+                WindowManager.TRANSIT_OPEN,
+                createTaskInfo(1, WindowConfiguration.WINDOWING_MODE_FREEFORM)
+            )
+        val transitionInfo =
+            TransitionInfoBuilder(WindowManager.TRANSIT_OPEN, 0).addChange(change).build()
+
+        // create change transition to be merged to above transition
+        val mergedChange =
+            createChange(
+                WindowManager.TRANSIT_OPEN,
+                createTaskInfo(2, WindowConfiguration.WINDOWING_MODE_FREEFORM)
+            )
+        val mergedTransitionInfo =
+            TransitionInfoBuilder(WindowManager.TRANSIT_OPEN, 0).addChange(mergedChange).build()
+        val mergedTransition = Mockito.mock(IBinder::class.java)
+
+        callOnTransitionReady(transitionInfo)
+        callOnTransitionReady(mergedTransitionInfo, mergedTransition)
+        callOnTransitionMerged(mergedTransition)
+        callOnTransitionFinished()
+        executor.flushAll()
+
+        assertThat(listener.taskInfoToBeNotified.taskId).isEqualTo(mergedChange.taskInfo?.taskId)
+        assertThat(listener.taskInfoToBeNotified.windowingMode)
+                .isEqualTo(mergedChange.taskInfo?.windowingMode)
+    }
+
     class TestListener : TaskStackTransitionObserver.TaskStackTransitionObserverListener {
         var taskInfoToBeNotified = ActivityManager.RunningTaskInfo()
 
@@ -179,16 +252,24 @@ class TaskStackTransitionObserverTest {
     }
 
     /** Simulate calling the onTransitionReady() method */
-    private fun callOnTransitionReady(transitionInfo: TransitionInfo) {
+    private fun callOnTransitionReady(
+        transitionInfo: TransitionInfo,
+        transition: IBinder = mockTransitionBinder
+    ) {
         val startT = Mockito.mock(SurfaceControl.Transaction::class.java)
         val finishT = Mockito.mock(SurfaceControl.Transaction::class.java)
 
-        transitionObserver.onTransitionReady(mockTransitionBinder, transitionInfo, startT, finishT)
+        transitionObserver.onTransitionReady(transition, transitionInfo, startT, finishT)
     }
 
     /** Simulate calling the onTransitionFinished() method */
     private fun callOnTransitionFinished() {
         transitionObserver.onTransitionFinished(mockTransitionBinder, false)
+    }
+
+    /** Simulate calling the onTransitionMerged() method */
+    private fun callOnTransitionMerged(merged: IBinder, playing: IBinder = mockTransitionBinder) {
+        transitionObserver.onTransitionMerged(merged, playing)
     }
 
     companion object {

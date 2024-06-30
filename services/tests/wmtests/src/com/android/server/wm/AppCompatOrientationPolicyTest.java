@@ -34,23 +34,15 @@ import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_FULLSCREEN
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import android.compat.testing.PlatformCompatChangeRule;
-import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
-
-import com.android.server.wm.utils.TestComponentStack;
 
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
@@ -87,7 +79,7 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_ANY_ORIENTATION_TO_USER})
     public void testOverrideOrientationIfNeeded_fullscreenOverrideEnabled_returnsUser() {
         runTestScenarioWithActivity((robot) -> {
-            robot.configureSetIgnoreOrientationRequest(true);
+            robot.activity().setIgnoreOrientationRequest(true);
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
                     /* expected */ SCREEN_ORIENTATION_USER);
         });
@@ -97,9 +89,11 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_ANY_ORIENTATION_TO_USER})
     public void testOverrideOrientationIfNeeded_fullscreenOverrideEnabled_optOut_isUnchanged() {
         runTestScenario((robot) -> {
-            robot.disableProperty(PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
-            robot.createActivityWithComponent();
-            robot.configureSetIgnoreOrientationRequest(true);
+            robot.prop().disable(PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.setIgnoreOrientationRequest(true);
+            });
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
                     /* expected */ SCREEN_ORIENTATION_PORTRAIT);
@@ -110,12 +104,13 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_ANY_ORIENTATION_TO_USER})
     public void testOverrideOrientationIfNeeded_fullscreenOverrides_optOutSystem_returnsUser() {
         runTestScenario((robot) -> {
-            robot.disableProperty(PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
-            robot.configureIsUserAppAspectRatioFullscreenEnabled(true);
-
-            robot.createActivityWithComponent();
-            robot.configureSetIgnoreOrientationRequest(true);
-            robot.prepareGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_FULLSCREEN);
+            robot.prop().disable(PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
+            robot.conf().enableUserAppAspectRatioFullscreen(true);
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.setIgnoreOrientationRequest(true);
+                a.setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_FULLSCREEN);
+            });
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
                     /* expected */ SCREEN_ORIENTATION_USER);
@@ -126,12 +121,13 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_ANY_ORIENTATION_TO_USER})
     public void testOverrideOrientationIfNeeded_fullscreenOverrides_optOutUser_returnsUser() {
         runTestScenario((robot) -> {
-            robot.disableProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE);
-            robot.configureIsUserAppAspectRatioFullscreenEnabled(true);
-
-            robot.createActivityWithComponent();
-            robot.configureSetIgnoreOrientationRequest(true);
-            robot.prepareGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_FULLSCREEN);
+            robot.prop().disable(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE);
+            robot.conf().enableUserAppAspectRatioFullscreen(true);
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.setIgnoreOrientationRequest(true);
+                a.setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_FULLSCREEN);
+            });
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
                     /* expected */ SCREEN_ORIENTATION_USER);
@@ -143,7 +139,7 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     public void testOverrideOrientationIfNeeded_fullscreenOverrideEnabled_returnsUnchanged()
             throws Exception {
         runTestScenarioWithActivity((robot) -> {
-            robot.configureSetIgnoreOrientationRequest(false);
+            robot.activity().setIgnoreOrientationRequest(false);
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
                     /* expected */ SCREEN_ORIENTATION_PORTRAIT);
@@ -154,11 +150,13 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_ANY_ORIENTATION_TO_USER})
     public void testOverrideOrientationIfNeeded_fullscreenAndUserOverrideEnabled_isUnchanged() {
         runTestScenario((robot) -> {
-            robot.prepareIsUserAppAspectRatioSettingsEnabled(true);
+            robot.conf().enableUserAppAspectRatioSettings(true);
 
-            robot.createActivityWithComponent();
-            robot.configureSetIgnoreOrientationRequest(true);
-            robot.prepareGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_3_2);
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.setIgnoreOrientationRequest(true);
+                a.setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_3_2);
+            });
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
                     /* expected */ SCREEN_ORIENTATION_PORTRAIT);
@@ -249,9 +247,9 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     public void testOverrideOrientationIfNeeded_propertyIsFalse_isUnchanged()
             throws Exception {
         runTestScenario((robot) -> {
-            robot.disableProperty(PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
+            robot.prop().disable(PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
 
-            robot.createActivityWithComponent();
+            robot.activity().createActivityWithComponent();
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_UNSPECIFIED,
                     /* expected */ SCREEN_ORIENTATION_UNSPECIFIED);
@@ -263,11 +261,14 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
             OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA})
     public void testOverrideOrientationIfNeeded_whenCameraNotActive_isUnchanged() {
         runTestScenario((robot) -> {
-            robot.configureIsCameraCompatTreatmentEnabled(true);
-            robot.configureIsCameraCompatTreatmentEnabledAtBuildTime(true);
-
-            robot.createActivityWithComponentInNewTask();
-            robot.prepareIsTopActivityEligibleForOrientationOverride(false);
+            robot.applyOnConf((c)-> {
+                c.enableCameraCompatTreatment(true);
+                c.enableCameraCompatTreatmentAtBuildTime(true);
+            });
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponentInNewTask();
+                a.setTopActivityEligibleForOrientationOverride(false);
+            });
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_UNSPECIFIED,
                     /* expected */ SCREEN_ORIENTATION_UNSPECIFIED);
@@ -279,11 +280,14 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
             OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA})
     public void testOverrideOrientationIfNeeded_whenCameraActive_returnsPortrait() {
         runTestScenario((robot) -> {
-            robot.configureIsCameraCompatTreatmentEnabled(true);
-            robot.configureIsCameraCompatTreatmentEnabledAtBuildTime(true);
-
-            robot.createActivityWithComponentInNewTask();
-            robot.prepareIsTopActivityEligibleForOrientationOverride(true);
+            robot.applyOnConf((c) -> {
+                c.enableCameraCompatTreatment(true);
+                c.enableCameraCompatTreatmentAtBuildTime(true);
+            });
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponentInNewTask();
+                a.setTopActivityEligibleForOrientationOverride(true);
+            });
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_UNSPECIFIED,
                     /* expected */ SCREEN_ORIENTATION_PORTRAIT);
@@ -293,8 +297,10 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @Test
     public void testOverrideOrientationIfNeeded_userFullscreenOverride_returnsUser() {
         runTestScenarioWithActivity((robot) -> {
-            robot.prepareShouldApplyUserFullscreenOverride(true);
-            robot.configureSetIgnoreOrientationRequest(true);
+            robot.applyOnActivity((a) -> {
+                a.setShouldApplyUserFullscreenOverride(true);
+                a.setIgnoreOrientationRequest(true);
+            });
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_UNSPECIFIED,
                     /* expected */ SCREEN_ORIENTATION_USER);
@@ -304,11 +310,14 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @Test
     public void testOverrideOrientationIfNeeded_fullscreenOverride_cameraActivity_unchanged() {
         runTestScenario((robot) -> {
-            robot.configureIsCameraCompatTreatmentEnabled(true);
-            robot.configureIsCameraCompatTreatmentEnabledAtBuildTime(true);
-
-            robot.createActivityWithComponentInNewTask();
-            robot.configureIsTopActivityCameraActive(false);
+            robot.applyOnConf((c) -> {
+                c.enableCameraCompatTreatment(true);
+                c.enableCameraCompatTreatmentAtBuildTime(true);
+            });
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponentInNewTask();
+                a.setTopActivityCameraActive(false);
+            });
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
                     /* expected */ SCREEN_ORIENTATION_PORTRAIT);
@@ -318,8 +327,10 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @Test
     public void testOverrideOrientationIfNeeded_respectOrientationRequestOverUserFullScreen() {
         runTestScenarioWithActivity((robot) -> {
-            robot.prepareShouldApplyUserFullscreenOverride(true);
-            robot.configureSetIgnoreOrientationRequest(false);
+            robot.applyOnActivity((a) -> {
+                a.setShouldApplyUserFullscreenOverride(true);
+                a.setIgnoreOrientationRequest(false);
+            });
 
             robot.checkOverrideOrientationIsNot(/* candidate */ SCREEN_ORIENTATION_UNSPECIFIED,
                     /* notExpected */ SCREEN_ORIENTATION_USER);
@@ -330,8 +341,10 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT, OVERRIDE_ANY_ORIENTATION})
     public void testOverrideOrientationIfNeeded_userFullScreenOverrideOverSystem_returnsUser() {
         runTestScenarioWithActivity((robot) -> {
-            robot.prepareShouldApplyUserFullscreenOverride(true);
-            robot.configureSetIgnoreOrientationRequest(true);
+            robot.applyOnActivity((a) -> {
+                a.setShouldApplyUserFullscreenOverride(true);
+                a.setIgnoreOrientationRequest(true);
+            });
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
                     /* expected */ SCREEN_ORIENTATION_USER);
@@ -342,9 +355,10 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT, OVERRIDE_ANY_ORIENTATION})
     public void testOverrideOrientationIfNeeded_respectOrientationReqOverUserFullScreenAndSystem() {
         runTestScenarioWithActivity((robot) -> {
-            robot.prepareShouldApplyUserFullscreenOverride(true);
-            robot.configureSetIgnoreOrientationRequest(false);
-
+            robot.applyOnActivity((a) -> {
+                a.setShouldApplyUserFullscreenOverride(true);
+                a.setIgnoreOrientationRequest(false);
+            });
             robot.checkOverrideOrientationIsNot(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
                     /* notExpected */ SCREEN_ORIENTATION_USER);
         });
@@ -353,7 +367,7 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @Test
     public void testOverrideOrientationIfNeeded_userFullScreenOverrideDisabled_returnsUnchanged() {
         runTestScenarioWithActivity((robot) -> {
-            robot.prepareShouldApplyUserFullscreenOverride(false);
+            robot.activity().setShouldApplyUserFullscreenOverride(false);
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_PORTRAIT,
                     /* expected */ SCREEN_ORIENTATION_PORTRAIT);
@@ -363,7 +377,7 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @Test
     public void testOverrideOrientationIfNeeded_userAspectRatioApplied_unspecifiedOverridden() {
         runTestScenarioWithActivity((robot) -> {
-            robot.prepareShouldApplyUserMinAspectRatioOverride(true);
+            robot.activity().setShouldApplyUserMinAspectRatioOverride(true);
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_UNSPECIFIED,
                     /* expected */ SCREEN_ORIENTATION_PORTRAIT);
@@ -377,7 +391,7 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
     @Test
     public void testOverrideOrientationIfNeeded_userAspectRatioNotApplied_isUnchanged() {
         runTestScenarioWithActivity((robot) -> {
-            robot.prepareShouldApplyUserFullscreenOverride(false);
+            robot.activity().setShouldApplyUserFullscreenOverride(false);
 
             robot.checkOverrideOrientation(/* candidate */ SCREEN_ORIENTATION_UNSPECIFIED,
                     /* expected */ SCREEN_ORIENTATION_UNSPECIFIED);
@@ -410,99 +424,24 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
         consumer.accept(robot);
     }
 
-    private static class OrientationPolicyRobotTest {
+    private static class OrientationPolicyRobotTest extends AppCompatRobotBase{
 
-        @NonNull
-        private final ActivityTaskManagerService mAtm;
-        @NonNull
         private final WindowManagerService mWm;
-        @NonNull
-        private final LetterboxConfiguration mLetterboxConfiguration;
-        @NonNull
-        private final TestComponentStack<ActivityRecord> mActivityStack;
-        @NonNull
-        private final TestComponentStack<Task> mTaskStack;
-
-        @NonNull
-        private final ActivityTaskSupervisor mSupervisor;
 
         OrientationPolicyRobotTest(@NonNull WindowManagerService wm,
                                    @NonNull ActivityTaskManagerService atm,
                                    @NonNull ActivityTaskSupervisor supervisor,
                                    boolean withActivity) {
-            mAtm = atm;
+            super(wm, atm, supervisor);
             mWm = wm;
             spyOn(mWm);
-            mSupervisor = supervisor;
-            mActivityStack = new TestComponentStack<>();
-            mTaskStack = new TestComponentStack<>();
-            mLetterboxConfiguration = mWm.mLetterboxConfiguration;
             if (withActivity) {
-                createActivityWithComponent();
+                activity().createActivityWithComponent();
             }
         }
 
-        void configureSetIgnoreOrientationRequest(boolean enabled) {
-            mActivityStack.top().mDisplayContent.setIgnoreOrientationRequest(enabled);
-        }
-
-        void configureIsUserAppAspectRatioFullscreenEnabled(boolean enabled) {
-            doReturn(enabled).when(mLetterboxConfiguration).isUserAppAspectRatioFullscreenEnabled();
-        }
-
-        void configureIsCameraCompatTreatmentEnabled(boolean enabled) {
-            doReturn(enabled).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled();
-        }
-
-        void configureIsCameraCompatTreatmentEnabledAtBuildTime(boolean enabled) {
-            doReturn(enabled).when(mLetterboxConfiguration)
-                    .isCameraCompatTreatmentEnabledAtBuildTime();
-        }
-
-        void prepareGetUserMinAspectRatioOverrideCode(int orientation) {
-            spyOn(mActivityStack.top().mLetterboxUiController);
-            doReturn(orientation).when(mActivityStack.top()
-                    .mLetterboxUiController).getUserMinAspectRatioOverrideCode();
-        }
-
-        void prepareShouldApplyUserFullscreenOverride(boolean enabled) {
-            spyOn(mActivityStack.top().mLetterboxUiController);
-            doReturn(enabled).when(mActivityStack.top()
-                    .mLetterboxUiController).shouldApplyUserFullscreenOverride();
-        }
-
-        void prepareShouldApplyUserMinAspectRatioOverride(boolean enabled) {
-            spyOn(mActivityStack.top().mLetterboxUiController);
-            doReturn(enabled).when(mActivityStack.top()
-                    .mLetterboxUiController).shouldApplyUserMinAspectRatioOverride();
-        }
-
-        void prepareIsUserAppAspectRatioSettingsEnabled(boolean enabled) {
-            doReturn(enabled).when(mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
-        }
-
-        void prepareIsTopActivityEligibleForOrientationOverride(boolean enabled) {
-            final DisplayRotationCompatPolicy displayPolicy =
-                    mActivityStack.top().mDisplayContent.mDisplayRotationCompatPolicy;
-            spyOn(displayPolicy);
-            doReturn(enabled).when(displayPolicy)
-                    .isActivityEligibleForOrientationOverride(eq(mActivityStack.top()));
-        }
-
-        void configureIsTopActivityCameraActive(boolean enabled) {
-            final DisplayRotationCompatPolicy displayPolicy =
-                    mActivityStack.top().mDisplayContent.mDisplayRotationCompatPolicy;
-            spyOn(displayPolicy);
-            doReturn(enabled).when(displayPolicy)
-                    .isCameraActive(eq(mActivityStack.top()), /* mustBeFullscreen= */ eq(true));
-        }
-
-        void disableProperty(@NonNull String propertyName) {
-            setPropertyValue(propertyName, /* enabled */ false);
-        }
-
         int overrideOrientationIfNeeded(@ActivityInfo.ScreenOrientation int candidate) {
-            return mActivityStack.top().mAppCompatController.getOrientationPolicy()
+            return activity().top().mAppCompatController.getOrientationPolicy()
                     .overrideOrientationIfNeeded(candidate);
         }
 
@@ -518,53 +457,6 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
         void checkOverrideOrientationIsNot(@ActivityInfo.ScreenOrientation int candidate,
                                            @ActivityInfo.ScreenOrientation int notExpected) {
             Assert.assertNotEquals(notExpected, overrideOrientationIfNeeded(candidate));
-        }
-
-        private void createActivityWithComponent() {
-            if (mTaskStack.isEmpty()) {
-                final DisplayContent displayContent = new TestDisplayContent
-                        .Builder(mAtm, /* dw */ 1000, /* dh */ 2000).build();
-                final Task task = new TaskBuilder(mSupervisor).setDisplay(displayContent).build();
-                mTaskStack.push(task);
-            }
-            final ActivityRecord activity = new ActivityBuilder(mAtm)
-                    .setOnTop(true)
-                    .setTask(mTaskStack.top())
-                    // Set the component to be that of the test class in order
-                    // to enable compat changes
-                    .setComponent(ComponentName.createRelative(mAtm.mContext,
-                            com.android.server.wm.LetterboxUiControllerTest.class.getName()))
-                    .build();
-            mActivityStack.push(activity);
-        }
-
-        private void createActivityWithComponentInNewTask() {
-            final DisplayContent displayContent = new TestDisplayContent
-                    .Builder(mAtm, /* dw */ 1000, /* dh */ 2000).build();
-            final Task task = new TaskBuilder(mSupervisor).setDisplay(displayContent).build();
-            final ActivityRecord activity = new ActivityBuilder(mAtm)
-                    .setOnTop(true)
-                    .setTask(task)
-                    // Set the component to be that of the test class in order
-                    // to enable compat changes
-                    .setComponent(ComponentName.createRelative(mAtm.mContext,
-                            com.android.server.wm.LetterboxUiControllerTest.class.getName()))
-                    .build();
-            mTaskStack.push(task);
-            mActivityStack.push(activity);
-        }
-
-        private void setPropertyValue(@NonNull String propertyName, boolean enabled) {
-            PackageManager.Property property = new PackageManager.Property(propertyName,
-                    /* value */ enabled, /* packageName */ "",
-                    /* className */ "");
-            PackageManager pm = mWm.mContext.getPackageManager();
-            spyOn(pm);
-            try {
-                doReturn(property).when(pm).getProperty(eq(propertyName), anyString());
-            } catch (PackageManager.NameNotFoundException e) {
-                fail(e.getLocalizedMessage());
-            }
         }
     }
 }

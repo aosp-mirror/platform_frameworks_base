@@ -373,6 +373,8 @@
     <!-- Listen to (dis-)connection of external displays and enable / disable them. -->
     <uses-permission android:name="android.permission.MANAGE_DISPLAYS" />
 
+    <uses-permission android:name="android.permission.SET_BIOMETRIC_DIALOG_ADVANCED" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />

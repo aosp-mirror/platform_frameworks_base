@@ -334,6 +334,7 @@ public class UserManagerService extends IUserManager.Stub {
     private final Context mContext;
     private final PackageManagerService mPm;
 
+
     /**
      * Lock for packages. If using with {@link #mUsersLock}, {@link #mPackagesLock} should be
      * acquired first.
@@ -1076,6 +1077,10 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         showHsumNotificationIfNeeded();
+
+        if (Flags.addUiForSoundsFromBackgroundUsers()) {
+            new BackgroundUserSoundNotifier(mContext);
+        }
     }
 
     private boolean isAutoLockingPrivateSpaceOnRestartsEnabled() {

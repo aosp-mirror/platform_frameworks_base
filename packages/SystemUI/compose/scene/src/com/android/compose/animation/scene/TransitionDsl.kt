@@ -185,6 +185,17 @@ interface TransitionBuilder : BaseTransitionBuilder {
 
 @TransitionDsl
 interface OverscrollBuilder : BaseTransitionBuilder {
+    /**
+     * Function that takes a linear overscroll progress value ranging from 0 to +/- infinity and
+     * outputs the desired **overscroll progress value**.
+     *
+     * When the progress value is:
+     * - 0, the user is not overscrolling.
+     * - 1, the user overscrolled by exactly the [distance].
+     * - Greater than 1, the user overscrolled more than the [distance].
+     */
+    var progressConverter: (Float) -> Float
+
     /** Translate the element(s) matching [matcher] by ([x], [y]) pixels. */
     fun translate(
         matcher: ElementMatcher,

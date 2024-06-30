@@ -119,7 +119,7 @@ constructor(
             if (delayed) {
                 scope.launch {
                     delay(125)
-                    animateCollapseShadeInternal()
+                    withContext(mainDispatcher) { animateCollapseShadeInternal() }
                 }
             } else {
                 animateCollapseShadeInternal()

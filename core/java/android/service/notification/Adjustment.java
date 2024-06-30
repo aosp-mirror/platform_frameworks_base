@@ -184,7 +184,6 @@ public final class Adjustment implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = { "TYPE_" }, value = {
-            TYPE_UNKNOWN,
             TYPE_OTHER,
             TYPE_PROMOTION,
             TYPE_SOCIAL_MEDIA,
@@ -195,12 +194,8 @@ public final class Adjustment implements Parcelable {
     public @interface Types {}
 
     /**
-     * The type of this notification is unknown.
-     */
-    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
-    public static final int TYPE_UNKNOWN = -1;
-    /**
-     * The type of this notification is not one of ones known to the NotificationAssistantService.
+     * This notification can be categorized, but not into one of the other categories known to the
+     * OS at a given version.
      */
     @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public static final int TYPE_OTHER = 0;

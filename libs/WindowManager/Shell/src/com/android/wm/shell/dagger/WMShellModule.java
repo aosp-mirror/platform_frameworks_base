@@ -17,6 +17,7 @@
 package com.android.wm.shell.dagger;
 
 import android.annotation.Nullable;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Handler;
@@ -514,6 +515,7 @@ public abstract class WMShellModule {
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             DragAndDropController dragAndDropController,
             Transitions transitions,
+            KeyguardManager keyguardManager,
             EnterDesktopTaskTransitionHandler enterDesktopTransitionHandler,
             ExitDesktopTaskTransitionHandler exitDesktopTransitionHandler,
             ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
@@ -528,7 +530,7 @@ public abstract class WMShellModule {
             Optional<RecentTasksController> recentTasksController) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
-                dragAndDropController, transitions, enterDesktopTransitionHandler,
+                dragAndDropController, transitions, keyguardManager, enterDesktopTransitionHandler,
                 exitDesktopTransitionHandler, toggleResizeDesktopTaskTransitionHandler,
                 dragToDesktopTransitionHandler, desktopModeTaskRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
@@ -644,6 +646,7 @@ public abstract class WMShellModule {
             ShellInit shellInit,
             ShellController shellController,
             ShellCommandHandler shellCommandHandler,
+            ShellTaskOrganizer shellTaskOrganizer,
             DisplayController displayController,
             UiEventLogger uiEventLogger,
             IconProvider iconProvider,
@@ -651,8 +654,8 @@ public abstract class WMShellModule {
             Transitions transitions,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new DragAndDropController(context, shellInit, shellController, shellCommandHandler,
-                displayController, uiEventLogger, iconProvider, globalDragListener, transitions,
-                mainExecutor);
+                shellTaskOrganizer, displayController, uiEventLogger, iconProvider,
+                globalDragListener, transitions, mainExecutor);
     }
 
     //

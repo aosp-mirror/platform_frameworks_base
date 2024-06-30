@@ -16,8 +16,14 @@
 
 package com.android.server.autofill;
 
-import java.util.List;
+import static com.android.server.autofill.Helper.sDebug;
+
+import android.util.Slog;
+import android.util.SparseArray;
+
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
+import java.util.Random;
 
 // Helper class containing various methods to deal with FillRequest Ids.
 // For authentication flows, there needs to be a way to know whether to retrieve the Fill
@@ -25,56 +31,97 @@ import java.util.concurrent.atomic.AtomicInteger;
 // way to achieve this is by assigning odd number request ids to secondary provider and
 // even numbers to primary provider.
 public class RequestId {
+    private AtomicInteger sIdCounter;
 
-  private AtomicInteger sIdCounter;
+    // The minimum request id is 2 to avoid possible authentication issues.
+    static final int MIN_REQUEST_ID = 2;
+    // The maximum request id is 0x7FFF to make sure the 16th bit is 0.
+    // This is to make sure the authentication id is always positive.
+    static final int MAX_REQUEST_ID = 0x7FFF; // 32767
 
-  // Mainly used for tests
-  RequestId(int start) {
-    sIdCounter = new AtomicInteger(start);
-  }
+    // The maximum start id is made small to best avoid wrapping around.
+    static final int MAX_START_ID = 1000;
+    // The magic number is used to determine if a wrap has happened.
+    // The underlying assumption of MAGIC_NUMBER is that there can't be as many as MAGIC_NUMBER
+    // of fill requests in one session. so there can't be as many as MAGIC_NUMBER of fill requests
+    // getting dropped.
+    static final int MAGIC_NUMBER = 5000;
 
-  public RequestId() {
-    this((int) (Math.floor(Math.random() * 0xFFFF)));
-  }
+    static final int MIN_PRIMARY_REQUEST_ID = 2;
+    static final int MAX_PRIMARY_REQUEST_ID = 0x7FFE; // 32766
 
-  public static int getLastRequestIdIndex(List<Integer> requestIds) {
-    int lastId = -1;
-    int indexOfBiggest = -1;
-    // Biggest number is usually the latest request, since IDs only increase
-    // The only exception is when the request ID wraps around back to 0
-      for (int i = requestIds.size() - 1; i >= 0; i--) {
-        if (requestIds.get(i) > lastId) {
-        lastId = requestIds.get(i);
-        indexOfBiggest = i;
-      }
-    }
+    static final int MIN_SECONDARY_REQUEST_ID = 3;
+    static final int MAX_SECONDARY_REQUEST_ID = 0x7FFF; // 32767
 
-    // 0xFFFE + 2 == 0x1 (for secondary)
-    // 0xFFFD + 2 == 0x0 (for primary)
-    // Wrap has occurred
-    if (lastId >= 0xFFFD) {
-      // Calculate the biggest size possible
-      // If list only has one kind of request ids - we need to multiple by 2
-      // (since they skip odd ints)
-      // Also subtract one from size because at least one integer exists pre-wrap
-      int calcSize = (requestIds.size()) * 2;
-      //Biggest possible id after wrapping
-      int biggestPossible = (lastId + calcSize) % 0xFFFF;
-      lastId = -1;
-      indexOfBiggest = -1;
-      for (int i = 0; i < requestIds.size(); i++) {
-        int currentId = requestIds.get(i);
-        if (currentId <= biggestPossible && currentId > lastId) {
-          lastId = currentId;
-          indexOfBiggest = i;
+    private static final String TAG = "RequestId";
+
+    // WARNING: This constructor should only be used for testing
+    RequestId(int startId) {
+        if (startId < MIN_REQUEST_ID || startId > MAX_REQUEST_ID) {
+            throw new IllegalArgumentException("startId must be between " + MIN_REQUEST_ID +
+                                                   " and " + MAX_REQUEST_ID);
         }
-      }
+        if (sDebug) {
+            Slog.d(TAG, "RequestId(int): startId= " + startId);
+        }
+        sIdCounter = new AtomicInteger(startId);
     }
 
-    return indexOfBiggest;
-  }
+    // WARNING: This get method should only be used for testing
+    int getRequestId() {
+        return sIdCounter.get();
+    }
 
-  public int nextId(boolean isSecondary) {
+    public RequestId() {
+        Random random = new Random();
+        int low = MIN_REQUEST_ID;
+        int high = MAX_START_ID + 1; // nextInt is exclusive on upper limit
+
+        // Generate a random start request id that >= MIN_REQUEST_ID and <= MAX_START_ID
+        int startId = random.nextInt(high - low) + low;
+        if (sDebug) {
+            Slog.d(TAG, "RequestId(): startId= " + startId);
+        }
+        sIdCounter = new AtomicInteger(startId);
+    }
+
+    // Given a list of request ids, find the index of the last request id.
+    // Note: Since the request id wraps around, the largest request id may not be
+    // the latest request id.
+    //
+    // @param requestIds List of request ids in ascending order with at least one element.
+    // @return Index of the last request id.
+    public static int getLastRequestIdIndex(List<Integer> requestIds) {
+        // If there is only one request id, return index as 0.
+        if (requestIds.size() == 1) {
+            return 0;
+        }
+
+        // We have to use a magical number to determine if a wrap has happened because
+        // the request id could be lost. The underlying assumption of MAGIC_NUMBER is that
+        // there can't be as many as MAGIC_NUMBER of fill requests in one session.
+        boolean wrapHasHappened = false;
+        int latestRequestIdIndex = -1;
+
+        for (int i = 0; i < requestIds.size() - 1; i++) {
+            if (requestIds.get(i+1) - requestIds.get(i) > MAGIC_NUMBER) {
+                wrapHasHappened = true;
+                latestRequestIdIndex = i;
+                break;
+            }
+        }
+
+        // If there was no wrap, the last request index is the last index.
+        if (!wrapHasHappened) {
+            latestRequestIdIndex = requestIds.size() - 1;
+        }
+        if (sDebug) {
+            Slog.d(TAG, "getLastRequestIdIndex(): latestRequestIdIndex = " + latestRequestIdIndex);
+        }
+        return latestRequestIdIndex;
+    }
+
+    public int nextId(boolean isSecondary) {
         // For authentication flows, there needs to be a way to know whether to retrieve the Fill
         // Response from the primary provider or the secondary provider from the requestId. A simple
         // way to achieve this is by assigning odd number request ids to secondary provider and
@@ -82,13 +129,20 @@ public class RequestId {
         int requestId;
 
         do {
-            requestId = sIdCounter.incrementAndGet() % 0xFFFF;
+            requestId = sIdCounter.incrementAndGet() % (MAX_REQUEST_ID + 1);
+            // Skip numbers smaller than MIN_REQUEST_ID to avoid possible authentication issue
+            if (requestId < MIN_REQUEST_ID) {
+                requestId = MIN_REQUEST_ID;
+            }
             sIdCounter.set(requestId);
         } while (isSecondaryProvider(requestId) != isSecondary);
+        if (sDebug) {
+            Slog.d(TAG, "nextId(): requestId = " + requestId);
+        }
         return requestId;
-  }
+    }
 
-  public static boolean isSecondaryProvider(int requestId) {
-      return requestId % 2 == 1;
-  }
+    public static boolean isSecondaryProvider(int requestId) {
+        return requestId % 2 == 1;
+    }
 }

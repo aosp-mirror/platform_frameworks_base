@@ -44,6 +44,7 @@ import androidx.annotation.Nullable;
 
 import com.android.settingslib.R;
 
+import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -59,7 +60,7 @@ public class ZenMode {
 
     private static final String TAG = "ZenMode";
 
-    public static final String MANUAL_DND_MODE_ID = "manual_dnd";
+    static final String MANUAL_DND_MODE_ID = "manual_dnd";
 
     // Must match com.android.server.notification.ZenModeHelper#applyCustomPolicy.
     private static final ZenPolicy POLICY_INTERRUPTION_FILTER_ALARMS =
@@ -78,24 +79,57 @@ public class ZenMode {
                     .allowPriorityChannels(false)
                     .build();
 
-    private final String mId;
-    private AutomaticZenRule mRule;
-    private final boolean mIsActive;
-    private final boolean mIsManualDnd;
-
-    public ZenMode(String id, AutomaticZenRule rule, boolean isActive) {
-        this(id, rule, isActive, false);
+    public enum Status {
+        ENABLED,
+        ENABLED_AND_ACTIVE,
+        DISABLED_BY_USER,
+        DISABLED_BY_OTHER
     }
 
-    private ZenMode(String id, AutomaticZenRule rule, boolean isActive, boolean isManualDnd) {
-        mId = id;
-        mRule = rule;
-        mIsActive = isActive;
-        mIsManualDnd = isManualDnd;
+    private final String mId;
+    private final AutomaticZenRule mRule;
+    private final Status mStatus;
+    private final boolean mIsManualDnd;
+
+    /**
+     * Initializes a {@link ZenMode}, mainly based on the information from the
+     * {@link AutomaticZenRule}.
+     *
+     * <p>Some pieces which are not part of the public API (such as whether the mode is currently
+     * active, or the reason it was disabled) are read from the {@link ZenModeConfig.ZenRule} --
+     * see {@link #computeStatus}.
+     */
+    public ZenMode(String id, @NonNull AutomaticZenRule rule,
+            @NonNull ZenModeConfig.ZenRule zenRuleExtraData) {
+        this(id, rule, computeStatus(zenRuleExtraData), false);
+    }
+
+    private static Status computeStatus(@NonNull ZenModeConfig.ZenRule zenRuleExtraData) {
+        if (zenRuleExtraData.enabled) {
+            if (zenRuleExtraData.isAutomaticActive()) {
+                return Status.ENABLED_AND_ACTIVE;
+            } else {
+                return Status.ENABLED;
+            }
+        } else {
+            if (zenRuleExtraData.disabledOrigin == ZenModeConfig.UPDATE_ORIGIN_USER) {
+                return Status.DISABLED_BY_USER;
+            } else {
+                return Status.DISABLED_BY_OTHER; // by APP, SYSTEM, UNKNOWN.
+            }
+        }
     }
 
     public static ZenMode manualDndMode(AutomaticZenRule manualRule, boolean isActive) {
-        return new ZenMode(MANUAL_DND_MODE_ID, manualRule, isActive, true);
+        return new ZenMode(MANUAL_DND_MODE_ID, manualRule,
+                isActive ? Status.ENABLED_AND_ACTIVE : Status.ENABLED, true);
+    }
+
+    private ZenMode(String id, @NonNull AutomaticZenRule rule, Status status, boolean isManualDnd) {
+        mId = id;
+        mRule = rule;
+        mStatus = status;
+        mIsManualDnd = isManualDnd;
     }
 
     @NonNull
@@ -106,6 +140,26 @@ public class ZenMode {
     @NonNull
     public AutomaticZenRule getRule() {
         return mRule;
+    }
+
+    @NonNull
+    public String getName() {
+        return Strings.nullToEmpty(mRule.getName());
+    }
+
+    @NonNull
+    public Status getStatus() {
+        return mStatus;
+    }
+
+    @AutomaticZenRule.Type
+    public int getType() {
+        return mRule.getType();
+    }
+
+    @Nullable
+    public String getTriggerDescription() {
+        return mRule.getTriggerDescription();
     }
 
     @NonNull
@@ -225,16 +279,11 @@ public class ZenMode {
     }
 
     public boolean isActive() {
-        return mIsActive;
+        return mStatus == Status.ENABLED_AND_ACTIVE;
     }
 
     public boolean isSystemOwned() {
         return SystemZenRules.PACKAGE_ANDROID.equals(mRule.getPackageName());
-    }
-
-    @AutomaticZenRule.Type
-    public int getType() {
-        return mRule.getType();
     }
 
     @Override
@@ -242,16 +291,17 @@ public class ZenMode {
         return obj instanceof ZenMode other
                 && mId.equals(other.mId)
                 && mRule.equals(other.mRule)
-                && mIsActive == other.mIsActive;
+                && mStatus.equals(other.mStatus)
+                && mIsManualDnd == other.mIsManualDnd;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mRule, mIsActive);
+        return Objects.hash(mId, mRule, mStatus, mIsManualDnd);
     }
 
     @Override
     public String toString() {
-        return mId + "(" + (mIsActive ? "active" : "inactive") + ") -> " + mRule;
+        return mId + " (" + mStatus + ") -> " + mRule;
     }
 }

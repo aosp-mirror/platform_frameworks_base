@@ -274,6 +274,29 @@ class QSLongPressEffectTest : SysuiTestCase() {
             assertThat(couldClick).isFalse()
         }
 
+    @Test
+    fun onTileClick_whileIdle_withQSTile_clicks() =
+        testWhileInState(QSLongPressEffect.State.IDLE) {
+            // GIVEN that a click was detected
+            val couldClick = longPressEffect.onTileClick()
+
+            // THEN the click is successful
+            assertThat(couldClick).isTrue()
+        }
+
+    @Test
+    fun onTileClick_whileIdle_withoutQSTile_cannotClick() =
+        testWhileInState(QSLongPressEffect.State.IDLE) {
+            // GIVEN that no QSTile has been set
+            longPressEffect.qsTile = null
+
+            // GIVEN that a click was detected
+            val couldClick = longPressEffect.onTileClick()
+
+            // THEN the click is not successful
+            assertThat(couldClick).isFalse()
+        }
+
     private fun testWithScope(initialize: Boolean = true, test: suspend TestScope.() -> Unit) =
         with(kosmos) {
             testScope.runTest {

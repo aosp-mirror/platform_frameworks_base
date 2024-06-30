@@ -106,6 +106,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -367,15 +368,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     false /* fromRotation */, fromImeAdjustment, false /* fromShelfAdjustment */,
                     null /* windowContainerTransaction */);
         }
-
-        @Override
-        public void onActivityHidden(ComponentName componentName) {
-            if (componentName.equals(mPipBoundsState.getLastPipComponentName())) {
-                // The activity was removed, we don't want to restore to the reentry state
-                // saved for this component anymore.
-                mPipBoundsState.setLastPipComponentName(null);
-            }
-        }
     }
 
     /**
@@ -487,7 +479,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
                 INPUT_CONSUMER_PIP, mMainExecutor);
-        mPipTransitionController.registerPipTransitionCallback(this);
+        mPipTransitionController.registerPipTransitionCallback(this, mMainExecutor);
         mPipTaskOrganizer.registerOnDisplayIdChangeCallback((int displayId) -> {
             mPipDisplayLayoutState.setDisplayId(displayId);
             onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
@@ -1229,8 +1221,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public PipTransitionController getPipTransitionController() {
-            return mPipTransitionController;
+        public void registerPipTransitionCallback(
+                PipTransitionController.PipTransitionCallback callback,
+                Executor executor) {
+            mMainExecutor.execute(() -> mPipTransitionController.registerPipTransitionCallback(
+                    callback, executor));
         }
     }
 

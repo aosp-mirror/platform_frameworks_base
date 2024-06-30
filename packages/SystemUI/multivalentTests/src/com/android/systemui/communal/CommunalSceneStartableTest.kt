@@ -451,6 +451,24 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun transitionFromDozingToGlanceableHub_forcesCommunal() =
+        with(kosmos) {
+            testScope.runTest {
+                val scene by collectLastValue(communalSceneInteractor.currentScene)
+                communalSceneInteractor.changeScene(CommunalScenes.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
+
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.DOZING,
+                    to = KeyguardState.GLANCEABLE_HUB,
+                    testScope = this
+                )
+
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+            }
+        }
+
     private fun TestScope.updateDocked(docked: Boolean) =
         with(kosmos) {
             runCurrent()

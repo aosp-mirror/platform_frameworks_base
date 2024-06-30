@@ -26,6 +26,7 @@ import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
+import com.android.systemui.volume.panel.shared.VolumePanelLogger
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -51,6 +52,7 @@ constructor(
     private val context: Context,
     private val audioVolumeInteractor: AudioVolumeInteractor,
     private val uiEventLogger: UiEventLogger,
+    private val volumePanelLogger: VolumePanelLogger,
 ) : SliderViewModel {
 
     private val volumeChanges = MutableStateFlow<Int?>(null)
@@ -105,6 +107,7 @@ constructor(
                 audioVolumeInteractor.canChangeVolume(audioStream),
                 audioVolumeInteractor.ringerMode,
             ) { model, isEnabled, ringerMode ->
+                volumePanelLogger.onVolumeUpdateReceived(audioStream, model.volume)
                 model.toState(isEnabled, ringerMode)
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
@@ -112,7 +115,10 @@ constructor(
     init {
         volumeChanges
             .filterNotNull()
-            .onEach { audioVolumeInteractor.setVolume(audioStream, it) }
+            .onEach {
+                volumePanelLogger.onSetVolumeRequested(audioStream, it)
+                audioVolumeInteractor.setVolume(audioStream, it)
+            }
             .launchIn(coroutineScope)
     }
 

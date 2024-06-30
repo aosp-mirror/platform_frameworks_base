@@ -217,6 +217,17 @@ flag {
 }
 
 flag {
+    name: "notification_group_hun_removal_animation_fix"
+    namespace: "systemui"
+    description: "Fix the lack of hun removal animation for group notifications"
+        "(not GROUP_ALERT_SUMMARY)"
+    bug: "343475993"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "scene_container"
     namespace: "systemui"
     description: "Enables the scene container framework go/flexiglass."
@@ -1021,20 +1032,6 @@ flag {
 }
 
 flag {
-  name: "glanceable_hub_fullscreen_swipe"
-  namespace: "systemui"
-  description: "Increase swipe area for gestures to bring in glanceable hub"
-  bug: "339665673"
-}
-
-flag {
-  name: "glanceable_hub_shortcut_button"
-  namespace: "systemui"
-  description: "Shows a button over the dream and lock screen to open the glanceable hub"
-  bug: "339667383"
-}
-
-flag {
   name: "glanceable_hub_gesture_handle"
   namespace: "systemui"
   description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
@@ -1101,6 +1098,26 @@ flag {
   namespace: "systemui"
   description: "Allow showing new pulsing notifications when the device is already pulsing."
   bug: "335560575"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "media_lockscreen_launch_animation"
+    namespace : "systemui"
+    description : "Enable the origin launch animation for UMO when opening on top of lockscreen."
+    bug : "346865769"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "expand_heads_up_on_inline_reply"
+  namespace: "systemui"
+  description: "Expands heads up notification when users clicks reply button and activate inline reply"
+  bug: "346976443"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
