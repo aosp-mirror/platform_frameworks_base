@@ -92,7 +92,7 @@ interface IAccessibilityManager {
     void notifyAccessibilityButtonVisibilityChanged(boolean available);
 
     @EnforcePermission("MANAGE_ACCESSIBILITY")
-    void performAccessibilityShortcut(String targetName);
+    void performAccessibilityShortcut(int displayId, int shortcutType, String targetName);
 
     @EnforcePermission("MANAGE_ACCESSIBILITY")
     List<String> getAccessibilityShortcutTargets(int shortcutType);

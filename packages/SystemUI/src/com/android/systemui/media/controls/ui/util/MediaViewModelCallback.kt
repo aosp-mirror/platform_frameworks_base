@@ -54,7 +54,8 @@ class MediaViewModelCallback(
             oldItem is MediaCommonViewModel.MediaControl &&
                 newItem is MediaCommonViewModel.MediaControl
         ) {
-            oldItem.immediatelyUpdateUi == newItem.immediatelyUpdateUi
+            oldItem.immediatelyUpdateUi == newItem.immediatelyUpdateUi &&
+                oldItem.updateTime == newItem.updateTime
         } else if (
             oldItem is MediaCommonViewModel.MediaRecommendations &&
                 newItem is MediaCommonViewModel.MediaRecommendations

@@ -21,6 +21,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.core.view.setPadding
 import com.android.systemui.res.R
 import com.android.systemui.settings.brightness.BrightnessSliderController
 
@@ -33,7 +34,15 @@ object BrightnessMirrorInflater {
         val frame =
             (LayoutInflater.from(context).inflate(R.layout.brightness_mirror_container, null)
                     as ViewGroup)
-                .apply { isVisible = true }
+                .apply {
+                    isVisible = true
+                    // Match BrightnessMirrorController padding
+                    setPadding(
+                        context.resources.getDimensionPixelSize(
+                            R.dimen.rounded_slider_background_padding
+                        )
+                    )
+                }
         val sliderController = sliderControllerFactory.create(context, frame)
         sliderController.init()
         frame.addView(

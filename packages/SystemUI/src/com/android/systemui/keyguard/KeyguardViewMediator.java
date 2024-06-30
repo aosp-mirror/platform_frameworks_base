@@ -3143,9 +3143,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         w -> w.mode == RemoteAnimationTarget.MODE_OPENING).toArray(
                         RemoteAnimationTarget[]::new);
 
+                RemoteAnimationTarget[] closingWallpapers = Arrays.stream(wallpapers).filter(
+                        w -> w.mode == RemoteAnimationTarget.MODE_CLOSING).toArray(
+                        RemoteAnimationTarget[]::new);
+
                 mKeyguardUnlockAnimationControllerLazy.get()
                         .notifyStartSurfaceBehindRemoteAnimation(
-                                openingApps, openingWallpapers, startTime,
+                                openingApps, openingWallpapers, closingWallpapers, startTime,
                                 mSurfaceBehindRemoteAnimationRequested);
             } else {
                 mInteractionJankMonitor.begin(

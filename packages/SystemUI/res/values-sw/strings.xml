@@ -107,7 +107,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Inachakata rekodi ya skrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Arifa inayoendelea ya kipindi cha kurekodi skrini"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Ungependa kuanza kurekodi?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Unaporekodi, Android inaweza kufikia kitu chochote kitakachoonekana kwenye skrini yako au kuchezwa kwenye kifaa chako. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Unaporekodi, Android inaweza kufikia kitu chochote kitakachoonekana kwenye skrini yako au kuchezwa kwenye kifaa chako. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha, sauti na video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Unaporekodi programu, Android inaweza kufikia kitu chochote kitakachoonekana au kuchezwa kwenye programu hiyo. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Anza kurekodi"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rekodi sauti"</string>
@@ -129,24 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Utaacha kurekodi maudhui ya &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Utakomesha ufikiaji wa maudhui ya &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
-    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Utaacha kutuma maudhui ya &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -309,10 +306,8 @@
     <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Vipengele kama vile Kutuma Haraka na Tafuta Kifaa Changu hutumia Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth itawaka kesho asubuhi"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Sikiliza pamoja na wengine"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Mnasikiliza pamoja"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Chaji ya betri ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Sauti"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Vifaa vya sauti"</string>
@@ -384,7 +379,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Rekodi ya skrini"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Anza kurekodi"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Acha kurekodi"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Hitilafu ya Kurekodi"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rekodi Hitilafu"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Anza"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Simamisha"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Ripoti ya Hitilafu"</string>
@@ -495,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"chagua wijeti"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ondoa wijeti"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"weka wijeti uliyochagua"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Badili mtumiaji"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menyu ya kuvuta chini"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Data na programu zote katika kipindi hiki zitafutwa."</string>
@@ -548,6 +549,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Anza sasa"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Hakuna arifa"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Hakuna arifa mpya"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Umewasha arifa zinazojirekebisha"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Sasa kifaa chako kinapunguza sauti na idadi ya madirisha ibukizi kwenye skrini kwa hadi dakika mbili ukipokea arifa nyingi kwa muda mfupi."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Zima"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Fungua ili uone arifa za zamani"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Kifaa hiki kinadhibitiwa na mzazi wako"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Shirika lako linamiliki kifaa hiki na huenda likafuatilia trafiki ya mtandao"</string>
@@ -1203,8 +1207,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Gusa ili upate maelezo zaidi"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Hujaweka kengele"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"weka kifunga skrini"</string>
-    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
-    <skip />
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Gusa kitambuzi cha alama ya kidole. Ni kitufe kifupi zaidi kilicho pembeni mwa simu"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Kitambua alama ya kidole"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"thibitisha"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"weka kifaa"</string>
@@ -1363,6 +1366,10 @@
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Rudi nyuma"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Ili kurudi nyuma, telezesha vidole vitatu kushoto au kulia mahali popote kwenye padi ya kugusa."</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Padi ya kugusa inayoonyesha vidole vitatu vikisonga kulia na kushoto"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Skrini ya kifaa inayoonyesha uhuishaji wa mguso wa nyuma"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Mwanga chini ya kibodi"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Kiwango cha %1$d kati ya %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Dhibiti Vifaa Nyumbani"</string>

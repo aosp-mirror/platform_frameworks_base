@@ -28,12 +28,14 @@ import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepositor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.ui.viewmodel.quickSettingsShadeSceneViewModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -56,7 +58,7 @@ class QuickSettingsShadeSceneViewModelTest : SysuiTestCase() {
     private val sceneInteractor = kosmos.sceneInteractor
     private val deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor
 
-    private val underTest = kosmos.quickSettingsShadeSceneViewModel
+    private val underTest by lazy { kosmos.quickSettingsShadeSceneViewModel }
 
     @Test
     fun upTransitionSceneKey_deviceLocked_lockscreen() =
@@ -66,7 +68,20 @@ class QuickSettingsShadeSceneViewModelTest : SysuiTestCase() {
             lockDevice()
 
             assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(destinationScenes?.get(Swipe.Down)).isNull()
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun upTransitionSceneKey_deviceLocked_keyguardDisabled_gone() =
+        testScope.runTest {
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
+            lockDevice()
+            kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
+
+            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 
     @Test
@@ -78,6 +93,34 @@ class QuickSettingsShadeSceneViewModelTest : SysuiTestCase() {
             unlockDevice()
 
             assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(destinationScenes?.get(Swipe.Down)).isNull()
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    fun downTransitionSceneKey_deviceLocked_bottomAligned_lockscreen() =
+        testScope.runTest {
+            kosmos.fakeShadeRepository.setDualShadeAlignedToBottom(true)
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
+            lockDevice()
+
+            assertThat(destinationScenes?.get(Swipe.Down)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(destinationScenes?.get(Swipe.Up)).isNull()
+            assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun downTransitionSceneKey_deviceUnlocked_bottomAligned_gone() =
+        testScope.runTest {
+            kosmos.fakeShadeRepository.setDualShadeAlignedToBottom(true)
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
+            lockDevice()
+            unlockDevice()
+
+            assertThat(destinationScenes?.get(Swipe.Down)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(destinationScenes?.get(Swipe.Up)).isNull()
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 

@@ -1567,7 +1567,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // even if they range changes what it means in absolute terms.
             mDisplayBrightnessController.updateScreenBrightnessSetting(
                     MathUtils.constrain(unthrottledBrightnessState,
-                            clampedState.getMinBrightness(), clampedState.getMaxBrightness()));
+                            clampedState.getMinBrightness(), clampedState.getMaxBrightness()),
+                    Math.min(mBrightnessRangeController.getCurrentBrightnessMax(),
+                            clampedState.getMaxBrightness()));
         }
 
         // The current brightness to use has been calculated at this point, and HbmController should
@@ -2096,7 +2098,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void onDisplayOffloadUnblockScreenOn(DisplayOffloadSession displayOffloadSession) {
         Message msg = mHandler.obtainMessage(MSG_OFFLOADING_SCREEN_ON_UNBLOCKED,
                 displayOffloadSession);
-        mHandler.sendMessage(msg);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     private void unblockScreenOnByDisplayOffload() {
@@ -2110,6 +2112,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 Trace.TRACE_TAG_POWER, SCREEN_ON_BLOCKED_BY_DISPLAYOFFLOAD_TRACE_NAME, 0);
     }
 
+    private void cancelUnblockScreenOnByDisplayOffload() {
+        if (mDisplayOffloadSession == null) {
+            return;
+        }
+        if (mPendingScreenOnUnblockerByDisplayOffload == null) {
+            // Already unblocked.
+            return;
+        }
+        mDisplayOffloadSession.cancelBlockScreenOn();
+    }
+
     private boolean setScreenState(int state, @Display.StateReason int reason) {
         return setScreenState(state, reason, false /*reportOnly*/);
     }
@@ -2121,11 +2134,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // If the screen is turning on, give displayoffload a chance to do something before the
         // screen actually turns on.
-        // TODO(b/316941732): add tests for this displayoffload screen-on blocker.
         if (isOn && changed && !mScreenTurningOnWasBlockedByDisplayOffload) {
             blockScreenOnByDisplayOffload(mDisplayOffloadSession);
         } else if (!isOn && mScreenTurningOnWasBlockedByDisplayOffload) {
             // No longer turning screen on, so unblock previous screen on blocking immediately.
+            if (mFlags.isOffloadSessionCancelBlockScreenOnEnabled()) {
+                cancelUnblockScreenOnByDisplayOffload();
+            }
             unblockScreenOnByDisplayOffload();
             mScreenTurningOnWasBlockedByDisplayOffload = false;
         }
@@ -2457,12 +2472,20 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     @Override
     public void setBrightness(float brightness) {
-        mDisplayBrightnessController.setBrightness(clampScreenBrightness(brightness));
+        // After HBMController and NBMController migration to Clampers framework
+        // currentBrightnessMax should be taken from clampers controller
+        // TODO(b/263362199)
+        mDisplayBrightnessController.setBrightness(clampScreenBrightness(brightness),
+                mBrightnessRangeController.getCurrentBrightnessMax());
     }
 
     @Override
     public void setBrightness(float brightness, int userSerial) {
-        mDisplayBrightnessController.setBrightness(clampScreenBrightness(brightness), userSerial);
+        // After HBMController and NBMController migration to Clampers framework
+        // currentBrightnessMax should be taken from clampers controller
+        // TODO(b/263362199)
+        mDisplayBrightnessController.setBrightness(clampScreenBrightness(brightness), userSerial,
+                mBrightnessRangeController.getCurrentBrightnessMax());
     }
 
     @Override

@@ -38,6 +38,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipBoundsState;
@@ -47,6 +48,7 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
@@ -171,7 +173,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         public void onPipTransitionCanceled(int direction) {}
     };
 
-    public PipMotionHelper(Context context, @NonNull PipBoundsState pipBoundsState,
+    public PipMotionHelper(Context context,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @NonNull PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer, PhonePipMenuController menuController,
             PipSnapAlgorithm snapAlgorithm, PipTransitionController pipTransitionController,
             FloatingContentCoordinator floatingContentCoordinator,
@@ -183,7 +187,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mSnapAlgorithm = snapAlgorithm;
         mFloatingContentCoordinator = floatingContentCoordinator;
         mPipPerfHintController = pipPerfHintControllerOptional.orElse(null);
-        pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
+        pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback, mainExecutor);
         mResizePipUpdateListener = (target, values) -> {
             if (mPipBoundsState.getMotionBoundsState().isInMotion()) {
                 mPipTaskOrganizer.scheduleUserResizePip(getBounds(),

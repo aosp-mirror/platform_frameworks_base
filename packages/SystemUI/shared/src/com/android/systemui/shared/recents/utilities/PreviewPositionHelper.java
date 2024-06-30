@@ -10,7 +10,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 
 import com.android.systemui.shared.recents.model.ThumbnailData;
-import com.android.wm.shell.util.SplitBounds;
 
 /**
  * Utility class to position the thumbnail in the TaskView
@@ -35,8 +34,6 @@ public class PreviewPositionHelper {
 
     private final Matrix mMatrix = new Matrix();
     private boolean mIsOrientationChanged;
-    private SplitBounds mSplitBounds;
-    private int mDesiredStagePosition;
 
     public Matrix getMatrix() {
         return mMatrix;
@@ -48,11 +45,6 @@ public class PreviewPositionHelper {
 
     public boolean isOrientationChanged() {
         return mIsOrientationChanged;
-    }
-
-    public void setSplitBounds(SplitBounds splitBounds, int desiredStagePosition) {
-        mSplitBounds = splitBounds;
-        mDesiredStagePosition = desiredStagePosition;
     }
 
     /**

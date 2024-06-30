@@ -1649,7 +1649,8 @@ class ActivityStarter {
                 // activity, so this isn't just deliver-to-top
                 && mMovedToTopActivity == null
                 && !transitionController.hasOrderChanges()
-                && !transitionController.isTransientHide(startedActivityRootTask)) {
+                && !transitionController.isTransientHide(startedActivityRootTask)
+                && !newTransition.hasChanged(mLastStartActivityRecord)) {
             // We just delivered to top, so there isn't an actual transition here.
             if (!forceTransientTransition) {
                 newTransition.abort();
@@ -1792,6 +1793,7 @@ class ActivityStarter {
                     activity.destroyIfPossible("Removes redundant singleInstance");
                 }
             }
+            targetTaskTop.mTransitionController.collect(targetTaskTop);
             recordTransientLaunchIfNeeded(targetTaskTop);
             // Recycle the target task for this launch.
             startResult =

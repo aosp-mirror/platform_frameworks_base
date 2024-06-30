@@ -20,6 +20,8 @@ import static android.platform.test.flag.junit.FlagsParameterization.allCombinat
 import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
 import static com.android.systemui.util.concurrency.MockExecutorHandlerKt.mockExecutorHandler;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -278,5 +280,24 @@ public class TileServiceManagerTest extends SysuiTestCase {
         mFakeExecutor.runAllReady();
         verify(mTileLifecycle, never()).onStopListening();
         verify(mTileLifecycle, never()).executeSetBindService(false);
+    }
+
+    @Test
+    public void testNoExtraPendingBindIfAlreadyBound() {
+        mTileServiceManager.startLifecycleManagerAndAddTile();
+
+        // As part of adding the tile, it will be bound and it will send a start successful to
+        // TileServices. startSuccessful will clear pending bind
+        mTileServiceManager.clearPendingBind();
+
+        // Assume we are still bound
+        when(mTileLifecycle.isBound()).thenReturn(true);
+
+        // And we want to bind again
+        mTileServiceManager.setBindAllowed(true);
+        mTileServiceManager.setBindRequested(true);
+
+        // Then the tile doesn't have pending bind
+        assertThat(mTileServiceManager.hasPendingBind()).isFalse();
     }
 }

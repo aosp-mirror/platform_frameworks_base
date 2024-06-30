@@ -42,3 +42,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "vibration_xml_apis"
+    description: "Enabled System APIs for vibration effect XML parser and serializer"
+    bug: "347273158"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}

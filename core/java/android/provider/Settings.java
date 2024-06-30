@@ -1403,6 +1403,19 @@ public final class Settings {
             "android.settings.QUICK_LAUNCH_SETTINGS";
 
     /**
+     * Activity Action: Showing settings to manage adaptive notifications.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_ADAPTIVE_NOTIFICATIONS =
+            "android.settings.MANAGE_ADAPTIVE_NOTIFICATIONS";
+
+    /**
      * Activity Action: Show settings to manage installed applications.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -11072,6 +11085,13 @@ public final class Settings {
                 "active_unlock_on_biometric_fail";
 
         /**
+         * Whether or not active unlock triggers on legacy unlock intents.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_UNLOCK_INTENT_LEGACY =
+                "active_unlock_on_unlock_intent_legacy";
+
+        /**
          * If active unlock triggers on biometric failures, include the following error codes
          * as a biometric failure. See {@link android.hardware.biometrics.BiometricFaceConstants}.
          * Error codes should be separated by a pipe. For example: "1|4|5". If active unlock
@@ -20087,7 +20107,7 @@ public final class Settings {
              * (0 = false, 1 = true)
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String REDUCE_MOTION = "reduce_motion";
 
             /**

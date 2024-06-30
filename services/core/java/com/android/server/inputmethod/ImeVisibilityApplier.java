@@ -67,10 +67,12 @@ interface ImeVisibilityApplier {
      * @param windowToken the token of a window for applying the IME visibility
      * @param statsToken  the token tracking the current IME request
      * @param state       the new IME visibility state for the applier to handle
+     * @param reason      the reason why the input window is visible or hidden
      * @param userId      the target user when applying the IME visibility state
      */
     default void applyImeVisibility(IBinder windowToken, @NonNull ImeTracker.Token statsToken,
-            @ImeVisibilityStateComputer.VisibilityState int state, @UserIdInt int userId) {
+            @ImeVisibilityStateComputer.VisibilityState int state,
+            @SoftInputShowHideReason int reason, @UserIdInt int userId) {
     }
 
     /**

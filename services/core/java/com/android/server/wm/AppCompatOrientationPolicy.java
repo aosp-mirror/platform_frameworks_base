@@ -45,7 +45,7 @@ class AppCompatOrientationPolicy {
     private final ActivityRecord mActivityRecord;
 
     @NonNull
-    private final AppCompatCapability mAppCompatCapability;
+    private final AppCompatOverrides mAppCompatOverrides;
 
     @NonNull
     private final BooleanSupplier mShouldApplyUserFullscreenOverride;
@@ -56,12 +56,12 @@ class AppCompatOrientationPolicy {
 
     // TODO(b/341903757) Remove BooleanSuppliers after fixing dependency with spectRatio component
     AppCompatOrientationPolicy(@NonNull ActivityRecord activityRecord,
-                               @NonNull AppCompatCapability appCompatCapability,
+                               @NonNull AppCompatOverrides appCompatOverrides,
                                @NonNull BooleanSupplier shouldApplyUserFullscreenOverride,
                                @NonNull BooleanSupplier shouldApplyUserMinAspectRatioOverride,
                                @NonNull BooleanSupplier isSystemOverrideToFullscreenEnabled) {
         mActivityRecord = activityRecord;
-        mAppCompatCapability = appCompatCapability;
+        mAppCompatOverrides = appCompatOverrides;
         mShouldApplyUserFullscreenOverride = shouldApplyUserFullscreenOverride;
         mShouldApplyUserMinAspectRatioOverride = shouldApplyUserMinAspectRatioOverride;
         mIsSystemOverrideToFullscreenEnabled = isSystemOverrideToFullscreenEnabled;
@@ -99,11 +99,11 @@ class AppCompatOrientationPolicy {
             return SCREEN_ORIENTATION_PORTRAIT;
         }
 
-        if (mAppCompatCapability.isAllowOrientationOverrideOptOut()) {
+        if (mAppCompatOverrides.isAllowOrientationOverrideOptOut()) {
             return candidate;
         }
 
-        if (displayContent != null && mAppCompatCapability
+        if (displayContent != null && mAppCompatOverrides
                 .isOverrideOrientationOnlyForCameraEnabled()
                 && (displayContent.mDisplayRotationCompatPolicy == null
                 || !displayContent.mDisplayRotationCompatPolicy
@@ -127,9 +127,9 @@ class AppCompatOrientationPolicy {
             return SCREEN_ORIENTATION_USER;
         }
 
-        final AppCompatOrientationCapability.OrientationCapabilityState capabilityState =
-                mAppCompatCapability.getAppCompatOrientationCapability()
-                        .mOrientationCapabilityState;
+        final AppCompatOrientationOverrides.OrientationOverridesState capabilityState =
+                mAppCompatOverrides.getAppCompatOrientationOverrides()
+                        .mOrientationOverridesState;
 
         if (capabilityState.mIsOverrideToReverseLandscapeOrientationEnabled
                 && (isFixedOrientationLandscape(candidate)

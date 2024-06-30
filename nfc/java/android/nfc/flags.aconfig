@@ -110,3 +110,11 @@ flag {
     bug: "321311407"
 }
 
+flag {
+    name: "nfc_persist_log"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable NFC persistent log support"
+    bug: "321310044"
+}
+

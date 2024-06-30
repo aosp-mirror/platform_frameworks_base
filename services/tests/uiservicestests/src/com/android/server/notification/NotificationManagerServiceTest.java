@@ -14335,6 +14335,29 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_SECURE_ALLOWLIST_TOKEN)
+    public void enqueueNotification_directlyThroughRunnable_populatesAllowlistToken() {
+        Notification receivedWithoutParceling = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setContentIntent(createPendingIntent("content"))
+                .build();
+        NotificationRecord record = new NotificationRecord(
+                mContext,
+                new StatusBarNotification(mPkg, mPkg, 1, "tag", mUid, 44, receivedWithoutParceling,
+                        mUser, "groupKey", 0),
+                mTestNotificationChannel);
+        assertThat(record.getNotification().getAllowlistToken()).isNull();
+
+        mWorkerHandler.post(
+                mService.new EnqueueNotificationRunnable(mUserId, record, false, false,
+                mPostNotificationTrackerFactory.newTracker(null)));
+        waitForIdle();
+
+        assertThat(mService.mNotificationList).hasSize(1);
+        assertThat(mService.mNotificationList.get(0).getNotification().getAllowlistToken())
+                .isEqualTo(NotificationManagerService.ALLOWLIST_TOKEN);
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_SECURE_ALLOWLIST_TOKEN)
     public void enqueueNotification_rejectsOtherToken() throws RemoteException {
         Notification sent = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentIntent(createPendingIntent("content"))

@@ -393,6 +393,18 @@ public class AuthServiceTest {
         testAuthenticate_throwsSecurityException(promptInfo);
     }
 
+    @Test
+    public void testCanAuthenticate_throwsWhenUsingAdvancedApis() {
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        assertThrows(SecurityException.class, () -> {
+            mAuthService.mImpl.canAuthenticate(TEST_OP_PACKAGE_NAME, 1 /* userId */,
+                    BiometricManager.Authenticators.MANDATORY_BIOMETRICS);
+            waitForIdle();
+        });
+    }
+
     private void testAuthenticate_throwsSecurityException(PromptInfo promptInfo) {
         mAuthService = new AuthService(mContext, mInjector);
         mAuthService.onStart();

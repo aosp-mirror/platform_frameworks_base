@@ -13859,6 +13859,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     })
     @ResolvedLayoutDir
     public int getLayoutDirection() {
+        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED;
+            return LAYOUT_DIRECTION_RESOLVED_DEFAULT;
+        }
         return ((mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ==
                 PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ? LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR;
     }
@@ -30607,7 +30612,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setPointerIcon(PointerIcon)} for mouse devices. Subclasses may override this to
      * customize the icon for the given pointer.
      *
-     * For example, the pointer icon for a stylus pointer can be resolved in the following way:
+     * For example, to always show the PointerIcon.TYPE_HANDWRITING icon for a stylus pointer,
+     * the event can be resolved in the following way:
      * <code><pre>
      * &#64;Override
      * public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
@@ -30617,7 +30623,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *             && (toolType == MotionEvent.TOOL_TYPE_STYLUS
      *                     || toolType == MotionEvent.TOOL_TYPE_ERASER)) {
      *         // Show this pointer icon only if this pointer is a stylus.
-     *         return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_WAIT);
+     *         return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_HANDWRITING);
      *     }
      *     // Use the default logic for determining the pointer icon for other non-stylus pointers,
      *     // like for the mouse cursor.
@@ -33932,6 +33938,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         float velocity = mFrameContentVelocity;
         final float frameRate = mPreferredFrameRate;
         ViewParent parent = mParent;
+        boolean isInputMethodWindowType = false;
+        if (mAttachInfo != null && mAttachInfo.mViewRootImpl != null) {
+            isInputMethodWindowType =
+                    mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD;
+        }
         if (velocity <= 0 && Float.isNaN(frameRate)) {
             // The most common case is when nothing is set, so this special case is called
             // often.
@@ -33941,7 +33952,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     || mLastFrameTop != mTop)
                     && viewRootImpl.shouldCheckFrameRate(false)
                     && parent instanceof View
-                    && ((View) parent).mFrameContentVelocity <= 0) {
+                    && ((View) parent).mFrameContentVelocity <= 0
+                    && !isInputMethodWindowType) {
                 viewRootImpl.votePreferredFrameRate(MAX_FRAME_RATE, FRAME_RATE_COMPATIBILITY_GTE);
             }
             if (viewRootImpl.shouldCheckFrameRateCategory()) {
@@ -33964,6 +33976,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         || mLastFrameTop != mTop)
                         && mParent instanceof View
                         && ((View) mParent).mFrameContentVelocity <= 0
+                        && !isInputMethodWindowType
                 ) {
                     // This current calculation is very simple. If something on the screen
                     // moved, then it votes for the highest velocity.
