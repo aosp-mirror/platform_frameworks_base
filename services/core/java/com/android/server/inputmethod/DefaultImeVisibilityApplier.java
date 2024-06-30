@@ -141,14 +141,7 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
 
     @GuardedBy("ImfLock.class")
     @Override
-    public void applyImeVisibility(IBinder windowToken, @NonNull ImeTracker.Token statsToken,
-            @ImeVisibilityStateComputer.VisibilityState int state, @UserIdInt int userId) {
-        applyImeVisibility(windowToken, statsToken, state,
-                SoftInputShowHideReason.NOT_SET /* ignore reason */, userId);
-    }
-
-    @GuardedBy("ImfLock.class")
-    void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
+    public void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
             @ImeVisibilityStateComputer.VisibilityState int state,
             @SoftInputShowHideReason int reason, @UserIdInt int userId) {
         final var bindingController = mService.getInputMethodBindingController(userId);
