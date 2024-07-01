@@ -57,7 +57,7 @@ import android.window.ScreenCapture;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
 import com.android.window.flags.Flags;

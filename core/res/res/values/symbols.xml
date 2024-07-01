@@ -1753,6 +1753,15 @@
   <java-symbol type="anim" name="task_fragment_clear_top_close_exit" />
   <java-symbol type="anim" name="task_fragment_clear_top_open_enter" />
   <java-symbol type="anim" name="task_fragment_clear_top_open_exit" />
+  <java-symbol type="anim" name="overlay_task_fragment_open_from_left" />
+  <java-symbol type="anim" name="overlay_task_fragment_open_from_top" />
+  <java-symbol type="anim" name="overlay_task_fragment_open_from_right" />
+  <java-symbol type="anim" name="overlay_task_fragment_open_from_bottom" />
+  <java-symbol type="anim" name="overlay_task_fragment_change" />
+  <java-symbol type="anim" name="overlay_task_fragment_close_to_left" />
+  <java-symbol type="anim" name="overlay_task_fragment_close_to_top" />
+  <java-symbol type="anim" name="overlay_task_fragment_close_to_right" />
+  <java-symbol type="anim" name="overlay_task_fragment_close_to_bottom" />
 
   <java-symbol type="array" name="config_autoRotationTiltTolerance" />
   <java-symbol type="array" name="config_longPressVibePattern" />
