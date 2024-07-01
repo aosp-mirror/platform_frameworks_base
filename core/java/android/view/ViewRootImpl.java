@@ -114,6 +114,7 @@ import static android.view.accessibility.Flags.fixMergedContentChangeEventV2;
 import static android.view.accessibility.Flags.forceInvertColor;
 import static android.view.accessibility.Flags.reduceWindowContentChangedEventThrottle;
 import static android.view.flags.Flags.addSchandleToVriSurface;
+import static android.view.flags.Flags.disableDrawWakeLock;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.sensitiveContentPrematureProtectionRemovedFix;
 import static android.view.flags.Flags.toolkitFrameRateFunctionEnablingReadOnly;
@@ -149,6 +150,8 @@ import android.app.ResourcesManager;
 import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
 import android.app.servertransaction.WindowStateTransactionItem;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -335,6 +338,15 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_SENSITIVE_CONTENT = false || LOCAL_LOGV;
     private static final int LOGTAG_INPUT_FOCUS = 62001;
     private static final int LOGTAG_VIEWROOT_DRAW_EVENT = 60004;
+
+    /**
+     * This change disables the {@code DRAW_WAKE_LOCK}, an internal wakelock acquired per-frame
+     * duration display DOZE. It was added to allow animation during AOD. This wakelock consumes
+     * battery severely if the animation is too heavy, so, it will be removed.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    private static final long DISABLE_DRAW_WAKE_LOCK = 349153669L;
 
     /**
      * Set to false if we do not want to use the multi threaded renderer even though
@@ -2459,6 +2471,11 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void pokeDrawLockIfNeeded() {
+        // Disable DRAW_WAKE_LOCK starting U. Otherwise, only need to acquire it for DOZE state.
+        if (CompatChanges.isChangeEnabled(DISABLE_DRAW_WAKE_LOCK) && disableDrawWakeLock()) {
+            return;
+        }
+
         if (!Display.isDozeState(mAttachInfo.mDisplayState)) {
             // Only need to acquire wake lock for DOZE state.
             return;
