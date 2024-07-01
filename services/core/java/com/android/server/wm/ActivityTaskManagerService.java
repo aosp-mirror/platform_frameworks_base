@@ -6192,11 +6192,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLockWithoutBoost) {
                 final WindowProcessController proc = mProcessNames.remove(name, uid);
                 if (proc != null && !mStartingProcessActivities.isEmpty()) {
-                    for (int i = mStartingProcessActivities.size() - 1; i >= 0; i--) {
-                        final ActivityRecord r = mStartingProcessActivities.get(i);
+                    // Use a copy in case finishIfPossible changes the list indirectly.
+                    final ArrayList<ActivityRecord> activities =
+                            new ArrayList<>(mStartingProcessActivities);
+                    for (int i = activities.size() - 1; i >= 0; i--) {
+                        final ActivityRecord r = activities.get(i);
                         if (uid == r.info.applicationInfo.uid && name.equals(r.processName)) {
                             Slog.w(TAG, proc + " is removed with pending start " + r);
-                            mStartingProcessActivities.remove(i);
+                            mStartingProcessActivities.remove(r);
                             // If visible, finish it to avoid getting stuck on screen.
                             if (r.isVisibleRequested()) {
                                 r.finishIfPossible("starting-proc-removed", false /* oomAdj */);
