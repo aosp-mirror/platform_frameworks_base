@@ -22,6 +22,7 @@ import android.app.PendingIntent
 import android.app.TaskInfo
 import android.app.WindowConfiguration
 import android.content.ComponentName
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.RectF
@@ -53,6 +54,7 @@ import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.Flags.activityTransitionUseLargestWindow
+import com.android.systemui.Flags.translucentOccludingActivityFix
 import com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary
 import com.android.wm.shell.shared.IShellTransitions
 import com.android.wm.shell.shared.ShellTransitions
@@ -991,7 +993,12 @@ constructor(
                     controller.createAnimatorState()
                 }
             val windowBackgroundColor =
-                window.taskInfo?.let { callback.getBackgroundColor(it) } ?: window.backgroundColor
+                if (translucentOccludingActivityFix() && window.isTranslucent) {
+                    Color.TRANSPARENT
+                } else {
+                    window.taskInfo?.let { callback.getBackgroundColor(it) }
+                        ?: window.backgroundColor
+                }
 
             // TODO(b/184121838): We should somehow get the top and bottom radius of the window
             // instead of recomputing isExpandingFullyAbove here.
