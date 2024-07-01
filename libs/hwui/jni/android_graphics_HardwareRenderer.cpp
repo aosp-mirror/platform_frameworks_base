@@ -310,17 +310,35 @@ static void android_view_ThreadedRenderer_setIsHighEndGfx(JNIEnv* env, jobject c
 
 static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlongArray frameInfo, jint frameInfoSize) {
-    size_t expectedFrameInfoSize = UI_THREAD_FRAME_INFO_SIZE;
     int robolectricApiLevel = GetRobolectricApiLevel(env);
-    // In Q and R (SDK 29 and 30), FrameInfo has size 9.
-    if (robolectricApiLevel == 29 || robolectricApiLevel == 30) {
-        expectedFrameInfoSize = 9;  // From FrameInfo.h in Android Q
-    }
+    // In R (SDK 30) and below, FrameInfo has size 9.
+    size_t expectedFrameInfoSize = (robolectricApiLevel <= 30) ? 9 : UI_THREAD_FRAME_INFO_SIZE;
     LOG_ALWAYS_FATAL_IF(frameInfoSize != expectedFrameInfoSize,
                         "Mismatched size expectations, given %d expected %zu", frameInfoSize,
                         expectedFrameInfoSize);
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    env->GetLongArrayRegion(frameInfo, 0, frameInfoSize, proxy->frameInfo());
+    if (robolectricApiLevel <= 30) {
+        int64_t frameInfoR[9];
+        env->GetLongArrayRegion(frameInfo, 0, 9, frameInfoR);
+        // See FrameInfo.h for field details.
+        int64_t frameInfoU[UI_THREAD_FRAME_INFO_SIZE] = {
+                frameInfoR[0],  // FLAGS
+                0,              // FRAME_TIMELINE_VSYNC_ID
+                frameInfoR[1],  // INTENDED_VSYNC
+                frameInfoR[2],  // VSYNC
+                0,              // INPUT_EVENT_ID
+                frameInfoR[5],  // HANDLE_INPUT_START
+                frameInfoR[6],  // ANIMATION_START
+                frameInfoR[7],  // PERFORM_TRAVERSALS_START
+                frameInfoR[8],  // DRAW_START
+                0,              // FRAME_DEADLINE
+                0,              // FRAME_START_TIME
+                0,              // FRAME_INTERVAL
+        };
+        std::memcpy(proxy->frameInfo(), frameInfoU, UI_THREAD_FRAME_INFO_SIZE * sizeof(int64_t));
+    } else {
+        env->GetLongArrayRegion(frameInfo, 0, frameInfoSize, proxy->frameInfo());
+    }
     return proxy->syncAndDrawFrame();
 }
 
