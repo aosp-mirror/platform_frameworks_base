@@ -325,6 +325,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     final Resources mRes;
     private final Handler mHandler;
 
+    private final InputMethodManagerInternal mInputMethodManagerInternal;
     @NonNull
     private final Handler mIoHandler;
 
@@ -1315,6 +1316,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mHwController = new HandwritingModeController(mContext, thread.getLooper(),
                     new InkWindowInitializer(), discardDelegationTextRunnable);
             registerDeviceListenerAndCheckStylusSupport();
+            mInputMethodManagerInternal = new LocalServiceImpl();
         }
     }
 
@@ -5651,7 +5653,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     private void publishLocalService() {
-        LocalServices.addService(InputMethodManagerInternal.class, new LocalServiceImpl());
+        LocalServices.addService(InputMethodManagerInternal.class, mInputMethodManagerInternal);
+    }
+
+    // TODO(b/352228316): Remove it once IMMIProxy is removed.
+    InputMethodManagerInternal getLocalService(){
+        return mInputMethodManagerInternal;
     }
 
     private final class LocalServiceImpl extends InputMethodManagerInternal {
