@@ -2397,12 +2397,17 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abre a app Mensagens"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configure o Desbloqueio por impressão digital novamente"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"A <xliff:g id="FINGERPRINT">%s</xliff:g> não estava a funcionar bem e foi eliminada"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"A <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> não estavam a funcionar bem e foram eliminadas"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"A <xliff:g id="FINGERPRINT">%s</xliff:g> não estava a funcionar bem e foi eliminada. Configure-a novamente para desbloquear o telemóvel com a impressão digital."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"A <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> não estavam a funcionar bem e foram eliminadas. Configure-as novamente para desbloquear o telemóvel com a sua impressão digital."</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
+    <skip />
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Configure o Desbloqueio facial novamente"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"O seu modelo de rosto não estava a funcionar bem e foi eliminado. Configure-o novamente para desbloquear o telemóvel com o rosto."</string>
+    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
+    <skip />
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configurar"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Agora não"</string>
 </resources>

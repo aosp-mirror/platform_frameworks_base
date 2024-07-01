@@ -1233,7 +1233,7 @@
     <string name="alwaysUse" msgid="3153558199076112903">"Користи ја стандардно за ова дејство."</string>
     <string name="use_a_different_app" msgid="4987790276170972776">"Користи различна апликација"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Избриши ги стандардните вредности во Системски поставки &gt; Апликации &gt; Преземено."</string>
-    <string name="chooseActivity" msgid="8563390197659779956">"Избери дејство"</string>
+    <string name="chooseActivity" msgid="8563390197659779956">"Изберете дејство"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"Изберете апликација за USB-уредот"</string>
     <string name="noApplications" msgid="1186909265235544019">"Нема апликации што можат да го извршат ова дејство."</string>
     <string name="aerr_application" msgid="4090916809370389109">"<xliff:g id="APPLICATION">%1$s</xliff:g> запре"</string>
@@ -1301,7 +1301,7 @@
     <string name="dump_heap_text" msgid="1692649033835719336">"Процесот <xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето за меморија од <xliff:g id="SIZE">%2$s</xliff:g>. Слика од меморијата ви е достапна за споделување со програмерот. Бидете внимателни: оваа слика од меморијата може да ги содржи сите лични информации до коишто апликацијата има пристап."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"Процесот <xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето за меморија од <xliff:g id="SIZE">%2$s</xliff:g>. Слика од меморијата ви е достапна за споделување. Бидете внимателни: оваа слика од меморијата може да содржи чувствителни лични информации до коишто процесот има пристап, што може да вклучуваат работи што сте ги напишале."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Слика од меморијата на <xliff:g id="PROC">%1$s</xliff:g> ви е достапна за споделување. Бидете внимателни: оваа слика од меморијата можеби ги содржи сите чувствителни лични информации до коишто процесот има пристап, што може да вклучуваат работи што сте ги напишале."</string>
-    <string name="sendText" msgid="493003724401350724">"Избери дејство за текст"</string>
+    <string name="sendText" msgid="493003724401350724">"Изберете дејство за текст"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Јачина на звук на ѕвонче"</string>
     <string name="volume_music" msgid="7727274216734955095">"Јачина на звук за аудио/видео"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Се репродуцира преку Bluetooth"</string>
@@ -2396,12 +2396,17 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Отворете ја Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Дознајте како функционира"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Поставете „Отклучување со отпечаток“ повторно"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> не функционираше добро, па се избриша"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> не функционираа добро, па се избришаа"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> не функционираше добро, па се избриша. Поставете го повторно за да го отклучувате телефонот со отпечаток."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> не функционираа добро, па се избришаа. Поставете ги повторно за да го отклучувате телефонот со отпечаток."</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
+    <skip />
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Поставете „Отклучување со лик“ повторно"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Вашиот модел на лик не функционираше добро, па се избриша. Поставете го повторно за да го отклучите телефонот со лик."</string>
+    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
+    <skip />
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Поставете"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Не сега"</string>
 </resources>
