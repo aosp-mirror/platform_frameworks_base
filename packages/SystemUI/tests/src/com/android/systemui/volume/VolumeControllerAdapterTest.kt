@@ -19,16 +19,17 @@ package com.android.systemui.volume
 import android.media.IVolumeController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.media.data.repository.VolumeControllerEvent
+import com.android.settingslib.volume.data.model.VolumeControllerEvent
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
+import com.android.systemui.volume.data.repository.audioRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.eq
@@ -38,13 +39,19 @@ import org.mockito.kotlin.verify
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class VolumeControllerCollectorTest : SysuiTestCase() {
+class VolumeControllerAdapterTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val eventsFlow = MutableStateFlow<VolumeControllerEvent?>(null)
-    private val underTest = VolumeControllerCollector(kosmos.applicationCoroutineScope)
+    private val underTest =
+        with(kosmos) { VolumeControllerAdapter(applicationCoroutineScope, audioRepository) }
 
     private val volumeController = mock<IVolumeController> {}
+
+    @Before
+    fun setUp() {
+        kosmos.audioRepository.init()
+    }
 
     @Test
     fun volumeControllerEvent_volumeChanged_callsMethod() =
@@ -90,7 +97,8 @@ class VolumeControllerCollectorTest : SysuiTestCase() {
 
     private fun testEvent(event: VolumeControllerEvent, verify: () -> Unit) =
         kosmos.testScope.runTest {
-            underTest.collectToController(eventsFlow.filterNotNull(), volumeController)
+            kosmos.audioRepository.sendVolumeControllerEvent(event)
+            underTest.collectToController(volumeController)
 
             eventsFlow.value = event
             runCurrent()
