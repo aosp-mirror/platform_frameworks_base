@@ -206,7 +206,7 @@ class InstallRepository(private val context: Context) {
             return InstallAborted(ABORT_REASON_INTERNAL_ERROR)
         }
 
-        val restriction = getDevicePolicyRestrictions()
+        val restriction = getDevicePolicyRestrictions(isTrustedSource)
         if (restriction != null) {
             val adminSupportDetailsIntent =
                 devicePolicyManager!!.createAdminSupportIntent(restriction)
@@ -243,12 +243,17 @@ class InstallRepository(private val context: Context) {
             || isPermissionGranted(context, Manifest.permission.INSTALL_PACKAGES, callingUid)))
     }
 
-    private fun getDevicePolicyRestrictions(): String? {
-        val restrictions = arrayOf(
-            UserManager.DISALLOW_INSTALL_APPS,
-            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
-            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
-        )
+    private fun getDevicePolicyRestrictions(isTrustedSource: Boolean): String? {
+        val restrictions: Array<String> = if (isTrustedSource) {
+            arrayOf(UserManager.DISALLOW_INSTALL_APPS)
+        } else {
+            arrayOf(
+                UserManager.DISALLOW_INSTALL_APPS,
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
+            )
+        }
+
         for (restriction in restrictions) {
             if (!userManager!!.hasUserRestrictionForUser(restriction, Process.myUserHandle())) {
                 continue
