@@ -2929,6 +2929,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final var userData = getUserData(userId);
         userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
+
+        final var bindingController = getInputMethodBindingController(userId);
+        bindingController.setSelectedMethodId(id);
     }
 
     @GuardedBy("ImfLock.class")
