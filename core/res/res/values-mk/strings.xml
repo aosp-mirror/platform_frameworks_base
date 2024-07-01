@@ -1208,7 +1208,7 @@
     <string name="alwaysUse" msgid="3153558199076112903">"Користи ја стандардно за ова дејство."</string>
     <string name="use_a_different_app" msgid="4987790276170972776">"Користи различна апликација"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Избриши ги стандардните вредности во Системски поставки &gt; Апликации &gt; Преземено."</string>
-    <string name="chooseActivity" msgid="8563390197659779956">"Избери дејство"</string>
+    <string name="chooseActivity" msgid="8563390197659779956">"Изберете дејство"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"Изберете апликација за USB-уредот"</string>
     <string name="noApplications" msgid="1186909265235544019">"Нема апликации што можат да го извршат ова дејство."</string>
     <string name="aerr_application" msgid="4090916809370389109">"<xliff:g id="APPLICATION">%1$s</xliff:g> запре"</string>
@@ -1276,7 +1276,7 @@
     <string name="dump_heap_text" msgid="1692649033835719336">"Процесот <xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето за меморија од <xliff:g id="SIZE">%2$s</xliff:g>. Слика од меморијата ви е достапна за споделување со програмерот. Бидете внимателни: оваа слика од меморијата може да ги содржи сите лични информации до коишто апликацијата има пристап."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"Процесот <xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето за меморија од <xliff:g id="SIZE">%2$s</xliff:g>. Слика од меморијата ви е достапна за споделување. Бидете внимателни: оваа слика од меморијата може да содржи чувствителни лични информации до коишто процесот има пристап, што може да вклучуваат работи што сте ги напишале."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Слика од меморијата на <xliff:g id="PROC">%1$s</xliff:g> ви е достапна за споделување. Бидете внимателни: оваа слика од меморијата можеби ги содржи сите чувствителни лични информации до коишто процесот има пристап, што може да вклучуваат работи што сте ги напишале."</string>
-    <string name="sendText" msgid="493003724401350724">"Избери дејство за текст"</string>
+    <string name="sendText" msgid="493003724401350724">"Изберете дејство за текст"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Јачина на звук на ѕвонче"</string>
     <string name="volume_music" msgid="7727274216734955095">"Јачина на звук за аудио/видео"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Се репродуцира преку Bluetooth"</string>
