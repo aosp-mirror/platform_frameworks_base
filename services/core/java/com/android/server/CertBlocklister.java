@@ -68,7 +68,11 @@ public class CertBlocklister extends Binder {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
-            writeDenylist();
+            new Thread("BlocklistUpdater") {
+                public void run() {
+                    writeDenylist();
+                }
+            }.start();
         }
 
         public String getValue() {
@@ -77,35 +81,32 @@ public class CertBlocklister extends Binder {
         }
 
         private void writeDenylist() {
-            new Thread("BlocklistUpdater") {
-                public void run() {
-                    synchronized (mTmpDir) {
-                        String blocklist = getValue();
-                        if (blocklist != null) {
-                            Slog.i(TAG, "Certificate blocklist changed, updating...");
-                            FileOutputStream out = null;
-                            try {
-                                // create a temporary file
-                                File tmp = File.createTempFile("journal", "", mTmpDir);
-                                // mark it -rw-r--r--
-                                tmp.setReadable(true, false);
-                                // write to it
-                                out = new FileOutputStream(tmp);
-                                out.write(blocklist.getBytes());
-                                // sync to disk
-                                FileUtils.sync(out);
-                                // atomic rename
-                                tmp.renameTo(new File(mPath));
-                                Slog.i(TAG, "Certificate blocklist updated");
-                            } catch (IOException e) {
-                                Slog.e(TAG, "Failed to write blocklist", e);
-                            } finally {
-                                IoUtils.closeQuietly(out);
-                            }
-                        }
-                    }
+            synchronized (mTmpDir) {
+                String blocklist = getValue();
+                if (blocklist == null) {
+                    return;
                 }
-            }.start();
+                if (mPath.equals(SERIAL_PATH)) {
+                    Slog.w(TAG, "The certificate blocklist based on serials is deprecated. "
+                            + "Please use the pubkey blocklist instead.");
+                }
+                Slog.i(TAG, "Certificate blocklist changed, updating...");
+                FileOutputStream out = null;
+                try {
+                    // Create a temporary file and rename it atomically.
+                    File tmp = File.createTempFile("journal", "", mTmpDir);
+                    tmp.setReadable(true /* readable */, false /* ownerOnly */);
+                    out = new FileOutputStream(tmp);
+                    out.write(blocklist.getBytes());
+                    FileUtils.sync(out);
+                    tmp.renameTo(new File(mPath));
+                    Slog.i(TAG, "Certificate blocklist updated");
+                } catch (IOException e) {
+                    Slog.e(TAG, "Failed to write blocklist", e);
+                } finally {
+                    IoUtils.closeQuietly(out);
+                }
+            }
         }
     }
 
