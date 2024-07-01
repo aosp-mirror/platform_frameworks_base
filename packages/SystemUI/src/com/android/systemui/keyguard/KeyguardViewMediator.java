@@ -77,7 +77,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -150,6 +149,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.UserTracker;
@@ -359,6 +359,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final SecureSettings mSecureSettings;
     private final SystemSettings mSystemSettings;
     private final SystemClock mSystemClock;
+    private final ProcessWrapper mProcessWrapper;
     private final SystemPropertiesHelper mSystemPropertiesHelper;
 
     /**
@@ -1442,10 +1443,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             Lazy<ActivityTransitionAnimator> activityTransitionAnimator,
             Lazy<ScrimController> scrimControllerLazy,
             IActivityTaskManager activityTaskManagerService,
+            IStatusBarService statusBarService,
             FeatureFlags featureFlags,
             SecureSettings secureSettings,
             SystemSettings systemSettings,
             SystemClock systemClock,
+            ProcessWrapper processWrapper,
             @Main CoroutineDispatcher mainDispatcher,
             Lazy<DreamViewModel> dreamViewModel,
             Lazy<CommunalTransitionViewModel> communalTransitionViewModel,
@@ -1470,9 +1473,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mSecureSettings = secureSettings;
         mSystemSettings = systemSettings;
         mSystemClock = systemClock;
+        mProcessWrapper = processWrapper;
         mSystemPropertiesHelper = systemPropertiesHelper;
-        mStatusBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        mStatusBarService = statusBarService;
         mKeyguardDisplayManager = keyguardDisplayManager;
         mShadeController = shadeControllerLazy;
         dumpManager.registerDumpable(this);
@@ -3475,12 +3478,20 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             // TODO (b/155663717) After restart, status bar will not properly hide home button
             //  unless disable is called to show un-hide it once first
             if (forceClearFlags) {
-                try {
-                    mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
-                            mContext.getPackageName(),
-                            mSelectedUserInteractor.getSelectedUserId(true));
-                } catch (RemoteException e) {
-                    Log.d(TAG, "Failed to force clear flags", e);
+                if (UserManager.isVisibleBackgroundUsersEnabled()
+                        && !mProcessWrapper.isSystemUser() && !mProcessWrapper.isForegroundUser()) {
+                    // TODO: b/341604160 - Support visible background users properly.
+                    if (DEBUG) {
+                        Log.d(TAG, "Status bar manager is disabled for visible background users");
+                    }
+                } else {
+                    try {
+                        mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
+                                mContext.getPackageName(),
+                                mSelectedUserInteractor.getSelectedUserId(true));
+                    } catch (RemoteException e) {
+                        Log.d(TAG, "Failed to force clear flags", e);
+                    }
                 }
             }
 
@@ -3504,6 +3515,14 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             }
 
             if (!SceneContainerFlag.isEnabled()) {
+                if (UserManager.isVisibleBackgroundUsersEnabled()
+                        && !mProcessWrapper.isSystemUser() && !mProcessWrapper.isForegroundUser()) {
+                    // TODO: b/341604160 - Support visible background users properly.
+                    if (DEBUG) {
+                        Log.d(TAG, "Status bar manager is disabled for visible background users");
+                    }
+                    return;
+                }
                 try {
                     mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
                             mContext.getPackageName(),
