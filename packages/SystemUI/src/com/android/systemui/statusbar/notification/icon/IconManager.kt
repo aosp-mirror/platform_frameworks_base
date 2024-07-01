@@ -20,8 +20,6 @@ import android.app.Notification
 import android.app.Notification.MessagingStyle
 import android.app.Person
 import android.content.pm.LauncherApps
-import android.graphics.drawable.AdaptiveIconDrawable
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
@@ -226,28 +224,22 @@ constructor(
         }
 
         val n = entry.sbn.notification
-        var usingMonochromeAppIcon = false
-        val icon: Icon?
-        if (showPeopleAvatar) {
-            icon = createPeopleAvatar(entry)
-        } else if (android.app.Flags.notificationsUseMonochromeAppIcon()) {
-            if (n.shouldUseAppIcon()) {
-                icon =
-                    getMonochromeAppIcon(entry)?.also { usingMonochromeAppIcon = true }
-                        ?: n.smallIcon
+        val (icon: Icon?, type: StatusBarIcon.Type) =
+            if (showPeopleAvatar) {
+                createPeopleAvatar(entry) to StatusBarIcon.Type.PeopleAvatar
+            } else if (
+                android.app.Flags.notificationsUseMonochromeAppIcon() && n.shouldUseAppIcon()
+            ) {
+                n.smallIcon to StatusBarIcon.Type.MaybeMonochromeAppIcon
             } else {
-                icon = n.smallIcon
+                n.smallIcon to StatusBarIcon.Type.NotifSmallIcon
             }
-        } else {
-            icon = n.smallIcon
-        }
-
         if (icon == null) {
             throw InflationException("No icon in notification from ${entry.sbn.packageName}")
         }
 
-        val sbi = icon.toStatusBarIcon(entry)
-        cacheIconDescriptor(entry, sbi, showPeopleAvatar, usingMonochromeAppIcon)
+        val sbi = icon.toStatusBarIcon(entry, type)
+        cacheIconDescriptor(entry, sbi)
         return sbi
     }
 
@@ -269,29 +261,24 @@ constructor(
         }
     }
 
-    private fun cacheIconDescriptor(
-        entry: NotificationEntry,
-        descriptor: StatusBarIcon,
-        showPeopleAvatar: Boolean,
-        usingMonochromeAppIcon: Boolean
-    ) {
-        if (android.app.Flags.notificationsUseAppIcon() ||
-            android.app.Flags.notificationsUseMonochromeAppIcon()
+    private fun cacheIconDescriptor(entry: NotificationEntry, descriptor: StatusBarIcon) {
+        if (
+            android.app.Flags.notificationsUseAppIcon() ||
+                android.app.Flags.notificationsUseMonochromeAppIcon()
         ) {
             // If either of the new icon flags is enabled, we cache the icon all the time.
-            if (showPeopleAvatar) {
-                entry.icons.peopleAvatarDescriptor = descriptor
-            } else if (usingMonochromeAppIcon) {
+            when (descriptor.type) {
+                StatusBarIcon.Type.PeopleAvatar -> entry.icons.peopleAvatarDescriptor = descriptor
                 // When notificationsUseMonochromeAppIcon is enabled, we use the appIconDescriptor.
-                entry.icons.appIconDescriptor = descriptor
-            } else {
+                StatusBarIcon.Type.MaybeMonochromeAppIcon ->
+                    entry.icons.appIconDescriptor = descriptor
                 // When notificationsUseAppIcon is enabled, the app icon overrides the small icon.
                 // But either way, it's a good idea to cache the descriptor.
-                entry.icons.smallIconDescriptor = descriptor
+                else -> entry.icons.smallIconDescriptor = descriptor
             }
         } else if (isImportantConversation(entry)) {
             // Old approach: cache only if important conversation.
-            if (showPeopleAvatar) {
+            if (descriptor.type == StatusBarIcon.Type.PeopleAvatar) {
                 entry.icons.peopleAvatarDescriptor = descriptor
             } else {
                 entry.icons.smallIconDescriptor = descriptor
@@ -312,7 +299,10 @@ constructor(
         }
     }
 
-    private fun Icon.toStatusBarIcon(entry: NotificationEntry): StatusBarIcon {
+    private fun Icon.toStatusBarIcon(
+        entry: NotificationEntry,
+        type: StatusBarIcon.Type
+    ): StatusBarIcon {
         val n = entry.sbn.notification
         return StatusBarIcon(
             entry.sbn.user,
@@ -320,31 +310,9 @@ constructor(
             /* icon = */ this,
             n.iconLevel,
             n.number,
-            iconBuilder.getIconContentDescription(n)
+            iconBuilder.getIconContentDescription(n),
+            type
         )
-    }
-
-    // TODO(b/335211019): Should we merge this with the method in GroupHelper?
-    private fun getMonochromeAppIcon(entry: NotificationEntry): Icon? {
-        // TODO(b/335211019): This should be done in the background.
-        var monochromeIcon: Icon? = null
-        try {
-            val appIcon: Drawable = iconBuilder.getAppIcon(entry.sbn.notification)
-            if (appIcon is AdaptiveIconDrawable) {
-                if (appIcon.monochrome != null) {
-                    monochromeIcon =
-                        Icon.createWithResourceAdaptiveDrawable(
-                            /* resPackage = */ entry.sbn.packageName,
-                            /* resId = */ appIcon.sourceDrawableResId,
-                            /* useMonochrome = */ true,
-                            /* inset = */ -3.0f * AdaptiveIconDrawable.getExtraInsetFraction()
-                        )
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to getAppIcon() in getMonochromeAppIcon()", e)
-        }
-        return monochromeIcon
     }
 
     private suspend fun getLauncherShortcutIconForPeopleAvatar(entry: NotificationEntry) =
@@ -365,7 +333,8 @@ constructor(
             // Once we have the icon, updating it should happen on the main thread.
             if (icon != null) {
                 withContext(mainCoroutineContext) {
-                    val iconDescriptor = icon.toStatusBarIcon(entry)
+                    val iconDescriptor =
+                        icon.toStatusBarIcon(entry, StatusBarIcon.Type.PeopleAvatar)
 
                     // Cache the value
                     entry.icons.peopleAvatarDescriptor = iconDescriptor

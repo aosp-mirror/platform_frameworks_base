@@ -257,7 +257,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     }
 
     private void onInit() {
-        mPipTransitionController.registerPipTransitionCallback(this);
+        mPipTransitionController.registerPipTransitionCallback(this, mMainExecutor);
 
         reloadResources();
 

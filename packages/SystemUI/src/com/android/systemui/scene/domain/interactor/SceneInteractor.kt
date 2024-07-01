@@ -22,10 +22,14 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.scene.data.repository.SceneContainerRepository
+import com.android.systemui.scene.domain.resolver.SceneResolver
 import com.android.systemui.scene.shared.logger.SceneLogger
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.pairwiseBy
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,9 +37,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -52,7 +59,9 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val repository: SceneContainerRepository,
     private val logger: SceneLogger,
+    private val sceneFamilyResolvers: Lazy<Map<SceneKey, @JvmSuppressWildcards SceneResolver>>,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
+    private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
 ) {
 
     interface OnSceneAboutToChangeListener {
@@ -96,7 +105,14 @@ constructor(
      * 2. When transitioning, which scenes are being transitioned between.
      * 3. When transitioning, what the progress of the transition is.
      */
-    val transitionState: StateFlow<ObservableTransitionState> = repository.transitionState
+    val transitionState: StateFlow<ObservableTransitionState> =
+        repository.transitionState
+            .onEach { logger.logSceneTransition(it) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = repository.transitionState.value,
+            )
 
     /**
      * The key of the scene that the UI is currently transitioning to or `null` if there is no
@@ -151,6 +167,32 @@ constructor(
                 initialValue = isVisibleInternal()
             )
 
+    /** Whether there's an ongoing remotely-initiated user interaction. */
+    val isRemoteUserInteractionOngoing: StateFlow<Boolean> =
+        repository.isRemoteUserInteractionOngoing
+
+    /**
+     * The amount of transition into or out of the given [scene].
+     *
+     * The value will be `0` if not in this scene or `1` when fully in the given scene.
+     */
+    fun transitionProgress(scene: SceneKey): Flow<Float> {
+        return transitionState.flatMapLatest { transition ->
+            when (transition) {
+                is ObservableTransitionState.Idle -> {
+                    flowOf(if (transition.currentScene == scene) 1f else 0f)
+                }
+                is ObservableTransitionState.Transition -> {
+                    when {
+                        transition.toScene == scene -> transition.progress
+                        transition.fromScene == scene -> transition.progress.map { 1f - it }
+                        else -> flowOf(0f)
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Returns the keys of all scenes in the container.
      *
@@ -180,10 +222,11 @@ constructor(
         sceneState: Any? = null,
     ) {
         val currentSceneKey = currentScene.value
+        val resolvedScene = sceneFamilyResolvers.get()[toScene]?.resolvedScene?.value ?: toScene
         if (
             !validateSceneChange(
                 from = currentSceneKey,
-                to = toScene,
+                to = resolvedScene,
                 loggingReason = loggingReason,
             )
         ) {
@@ -192,13 +235,13 @@ constructor(
 
         logger.logSceneChangeRequested(
             from = currentSceneKey,
-            to = toScene,
+            to = resolvedScene,
             reason = loggingReason,
             isInstant = false,
         )
 
-        onSceneAboutToChangeListener.forEach { it.onSceneAboutToChange(toScene, sceneState) }
-        repository.changeScene(toScene, transitionKey)
+        onSceneAboutToChangeListener.forEach { it.onSceneAboutToChange(resolvedScene, sceneState) }
+        repository.changeScene(resolvedScene, transitionKey)
     }
 
     /**
@@ -212,10 +255,18 @@ constructor(
         loggingReason: String,
     ) {
         val currentSceneKey = currentScene.value
+        val resolvedScene =
+            sceneFamilyResolvers.get()[toScene]?.let { familyResolver ->
+                if (familyResolver.includesScene(currentSceneKey)) {
+                    return
+                } else {
+                    familyResolver.resolvedScene.value
+                }
+            } ?: toScene
         if (
             !validateSceneChange(
                 from = currentSceneKey,
-                to = toScene,
+                to = resolvedScene,
                 loggingReason = loggingReason,
             )
         ) {
@@ -224,12 +275,12 @@ constructor(
 
         logger.logSceneChangeRequested(
             from = currentSceneKey,
-            to = toScene,
+            to = resolvedScene,
             reason = loggingReason,
             isInstant = true,
         )
 
-        repository.snapToScene(toScene)
+        repository.snapToScene(resolvedScene)
     }
 
     /**
@@ -288,6 +339,21 @@ constructor(
         repository.setTransitionState(transitionState)
     }
 
+    /**
+     * Returns the [concrete scene][Scenes] for [sceneKey] if it is a [scene family][SceneFamilies],
+     * otherwise returns a singleton [Flow] containing [sceneKey].
+     */
+    fun resolveSceneFamily(sceneKey: SceneKey): Flow<SceneKey> = flow {
+        emitAll(resolveSceneFamilyOrNull(sceneKey) ?: flowOf(sceneKey))
+    }
+
+    /**
+     * Returns the [concrete scene][Scenes] for [sceneKey] if it is a [scene family][SceneFamilies],
+     * otherwise returns `null`.
+     */
+    fun resolveSceneFamilyOrNull(sceneKey: SceneKey): StateFlow<SceneKey>? =
+        sceneFamilyResolvers.get()[sceneKey]?.resolvedScene
+
     private fun isVisibleInternal(
         raw: Boolean = repository.isVisible.value,
         isRemoteUserInteractionOngoing: Boolean = repository.isRemoteUserInteractionOngoing.value,
@@ -321,7 +387,8 @@ constructor(
         val isChangeAllowed =
             to != Scenes.Gone ||
                 inMidTransitionFromGone ||
-                deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked
+                deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked ||
+                !keyguardEnabledInteractor.isKeyguardEnabled.value
         check(isChangeAllowed) {
             "Cannot change to the Gone scene while the device is locked and not currently" +
                 " transitioning from Gone. Current transition state is ${transitionState.value}." +
@@ -330,4 +397,12 @@ constructor(
 
         return from != to
     }
+
+    /** Returns a flow indicating if the currently visible scene can be resolved from [family]. */
+    fun isCurrentSceneInFamily(family: SceneKey): Flow<Boolean> =
+        currentScene.map { currentScene -> isSceneInFamily(currentScene, family) }
+
+    /** Returns `true` if [scene] can be resolved from [family]. */
+    fun isSceneInFamily(scene: SceneKey, family: SceneKey): Boolean =
+        sceneFamilyResolvers.get()[family]?.includesScene(scene) == true
 }

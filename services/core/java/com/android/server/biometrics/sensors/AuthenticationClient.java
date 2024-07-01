@@ -242,14 +242,14 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
                 byteToken[i] = hardwareAuthToken.get(i);
             }
 
-            if (mIsStrongBiometric) {
-                mBiometricManager.resetLockoutTimeBound(getToken(),
-                        getContext().getOpPackageName(),
-                        getSensorId(), getTargetUserId(), byteToken);
-            }
-
             // For BP, BiometricService will add the authToken to Keystore.
-            if (!isBiometricPrompt() && mIsStrongBiometric) {
+            if (!isBiometricPrompt()) {
+                if (mIsStrongBiometric) {
+                    mBiometricManager.resetLockoutTimeBound(getToken(),
+                            getContext().getOpPackageName(),
+                            getSensorId(), getTargetUserId(), byteToken);
+                }
+
                 final int result = KeyStoreAuthorization.getInstance().addAuthToken(byteToken);
                 if (result != 0) {
                     Slog.d(TAG, "Error adding auth token : " + result);
@@ -418,7 +418,7 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
     }
 
     protected int getRequestReason() {
-        if (isKeyguard()) {
+        if (isKeyguard() && !isBiometricPrompt()) {
             return BiometricRequestConstants.REASON_AUTH_KEYGUARD;
         } else if (isBiometricPrompt()) {
             // BP reason always takes precedent over settings, since callers from within

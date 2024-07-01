@@ -39,13 +39,14 @@ object SceneContainerFlag {
     inline val isEnabled
         get() =
             sceneContainer() && // mainAconfigFlag
-            ComposeLockscreen.isEnabled &&
+                ComposeLockscreen.isEnabled &&
                 KeyguardBottomAreaRefactor.isEnabled &&
                 KeyguardWmStateRefactor.isEnabled &&
                 MigrateClocksToBlueprint.isEnabled &&
                 NotificationsHeadsUpRefactor.isEnabled &&
                 PredictiveBackSysUiFlag.isEnabled &&
                 DeviceEntryUdfpsRefactor.isEnabled
+
     // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
 
     /** The main aconfig flag. */
@@ -90,6 +91,14 @@ object SceneContainerFlag {
      */
     @JvmStatic
     inline fun assertInLegacyMode() = RefactorFlagUtils.assertInLegacyMode(isEnabled, DESCRIPTION)
+
+    /**
+     * Called to ensure the new code is only run when the flag is enabled. This will throw an
+     * exception if the flag is disabled to ensure that the refactor author catches issues in
+     * testing.
+     */
+    @JvmStatic
+    inline fun assertInNewMode() = RefactorFlagUtils.assertInNewMode(isEnabled, DESCRIPTION)
 
     /** Returns a developer-readable string that describes the current requirement list. */
     @JvmStatic

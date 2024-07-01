@@ -21,6 +21,8 @@ import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_P
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH;
 
+import static java.util.Collections.unmodifiableMap;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -56,6 +58,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
+import android.util.ArrayMap;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -75,6 +78,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
@@ -119,29 +123,31 @@ public final class CompanionDeviceManager {
      * is created successfully.
      */
     public static final int RESULT_OK = -1;
-
+    //TODO(b/331459560) Need to update the java doc after API cut for W.
     /**
      * The result code to propagate back to the user activity, indicates if the association dialog
      * is implicitly cancelled.
      * E.g. phone is locked, switch to another app or press outside the dialog.
      */
     public static final int RESULT_CANCELED = 0;
-
+    //TODO(b/331459560) Need to update the java doc after API cut for W.
     /**
      * The result code to propagate back to the user activity, indicates the association dialog
      * is explicitly declined by the users.
      */
     public static final int RESULT_USER_REJECTED = 1;
-
+    //TODO(b/331459560) Need to update the java doc after API cut for W.
     /**
      * The result code to propagate back to the user activity, indicates the association
      * dialog is dismissed if there's no device found after 20 seconds.
      */
     public static final int RESULT_DISCOVERY_TIMEOUT = 2;
-
+    //TODO(b/331459560) Need to update the java doc after API cut for W.
     /**
      * The result code to propagate back to the user activity, indicates the internal error
      * in CompanionDeviceManager.
+     * E.g. Missing necessary permissions or duplicate {@link AssociationRequest}s when create the
+     * {@link AssociationInfo}.
      */
     public static final int RESULT_INTERNAL_ERROR = 3;
 
@@ -368,12 +374,22 @@ public final class CompanionDeviceManager {
          */
         public void onAssociationCreated(@NonNull AssociationInfo associationInfo) {}
 
+        //TODO(b/331459560): Add deprecated and remove abstract after API cut for W.
         /**
          * Invoked if the association could not be created.
          *
          * @param error error message.
          */
         public abstract void onFailure(@Nullable CharSequence error);
+
+        /**
+         * Invoked if the association could not be created.
+         *
+         * @param resultCode indicate the particular reason why the association
+         *                   could not be created.
+         */
+        @FlaggedApi(Flags.FLAG_ASSOCIATION_FAILURE_CODE)
+        public void onFailure(@ResultCode int resultCode) {}
     }
 
     private final ICompanionDeviceManager mService;
@@ -1149,6 +1165,32 @@ public final class CompanionDeviceManager {
         }
     }
 
+    /**
+     * Remove bonding between this device and an associated companion device.
+     *
+     * <p>This is an asynchronous call, it will return immediately. Register for {@link
+     * BluetoothDevice#ACTION_BOND_STATE_CHANGED} intents to be notified when the bond removal
+     * process completes, and its result.
+     *
+     * @param associationId an already-associated companion device to remove bond from
+     * @return false on immediate error, true if bond removal process will begin
+     */
+    @FlaggedApi(Flags.FLAG_UNPAIR_ASSOCIATED_DEVICE)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    public boolean removeBond(int associationId) {
+        if (mService == null) {
+            Log.w(TAG, "CompanionDeviceManager service is not available.");
+            return false;
+        }
+
+        try {
+            return mService.removeBond(associationId, mContext.getOpPackageName(),
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Register to receive callbacks whenever the associated device comes in and out of range.
@@ -1777,8 +1819,12 @@ public final class CompanionDeviceManager {
         }
 
         @Override
-        public void onFailure(CharSequence error) throws RemoteException {
-            execute(mCallback::onFailure, error);
+        public void onFailure(@ResultCode int resultCode) {
+            if (Flags.associationFailureCode()) {
+                execute(mCallback::onFailure, resultCode);
+            }
+
+            execute(mCallback::onFailure, RESULT_CODE_TO_REASON.get(resultCode));
         }
 
         private <T> void execute(Consumer<T> callback, T arg) {
@@ -1961,5 +2007,16 @@ public final class CompanionDeviceManager {
                 out.flush();
             }
         }
+    }
+
+    private static final Map<Integer, String> RESULT_CODE_TO_REASON;
+    static {
+        final Map<Integer, String> map = new ArrayMap<>();
+        map.put(RESULT_CANCELED, REASON_CANCELED);
+        map.put(RESULT_USER_REJECTED, REASON_USER_REJECTED);
+        map.put(RESULT_DISCOVERY_TIMEOUT, REASON_DISCOVERY_TIMEOUT);
+        map.put(RESULT_INTERNAL_ERROR, REASON_INTERNAL_ERROR);
+
+        RESULT_CODE_TO_REASON = unmodifiableMap(map);
     }
 }

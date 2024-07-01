@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ୱାୟାରଲେସ୍ ଡିବଗିଂକୁ ଅକ୍ଷମ କରିବା ପାଇଁ ଚୟନ କରନ୍ତୁ।"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"ଟେଷ୍ଟ ହାର୍ନେସ୍ ମୋଡ୍ ସକ୍ଷମ ଅଛି"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"ଟେଷ୍ଟ ହାର୍‌ନେସ୍ ମୋଡ୍ ଅକ୍ଷମ କରିବାକୁ ଏକ ଫ୍ୟାକ୍ଟରୀ ରିସେଟ୍ କରନ୍ତୁ।"</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"କ୍ରମିକ କନ୍‍‍ସୋଲ୍‍କୁ ସକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"କାର୍ଯ୍ୟଦକ୍ଷତା ପ୍ରଭାବିତ ହୋଇଛି। ଅକ୍ଷମ କରିବା ପାଇଁ, ବୁଟ୍‌ଲୋଡର୍‍ର ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"ପରୀକ୍ଷାମୂଳକ MTEକୁ ସକ୍ଷମ କରାଯାଇଛି"</string>
@@ -1751,16 +1755,22 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"ରଙ୍ଗ ସଂଶୋଧନ"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ଏକ-ହାତ ମୋଡ୍"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ଅତ୍ୟଧିକ ଡିମ"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ହିଅରିଂ ଡିଭାଇସଗୁଡ଼ିକ"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ଶ୍ରବଣ ଡିଭାଇସଗୁଡ଼ିକ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ଭଲ୍ୟୁମ୍ କୀ\'ଗୁଡ଼ିକୁ ଧରି ରଖାଯାଇଛି। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ଚାଲୁ ହୋଇଛି।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ଭଲ୍ୟୁମ୍ କୀ\'ଗୁଡ଼ିକୁ ଧରି ରଖାଯାଇଛି। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ବନ୍ଦ ହୋଇଛି।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ଭଲ୍ୟୁମ କୀ\'ଗୁଡ଼ିକୁ ରିଲିଜ କରନ୍ତୁ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g>କୁ ଚାଲୁ କରିବା ପାଇଁ ଉଭୟ ଭଲ୍ୟୁମ କୀ\'କୁ ପୁଣି 3 ସେକେଣ୍ଡ ପାଇଁ ଦବାଇ ଧରି ରଖନ୍ତୁ।"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ଆପଣ ଆକ୍ସେସିବିଲିଟୀ ବଟନ୍ ଟାପ୍ କରିବା ବେଳେ ଏକ ଫିଚର୍ ବ୍ୟବହାର କରିବାକୁ ବାଛନ୍ତୁ:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ଆକ୍ସେସିବିଲିଟୀ ଜେଶ୍ଚର୍ ସହିତ ବ୍ୟବହାର କରିବାକୁ ଏକ ଫିଚର୍ ବାଛନ୍ତୁ (ଦୁଇଟି ଆଙ୍ଗୁଠିରେ ସ୍କ୍ରିନର ତଳୁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ଆକ୍ସେସିବିଲିଟୀ ଜେଶ୍ଚର୍ ସହିତ ବ୍ୟବହାର କରିବାକୁ ଏକ ଫିଚର୍ ବାଛନ୍ତୁ (ତିନୋଟି ଆଙ୍ଗୁଠିରେ ସ୍କ୍ରିନର ତଳୁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"ଫିଚରଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବାକୁ ଆକ୍ସେସିବିଲିଟୀ ବଟନ୍ ସ୍ପର୍ଶ କରି ଧରି ରଖନ୍ତୁ।"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"ଫିଚରଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବାକୁ ଦୁଇଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ୍ କରି ଧରି ରଖନ୍ତୁ।"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ଫିଚରଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବାକୁ, ତିନୋଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ୍ କରି ଧରି ରଖନ୍ତୁ।"</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ମେଗ୍ନିଫିକେସନ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ବର୍ତ୍ତମାନର ୟୁଜର୍‌ ହେଉଛନ୍ତି <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>ରେ ସ୍ୱିଚ କରନ୍ତୁ…"</string>
@@ -1883,7 +1893,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN ବହୁତ ଛୋଟ। ଅତି କମ୍‍ରେ 4 ସଂଖ୍ୟା ବିଶିଷ୍ଟ ହେବା ଦରକାର।"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ଦେଖାଯାଉଛି"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"ବାହାରିବା ପାଇଁ, ଉପରୁ ତଳକୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ।"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ବୁଝିଗଲି"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ଏକ ଭଲ ଭ୍ୟୁ ପାଇଁ ରୋଟେଟ କରନ୍ତୁ"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ଏକ ଭଲ ଭ୍ୟୁ ପାଇଁ ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନରେ <xliff:g id="NAME">%s</xliff:g> ଖୋଲନ୍ତୁ"</string>
@@ -1975,6 +1986,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"ଚାଲିଥିବା କଲ୍"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"ଏକ ଇନକମିଂ କଲକୁ ସ୍କ୍ରିନ୍ କରୁଛି"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"ଅବର୍ଗୀକୃତ"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"ପ୍ରଚାରଗୁଡ଼ିକ"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"ସୋସିଆଲ"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"ନ୍ୟୁଜ"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"ସୁପାରିଶଗୁଡ଼ିକ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ପ୍ରମୁଖତା ଆପଣ ସେଟ୍‍ କରନ୍ତି।"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ସମ୍ପୃକ୍ତ ଲୋକଙ୍କ କାରଣରୁ ଏହା ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ଅଟେ।"</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"କଷ୍ଟମ୍ ଆପ୍ ବିଜ୍ଞପ୍ତି"</string>
@@ -2191,6 +2206,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ଅନ୍-ସ୍କ୍ରିନ୍ ଆକ୍ସେସିବିଲିଟୀ ସର୍ଟକଟ୍ ବାଛିବା ସୁବିଧା"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ଆକ୍ସେସିବିଲିଟୀ ସର୍ଟକଟ୍"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"ବିଜ୍ଞପ୍ତି ସେଡକୁ ଖାରଜ କରନ୍ତୁ"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"ମେନୁ"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"ମିଡିଆ ପ୍ଲେ କରନ୍ତୁ/ବିରତ କରନ୍ତୁ"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad ଉପର"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad ତଳ"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ବାମ"</string>
@@ -2407,6 +2424,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ପ୍ରାଇଭେଟ ସ୍ପେସ"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"କ୍ଲୋନ"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"କମ୍ୟୁନାଲ"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"ପ୍ରାଇଭେଟ ସ୍ପେସ"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"ସମ୍ୱେଦନଶୀଳ ବିଜ୍ଞପ୍ତି ବିଷୟବସ୍ତୁକୁ ଲୁଚାଯାଇଛି"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ସୁରକ୍ଷା ପାଇଁ ସ୍କ୍ରିନ ସେୟାରରୁ ଆପ ବିଷୟବସ୍ତୁକୁ ଲୁଚାଯାଇଛି"</string>

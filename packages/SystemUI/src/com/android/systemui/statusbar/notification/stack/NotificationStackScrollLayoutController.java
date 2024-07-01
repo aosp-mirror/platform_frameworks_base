@@ -68,7 +68,6 @@ import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -1053,6 +1052,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public void setOverscrollTopChangedListener(
             OnOverscrollTopChangedListener listener) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setOverscrollTopChangedListener(listener);
     }
 
@@ -1178,6 +1178,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void goToFullShade(long delay) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.goToFullShade(delay);
     }
 
@@ -1248,6 +1249,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setOnStackYChanged(Consumer<Boolean> onStackYChanged) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setOnStackYChanged(onStackYChanged);
     }
 
@@ -1320,7 +1322,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         updateAlpha();
     }
 
-    void setMaxAlphaFromView(float alpha) {
+    /**
+     * Max alpha from the containing view. Used by brightness slider as an example.
+     */
+    public void setMaxAlphaFromView(float alpha) {
         mMaxAlphaFromView = alpha;
         updateAlpha();
     }
@@ -1747,6 +1752,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * Set a listener to when scrolling changes.
      */
     public void setOnScrollListener(Consumer<Integer> listener) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setOnScrollListener(listener);
     }
 

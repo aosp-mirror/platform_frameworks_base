@@ -71,7 +71,7 @@ fun ModalBottomSheet(
                 },
                 scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = .32f),
                 shape = EntryShape.TopRoundedCorner,
-                windowInsets = WindowInsets.navigationBars,
+                contentWindowInsets = { WindowInsets.navigationBars },
                 dragHandle = null,
                 // Never take over the full screen. We always want to leave some top scrim space
                 // for exiting and viewing the underlying app to help a user gain context.

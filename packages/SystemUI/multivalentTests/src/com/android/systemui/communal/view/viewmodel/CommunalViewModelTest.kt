@@ -75,6 +75,7 @@ import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
+import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
@@ -91,6 +92,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -100,7 +102,6 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
-    @Mock private lateinit var user: UserInfo
     @Mock private lateinit var providerInfo: AppWidgetProviderInfo
 
     private val kosmos = testKosmos()
@@ -152,16 +153,18 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             CommunalViewModel(
                 kosmos.testDispatcher,
                 testScope,
+                kosmos.testScope.backgroundScope,
                 context.resources,
                 kosmos.keyguardTransitionInteractor,
                 kosmos.keyguardInteractor,
+                mock<KeyguardIndicationController>(),
                 kosmos.communalSceneInteractor,
                 kosmos.communalInteractor,
                 kosmos.communalSettingsInteractor,
                 kosmos.communalTutorialInteractor,
                 kosmos.shadeInteractor,
                 mediaHost,
-                logcatLogBuffer("CommunalViewModelTest"),
+                logcatLogBuffer("CommunalViewModelTest")
             )
     }
 
@@ -315,6 +318,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun dismissCta_hidesCtaTileAndShowsPopup_thenHidesPopupAfterTimeout() =
         testScope.runTest {
+            setIsMainUser(true)
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             val communalContent by collectLastValue(underTest.communalContent)
@@ -338,6 +342,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun popup_onDismiss_hidesImmediately() =
         testScope.runTest {
+            setIsMainUser(true)
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             val currentPopup by collectLastValue(underTest.currentPopup)
@@ -357,7 +362,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             val currentPopup by collectLastValue(underTest.currentPopup)
 
             assertThat(currentPopup).isNull()
-            underTest.onShowCustomizeWidgetButton()
+            underTest.onLongClick()
             assertThat(currentPopup).isEqualTo(PopupType.CustomizeWidgetButton)
             advanceTimeBy(POPUP_AUTO_HIDE_TIMEOUT_MS)
             assertThat(currentPopup).isNull()
@@ -369,7 +374,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
             val currentPopup by collectLastValue(underTest.currentPopup)
 
-            underTest.onShowCustomizeWidgetButton()
+            underTest.onLongClick()
             assertThat(currentPopup).isEqualTo(PopupType.CustomizeWidgetButton)
 
             underTest.onHidePopup()
@@ -743,13 +748,17 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     private suspend fun setIsMainUser(isMainUser: Boolean) {
-        whenever(user.isMain).thenReturn(isMainUser)
-        userRepository.setUserInfos(listOf(user))
-        userRepository.setSelectedUserInfo(user)
+        val user = if (isMainUser) MAIN_USER_INFO else SECONDARY_USER_INFO
+        with(userRepository) {
+            setUserInfos(listOf(user))
+            setSelectedUserInfo(user)
+        }
+        kosmos.fakeUserTracker.set(userInfos = listOf(user), selectedUserIndex = 0)
     }
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
+        val SECONDARY_USER_INFO = UserInfo(1, "secondary", 0)
 
         @JvmStatic
         @Parameters(name = "{0}")

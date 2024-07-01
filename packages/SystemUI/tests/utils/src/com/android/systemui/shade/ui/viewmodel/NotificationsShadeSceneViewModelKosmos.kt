@@ -17,13 +17,8 @@
 package com.android.systemui.shade.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneViewModel
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 
 val Kosmos.notificationsShadeSceneViewModel: NotificationsShadeSceneViewModel by
-    Kosmos.Fixture {
-        NotificationsShadeSceneViewModel(
-            applicationScope = applicationCoroutineScope,
-            overlayShadeViewModel = overlayShadeViewModel,
-        )
-    }
+    Kosmos.Fixture { NotificationsShadeSceneViewModel(shadeInteractor) }

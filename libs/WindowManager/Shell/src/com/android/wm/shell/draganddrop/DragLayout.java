@@ -42,6 +42,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
@@ -102,6 +103,8 @@ public class DragLayout extends LinearLayout
     private boolean mIsShowing;
     private boolean mHasDropped;
     private DragSession mSession;
+    // The last position that was handled by the drag layout
+    private final Point mLastPosition = new Point();
 
     @SuppressLint("WrongConstant")
     public DragLayout(Context context, SplitScreenController splitScreenController,
@@ -265,6 +268,15 @@ public class DragLayout extends LinearLayout
      */
     public void prepare(DragSession session, InstanceId loggerSessionId) {
         mPolicy.start(session, loggerSessionId);
+        updateSession(session);
+    }
+
+    /**
+     * Updates the drag layout based on the diven drag session.
+     */
+    public void updateSession(DragSession session) {
+        // Note: The policy currently just keeps a reference to the session
+        boolean updatingExistingSession = mSession != null;
         mSession = session;
         mHasDropped = false;
         mCurrentTarget = null;
@@ -312,6 +324,11 @@ public class DragLayout extends LinearLayout
             updateDropZoneSizes(topOrLeftBounds, bottomOrRightBounds);
         }
         requestLayout();
+        if (updatingExistingSession) {
+            // Update targets if we are already currently dragging
+            recomputeDropTargets();
+            update(mLastPosition.x, mLastPosition.y);
+        }
     }
 
     private void updateDropZoneSizesForSingleTask() {
@@ -359,6 +376,9 @@ public class DragLayout extends LinearLayout
         mDropZoneView2.setLayoutParams(dropZoneView2);
     }
 
+    /**
+     * Shows the drag layout.
+     */
     public void show() {
         mIsShowing = true;
         recomputeDropTargets();
@@ -384,13 +404,19 @@ public class DragLayout extends LinearLayout
      * Updates the visible drop target as the user drags.
      */
     public void update(DragEvent event) {
+        update((int) event.getX(), (int) event.getY());
+    }
+
+    /**
+     * Updates the visible drop target as the user drags to the given coordinates.
+     */
+    private void update(int x, int y) {
         if (mHasDropped) {
             return;
         }
         // Find containing region, if the same as mCurrentRegion, then skip, otherwise, animate the
         // visibility of the current region
-        DragAndDropPolicy.Target target = mPolicy.getTargetAtLocation(
-                (int) event.getX(), (int) event.getY());
+        DragAndDropPolicy.Target target = mPolicy.getTargetAtLocation(x, y);
         if (mCurrentTarget != target) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Current target: %s", target);
             if (target == null) {
@@ -429,6 +455,7 @@ public class DragLayout extends LinearLayout
             }
             mCurrentTarget = target;
         }
+        mLastPosition.set(x, y);
     }
 
     /**
@@ -436,6 +463,7 @@ public class DragLayout extends LinearLayout
      */
     public void hide(DragEvent event, Runnable hideCompleteCallback) {
         mIsShowing = false;
+        mLastPosition.set(-1, -1);
         animateSplitContainers(false, () -> {
             if (hideCompleteCallback != null) {
                 hideCompleteCallback.run();

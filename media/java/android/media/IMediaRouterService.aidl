@@ -52,6 +52,7 @@ interface IMediaRouterService {
     // Methods for MediaRouter2
     List<MediaRoute2Info> getSystemRoutes(String callerPackageName, boolean isProxyRouter);
     RoutingSessionInfo getSystemSessionInfo();
+    boolean showMediaOutputSwitcherWithRouter2(String packageName);
 
     void registerRouter2(IMediaRouter2 router, String packageName);
     void unregisterRouter2(IMediaRouter2 router);
@@ -97,5 +98,5 @@ interface IMediaRouterService {
     void setSessionVolumeWithManager(IMediaRouter2Manager manager, int requestId,
             String sessionId, int volume);
     void releaseSessionWithManager(IMediaRouter2Manager manager, int requestId, String sessionId);
-    boolean showMediaOutputSwitcher(String packageName);
+    boolean showMediaOutputSwitcherWithProxyRouter(IMediaRouter2Manager manager);
 }

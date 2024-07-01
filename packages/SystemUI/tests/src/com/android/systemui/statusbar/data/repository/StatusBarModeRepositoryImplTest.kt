@@ -23,6 +23,7 @@ import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS
 import android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS
 import android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
@@ -36,6 +37,7 @@ import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -47,9 +49,11 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class StatusBarModeRepositoryImplTest : SysuiTestCase() {
     private val testScope = TestScope()
     private val commandQueue = mock<CommandQueue>()
@@ -390,7 +394,9 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            ongoingCallRepository.setHasOngoingCall(true)
+            ongoingCallRepository.setOngoingCallState(
+                OngoingCallModel.InCall(startTimeMs = 34, intent = null)
+            )
             onSystemBarAttributesChanged(
                 requestedVisibleTypes = WindowInsets.Type.navigationBars(),
             )
@@ -403,7 +409,9 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            ongoingCallRepository.setHasOngoingCall(true)
+            ongoingCallRepository.setOngoingCallState(
+                OngoingCallModel.InCall(startTimeMs = 789, intent = null)
+            )
             onSystemBarAttributesChanged(
                 requestedVisibleTypes = WindowInsets.Type.statusBars(),
                 appearance = APPEARANCE_OPAQUE_STATUS_BARS,
@@ -417,7 +425,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            ongoingCallRepository.setHasOngoingCall(false)
+            ongoingCallRepository.setOngoingCallState(OngoingCallModel.NoCall)
             onSystemBarAttributesChanged(
                 requestedVisibleTypes = WindowInsets.Type.navigationBars(),
                 appearance = APPEARANCE_OPAQUE_STATUS_BARS,

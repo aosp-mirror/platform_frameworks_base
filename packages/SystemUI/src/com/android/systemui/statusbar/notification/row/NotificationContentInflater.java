@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
+import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineConversationViewBinder;
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineViewBinder;
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineViewModel;
@@ -105,6 +106,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
             HeadsUpStyleProvider headsUpStyleProvider,
             NotificationRowContentBinderLogger logger) {
+        NotificationRowContentBinderRefactor.assertInLegacyMode();
         mRemoteViewCache = remoteViewCache;
         mRemoteInputManager = remoteInputManager;
         mConversationProcessor = conversationProcessor;

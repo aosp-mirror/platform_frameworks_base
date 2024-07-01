@@ -17,7 +17,9 @@
 package com.android.server.inputmethod;
 
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
+import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -44,6 +46,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -67,7 +70,7 @@ final class InputMethodBindingController {
     /** Time in milliseconds that the IME service has to bind before it is reconnected. */
     static final long TIME_TO_RECONNECT = 3 * 1000;
 
-    @UserIdInt final int mUserId;
+    @UserIdInt private final int mUserId;
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
     @NonNull private final AutofillSuggestionsController mAutofillController;
@@ -82,11 +85,16 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class") @Nullable private IInputMethodInvoker mCurMethod;
     @GuardedBy("ImfLock.class") private int mCurMethodUid = Process.INVALID_UID;
     @GuardedBy("ImfLock.class") @Nullable private IBinder mCurToken;
-    @GuardedBy("ImfLock.class") private int mCurTokenDisplayId = Display.INVALID_DISPLAY;
+    @GuardedBy("ImfLock.class") @Nullable private InputMethodSubtype mCurrentSubtype;
+    @GuardedBy("ImfLock.class") private int mCurTokenDisplayId = INVALID_DISPLAY;
     @GuardedBy("ImfLock.class") private int mCurSeq;
     @GuardedBy("ImfLock.class") private boolean mVisibleBound;
     @GuardedBy("ImfLock.class") private boolean mSupportsStylusHw;
     @GuardedBy("ImfLock.class") private boolean mSupportsConnectionlessStylusHw;
+
+    /** The display id for which the latest startInput was called. */
+    @GuardedBy("ImfLock.class") private int mDisplayIdToShowIme = INVALID_DISPLAY;
+    @GuardedBy("ImfLock.class") private int mDeviceIdToShowIme = DEVICE_ID_DEFAULT;
 
     @Nullable private CountDownLatch mLatchForTesting;
 
@@ -189,6 +197,18 @@ final class InputMethodBindingController {
     }
 
     /**
+     * Returns {@link InputMethodInfo} that is queried from {@link #getSelectedMethodId()}.
+     *
+     * @return {@link InputMethodInfo} whose IME ID is the same as {@link #getSelectedMethodId()}.
+     *         {@code null} otherwise
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    InputMethodInfo getSelectedMethod() {
+        return InputMethodSettingsRepository.get(mUserId).getMethodMap().get(mSelectedMethodId);
+    }
+
+    /**
      * The token we have made for the currently active input method, to
      * identify it in the future.
      */
@@ -196,6 +216,28 @@ final class InputMethodBindingController {
     @Nullable
     IBinder getCurToken() {
         return mCurToken;
+    }
+
+    /**
+     * The current {@link InputMethodSubtype} of the current input method.
+     *
+     * @return the current {@link InputMethodSubtype} of the current input method. {@code null}
+     *         means that there is no {@link InputMethodSubtype} currently selected
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    InputMethodSubtype getCurrentSubtype() {
+        return mCurrentSubtype;
+    }
+
+    /**
+     * Sets the current {@link InputMethodSubtype} of the current input method.
+     *
+     * @param currentSubtype the current {@link InputMethodSubtype} of the current input method
+     */
+    @GuardedBy("ImfLock.class")
+    void setCurrentSubtype(@Nullable InputMethodSubtype currentSubtype) {
+        mCurrentSubtype = currentSubtype;
     }
 
     /**
@@ -340,9 +382,9 @@ final class InputMethodBindingController {
                         InputMethodManager
                                 .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
                     }
-                    mService.initializeImeLocked(mCurMethod, mCurToken);
+                    mService.initializeImeLocked(mCurMethod, mCurToken, mUserId);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
-                    mService.reRequestCurrentClientSessionLocked();
+                    mService.reRequestCurrentClientSessionLocked(mUserId);
                     mAutofillController.performOnCreateInlineSuggestionsRequest();
                 }
 
@@ -395,7 +437,7 @@ final class InputMethodBindingController {
                     mLastBindTime = SystemClock.uptimeMillis();
                     clearCurMethodAndSessions();
                     mService.clearInputShownLocked();
-                    mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
+                    mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME, mUserId);
                 }
             }
         }
@@ -441,7 +483,7 @@ final class InputMethodBindingController {
 
     @GuardedBy("ImfLock.class")
     private void clearCurMethodAndSessions() {
-        mService.clearClientSessionsLocked();
+        mService.clearClientSessionsLocked(this);
         mCurMethod = null;
         mCurMethodUid = Process.INVALID_UID;
     }
@@ -455,7 +497,7 @@ final class InputMethodBindingController {
         mWindowManagerInternal.removeWindowToken(mCurToken, true /* removeWindows */,
                 false /* animateExit */, mCurTokenDisplayId);
         mCurToken = null;
-        mCurTokenDisplayId = Display.INVALID_DISPLAY;
+        mCurTokenDisplayId = INVALID_DISPLAY;
     }
 
     @GuardedBy("ImfLock.class")
@@ -478,16 +520,15 @@ final class InputMethodBindingController {
             mCurId = info.getId();
             mLastBindTime = SystemClock.uptimeMillis();
 
-            final int displayIdToShowIme = mService.getDisplayIdToShowImeLocked();
             mCurToken = new Binder();
-            mCurTokenDisplayId = displayIdToShowIme;
+            mCurTokenDisplayId = mDisplayIdToShowIme;
             if (DEBUG) {
                 Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
-                        + displayIdToShowIme);
+                        + mDisplayIdToShowIme);
             }
             mWindowManagerInternal.addWindowToken(mCurToken,
                     WindowManager.LayoutParams.TYPE_INPUT_METHOD,
-                    displayIdToShowIme, null /* options */);
+                    mDisplayIdToShowIme, null /* options */);
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
                     null, null, null, mCurId, mCurSeq, false);
@@ -595,5 +636,30 @@ final class InputMethodBindingController {
         if (isVisibleBound()) {
             unbindVisibleConnection();
         }
+    }
+
+    @GuardedBy("ImfLock.class")
+    void setDisplayIdToShowIme(int displayId) {
+        mDisplayIdToShowIme = displayId;
+    }
+
+    @GuardedBy("ImfLock.class")
+    int getDisplayIdToShowIme() {
+        return mDisplayIdToShowIme;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void setDeviceIdToShowIme(int deviceId) {
+        mDeviceIdToShowIme = deviceId;
+    }
+
+    @GuardedBy("ImfLock.class")
+    int getDeviceIdToShowIme() {
+        return mDeviceIdToShowIme;
+    }
+
+    @UserIdInt
+    int getUserId() {
+        return mUserId;
     }
 }

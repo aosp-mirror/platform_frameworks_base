@@ -22,7 +22,6 @@ import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PIP_TRANSITION;
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
@@ -107,6 +106,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -368,15 +368,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     false /* fromRotation */, fromImeAdjustment, false /* fromShelfAdjustment */,
                     null /* windowContainerTransaction */);
         }
-
-        @Override
-        public void onActivityHidden(ComponentName componentName) {
-            if (componentName.equals(mPipBoundsState.getLastPipComponentName())) {
-                // The activity was removed, we don't want to restore to the reentry state
-                // saved for this component anymore.
-                mPipBoundsState.setLastPipComponentName(null);
-            }
-        }
     }
 
     /**
@@ -488,7 +479,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
                 INPUT_CONSUMER_PIP, mMainExecutor);
-        mPipTransitionController.registerPipTransitionCallback(this);
+        mPipTransitionController.registerPipTransitionCallback(this, mMainExecutor);
         mPipTaskOrganizer.registerOnDisplayIdChangeCallback((int displayId) -> {
             mPipDisplayLayoutState.setDisplayId(displayId);
             onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
@@ -1002,9 +993,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
-            SurfaceControl overlay, Rect appBounds) {
+            SurfaceControl overlay, Rect appBounds, Rect sourceRectHint) {
         mPipTaskOrganizer.stopSwipePipToHome(taskId, componentName, destinationBounds, overlay,
-                appBounds);
+                appBounds, sourceRectHint);
     }
 
     private void abortSwipePipToHome(int taskId, ComponentName componentName) {
@@ -1230,8 +1221,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public PipTransitionController getPipTransitionController() {
-            return mPipTransitionController;
+        public void registerPipTransitionCallback(
+                PipTransitionController.PipTransitionCallback callback,
+                Executor executor) {
+            mMainExecutor.execute(() -> mPipTransitionController.registerPipTransitionCallback(
+                    callback, executor));
         }
     }
 
@@ -1292,13 +1286,15 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
         @Override
         public void stopSwipePipToHome(int taskId, ComponentName componentName,
-                Rect destinationBounds, SurfaceControl overlay, Rect appBounds) {
+                Rect destinationBounds, SurfaceControl overlay, Rect appBounds,
+                Rect sourceRectHint) {
             if (overlay != null) {
                 overlay.setUnreleasedWarningCallSite("PipController.stopSwipePipToHome");
             }
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> controller.stopSwipePipToHome(
-                            taskId, componentName, destinationBounds, overlay, appBounds));
+                            taskId, componentName, destinationBounds, overlay, appBounds,
+                            sourceRectHint));
         }
 
         @Override

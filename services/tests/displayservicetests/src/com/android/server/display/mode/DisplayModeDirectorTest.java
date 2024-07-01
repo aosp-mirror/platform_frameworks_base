@@ -132,7 +132,8 @@ public class DisplayModeDirectorTest {
             /* defaultPeakRefreshRate= */ 0,
             /* defaultRefreshRateInHbmHdr= */ 0,
             /* defaultRefreshRateInHbmSunlight= */ 0,
-            /* lowPowerSupportedModes =*/ List.of());
+            /* lowPowerSupportedModes= */ List.of(),
+            /* lowLightBlockingZoneSupportedModes= */ List.of());
 
     public static Collection<Object[]> getAppRequestedSizeTestCases() {
         var appRequestedSizeTestCases = Arrays.asList(new Object[][] {
@@ -3170,7 +3171,8 @@ public class DisplayModeDirectorTest {
                 /* defaultPeakRefreshRate= */ 65,
                 /* defaultRefreshRateInHbmHdr= */ 65,
                 /* defaultRefreshRateInHbmSunlight= */ 75,
-                /* lowPowerSupportedModes= */ List.of());
+                /* lowPowerSupportedModes= */ List.of(),
+                /* lowLightBlockingZoneSupportedModes= */ List.of());
         when(displayDeviceConfig.getRefreshRateData()).thenReturn(refreshRateData);
         when(displayDeviceConfig.getDefaultLowBlockingZoneRefreshRate()).thenReturn(50);
         when(displayDeviceConfig.getDefaultHighBlockingZoneRefreshRate()).thenReturn(55);

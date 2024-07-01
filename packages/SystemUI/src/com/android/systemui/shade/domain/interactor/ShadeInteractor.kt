@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.systemui.shade.shared.model.ShadeAlignment
 import com.android.systemui.shade.shared.model.ShadeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -53,6 +54,9 @@ interface ShadeInteractor : BaseShadeInteractor {
 
     /** Emits true if the shade can be expanded from QQS to QS and false otherwise. */
     val isExpandToQsEnabled: Flow<Boolean>
+
+    /** How to align the shade content. */
+    val shadeAlignment: ShadeAlignment
 }
 
 /** ShadeInteractor methods with implementations that differ between non-empty impls. */

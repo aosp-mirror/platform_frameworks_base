@@ -16,42 +16,47 @@
 
 package com.android.keyguard
 
-import android.testing.AndroidTestingRunner
 import android.view.View
 import android.view.ViewGroup
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
+import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.StatusBarState.SHADE
+import com.android.systemui.unfold.FakeUnfoldTransitionProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
-import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
-import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.whenever
+import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.whenever
 
 /**
  * Translates items away/towards the hinge when the device is opened/closed. This is controlled by
  * the set of ids, which also dictact which direction to move and when, via a filter fn.
  */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class KeyguardUnfoldTransitionTest : SysuiTestCase() {
 
-    @Mock private lateinit var progressProvider: NaturalRotationUnfoldProgressProvider
+    private val kosmos = Kosmos()
 
-    @Captor private lateinit var progressListenerCaptor: ArgumentCaptor<TransitionProgressListener>
+    private val progressProvider: FakeUnfoldTransitionProvider =
+        kosmos.fakeUnfoldTransitionProgressProvider
 
-    @Mock private lateinit var parent: ViewGroup
+    @Mock
+    private lateinit var keyguardRootView: KeyguardRootView
+
+    @Mock
+    private lateinit var notificationShadeWindowView: NotificationShadeWindowView
 
     @Mock private lateinit var statusBarStateController: StatusBarStateController
 
@@ -66,13 +71,15 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
         xTranslationMax =
             context.resources.getDimensionPixelSize(R.dimen.keyguard_unfold_translation_x).toFloat()
 
-        underTest = KeyguardUnfoldTransition(context, statusBarStateController, progressProvider)
+        underTest = KeyguardUnfoldTransition(
+            context, keyguardRootView, notificationShadeWindowView,
+            statusBarStateController, progressProvider
+        )
 
-        underTest.setup(parent)
+        underTest.setup()
         underTest.statusViewCentered = false
 
-        verify(progressProvider).addCallback(capture(progressListenerCaptor))
-        progressListener = progressListenerCaptor.value
+        progressListener = progressProvider
     }
 
     @Test
@@ -81,7 +88,9 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
         underTest.statusViewCentered = true
 
         val view = View(context)
-        whenever(parent.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(view)
+        whenever(keyguardRootView.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(
+            view
+        )
 
         progressListener.onTransitionStarted()
         assertThat(view.translationX).isZero()
@@ -101,7 +110,9 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
         whenever(statusBarStateController.getState()).thenReturn(SHADE)
 
         val view = View(context)
-        whenever(parent.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(view)
+        whenever(keyguardRootView.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(
+            view
+        )
 
         progressListener.onTransitionStarted()
         assertThat(view.translationX).isZero()
@@ -121,7 +132,10 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
         whenever(statusBarStateController.getState()).thenReturn(KEYGUARD)
 
         val view = View(context)
-        whenever(parent.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(view)
+        whenever(
+            notificationShadeWindowView
+                .findViewById<View>(R.id.lockscreen_clock_view_large)
+        ).thenReturn(view)
 
         progressListener.onTransitionStarted()
         assertThat(view.translationX).isZero()

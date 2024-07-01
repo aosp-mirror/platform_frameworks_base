@@ -24,7 +24,6 @@ import android.provider.Settings
 import com.android.systemui.Flags.communalHub
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.model.CommunalEnabledState
-import com.android.systemui.communal.data.model.CommunalWidgetCategories
 import com.android.systemui.communal.data.model.DisabledReason
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_DEVICE_POLICY
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_FLAG
@@ -51,12 +50,6 @@ import kotlinx.coroutines.flow.onStart
 interface CommunalSettingsRepository {
     /** A [CommunalEnabledState] for the specified user. */
     fun getEnabledState(user: UserInfo): Flow<CommunalEnabledState>
-
-    /**
-     * A flow that reports the widget categories to show on the hub as selected by the user in
-     * Settings.
-     */
-    fun getWidgetCategories(user: UserInfo): Flow<CommunalWidgetCategories>
 
     /** Keyguard widgets enabled state by Device Policy Manager for the specified user. */
     fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean>
@@ -104,22 +97,6 @@ constructor(
             .flowOn(bgDispatcher)
     }
 
-    override fun getWidgetCategories(user: UserInfo): Flow<CommunalWidgetCategories> =
-        secureSettings
-            .observerFlow(userId = user.id, names = arrayOf(GLANCEABLE_HUB_CONTENT_SETTING))
-            // Force an update
-            .onStart { emit(Unit) }
-            .map {
-                CommunalWidgetCategories(
-                    secureSettings.getIntForUser(
-                        GLANCEABLE_HUB_CONTENT_SETTING,
-                        CommunalWidgetCategories.defaultCategories,
-                        user.id
-                    )
-                )
-            }
-            .flowOn(bgDispatcher)
-
     override fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean> =
         broadcastDispatcher
             .broadcastFlow(
@@ -159,7 +136,6 @@ constructor(
             }
 
     companion object {
-        const val GLANCEABLE_HUB_CONTENT_SETTING = "glanceable_hub_content_setting"
         const val GLANCEABLE_HUB_BACKGROUND_SETTING = "glanceable_hub_background"
         private const val ENABLED_SETTING_DEFAULT = 1
     }

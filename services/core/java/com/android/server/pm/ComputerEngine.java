@@ -2207,11 +2207,17 @@ public class ComputerEngine implements Computer {
         if (PackageManagerServiceUtils.isSystemOrRoot(callingUid)) {
             return true;
         }
-        if (requireFullPermission) {
-            return hasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        boolean permissionGranted = requireFullPermission ? hasPermission(
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                : (hasPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                        || hasPermission(Manifest.permission.INTERACT_ACROSS_USERS));
+        if (!permissionGranted) {
+            if (Process.isIsolatedUid(callingUid) && isKnownIsolatedComputeApp(callingUid)) {
+                return checkIsolatedOwnerHasPermission(callingUid, requireFullPermission);
+            }
         }
-        return hasPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-                || hasPermission(Manifest.permission.INTERACT_ACROSS_USERS);
+        return permissionGranted;
     }
 
     /**
@@ -2225,6 +2231,24 @@ public class ComputerEngine implements Computer {
     private boolean hasPermission(String permission) {
         return mContext.checkCallingOrSelfPermission(permission)
                 == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean hasPermission(String permission, int uid) {
+        return mContext.checkPermission(permission, Process.INVALID_PID, uid)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Since isolated process cannot hold permissions, we check the permissions on the owner app
+     * for known isolated_compute_app cases because they belong to the same package.
+     */
+    private boolean checkIsolatedOwnerHasPermission(int callingUid, boolean requireFullPermission) {
+        int ownerUid = getIsolatedOwner(callingUid);
+        if (requireFullPermission) {
+            return hasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, ownerUid);
+        }
+        return hasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, ownerUid)
+                || hasPermission(Manifest.permission.INTERACT_ACROSS_USERS, ownerUid);
     }
 
     public final boolean isCallerSameApp(String packageName, int uid) {
@@ -4364,7 +4388,7 @@ public class ComputerEngine implements Computer {
             uid = getBaseSdkSandboxUid();
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
-        if (isKnownIsolatedComputeApp(uid, callingUserId)) {
+        if (isKnownIsolatedComputeApp(uid)) {
             try {
                 uid = getIsolatedOwner(uid);
             } catch (IllegalStateException e) {
@@ -4407,7 +4431,7 @@ public class ComputerEngine implements Computer {
             if (Process.isSdkSandboxUid(uid)) {
                 uid = getBaseSdkSandboxUid();
             }
-            if (isKnownIsolatedComputeApp(uid, callingUserId)) {
+            if (isKnownIsolatedComputeApp(uid)) {
                 try {
                     uid = getIsolatedOwner(uid);
                 } catch (IllegalStateException e) {
@@ -5809,7 +5833,7 @@ public class ComputerEngine implements Computer {
     }
 
 
-    private boolean isKnownIsolatedComputeApp(int uid, int callingUserId) {
+    private boolean isKnownIsolatedComputeApp(int uid) {
         if (!Process.isIsolatedUid(uid)) {
             return false;
         }
@@ -5822,27 +5846,8 @@ public class ComputerEngine implements Computer {
         }
         OnDeviceIntelligenceManagerInternal onDeviceIntelligenceManagerInternal =
                 mInjector.getLocalService(OnDeviceIntelligenceManagerInternal.class);
-        if (onDeviceIntelligenceManagerInternal == null) {
-            return false;
-        }
-
-        String onDeviceIntelligencePackage =
-                onDeviceIntelligenceManagerInternal.getRemoteServicePackageName();
-        if (onDeviceIntelligencePackage == null) {
-            return false;
-        }
-
-        try {
-            if (getIsolatedOwner(uid) == getPackageUid(onDeviceIntelligencePackage, 0,
-                    callingUserId)) {
-                return true;
-            }
-        } catch (IllegalStateException e) {
-            // If the owner uid doesn't exist, just use the current uid
-            Slog.wtf(TAG, "Expected isolated uid " + uid + " to have an owner", e);
-        }
-
-        return false;
+        return onDeviceIntelligenceManagerInternal != null
+                && uid == onDeviceIntelligenceManagerInternal.getInferenceServiceUid();
     }
 
     @Nullable

@@ -17,12 +17,14 @@ package com.android.systemui.flags
 
 import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.never
@@ -34,6 +36,7 @@ import org.mockito.MockitoAnnotations
  * overriding, and should never return any value other than the one provided as the default.
  */
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class FeatureFlagsClassicReleaseTest : SysuiTestCase() {
     private lateinit var mFeatureFlagsClassicRelease: FeatureFlagsClassicRelease
 

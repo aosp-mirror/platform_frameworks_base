@@ -34,6 +34,7 @@ import android.view.WindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.Flags.communalHub
+import com.android.systemui.Flags.mediaLockscreenLaunchAnimation
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.DelegateTransitionAnimatorController
 import com.android.systemui.assist.AssistManager
@@ -228,8 +229,10 @@ constructor(
         associatedView: View?,
         animationController: ActivityTransitionAnimator.Controller?,
         showOverLockscreen: Boolean,
+        skipLockscreenChecks: Boolean,
         fillInIntent: Intent?,
         extraOptions: Bundle?,
+        customMessage: String?,
     ) {
         val animationController =
             if (associatedView is ExpandableNotificationRow) {
@@ -246,10 +249,11 @@ constructor(
         val actuallyShowOverLockscreen =
             showOverLockscreen &&
                 intent.isActivity &&
-                activityIntentHelper.wouldPendingShowOverLockscreen(
-                    intent,
-                    lockScreenUserManager.currentUserId
-                )
+                (skipLockscreenChecks ||
+                    activityIntentHelper.wouldPendingShowOverLockscreen(
+                        intent,
+                        lockScreenUserManager.currentUserId
+                    ))
 
         val animate =
             !willLaunchResolverActivity &&
@@ -337,6 +341,7 @@ constructor(
                     afterKeyguardGone = willLaunchResolverActivity,
                     dismissShade = collapse,
                     willAnimateOnKeyguard = animate,
+                    customMessage = customMessage,
                 )
             }
         } else {
@@ -469,12 +474,16 @@ constructor(
                         shadeControllerLazy.get().collapseShadeForActivityStart()
                     }
                     if (communalHub()) {
-                        communalSceneInteractor.snapToScene(CommunalScenes.Blank)
+                        communalSceneInteractor.changeSceneForActivityStartOnDismissKeyguard()
                     }
                     return deferred
                 }
 
                 override fun willRunAnimationOnKeyguard(): Boolean {
+                    if (communalHub() && communalSceneInteractor.isIdleOnCommunal.value) {
+                        // Override to false when launching activity over the hub that requires auth
+                        return false
+                    }
                     return willAnimateOnKeyguard
                 }
             }
@@ -555,7 +564,12 @@ constructor(
 
                 override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                     super.onTransitionAnimationStart(isExpandingFullyAbove)
-
+                    if (communalHub()) {
+                        communalSceneInteractor.snapToScene(
+                            CommunalScenes.Blank,
+                            ActivityTransitionAnimator.TIMINGS.totalDuration
+                        )
+                    }
                     // Double check that the keyguard is still showing and not going
                     // away, but if so set the keyguard occluded. Typically, WM will let
                     // KeyguardViewMediator know directly, but we're overriding that to
@@ -581,9 +595,6 @@ constructor(
                     // collapse the shade (or at least run the post collapse runnables)
                     // later on.
                     centralSurfaces?.setIsLaunchingActivityOverLockscreen(false, false)
-                    if (communalHub()) {
-                        communalSceneInteractor.snapToScene(CommunalScenes.Blank)
-                    }
                     delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
                 }
 
@@ -627,8 +638,9 @@ constructor(
         isActivityIntent: Boolean,
         showOverLockscreen: Boolean,
     ): Boolean {
-        // TODO(b/294418322): Support launch animations when occluded.
-        if (keyguardStateController.isOccluded) {
+        // TODO(b/294418322): always support launch animations when occluded.
+        val ignoreOcclusion = showOverLockscreen && mediaLockscreenLaunchAnimation()
+        if (keyguardStateController.isOccluded && !ignoreOcclusion) {
             return false
         }
 

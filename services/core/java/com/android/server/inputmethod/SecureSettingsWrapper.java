@@ -44,6 +44,32 @@ final class SecureSettingsWrapper {
     @Nullable
     private static volatile ContentResolver sContentResolver = null;
 
+    private static volatile boolean sTestMode = false;
+
+    /**
+     * Can be called from unit tests to start the test mode, where a fake implementation will be
+     * used instead.
+     *
+     * <p>The fake implementation is just an {@link ArrayMap}. By default it is empty, and the data
+     * written can be read back later.</p>
+     */
+    @AnyThread
+    static void startTestMode() {
+        sTestMode = true;
+    }
+
+    /**
+     * Can be called from unit tests to end the test mode, where a fake implementation will be used
+     * instead.
+     */
+    @AnyThread
+    static void endTestMode() {
+        synchronized (sUserMap) {
+            sUserMap.clear();
+        }
+        sTestMode = false;
+    }
+
     /**
      * Not intended to be instantiated.
      */
@@ -76,6 +102,52 @@ final class SecureSettingsWrapper {
 
         @AnyThread
         int getInt(String key, int defaultValue);
+    }
+
+    private static class FakeReaderWriterImpl implements ReaderWriter {
+        @GuardedBy("mNonPersistentKeyValues")
+        private final ArrayMap<String, String> mNonPersistentKeyValues = new ArrayMap<>();
+
+        @AnyThread
+        @Override
+        public void putString(String key, String value) {
+            synchronized (mNonPersistentKeyValues) {
+                mNonPersistentKeyValues.put(key, value);
+            }
+        }
+
+        @AnyThread
+        @Nullable
+        @Override
+        public String getString(String key, String defaultValue) {
+            synchronized (mNonPersistentKeyValues) {
+                if (mNonPersistentKeyValues.containsKey(key)) {
+                    final String result = mNonPersistentKeyValues.get(key);
+                    return result != null ? result : defaultValue;
+                }
+                return defaultValue;
+            }
+        }
+
+        @AnyThread
+        @Override
+        public void putInt(String key, int value) {
+            synchronized (mNonPersistentKeyValues) {
+                mNonPersistentKeyValues.put(key, String.valueOf(value));
+            }
+        }
+
+        @AnyThread
+        @Override
+        public int getInt(String key, int defaultValue) {
+            synchronized (mNonPersistentKeyValues) {
+                if (mNonPersistentKeyValues.containsKey(key)) {
+                    final String result = mNonPersistentKeyValues.get(key);
+                    return result != null ? Integer.parseInt(result) : defaultValue;
+                }
+                return defaultValue;
+            }
+        }
     }
 
     private static class UnlockedUserImpl implements ReaderWriter {
@@ -200,6 +272,9 @@ final class SecureSettingsWrapper {
 
     private static ReaderWriter createImpl(@NonNull UserManagerInternal userManagerInternal,
             @UserIdInt int userId) {
+        if (sTestMode) {
+            return new FakeReaderWriterImpl();
+        }
         return userManagerInternal.isUserUnlockingOrUnlocked(userId)
                 ? new UnlockedUserImpl(userId, sContentResolver)
                 : new LockedUserImpl(userId, sContentResolver);
@@ -233,6 +308,9 @@ final class SecureSettingsWrapper {
             if (readerWriter != null) {
                 return readerWriter;
             }
+        }
+        if (sTestMode) {
+            return putOrGet(userId, new FakeReaderWriterImpl());
         }
         final UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);
@@ -276,6 +354,10 @@ final class SecureSettingsWrapper {
      */
     @AnyThread
     static void onUserStarting(@UserIdInt int userId) {
+        if (sTestMode) {
+            putOrGet(userId, new FakeReaderWriterImpl());
+            return;
+        }
         putOrGet(userId, createImpl(LocalServices.getService(UserManagerInternal.class), userId));
     }
 
@@ -286,6 +368,10 @@ final class SecureSettingsWrapper {
      */
     @AnyThread
     static void onUserUnlocking(@UserIdInt int userId) {
+        if (sTestMode) {
+            putOrGet(userId, new FakeReaderWriterImpl());
+            return;
+        }
         final ReaderWriter readerWriter = new UnlockedUserImpl(userId, sContentResolver);
         putOrGet(userId, readerWriter);
     }

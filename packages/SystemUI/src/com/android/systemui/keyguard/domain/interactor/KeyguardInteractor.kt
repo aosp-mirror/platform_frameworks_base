@@ -77,6 +77,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
 
 /**
  * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
@@ -91,7 +92,7 @@ constructor(
     bouncerRepository: KeyguardBouncerRepository,
     configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
-    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     sceneInteractorProvider: Provider<SceneInteractor>,
     private val fromGoneTransitionInteractor: Provider<FromGoneTransitionInteractor>,
     private val fromLockscreenTransitionInteractor: Provider<FromLockscreenTransitionInteractor>,
@@ -110,7 +111,7 @@ constructor(
                 keyguardTransitionInteractor.transitionState.map { step ->
                     val startingProgress = lastChangeStep.value
                     val progress = step.value
-                    if (step.to == AOD && progress >= startingProgress) {
+                    if (step.to == AOD && progress >= startingProgress && startingProgress < 1f) {
                         val adjustedProgress =
                             ((progress - startingProgress) / (1F - startingProgress)).coerceIn(
                                 0F,
@@ -250,14 +251,13 @@ constructor(
     /** Keyguard can be clipped at the top as the shade is dragged */
     val topClippingBounds: Flow<Int?> =
         combineTransform(
-                configurationInteractor.onAnyConfigurationChange,
                 keyguardTransitionInteractor
-                    .transitionValue(GONE)
+                    .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
                     .map { it == 1f }
                     .onStart { emit(false) }
                     .distinctUntilChanged(),
                 repository.topClippingBounds
-            ) { _, isGone, topClippingBounds ->
+            ) { isGone, topClippingBounds ->
                 if (!isGone) {
                     emit(topClippingBounds)
                 }
@@ -323,6 +323,10 @@ constructor(
     @Deprecated("Use the relevant TransitionViewModel")
     val keyguardAlpha: Flow<Float> = repository.keyguardAlpha
 
+    /** Temporary shim for fading out content when the brightness slider is used */
+    @Deprecated("SceneContainer uses NotificationStackAppearanceInteractor")
+    val panelAlpha: StateFlow<Float> = repository.panelAlpha.asStateFlow()
+
     /**
      * When the lockscreen can be dismissed, emit an alpha value as the user swipes up. This is
      * useful just before the code commits to moving to GONE.
@@ -330,28 +334,35 @@ constructor(
      * This uses legacyShadeExpansion to process swipe up events. In the future, the touch input
      * signal should be sent directly to transitions.
      */
-    val dismissAlpha: Flow<Float?> =
+    val dismissAlpha: Flow<Float> =
         shadeRepository.legacyShadeExpansion
-            .filter { it < 1f }
             .sampleCombine(
                 statusBarState,
                 keyguardTransitionInteractor.currentKeyguardState,
+                keyguardTransitionInteractor.transitionState,
                 isKeyguardDismissible,
             )
-            .map {
-                (legacyShadeExpansion, statusBarState, currentKeyguardState, isKeyguardDismissible)
-                ->
+            .filter { (_, _, _, step, _) -> !step.transitionState.isTransitioning() }
+            .transform {
+                (
+                    legacyShadeExpansion,
+                    statusBarState,
+                    currentKeyguardState,
+                    step,
+                    isKeyguardDismissible) ->
                 if (
                     statusBarState == StatusBarState.KEYGUARD &&
                         isKeyguardDismissible &&
-                        currentKeyguardState == LOCKSCREEN
+                        currentKeyguardState == LOCKSCREEN &&
+                        legacyShadeExpansion != 1f
                 ) {
-                    MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, legacyShadeExpansion)
-                } else {
-                    null
+                    emit(MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, legacyShadeExpansion))
+                } else if (legacyShadeExpansion == 0f || legacyShadeExpansion == 1f) {
+                    // Resets alpha state
+                    emit(1f)
                 }
             }
-            .onStart { emit(null) }
+            .onStart { emit(1f) }
             .distinctUntilChanged()
 
     val keyguardTranslationY: Flow<Float> =
@@ -453,6 +464,10 @@ constructor(
         repository.setKeyguardAlpha(alpha)
     }
 
+    fun setPanelAlpha(alpha: Float) {
+        repository.setPanelAlpha(alpha)
+    }
+
     fun setAnimateDozingTransitions(animate: Boolean) {
         repository.setAnimateDozingTransitions(animate)
     }
@@ -475,6 +490,10 @@ constructor(
 
     fun setTopClippingBounds(top: Int?) {
         repository.topClippingBounds.value = top
+    }
+
+    fun setDreaming(isDreaming: Boolean) {
+        repository.setDreaming(isDreaming)
     }
 
     /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */

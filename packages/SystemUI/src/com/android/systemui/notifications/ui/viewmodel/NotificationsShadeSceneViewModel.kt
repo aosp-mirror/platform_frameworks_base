@@ -17,41 +17,35 @@
 package com.android.systemui.notifications.ui.viewmodel
 
 import com.android.compose.animation.scene.Back
-import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
+import com.android.systemui.scene.shared.model.SceneFamilies
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeAlignment
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Models UI state and handles user input for the Notifications Shade scene. */
 @SysUISingleton
 class NotificationsShadeSceneViewModel
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
-    overlayShadeViewModel: OverlayShadeViewModel,
+    shadeInteractor: ShadeInteractor,
 ) {
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        overlayShadeViewModel.backgroundScene
-            .map(::destinationScenes)
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = destinationScenes(overlayShadeViewModel.backgroundScene.value),
+        MutableStateFlow(
+                mapOf(
+                    if (shadeInteractor.shadeAlignment == ShadeAlignment.Top) {
+                        Swipe.Up
+                    } else {
+                        Swipe.Down
+                    } to SceneFamilies.Home,
+                    Back to SceneFamilies.Home,
+                )
             )
-
-    private fun destinationScenes(backgroundScene: SceneKey): Map<UserAction, UserActionResult> {
-        return mapOf(
-            Swipe.Up to backgroundScene,
-            Back to backgroundScene,
-        )
-    }
+            .asStateFlow()
 }

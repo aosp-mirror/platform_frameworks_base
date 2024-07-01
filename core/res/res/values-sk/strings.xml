@@ -159,7 +159,7 @@
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Šifrovanie, upozornenia na nešifrované siete"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Bol zaznamenaný prístup k identifikátoru zariadenia"</string>
     <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"Sieť v okolí nahrala o <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> jedinečný identifikátor vášho zariadenia (IMSI alebo IMEI), keď ste používali SIM siete <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"Sieť v okolí nahrala o <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> jedinečný identifikátor vášho zariadenia (IMSI alebo IMEI), keď ste používali SIM siete <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nZnamená to, že vaša poloha, aktivita alebo totožnosť bola zaznamenaná. Ide o bežný postup, ale môže to byť problém pre ľudí, ktorí majú obavy o ochranu súkromia."</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"O <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> zaznamenala sieť v okolí pri použití SIM karty <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> jedinečný identifikátor vášho zariadenia (IMSI alebo IMEI).\n\nZnamená to, že bola zaznamenaná vaša poloha, aktivita alebo totožnosť. Ide o bežný postup, ale pre ľudí, ktorým záleží na ochrane súkromia, to môže byť problém."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Pripojené k šifrovanej sieti <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Pripojenie SIM siete <xliff:g id="NETWORK_NAME">%1$s</xliff:g> je teraz zabezpečenejšie"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Pripojené k nešifrovanej sieti"</string>
@@ -1413,6 +1413,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Výberom zakážete bezdrôtové ladenie."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Režim správcu testov je aktivovaný"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Ak chcete zakázať režim správcu testov, obnovte výrobné nastavenia."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"Sériová konzola je povolená"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Ovplyvňuje výkon. Ak ju chcete zakázať, skontrolujte zavádzací program systému."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Je zapnuté experimentálne rozšírenie MTE"</string>
@@ -1757,12 +1761,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je zapnutá."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vypnutá."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Uvoľnite tlačidlá hlasitosti. Ak chcete zapnúť službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, znova pridržte tri sekundy obe tlačidlá hlasitosti."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Klepnutím na tlačidlo dostupnosti vyberte požadovanú funkciu:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Vyberte funkciu, ktorú chcete používať s daným gestom dostupnosti (potiahnutím dvoma prstami z dolnej časti obrazovky nahor):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Vyberte funkciu aktivovanú daným gestom dostupnosti (potiahnutím troma prstami z dolnej časti obrazovky nahor):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Funkcie prepnete pridržaním tlačidla dostupnosti."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Funkcie prepnete potiahnutím dvoma prstami nahor a pridržaním."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Funkcie prepnete potiahnutím troma prstami nahor a pridržaním."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zväčšenie"</string>
     <string name="user_switched" msgid="7249833311585228097">"Aktuálny používateľ je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Prepína sa na účet <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1885,7 +1895,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Kód PIN je príliš krátky. Musí mať minimálne 4 číslice."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Skúste to neskôr"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Zobrazenie na celú obrazovku"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Ukončíte potiahnutím zhora nadol."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Dobre"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Otočte zariadenie pre lepšie zobrazenie"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otvorte <xliff:g id="NAME">%s</xliff:g> na celej obrazovke pre lepšie zobrazenie"</string>
@@ -1977,6 +1988,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Prebiehajúci hovor"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Preveruje sa prichádzajúci hovor"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Nekategorizované"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"Promá"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"Sociálne siete"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"Správy"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"Odporúčania"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Nastavili ste dôležitosť týchto upozornení."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Táto správa je dôležitá vzhľadom na osoby, ktorých sa to týka."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Vlastné upozornenie na aplikáciu"</string>
@@ -2040,7 +2055,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Pripnúť <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Uvoľniť"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Odopnúť <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Info o aplikácii"</string>
+    <string name="app_info" msgid="6113278084877079851">"Informácie o aplikácii"</string>
     <string name="negative_duration" msgid="1938335096972945232">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Spúšťa sa ukážka…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Resetuje sa zariadenie…"</string>
@@ -2193,6 +2208,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Výber skratky dostupnosti na obrazovke"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Skratka dostupnosti"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Zavrieť panel upozornení"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Ponuka"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Prehrať / pozastaviť médium"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Stlačiť tlačidlo nahor krížového ovládača"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Stlačiť tlačidlo nadol krížového ovládača"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Stlačiť tlačidlo doľava krížového ovládača"</string>
@@ -2409,6 +2426,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Súkromný priestor"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Spoločný"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Súkromný priestor"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Obsah citlivého upozornenia je skrytý"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Obsah aplikácie bol na účely zabezpečenia skrytý v zdieľaní obrazovky"</string>

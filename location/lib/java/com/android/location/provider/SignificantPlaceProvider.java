@@ -21,16 +21,21 @@ import android.app.trust.TrustManager;
 import android.hardware.location.ISignificantPlaceProvider;
 import android.hardware.location.ISignificantPlaceProviderManager;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
 /** @hide */
-public class SignificantPlaceProvider {
+public abstract class SignificantPlaceProvider {
 
     public static final String ACTION = TrustManager.ACTION_BIND_SIGNIFICANT_PLACE_PROVIDER;
+
+    private static final String TAG = "SignificantPlaceProvider";
 
     private final IBinder mBinder;
 
@@ -69,6 +74,9 @@ public class SignificantPlaceProvider {
         }
     }
 
+    /** Invoked when some client has checked whether the device is in a significant place. */
+    public abstract void onSignificantPlaceCheck();
+
     private final class Service extends ISignificantPlaceProvider.Stub {
 
         Service() {}
@@ -76,7 +84,7 @@ public class SignificantPlaceProvider {
         @Override
         public void setSignificantPlaceProviderManager(ISignificantPlaceProviderManager manager) {
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                return;
+                throw new SecurityException();
             }
 
             synchronized (mBinder) {
@@ -89,6 +97,23 @@ public class SignificantPlaceProvider {
                 }
 
                 mManager = manager;
+            }
+        }
+
+        @Override
+        public void onSignificantPlaceCheck() {
+            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+                throw new SecurityException();
+            }
+
+            try {
+                SignificantPlaceProvider.this.onSignificantPlaceCheck();
+            } catch (RuntimeException e) {
+                // exceptions on one-way binder threads are dropped - move to a different thread
+                Log.w(TAG, e);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    throw new AssertionError(e);
+                });
             }
         }
     }

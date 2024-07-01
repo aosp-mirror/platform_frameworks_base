@@ -52,6 +52,7 @@ import com.android.internal.view.menu.MenuPresenter;
  */
 public class ActionBarOverlayLayout extends ViewGroup implements DecorContentParent {
     private static final String TAG = "ActionBarOverlayLayout";
+    private static final Rect EMPTY_RECT = new Rect();
 
     private int mActionBarHeight;
     //private WindowDecorActionBar mActionBar;
@@ -294,55 +295,53 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
     }
 
     private boolean applyInsets(View view, Rect insets, boolean toPadding,
-            boolean left, boolean top, boolean bottom, boolean right) {
+            boolean left, boolean top, boolean right, boolean bottom) {
         boolean changed;
         if (toPadding) {
-            changed = setMargin(view, left, top, bottom, right, 0, 0, 0, 0);
-            changed |= setPadding(view, left, top, bottom, right,
-                    insets.left, insets.top, insets.right, insets.bottom);
+            changed = setMargin(view, EMPTY_RECT, left, top, right, bottom);
+            changed |= setPadding(view, insets, left, top, right, bottom);
         } else {
-            changed = setPadding(view, left, top, bottom, right, 0, 0, 0, 0);
-            changed |= setMargin(view, left, top, bottom, right,
-                    insets.left, insets.top, insets.right, insets.bottom);
+            changed = setPadding(view, EMPTY_RECT, left, top, right, bottom);
+            changed |= setMargin(view, insets, left, top, right, bottom);
         }
         return changed;
     }
 
-    private boolean setPadding(View view, boolean left, boolean top, boolean bottom, boolean right,
-            int l, int t, int r, int b) {
-        if ((left && view.getPaddingLeft() != l)
-                || (top && view.getPaddingTop() != t)
-                || (right && view.getPaddingRight() != r)
-                || (bottom && view.getPaddingBottom() != b)) {
+    private boolean setPadding(View view, Rect insets,
+            boolean left, boolean top, boolean right, boolean bottom) {
+        if ((left && view.getPaddingLeft() != insets.left)
+                || (top && view.getPaddingTop() != insets.top)
+                || (right && view.getPaddingRight() != insets.right)
+                || (bottom && view.getPaddingBottom() != insets.bottom)) {
             view.setPadding(
-                    left ? l : view.getPaddingLeft(),
-                    top ? t : view.getPaddingTop(),
-                    right ? r : view.getPaddingRight(),
-                    bottom ? b : view.getPaddingBottom());
+                    left ? insets.left : view.getPaddingLeft(),
+                    top ? insets.top : view.getPaddingTop(),
+                    right ? insets.right : view.getPaddingRight(),
+                    bottom ? insets.bottom : view.getPaddingBottom());
             return true;
         }
         return false;
     }
 
-    private boolean setMargin(View view, boolean left, boolean top, boolean bottom, boolean right,
-            int l, int t, int r, int b) {
-        LayoutParams lp = (LayoutParams) view.getLayoutParams();
+    private boolean setMargin(View view,  Rect insets,
+            boolean left, boolean top, boolean right, boolean bottom) {
+        final LayoutParams lp = (LayoutParams) view.getLayoutParams();
         boolean changed = false;
-        if (left && lp.leftMargin != l) {
+        if (left && lp.leftMargin != insets.left) {
             changed = true;
-            lp.leftMargin = l;
+            lp.leftMargin = insets.left;
         }
-        if (top && lp.topMargin != t) {
+        if (top && lp.topMargin != insets.top) {
             changed = true;
-            lp.topMargin = t;
+            lp.topMargin = insets.top;
         }
-        if (right && lp.rightMargin != r) {
+        if (right && lp.rightMargin != insets.right) {
             changed = true;
-            lp.rightMargin = r;
+            lp.rightMargin = insets.right;
         }
-        if (bottom && lp.bottomMargin != b) {
+        if (bottom && lp.bottomMargin != insets.bottom) {
             changed = true;
-            lp.bottomMargin = b;
+            lp.bottomMargin = insets.bottom;
         }
         return changed;
     }
@@ -370,7 +369,7 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
 
         // The top and bottom action bars are always within the content area.
         boolean changed = applyInsets(mActionBarTop, mSystemInsets,
-                mActionBarExtendsIntoSystemInsets, true, true, false, true);
+                mActionBarExtendsIntoSystemInsets, true, true, true, false);
         if (mActionBarBottom != null) {
             changed |= applyInsets(mActionBarBottom, mSystemInsets,
                     mActionBarExtendsIntoSystemInsets, true, false, true, true);
@@ -522,7 +521,7 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
                 );
             }
         }
-        applyInsets(mContent, mContentInsets, false /* toPadding */, true, true, true, true);
+        setMargin(mContent, mContentInsets, true, true, true, true);
 
         if (!mLastInnerInsets.equals(mInnerInsets)) {
             // If the inner insets have changed, we need to dispatch this down to
@@ -897,6 +896,13 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
     public void dismissPopups() {
         pullChildren();
         mDecorToolbar.dismissPopupMenus();
+    }
+
+    @Override
+    public void notifyContentChanged() {
+        mLastBaseContentInsets.setEmpty();
+        mLastBaseInnerInsets = WindowInsets.CONSUMED;
+        mLastInnerInsets = WindowInsets.CONSUMED;
     }
 
     public static class LayoutParams extends MarginLayoutParams {

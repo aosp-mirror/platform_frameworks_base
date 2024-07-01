@@ -32,7 +32,7 @@ import com.android.internal.compat.IPlatformCompat;
 public final class ChangeIdStateCache
         extends PropertyInvalidatedCache<ChangeIdStateQuery, Boolean> {
     private static final String CACHE_KEY = "cache_key.is_compat_change_enabled";
-    private static final int MAX_ENTRIES = 64;
+    private static final int MAX_ENTRIES = 2048;
     private static boolean sDisabled = false;
     private volatile IPlatformCompat mPlatformCompat;
 

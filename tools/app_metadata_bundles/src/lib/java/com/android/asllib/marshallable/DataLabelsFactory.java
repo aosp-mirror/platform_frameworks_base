@@ -18,16 +18,15 @@ package com.android.asllib.marshallable;
 
 import com.android.asllib.util.AslgenUtil;
 import com.android.asllib.util.DataCategoryConstants;
+import com.android.asllib.util.DataTypeConstants;
 import com.android.asllib.util.MalformedXmlException;
 import com.android.asllib.util.XmlUtils;
 
 import org.w3c.dom.Element;
 
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
 
@@ -39,13 +38,46 @@ public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
             AslgenUtil.logI("Found no DataLabels in hr format.");
             return null;
         }
-        Map<String, DataCategory> dataAccessed =
-                getDataCategoriesWithTag(ele, XmlUtils.HR_TAG_DATA_ACCESSED);
         Map<String, DataCategory> dataCollected =
-                getDataCategoriesWithTag(ele, XmlUtils.HR_TAG_DATA_COLLECTED);
+                getDataCategoriesWithTag(ele, XmlUtils.HR_TAG_DATA_COLLECTED, false);
+        Map<String, DataCategory> dataCollectedEphemeral =
+                getDataCategoriesWithTag(ele, XmlUtils.HR_TAG_DATA_COLLECTED_EPHEMERAL, true);
         Map<String, DataCategory> dataShared =
-                getDataCategoriesWithTag(ele, XmlUtils.HR_TAG_DATA_SHARED);
-        DataLabels dataLabels = new DataLabels(dataAccessed, dataCollected, dataShared);
+                getDataCategoriesWithTag(ele, XmlUtils.HR_TAG_DATA_SHARED, null);
+
+        for (String dataCollectedEphemeralDataCategoryKey : dataCollectedEphemeral.keySet()) {
+            DataCategory dataCategoryEphemeral =
+                    dataCollectedEphemeral.get(dataCollectedEphemeralDataCategoryKey);
+            for (String dataCollectedEphemeralDataTypeKey :
+                    dataCategoryEphemeral.getDataTypes().keySet()) {
+                if (dataCollected.containsKey(dataCollectedEphemeralDataCategoryKey)
+                        && dataCollected
+                                .get(dataCollectedEphemeralDataCategoryKey)
+                                .getDataTypes()
+                                .containsKey(dataCollectedEphemeralDataTypeKey)) {
+                    throw new MalformedXmlException(
+                            String.format(
+                                    "Duplicate entries in data-collected and"
+                                            + " data-collected-ephemeral: %s %s",
+                                    dataCollectedEphemeralDataCategoryKey,
+                                    dataCollectedEphemeralDataTypeKey));
+                }
+
+                if (!dataCollected.containsKey(dataCollectedEphemeralDataCategoryKey)) {
+                    dataCollected.put(
+                            dataCollectedEphemeralDataCategoryKey,
+                            new DataCategory(dataCollectedEphemeralDataCategoryKey));
+                }
+                DataType dataTypeEphemeral =
+                        dataCategoryEphemeral.getDataTypes().get(dataCollectedEphemeralDataTypeKey);
+                dataCollected
+                        .get(dataCollectedEphemeralDataCategoryKey)
+                        .getDataTypes()
+                        .put(dataCollectedEphemeralDataTypeKey, dataTypeEphemeral);
+            }
+        }
+        DataLabels dataLabels = new DataLabels(dataCollected, dataShared);
+
         validateIsXOptional(dataLabels);
         return dataLabels;
     }
@@ -58,13 +90,11 @@ public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
             AslgenUtil.logI("Found no DataLabels in od format.");
             return null;
         }
-        Map<String, DataCategory> dataAccessed =
-                getOdDataCategoriesWithTag(dataLabelsEle, XmlUtils.OD_NAME_DATA_ACCESSED);
         Map<String, DataCategory> dataCollected =
                 getOdDataCategoriesWithTag(dataLabelsEle, XmlUtils.OD_NAME_DATA_COLLECTED);
         Map<String, DataCategory> dataShared =
                 getOdDataCategoriesWithTag(dataLabelsEle, XmlUtils.OD_NAME_DATA_SHARED);
-        DataLabels dataLabels = new DataLabels(dataAccessed, dataCollected, dataShared);
+        DataLabels dataLabels = new DataLabels(dataCollected, dataShared);
         validateIsXOptional(dataLabels);
         return dataLabels;
     }
@@ -88,56 +118,56 @@ public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
     }
 
     private static Map<String, DataCategory> getDataCategoriesWithTag(
-            Element dataLabelsEle, String dataCategoryUsageTypeTag) throws MalformedXmlException {
+            Element dataLabelsEle, String dataCategoryUsageTypeTag, Boolean ephemeral)
+            throws MalformedXmlException {
         List<Element> dataUsedElements =
                 XmlUtils.getChildrenByTagName(dataLabelsEle, dataCategoryUsageTypeTag);
         Map<String, DataCategory> dataCategoryMap = new LinkedHashMap<String, DataCategory>();
 
-        Set<String> dataCategoryNames = new HashSet<String>();
         for (int i = 0; i < dataUsedElements.size(); i++) {
             Element dataUsedEle = dataUsedElements.get(i);
-            String dataCategoryName = dataUsedEle.getAttribute(XmlUtils.HR_ATTR_DATA_CATEGORY);
+            String dataCategoryAndTypeCombinedStr =
+                    dataUsedEle.getAttribute(XmlUtils.HR_ATTR_DATA_TYPE);
+            String[] strs = dataCategoryAndTypeCombinedStr.split(XmlUtils.DATA_TYPE_SEPARATOR);
+            if (strs.length != 2) {
+                throw new MalformedXmlException(
+                        String.format(
+                                "Could not parse human-readable data type string (expecting"
+                                        + " substring of _data_type_): %s",
+                                dataCategoryAndTypeCombinedStr));
+            }
+            String dataCategoryName = strs[0];
+            String dataTypeName = strs[1];
+
             if (!DataCategoryConstants.getValidDataCategories().contains(dataCategoryName)) {
                 throw new MalformedXmlException(
                         String.format("Unrecognized category name: %s", dataCategoryName));
             }
-            dataCategoryNames.add(dataCategoryName);
+            if (!DataTypeConstants.getValidDataTypes()
+                    .get(dataCategoryName)
+                    .contains(dataTypeName)) {
+                throw new MalformedXmlException(
+                        String.format(
+                                "Unrecognized data type name %s for category %s",
+                                dataTypeName, dataCategoryName));
+            }
+
+            if (!dataCategoryMap.containsKey(dataCategoryName)) {
+                dataCategoryMap.put(dataCategoryName, new DataCategory(dataCategoryName));
+            }
+            dataCategoryMap
+                    .get(dataCategoryName)
+                    .getDataTypes()
+                    .put(
+                            dataTypeName,
+                            new DataTypeFactory().createFromHrElements(dataUsedEle, ephemeral));
         }
-        for (String dataCategoryName : dataCategoryNames) {
-            var dataCategoryElements =
-                    dataUsedElements.stream()
-                            .filter(
-                                    ele ->
-                                            ele.getAttribute(XmlUtils.HR_ATTR_DATA_CATEGORY)
-                                                    .equals(dataCategoryName))
-                            .toList();
-            DataCategory dataCategory =
-                    new DataCategoryFactory().createFromHrElements(dataCategoryElements);
-            dataCategoryMap.put(dataCategoryName, dataCategory);
-        }
+
         return dataCategoryMap;
     }
 
     private void validateIsXOptional(DataLabels dataLabels) throws MalformedXmlException {
         // Validate booleans such as isCollectionOptional, isSharingOptional.
-        for (DataCategory dataCategory : dataLabels.getDataAccessed().values()) {
-            for (DataType dataType : dataCategory.getDataTypes().values()) {
-                if (dataType.getIsSharingOptional() != null) {
-                    throw new MalformedXmlException(
-                            String.format(
-                                    "isSharingOptional was unexpectedly defined on a DataType"
-                                            + " belonging to data accessed: %s",
-                                    dataType.getDataTypeName()));
-                }
-                if (dataType.getIsCollectionOptional() != null) {
-                    throw new MalformedXmlException(
-                            String.format(
-                                    "isCollectionOptional was unexpectedly defined on a DataType"
-                                            + " belonging to data accessed: %s",
-                                    dataType.getDataTypeName()));
-                }
-            }
-        }
         for (DataCategory dataCategory : dataLabels.getDataCollected().values()) {
             for (DataType dataType : dataCategory.getDataTypes().values()) {
                 if (dataType.getIsSharingOptional() != null) {
