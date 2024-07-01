@@ -642,7 +642,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Zamijeni raspored tastature"</string>
     <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Brisanje teksta"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Prečice"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Pretraživanje prečica"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Pretražite prečice"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Nisu pronađene prečice"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistem"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Unos"</string>
@@ -1062,7 +1062,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi se trenutno ne može automatski povezati"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da promijenite mrežu, isključite ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi poboljšanja iskustva s uređajem aplikacije i usluge i dalje mogu tražiti WiFi mreže bilo kada, čak i kada je WiFi isključen. Ovo možete promijeniti u Postavkama traženja WiFi mreže. "<annotation id="link">"Promijeni"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi poboljšanja iskustva s uređajem aplikacije i usluge i dalje mogu tražiti WiFi mreže bilo kada, čak i kada je WiFi isključen. Ovo možete promijeniti u postavkama traženja WiFi-ja. "<annotation id="link">"Promijeni"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Isključi način rada u avionu"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> želi dodati sljedeću karticu u Brze postavke"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj karticu"</string>
@@ -1071,7 +1071,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# aplikacija je aktivna}one{# aplikacija je aktivna}few{# aplikacije su aktivne}other{# aplikacija je aktivno}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nove informacije"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ove aplikacije su aktivne i pokrenute, čak i kada ih ne koristite. Ovim se poboljšava njihova funkcionalnost, ali može uticati i na vijek trajanja baterije."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ove aplikacije su aktivne i pokrenute, čak i kada ih ne koristite. Ovim se poboljšava njihova funkcionalnost, ali to može uticati i na vijek trajanja baterije."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zaustavi"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zaustavljeno"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gotovo"</string>

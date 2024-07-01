@@ -502,7 +502,7 @@
     <string name="stream_voice_call" msgid="7468348170702375660">"Chamada"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Toque"</string>
-    <string name="stream_music" msgid="2188224742361847580">"Suporte de dados"</string>
+    <string name="stream_music" msgid="2188224742361847580">"Multimédia"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarme"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notificação"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
@@ -804,7 +804,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps em execução em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Toque para obter detalhes acerca da utilização da bateria e dos dados"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Desativar os dados móveis?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Não terá acesso a dados ou à Internet através do operador <xliff:g id="CARRIER">%s</xliff:g>. A Internet estará disponível apenas por Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Não vai ter acesso aos dados nem à Internet através do operador <xliff:g id="CARRIER">%s</xliff:g>. A Internet vai estar disponível só por Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"o seu operador"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Mudar de novo para <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Os dados móveis não vão mudar automaticamente com base na disponibilidade"</string>

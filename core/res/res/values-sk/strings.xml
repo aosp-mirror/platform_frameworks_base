@@ -1989,7 +1989,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Pripnúť <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Uvoľniť"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Odopnúť <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Info o aplikácii"</string>
+    <string name="app_info" msgid="6113278084877079851">"Informácie o aplikácii"</string>
     <string name="negative_duration" msgid="1938335096972945232">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Spúšťa sa ukážka…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Resetuje sa zariadenie…"</string>

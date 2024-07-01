@@ -1284,7 +1284,7 @@
     <string name="volume_call" msgid="7625321655265747433">"Sauti ya simu inayoendelea"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Sauti ya simu inayoendelea ya Bluetooth"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Sauti ya kengele"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Sauti ya notisi"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Sauti ya arifa"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Kiwango"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Sauti ya Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Sauti ya toni mlio"</string>

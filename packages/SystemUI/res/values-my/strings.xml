@@ -99,7 +99,7 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"ဖန်သားပြင်ရိုက်ကူးစက်"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"စကရင်ရိုက်ကူးမှု အပြီးသတ်နေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ရိုက်သံဖမ်းခြင်း စတင်မလား။"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ရုပ်သံဖမ်းခြင်း စတင်မလား။"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"ရုပ်သံဖမ်းနေစဉ် Android သည် သင့်ဖန်သားပြင်တွင် မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"အက်ပ်တစ်ခုကို ရုပ်သံဖမ်းနေစဉ် Android သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ရုပ်သံ စဖမ်းရန်"</string>
@@ -642,7 +642,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"ကီးဘုတ်အပြင်အဆင် ပြောင်းခြင်း"</string>
     <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"စာသား ဖယ်ရှားရန်"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ဖြတ်လမ်းလင့်ခ်များ"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ဖြတ်လမ်းလင့်ခ်များ ရှာပါ"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ဖြတ်လမ်းများ ရှာရန်"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ဖြတ်လမ်းလင့်ခ် မတွေ့ပါ"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"စနစ်"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"စာရိုက်ခြင်း"</string>

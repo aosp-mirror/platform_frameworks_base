@@ -555,7 +555,7 @@
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"更改网络共享连接"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"允许应用更改绑定网络连接的状态。"</string>
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"查看WLAN连接"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"允许该应用查看WLAN网络的相关信息，例如是否启用了WLAN以及连接的WLAN设备的名称。"</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"允许该应用查看 WLAN 网络的相关信息，例如是否启用了 WLAN 以及连接的 WLAN 设备的名称。"</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"连接WLAN网络和断开连接"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"允许该应用与WLAN接入点建立和断开连接，以及更改WLAN网络的设备配置。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"允许接收WLAN多播"</string>

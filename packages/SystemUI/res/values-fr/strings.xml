@@ -1073,7 +1073,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Applis actives"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ces applis sont actives et s\'exécutent même lorsque vous ne les utilisez pas. Cela améliore leur fonctionnement, mais peut également affecter l\'autonomie de la batterie."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Arrêter"</string>
-    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Arrêtée"</string>
+    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Arrêté"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"OK"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Copié"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"De <xliff:g id="APPNAME">%1$s</xliff:g>"</string>

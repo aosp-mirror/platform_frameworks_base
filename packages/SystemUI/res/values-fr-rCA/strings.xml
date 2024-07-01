@@ -1070,8 +1070,8 @@
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Choisir l\'utilisateur"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# application est active}one{# application est active}many{# d\'applications sont actives}other{# applications sont actives}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nouvelle information"</string>
-    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Applications actives"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ces applications sont actives et s\'exécutent même lorsque vous ne les utilisez pas. Cela améliore leur fonctionnalité, mais peut également affecter l\'autonomie de la pile."</string>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Applis actives"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ces applis sont actives et s\'exécutent même lorsque vous ne les utilisez pas. Cela améliore leur fonctionnalité, mais peut également affecter l\'autonomie de la pile."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Arrêter"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Arrêtée"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"OK"</string>

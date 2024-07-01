@@ -1062,7 +1062,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-fi sal vir nou nie outomaties koppel nie"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Sien alles"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ontkoppel Ethernet om netwerke te wissel"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Om toestelervaring te verbeter, kan programme en dienste steeds enige tyd na wi‑fi-netwerke soek, selfs wanneer wi‑fi af is. Jy kan dit in Wi-fi-opsporinginstellings verander. "<annotation id="link">"Verander"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Om toestelervaring te verbeter, kan apps en dienste steeds enige tyd na wi‑fi-netwerke soek, selfs wanneer wi‑fi af is. Jy kan dit in Wi-fi-opsporinginstellings verander. "<annotation id="link">"Verander"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Skakel vliegtuigmodus af"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> wil die volgende teël by Kitsinstellings voeg"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Voeg teël by"</string>

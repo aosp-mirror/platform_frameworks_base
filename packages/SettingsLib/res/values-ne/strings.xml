@@ -116,7 +116,7 @@
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD अडियो"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"हियरिङ डिभाइसहरू"</string>
     <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE अडियो"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"श्रवण यन्त्रहरूमा जडान गरियो"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"हियरिङ डिभाइसमा कनेक्ट गरियो"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE अडियोमा कनेक्ट गरिएको छ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"मिडिया अडियोसँग जडित"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"फोन अडियोमा जडान गरियो"</string>
@@ -134,7 +134,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"फोन अडियोको लागि प्रयोग गर्नुहोस्"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"फाइल ट्रान्सफरका लागि प्रयोग गर्नुहोस्"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"इनपुटको लागि प्रयोग गर्नुहोस्"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"श्रवण यन्त्रहरूका लागि प्रयोग गर्नुहोस्"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"हियरिङ डिभासहरूका लागि प्रयोग गर्नुहोस्"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO मा प्रयोग गर्नुहोस्"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"कनेक्ट गर्नुहोस्"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"जोडी"</string>
@@ -603,7 +603,7 @@
     <string name="user_nickname" msgid="262624187455825083">"उपनाम"</string>
     <string name="user_add_user" msgid="7876449291500212468">"प्रयोगकर्ता कनेक्ट गर्नुहोस्"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि कनेक्ट गर्नुहोस्"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"गेस्ट मोडबाट बाहिर निस्कियोस्"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"अथिति हटाउनुहोस्"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"अतिथि सत्र रिसेट गर्नुहोस्"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"अतिथिका रूपमा ब्राउज गर्ने सेसन रिसेट गर्ने हो?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"यी अतिथि हटाउने हो?"</string>

@@ -315,7 +315,7 @@
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"中"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"高"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"要解除封鎖裝置麥克風嗎？"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"要解除封鎖裝置相機嗎？"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"解除封鎖裝置相機？"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"要將裝置的相機和麥克風解除封鎖嗎？"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"執行後，具備麥克風存取權的所有應用程式和服務，都將可使用麥克風。"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"執行後，具備相機存取權的所有應用程式和服務，都將可使用相機。"</string>
@@ -671,7 +671,7 @@
     <string name="input_switch_input_language_next" msgid="3394291576873633793">"切換輸入語言 (下一個語言)"</string>
     <string name="input_switch_input_language_previous" msgid="8823659252918609216">"切換輸入語言 (上一個語言)"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"存取表情符號"</string>
-    <string name="input_access_voice_typing" msgid="7291201476395326141">"存取語音輸入內容"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"使用語音輸入功能"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"應用程式"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"小幫手"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"瀏覽器 (預設為 Chrome)"</string>
@@ -804,7 +804,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"在背景執行的應用程式"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"輕觸即可查看電池和數據用量詳情"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"要關閉行動數據嗎？"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"你將無法透過「<xliff:g id="CARRIER">%s</xliff:g>」使用行動數據或網際網路。你只能透過 Wi-Fi 使用網際網路。"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"你將無法透過「<xliff:g id="CARRIER">%s</xliff:g>」使用行動數據或網際網路，只能利用 Wi-Fi 上網。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"你的電信業者"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"要切換回「<xliff:g id="CARRIER">%s</xliff:g>」嗎？"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"行動數據不會依據可用性自動切換"</string>
@@ -1071,7 +1071,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# 個應用程式正在運作}other{# 個應用程式正在運作}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新資訊"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"運作中的應用程式"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"這些應用程式會在沒有使用的情況下持續運作。應用程式的實用度會因此提升，但也可能影響電池續航力。"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"這些應用程式即使是在閒置狀態下，也會持續運作。應用程式的功能會因而提升，但也可能影響電池續航力。"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完成"</string>
