@@ -885,7 +885,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Mover para fora da borda e exibir"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Remover"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"alternar"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Controles do dispositivo"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Controles do disp."</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolha um app para adicionar controles"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# controle adicionado.}one{# controle adicionado.}many{# de controles adicionados.}other{# controles adicionados.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Removido"</string>
