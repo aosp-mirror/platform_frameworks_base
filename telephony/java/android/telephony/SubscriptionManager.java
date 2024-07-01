@@ -1127,7 +1127,7 @@ public class SubscriptionManager {
      * <P>Type: INTEGER (int)</P>
      * @hide
      */
-    public static final String IS_NTN = SimInfo.COLUMN_IS_NTN;
+    public static final String IS_ONLY_NTN = SimInfo.COLUMN_IS_ONLY_NTN;
 
     /**
      * TelephonyProvider column name to identify service capabilities.
@@ -1166,6 +1166,16 @@ public class SubscriptionManager {
      */
     public static final String SATELLITE_ENTITLEMENT_PLMNS =
             SimInfo.COLUMN_SATELLITE_ENTITLEMENT_PLMNS;
+
+    /**
+     * TelephonyProvider column name to indicate the satellite ESOS supported. The value of this
+     * column is set based on {@link CarrierConfigManager#KEY_SATELLITE_ESOS_SUPPORTED_BOOL}.
+     * By default, it's disabled.
+     * <P>Type: INTEGER (int)</P>
+     *
+     * @hide
+     */
+    public static final String SATELLITE_ESOS_SUPPORTED = SimInfo.COLUMN_SATELLITE_ESOS_SUPPORTED;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

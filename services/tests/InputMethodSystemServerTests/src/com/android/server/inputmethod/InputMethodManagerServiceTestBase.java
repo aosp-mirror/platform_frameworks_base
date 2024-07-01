@@ -189,6 +189,7 @@ public class InputMethodManagerServiceTestBase {
         // Injecting and mocked InputMethodBindingController and InputMethod.
         mMockInputMethodInvoker = IInputMethodInvoker.create(mMockInputMethod);
         mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mMockIInputManager);
+        when(mMockInputMethodBindingController.getUserId()).thenReturn(mCallingUserId);
         synchronized (ImfLock.class) {
             when(mMockInputMethodBindingController.getCurMethod())
                     .thenReturn(mMockInputMethodInvoker);
