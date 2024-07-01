@@ -103,6 +103,8 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> បានរកឃើញ​រូបថតអេក្រង់នេះ។"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> និងកម្មវិធីដែលបើក​ផ្សេងទៀតបានរកឃើញ​រូបថតអេក្រង់នេះ។"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"បញ្ចូលទៅក្នុងកំណត់ចំណាំ"</string>
+    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
+    <skip />
     <string name="screenrecord_title" msgid="4257171601439507792">"មុខងារថត​វីដេអូអេក្រង់"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"កំពុង​ដំណើរការ​ការថតអេក្រង់"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ការជូនដំណឹង​ដែល​កំពុង​ដំណើរការ​សម្រាប់​រយៈពេលប្រើ​ការថត​សកម្មភាព​អេក្រង់"</string>
@@ -132,6 +134,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"អ្នកនឹងឈប់ថត &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"កំពុងបង្ហាញអេក្រង់"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +142,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"អ្នកនឹងឈប់ចែករំលែក &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"កំពុង​បញ្ជូន​អេក្រង់"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +196,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"បានដោះសោដោយប្រើមុខ។ សូមចុច ដើម្បីបន្ត។"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"បានស្គាល់មុខ។ សូមចុច ដើម្បីបន្ត។"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"បានស្គាល់មុខ។ សូមចុចរូបដោះសោ ដើម្បីបន្ត។"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"បាន​ផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"បោះបង់ការផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"ជម្រើស​ច្រើន​ទៀត"</string>
@@ -472,6 +478,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"បញ្ចូលធាតុ​ក្រាហ្វិកច្រើនទៀត"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ចុច​ឱ្យ​យូរ ដើម្បីប្ដូរធាតុ​ក្រាហ្វិកតាមបំណង"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ប្ដូរ​ធាតុ​ក្រាហ្វិកតាម​បំណង"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"រូបកម្មវិធីសម្រាប់ធាតុ​ក្រាហ្វិកដែលបានបិទ"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"រូបតំណាងកម្មវិធីសម្រាប់ធាតុ​ក្រាហ្វិកកំពុងត្រូវបានដំឡើង"</string>
     <string name="edit_widget" msgid="9030848101135393954">"កែធាតុ​ក្រាហ្វិក"</string>
@@ -1349,7 +1357,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"កំពុងប្រើដោយ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"បានប្រើនាពេលថ្មីៗនេះដោយ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"ប្រព័ន្ធ"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"ការគ្រប់គ្រង​ប្រព័ន្ធ"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"កម្មវិធី​ប្រព័ន្ធ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ការដំណើរការបានច្រើន"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"កម្មវិធី​ថ្មីៗ"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"មុខងារ​បំបែកអេក្រង់"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ធាតុចូល"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ផ្លូវកាត់​កម្មវិធី"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ភាពងាយស្រួល"</string>

@@ -103,6 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g>, ఈ స్క్రీన్‌షాట్‌ను గుర్తించింది."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g>, ఇతర ఓపెన్ యాప్‌లు ఈ స్క్రీన్‌షాట్‌ను గుర్తించాయి."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"గమనికకు జోడించండి"</string>
+    <string name="backlinks_include_link" msgid="4562093591148248158">"లింక్‌ను చేర్చండి"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"స్క్రీన్ రికార్డర్"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"స్క్రీన్ రికార్డింగ్ అవుతోంది"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"స్క్రీన్ రికార్డ్ సెషన్ కోసం ఆన్‌గోయింగ్ నోటిఫికేషన్"</string>
@@ -132,6 +133,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"మీరు &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను రికార్డ్ చేయడం ఆపివేస్తారు"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"స్క్రీన్‌ను షేర్ చేస్తోంది"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +141,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"మీరు &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను షేర్ చేయడం ఆపివేస్తారు"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"స్క్రీన్‌ను ప్రసారం చేస్తోంది"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది. కొనసాగించడానికి నొక్కండి."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ముఖం గుర్తించబడింది. కొనసాగించడానికి నొక్కండి."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ముఖం గుర్తించబడింది. కొనసాగడానికి అన్‌లాక్ చిహ్నం నొక్కండి."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"ముఖం ద్వారా అన్‌లాక్ అయింది. కొనసాగడానికి ట్యాప్ చేయండి."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ప్రామాణీకరించబడింది"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ప్రామాణీకరణను రద్దు చేయండి"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"మరిన్ని ఆప్షన్‌లు"</string>
@@ -472,6 +476,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"మరిన్ని విడ్జెట్‌లను జోడించండి"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"విడ్జెట్‌లను అనుకూలీకరించడానికి, నొక్కి, ఉంచండి"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"విడ్జెట్‌లను అనుకూలంగా మార్చండి"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"డిజేబుల్ చేయబడిన విడ్జెట్ కోసం యాప్ చిహ్నం"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"ఇన్‌స్టాల్ చేస్తున్న విడ్జెట్ కోసం యాప్ చిహ్నం"</string>
     <string name="edit_widget" msgid="9030848101135393954">"విడ్జెట్‌ను ఎడిట్ చేయండి"</string>
@@ -1349,7 +1355,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ద్వారా వినియోగంలో ఉంది"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ద్వారా ఇటీవల ఉపయోగించబడింది"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"సిస్టమ్"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"సిస్టమ్ కంట్రోల్స్"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"సిస్టమ్ యాప్‌లు"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"మల్టీ-టాస్కింగ్"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"ఇటీవలి యాప్‌లు"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"స్ప్లిట్ స్క్రీన్"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ఇన్‌పుట్"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"యాప్ షార్ట్‌కట్‌లు"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"యాక్సెసిబిలిటీ"</string>
