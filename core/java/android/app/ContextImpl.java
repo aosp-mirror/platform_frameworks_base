@@ -2303,19 +2303,26 @@ class ContextImpl extends Context {
                 && PermissionManager.DEVICE_AWARE_PERMISSIONS.contains(permission)) {
             VirtualDeviceManager virtualDeviceManager =
                     getSystemService(VirtualDeviceManager.class);
-            VirtualDevice virtualDevice = virtualDeviceManager.getVirtualDevice(deviceId);
-            if (virtualDevice != null) {
-                if ((Objects.equals(permission, Manifest.permission.RECORD_AUDIO)
-                                && !virtualDevice.hasCustomAudioInputSupport())
-                        || (Objects.equals(permission, Manifest.permission.CAMERA)
-                                && !virtualDevice.hasCustomCameraSupport())) {
-                    deviceId = Context.DEVICE_ID_DEFAULT;
-                }
-            } else {
+            if (virtualDeviceManager == null) {
                 Slog.e(
                         TAG,
-                        "virtualDevice is not found when device id is not default. deviceId = "
+                        "VDM is not enabled when device id is not default. deviceId = "
                                 + deviceId);
+            } else {
+                VirtualDevice virtualDevice = virtualDeviceManager.getVirtualDevice(deviceId);
+                if (virtualDevice != null) {
+                    if ((Objects.equals(permission, Manifest.permission.RECORD_AUDIO)
+                                    && !virtualDevice.hasCustomAudioInputSupport())
+                            || (Objects.equals(permission, Manifest.permission.CAMERA)
+                                    && !virtualDevice.hasCustomCameraSupport())) {
+                        deviceId = Context.DEVICE_ID_DEFAULT;
+                    }
+                } else {
+                    Slog.e(
+                            TAG,
+                            "virtualDevice is not found when device id is not default. deviceId = "
+                                    + deviceId);
+                }
             }
         }
 
@@ -3169,6 +3176,11 @@ class ContextImpl extends Context {
     public void updateDeviceId(int updatedDeviceId) {
         if (updatedDeviceId != Context.DEVICE_ID_DEFAULT) {
             VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
+            if (vdm == null) {
+                throw new IllegalArgumentException(
+                        "VDM is not enabled when updating to non-default device id: "
+                                + updatedDeviceId);
+            }
             if (!vdm.isValidVirtualDeviceId(updatedDeviceId)) {
                 throw new IllegalArgumentException(
                         "Not a valid ID of the default device or any virtual device: "

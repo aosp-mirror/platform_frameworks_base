@@ -48,32 +48,28 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
-import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
-import com.android.systemui.qs.footerActionsController
-import com.android.systemui.qs.footerActionsViewModelFactory
-import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
-import com.android.systemui.scene.domain.interactor.sceneContainerStartable
+import com.android.systemui.qs.ui.adapter.fakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
+import com.android.systemui.scene.domain.startable.sceneContainerStartable
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
-import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModel
+import com.android.systemui.shade.ui.viewmodel.shadeSceneViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
 import com.android.systemui.testKosmos
-import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -91,7 +87,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -152,8 +147,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = deviceEntryInteractor,
             communalInteractor = communalInteractor,
-            longPress =
-                KeyguardLongPressViewModel(
+            touchHandling =
+                KeyguardTouchHandlingViewModel(
                     interactor = mock(),
                 ),
             notifications = kosmos.notificationsPlaceholderViewModel,
@@ -167,9 +162,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private var bouncerSceneJob: Job? = null
 
-    private val qsFlexiglassAdapter = FakeQSSceneAdapter(inflateDelegate = { mock() })
-
-    @Mock private lateinit var mediaDataManager: MediaDataManager
+    private val qsFlexiglassAdapter = kosmos.fakeQSSceneAdapter
 
     private lateinit var emergencyAffordanceManager: EmergencyAffordanceManager
     private lateinit var telecomManager: TelecomManager
@@ -202,21 +195,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         bouncerActionButtonInteractor = kosmos.bouncerActionButtonInteractor
         bouncerViewModel = kosmos.bouncerViewModel
 
-        shadeSceneViewModel =
-            ShadeSceneViewModel(
-                applicationScope = testScope.backgroundScope,
-                deviceEntryInteractor = deviceEntryInteractor,
-                shadeHeaderViewModel = kosmos.shadeHeaderViewModel,
-                qsSceneAdapter = qsFlexiglassAdapter,
-                notifications = kosmos.notificationsPlaceholderViewModel,
-                brightnessMirrorViewModel = kosmos.brightnessMirrorViewModel,
-                mediaCarouselInteractor = kosmos.mediaCarouselInteractor,
-                shadeInteractor = kosmos.shadeInteractor,
-                footerActionsController = kosmos.footerActionsController,
-                footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
-                sceneInteractor = sceneInteractor,
-                unfoldTransitionInteractor = kosmos.unfoldTransitionInteractor,
-            )
+        shadeSceneViewModel = kosmos.shadeSceneViewModel
 
         val startable = kosmos.sceneContainerStartable
         startable.start()
@@ -280,6 +259,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
             val destinationScenes by collectLastValue(shadeSceneViewModel.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
             assertCurrentScene(Scenes.Lockscreen)
 
@@ -288,9 +268,10 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             assertCurrentScene(Scenes.Shade)
 
             val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
-            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(upDestinationSceneKey).isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
             emulateUserDrivenTransition(
-                to = upDestinationSceneKey,
+                to = homeScene,
             )
         }
 
@@ -299,6 +280,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val destinationScenes by collectLastValue(shadeSceneViewModel.destinationScenes)
             val canSwipeToEnter by collectLastValue(deviceEntryInteractor.canSwipeToEnter)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
 
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
 
@@ -314,9 +296,10 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             assertCurrentScene(Scenes.Shade)
 
             val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
-            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
+            assertThat(upDestinationSceneKey).isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
             emulateUserDrivenTransition(
-                to = upDestinationSceneKey,
+                to = homeScene,
             )
         }
 

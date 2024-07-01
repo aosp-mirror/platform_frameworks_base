@@ -412,6 +412,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"გასამართი აპებისთვის GPU-ს შეცდომების გამართვის შრეების გაშვების დაშვება"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ჟურნალებში მომწოდებელთა დაწვრილებითი აღრიცხვის ჩართვა"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"გამყიდველის მოწყობილობისთვის სპეციფიკური დამატებითი ჟურნალები შევიდეს სისტემის ხარვეზის ანგარიშებში, რომლებიც შეიძლება შეიცავდეს პირად ინფორმაციას, ხარჯავდეს ბატარეის მეტ მუხტს და/ან იყენებდეს მეტ მეხსიერებას."</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ფანჯარა: მასშტაბი"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"გადასვლის მასშტაბი"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ანიმაციების ხანგრძლივობის მასშტაბი"</string>
@@ -561,6 +573,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"მაღვიძარები და შეხსენებები"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ნებას რთავს ამ აპს, დააყენოს მაღვიძარები და დაგეგმოს დროზე დამოკიდებული მოქმედებები. ეს საშუალებას აძლევს აპს, იმუშაოს ფონურად, რამაც შეიძლება ბატარეის ხარჯი გაზარდოს.\n\nთუ ეს ნებართვა გამორთულია, ამ აპით დაგეგმილი მაღვიძარები და დროზე დამოკიდებული მოვლენები არ იმუშავებს."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"განრიგი, მაღვიძარა, შეხსენება, საათი"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"არ შემაწუხოთ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ჩართვა"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"„არ შემაწუხოთ“ რეჟიმის ჩართვა"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"არასოდეს"</string>
@@ -573,6 +586,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"ხანგრძლივობა"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ყოველთვის მკითხეთ"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"გამორთვამდე"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(უსახელო)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ახლახან"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ეს ტელეფონი"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ამ ტაბლეტზე"</string>

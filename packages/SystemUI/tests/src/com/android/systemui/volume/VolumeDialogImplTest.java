@@ -35,6 +35,7 @@ import static org.junit.Assume.assumeNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -86,7 +87,9 @@ import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.volume.domain.interactor.VolumeDialogInteractor;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
+import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
 import dagger.Lazy;
@@ -118,7 +121,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     View mDrawerNormal;
     ViewGroup mDialogRowsView;
     CaptionsToggleImageButton mODICaptionsIcon;
-
     private TestableLooper mTestableLooper;
     private ConfigurationController mConfigurationController;
     private int mOriginalOrientation;
@@ -148,6 +150,10 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     private VolumePanelNavigationInteractor mVolumePanelNavigationInteractor;
     @Mock
     private VolumeNavigator mVolumeNavigator;
+    @Mock
+    private VolumePanelFlag mVolumePanelFlag;
+    @Mock
+    private VolumeDialogInteractor mVolumeDialogInteractor;
 
     private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
             new CsdWarningDialog.Factory() {
@@ -208,10 +214,12 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mCsdWarningDialogFactory,
                 mPostureController,
                 mTestableLooper.getLooper(),
+                mVolumePanelFlag,
                 mDumpManager,
                 mLazySecureSettings,
                 mVibratorHelper,
-                new FakeSystemClock());
+                new FakeSystemClock(),
+                mVolumeDialogInteractor);
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
@@ -769,6 +777,15 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         boolean foundDnDIcon = findDndIconAmongVolumeRows();
         assertFalse(foundDnDIcon);
+    }
+
+    @Test
+    public void testInteractor_onShow() {
+        mDialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processAllMessages();
+
+        verify(mVolumeDialogInteractor, atLeastOnce()).onDialogShown();
+        verify(mVolumeDialogInteractor, atLeastOnce()).onDialogDismissed(); // dismiss by timeout
     }
 
     /**

@@ -722,6 +722,9 @@
     <!-- label for screenshot item in power menu [CHAR LIMIT=24]-->
     <string name="global_action_screenshot">Screenshot</string>
 
+    <!-- description for mandatory biometrics prompt -->
+    <string name="identity_check_biometric_prompt_description">This is needed since Identity Check is on</string>
+
     <!-- Take bug report menu title [CHAR LIMIT=30] -->
     <string name="bugreport_title">Bug report</string>
     <!-- Message in bugreport dialog describing what it does [CHAR LIMIT=NONE] -->
@@ -788,11 +791,7 @@
     <!-- label for item that locks the phone and enforces that it can't be unlocked without strong authentication. [CHAR LIMIT=24] -->
     <string name="global_action_lockdown">Lockdown</string>
 
-    <!-- Text to use when the number in a notification info is too large
-         (greater than status_bar_notification_info_maxnum, defined in
-         values/config.xml) and must be truncated. May need to be localized
-         for most appropriate textual indicator of "more than X".
-         [CHAR LIMIT=4] -->
+    <!-- @deprecated No longer used. -->
     <string name="status_bar_notification_info_overflow">999+</string>
 
     <!-- The divider symbol between different parts of the notification header. not translatable [CHAR LIMIT=1] -->
@@ -3837,6 +3836,11 @@
     <!-- Message of notification shown when Test Harness Mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="test_harness_mode_notification_message">Perform a factory reset to disable Test Harness Mode.</string>
 
+    <!-- Title of notification shown when device is in the wrong Headless System User Mode configuration. [CHAR LIMIT=NONE] -->
+    <string name="wrong_hsum_configuration_notification_title">Wrong HSUM build configuration</string>
+    <!-- Message of notification shown when device is in the wrong Headless System User Mode configuration. [CHAR LIMIT=NONE] -->
+    <string name="wrong_hsum_configuration_notification_message">The Headless System User Mode state of this device differs from its build configuration. Please factory reset the device.</string>
+
     <!-- Title of notification shown when serial console is enabled. [CHAR LIMIT=NONE] -->
     <string name="console_running_notification_title">Serial console enabled</string>
     <!-- Message of notification shown when serial console is enabled. [CHAR LIMIT=NONE] -->
@@ -4844,19 +4848,19 @@
     <!-- Text spoken when accessibility shortcut warning dialog is shown. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_spoken_feedback">Release the volume keys. To turn on <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g>, press and hold both volume keys again for 3 seconds.</string>
 
-    <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
-    <string name="accessibility_button_prompt_text">Choose a feature to use when you tap the accessibility button:</string>
+    <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar or in gesture navigation. [CHAR LIMIT=none]-->
+    <string name="accessibility_button_prompt_text">Choose a feature</string>
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_prompt_text">Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):</string>
+    <string name="accessibility_gesture_prompt_text">Choose a feature</string>
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_prompt_text">Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):</string>
+    <string name="accessibility_gesture_3finger_prompt_text">Choose a feature</string>
 
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
-    <string name="accessibility_button_instructional_text">To switch between features, touch &amp; hold the accessibility button.</string>
+    <string name="accessibility_button_instructional_text">The feature will open next time you tap the accessibility button</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_instructional_text">To switch between features, swipe up with two fingers and hold.</string>
+    <string name="accessibility_gesture_instructional_text">The feature will open next time you use this shortcut. Swipe up with 2 fingers from the bottom of your screen and release quickly.</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_instructional_text">To switch between features, swipe up with three fingers and hold.</string>
+    <string name="accessibility_gesture_3finger_instructional_text">The feature will open next time you use this shortcut. Swipe up with 3 fingers from the bottom of your screen and release quickly.</string>
 
     <!-- Text used to describe system navigation features, shown within a UI allowing a user to assign system magnification features to the Accessibility button in the navigation bar. -->
     <string name="accessibility_magnification_chooser_text">Magnification</string>
@@ -5125,7 +5129,7 @@
     <string name="immersive_cling_title">Viewing full screen</string>
 
     <!-- Cling help message description when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
-    <string name="immersive_cling_description">To exit, swipe down from the top.</string>
+    <string name="immersive_cling_description">To exit, swipe down from the top of your screen</string>
 
     <!-- Cling help message confirmation button when hiding the navigation bar entering immersive mode [CHAR LIMIT=30] -->
     <string name="immersive_cling_positive">Got it</string>
@@ -5430,6 +5434,10 @@
     <string name="call_notification_screening_text">Screening an incoming call</string>
 
     <string name="default_notification_channel_label">Uncategorized</string>
+    <string name="promotional_notification_channel_label">Promotions</string>
+    <string name="social_notification_channel_label">Social</string>
+    <string name="news_notification_channel_label">News</string>
+    <string name="recs_notification_channel_label">Recommendations</string>
 
     <string name="importance_from_user">You set the importance of these notifications.</string>
     <string name="importance_from_person">This is important because of the people involved.</string>
@@ -5981,6 +5989,10 @@
     <string name="accessibility_system_action_hardware_a11y_shortcut_label">Accessibility Shortcut</string>
     <!-- Label for dismissing the notification shade [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dismiss_notification_shade">Dismiss Notification Shade</string>
+     <!-- Label for menu action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_menu_label">Menu</string>
+     <!-- Label for media play/pause action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_media_play_pause_label">Media Play/Pause</string>
     <!-- Label for Dpad up action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dpad_up_label">Dpad Up</string>
     <!-- Label for Dpad down action [CHAR LIMIT=NONE] -->
@@ -6473,6 +6485,9 @@ ul.</string>
     <!-- Accessibility label for clone profile user type [CHAR LIMIT=30] -->
     <string name="accessibility_label_communal_profile">Communal</string>
 
+    <!-- Label for private space biometric prompt logo description [CHAR LIMIT=30] -->
+    <string name="private_space_biometric_prompt_title">Private space</string>
+
     <!-- Notification message used when a notification's normal message contains sensitive information [CHAR_LIMIT=NOTIF_BODY] -->
     <string name="redacted_notification_message">Sensitive notification content hidden</string>
     <!-- Notification action title used instead of a notification's normal title sensitive [CHAR_LIMIT=NOTIF_BODY] -->
@@ -6511,4 +6526,15 @@ ul.</string>
     <string name="biometric_dangling_notification_action_set_up">Set up</string>
     <!-- Biometric dangling notification "Not now" action button -->
     <string name="biometric_dangling_notification_action_not_now">Not now</string>
+
+
+    <!-- Background user sound notification related messages -->
+    <!-- Notification title when sound comes from an alarm or timer on background user [CHAR LIMIT=NOTIF_TITLE]-->
+    <string name="bg_user_sound_notification_title_alarm">Alarm for <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
+    <!-- Notification action button to prompt user switch to the background user [CHAR LIMIT=NONE] -->
+    <string name="bg_user_sound_notification_button_switch_user">Switch user</string>
+    <!-- Notification action button to mute the sound from the background user [CHAR LIMIT=NONE] -->
+    <string name="bg_user_sound_notification_button_mute">Mute</string>
+    <!-- Notification text to mute the sound from the background user [CHAR LIMIT=NOTIF_BODY]-->
+    <string name="bg_user_sound_notification_message">Tap to mute sound</string>
 </resources>

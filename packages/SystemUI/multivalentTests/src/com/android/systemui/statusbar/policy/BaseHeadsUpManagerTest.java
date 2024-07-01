@@ -627,7 +627,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         hum.onEntryAdded(entryToPin);
 
         assertEquals(2, mUiEventLoggerFake.numLogs());
-        assertEquals(AvalancheController.ThrottleEvent.SHOWN.getId(),
+        assertEquals(AvalancheController.ThrottleEvent.AVALANCHE_THROTTLING_HUN_SHOWN.getId(),
                 mUiEventLoggerFake.eventId(0));
         assertEquals(BaseHeadsUpManager.NotificationPeekEvent.NOTIFICATION_PEEK.getId(),
                 mUiEventLoggerFake.eventId(1));

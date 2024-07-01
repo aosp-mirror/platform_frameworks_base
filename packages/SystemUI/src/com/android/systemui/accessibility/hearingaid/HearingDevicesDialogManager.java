@@ -16,18 +16,23 @@
 
 package com.android.systemui.accessibility.hearingaid;
 
-import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
+import androidx.concurrent.futures.CallbackToFutureAdapter;
 
 import com.android.internal.jank.InteractionJankMonitor;
-import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+
+import com.google.common.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -43,16 +48,22 @@ public class HearingDevicesDialogManager {
     private SystemUIDialog mDialog;
     private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final HearingDevicesDialogDelegate.Factory mDialogFactory;
-    private final LocalBluetoothManager mLocalBluetoothManager;
+    private final HearingDevicesChecker mDevicesChecker;
+    private final Executor mBackgroundExecutor;
+    private final Executor mMainExecutor;
 
     @Inject
     public HearingDevicesDialogManager(
             DialogTransitionAnimator dialogTransitionAnimator,
             HearingDevicesDialogDelegate.Factory dialogFactory,
-            @Nullable LocalBluetoothManager localBluetoothManager) {
+            HearingDevicesChecker devicesChecker,
+            @Background Executor backgroundExecutor,
+            @Main Executor mainExecutor) {
         mDialogTransitionAnimator = dialogTransitionAnimator;
         mDialogFactory = dialogFactory;
-        mLocalBluetoothManager = localBluetoothManager;
+        mDevicesChecker = devicesChecker;
+        mBackgroundExecutor = backgroundExecutor;
+        mMainExecutor = mainExecutor;
     }
 
     /**
@@ -68,36 +79,41 @@ public class HearingDevicesDialogManager {
             destroyDialog();
         }
 
-        mDialog = mDialogFactory.create(!isAnyBondedHearingDevice()).createDialog();
+        final ListenableFuture<Boolean> pairedHearingDeviceCheckTask =
+                CallbackToFutureAdapter.getFuture(completer -> {
+                    mBackgroundExecutor.execute(
+                            () -> {
+                                completer.set(mDevicesChecker.isAnyPairedHearingDevice());
+                            });
+                    // This value is used only for debug purposes: it will be used in toString()
+                    // of returned future or error cases.
+                    return "isAnyPairedHearingDevice check";
+                });
+        pairedHearingDeviceCheckTask.addListener(() -> {
+            try {
+                mDialog = mDialogFactory.create(!pairedHearingDeviceCheckTask.get()).createDialog();
 
-        if (expandable != null) {
-            DialogTransitionAnimator.Controller controller = expandable.dialogTransitionController(
-                    new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                            INTERACTION_JANK_TAG));
-            if (controller != null) {
-                mDialogTransitionAnimator.show(mDialog,
-                        controller, /* animateBackgroundBoundsChange= */ true);
-                return;
+                if (expandable != null) {
+                    DialogTransitionAnimator.Controller controller =
+                            expandable.dialogTransitionController(
+                                    new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                            INTERACTION_JANK_TAG));
+                    if (controller != null) {
+                        mDialogTransitionAnimator.show(mDialog,
+                                controller, /* animateBackgroundBoundsChange= */ true);
+                        return;
+                    }
+                }
+                mDialog.show();
+
+            } catch (InterruptedException | ExecutionException e) {
+                Log.e(TAG, "Exception occurs while running pairedHearingDeviceCheckTask", e);
             }
-        }
-        mDialog.show();
+        }, mMainExecutor);
     }
 
     private void destroyDialog() {
         mDialog.dismiss();
         mDialog = null;
-    }
-
-    private boolean isAnyBondedHearingDevice() {
-        if (mLocalBluetoothManager == null) {
-            return false;
-        }
-        if (!mLocalBluetoothManager.getBluetoothAdapter().isEnabled()) {
-            return false;
-        }
-
-        return mLocalBluetoothManager.getCachedDeviceManager().getCachedDevicesCopy().stream()
-                .anyMatch(device -> device.isHearingAidDevice()
-                        && device.getBondState() != BluetoothDevice.BOND_NONE);
     }
 }

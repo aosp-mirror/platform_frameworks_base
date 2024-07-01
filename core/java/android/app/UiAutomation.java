@@ -1647,10 +1647,13 @@ public final class UiAutomation {
 
             // Calling out without a lock held.
             mUiAutomationConnection.executeShellCommand(command, sink, null);
-        } catch (IOException ioe) {
-            Log.e(LOG_TAG, "Error executing shell command!", ioe);
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing shell command!", re);
+        } catch (IOException | RemoteException e) {
+            Log.e(LOG_TAG, "Error executing shell command!", e);
+        } catch (IllegalArgumentException | NullPointerException | SecurityException e) {
+            // An exception of these types is propagated from the server.
+            // Rethrow it to keep the old behavior. To avoid FD leak, close the source.
+            IoUtils.closeQuietly(source);
+            throw e;
         } finally {
             IoUtils.closeQuietly(sink);
         }
@@ -1734,10 +1737,15 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.executeShellCommandWithStderr(
                     command, sink_read, source_write, stderr_sink_read);
-        } catch (IOException ioe) {
-            Log.e(LOG_TAG, "Error executing shell command!", ioe);
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing shell command!", re);
+        } catch (IOException | RemoteException e) {
+            Log.e(LOG_TAG, "Error executing shell command!", e);
+        } catch (IllegalArgumentException | SecurityException | NullPointerException e) {
+            // An exception of these types is propagated from the server.
+            // Rethrow it to keep the old behavior. To avoid FD leaks, close the sources.
+            IoUtils.closeQuietly(sink_write);
+            IoUtils.closeQuietly(source_read);
+            IoUtils.closeQuietly(stderr_source_read);
+            throw e;
         } finally {
             IoUtils.closeQuietly(sink_read);
             IoUtils.closeQuietly(source_write);
@@ -1966,11 +1974,6 @@ public final class UiAutomation {
                 @Override
                 public boolean onKeyEvent(KeyEvent event) {
                     return false;
-                }
-
-                @Override
-                public void onMagnificationSystemUIConnectionChanged(boolean connected) {
-                    /* do nothing */
                 }
 
                 @Override

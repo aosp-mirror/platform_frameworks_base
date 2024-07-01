@@ -19,16 +19,20 @@ package com.android.systemui.statusbar.pipeline.mobile.data.model
 import android.os.PersistableBundle
 import android.telephony.CarrierConfigManager
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
+import android.telephony.CarrierConfigManager.KEY_SHOW_5G_SLICE_ICON_BOOL
 import android.telephony.CarrierConfigManager.KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class SystemUiCarrierConfigTest : SysuiTestCase() {
 
     lateinit var underTest: SystemUiCarrierConfig
@@ -53,16 +57,19 @@ class SystemUiCarrierConfigTest : SysuiTestCase() {
     fun processNewConfig_updatesAllFlows() {
         assertThat(underTest.shouldInflateSignalStrength.value).isFalse()
         assertThat(underTest.showOperatorNameInStatusBar.value).isFalse()
+        assertThat(underTest.allowNetworkSliceIndicator.value).isTrue()
 
         underTest.processNewCarrierConfig(
             configWithOverrides(
                 KEY_INFLATE_SIGNAL_STRENGTH_BOOL to true,
                 KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL to true,
+                KEY_SHOW_5G_SLICE_ICON_BOOL to false,
             )
         )
 
         assertThat(underTest.shouldInflateSignalStrength.value).isTrue()
         assertThat(underTest.showOperatorNameInStatusBar.value).isTrue()
+        assertThat(underTest.allowNetworkSliceIndicator.value).isFalse()
     }
 
     @Test
@@ -79,12 +86,14 @@ class SystemUiCarrierConfigTest : SysuiTestCase() {
                 configWithOverrides(
                     KEY_INFLATE_SIGNAL_STRENGTH_BOOL to true,
                     KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL to true,
+                    KEY_SHOW_5G_SLICE_ICON_BOOL to true,
                 )
             )
 
         assertThat(underTest.isUsingDefault).isTrue()
         assertThat(underTest.shouldInflateSignalStrength.value).isTrue()
         assertThat(underTest.showOperatorNameInStatusBar.value).isTrue()
+        assertThat(underTest.allowNetworkSliceIndicator.value).isTrue()
 
         // Process a new config with no keys
         underTest.processNewCarrierConfig(PersistableBundle())
@@ -92,6 +101,7 @@ class SystemUiCarrierConfigTest : SysuiTestCase() {
         assertThat(underTest.isUsingDefault).isFalse()
         assertThat(underTest.shouldInflateSignalStrength.value).isFalse()
         assertThat(underTest.showOperatorNameInStatusBar.value).isFalse()
+        assertThat(underTest.allowNetworkSliceIndicator.value).isFalse()
     }
 
     companion object {
@@ -105,6 +115,7 @@ class SystemUiCarrierConfigTest : SysuiTestCase() {
             PersistableBundle().also {
                 it.putBoolean(CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL, false)
                 it.putBoolean(CarrierConfigManager.KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL, false)
+                it.putBoolean(CarrierConfigManager.KEY_SHOW_5G_SLICE_ICON_BOOL, true)
             }
 
         /** Override the default config with the given (key, value) pair */

@@ -72,7 +72,7 @@ constructor(
         val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
 
         LockscreenLongPress(
-            viewModel = viewModel.longPress,
+            viewModel = viewModel.touchHandling,
             modifier = modifier,
         ) { onSettingsMenuPlaced ->
             Layout(

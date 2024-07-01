@@ -24,6 +24,7 @@ import static android.util.RotationUtils.rotateBounds;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -200,9 +201,6 @@ public class PipTransition extends PipTransitionController {
             animator.cancel();
         }
         mExitTransition = mTransitions.startTransition(type, out, this);
-        if (mPipOrganizer.getOutPipWindowingMode() == WINDOWING_MODE_UNDEFINED) {
-            mHomeTransitionObserver.notifyHomeVisibilityChanged(false /* isVisible */);
-        }
     }
 
     @Override
@@ -303,6 +301,10 @@ public class PipTransition extends PipTransitionController {
                     finishTransaction);
         }
 
+        if (isCurrentPipActivityClosed(info)) {
+            mPipBoundsState.setLastPipComponentName(null /* componentName */);
+        }
+
         return false;
     }
 
@@ -324,6 +326,21 @@ public class PipTransition extends PipTransitionController {
                 startT, finishT, finishCallback);
         return true;
     }
+
+    private boolean isCurrentPipActivityClosed(TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            TransitionInfo.Change change = info.getChanges().get(i);
+            boolean isTaskChange = change.getTaskInfo() != null;
+            boolean hasComponentNameOfPip = change.getActivityComponent() != null
+                    && change.getActivityComponent().equals(
+                            mPipBoundsState.getLastPipComponentName());
+            if (!isTaskChange && change.getMode() == TRANSIT_CLOSE && hasComponentNameOfPip) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
@@ -658,6 +675,9 @@ public class PipTransition extends PipTransitionController {
         if (mPipOrganizer.mPipOverlay != null) {
             startTransaction.remove(mPipOrganizer.mPipOverlay);
             mPipOrganizer.clearContentOverlay();
+        }
+        if (mPipOrganizer.getOutPipWindowingMode() == WINDOWING_MODE_UNDEFINED) {
+            mHomeTransitionObserver.notifyHomeVisibilityChanged(false /* isVisible */);
         }
         if (pipChange == null) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -1004,8 +1024,11 @@ public class PipTransition extends PipTransitionController {
         final Rect currentBounds = pipChange.getStartAbsBounds();
 
         int rotationDelta = deltaRotation(startRotation, endRotation);
-        Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
-                taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
+        Rect sourceHintRect = mPipOrganizer.takeSwipeSourceRectHint();
+        if (sourceHintRect == null) {
+            sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
+                    taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
+        }
         if (rotationDelta != Surface.ROTATION_0
                 && endRotation != mPipDisplayLayoutState.getRotation()) {
             // Computes the destination bounds in new rotation.
@@ -1080,6 +1103,8 @@ public class PipTransition extends PipTransitionController {
             mSurfaceTransactionHelper
                     .crop(finishTransaction, leash, destinationBounds)
                     .round(finishTransaction, leash, true /* applyCornerRadius */);
+            // Always reset to bounds animation type afterwards.
+            setEnterAnimationType(ANIM_TYPE_BOUNDS);
         } else {
             throw new RuntimeException("Unrecognized animation type: " + enterAnimationType);
         }

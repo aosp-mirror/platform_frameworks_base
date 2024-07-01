@@ -188,7 +188,7 @@
   </string-array>
   <string-array name="tile_states_hearing_devices">
     <item msgid="1235334096484287173">"不可用"</item>
-    <item msgid="3079622119444911877">"关闭"</item>
+    <item msgid="3079622119444911877">"已关闭"</item>
     <item msgid="3028994095749238254">"开启"</item>
   </string-array>
 </resources>

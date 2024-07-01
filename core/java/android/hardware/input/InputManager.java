@@ -1025,8 +1025,18 @@ public final class InputManager {
     /**
      * Monitor input on the specified display for gestures.
      *
+     * NOTE: New usages of Gesture Monitors are strongly discouraged. Gesture Monitors are
+     * deprecated, in favor of spy windows (see {@link LayoutParams#INPUT_FEATURE_SPY}).
+     * The spy window should be configured specifically to receive the desired events,
+     * unlike the gesture monitor which receives all events on the display.
+     *
      * @hide
+     * @deprecated
+     * @see LayoutParams#INPUT_FEATURE_SPY
+     * @see android.os.InputConfig#SPY
+     * @see #pilferPointers(IBinder)
      */
+    @Deprecated
     public InputMonitor monitorGestureInput(String name, int displayId) {
         return mGlobal.monitorGestureInput(name, displayId);
     }

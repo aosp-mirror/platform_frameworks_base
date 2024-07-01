@@ -17,10 +17,10 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.res.R
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
-import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTouchHandlingInteractor
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.Flow
 class KeyguardSettingsMenuViewModel
 @Inject
 constructor(
-    private val interactor: KeyguardLongPressInteractor,
+    private val interactor: KeyguardTouchHandlingInteractor,
 ) {
     val isVisible: Flow<Boolean> = interactor.isMenuVisible
     val shouldOpenSettings: Flow<Boolean> = interactor.shouldOpenSettings

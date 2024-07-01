@@ -126,7 +126,7 @@ flag {
     description: "Talkback focus doesn't move to the 'If you change your Google Account picture…' after swiping next to move the focus from 'Choose a picture'"
     bug: "330835921"
     metadata {
-    	purpose: PURPOSE_BUGFIX
+        purpose: PURPOSE_BUGFIX
   }
 }
 
@@ -136,7 +136,7 @@ flag {
     description: "Talkback doesn't announce 'selected' after double tapping the button in the picture list in 'Choose a picture' page."
     bug: "330840549"
     metadata {
-    	purpose: PURPOSE_BUGFIX
+        purpose: PURPOSE_BUGFIX
   }
 }
 
@@ -146,9 +146,20 @@ flag {
     description: "Fix potential unexpected behavior due to concurrent file writing"
     bug: "339351031"
     metadata {
-    	purpose: PURPOSE_BUGFIX
+        purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "cache_user_serial_number"
+    namespace: "multiuser"
+    description: "Optimise user serial number retrieval"
+    bug: "340018451"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
 
 # This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
 flag {
@@ -266,4 +277,14 @@ flag {
     metadata {
       purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+  name: "use_private_space_icon_in_biometric_prompt"
+  namespace: "profile_experiences"
+  description: "Update the biometric prompt from generic Settings icon to private space icon"
+  bug: "333528540"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

@@ -41,7 +41,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -64,7 +63,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.view.IWindow;
 import android.view.IWindowId;
@@ -81,7 +79,6 @@ import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 import android.view.WindowRelayoutResult;
-import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
 
@@ -290,37 +287,12 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         return res;
     }
 
-    /** @deprecated */
-    @Deprecated
-    @Override
-    public int relayoutLegacy(IWindow window, WindowManager.LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
-            int lastSyncSeqId, ClientWindowFrames outFrames,
-            MergedConfiguration mergedConfiguration, SurfaceControl outSurfaceControl,
-            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
-            Bundle outBundle) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
-        int res = mService.relayoutWindow(this, window, attrs,
-                requestedWidth, requestedHeight, viewFlags, flags, seq,
-                lastSyncSeqId, outFrames, mergedConfiguration, outSurfaceControl, outInsetsState,
-                outActiveControls, outBundle);
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        return res;
-    }
-
     @Override
     public void relayoutAsync(IWindow window, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
             int lastSyncSeqId) {
-        if (windowSessionRelayoutInfo()) {
-            relayout(window, attrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
-                    lastSyncSeqId, null /* outRelayoutResult */);
-        } else {
-            relayoutLegacy(window, attrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
-                    lastSyncSeqId, null /* outFrames */, null /* mergedConfiguration */,
-                    null /* outSurfaceControl */, null /* outInsetsState */,
-                    null /* outActiveControls */, null /* outSyncIdBundle */);
-        }
+        relayout(window, attrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
+                lastSyncSeqId, null /* outRelayoutResult */);
     }
 
     @Override

@@ -135,7 +135,7 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
     }
 
     /** Return the id of the virtual camera with the given config. */
-    public int getCameraId(@NonNull VirtualCameraConfig cameraConfig) {
+    public String getCameraId(@NonNull VirtualCameraConfig cameraConfig) {
         connectVirtualCameraServiceIfNeeded();
 
         try {

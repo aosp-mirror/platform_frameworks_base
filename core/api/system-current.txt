@@ -105,6 +105,7 @@ package android {
     field public static final String CAMERA_OPEN_CLOSE_LISTENER = "android.permission.CAMERA_OPEN_CLOSE_LISTENER";
     field @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") public static final String CAMERA_PRIVACY_ALLOWLIST = "android.permission.CAMERA_PRIVACY_ALLOWLIST";
     field public static final String CAPTURE_AUDIO_HOTWORD = "android.permission.CAPTURE_AUDIO_HOTWORD";
+    field @FlaggedApi("android.os.allow_consentless_bugreport_delegated_consent") public static final String CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT = "android.permission.CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT";
     field public static final String CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD = "android.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD";
     field public static final String CAPTURE_MEDIA_OUTPUT = "android.permission.CAPTURE_MEDIA_OUTPUT";
     field public static final String CAPTURE_TUNER_AUDIO_INPUT = "android.permission.CAPTURE_TUNER_AUDIO_INPUT";
@@ -3446,6 +3447,7 @@ package android.companion.virtual {
   }
 
   public static interface VirtualDeviceManager.ActivityListener {
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public default void onActivityLaunchBlocked(int, @NonNull android.content.ComponentName, int);
     method public void onDisplayEmpty(int);
     method @Deprecated public void onTopActivityChanged(int, @NonNull android.content.ComponentName);
     method public default void onTopActivityChanged(int, @NonNull android.content.ComponentName, int);
@@ -3475,6 +3477,7 @@ package android.companion.virtual {
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.input.VirtualMouseConfig);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualNavigationTouchpad createVirtualNavigationTouchpad(@NonNull android.hardware.input.VirtualNavigationTouchpadConfig);
+    method @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualRotaryEncoder createVirtualRotaryEncoder(@NonNull android.hardware.input.VirtualRotaryEncoderConfig);
     method @FlaggedApi("android.companion.virtual.flags.virtual_stylus") @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualStylus createVirtualStylus(@NonNull android.hardware.input.VirtualStylusConfig);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.input.VirtualTouchscreenConfig);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
@@ -5759,6 +5762,37 @@ package android.hardware.input {
   public static final class VirtualNavigationTouchpadConfig.Builder extends android.hardware.input.VirtualInputDeviceConfig.Builder<android.hardware.input.VirtualNavigationTouchpadConfig.Builder> {
     ctor public VirtualNavigationTouchpadConfig.Builder(@IntRange(from=1) int, @IntRange(from=1) int);
     method @NonNull public android.hardware.input.VirtualNavigationTouchpadConfig build();
+  }
+
+  @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") public class VirtualRotaryEncoder implements java.io.Closeable {
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendScrollEvent(@NonNull android.hardware.input.VirtualRotaryEncoderScrollEvent);
+  }
+
+  @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") public final class VirtualRotaryEncoderConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualRotaryEncoderConfig> CREATOR;
+  }
+
+  public static final class VirtualRotaryEncoderConfig.Builder extends android.hardware.input.VirtualInputDeviceConfig.Builder<android.hardware.input.VirtualRotaryEncoderConfig.Builder> {
+    ctor public VirtualRotaryEncoderConfig.Builder();
+    method @NonNull public android.hardware.input.VirtualRotaryEncoderConfig build();
+  }
+
+  @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") public final class VirtualRotaryEncoderScrollEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getEventTimeNanos();
+    method @FloatRange(from=-1.0F, to=1.0f) public float getScrollAmount();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualRotaryEncoderScrollEvent> CREATOR;
+  }
+
+  public static final class VirtualRotaryEncoderScrollEvent.Builder {
+    ctor public VirtualRotaryEncoderScrollEvent.Builder();
+    method @NonNull public android.hardware.input.VirtualRotaryEncoderScrollEvent build();
+    method @NonNull public android.hardware.input.VirtualRotaryEncoderScrollEvent.Builder setEventTimeNanos(long);
+    method @NonNull public android.hardware.input.VirtualRotaryEncoderScrollEvent.Builder setScrollAmount(@FloatRange(from=-1.0F, to=1.0f) float);
   }
 
   @FlaggedApi("android.companion.virtual.flags.virtual_stylus") public class VirtualStylus implements java.io.Closeable {
@@ -11366,8 +11400,9 @@ package android.os.connectivity {
     method public long getNumPacketsTx();
     method public long getRxTimeMillis();
     method public long getSleepTimeMillis();
-    method @NonNull public long getTimeInRatMicros(int);
-    method @NonNull public long getTimeInRxSignalStrengthLevelMicros(@IntRange(from=android.telephony.CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN, to=android.telephony.CellSignalStrength.SIGNAL_STRENGTH_GREAT) int);
+    method public long getTimeInRatMicros(int);
+    method public long getTimeInRxSignalStrengthLevelMicros(@IntRange(from=android.telephony.CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN, to=android.telephony.CellSignalStrength.SIGNAL_STRENGTH_GREAT) int);
+    method @FlaggedApi("com.android.server.power.optimization.streamlined_connectivity_battery_stats") public long getTxTimeMillis(@IntRange(from=android.telephony.ModemActivityInfo.TX_POWER_LEVEL_0, to=android.telephony.ModemActivityInfo.TX_POWER_LEVEL_4) int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.connectivity.CellularBatteryStats> CREATOR;
   }
@@ -11467,6 +11502,19 @@ package android.os.storage {
   public final class StorageVolume implements android.os.Parcelable {
     method @NonNull public String getId();
     method public boolean isExternallyManaged();
+  }
+
+}
+
+package android.os.vibrator.persistence {
+
+  @FlaggedApi("android.os.vibrator.vibration_xml_apis") public final class ParsedVibration {
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
+  }
+
+  @FlaggedApi("android.os.vibrator.vibration_xml_apis") public final class VibrationXmlParser {
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @NonNull public static android.os.vibrator.persistence.ParsedVibration parse(@NonNull java.io.InputStream) throws java.io.IOException;
+    method @FlaggedApi("android.os.vibrator.vibration_xml_apis") @NonNull public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.InputStream) throws java.io.IOException;
   }
 
 }
@@ -12886,7 +12934,13 @@ package android.service.notification {
     field public static final String KEY_SENSITIVE_CONTENT = "key_sensitive_content";
     field public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
     field public static final String KEY_TEXT_REPLIES = "key_text_replies";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String KEY_TYPE = "key_type";
     field public static final String KEY_USER_SENTIMENT = "key_user_sentiment";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_CONTENT_RECOMMENDATION = 4; // 0x4
+    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_NEWS = 3; // 0x3
+    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_OTHER = 0; // 0x0
+    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_PROMOTION = 1; // 0x1
+    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_SOCIAL_MEDIA = 2; // 0x2
   }
 
   public abstract class NotificationAssistantService extends android.service.notification.NotificationListenerService {

@@ -81,6 +81,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.media.flags.Flags;
 import com.android.server.LocalServices;
 import com.android.server.uri.UriGrantsManagerInternal;
 
@@ -229,6 +231,14 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
 
     private int mPolicies;
 
+    private final Runnable mUserEngagementTimeoutExpirationRunnable =
+            () -> {
+                synchronized (mLock) {
+                    updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ true);
+                }
+            };
+
+    @GuardedBy("mLock")
     private @UserEngagementState int mUserEngagementState = USER_DISENGAGED;
 
     @IntDef({USER_PERMANENTLY_ENGAGED, USER_TEMPORARY_ENGAGED, USER_DISENGAGED})
@@ -238,26 +248,26 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
     /**
      * Indicates that the session is active and in one of the user engaged states.
      *
-     * @see #updateUserEngagedStateIfNeededLocked(boolean) ()
+     * @see #updateUserEngagedStateIfNeededLocked(boolean)
      */
     private static final int USER_PERMANENTLY_ENGAGED = 0;
 
     /**
      * Indicates that the session is active and in {@link PlaybackState#STATE_PAUSED} state.
      *
-     * @see #updateUserEngagedStateIfNeededLocked(boolean) ()
+     * @see #updateUserEngagedStateIfNeededLocked(boolean)
      */
     private static final int USER_TEMPORARY_ENGAGED = 1;
 
     /**
      * Indicates that the session is either not active or in one of the user disengaged states
      *
-     * @see #updateUserEngagedStateIfNeededLocked(boolean) ()
+     * @see #updateUserEngagedStateIfNeededLocked(boolean)
      */
     private static final int USER_DISENGAGED = 2;
 
     /**
-     * Indicates the duration of the temporary engaged states.
+     * Indicates the duration of the temporary engaged states, in milliseconds.
      *
      * <p>Some {@link MediaSession} states like {@link PlaybackState#STATE_PAUSED} are temporarily
      * engaged, meaning the corresponding session is only considered in an engaged state for the
@@ -270,7 +280,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
      * user-engaged state is not considered user-engaged when transitioning from a non-user engaged
      * state {@link PlaybackState#STATE_STOPPED}.
      */
-    private static final int TEMP_USER_ENGAGED_TIMEOUT = 600000;
+    private static final int TEMP_USER_ENGAGED_TIMEOUT_MS = 600000;
 
     public MediaSessionRecord(
             int ownerPid,
@@ -284,7 +294,6 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             Looper handlerLooper,
             int policies)
             throws RemoteException {
-        mUniqueId = sNextMediaSessionRecordId.getAndIncrement();
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
@@ -609,8 +618,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
 
     @Override
     public void expireTempEngaged() {
-        mHandler.removeCallbacks(mHandleTempEngagedSessionTimeout);
-        updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ true);
+        mHandler.post(mUserEngagementTimeoutExpirationRunnable);
     }
 
     /**
@@ -1086,11 +1094,6 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                 }
             };
 
-    private final Runnable mHandleTempEngagedSessionTimeout =
-            () -> {
-                updateUserEngagedStateIfNeededLocked(/* isTimeoutExpired= */ true);
-            };
-
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     private static boolean componentNameExists(
             @NonNull ComponentName componentName, @NonNull Context context, int userId) {
@@ -1107,10 +1110,14 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         return !resolveInfos.isEmpty();
     }
 
+    @GuardedBy("mLock")
     private void updateUserEngagedStateIfNeededLocked(boolean isTimeoutExpired) {
+        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
         int oldUserEngagedState = mUserEngagementState;
         int newUserEngagedState;
-        if (!isActive() || mPlaybackState == null) {
+        if (!isActive() || mPlaybackState == null || mDestroyed) {
             newUserEngagedState = USER_DISENGAGED;
         } else if (isActive() && mPlaybackState.isActive()) {
             newUserEngagedState = USER_PERMANENTLY_ENGAGED;
@@ -1126,18 +1133,22 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             return;
         }
 
+        mUserEngagementState = newUserEngagedState;
         if (newUserEngagedState == USER_TEMPORARY_ENGAGED) {
-            mHandler.postDelayed(mHandleTempEngagedSessionTimeout, TEMP_USER_ENGAGED_TIMEOUT);
-        } else if (oldUserEngagedState == USER_TEMPORARY_ENGAGED) {
-            mHandler.removeCallbacks(mHandleTempEngagedSessionTimeout);
+            mHandler.postDelayed(
+                    mUserEngagementTimeoutExpirationRunnable, TEMP_USER_ENGAGED_TIMEOUT_MS);
+        } else {
+            mHandler.removeCallbacks(mUserEngagementTimeoutExpirationRunnable);
         }
 
         boolean wasUserEngaged = oldUserEngagedState != USER_DISENGAGED;
         boolean isNowUserEngaged = newUserEngagedState != USER_DISENGAGED;
-        mUserEngagementState = newUserEngagedState;
         if (wasUserEngaged != isNowUserEngaged) {
-            mService.onSessionUserEngagementStateChange(
-                    /* mediaSessionRecord= */ this, /* isUserEngaged= */ isNowUserEngaged);
+            mHandler.post(
+                    () ->
+                            mService.onSessionUserEngagementStateChange(
+                                    /* mediaSessionRecord= */ this,
+                                    /* isUserEngaged= */ isNowUserEngaged));
         }
     }
 

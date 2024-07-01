@@ -22,9 +22,12 @@ import android.animation.ValueAnimator
 import android.annotation.BinderThread
 import android.os.SystemProperties
 import android.util.Log
+import android.view.View
 import android.view.animation.DecelerateInterpolator
 import com.android.app.tracing.TraceUtils.traceAsync
 import com.android.internal.foldables.FoldLockSettingAvailabilityProvider
+import com.android.internal.jank.Cuj.CUJ_FOLD_ANIM
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.repository.DeviceStateRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -65,7 +68,8 @@ constructor(
     @Background private val applicationScope: CoroutineScope,
     private val animationStatusRepository: AnimationStatusRepository,
     private val controllerFactory: FullscreenLightRevealAnimationController.Factory,
-    private val foldLockSettingAvailabilityProvider: FoldLockSettingAvailabilityProvider
+    private val foldLockSettingAvailabilityProvider: FoldLockSettingAvailabilityProvider,
+    private val interactionJankMonitor: InteractionJankMonitor
 ) : FullscreenLightRevealAnimation {
 
     private val revealProgressValueAnimator: ValueAnimator =
@@ -87,7 +91,7 @@ constructor(
             controllerFactory.create(
                 displaySelector = { minByOrNull { it.naturalWidth } },
                 effectFactory = { LinearSideLightRevealEffect(it.isVerticalRotation()) },
-                overlayContainerName = SURFACE_CONTAINER_NAME
+                overlayContainerName = OVERLAY_TITLE
             )
         controller.init()
 
@@ -149,13 +153,23 @@ constructor(
     private suspend fun waitForGoToSleep() =
         traceAsync(TAG, "waitForGoToSleep()") { powerInteractor.isAsleep.filter { it }.first() }
 
-    private suspend fun playFoldLightRevealOverlayAnimation() {
-        revealProgressValueAnimator.duration = ANIMATION_DURATION
-        revealProgressValueAnimator.interpolator = DecelerateInterpolator()
-        revealProgressValueAnimator.addUpdateListener { animation ->
-            controller.updateRevealAmount(animation.animatedFraction)
+    private suspend fun playFoldLightRevealOverlayAnimation() =
+        trackCuj(CUJ_FOLD_ANIM, controller.scrimView) {
+            revealProgressValueAnimator.duration = ANIMATION_DURATION
+            revealProgressValueAnimator.interpolator = DecelerateInterpolator()
+            revealProgressValueAnimator.addUpdateListener { animation ->
+                controller.updateRevealAmount(animation.animatedFraction)
+            }
+            revealProgressValueAnimator.startAndAwaitCompletion()
         }
-        revealProgressValueAnimator.startAndAwaitCompletion()
+
+    private suspend fun trackCuj(cuj: Int, view: View?, block: suspend () -> Unit) {
+        view?.let { interactionJankMonitor.begin(it, cuj) }
+        try {
+            block()
+        } finally {
+            if (view != null) interactionJankMonitor.end(cuj)
+        }
     }
 
     private suspend fun ValueAnimator.startAndAwaitCompletion(): Unit =
@@ -182,7 +196,7 @@ constructor(
     private companion object {
         const val TAG = "FoldLightRevealOverlayAnimation"
         const val WAIT_FOR_ANIMATION_TIMEOUT_MS = 2000L
-        const val SURFACE_CONTAINER_NAME = "fold-overlay-container"
+        const val OVERLAY_TITLE = "fold-animation-overlay"
         val ANIMATION_DURATION: Long
             get() = SystemProperties.getLong("persist.fold_animation_duration", 200L)
     }

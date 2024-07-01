@@ -373,6 +373,8 @@
     <!-- Listen to (dis-)connection of external displays and enable / disable them. -->
     <uses-permission android:name="android.permission.MANAGE_DISPLAYS" />
 
+    <uses-permission android:name="android.permission.SET_BIOMETRIC_DIALOG_ADVANCED" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
@@ -387,7 +389,7 @@
         android:killAfterRestore="false"
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
-        android:icon="@drawable/android14_patch_adaptive"
+        android:icon="@drawable/android15_patch_adaptive"
         android:process="com.android.systemui"
         android:supportsRtl="true"
         android:theme="@style/Theme.SystemUI"
@@ -474,6 +476,15 @@
             android:excludeFromRecents="true"
             android:exported="false"
             android:noHistory="true" />
+
+        <activity android:name=".touchpad.tutorial.ui.view.TouchpadTutorialActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
+            <intent-filter>
+                <action android:name="com.android.systemui.action.TOUCHPAD_TUTORIAL"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
 
         <service android:name=".screenshot.appclips.AppClipsScreenshotHelperService"
             android:exported="false"
@@ -641,6 +652,7 @@
         <!-- started from MediaProjectionManager -->
         <activity
             android:name=".mediaprojection.permission.MediaProjectionPermissionActivity"
+            android:showForAllUsers="true"
             android:exported="true"
             android:theme="@style/Theme.SystemUI.MediaProjectionAlertDialog"
             android:finishOnCloseSystemDialogs="true"
@@ -651,6 +663,7 @@
         <activity
             android:name=".mediaprojection.appselector.MediaProjectionAppSelectorActivity"
             android:theme="@style/Theme.SystemUI.MediaProjectionAppSelector"
+            android:showForAllUsers="true"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:documentLaunchMode="never"
@@ -1098,8 +1111,8 @@
 
         <activity android:name="com.android.systemui.keyboard.shortcut.ui.view.ShortcutHelperActivity"
             android:exported="false"
+            android:showForAllUsers="true"
             android:theme="@style/ShortcutHelperTheme"
-            android:excludeFromRecents="true"
-            android:finishOnCloseSystemDialogs="true" />
+            android:excludeFromRecents="true" />
     </application>
 </manifest>

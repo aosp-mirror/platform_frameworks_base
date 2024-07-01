@@ -246,6 +246,12 @@ public class Task {
     public ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
             new ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData();
 
+    @ViewDebug.ExportedProperty(category="recents")
+    public boolean isVisible;
+
+    @ViewDebug.ExportedProperty(category = "recents")
+    public boolean isMinimized;
+
     public Task() {
         // Do nothing
     }
@@ -279,6 +285,8 @@ public class Task {
         lastSnapshotData.set(other.lastSnapshotData);
         positionInParent = other.positionInParent;
         appBounds = other.appBounds;
+        isVisible = other.isVisible;
+        isMinimized = other.isMinimized;
     }
 
     /**

@@ -30,15 +30,18 @@ fun transition(
     current: () -> SceneKey = { from },
     progress: () -> Float = { 0f },
     progressVelocity: () -> Float = { 0f },
-    interruptionProgress: () -> Float = { 100f },
+    interruptionProgress: () -> Float = { 0f },
     isInitiatedByUserInput: Boolean = false,
     isUserInputOngoing: Boolean = false,
     isUpOrLeft: Boolean = false,
     bouncingScene: SceneKey? = null,
     orientation: Orientation = Orientation.Horizontal,
     onFinish: ((TransitionState.Transition) -> Job)? = null,
+    replacedTransition: TransitionState.Transition? = null,
 ): TransitionState.Transition {
-    return object : TransitionState.Transition(from, to), TransitionState.HasOverscrollProperties {
+    return object :
+        TransitionState.Transition(from, to, replacedTransition),
+        TransitionState.HasOverscrollProperties {
         override val currentScene: SceneKey
             get() = current()
 

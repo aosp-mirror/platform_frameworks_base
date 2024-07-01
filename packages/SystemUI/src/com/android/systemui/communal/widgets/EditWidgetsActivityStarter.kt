@@ -22,6 +22,7 @@ import com.android.systemui.communal.widgets.EditWidgetsActivity.Companion.EXTRA
 import com.android.systemui.communal.widgets.EditWidgetsActivity.Companion.EXTRA_PRESELECTED_KEY
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 interface EditWidgetsActivityStarter {
@@ -48,6 +49,7 @@ constructor(
                 },
             /* onlyProvisioned = */ true,
             /* dismissShade = */ true,
+            applicationContext.resources.getString(R.string.unlock_reason_to_customize_widgets),
         )
     }
 }

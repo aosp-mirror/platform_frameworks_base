@@ -115,25 +115,16 @@ public class PowerStatsExporter {
 
     private void populateBatteryUsageStatsBuilder(
             BatteryUsageStats.Builder batteryUsageStatsBuilder, AggregatedPowerStats stats) {
-        AggregatedPowerStatsConfig config = mPowerStatsAggregator.getConfig();
-        List<AggregatedPowerStatsConfig.PowerComponent> powerComponents =
-                config.getPowerComponentsAggregatedStatsConfigs();
-        for (int i = powerComponents.size() - 1; i >= 0; i--) {
-            populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder, stats,
-                    powerComponents.get(i));
+        List<PowerComponentAggregatedPowerStats> powerComponentStats =
+                stats.getPowerComponentStats();
+        for (int i = powerComponentStats.size() - 1; i >= 0; i--) {
+            populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder, powerComponentStats.get(i));
         }
     }
 
-    private void populateBatteryUsageStatsBuilder(
-            BatteryUsageStats.Builder batteryUsageStatsBuilder, AggregatedPowerStats stats,
-            AggregatedPowerStatsConfig.PowerComponent powerComponent) {
-        int powerComponentId = powerComponent.getPowerComponentId();
-        PowerComponentAggregatedPowerStats powerComponentStats = stats.getPowerComponentStats(
-                powerComponentId);
-        if (powerComponentStats == null) {
-            return;
-        }
-
+    private static void populateBatteryUsageStatsBuilder(
+            BatteryUsageStats.Builder batteryUsageStatsBuilder,
+            PowerComponentAggregatedPowerStats powerComponentStats) {
         PowerStats.Descriptor descriptor = powerComponentStats.getPowerStatsDescriptor();
         if (descriptor == null) {
             return;
@@ -144,7 +135,8 @@ public class PowerStatsExporter {
 
         long[] deviceStats = new long[descriptor.statsArrayLength];
         double[] totalPower = new double[1];
-        MultiStateStats.States.forEachTrackedStateCombination(powerComponent.getDeviceStateConfig(),
+        MultiStateStats.States.forEachTrackedStateCombination(
+                powerComponentStats.getConfig().getDeviceStateConfig(),
                 states -> {
                     if (states[AggregatedPowerStatsConfig.STATE_POWER]
                             != AggregatedPowerStatsConfig.POWER_STATE_BATTERY) {
@@ -161,29 +153,37 @@ public class PowerStatsExporter {
         AggregateBatteryConsumer.Builder deviceScope =
                 batteryUsageStatsBuilder.getAggregateBatteryConsumerBuilder(
                         BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
-        deviceScope.addConsumedPower(powerComponentId,
-                totalPower[0], BatteryConsumer.POWER_MODEL_UNDEFINED);
+        if (descriptor.powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
+            if (batteryUsageStatsBuilder.isSupportedCustomPowerComponent(
+                    descriptor.powerComponentId)) {
+                deviceScope.addConsumedPowerForCustomComponent(descriptor.powerComponentId,
+                        totalPower[0]);
+            }
+        } else {
+            deviceScope.addConsumedPower(descriptor.powerComponentId,
+                    totalPower[0], BatteryConsumer.POWER_MODEL_UNDEFINED);
+        }
 
         if (layout.isUidPowerAttributionSupported()) {
-            populateUidBatteryConsumers(batteryUsageStatsBuilder, powerComponent,
+            populateUidBatteryConsumers(batteryUsageStatsBuilder,
                     powerComponentStats, layout);
         }
     }
 
     private static void populateUidBatteryConsumers(
             BatteryUsageStats.Builder batteryUsageStatsBuilder,
-            AggregatedPowerStatsConfig.PowerComponent powerComponent,
             PowerComponentAggregatedPowerStats powerComponentStats,
             PowerStatsLayout layout) {
+        AggregatedPowerStatsConfig.PowerComponent powerComponent = powerComponentStats.getConfig();
         int powerComponentId = powerComponent.getPowerComponentId();
         PowerStats.Descriptor descriptor = powerComponentStats.getPowerStatsDescriptor();
         long[] uidStats = new long[descriptor.uidStatsArrayLength];
 
-        boolean breakDownByProcState =
-                batteryUsageStatsBuilder.isProcessStateDataNeeded()
+        // TODO(b/347101393): add support for per-procstate breakdown for custom energy consumers
+        boolean breakDownByProcState = batteryUsageStatsBuilder.isProcessStateDataNeeded()
                 && powerComponent
-                        .getUidStateConfig()[AggregatedPowerStatsConfig.STATE_PROCESS_STATE]
-                        .isTracked();
+                .getUidStateConfig()[AggregatedPowerStatsConfig.STATE_PROCESS_STATE].isTracked()
+                && powerComponentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
 
         double[] powerByProcState =
                 new double[breakDownByProcState ? BatteryConsumer.PROCESS_STATE_COUNT : 1];
@@ -224,19 +224,27 @@ public class PowerStatsExporter {
                 powerAllProcStates += power;
                 if (breakDownByProcState
                         && procState != BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
-                    builder.addConsumedPower(builder.getKey(powerComponentId, procState),
-                            power, BatteryConsumer.POWER_MODEL_UNDEFINED);
+                    builder.addConsumedPower(builder.getKey(powerComponentId, procState), power,
+                            BatteryConsumer.POWER_MODEL_UNDEFINED);
                 }
             }
-            builder.addConsumedPower(powerComponentId, powerAllProcStates,
-                    BatteryConsumer.POWER_MODEL_UNDEFINED);
+            if (powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
+                builder.addConsumedPowerForCustomComponent(powerComponentId, powerAllProcStates);
+            } else {
+                builder.addConsumedPower(powerComponentId, powerAllProcStates,
+                        BatteryConsumer.POWER_MODEL_UNDEFINED);
+            }
             powerAllApps += powerAllProcStates;
         }
 
         AggregateBatteryConsumer.Builder allAppsScope =
                 batteryUsageStatsBuilder.getAggregateBatteryConsumerBuilder(
                         BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
-        allAppsScope.addConsumedPower(powerComponentId, powerAllApps,
-                BatteryConsumer.POWER_MODEL_UNDEFINED);
+        if (powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
+            allAppsScope.addConsumedPowerForCustomComponent(powerComponentId, powerAllApps);
+        } else {
+            allAppsScope.addConsumedPower(powerComponentId, powerAllApps,
+                    BatteryConsumer.POWER_MODEL_UNDEFINED);
+        }
     }
 }

@@ -17,12 +17,18 @@
 package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.util.SparseArray;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ImeTracker;
+import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.server.pm.UserManagerInternal;
 
 import java.util.function.Consumer;
@@ -53,7 +59,8 @@ final class UserDataRepository {
         }
     }
 
-    UserDataRepository(@NonNull Handler handler, @NonNull UserManagerInternal userManagerInternal,
+    UserDataRepository(
+            @NonNull Handler handler, @NonNull UserManagerInternal userManagerInternal,
             @NonNull IntFunction<InputMethodBindingController> bindingControllerFactory) {
         mBindingControllerFactory = bindingControllerFactory;
         userManagerInternal.addUserLifecycleListener(
@@ -88,6 +95,84 @@ final class UserDataRepository {
         @NonNull
         final InputMethodBindingController mBindingController;
 
+        @NonNull
+        final InputMethodSubtypeSwitchingController mSwitchingController;
+
+        @NonNull
+        final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController;
+
+        /**
+         * Have we called mCurMethod.bindInput()?
+         */
+        @GuardedBy("ImfLock.class")
+        boolean mBoundToMethod = false;
+
+        /**
+         * Have we called bindInput() for accessibility services?
+         */
+        @GuardedBy("ImfLock.class")
+        boolean mBoundToAccessibility;
+
+        @GuardedBy("ImfLock.class")
+        @NonNull
+        ImeBindingState mImeBindingState = ImeBindingState.newEmptyState();
+
+        @GuardedBy("ImfLock.class")
+        @Nullable
+        ClientState mCurClient = null;
+
+        @GuardedBy("ImfLock.class")
+        boolean mInFullscreenMode;
+
+        /**
+         * The {@link IRemoteInputConnection} last provided by the current client.
+         */
+        @GuardedBy("ImfLock.class")
+        @Nullable
+        IRemoteInputConnection mCurInputConnection;
+
+        /**
+         * The {@link ImeOnBackInvokedDispatcher} last provided by the current client to
+         * receive {@link android.window.OnBackInvokedCallback}s forwarded from IME.
+         */
+        @GuardedBy("ImfLock.class")
+        @Nullable
+        ImeOnBackInvokedDispatcher mCurImeDispatcher;
+
+        /**
+         * The {@link IRemoteAccessibilityInputConnection} last provided by the current client.
+         */
+        @GuardedBy("ImfLock.class")
+        @Nullable
+        IRemoteAccessibilityInputConnection mCurRemoteAccessibilityInputConnection;
+
+        /**
+         * The {@link EditorInfo} last provided by the current client.
+         */
+        @GuardedBy("ImfLock.class")
+        @Nullable
+        EditorInfo mCurEditorInfo;
+
+        /**
+         * The token tracking the current IME show request that is waiting for a connection to an
+         * IME, otherwise {@code null}.
+         */
+        @GuardedBy("ImfLock.class")
+        @Nullable
+        ImeTracker.Token mCurStatsToken;
+
+        /**
+         * Currently enabled session.
+         */
+        @GuardedBy("ImfLock.class")
+        @Nullable
+        InputMethodManagerService.SessionState mEnabledSession;
+
+        @GuardedBy("ImfLock.class")
+        @Nullable
+        SparseArray<InputMethodManagerService.AccessibilitySessionState>
+                mEnabledAccessibilitySessions = new SparseArray<>();
+
         /**
          * Intended to be instantiated only from this file.
          */
@@ -95,6 +180,8 @@ final class UserDataRepository {
                 @NonNull InputMethodBindingController bindingController) {
             mUserId = userId;
             mBindingController = bindingController;
+            mSwitchingController = new InputMethodSubtypeSwitchingController();
+            mHardwareKeyboardShortcutController = new HardwareKeyboardShortcutController();
         }
 
         @Override

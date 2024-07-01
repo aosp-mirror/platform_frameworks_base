@@ -516,6 +516,19 @@ class PowerComponents {
         }
 
         @NonNull
+        public Builder addConsumedPowerForCustomComponent(int componentId, double componentPower) {
+            final int index = componentId - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+            if (index < 0 || index >= mData.layout.customPowerComponentCount) {
+                throw new IllegalArgumentException(
+                        "Unsupported custom power component ID: " + componentId);
+            }
+            mData.putDouble(mData.layout.firstCustomConsumedPowerColumn + index,
+                    mData.getDouble(mData.layout.firstCustomConsumedPowerColumn + index)
+                            + componentPower);
+            return this;
+        }
+
+        @NonNull
         public Builder setUsageDurationMillis(BatteryConsumer.Key key,
                 long componentUsageDurationMillis) {
             mData.putLong(key.mDurationColumnIndex, componentUsageDurationMillis);

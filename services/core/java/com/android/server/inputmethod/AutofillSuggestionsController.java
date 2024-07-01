@@ -103,8 +103,8 @@ final class AutofillSuggestionsController {
 
         // Note that current user ID is guaranteed to be userId.
         final var imeId = mBindingController.getSelectedMethodId();
-        final InputMethodInfo imi = InputMethodSettingsRepository.get(mBindingController.mUserId)
-                .getMethodMap().get(imeId);
+        final InputMethodInfo imi = InputMethodSettingsRepository.get(
+                mBindingController.getUserId()).getMethodMap().get(imeId);
         if (imi == null || !isInlineSuggestionsEnabled(imi, touchExplorationEnabled)) {
             callback.onInlineSuggestionsUnsupported();
             return;

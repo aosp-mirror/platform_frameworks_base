@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
+import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.biometrics.AuthController
@@ -39,6 +40,7 @@ import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
@@ -77,6 +79,8 @@ interface KeyguardRepository {
     val bottomAreaAlpha: StateFlow<Float>
 
     val keyguardAlpha: StateFlow<Float>
+
+    val panelAlpha: MutableStateFlow<Float>
 
     /**
      * Observable for whether the keyguard is showing.
@@ -148,7 +152,7 @@ interface KeyguardRepository {
      * Dozing/AOD is a specific type of dream, but it is also possible for other non-systemui dreams
      * to be active, such as screensavers.
      */
-    val isDreaming: Flow<Boolean>
+    val isDreaming: MutableStateFlow<Boolean>
 
     /** Observable for whether the device is dreaming with an overlay, see [DreamOverlayService] */
     val isDreamingWithOverlay: Flow<Boolean>
@@ -250,6 +254,12 @@ interface KeyguardRepository {
     /** Sets the current amount of alpha that should be used for rendering the keyguard. */
     fun setKeyguardAlpha(alpha: Float)
 
+    /** Temporary shim for fading out content when the brightness slider is used */
+    fun setPanelAlpha(alpha: Float)
+
+    /** Whether the device is actively dreaming */
+    fun setDreaming(isDreaming: Boolean)
+
     /**
      * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
      */
@@ -285,6 +295,15 @@ interface KeyguardRepository {
 
     /** Sets whether the keyguard is enabled (see [isKeyguardEnabled]). */
     fun setKeyguardEnabled(enabled: Boolean)
+
+    /** @see isShowKeyguardWhenReenabled */
+    fun setShowKeyguardWhenReenabled(isShowKeyguardWhenReenabled: Boolean)
+
+    /**
+     * Returns `true` if the keyguard should be re-shown once it becomes re-enabled again; `false`
+     * otherwise.
+     */
+    fun isShowKeyguardWhenReenabled(): Boolean
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -303,6 +322,7 @@ constructor(
     private val systemClock: SystemClock,
     facePropertyRepository: FacePropertyRepository,
     private val userTracker: UserTracker,
+    lockPatternUtils: LockPatternUtils,
 ) : KeyguardRepository {
     private val _dismissAction: MutableStateFlow<DismissAction> =
         MutableStateFlow(DismissAction.None)
@@ -334,6 +354,8 @@ constructor(
 
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha = _keyguardAlpha.asStateFlow()
+
+    override val panelAlpha: MutableStateFlow<Float> = MutableStateFlow(1f)
 
     private val _clockShouldBeCentered = MutableStateFlow(true)
     override val clockShouldBeCentered: Flow<Boolean> = _clockShouldBeCentered.asStateFlow()
@@ -458,11 +480,14 @@ constructor(
         awaitClose { keyguardStateController.removeCallback(callback) }
     }
 
-    private val _isKeyguardEnabled = MutableStateFlow(true)
+    private val _isKeyguardEnabled =
+        MutableStateFlow(!lockPatternUtils.isLockScreenDisabled(userTracker.userId))
     override val isKeyguardEnabled: StateFlow<Boolean> = _isKeyguardEnabled.asStateFlow()
 
     private val _isDozing = MutableStateFlow(statusBarStateController.isDozing)
     override val isDozing: StateFlow<Boolean> = _isDozing.asStateFlow()
+
+    private var isShowKeyguardWhenReenabled: Boolean = false
 
     override fun setIsDozing(isDozing: Boolean) {
         _isDozing.value = isDozing
@@ -509,25 +534,7 @@ constructor(
             }
             .distinctUntilChanged()
 
-    override val isDreaming: Flow<Boolean> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : KeyguardUpdateMonitorCallback() {
-                        override fun onDreamingStateChanged(isDreaming: Boolean) {
-                            trySendWithFailureLogging(isDreaming, TAG, "updated isDreaming")
-                        }
-                    }
-                keyguardUpdateMonitor.registerCallback(callback)
-                trySendWithFailureLogging(
-                    keyguardUpdateMonitor.isDreaming,
-                    TAG,
-                    "initial isDreaming",
-                )
-
-                awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
-            }
-            .flowOn(mainDispatcher)
-            .distinctUntilChanged()
+    override val isDreaming: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override val linearDozeAmount: Flow<Float> = conflatedCallbackFlow {
         val callback =
@@ -674,6 +681,14 @@ constructor(
         _keyguardAlpha.value = alpha
     }
 
+    override fun setPanelAlpha(alpha: Float) {
+        panelAlpha.value = alpha
+    }
+
+    override fun setDreaming(isDreaming: Boolean) {
+        this.isDreaming.value = isDreaming
+    }
+
     override fun isUdfpsSupported(): Boolean = keyguardUpdateMonitor.isUdfpsSupported
 
     override fun setQuickSettingsVisible(isVisible: Boolean) {
@@ -690,6 +705,16 @@ constructor(
 
     override fun setKeyguardEnabled(enabled: Boolean) {
         _isKeyguardEnabled.value = enabled
+    }
+
+    override fun setShowKeyguardWhenReenabled(isShowKeyguardWhenReenabled: Boolean) {
+        SceneContainerFlag.assertInNewMode()
+        this.isShowKeyguardWhenReenabled = isShowKeyguardWhenReenabled
+    }
+
+    override fun isShowKeyguardWhenReenabled(): Boolean {
+        SceneContainerFlag.assertInNewMode()
+        return isShowKeyguardWhenReenabled
     }
 
     private fun statusBarStateIntToObject(value: Int): StatusBarState {

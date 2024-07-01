@@ -185,6 +185,9 @@
          https://www.itu.int/dms_pub/itu-t/oth/02/02/T020200006B0001PDFE.pdf -->
     <shortcode country="it" pattern="\\d{5}" premium="44[0-4]\\d{2}|47[0-4]\\d{2}|48[0-4]\\d{2}|44[5-9]\\d{4}|47[5-9]\\d{4}|48[5-9]\\d{4}|455\\d{2}|499\\d{2}" free="116\\d{3}|4112503|40\\d{0,12}" standard="430\\d{2}|431\\d{2}|434\\d{4}|435\\d{4}|439\\d{7}" />
 
+    <!-- Jordan: 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="jo" pattern="\\d{1,5}" free="99066" />
+
     <!-- Japan: 8083 used by SOFTBANK_DCB_2 -->
     <shortcode country="jp" pattern="\\d{1,5}" free="8083" />
 

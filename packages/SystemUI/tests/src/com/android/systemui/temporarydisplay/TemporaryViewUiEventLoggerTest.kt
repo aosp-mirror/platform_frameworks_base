@@ -16,6 +16,7 @@
 
 package com.android.systemui.temporarydisplay
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.testing.UiEventLoggerFake
@@ -23,8 +24,10 @@ import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class TemporaryViewUiEventLoggerTest : SysuiTestCase() {
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
     private lateinit var logger: TemporaryViewUiEventLogger

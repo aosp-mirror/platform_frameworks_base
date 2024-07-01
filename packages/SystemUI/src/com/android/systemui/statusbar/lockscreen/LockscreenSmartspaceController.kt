@@ -38,6 +38,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
 import com.android.systemui.Flags.smartspaceLockscreenViewmodel
@@ -53,6 +54,7 @@ import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
+import com.android.systemui.plugins.BcSmartspaceDataPlugin.TimeChangedDelegate
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -107,6 +109,7 @@ constructor(
         @Main private val uiExecutor: Executor,
         @Background private val bgExecutor: Executor,
         @Main private val handler: Handler,
+        @Background private val bgHandler: Handler,
         @Named(DATE_SMARTSPACE_DATA_PLUGIN)
         optionalDatePlugin: Optional<BcSmartspaceDataPlugin>,
         @Named(WEATHER_SMARTSPACE_DATA_PLUGIN)
@@ -302,26 +305,20 @@ constructor(
         dumpManager.registerDumpable(this)
     }
 
-    fun isEnabled(): Boolean {
-        execution.assertIsMainThread()
+    val isEnabled: Boolean = plugin != null
 
-        return plugin != null
-    }
+    val isDateWeatherDecoupled: Boolean = datePlugin != null && weatherPlugin != null
 
-    fun isDateWeatherDecoupled(): Boolean {
-        execution.assertIsMainThread()
-
-        return datePlugin != null && weatherPlugin != null
-    }
-
-    fun isWeatherEnabled(): Boolean {
-       execution.assertIsMainThread()
-       val showWeather = secureSettings.getIntForUser(
-           LOCK_SCREEN_WEATHER_ENABLED,
-           1,
-           userTracker.userId) == 1
-       return showWeather
-    }
+    val isWeatherEnabled: Boolean
+        get() {
+            val showWeather =
+                secureSettings.getIntForUser(
+                    LOCK_SCREEN_WEATHER_ENABLED,
+                    1,
+                    userTracker.userId,
+                ) == 1
+            return showWeather
+        }
 
     private fun updateBypassEnabled() {
         val bypassEnabled = bypassController.bypassEnabled
@@ -334,10 +331,10 @@ constructor(
     fun buildAndConnectDateView(parent: ViewGroup): View? {
         execution.assertIsMainThread()
 
-        if (!isEnabled()) {
+        if (!isEnabled) {
             throw RuntimeException("Cannot build view when not enabled")
         }
-        if (!isDateWeatherDecoupled()) {
+        if (!isDateWeatherDecoupled) {
             throw RuntimeException("Cannot build date view when not decoupled")
         }
 
@@ -358,10 +355,10 @@ constructor(
     fun buildAndConnectWeatherView(parent: ViewGroup): View? {
         execution.assertIsMainThread()
 
-        if (!isEnabled()) {
+        if (!isEnabled) {
             throw RuntimeException("Cannot build view when not enabled")
         }
-        if (!isDateWeatherDecoupled()) {
+        if (!isDateWeatherDecoupled) {
             throw RuntimeException("Cannot build weather view when not decoupled")
         }
 
@@ -382,7 +379,7 @@ constructor(
     fun buildAndConnectView(parent: ViewGroup): View? {
         execution.assertIsMainThread()
 
-        if (!isEnabled()) {
+        if (!isEnabled) {
             throw RuntimeException("Cannot build view when not enabled")
         }
 
@@ -410,7 +407,9 @@ constructor(
 
         val ssView = plugin.getView(parent)
         configPlugin?.let { ssView.registerConfigProvider(it) }
+        ssView.setBgHandler(bgHandler)
         ssView.setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        ssView.setTimeChangedDelegate(SmartspaceTimeChangedDelegate(keyguardUpdateMonitor))
         ssView.registerDataProvider(plugin)
 
         ssView.setIntentStarter(object : BcSmartspaceDataPlugin.IntentStarter {
@@ -572,7 +571,7 @@ constructor(
     }
 
     private fun filterSmartspaceTarget(t: SmartspaceTarget): Boolean {
-        if (isDateWeatherDecoupled() && t.featureType == SmartspaceTarget.FEATURE_WEATHER) {
+        if (isDateWeatherDecoupled && t.featureType == SmartspaceTarget.FEATURE_WEATHER) {
             return false
         }
         if (!showNotifications) {
@@ -680,6 +679,29 @@ constructor(
                 }
                 pw.println()
             }
+        }
+    }
+
+    private class SmartspaceTimeChangedDelegate(
+        private val keyguardUpdateMonitor: KeyguardUpdateMonitor
+    ) : TimeChangedDelegate {
+        private var keyguardUpdateMonitorCallback: KeyguardUpdateMonitorCallback? = null
+        override fun register(callback: Runnable) {
+            if (keyguardUpdateMonitorCallback != null) {
+                unregister()
+            }
+            keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
+                override fun onTimeChanged() {
+                    callback.run()
+                }
+            }
+            keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+            callback.run()
+        }
+
+        override fun unregister() {
+            keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
+            keyguardUpdateMonitorCallback = null
         }
     }
 }

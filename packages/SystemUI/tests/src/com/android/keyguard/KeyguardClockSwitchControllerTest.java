@@ -30,9 +30,9 @@ import static org.mockito.Mockito.when;
 import android.database.ContentObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -47,7 +47,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.verification.VerificationMode;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchControllerBaseTest {
     @Test
     public void testInit_viewAlreadyAttached() {

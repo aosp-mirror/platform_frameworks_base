@@ -55,6 +55,9 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
     static final int RESULT_CODE_UNREGISTER = 1;
     @NonNull
     private final ResultReceiver mResultReceiver;
+    // The handler to run callbacks on. This should be on the same thread
+    // the ViewRootImpl holding IME's WindowOnBackInvokedDispatcher is created on.
+    private Handler mHandler;
 
     public ImeOnBackInvokedDispatcher(Handler handler) {
         mResultReceiver = new ResultReceiver(handler) {
@@ -66,6 +69,10 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
                 }
             }
         };
+    }
+
+    void setHandler(@NonNull Handler handler) {
+        mHandler = handler;
     }
 
     /**
@@ -326,7 +333,7 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
 
         @Override
         public void onBackInvoked() {
-            mCallback.onBackInvoked();
+            mHandler.post(mCallback::onBackInvoked);
         }
 
         @Override
@@ -336,7 +343,7 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
 
         private void maybeRunOnAnimationCallback(Consumer<OnBackAnimationCallback> block) {
             if (mCallback instanceof OnBackAnimationCallback) {
-                block.accept((OnBackAnimationCallback) mCallback);
+                mHandler.post(() -> block.accept((OnBackAnimationCallback) mCallback));
             }
         }
     }

@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.util.SequenceUtils.getInitSeq;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.InsetsStateProto.DISPLAY_CUTOUT;
@@ -94,6 +95,9 @@ public class InsetsState implements Parcelable {
 
     /** The display shape */
     private DisplayShape mDisplayShape = DisplayShape.NONE;
+
+    /** To make sure the info update between client and system server is in order. */
+    private int mSeq = getInitSeq();
 
     public InsetsState() {
         mSources = new SparseArray<>();
@@ -586,6 +590,14 @@ public class InsetsState implements Parcelable {
         }
     }
 
+    public int getSeq() {
+        return mSeq;
+    }
+
+    public void setSeq(int seq) {
+        mSeq = seq;
+    }
+
     public void set(InsetsState other) {
         set(other, false /* copySources */);
     }
@@ -597,6 +609,7 @@ public class InsetsState implements Parcelable {
         mRoundedCornerFrame.set(other.mRoundedCornerFrame);
         mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
         mDisplayShape = other.getDisplayShape();
+        mSeq = other.mSeq;
         mSources.clear();
         for (int i = 0, size = other.mSources.size(); i < size; i++) {
             final InsetsSource otherSource = other.mSources.valueAt(i);
@@ -620,6 +633,7 @@ public class InsetsState implements Parcelable {
         mRoundedCornerFrame.set(other.mRoundedCornerFrame);
         mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
         mDisplayShape = other.getDisplayShape();
+        mSeq = other.mSeq;
         if (types == 0) {
             return;
         }
@@ -705,6 +719,7 @@ public class InsetsState implements Parcelable {
                 || !mRoundedCornerFrame.equals(state.mRoundedCornerFrame)
                 || !mPrivacyIndicatorBounds.equals(state.mPrivacyIndicatorBounds)
                 || !mDisplayShape.equals(state.mDisplayShape)) {
+            // mSeq is for internal bookkeeping only.
             return false;
         }
 
@@ -778,6 +793,7 @@ public class InsetsState implements Parcelable {
         mRoundedCornerFrame.writeToParcel(dest, flags);
         dest.writeTypedObject(mPrivacyIndicatorBounds, flags);
         dest.writeTypedObject(mDisplayShape, flags);
+        dest.writeInt(mSeq);
         final int size = mSources.size();
         dest.writeInt(size);
         for (int i = 0; i < size; i++) {
@@ -803,6 +819,7 @@ public class InsetsState implements Parcelable {
         mRoundedCornerFrame.readFromParcel(in);
         mPrivacyIndicatorBounds = in.readTypedObject(PrivacyIndicatorBounds.CREATOR);
         mDisplayShape = in.readTypedObject(DisplayShape.CREATOR);
+        mSeq = in.readInt();
         final int size = in.readInt();
         final SparseArray<InsetsSource> sources;
         if (mSources == null) {

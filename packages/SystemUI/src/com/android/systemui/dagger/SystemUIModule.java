@@ -32,8 +32,6 @@ import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.CameraProtectionModule;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.SystemUISecondaryUserService;
-import com.android.systemui.accessibility.AccessibilityModule;
-import com.android.systemui.accessibility.data.repository.AccessibilityRepositoryModule;
 import com.android.systemui.ambient.dagger.AmbientModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
@@ -143,7 +141,6 @@ import com.android.systemui.statusbar.window.StatusBarWindowModule;
 import com.android.systemui.telephony.data.repository.TelephonyRepositoryModule;
 import com.android.systemui.temporarydisplay.dagger.TemporaryDisplayModule;
 import com.android.systemui.tuner.dagger.TunerModule;
-import com.android.systemui.unfold.SysUIUnfoldModule;
 import com.android.systemui.user.UserModule;
 import com.android.systemui.user.domain.UserDomainLayerModule;
 import com.android.systemui.util.EventLogModule;
@@ -188,8 +185,6 @@ import javax.inject.Named;
  * may not appreciate that.
  */
 @Module(includes = {
-        AccessibilityModule.class,
-        AccessibilityRepositoryModule.class,
         AmbientModule.class,
         AppOpsModule.class,
         AssistModule.class,
@@ -254,7 +249,7 @@ import javax.inject.Named;
         SystemPropertiesFlagsModule.class,
         SysUIConcurrencyModule.class,
         SysUICoroutinesModule.class,
-        SysUIUnfoldModule.class,
+        CommonSystemUIUnfoldModule.class,
         TelephonyRepositoryModule.class,
         TemporaryDisplayModule.class,
         TunerModule.class,
