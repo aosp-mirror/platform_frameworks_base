@@ -106,7 +106,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.function.Consumer;
 
 /**
  * An intent is an abstract description of an operation to be performed.  It
@@ -6069,7 +6068,6 @@ public class Intent implements Parcelable, Cloneable {
      * @see #CHOOSER_CONTENT_TYPE_ALBUM
      * @see #createChooser(Intent, CharSequence)
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_ALBUM_TEXT)
     public static final String EXTRA_CHOOSER_CONTENT_TYPE_HINT =
             "android.intent.extra.CHOOSER_CONTENT_TYPE_HINT";
 
@@ -6086,7 +6084,6 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #EXTRA_CHOOSER_CONTENT_TYPE_HINT
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_ALBUM_TEXT)
     public static final int CHOOSER_CONTENT_TYPE_ALBUM = 1;
 
     /**
@@ -6110,11 +6107,17 @@ public class Intent implements Parcelable, Cloneable {
      * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}
      * method will contains the original intent Chooser has been launched with under the
      * {@link #EXTRA_INTENT} key as a context for the current sharing session. The returned
-     * {@link android.database.Cursor} should contain
-     * {@link android.service.chooser.AdditionalContentContract.Columns#URI} column for the item URI
-     * and, optionally, {@link AdditionalContentContract.CursorExtraKeys#POSITION} extra that
+     * {@link android.database.Cursor} should contain:
+     * <ul>
+     * <li>{@link android.service.chooser.AdditionalContentContract.Columns#URI} column for the item
+     * URI.</li>
+     * <li>Optional columns {@link MediaStore.MediaColumns#WIDTH} and
+     * {@link MediaStore.MediaColumns#HEIGHT} for the dimensions of the preview image.
+     * These columns can also be returned for each {@link #EXTRA_STREAM} item metadata
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)} call.</li>
+     * <li>Optional {@link AdditionalContentContract.CursorExtraKeys#POSITION} extra that
      * specifies the cursor starting position; the item at this position is expected to match the
-     * item specified by {@link #EXTRA_CHOOSER_FOCUSED_ITEM_POSITION}.</p>
+     * item specified by {@link #EXTRA_CHOOSER_FOCUSED_ITEM_POSITION}.</li></ul></p>
      *
      * <p>When the user makes a selection change,
      * {@link ContentProvider#call(String, String, Bundle)} method will be invoked with the "method"
@@ -7625,6 +7628,13 @@ public class Intent implements Parcelable, Cloneable {
             | FLAG_GRANT_PREFIX_URI_PERMISSION;
 
     /**
+     * Flags that are not normally set by application code, but set for you by the system.
+     */
+    private static final int SYSTEM_ONLY_FLAGS = FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+            | FLAG_ACTIVITY_BROUGHT_TO_FRONT
+            | FLAG_RECEIVER_FROM_SHELL;
+
+    /**
      * Local flag indicating this instance was created by copy constructor.
      */
     private static final int LOCAL_FLAG_FROM_COPY = 1 << 0;
@@ -7676,6 +7686,11 @@ public class Intent implements Parcelable, Cloneable {
      */
     @TestApi
     public static final int EXTENDED_FLAG_FILTER_MISMATCH = 1 << 0;
+
+    /**
+     * Extended flags that are not normally set by application code, but set for you by the system.
+     */
+    private static final int SYSTEM_ONLY_EXTENDED_FLAGS = EXTENDED_FLAG_FILTER_MISMATCH;
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -8327,27 +8342,6 @@ public class Intent implements Parcelable, Cloneable {
 
         } catch (IndexOutOfBoundsException e) {
             throw new URISyntaxException(uri, "illegal Intent URI format", i);
-        }
-    }
-
-    /**
-     * Note all {@link Uri} that are referenced internally, with the expectation that Uri permission
-     * grants will need to be issued to ensure the recipient of this object is able to render its
-     * contents.
-     * See b/281044385 for more context and examples about what happens when this isn't done
-     * correctly.
-     *
-     * @hide
-     */
-    public void visitUris(@NonNull Consumer<Uri> visitor) {
-        if (android.app.Flags.visitRiskyUris()) {
-            visitor.accept(mData);
-            if (mSelector != null) {
-                mSelector.visitUris(visitor);
-            }
-            if (mOriginalIntent != null) {
-                mOriginalIntent.visitUris(visitor);
-            }
         }
     }
 
@@ -12638,6 +12632,28 @@ public class Intent implements Parcelable, Cloneable {
             if (device != null) {
                 device.prepareToEnterProcess(source);
             }
+        }
+    }
+
+    /**
+     * Prepare this {@link Intent} to enter system_server.
+     *
+     * @hide
+     */
+    public void prepareToEnterSystemServer() {
+        // Refuse possible leaked file descriptors
+        if (hasFileDescriptors()) {
+            throw new IllegalArgumentException("File descriptors passed in Intent");
+        }
+        // These flags are set only by the system, and should be stripped out as soon as the intent
+        // is received by system_server from the caller so it can be properly updated later.
+        removeFlags(SYSTEM_ONLY_FLAGS);
+        removeExtendedFlags(SYSTEM_ONLY_EXTENDED_FLAGS);
+        if (mOriginalIntent != null) {
+            mOriginalIntent.prepareToEnterSystemServer();
+        }
+        if (mSelector != null) {
+            mSelector.prepareToEnterSystemServer();
         }
     }
 

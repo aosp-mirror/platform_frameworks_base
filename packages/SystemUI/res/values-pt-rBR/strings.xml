@@ -107,7 +107,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processando gravação de tela"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação contínua para uma sessão de gravação de tela"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Iniciar gravação?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Enquanto você grava, o Android tem acesso a todas as informações na tela ou reproduzidas no dispositivo. Portanto, tenha cuidado com senhas, detalhes de pagamento, mensagens, fotos, áudios e vídeos."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Durante a gravação, o Android tem acesso às informações na tela ou reproduzidas no dispositivo. Portanto, tenha cuidado com senhas, detalhes de pagamento, mensagens, fotos, áudios e vídeos."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Enquanto você grava um app, o Android tem acesso a todas as informações visíveis ou reproduzidas nele. Tenha cuidado com senhas, detalhes de pagamento, mensagens fotos, áudios e vídeos."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Iniciar gravação"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Gravar áudio"</string>
@@ -125,6 +125,29 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Toque para ver"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Erro ao salvar a gravação da tela"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Erro ao iniciar a gravação de tela"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Você vai parar de gravar o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Você vai parar de compartilhar o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Você vai parar de transmitir o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Gravador de problemas"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Processando a gravação do problema"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Notificação em andamento para uma sessão de coleta de problemas"</string>
@@ -135,7 +158,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Erro ao salvar a gravação do problema"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Erro ao iniciar a gravação do problema"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Visualização em tela cheia"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"Para sair, deslize de cima para baixo."</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Entendi"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Voltar"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Página inicial"</string>
@@ -278,11 +302,12 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Salvo"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"desconectar"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ativar"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Ativar automaticamente de novo amanhã"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Recursos como o Quick Share e o Encontre Meu Dispositivo usam Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"O Bluetooth será ativado amanhã de manhã"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Compartilhamento de áudio"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Compartilhando áudio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Compartilhar áudio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Compartilhando áudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Áudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Fone de ouvido"</string>
@@ -361,18 +386,13 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Que parte da sua experiência no dispositivo foi afetada?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Selecionar tipo de problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Gravação de tela"</string>
-    <!-- no translation found for performance (6552785217174378320) -->
-    <skip />
-    <!-- no translation found for user_interface (3712869377953950887) -->
-    <skip />
-    <!-- no translation found for thermal (6758074791325414831) -->
-    <skip />
+    <string name="performance" msgid="6552785217174378320">"Desempenho"</string>
+    <string name="user_interface" msgid="3712869377953950887">"Interface do usuário"</string>
+    <string name="thermal" msgid="6758074791325414831">"Térmico"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo uma mão"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Aparelhos auditivos"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Ativos"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Desconectados"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Aparelhos auditivos"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Parear novo dispositivo"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Clique para parear o novo dispositivo"</string>
@@ -470,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"selecionar widget"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"remover widget"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"posicionar widget selecionado"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Trocar usuário"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu suspenso"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todos os apps e dados nesta sessão serão excluídos."</string>
@@ -523,6 +549,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Iniciar agora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Sem notificações"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nenhuma notificação nova"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Notificações adaptáveis ativadas"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"O dispositivo agora diminui o volume e reduz os pop-ups na tela por até 2 minutos quando você recebe muitas notificações em pouco tempo."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Desativar"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloqueie p/ acessar notificações antigas"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Este dispositivo é gerenciado pelo seu familiar responsável"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Sua organização é dona deste dispositivo e pode monitorar o tráfego de rede"</string>
@@ -599,7 +628,7 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Agora não"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"App fixado"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App liberado"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Ligar"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Ligações"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Toques"</string>
     <string name="stream_music" msgid="2188224742361847580">"Mídia"</string>
@@ -639,7 +668,7 @@
     <string name="volume_panel_hint_muted" msgid="1124844870181285320">"som desativado"</string>
     <string name="volume_panel_hint_vibrate" msgid="4136223145435914132">"vibrar"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Tocando <xliff:g id="LABEL">%s</xliff:g> em"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Onde o áudio vai tocar?"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Áudio definido para"</string>
     <string name="media_output_title_ongoing_call" msgid="208426888064112006">"Ligando"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sintonizador System UI"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de status"</string>
@@ -1178,6 +1207,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toque para mais informações"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nenhum alarme definido"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"inserir bloqueio de tela"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Toque no sensor de impressão digital. É o menor botão na lateral do smartphone"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensor de impressão digital"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autenticar"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"acessar o dispositivo"</string>
@@ -1210,7 +1240,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# app está ativo}one{# apps está ativo}many{# de apps estão ativos}other{# apps estão ativos}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nova informação"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apps ativos"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Esses apps ficam ativos e em execução mesmo quando não estão em uso. Isso melhora a funcionalidade deles, mas também pode afetar a duração da bateria."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Esses apps ficam ativos e em execução mesmo quando não estão em uso. Isso melhora a funcionalidade deles, mas também afeta a duração da bateria."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Parar"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Parado"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Concluído"</string>
@@ -1275,8 +1305,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"fechado"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"aberto"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"Bateria da stylus em <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Conecte sua stylus a um carregador"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria da stylus fraca"</string>
     <string name="video_camera" msgid="7654002575156149298">"Filmadora"</string>
@@ -1328,8 +1357,19 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Atalhos de pesquisa"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ícone \"Fechar\""</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ícone \"Abrir\""</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
     <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Voltar"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Para voltar, deslize para a esquerda ou direita usando 3 dedos em qualquer lugar do touchpad."</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Touchpad mostrando 3 dedos deslizando para a direita e esquerda"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Tela do dispositivo mostrando a animação do gesto de volta"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Luz de fundo do teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nível %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Automação residencial"</string>

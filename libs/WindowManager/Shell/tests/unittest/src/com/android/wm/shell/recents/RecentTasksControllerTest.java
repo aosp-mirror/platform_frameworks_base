@@ -113,6 +113,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private DisplayInsetsController mDisplayInsetsController;
     @Mock
     private IRecentTasksListener mRecentTasksListener;
+    @Mock
+    private TaskStackTransitionObserver mTaskStackTransitionObserver;
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -139,7 +141,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 mDisplayInsetsController, mMainExecutor));
         mRecentTasksControllerReal = new RecentTasksController(mContext, mShellInit,
                 mShellController, mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
-                Optional.of(mDesktopModeTaskRepository), mMainExecutor);
+                Optional.of(mDesktopModeTaskRepository), mTaskStackTransitionObserver,
+                mMainExecutor);
         mRecentTasksController = spy(mRecentTasksControllerReal);
         mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit, mShellCommandHandler,
                 null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController),
@@ -396,7 +399,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testGetRecentTasks_proto2Enabled_ignoresMinimizedFreeformTasks() {
+    public void testGetRecentTasks_proto2Enabled_includesMinimizedFreeformTasks() {
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
         ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
@@ -412,8 +415,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
         ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
                 MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
 
-        // 2 freeform tasks should be grouped into one, 1 task should be skipped, 3 total recents
-        // entries
+        // 3 freeform tasks should be grouped into one, 2 single tasks, 3 total recents entries
         assertEquals(3, recentTasks.size());
         GroupedRecentTaskInfo freeformGroup = recentTasks.get(0);
         GroupedRecentTaskInfo singleGroup1 = recentTasks.get(1);
@@ -425,9 +427,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
         assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup2.getType());
 
         // Check freeform group entries
-        assertEquals(2, freeformGroup.getTaskInfoList().size());
+        assertEquals(3, freeformGroup.getTaskInfoList().size());
         assertEquals(t1, freeformGroup.getTaskInfoList().get(0));
-        assertEquals(t5, freeformGroup.getTaskInfoList().get(1));
+        assertEquals(t3, freeformGroup.getTaskInfoList().get(1));
+        assertEquals(t5, freeformGroup.getTaskInfoList().get(2));
 
         // Check single entries
         assertEquals(t2, singleGroup1.getTaskInfo1());
@@ -554,6 +557,30 @@ public class RecentTasksControllerTest extends ShellTestCase {
         mRecentTasksControllerReal.onTaskRemoved(taskInfo);
 
         verify(mRecentTasksListener, never()).onRunningTaskVanished(any());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    public void onTaskMovedToFront_TaskStackObserverEnabled_triggersOnTaskMovedToFront()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskMovedToFrontThroughTransition(taskInfo);
+
+        verify(mRecentTasksListener).onTaskMovedToFront(taskInfo);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    public void onTaskMovedToFront_TaskStackObserverEnabled_doesNotTriggersOnTaskMovedToFront()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskMovedToFront(taskInfo);
+
+        verify(mRecentTasksListener, never()).onTaskMovedToFront(any());
     }
 
     @Test

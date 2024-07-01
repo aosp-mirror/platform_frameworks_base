@@ -48,8 +48,8 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_I
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
-import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_OPAQUE;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG_WINDOW_STATE;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.dumpBarTransitions;
 import static com.android.systemui.util.Utils.isGesturalModeOnDefaultDisplay;
@@ -136,6 +136,8 @@ import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.rotation.RotationButtonController;
+import com.android.systemui.shared.rotation.RotationPolicyUtil;
+import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -148,7 +150,6 @@ import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.AutoHideController;
-import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -366,9 +367,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 }
 
                 @Override
-                public void updateRotationWatcherState(int rotation) {
+                public void updateRotationWatcherState(
+                        int rotation, @Nullable Boolean isRotationLocked) {
                     if (mIsOnDefaultDisplay && mView != null) {
-                        mView.getRotationButtonController().onRotationWatcherChanged(rotation);
+                        RotationButtonController controller = mView.getRotationButtonController();
+                        controller.onRotationWatcherChanged(rotation, isRotationLocked);
                         if (mView.needsReorient(rotation)) {
                             repositionNavigationBar(rotation);
                         }
@@ -819,8 +822,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
             // Reset user rotation pref to match that of the WindowManager if starting in locked
             // mode. This will automatically happen when switching from auto-rotate to locked mode.
-            if (display != null && rotationButtonController.isRotationLocked()) {
-                rotationButtonController.setRotationLockedAtAngle(
+            @Nullable Boolean isRotationLocked = RotationPolicyUtil.isRotationLocked(mContext);
+            if (display != null && isRotationLocked) {
+                rotationButtonController.setRotationLockedAtAngle(isRotationLocked,
                         display.getRotation(), /* caller= */ "NavigationBar#onViewAttached");
             }
         } else {
@@ -2028,12 +2032,15 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                     getBarTransitions().setBackgroundOverrideAlpha(1f);
                 }
             }
-            updateScreenPinningGestures();
+
+            // Update the window layout params when the nav mode changes as that will affect the
+            // system gesture insets
+            setNavBarMode(mode);
+            repositionNavigationBar(mCurrentRotation);
 
             if (!canShowSecondaryHandle()) {
                 resetSecondaryHandle();
             }
-            setNavBarMode(mode);
             mView.setShouldShowSwipeUpUi(mOverviewProxyService.shouldShowSwipeUpUI());
         }
     };

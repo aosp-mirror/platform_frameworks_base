@@ -135,7 +135,6 @@ class CustomizationProviderTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
-                systemSettings = FakeSettings(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -481,8 +480,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                         )
                     }
                 }
-            }
-            ?: emptyList()
+            } ?: emptyList()
     }
 
     private fun querySlots(): List<Slot> {
@@ -517,8 +515,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                         )
                     }
                 }
-            }
-            ?: emptyList()
+            } ?: emptyList()
     }
 
     private fun queryAffordances(): List<Affordance> {
@@ -558,8 +555,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                         )
                     }
                 }
-            }
-            ?: emptyList()
+            } ?: emptyList()
     }
 
     data class Slot(

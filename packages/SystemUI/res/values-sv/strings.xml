@@ -125,6 +125,29 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Tryck för att visa"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Det gick inte att spara skärminspelningen"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Det gick inte att starta skärminspelningen"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Du slutar att spela in &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Du slutar att dela &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Du slutar att casta &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Probleminspelare"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Behandlar probleminspelning"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Avisering om pågående probleminsamlingssession"</string>
@@ -135,7 +158,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Det gick inte att spara probleminspelning"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Det gick inte att starta probleminspelning"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Visar på fullskärm"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"Svep nedåt från skärmens överkant för att avsluta."</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Tillbaka"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Startsida"</string>
@@ -278,11 +302,12 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Sparad"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"koppla från"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivera"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Aktivera automatiskt igen i morgon"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Funktioner som Snabbdelning och Hitta min enhet använder Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth aktiveras i morgon bitti"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Ljuddelning"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Delar ljud"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Dela ljud"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Delar ljud"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> batteri"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Ljud"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -366,10 +391,8 @@
     <string name="thermal" msgid="6758074791325414831">"Termisk"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Enhandsläge"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Hörhjälpmedel"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktiva"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Frånkopplade"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Hörhjälpmedel"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Parkoppla en ny enhet"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Klicka för att parkoppla en ny enhet"</string>
@@ -467,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"välj widget"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ta bort widget"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"placera vald widget"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Byt användare"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rullgardinsmeny"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alla appar och data i denna session kommer att raderas."</string>
@@ -520,6 +549,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Starta nu"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Inga aviseringar"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Det finns inga nya aviseringar"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Anpassade aviseringar är på"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Om du får många aviseringar tätt inpå varandra sänker nu enheten volymen och minskar antalet popuper i upp till två minuter."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Inaktivera"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Lås upp för att se äldre aviseringar"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Den här enheten hanteras av din förälder"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisationen äger den här enheten och kan övervaka nätverkstrafiken"</string>
@@ -1175,6 +1207,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tryck för mer information"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Inget inställt alarm"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"ange skärmlåset"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Tryck på fingeravtryckssensorn. Det är den mindre knappen på sidan av telefonen"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Fingeravtryckssensor"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentisera"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ange enhet"</string>
@@ -1324,8 +1357,19 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Sökgenvägar"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikonen Komprimera"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikonen Utöka"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"eller"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
     <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Tillbaka"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Gå tillbaka genom att svepa åt vänster eller höger med tre fingrar var som helst på styrplattan."</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Tre fingrar rör sig åt höger och vänster på en styrplatta"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"En enhetsskärm visar en animation för rörelsen Tillbaka"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Bakgrundsbelysning för tangentbord"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivå %1$d av %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Hemstyrning"</string>

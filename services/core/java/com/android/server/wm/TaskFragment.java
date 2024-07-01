@@ -29,6 +29,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.isFloating;
 import static android.content.pm.ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -40,6 +41,8 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
@@ -79,7 +82,6 @@ import android.app.IApplicationThread;
 import android.app.ResultInfo;
 import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityResultItem;
-import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
@@ -87,6 +89,7 @@ import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -1101,21 +1104,34 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     ActivityRecord getTopNonFinishingActivity() {
-        return getTopNonFinishingActivity(true /* includeOverlays */);
+        return getTopNonFinishingActivity(
+                true /* includeOverlays */, true /* includeLaunchedFromBubble */);
     }
 
     /**
      * Returns the top-most non-finishing activity, even if the activity is NOT ok to show to
      * the current user.
      * @param includeOverlays whether the task overlay activity should be included.
+     * @param includeLaunchedFromBubble whether activities that were launched from a bubble should
+     *                                  be included.
      * @see #topRunningActivity(boolean)
      */
-    ActivityRecord getTopNonFinishingActivity(boolean includeOverlays) {
-        // Split into 2 to avoid object creation due to variable capture.
+    ActivityRecord getTopNonFinishingActivity(boolean includeOverlays,
+            boolean includeLaunchedFromBubble) {
+        // Split to avoid object creation due to variable capture.
         if (includeOverlays) {
-            return getActivity((r) -> !r.finishing);
+            if (includeLaunchedFromBubble) {
+                return getActivity(r -> !r.finishing);
+            } else {
+                return getActivity(r -> !r.finishing && !r.getLaunchedFromBubble());
+            }
         }
-        return getActivity((r) -> !r.finishing && !r.isTaskOverlay());
+        if (includeLaunchedFromBubble) {
+            return getActivity(r -> !r.finishing && !r.isTaskOverlay());
+        } else {
+            return getActivity(
+                    r -> !r.finishing && !r.isTaskOverlay() && !r.getLaunchedFromBubble());
+        }
     }
 
     ActivityRecord topRunningActivity() {
@@ -1587,9 +1603,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             try {
                 final IApplicationThread appThread = next.app.getThread();
-                final ClientTransaction transaction = Flags.bundleClientTransactionFlag()
-                        ? null
-                        : ClientTransaction.obtain(appThread);
                 // Deliver all pending results.
                 final ArrayList<ResultInfo> a = next.results;
                 if (a != null) {
@@ -1600,24 +1613,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         }
                         final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
                                 next.token, a);
-                        if (transaction == null) {
-                            mAtmService.getLifecycleManager().scheduleTransactionItem(
-                                    appThread, activityResultItem);
-                        } else {
-                            transaction.addTransactionItem(activityResultItem);
-                        }
+                        mAtmService.getLifecycleManager().scheduleTransactionItem(
+                                appThread, activityResultItem);
                     }
                 }
 
                 if (next.newIntents != null) {
                     final NewIntentItem newIntentItem = NewIntentItem.obtain(
                             next.token, next.newIntents, true /* resume */);
-                    if (transaction == null) {
-                        mAtmService.getLifecycleManager().scheduleTransactionItem(
-                                appThread, newIntentItem);
-                    } else {
-                        transaction.addTransactionItem(newIntentItem);
-                    }
+                    mAtmService.getLifecycleManager().scheduleTransactionItem(
+                            appThread, newIntentItem);
                 }
 
                 // Well the app will no longer be stopped.
@@ -1634,13 +1639,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(
                         next.token, topProcessState, dc.isNextTransitionForward(),
                         next.shouldSendCompatFakeFocus());
-                if (transaction == null) {
-                    mAtmService.getLifecycleManager().scheduleTransactionItem(
-                            appThread, resumeActivityItem);
-                } else {
-                    transaction.addTransactionItem(resumeActivityItem);
-                    mAtmService.getLifecycleManager().scheduleTransaction(transaction);
-                }
+                mAtmService.getLifecycleManager().scheduleTransactionItem(
+                        appThread, resumeActivityItem);
 
                 ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivity: Resumed %s", next);
             } catch (Exception e) {
@@ -2225,7 +2225,44 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     static class ConfigOverrideHint {
         @Nullable DisplayInfo mTmpOverrideDisplayInfo;
         @Nullable ActivityRecord.CompatDisplayInsets mTmpCompatInsets;
+        @Nullable Rect mParentAppBoundsOverride;
+        int mTmpOverrideConfigOrientation;
         boolean mUseOverrideInsetsForConfig;
+
+        void resolveTmpOverrides(DisplayContent dc, Configuration parentConfig,
+                boolean isFixedRotationTransforming) {
+            mParentAppBoundsOverride = new Rect(parentConfig.windowConfiguration.getAppBounds());
+            mTmpOverrideConfigOrientation = parentConfig.orientation;
+            final Insets insets;
+            if (mUseOverrideInsetsForConfig && dc != null
+                    && !isFloating(parentConfig.windowConfiguration.getWindowingMode())) {
+                // Insets are decoupled from configuration by default from V+, use legacy
+                // compatibility behaviour for apps targeting SDK earlier than 35
+                // (see applySizeOverrideIfNeeded).
+                int rotation = parentConfig.windowConfiguration.getRotation();
+                if (rotation == ROTATION_UNDEFINED && !isFixedRotationTransforming) {
+                    rotation = dc.getRotation();
+                }
+                final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+                final int dw = rotated ? dc.mBaseDisplayHeight : dc.mBaseDisplayWidth;
+                final int dh = rotated ? dc.mBaseDisplayWidth : dc.mBaseDisplayHeight;
+                DisplayPolicy.DecorInsets.Info decorInsets = dc.getDisplayPolicy()
+                        .getDecorInsetsInfo(rotation, dw, dh);
+                final Rect stableBounds = decorInsets.mOverrideConfigFrame;
+                mTmpOverrideConfigOrientation = stableBounds.width() > stableBounds.height()
+                                ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+                insets = Insets.of(decorInsets.mOverrideNonDecorInsets);
+            } else {
+                insets = Insets.NONE;
+            }
+            mParentAppBoundsOverride.inset(insets);
+        }
+
+        void resetTmpOverrides() {
+            mTmpOverrideDisplayInfo = null;
+            mTmpCompatInsets = null;
+            mTmpOverrideConfigOrientation = ORIENTATION_UNDEFINED;
+        }
     }
 
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
@@ -2311,7 +2348,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             if (!customContainerPolicy && windowingMode != WINDOWING_MODE_FREEFORM) {
                 final Rect containingAppBounds;
                 if (insideParentBounds) {
-                    containingAppBounds = parentConfig.windowConfiguration.getAppBounds();
+                    containingAppBounds = useOverrideInsetsForConfig
+                            ? overrideHint.mParentAppBoundsOverride
+                            : parentConfig.windowConfiguration.getAppBounds();
                 } else {
                     // Restrict appBounds to display non-decor rather than parent because the
                     // override bounds are beyond the parent. Otherwise, it won't match the

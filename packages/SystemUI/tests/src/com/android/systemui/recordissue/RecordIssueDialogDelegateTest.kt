@@ -17,7 +17,6 @@
 package com.android.systemui.recordissue
 
 import android.app.Dialog
-import android.content.SharedPreferences
 import android.os.UserHandle
 import android.testing.TestableLooper
 import android.widget.Button
@@ -57,6 +56,7 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -71,7 +71,6 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
     @Mock private lateinit var mediaProjectionMetricsLogger: MediaProjectionMetricsLogger
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var state: IssueRecordingState
-    @Mock private lateinit var sharedPreferences: SharedPreferences
     @Mock
     private lateinit var screenCaptureDisabledDialogDelegate: ScreenCaptureDisabledDialogDelegate
     @Mock private lateinit var screenCaptureDisabledDialog: SystemUIDialog
@@ -192,7 +191,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                 anyInt(),
                 eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER)
             )
-        verify(factory).create(any<ScreenCapturePermissionDialogDelegate>())
+        verify(factory, times(2)).create(any(SystemUIDialog.Delegate::class.java))
     }
 
     @Test
@@ -213,7 +212,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                 anyInt(),
                 eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER)
             )
-        verify(factory, never()).create(any<ScreenCapturePermissionDialogDelegate>())
+        verify(factory, never()).create()
     }
 
     @Test

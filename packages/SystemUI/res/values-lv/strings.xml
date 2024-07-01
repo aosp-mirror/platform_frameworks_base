@@ -125,6 +125,29 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Pieskarieties, lai skatītu"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Saglabājot ekrāna ierakstu, radās kļūda."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Sākot ierakstīt ekrāna saturu, radās kļūda."</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Tiks pārtraukta lietotnes &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; satura ierakstīšana"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Tiks pārtraukta lietotnes &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; satura kopīgošana"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Tiks pārtraukta lietotnes &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; satura apraide"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Problēmu ierakstītājs"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Apstrādā problēmas ierakstu"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Aktīvs paziņojums par problēmu vākšanas sesiju"</string>
@@ -135,7 +158,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Saglabājot problēmas ierakstu, radās kļūda."</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Sākot problēmas ierakstīšanu, radās kļūda."</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Skatīšanās pilnekrāna režīmā"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"Lai izietu, no augšdaļas velciet lejup."</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Labi"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Atpakaļ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Sākums"</string>
@@ -278,11 +302,12 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Saglabāta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"atvienot"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivizēt"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Automātiski atkal ieslēgt rīt"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Tādas funkcijas kā “Ātrā kopīgošana” un “Atrast ierīci” izmanto Bluetooth savienojumu"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth savienojums tiks ieslēgts rīt no rīta"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Kopīgot audio"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Notiek audio kopīgošana"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Kopīgot audio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Notiek audio kopīgošana…"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Akumulators: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Austiņas"</string>
@@ -361,18 +386,13 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Kuras ierīces funkcijas tika ietekmētas?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Atlasiet problēmas veidu"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Ekrāna ierakstīšana"</string>
-    <!-- no translation found for performance (6552785217174378320) -->
-    <skip />
-    <!-- no translation found for user_interface (3712869377953950887) -->
-    <skip />
-    <!-- no translation found for thermal (6758074791325414831) -->
-    <skip />
+    <string name="performance" msgid="6552785217174378320">"Veiktspēja"</string>
+    <string name="user_interface" msgid="3712869377953950887">"Lietotāja saskarne"</string>
+    <string name="thermal" msgid="6758074791325414831">"Ierīces temperatūra"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Vienas rokas režīms"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Dzirdes aparāti"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktīvs"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Atvienots"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Dzirdes aparāti"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Savienot pārī jaunu ierīci"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Noklikšķiniet, lai savienotu pārī jaunu ierīci"</string>
@@ -470,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"atlasīt logrīku"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"noņemt logrīku"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"novietot atlasīto logrīku"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Mainīt lietotāju"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"novelkamā izvēlne"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tiks dzēstas visas šīs sesijas lietotnes un dati."</string>
@@ -523,6 +549,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Sākt tūlīt"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nav paziņojumu"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nav jaunu paziņojumu"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Adaptīvie paziņojumi ieslēgti"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Jūsu ierīce tagad līdz pat 2 minūtēm samazina skaļuma līmeni un ierobežo uznirstošo elementu skaitu, kad īsā laika posmā saņemat daudzu paziņojumu."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Izslēgt"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Atbloķējiet vecāku paziņojumu skatīšanai"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Šo ierīci pārvalda viens no jūsu vecākiem."</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Šī ierīce pieder jūsu organizācijai, un jūsu organizācija var uzraudzīt tīkla datplūsmu."</string>
@@ -1178,6 +1207,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Pieskarieties, lai iegūtu plašāku informāciju."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nav iestatīts signāls"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"ievadīt ekrāna bloķēšanas informāciju"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Pieskarieties pirksta nospieduma sensoram. Tā ir īsākā poga tālruņa malā."</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Pirksta nospieduma sensors"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"veiktu autentificēšanu"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"izmantotu ierīci"</string>
@@ -1275,8 +1305,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"aizvērta"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"atvērta"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
-    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"Skārienekrāna pildspalvas akumulatora uzlādes līmenis: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Pievienojiet skārienekrāna pildspalvu lādētājam"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Zems skārienekrāna pildspalvas akumulatora līmenis"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videokamera"</string>
@@ -1328,8 +1357,19 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Meklēšanas saīsnes"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Sakļaušanas ikona"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Izvēršanas ikona"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"vai"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
     <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Atpakaļ"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Lai pārietu atpakaļ, ar trim pirkstiem velciet pa kreisi vai pa labi jebkurā vietā uz skārienpaliktņa"</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Attēls ar skārienpaliktni, uz kura trīs pirksti kustas pa labi un pa kreisi"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Ierīces ekrāns, kurā redzama animācija ar žestu pāriešanai atpakaļ"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Tastatūras fona apgaismojums"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Līmenis numur %1$d, kopā ir %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Mājas kontrolierīces"</string>

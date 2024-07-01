@@ -25,6 +25,9 @@ import kotlinx.coroutines.flow.StateFlow
  * given mobile data subscription.
  */
 interface DeviceBasedSatelliteRepository {
+    /** The current status of satellite provisioning. If not false, we don't want to show an icon */
+    val isSatelliteProvisioned: StateFlow<Boolean>
+
     /** See [SatelliteConnectionState] for available states */
     val connectionState: StateFlow<SatelliteConnectionState>
 

@@ -105,7 +105,6 @@ import org.mockito.stubbing.Answer;
 
 import java.util.List;
 
-
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public final class DisplayPowerControllerTest {
@@ -1415,7 +1414,7 @@ public final class DisplayPowerControllerTest {
         when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
         when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(.2f);
         when(mHolder.displayPowerState.getSdrScreenBrightness()).thenReturn(.1f);
-        when(mHolder.clamperController.clamp(any(), anyFloat(), anyBoolean())).thenAnswer(
+        when(mHolder.clamperController.clamp(any(), anyFloat(), anyBoolean(), anyInt())).thenAnswer(
                 invocation -> DisplayBrightnessState.builder()
                         .setIsSlowChange(invocation.getArgument(2))
                         .setBrightness(invocation.getArgument(1))
@@ -1439,7 +1438,7 @@ public final class DisplayPowerControllerTest {
         when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
         when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(.2f);
         when(mHolder.displayPowerState.getSdrScreenBrightness()).thenReturn(.1f);
-        when(mHolder.clamperController.clamp(any(), anyFloat(), anyBoolean())).thenAnswer(
+        when(mHolder.clamperController.clamp(any(), anyFloat(), anyBoolean(), anyInt())).thenAnswer(
                 invocation -> DisplayBrightnessState.builder()
                         .setIsSlowChange(invocation.getArgument(2))
                         .setBrightness(invocation.getArgument(1))
@@ -1660,6 +1659,8 @@ public final class DisplayPowerControllerTest {
         int initState = Display.STATE_OFF;
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
+        when(mDisplayOffloadSession.blockScreenOn(any())).thenReturn(true);
+
         // start with OFF.
         when(mHolder.displayPowerState.getScreenState()).thenReturn(initState);
         DisplayPowerRequest dpr = new DisplayPowerRequest();
@@ -1673,6 +1674,7 @@ public final class DisplayPowerControllerTest {
         advanceTime(1); // Run updatePowerState
 
         verify(mDisplayOffloadSession).blockScreenOn(any(Runnable.class));
+        verify(mDisplayOffloadSession, never()).cancelBlockScreenOn();
     }
 
     @Test
@@ -1680,6 +1682,8 @@ public final class DisplayPowerControllerTest {
         // set up.
         int initState = Display.STATE_ON;
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
+        when(mDisplayOffloadSession.blockScreenOn(any())).thenReturn(true);
+
         // start with ON.
         when(mHolder.displayPowerState.getScreenState()).thenReturn(initState);
         DisplayPowerRequest dpr = new DisplayPowerRequest();
@@ -1692,7 +1696,78 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        verify(mDisplayOffloadSession, never()).blockScreenOn(any(Runnable.class));
+        // No cancelBlockScreenOn call because we didn't block.
+        verify(mDisplayOffloadSession, never()).cancelBlockScreenOn();
+    }
+
+    @RequiresFlagsEnabled(Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON)
+    @Test
+    public void testOffloadBlocker_turnON_thenOFF_cancelBlockScreenOnNotCalledIfUnblocked() {
+        // Set up.
+        int initState = Display.STATE_OFF;
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
+        ArgumentCaptor<Runnable> argumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        when(mDisplayOffloadSession.blockScreenOn(argumentCaptor.capture())).thenReturn(true);
+
+        // Start with OFF.
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(initState);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_OFF;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        // Go to ON.
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mDisplayOffloadSession).blockScreenOn(any());
+
+        // Unblocked
+        argumentCaptor.getValue().run();
+        advanceTime(1); // Run updatePowerState
+
+        // Go to OFF immediately
+        dpr.policy = DisplayPowerRequest.POLICY_OFF;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        // No cancelBlockScreenOn call because we already unblocked
+        verify(mDisplayOffloadSession, never()).cancelBlockScreenOn();
+    }
+
+    @RequiresFlagsEnabled(Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON)
+    @Test
+    public void testOffloadBlocker_turnON_thenOFF_cancelBlockScreenOn() {
+        // Set up.
+        int initState = Display.STATE_OFF;
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
+        when(mDisplayOffloadSession.blockScreenOn(any())).thenReturn(true);
+
+        // Start with OFF.
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(initState);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_OFF;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        // Go to ON.
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        // We should call blockScreenOn
+        verify(mDisplayOffloadSession).blockScreenOn(any(Runnable.class));
+
+        // Go to OFF immediately
+        dpr.policy = DisplayPowerRequest.POLICY_OFF;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        // We should call cancelBlockScreenOn
+        verify(mDisplayOffloadSession).cancelBlockScreenOn();
     }
 
     @Test
@@ -2094,7 +2169,7 @@ public final class DisplayPowerControllerTest {
         BrightnessClamperController clamperController = mock(BrightnessClamperController.class);
 
         when(hbmController.getCurrentBrightnessMax()).thenReturn(PowerManager.BRIGHTNESS_MAX);
-        when(clamperController.clamp(any(), anyFloat(), anyBoolean())).thenAnswer(
+        when(clamperController.clamp(any(), anyFloat(), anyBoolean(), anyInt())).thenAnswer(
                 invocation -> DisplayBrightnessState.builder()
                         .setIsSlowChange(invocation.getArgument(2))
                         .setBrightness(invocation.getArgument(1))
@@ -2328,7 +2403,7 @@ public final class DisplayPowerControllerTest {
         BrightnessClamperController getBrightnessClamperController(Handler handler,
                 BrightnessClamperController.ClamperChangeListener clamperChangeListener,
                 BrightnessClamperController.DisplayDeviceData data, Context context,
-                DisplayManagerFlags flags) {
+                DisplayManagerFlags flags, SensorManager sensorManager) {
             return mClamperController;
         }
 

@@ -254,7 +254,7 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
                 synchronized (ImfLock.class) {
                     ClientState cs = imms.getClientStateLocked(client);
                     if (cs != null) {
-                        imms.requestClientSessionLocked(cs);
+                        imms.requestClientSessionLocked(cs, userId);
                         imms.requestClientSessionForAccessibilityLocked(cs);
                     }
                 }

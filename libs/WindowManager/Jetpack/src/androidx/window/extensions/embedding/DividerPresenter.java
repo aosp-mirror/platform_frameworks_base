@@ -169,6 +169,11 @@ class DividerPresenter implements View.OnTouchListener {
     @GuardedBy("mLock")
     private int mDividerPosition;
 
+    /** Indicates if there are containers to be finished since the divider has appeared. */
+    @GuardedBy("mLock")
+    @VisibleForTesting
+    private boolean mHasContainersToFinish = false;
+
     DividerPresenter(int taskId, @NonNull DragEventCallback dragEventCallback,
             @NonNull Executor callbackExecutor) {
         mTaskId = taskId;
@@ -180,7 +185,8 @@ class DividerPresenter implements View.OnTouchListener {
     void updateDivider(
             @NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentParentInfo parentInfo,
-            @Nullable SplitContainer topSplitContainer) {
+            @Nullable SplitContainer topSplitContainer,
+            boolean isTaskFragmentVanished) {
         if (!Flags.activityEmbeddingInteractiveDividerFlag()) {
             return;
         }
@@ -188,6 +194,18 @@ class DividerPresenter implements View.OnTouchListener {
         synchronized (mLock) {
             // Clean up the decor surface if top SplitContainer is null.
             if (topSplitContainer == null) {
+                // Check if there are containers to finish but the TaskFragment hasn't vanished yet.
+                // Don't remove the decor surface and divider if so as the removal should happen in
+                // a following step when the TaskFragment has vanished. This ensures that the decor
+                // surface is removed only after the resulting Activity is ready to be shown,
+                // otherwise there may be flicker.
+                if (mHasContainersToFinish) {
+                    if (isTaskFragmentVanished) {
+                        setHasContainersToFinish(false);
+                    } else {
+                        return;
+                    }
+                }
                 removeDecorSurfaceAndDivider(wct);
                 return;
             }
@@ -868,6 +886,12 @@ class DividerPresenter implements View.OnTouchListener {
         }
     }
 
+    void setHasContainersToFinish(boolean hasContainersToFinish) {
+        synchronized (mLock) {
+            mHasContainersToFinish = hasContainersToFinish;
+        }
+    }
+
     private static boolean isDraggingToFullscreenAllowed(
             @NonNull DividerAttributes dividerAttributes) {
         // TODO(b/293654166) Use DividerAttributes.isDraggingToFullscreenAllowed when extension is
@@ -1394,10 +1418,16 @@ class DividerPresenter implements View.OnTouchListener {
                 primaryBounds = mProperties.mIsReversedLayout ? boundsBottom : boundsTop;
                 secondaryBounds = mProperties.mIsReversedLayout ? boundsTop : boundsBottom;
             }
-            t.setWindowCrop(mPrimaryVeil, primaryBounds.width(), primaryBounds.height());
-            t.setWindowCrop(mSecondaryVeil, secondaryBounds.width(), secondaryBounds.height());
-            t.setPosition(mPrimaryVeil, primaryBounds.left, primaryBounds.top);
-            t.setPosition(mSecondaryVeil, secondaryBounds.left, secondaryBounds.top);
+            if (mPrimaryVeil != null) {
+                t.setWindowCrop(mPrimaryVeil, primaryBounds.width(), primaryBounds.height());
+                t.setPosition(mPrimaryVeil, primaryBounds.left, primaryBounds.top);
+                t.setVisibility(mPrimaryVeil, !primaryBounds.isEmpty());
+            }
+            if (mSecondaryVeil != null) {
+                t.setWindowCrop(mSecondaryVeil, secondaryBounds.width(), secondaryBounds.height());
+                t.setPosition(mSecondaryVeil, secondaryBounds.left, secondaryBounds.top);
+                t.setVisibility(mSecondaryVeil, !secondaryBounds.isEmpty());
+            }
         }
 
         private static float[] colorToFloatArray(@NonNull Color color) {

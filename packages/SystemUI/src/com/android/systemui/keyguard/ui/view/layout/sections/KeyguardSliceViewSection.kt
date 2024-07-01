@@ -35,7 +35,7 @@ constructor(
 ) : KeyguardSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!MigrateClocksToBlueprint.isEnabled) return
-        if (smartspaceController.isEnabled()) return
+        if (smartspaceController.isEnabled) return
 
         constraintLayout.findViewById<View?>(R.id.keyguard_slice_view)?.let {
             (it.parent as ViewGroup).removeView(it)
@@ -47,7 +47,7 @@ constructor(
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
         if (!MigrateClocksToBlueprint.isEnabled) return
-        if (smartspaceController.isEnabled()) return
+        if (smartspaceController.isEnabled) return
 
         constraintSet.apply {
             connect(
@@ -82,7 +82,7 @@ constructor(
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
         if (!MigrateClocksToBlueprint.isEnabled) return
-        if (smartspaceController.isEnabled()) return
+        if (smartspaceController.isEnabled) return
 
         constraintLayout.removeView(R.id.keyguard_slice_view)
     }

@@ -34,6 +34,7 @@ import com.android.credentialmanager.getflow.ProviderDisplayInfo
 import com.android.credentialmanager.getflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.generateDisplayTitleTextResCode
 import com.android.credentialmanager.model.BiometricRequestInfo
+import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.creation.CreateOptionInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
@@ -476,7 +477,9 @@ private fun retrieveBiometricGetDisplayValues(
         return null
     }
     val singleEntryType = selectedEntry.credentialType
-    val username = selectedEntry.userName
+    val descriptionName = if (singleEntryType == CredentialType.PASSKEY &&
+        !selectedEntry.displayName.isNullOrBlank()) selectedEntry.displayName else
+        selectedEntry.userName
 
     // TODO(b/336362538) : In W, utilize updated localization strings
     displayTitleText = context.getString(
@@ -487,7 +490,7 @@ private fun retrieveBiometricGetDisplayValues(
     descriptionText = context.getString(
         R.string.get_dialog_description_single_tap,
         getRequestDisplayInfo.appName,
-        username
+        descriptionName
     )
 
     return BiometricDisplayInfo(providerIcon = icon, providerName = providerName,

@@ -783,9 +783,11 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.DEVICE_OUT_HDMI_EARC
     ));
 
+    private final Object mAbsoluteVolumeDeviceInfoMapLock = new Object();
     // Devices where the framework sends a full scale audio signal, and controls the volume of
     // the external audio system separately.
     // For possible volume behaviors, see {@link AudioManager.AbsoluteDeviceVolumeBehavior}.
+    @GuardedBy("mAbsoluteVolumeDeviceInfoMapLock")
     Map<Integer, AbsoluteVolumeDeviceInfo> mAbsoluteVolumeDeviceInfoMap = new ArrayMap<>();
 
     /**
@@ -3715,9 +3717,8 @@ public class AudioService extends IAudioService.Stub
         int oldIndex = mStreamStates[streamType].getIndex(device);
 
         // Check if the volume adjustment should be handled by an absolute volume controller instead
-        if (isAbsoluteVolumeDevice(device)
-                && (flags & AudioManager.FLAG_ABSOLUTE_VOLUME) == 0) {
-            AbsoluteVolumeDeviceInfo info = mAbsoluteVolumeDeviceInfoMap.get(device);
+        if (isAbsoluteVolumeDevice(device) && (flags & AudioManager.FLAG_ABSOLUTE_VOLUME) == 0) {
+            final AbsoluteVolumeDeviceInfo info = getAbsoluteVolumeDeviceInfo(device);
             if (info.mHandlesVolumeAdjustment) {
                 dispatchAbsoluteVolumeAdjusted(streamType, info, oldIndex, direction,
                         keyEventMode);
@@ -3784,7 +3785,7 @@ public class AudioService extends IAudioService.Stub
                 mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(newIndex / 10);
             } else if (isAbsoluteVolumeDevice(device)
                     && (flags & AudioManager.FLAG_ABSOLUTE_VOLUME) == 0) {
-                AbsoluteVolumeDeviceInfo info = mAbsoluteVolumeDeviceInfoMap.get(device);
+                final AbsoluteVolumeDeviceInfo info = getAbsoluteVolumeDeviceInfo(device);
                 dispatchAbsoluteVolumeChanged(streamType, info, newIndex);
             }
 
@@ -4787,7 +4788,7 @@ public class AudioService extends IAudioService.Stub
             mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(index / 10);
         } else if (isAbsoluteVolumeDevice(device)
                 && ((flags & AudioManager.FLAG_ABSOLUTE_VOLUME) == 0)) {
-            AbsoluteVolumeDeviceInfo info = mAbsoluteVolumeDeviceInfoMap.get(device);
+            final AbsoluteVolumeDeviceInfo info = getAbsoluteVolumeDeviceInfo(device);
 
             dispatchAbsoluteVolumeChanged(streamType, info, index);
         }
@@ -7575,7 +7576,8 @@ public class AudioService extends IAudioService.Stub
         if (register) {
             AbsoluteVolumeDeviceInfo info = new AbsoluteVolumeDeviceInfo(
                     device, volumes, cb, handlesVolumeAdjustment, deviceVolumeBehavior);
-            AbsoluteVolumeDeviceInfo oldInfo = mAbsoluteVolumeDeviceInfoMap.get(deviceOut);
+            final AbsoluteVolumeDeviceInfo oldInfo = getAbsoluteVolumeDeviceInfo(deviceOut);
+
             boolean volumeBehaviorChanged = (oldInfo == null)
                     || (oldInfo.mDeviceVolumeBehavior != deviceVolumeBehavior);
             if (volumeBehaviorChanged) {
@@ -7735,8 +7737,10 @@ public class AudioService extends IAudioService.Stub
         if (mAbsVolumeMultiModeCaseDevices.contains(audioSystemDeviceOut)) {
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE;
         }
-        if (mAbsoluteVolumeDeviceInfoMap.containsKey(audioSystemDeviceOut)) {
-            return mAbsoluteVolumeDeviceInfoMap.get(audioSystemDeviceOut).mDeviceVolumeBehavior;
+        synchronized (mAbsoluteVolumeDeviceInfoMapLock) {
+            if (mAbsoluteVolumeDeviceInfoMap.containsKey(audioSystemDeviceOut)) {
+                return mAbsoluteVolumeDeviceInfoMap.get(audioSystemDeviceOut).mDeviceVolumeBehavior;
+            }
         }
 
         if (isA2dpAbsoluteVolumeDevice(audioSystemDeviceOut)
@@ -9635,6 +9639,9 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_INIT_SPATIALIZER:
                     onInitSpatializer();
+                    // the device inventory can only be synchronized after the
+                    // spatializer has been initialized
+                    mDeviceBroker.postSynchronizeAdiDevicesInInventory(null);
                     mAudioEventWakeLock.release();
                     break;
 
@@ -10331,7 +10338,7 @@ public class AudioService extends IAudioService.Stub
         try {
             if (!permissionOverridesCheck && mHardeningEnforcer.blockFocusMethod(uid,
                     HardeningEnforcer.METHOD_AUDIO_MANAGER_REQUEST_AUDIO_FOCUS,
-                    clientId, durationHint, callingPackageName)) {
+                    clientId, durationHint, callingPackageName, attributionTag, sdk)) {
                 final String reason = "Audio focus request blocked by hardening";
                 Log.w(TAG, reason);
                 mmi.set(MediaMetrics.Property.EARLY_RETURN, reason).record();
@@ -10343,7 +10350,7 @@ public class AudioService extends IAudioService.Stub
 
         mmi.record();
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
-                clientId, callingPackageName, attributionTag, flags, sdk,
+                clientId, callingPackageName, flags, sdk,
                 forceFocusDuckingForAccessibility(aa, durationHint, uid), -1 /*testUid, ignored*/,
                 permissionOverridesCheck);
     }
@@ -10361,7 +10368,7 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
-                clientId, callingPackageName, null, flags,
+                clientId, callingPackageName, flags,
                 sdk, false /*forceDuck*/, fakeUid, true /*permissionOverridesCheck*/);
     }
 
@@ -11390,7 +11397,8 @@ public class AudioService extends IAudioService.Stub
 
         deviceState.setAudioDeviceCategory(btAudioDeviceCategory);
 
-        mDeviceBroker.addOrUpdateBtAudioDeviceCategoryInInventory(deviceState);
+        mDeviceBroker.addOrUpdateBtAudioDeviceCategoryInInventory(
+                deviceState, true /*syncInventory*/);
         mDeviceBroker.postPersistAudioDeviceSettings();
 
         mSpatializerHelper.refreshDevice(deviceState.getAudioDeviceAttributes(),
@@ -11694,7 +11702,7 @@ public class AudioService extends IAudioService.Stub
     static final int LOG_NB_EVENTS_VOLUME = 100;
     static final int LOG_NB_EVENTS_DYN_POLICY = 10;
     static final int LOG_NB_EVENTS_SPATIAL = 30;
-    static final int LOG_NB_EVENTS_SOUND_DOSE = 30;
+    static final int LOG_NB_EVENTS_SOUND_DOSE = 50;
 
     static final int LOG_NB_EVENTS_LOUDNESS_CODEC = 30;
 
@@ -11774,10 +11782,12 @@ public class AudioService extends IAudioService.Stub
     }
 
     private Set<Integer> getAbsoluteVolumeDevicesWithBehavior(int behavior) {
-        return mAbsoluteVolumeDeviceInfoMap.entrySet().stream()
-                .filter(entry -> entry.getValue().mDeviceVolumeBehavior == behavior)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
+        synchronized (mAbsoluteVolumeDeviceInfoMapLock) {
+            return mAbsoluteVolumeDeviceInfoMap.entrySet().stream()
+                    .filter(entry -> entry.getValue().mDeviceVolumeBehavior == behavior)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
+        }
     }
 
     private String dumpDeviceTypes(@NonNull Set<Integer> deviceTypes) {
@@ -11957,8 +11967,9 @@ public class AudioService extends IAudioService.Stub
         var umi = LocalServices.getService(UserManagerInternal.class);
         var pmsi = LocalServices.getService(PermissionManagerServiceInternal.class);
         var provider = new AudioServerPermissionProvider(packageStates,
-                (Integer uid, String perm) -> (pmsi.checkUidPermission(uid, perm,
-                        Context.DEVICE_ID_DEFAULT) == PackageManager.PERMISSION_GRANTED),
+                (Integer uid, String perm) -> ActivityManager.checkComponentPermission(perm, uid,
+                        /* owningUid = */ -1, /* exported */true)
+                    == PackageManager.PERMISSION_GRANTED,
                 () -> umi.getUserIds()
                 );
         audioPolicy.registerOnStartTask(() -> {
@@ -12320,13 +12331,19 @@ public class AudioService extends IAudioService.Stub
         }
 
         @Override
-        public void addAssistantServiceUid(int uid) {
+        public void addAssistantServiceUid(int uid, int owningUid) {
+            if (audioserverPermissions()) {
+                mPermissionProvider.setIsolatedServiceUid(uid, owningUid);
+            }
             sendMsg(mAudioHandler, MSG_ADD_ASSISTANT_SERVICE_UID, SENDMSG_QUEUE,
                     uid, 0, null, 0);
         }
 
         @Override
         public void removeAssistantServiceUid(int uid) {
+            if (audioserverPermissions()) {
+                mPermissionProvider.clearIsolatedServiceUid(uid);
+            }
             sendMsg(mAudioHandler, MSG_REMOVE_ASSISTANT_SERVICE_UID, SENDMSG_QUEUE,
                     uid, 0, null, 0);
         }
@@ -13911,9 +13928,8 @@ public class AudioService extends IAudioService.Stub
         final int stream = AudioAttributes.toLegacyStreamType(aa);
         final boolean mutingFromVolume = getStreamVolume(stream) == 0;
         if (mutingFromVolume) {
-            if (DEBUG_VOL) {
-                Slog.d(TAG, "notification should not play due to muted stream " + stream);
-            }
+            Slog.i(TAG, "shouldNotificationSoundPlay false: muted stream:" + stream
+                    + " attr:" + aa);
             return false;
         }
 
@@ -13926,10 +13942,8 @@ public class AudioService extends IAudioService.Stub
         // is the owner of GAIN_TRANSIENT_EXCLUSIVE focus also recording?
         final boolean mutingFromFocusAndRecording = mRecordMonitor.isRecordingActiveForUid(uid);
         if (mutingFromFocusAndRecording) {
-            if (DEBUG_VOL) {
-                Slog.d(TAG, "notification should not play due to exclusive focus owner recording "
-                        + " uid:" + uid);
-            }
+            Slog.i(TAG, "shouldNotificationSoundPlay false: exclusive focus owner recording "
+                        + " uid:" + uid + " attr:" + aa);
             return false;
         }
         return true;
@@ -14273,14 +14287,26 @@ public class AudioService extends IAudioService.Stub
     }
 
     /**
+     * Returns the input device which uses absolute volume behavior, including its variants,
+     * or {@code null} if there is no mapping for the device type
+     */
+    @Nullable
+    private AbsoluteVolumeDeviceInfo getAbsoluteVolumeDeviceInfo(int deviceType) {
+        synchronized (mAbsoluteVolumeDeviceInfoMapLock) {
+            return mAbsoluteVolumeDeviceInfoMap.get(deviceType);
+        }
+    }
+
+    /**
      * Returns whether the input device uses absolute volume behavior, including its variants.
      * For included volume behaviors, see {@link AudioManager.AbsoluteDeviceVolumeBehavior}.
-     *
-     * This is distinct from Bluetooth A2DP absolute volume behavior
+     * <p>This is distinct from Bluetooth A2DP absolute volume behavior
      * ({@link #isA2dpAbsoluteVolumeDevice}).
      */
     private boolean isAbsoluteVolumeDevice(int deviceType) {
-        return mAbsoluteVolumeDeviceInfoMap.containsKey(deviceType);
+        synchronized (mAbsoluteVolumeDeviceInfoMapLock) {
+            return mAbsoluteVolumeDeviceInfoMap.containsKey(deviceType);
+        }
     }
 
     /**
@@ -14392,7 +14418,9 @@ public class AudioService extends IAudioService.Stub
                     + AudioDeviceVolumeManager.volumeBehaviorName(info.mDeviceVolumeBehavior)
             );
         }
-        mAbsoluteVolumeDeviceInfoMap.put(audioSystemDeviceOut, info);
+        synchronized (mAbsoluteVolumeDeviceInfoMapLock) {
+            mAbsoluteVolumeDeviceInfoMap.put(audioSystemDeviceOut, info);
+        }
     }
 
     private AbsoluteVolumeDeviceInfo removeAudioSystemDeviceOutFromAbsVolumeDevices(
@@ -14401,7 +14429,10 @@ public class AudioService extends IAudioService.Stub
             Log.d(TAG, "Removing DeviceType: 0x" + Integer.toHexString(audioSystemDeviceOut)
                     + " from mAbsoluteVolumeDeviceInfoMap");
         }
-        return mAbsoluteVolumeDeviceInfoMap.remove(audioSystemDeviceOut);
+
+        synchronized (mAbsoluteVolumeDeviceInfoMapLock) {
+            return mAbsoluteVolumeDeviceInfoMap.remove(audioSystemDeviceOut);
+        }
     }
 
     //====================

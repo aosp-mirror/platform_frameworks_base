@@ -606,12 +606,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"এপ্‌টোক নিকটৱৰ্তী ব্লুটুথ ডিভাইচ বিচাৰি উলিয়াবলৈ আৰু সেইসমূহৰ সৈতে পেয়াৰ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"পেয়াৰ কৰা ব্লুটুথ ডিভাইচৰ সৈতে সংযোগ কৰক"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"এপ্‌টোক পেয়াৰ কৰা ব্লুটুথ ডিভাইচৰ সৈতে সংযোগ কৰিবলৈ অনুমতি দিয়ে"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"নিকটৱৰ্তী ব্লুটুথ ডিভাইচত বিজ্ঞাপন প্ৰচাৰ কৰা"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"এপ্‌টোক নিকটৱৰ্তী ব্লুটুথ ডিভাইচত বিজ্ঞাপন প্ৰচাৰ কৰিবলৈ দিয়ে"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"নিকটৱৰ্তী ব্লুটুথ ডিভাইচত বিজ্ঞাপন প্ৰচাৰাভিযান কৰা"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"এপ্‌টোক নিকটৱৰ্তী ব্লুটুথ ডিভাইচত বিজ্ঞাপন প্ৰচাৰাভিযান কৰিবলৈ দিয়ে"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"নিকটৱৰ্তী আল্ট্ৰা-ৱাইডবেণ্ড ডিভাইচৰ মাজৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰক"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"এপ্‌টোক নিকটৱৰ্তী আল্ট্ৰা-ৱাইডবেণ্ড ডিভাইচসমূহৰ মাজৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰিবলৈ অনুমতি দিয়ক"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"নিকটৱৰ্তী ৱাই-ফাই ডিভাইচসমূহৰ সৈতে ভাব বিনিময় কৰক"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"এপ্‌টোক বিজ্ঞাপন প্ৰচাৰ কৰিবলৈ, সংযোগ কৰিবলৈ আৰু নিকটৱৰ্তী ৱাই-ফাই ডিভাইচৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰিবলৈ অনুমতি দিয়ে"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"এপ্‌টোক বিজ্ঞাপন প্ৰচাৰাভিযান কৰিবলৈ, সংযোগ কৰিবলৈ আৰু নিকটৱৰ্তী ৱাই-ফাই ডিভাইচৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"অগ্ৰাধিকাৰ দিয়া NFC পৰিশোধ সেৱাৰ তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"এপ্‌টোক অগ্ৰাধিকাৰ দিয়া nfc পৰিশোধ সেৱাৰ পঞ্জীকৃত সহায়কসমূহ আৰু পৰিশোধ কৰিব লগা লক্ষ্যস্থান দৰে তথ্য পাবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়েৰ ফিল্ড কমিউনিকেশ্বন নিয়ন্ত্ৰণ কৰক"</string>
@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ৱায়াৰলেচ ডি\'বাগিং অক্ষম কৰিবলৈ বাছনি কৰক।"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"টেষ্ট হাৰনেছ ম’ড সক্ষম কৰা আছে"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"টেষ্ট হাৰনেছ ম’ড অক্ষম কৰিবলৈ ফেক্টৰী ৰিছেট কৰক।"</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"ক্ৰমিক কনছ’ল সক্ষম কৰা আছে"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"কাৰ্যক্ষমতা প্ৰভাৱিত হৈছে। অক্ষম কৰিবলৈ বুটল’ডাৰ পৰীক্ষা কৰক।"</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"পৰীক্ষামূলক MTE সক্ষম কৰা হ\'ল"</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কীসমূহ ধৰি ৰাখক। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অন কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধৰি ৰাখিছিল। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অফ কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ভলিউম কী এৰি দিয়ক। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অন কৰিবলৈ, দুয়োটা ভলিউম কী পুনৰ ৩ ছেকেণ্ডৰ বাবে টিপি হেঁচি ৰাখক।"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"আপুনি সাধ্য-সুবিধাৰ বুটামটো টিপিলে ব্যৱহাৰ কৰিবলৈ এটা সুবিধা বাছনি কৰক:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"সাধ্য-সুবিধাৰ নির্দেশৰ জৰিয়তে ব্যৱহাৰ কৰিবলৈ এটা সুবিধা বাছনি কৰক (দুটা আঙুলিৰে স্ক্রীনখনৰ একেবাৰে তলিৰ পৰা ওপৰলৈ ছোৱাইপ কৰক):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"সাধ্য-সুবিধাৰ নির্দেশৰ জৰিয়তে ব্যৱহাৰ কৰিবলৈ এটা সুবিধা বাছনি কৰক (তিনিটা আঙুলিৰে স্ক্রীনখনৰ একেবাৰে তলিৰ পৰা ওপৰলৈ ছোৱাইপ কৰক):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"সুবিধাসমূহ সালসলনিকৈ ব্যৱহাৰ কৰিবলৈ সাধ্য-সুবিধাৰ বুটামটো স্পৰ্শ কৰি ধৰি ৰাখক।"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"সুবিধাসমূহ সালসলনিকৈ ব্যৱহাৰ কৰিবলৈ দুটা আঙুলিৰে ওপৰলৈ ছোৱাইপ কৰি ধৰি ৰাখক।"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"সুবিধাসমূহ সালসলনিকৈ ব্যৱহাৰ কৰিবলৈ তিনিটা আঙুলিৰে ওপৰলৈ ছোৱাইপ কৰি ধৰি ৰাখক।"</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"বিবৰ্ধন"</string>
     <string name="user_switched" msgid="7249833311585228097">"বৰ্তমানৰ ব্যৱহাৰকাৰী <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>লৈ সলনি কৰি থকা হৈছে…"</string>
@@ -1865,7 +1875,7 @@
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
     <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"অজ্ঞাত প\'ৰ্ট্ৰেইট"</string>
-    <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"অজ্ঞাত লেণ্ডস্কেইপ"</string>
+    <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"অজ্ঞাত লেণ্ডস্কে’প"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"বাতিল কৰা হ’ল"</string>
     <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"সমল লিখাত আসোঁৱাহ"</string>
     <string name="reason_unknown" msgid="5599739807581133337">"অজ্ঞাত"</string>
@@ -1883,7 +1893,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"পিনটো অতি চুটি। কমেও ৪টা সংখ্যাৰ হ\'ব লাগিব।"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"পাছত আকৌ চেষ্টা কৰক"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"স্ক্ৰীন পূৰ্ণৰূপত চাই আছে"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"বাহিৰ হ\'বলৈ ওপৰৰপৰা তললৈ ছোৱাইপ কৰক।"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুজি পালোঁ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ভালকৈ চাবলৈ ঘূৰাওক"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ভালকৈ চাবলৈ <xliff:g id="NAME">%s</xliff:g> পূৰ্ণ স্ক্ৰীনত খোলক"</string>
@@ -1975,6 +1986,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"চলি থকা কল"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"এটা অন্তৰ্গামী কলৰ পৰীক্ষা কৰি থকা হৈছে"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"শ্ৰেণীবদ্ধ নকৰা"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"প্ৰমোশ্বন"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"সামাজিক"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"বাতৰি"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"চুপাৰিছ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"এই জাননীবোৰৰ গুৰুত্ব আপুনি ছেট কৰব লাগিব।"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"এই কার্যৰ সৈতে জড়িত থকা লোকসকলক ভিত্তি কৰি এইয়া গুৰুত্বপূর্ণ বুলি বিবেচনা কৰা হৈছ।"</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"কাষ্টম এপৰ জাননী"</string>
@@ -2191,6 +2206,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"স্ক্ৰীনত সাধ্য সুবিধাসমূহৰ শ্বৰ্টকাট বাছনি কৰাৰ সুবিধা"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"সাধ্য সুবিধাৰ শ্বৰ্টকাট"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"জাননী পেনেল অগ্ৰাহ্য কৰক"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"মেনু"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"মিডিয়া প্লে’/পজ কৰক"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"ডিপেডৰ ওপৰফালৰ বুটাম"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"ডিপেডৰ তলফালৰ বুটাম"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"ডিপেডৰ বাওঁফালৰ বুটাম"</string>
@@ -2407,8 +2424,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"প্ৰাইভেট স্পে’চ"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ক্ল’ন"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"সম্প্ৰদায়ৰ সৈতে জড়িত"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"প্ৰাইভেট স্পে’চ"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"সংবেদনশীল জাননী লুকুওৱা হৈছে"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"সুৰক্ষাৰ বাবে এপৰ সমল স্ক্ৰীণ শ্বেয়াৰ কৰাৰ পৰা লুকুৱাই ৰখা হৈছে"</string>

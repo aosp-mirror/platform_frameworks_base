@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -29,6 +30,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.assertLogsWtf
@@ -36,9 +38,11 @@ import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsMediaProjectionChip
+import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
+import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
+import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsScreenRecordChip
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsShareToAppChip
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
 import com.android.systemui.statusbar.data.model.StatusBarMode
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository.Companion.DISPLAY_ID
@@ -55,12 +59,19 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
-    private val kosmos = Kosmos().apply { testDispatcher = UnconfinedTestDispatcher() }
+    private val kosmos =
+        Kosmos().also {
+            it.testCase = this
+            it.testDispatcher = UnconfinedTestDispatcher()
+        }
 
     private val testScope = kosmos.testScope
 
@@ -76,6 +87,11 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
             kosmos.ongoingActivityChipsViewModel,
             kosmos.applicationCoroutineScope,
         )
+
+    @Before
+    fun setUp() {
+        setUpPackageManagerForMediaProjection(kosmos)
+    }
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_started_isTrue() =
@@ -405,9 +421,9 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(OngoingActivityChipModel.Hidden)
 
             kosmos.fakeMediaProjectionRepository.mediaProjectionState.value =
-                MediaProjectionState.EntireScreen
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
 
-            assertIsMediaProjectionChip(latest)
+            assertIsShareToAppChip(latest)
         }
 
     private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =

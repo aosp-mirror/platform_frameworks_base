@@ -405,6 +405,12 @@ cc_aconfig_library {
     aconfig_declarations: "android.companion.virtualdevice.flags-aconfig",
 }
 
+cc_aconfig_library {
+    name: "android.companion.virtualdevice.flags-aconfig-cc-host",
+    aconfig_declarations: "android.companion.virtualdevice.flags-aconfig",
+    host_supported: true,
+}
+
 java_aconfig_library {
     name: "android.companion.virtualdevice.flags-aconfig-java",
     aconfig_declarations: "android.companion.virtualdevice.flags-aconfig",

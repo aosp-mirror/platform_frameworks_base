@@ -581,7 +581,7 @@
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"更改网络共享连接"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"允许应用更改绑定网络连接的状态。"</string>
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"查看WLAN连接"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"允许该应用查看WLAN网络的相关信息，例如是否启用了WLAN以及连接的WLAN设备的名称。"</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"允许该应用查看 WLAN 网络的相关信息，例如是否启用了 WLAN 以及连接的 WLAN 设备的名称。"</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"连接WLAN网络和断开连接"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"允许该应用与WLAN接入点建立和断开连接，以及更改WLAN网络的设备配置。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"允许接收WLAN多播"</string>
@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"选择即可停用无线调试功能。"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"自动化测试框架模式已启用"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"恢复出厂设置以停用自动化测试框架模式。"</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"已启用序列控制台"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"性能受到影响。要停用，请查看引导加载程序。"</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"已启用实验性 MTE"</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已开启。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已关闭。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"松开音量键。如要启用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>，请再次同时按住两个音量键 3 秒。"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"选择点按“无障碍”按钮后要使用的功能："</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"选择要搭配无障碍手势（用两根手指从屏幕底部向上滑动）使用的功能："</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"选择要搭配无障碍手势（用三根手指从屏幕底部向上滑动）使用的功能："</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"轻触并按住“无障碍”按钮，即可在多项功能之间切换。"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"用两根手指向上滑动并按住，即可在多项功能之间切换。"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"用三根手指向上滑动并按住，即可在多项功能之间切换。"</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"放大功能"</string>
     <string name="user_switched" msgid="7249833311585228097">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"正在切换为<xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1883,7 +1893,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN码太短，至少应包含4位数字。"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"稍后重试"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"目前处于全屏模式"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"要退出，请从顶部向下滑动。"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋转可改善预览效果"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"在全屏模式下打开“<xliff:g id="NAME">%s</xliff:g>”可改善预览效果"</string>
@@ -1975,6 +1986,14 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"正在通话"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"正在过滤来电"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"未分类"</string>
+    <!-- no translation found for promotional_notification_channel_label (7414844730492860233) -->
+    <skip />
+    <!-- no translation found for social_notification_channel_label (106520267132019945) -->
+    <skip />
+    <!-- no translation found for news_notification_channel_label (4299937455247883311) -->
+    <skip />
+    <!-- no translation found for recs_notification_channel_label (4945985121418684297) -->
+    <skip />
     <string name="importance_from_user" msgid="2782756722448800447">"这些通知的重要程度由您来设置。"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"这条通知涉及特定的人，因此被归为重要通知。"</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"自定义应用通知"</string>
@@ -2191,6 +2210,10 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"屏幕上的无障碍功能快捷方式选择器"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"无障碍功能快捷方式"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"关闭通知栏"</string>
+    <!-- no translation found for accessibility_system_action_menu_label (3385283204496447040) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_media_play_pause_label (1905647491347119748) -->
+    <skip />
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"向上方向键"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"向下方向键"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"向左方向键"</string>
@@ -2407,8 +2430,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"私密空间"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"克隆"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"共用"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"私密空间"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"已隐藏敏感通知内容"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"为安全起见而在屏幕共享画面中处于隐藏状态的应用内容"</string>

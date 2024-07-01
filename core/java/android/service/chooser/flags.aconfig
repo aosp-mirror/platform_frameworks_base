@@ -2,14 +2,6 @@ package: "android.service.chooser"
 container: "system"
 
 flag {
-  name: "chooser_album_text"
-  is_exported: true
-  namespace: "intentresolver"
-  description: "Flag controlling the album text subtype hint for sharesheet"
-  bug: "323380224"
-}
-
-flag {
     name: "enable_sharesheet_metadata_extra"
     is_exported: true
     namespace: "intentresolver"
@@ -31,4 +23,15 @@ flag {
   namespace: "intentresolver"
   description: "Provides additional callbacks with information about user actions in ChooserResult"
   bug: "263474465"
+}
+
+flag {
+  name: "fix_resolver_memory_leak"
+  is_exported: true
+  namespace: "intentresolver"
+  description: "ResolverActivity memory leak (through the AppPredictor callback) fix"
+  bug: "346671041"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

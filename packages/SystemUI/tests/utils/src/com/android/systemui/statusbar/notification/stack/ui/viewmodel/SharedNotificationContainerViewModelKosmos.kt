@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
@@ -31,6 +32,7 @@ import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToLockscreenTrans
 import com.android.systemui.keyguard.ui.viewmodel.goneToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.goneToDozingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.goneToDreamingTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.goneToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGoneTransitionViewModel
@@ -70,6 +72,7 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         goneToAodTransitionViewModel = goneToAodTransitionViewModel,
         goneToDozingTransitionViewModel = goneToDozingTransitionViewModel,
         goneToDreamingTransitionViewModel = goneToDreamingTransitionViewModel,
+        goneToLockscreenTransitionViewModel = goneToLockscreenTransitionViewModel,
         glanceableHubToLockscreenTransitionViewModel = glanceableHubToLockscreenTransitionViewModel,
         lockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel,
         lockscreenToGlanceableHubTransitionViewModel = lockscreenToGlanceableHubTransitionViewModel,
@@ -84,6 +87,7 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         primaryBouncerToLockscreenTransitionViewModel =
             primaryBouncerToLockscreenTransitionViewModel,
         aodBurnInViewModel = aodBurnInViewModel,
+        communalSceneInteractor = communalSceneInteractor,
         unfoldTransitionInteractor = unfoldTransitionInteractor,
     )
 }

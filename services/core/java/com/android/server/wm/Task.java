@@ -47,8 +47,6 @@ import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -445,6 +443,7 @@ class Task extends TaskFragment {
     int mPrevDisplayId = INVALID_DISPLAY;
 
     int mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
+    WindowContainerToken mMultiWindowRestoreParent;
 
     /**
      * Last requested orientation reported to DisplayContent. This is different from {@link
@@ -1993,6 +1992,12 @@ class Task extends TaskFragment {
         final boolean wasInMultiWindowMode = inMultiWindowMode();
         final boolean wasInPictureInPicture = inPinnedWindowingMode();
         super.onConfigurationChanged(newParentConfig);
+        if (mDisplayContent == null) {
+            // This should be initializing from Task.Builder. The onConfigurationChanged will be
+            // called again when this task is attached to hierarchy. Early return here because the
+            // following operations are no-op for a non-attached task.
+            return;
+        }
         // Only need to update surface size here since the super method will handle updating
         // surface position.
         updateSurfaceSize(getSyncTransaction());
@@ -3514,7 +3519,10 @@ class Task extends TaskFragment {
                 && !appCompatTaskInfo.topActivityInSizeCompat
                 && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings()
                 && !info.isTopActivityTransparent;
-        appCompatTaskInfo.topActivityBoundsLetterboxed = top != null  && top.areBoundsLetterboxed();
+        appCompatTaskInfo.topActivityBoundsLetterboxed = top != null && top.areBoundsLetterboxed();
+        appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode = top == null
+                ? CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE
+                : top.mLetterboxUiController.getFreeformCameraCompatMode();
     }
 
     /**
@@ -3576,15 +3584,29 @@ class Task extends TaskFragment {
                 ? null : new PictureInPictureParams(top.pictureInPictureArgs);
     }
 
-    Rect getDisplayCutoutInsets() {
-        if (mDisplayContent == null || getDisplayInfo().displayCutout == null) return null;
+    /** @return The display cutout insets where the main window is not allowed to extend to. */
+    @NonNull Rect getDisplayCutoutInsets() {
+        final Rect displayCutoutInsets = new Rect();
+        if (mDisplayContent == null || getDisplayInfo().displayCutout == null) {
+            return displayCutoutInsets;
+        }
         final WindowState w = getTopVisibleAppMainWindow();
-        final int displayCutoutMode = w == null
-                ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-                : w.getAttrs().layoutInDisplayCutoutMode;
-        return (displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-                || displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)
-                ? null : getDisplayInfo().displayCutout.getSafeInsets();
+        final Rect displayFrame;
+        if (w != null && w.mHaveFrame) {
+            displayFrame = w.getDisplayFrame();
+        } else {
+            displayFrame = mDisplayContent.getBounds();
+            displayFrame.inset(getDisplayInfo().displayCutout.getSafeInsets());
+        }
+        final Rect taskBounds = getBounds();
+        if (displayCutoutInsets.setIntersect(taskBounds, displayFrame)) {
+            displayCutoutInsets.set(
+                    displayCutoutInsets.left - taskBounds.left,
+                    displayCutoutInsets.top - taskBounds.top,
+                    taskBounds.right - displayCutoutInsets.right,
+                    taskBounds.bottom - displayCutoutInsets.bottom);
+        }
+        return displayCutoutInsets;
     }
 
     /**
@@ -4634,6 +4656,25 @@ class Task extends TaskFragment {
         return TASK;
     }
 
+    /**
+     * Restores to the windowing mode saved when task requested to enter fullscreen using
+     * {@link Activity#requestFullscreenMode} API if it is valid. The task is also reparented to
+     * the previous parent if parent has changed.
+     */
+    void restoreWindowingMode() {
+        if (mMultiWindowRestoreWindowingMode == INVALID_WINDOWING_MODE) {
+            return;
+        }
+        if (!getParent().mRemoteToken.toWindowContainerToken()
+                .equals(mMultiWindowRestoreParent)) {
+            // Restore previous parent if parent has changed.
+            final Task parent = fromWindowContainerToken(mMultiWindowRestoreParent);
+            reparent(parent, MAX_VALUE);
+        }
+
+        setWindowingMode(mMultiWindowRestoreWindowingMode);
+    }
+
     @Override
     public void setWindowingMode(int windowingMode) {
         // Calling Task#setWindowingMode() for leaf task since this is a specialization of
@@ -4763,9 +4804,14 @@ class Task extends TaskFragment {
                     // task is still updated by core. Otherwise if the task is collected (e.g.
                     // rotation change) after leaving this scope, the visibility operation will be
                     // put in sync transaction, then it is not synced with reparent.
-                    if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()
-                            && lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
+                    if (lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
                         lastParentBeforePip.prepareSurfaces();
+                        // If the moveToFront is a part of finishing transition, then make sure
+                        // the z-order of tasks are up-to-date.
+                        if (topActivity.mTransitionController.inFinishingTransition(topActivity)) {
+                            Transition.assignLayers(taskDisplayArea,
+                                    taskDisplayArea.getPendingTransaction());
+                        }
                     }
                 }
                 if (isPip2ExperimentEnabled) {

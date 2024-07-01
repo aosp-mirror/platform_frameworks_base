@@ -95,8 +95,12 @@ public class BatteryUsageStatsProvider {
                 }
                 mPowerCalculators.add(new SensorPowerCalculator(
                         mContext.getSystemService(SensorManager.class)));
-                mPowerCalculators.add(new GnssPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new CameraPowerCalculator(mPowerProfile));
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_GNSS)) {
+                    mPowerCalculators.add(new GnssPowerCalculator(mPowerProfile));
+                }
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_CAMERA)) {
+                    mPowerCalculators.add(new CameraPowerCalculator(mPowerProfile));
+                }
                 if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT)) {
                     mPowerCalculators.add(new FlashlightPowerCalculator(mPowerProfile));
                 }
@@ -109,7 +113,9 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new IdlePowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new CustomEnergyConsumerPowerCalculator(mPowerProfile));
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_ANY)) {
+                    mPowerCalculators.add(new CustomEnergyConsumerPowerCalculator(mPowerProfile));
+                }
                 mPowerCalculators.add(new UserPowerCalculator());
 
                 if (!com.android.server.power.optimization.Flags.disableSystemServicePowerAttr()) {

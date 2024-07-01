@@ -28,12 +28,15 @@ import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
+import static android.window.TransitionInfo.FLAGS_IS_NON_APP_WINDOW;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
+import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
+import static com.android.window.flags.Flags.ensureWallpaperInTransitions;
 import static com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
@@ -237,6 +240,13 @@ public class Transitions implements RemoteCallable<Transitions>,
 
         /** Ordered list of transitions which have been merged into this one. */
         private ArrayList<ActiveTransition> mMerged;
+
+        /**
+         * @deprecated DO NOT USE THIS unless absolutely necessary. It will be removed once
+         * everything migrates off finishWCT.
+         */
+        @java.lang.Deprecated
+        SurfaceControl.Transaction mAfterMergeFinishT;
 
         ActiveTransition(IBinder token) {
             mToken = token;
@@ -512,12 +522,17 @@ public class Transitions implements RemoteCallable<Transitions>,
         boolean isOpening = isOpeningType(info.getType());
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
-            if (change.hasFlags(TransitionInfo.FLAGS_IS_NON_APP_WINDOW)) {
+            if (change.hasFlags(FLAGS_IS_NON_APP_WINDOW & ~FLAG_IS_WALLPAPER)) {
                 // Currently system windows are controlled by WindowState, so don't change their
                 // surfaces. Otherwise their surfaces could be hidden or cropped unexpectedly.
-                // This includes Wallpaper (always z-ordered at bottom) and IME (associated with
-                // app), because there may not be a transition associated with their visibility
-                // changes, and currently they don't need transition animation.
+                // This includes IME (associated with app), because there may not be a transition
+                // associated with their visibility changes, and currently they don't need a
+                // transition animation.
+                continue;
+            }
+            if (change.hasFlags(FLAG_IS_WALLPAPER) && !ensureWallpaperInTransitions()) {
+                // Wallpaper is always z-ordered at bottom, and historically is not animated by
+                // transition handlers.
                 continue;
             }
             final SurfaceControl leash = change.getLeash();
@@ -1018,6 +1033,20 @@ public class Transitions implements RemoteCallable<Transitions>,
         return null;
     }
 
+    /** @deprecated */
+    @java.lang.Deprecated
+    public void setAfterMergeFinishTransaction(IBinder transition,
+            SurfaceControl.Transaction afterMergeFinishT) {
+        final ActiveTransition at = mKnownTransitions.get(transition);
+        if (at == null) return;
+        if (at.mAfterMergeFinishT != null) {
+            Log.e(TAG, "Setting after-merge-t >1 time on transition: " + at.mInfo.getDebugId());
+            at.mAfterMergeFinishT.merge(afterMergeFinishT);
+            return;
+        }
+        at.mAfterMergeFinishT = afterMergeFinishT;
+    }
+
     /** Aborts a transition. This will still queue it up to maintain order. */
     private void onAbort(ActiveTransition transition) {
         final Track track = mTracks.get(transition.getTrack());
@@ -1078,6 +1107,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         }
         // Merge all associated transactions together
         SurfaceControl.Transaction fullFinish = active.mFinishT;
+        SurfaceControl.Transaction afterMergeFinish = active.mAfterMergeFinishT;
         if (active.mMerged != null) {
             for (int iM = 0; iM < active.mMerged.size(); ++iM) {
                 final ActiveTransition toMerge = active.mMerged.get(iM);
@@ -1097,6 +1127,21 @@ public class Transitions implements RemoteCallable<Transitions>,
                         fullFinish.merge(toMerge.mFinishT);
                     }
                 }
+                if (toMerge.mAfterMergeFinishT != null) {
+                    if (afterMergeFinish == null) {
+                        afterMergeFinish = toMerge.mAfterMergeFinishT;
+                    } else {
+                        afterMergeFinish.merge(toMerge.mAfterMergeFinishT);
+                    }
+                    toMerge.mAfterMergeFinishT = null;
+                }
+            }
+        }
+        if (afterMergeFinish != null) {
+            if (fullFinish == null) {
+                fullFinish = afterMergeFinish;
+            } else {
+                fullFinish.merge(afterMergeFinish);
             }
         }
         if (fullFinish != null) {

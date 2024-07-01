@@ -16,16 +16,13 @@
 
 package com.android.systemui.scene.domain.interactor
 
-import com.android.compose.animation.scene.SceneKey
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
-import com.android.systemui.scene.domain.resolver.HomeSceneFamilyResolver
-import com.android.systemui.scene.domain.resolver.SceneResolver
+import com.android.systemui.scene.domain.resolver.sceneFamilyResolvers
 import com.android.systemui.scene.shared.logger.sceneLogger
-import com.android.systemui.scene.shared.model.SceneFamilies
 
 val Kosmos.sceneInteractor by
     Kosmos.Fixture {
@@ -35,16 +32,6 @@ val Kosmos.sceneInteractor by
             logger = sceneLogger,
             sceneFamilyResolvers = { sceneFamilyResolvers },
             deviceUnlockedInteractor = deviceUnlockedInteractor,
-        )
-    }
-
-val Kosmos.sceneFamilyResolvers: Map<SceneKey, SceneResolver>
-    get() = mapOf(SceneFamilies.Home to homeSceneFamilyResolver)
-
-val Kosmos.homeSceneFamilyResolver by
-    Kosmos.Fixture {
-        HomeSceneFamilyResolver(
-            applicationScope = applicationCoroutineScope,
-            deviceEntryInteractor = deviceEntryInteractor,
+            keyguardEnabledInteractor = keyguardEnabledInteractor,
         )
     }

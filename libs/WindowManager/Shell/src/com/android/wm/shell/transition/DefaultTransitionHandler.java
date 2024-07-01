@@ -53,6 +53,7 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
+import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_CHANGE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_CLOSE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_INTRA_CLOSE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_INTRA_OPEN;
@@ -517,7 +518,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     animRelOffset.y = Math.max(animRelOffset.y, change.getEndRelOffset().y);
                 }
 
-                if (change.getActivityComponent() != null && !isActivityLevel) {
+                if (change.getActivityComponent() != null && !isActivityLevel
+                        && !mRotator.isRotated(change)) {
                     // At this point, this is an independent activity change in a non-activity
                     // transition. This means that an activity transition got erroneously combined
                     // with another ongoing transition. This then means that the animation root may
@@ -943,12 +945,15 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     private static int getWallpaperTransitType(TransitionInfo info) {
+        boolean hasWallpaper = false;
         boolean hasOpenWallpaper = false;
         boolean hasCloseWallpaper = false;
 
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
-            if ((change.getFlags() & FLAG_SHOW_WALLPAPER) != 0) {
+            if ((change.getFlags() & FLAG_SHOW_WALLPAPER) != 0
+                    || (change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
+                hasWallpaper = true;
                 if (TransitionUtil.isOpeningType(change.getMode())) {
                     hasOpenWallpaper = true;
                 } else if (TransitionUtil.isClosingType(change.getMode())) {
@@ -964,6 +969,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             return WALLPAPER_TRANSITION_OPEN;
         } else if (hasCloseWallpaper) {
             return WALLPAPER_TRANSITION_CLOSE;
+        } else if (hasWallpaper) {
+            return WALLPAPER_TRANSITION_CHANGE;
         } else {
             return WALLPAPER_TRANSITION_NONE;
         }

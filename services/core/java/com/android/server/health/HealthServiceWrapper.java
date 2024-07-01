@@ -71,6 +71,21 @@ public abstract class HealthServiceWrapper {
     public abstract android.hardware.health.HealthInfo getHealthInfo() throws RemoteException;
 
     /**
+     * Calls into getBatteryHealthData() in the health HAL.
+     * This function does not have a corresponding HIDL implementation, so
+     * returns null by default, unless there is an AIDL class that overrides
+     * this one.
+     *
+     * @return battery health data. {@code null} if no health HAL service.
+     *     {@code null} if any service-specific error when calling {@code
+     *     getBatteryHealthData}, e.g. it is unsupported.
+     * @throws RemoteException for any transaction-level errors
+     */
+    public android.hardware.health.BatteryHealthData getBatteryHealthData() throws RemoteException {
+        return null;
+    }
+
+    /**
      * Create a new HealthServiceWrapper instance.
      *
      * @param healthInfoCallback the callback to call when health info changes

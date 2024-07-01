@@ -125,6 +125,29 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"பார்க்கத் தட்டவும்"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"ஸ்கிரீன் ரெக்கார்டிங்கைச் சேமிப்பதில் பிழை ஏற்பட்டது"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ஸ்கிரீன் ரெக்கார்டிங்கைத் தொடங்குவதில் பிழை"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை ரெக்கார்டு செய்வதை நிறுத்துவீர்கள்"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸைப் பகிர்வதை நிறுத்துவீர்கள்"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அலைபரப்புவதை நிறுத்துவீர்கள்"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"சிக்கல் ரெக்கார்டர்"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"சிக்கல் ரெக்கார்டிங்கைச் செயலாக்குகிறது"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"சிக்கல் சேகரிப்பு அமர்வுக்கான பின்னணிச் செயல்பாட்டின் அறிவிப்பு"</string>
@@ -135,7 +158,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"சிக்கல் தொடர்பான ரெக்கார்டிங்கைச் சேமிப்பதில் பிழை ஏற்பட்டது"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"சிக்கலை ரெக்கார்டிங் செய்யத் தொடங்குவதில் பிழை ஏற்பட்டது"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"முழுத் திரையில் காட்டுகிறது"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"வெளியேற, மேலிருந்து கீழே ஸ்வைப் செய்யவும்."</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"சரி"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"பின்செல்"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"முகப்பு"</string>
@@ -278,11 +302,12 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"சேமிக்கப்பட்டது"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"இணைப்பு நீக்கும்"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"செயல்படுத்தும்"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"நாளைக்குத் தானாகவே மீண்டும் இயக்கப்படுதல்"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"விரைவுப் பகிர்தல், Find My Device போன்ற அம்சங்கள் புளூடூத்தைப் பயன்படுத்துகின்றன"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"நாளை காலை புளூடூத் இயக்கப்படும்"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"ஆடியோ பகிர்வு"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"ஆடியோ பகிரப்படுகிறது"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ஆடியோவைப் பகிர்"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ஆடியோ பகிரப்படுகிறது"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> பேட்டரி"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ஆடியோ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ஹெட்செட்"</string>
@@ -305,7 +330,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"நெட்வொர்க்குகள் கிடைக்கவில்லை"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"வைஃபை நெட்வொர்க்குகள் இல்லை"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"ஆன் செய்கிறது…"</string>
-    <string name="quick_settings_cast_title" msgid="3033553249449938182">"Cast"</string>
+    <string name="quick_settings_cast_title" msgid="3033553249449938182">"அலைபரப்பு"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"அனுப்புகிறது"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"பெயரிடப்படாத சாதனம்"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"சாதனங்கள் இல்லை"</string>
@@ -361,18 +386,13 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"சாதன அனுபவத்தின் எந்தப் பகுதி பாதிக்கப்பட்டது?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"சிக்கல் வகையைத் தேர்வுசெய்க"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ஸ்கிரீன் ரெக்கார்டு"</string>
-    <!-- no translation found for performance (6552785217174378320) -->
-    <skip />
-    <!-- no translation found for user_interface (3712869377953950887) -->
-    <skip />
-    <!-- no translation found for thermal (6758074791325414831) -->
-    <skip />
+    <string name="performance" msgid="6552785217174378320">"செயல்திறன்"</string>
+    <string name="user_interface" msgid="3712869377953950887">"பயனர் இடைமுகம்"</string>
+    <string name="thermal" msgid="6758074791325414831">"தெர்மல்"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"ஒற்றைக் கைப் பயன்முறை"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"செவித்துணைக் கருவிகள்"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"செயலில் உள்ளது"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"இணைக்கப்படவில்லை"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"செவித்துணைக் கருவிகள்"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"புதிய சாதனத்தை இணை"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"புதிய சாதனத்தை இணைக்க கிளிக் செய்யலாம்"</string>
@@ -470,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"விட்ஜெட்டைத் தேர்ந்தெடுக்கும்"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"விட்ஜெட்டை அகற்றும்"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"தேர்ந்தெடுத்த விட்ஜெட்டைக் காட்சிப்படுத்தும்"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"பயனரை மாற்று"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"கீழ் இழுக்கும் மெனு"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா ஆப்ஸும் தரவும் நீக்கப்படும்."</string>
@@ -523,6 +549,12 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"இப்போது தொடங்கு"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"அறிவிப்புகள் இல்லை"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"புதிய அறிவிப்புகள் இல்லை"</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (5720882373252389461) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (4260536236101821273) -->
+    <skip />
+    <!-- no translation found for go_to_adaptive_notification_settings (2423690125178298479) -->
+    <skip />
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"பழைய அறிவிப்பைப் பார்க்க அன்லாக் செய்க"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"இந்தச் சாதனம் உங்கள் பெற்றோரால் நிர்வகிக்கப்படுகிறது"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"இந்த சாதனம் உங்கள் நிறுவனத்துக்கு உரியது, நெட்வொர்க் ட்ராஃபிக்கையும் நிறுவனமே கண்காணிக்கக்கூடும்"</string>
@@ -1178,6 +1210,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"மேலும் தகவல்களுக்கு தட்டவும்"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"அலாரம் எதுவுமில்லை"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"திரைப் பூட்டை உள்ளிடலாம்"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"கைரேகை சென்சாரைத் தொடவும். இது மொபைலின் பக்கவாட்டில் உள்ள சிறிய பட்டன் ஆகும்"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"கைரேகை சென்சார்"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"அங்கீகரி"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"சாதனத்தைத் திற"</string>
@@ -1275,8 +1308,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"மடக்கப்பட்டது"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"விரிக்கப்பட்டது"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"ஸ்டைலஸ் பேட்டரி <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"உங்கள் ஸ்டைலஸைச் சார்ஜருடன் இணையுங்கள்"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ஸ்டைலஸின் பேட்டரி குறைவாக உள்ளது"</string>
     <string name="video_camera" msgid="7654002575156149298">"வீடியோ கேமரா"</string>
@@ -1328,7 +1360,22 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"தேடல் ஷார்ட்கட்கள்"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"சுருக்குவதற்கான ஐகான்"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"விரிவாக்குவதற்கான ஐகான்"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"அல்லது"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_action_title (7199067250654332735) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_guidance (4222430588599527272) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_animation_content_description (2646107450922379918) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_screen_animation_content_description (4036267494237748710) -->
     <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"கீபோர்டு பேக்லைட்"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"நிலை, %2$d இல் %1$d"</string>

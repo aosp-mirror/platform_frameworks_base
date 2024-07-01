@@ -71,7 +71,6 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.text.TextUtils;
@@ -94,6 +93,7 @@ import android.widget.FrameLayout;
 import android.window.InputTransferToken;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
 import com.android.systemui.Flags;
@@ -129,7 +129,7 @@ import java.util.function.Supplier;
 
 @LargeTest
 @TestableLooper.RunWithLooper
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RequiresFlagsEnabled(Flags.FLAG_CREATE_WINDOWLESS_WINDOW_MAGNIFIER)
 public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiTestCase {
 

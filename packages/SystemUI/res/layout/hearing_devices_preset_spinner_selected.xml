@@ -32,6 +32,7 @@
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
         android:textSize="14sp"
         android:gravity="center_vertical"
+        android:textDirection="locale"
         android:layout_weight="1" />
     <TextView
         android:id="@+id/hearing_devices_preset_option_text"
@@ -42,5 +43,6 @@
         android:gravity="center_vertical"
         android:ellipsize="end"
         android:maxLines="1"
+        android:textDirection="locale"
         android:layout_weight="1" />
 </LinearLayout>

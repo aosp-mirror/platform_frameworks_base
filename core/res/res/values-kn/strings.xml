@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"ಸ್ವಯಂ ಪರೀಕ್ಷೆಯಾಗುವಿಕೆ ಮೋಡ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"ಸ್ವಯಂ ಪರೀಕ್ಷೆಯಾಗುವಿಕೆ ಮೋಡ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಫ್ಯಾಕ್ಟರಿ ರಿಸೆಟ್ ಮಾಡಬೇಕು."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"ಸರಣಿ ಕನ್ಸೋಲ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"ಕಾರ್ಯಕ್ಷಮತೆಯ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುತ್ತದೆ. ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು, ಬೂಟ್‌ಲೋಡರ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"ಪ್ರಾಯೋಗಿಕ MTE ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಹಿಡಿದುಕೊಳ್ಳಿ. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಹಿಡಿದಿಟ್ಟುಕೊಳ್ಳಲಾಗಿದೆ. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಬಿಡುಗಡೆ ಮಾಡಿ. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಆನ್ ಮಾಡಲು, ಎರಡೂ ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಮತ್ತೊಮ್ಮೆ 3 ಸೆಕೆಂಡ್‌ಗಳ ಕಾಲ ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ನೀವು ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಬಟನ್ ಟ್ಯಾಪ್ ಮಾಡಿದಾಗ ಬಳಸುವುದಕ್ಕಾಗಿ ವೈಶಿಷ್ಟ್ಯವೊಂದನ್ನು ಆರಿಸಿ:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಗೆಸ್ಚರ್‌ನೊಂದಿಗೆ ಬಳಸಲು ವೈಶಿಷ್ಟ್ಯವೊಂದನ್ನು ಆಯ್ಕೆಮಾಡಿ (ಎರಡು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಪರದೆಯ ಕೆಳಭಾಗದಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಗೆಸ್ಚರ್‌ನೊಂದಿಗೆ ಬಳಸಲು ವೈಶಿಷ್ಟ್ಯವೊಂದನ್ನು ಆಯ್ಕೆಮಾಡಿ (ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಪರದೆಯ ಕೆಳಭಾಗದಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"ವೈಶಿಷ್ಟ್ಯಗಳ ನಡುವೆ ಬದಲಿಸಲು, ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಬಟನ್ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹೋಲ್ಡ್‌ ಮಾಡಿ."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"ವೈಶಿಷ್ಟ್ಯಗಳ ನಡುವೆ ಬದಲಿಸಲು, ಎರಡು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ವೈಶಿಷ್ಟ್ಯಗಳ ನಡುವೆ ಬದಲಿಸಲು, ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ಹಿಗ್ಗಿಸುವಿಕೆ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ಪ್ರಸ್ತುತ ಬಳಕೆದಾರರು <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>ಗೆ ಬದಲಾಯಿಸಲಾಗುತ್ತಿದೆ…"</string>
@@ -1883,7 +1893,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ಪಿನ್‌ ತುಂಬಾ ಚಿಕ್ಕದಾಗಿದೆ. ಕನಿಷ್ಠ ಪಕ್ಷ 4 ಅಂಕಿಗಳಾಗಿರಬೇಕು."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ಪೂರ್ಣ ಪರದೆಯನ್ನು ವೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"ನಿರ್ಗಮಿಸಲು, ಮೇಲಿನಿಂದ ಕೆಳಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ತಿಳಿಯಿತು"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ಅತ್ಯುತ್ತಮ ವೀಕ್ಷಣೆಗಾಗಿ ತಿರುಗಿಸಿ"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ಅತ್ಯುತ್ತಮ ವೀಕ್ಷಣೆಗಾಗಿ <xliff:g id="NAME">%s</xliff:g> ಅನ್ನು ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ತೆರೆಯಿರಿ"</string>
@@ -1975,6 +1986,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಕರೆ"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"ಒಳಬರುವ ಕರೆಯನ್ನು ಸ್ಕ್ರೀನ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"ವರ್ಗೀಕರಿಸದಿರುವುದು"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"ಪ್ರೊಮೋಷನ್‍ಗಳು"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"ಸಾಮಾಜಿಕ"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"ಸುದ್ದಿ"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"ಶಿಫಾರಸುಗಳು"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ನೀವು ಈ ಅಧಿಸೂಚನೆಗಳ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಹೊಂದಿಸಿರುವಿರಿ."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ಜನರು ತೊಡಗಿಕೊಂಡಿರುವ ಕಾರಣ ಇದು ಅತ್ಯಂತ ಪ್ರಮುಖವಾಗಿದೆ."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ಕಸ್ಟಮ್ ಆ್ಯಪ್ ನೋಟಿಫಿಕೇಶನ್"</string>
@@ -2191,6 +2206,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿನ ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಶಾರ್ಟ್‌ಕಟ್ ಆಯ್ಕೆ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಶಾರ್ಟ್‌ಕಟ್"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"ಅಧಿಸೂಚನೆಯ ಪರದೆಯನ್ನು ವಜಾಗೊಳಿಸಿ"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"ಮೆನು"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"ಮೀಡಿಯಾವನ್ನು ಪ್ಲೇ ಮಾಡಿ/ವಿರಾಮಗೊಳಿಸಿ"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad ನ ಮೇಲಿನ ಬಟನ್"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad ನ ಕೆಳಗಿನ ಬಟನ್"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ನ ಎಡಭಾಗದ ಬಟನ್"</string>
@@ -2407,8 +2424,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ಪ್ರೈವೆಟ್ ಸ್ಪೇಸ್"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ಕ್ಲೋನ್"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"ಸಮುದಾಯ"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"ಪ್ರೈವೆಟ್ ಸ್ಪೇಸ್"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"ಸೂಕ್ಷ್ಮ ನೋಟಿಫಿಕೇಶನ್ ಕಂಟೆಂಟ್ ಅನ್ನು ಮರೆಮಾಡಲಾಗಿದೆ"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ಭದ್ರತೆಗಾಗಿ ಸ್ಕ್ರೀನ್‌‌ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯಲ್ಲಿ ಆ್ಯಪ್ ಕಂಟೆಂಟ್‌ ಅನ್ನು ಮರೆಮಾಡಲಾಗಿದೆ"</string>

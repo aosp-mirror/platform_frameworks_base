@@ -24,9 +24,26 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCRE
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
-import static android.service.notification.ZenAdapters.notificationPolicySendersToZenPolicyPeopleType;
+import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+import static android.service.notification.ZenAdapters.peopleTypeToPrioritySenders;
+import static android.service.notification.ZenAdapters.prioritySendersToPeopleType;
 import static android.service.notification.ZenAdapters.zenPolicyConversationSendersToNotificationPolicy;
-import static android.service.notification.ZenAdapters.zenPolicyPeopleTypeToNotificationPolicySenders;
+import static android.service.notification.ZenModeConfig.EventInfo.REPLY_YES_OR_MAYBE;
+import static android.service.notification.ZenPolicy.PEOPLE_TYPE_STARRED;
+import static android.service.notification.ZenPolicy.PRIORITY_CATEGORY_ALARMS;
+import static android.service.notification.ZenPolicy.PRIORITY_CATEGORY_CALLS;
+import static android.service.notification.ZenPolicy.PRIORITY_CATEGORY_EVENTS;
+import static android.service.notification.ZenPolicy.PRIORITY_CATEGORY_MEDIA;
+import static android.service.notification.ZenPolicy.PRIORITY_CATEGORY_MESSAGES;
+import static android.service.notification.ZenPolicy.PRIORITY_CATEGORY_REMINDERS;
+import static android.service.notification.ZenPolicy.PRIORITY_CATEGORY_REPEAT_CALLERS;
+import static android.service.notification.ZenPolicy.PRIORITY_CATEGORY_SYSTEM;
+import static android.service.notification.ZenPolicy.STATE_ALLOW;
+import static android.service.notification.ZenPolicy.STATE_DISALLOW;
+import static android.service.notification.ZenPolicy.VISUAL_EFFECT_AMBIENT;
+import static android.service.notification.ZenPolicy.VISUAL_EFFECT_FULL_SCREEN_INTENT;
+import static android.service.notification.ZenPolicy.VISUAL_EFFECT_LIGHTS;
+import static android.service.notification.ZenPolicy.VISUAL_EFFECT_PEEK;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -58,6 +75,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -244,15 +262,12 @@ public class ZenModeConfig implements Parcelable {
     private static final String CONDITION_ATT_SOURCE = "source";
     private static final String CONDITION_ATT_FLAGS = "flags";
 
-    private static final String ZEN_POLICY_TAG = "zen_policy";
-
     private static final String MANUAL_TAG = "manual";
     private static final String AUTOMATIC_TAG = "automatic";
     private static final String AUTOMATIC_DELETED_TAG = "deleted";
 
     private static final String RULE_ATT_ID = "ruleId";
     private static final String RULE_ATT_ENABLED = "enabled";
-    private static final String RULE_ATT_SNOOZING = "snoozing";
     private static final String RULE_ATT_NAME = "name";
     private static final String RULE_ATT_PKG = "pkg";
     private static final String RULE_ATT_COMPONENT = "component";
@@ -268,6 +283,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_ICON = "rule_icon";
     private static final String RULE_ATT_TRIGGER_DESC = "triggerDesc";
     private static final String RULE_ATT_DELETION_INSTANT = "deletionInstant";
+    private static final String RULE_ATT_DISABLED_ORIGIN = "disabledOrigin";
 
     private static final String DEVICE_EFFECT_DISPLAY_GRAYSCALE = "zdeDisplayGrayscale";
     private static final String DEVICE_EFFECT_SUPPRESS_AMBIENT_DISPLAY =
@@ -320,31 +336,107 @@ public class ZenModeConfig implements Parcelable {
 
     @UnsupportedAppUsage
     public ZenModeConfig() {
+        if (Flags.modesUi()) {
+            ensureManualZenRule();
+        }
     }
 
     public ZenModeConfig(Parcel source) {
-        allowCalls = source.readInt() == 1;
-        allowRepeatCallers = source.readInt() == 1;
-        allowMessages = source.readInt() == 1;
-        allowReminders = source.readInt() == 1;
-        allowEvents = source.readInt() == 1;
-        allowCallsFrom = source.readInt();
-        allowMessagesFrom = source.readInt();
+        if (!Flags.modesUi()) {
+            allowCalls = source.readInt() == 1;
+            allowRepeatCallers = source.readInt() == 1;
+            allowMessages = source.readInt() == 1;
+            allowReminders = source.readInt() == 1;
+            allowEvents = source.readInt() == 1;
+            allowCallsFrom = source.readInt();
+            allowMessagesFrom = source.readInt();
+        }
         user = source.readInt();
         manualRule = source.readParcelable(null, ZenRule.class);
         readRulesFromParcel(automaticRules, source);
         if (Flags.modesApi()) {
             readRulesFromParcel(deletedRules, source);
         }
-        allowAlarms = source.readInt() == 1;
-        allowMedia = source.readInt() == 1;
-        allowSystem = source.readInt() == 1;
-        suppressedVisualEffects = source.readInt();
+        if (!Flags.modesUi()) {
+            allowAlarms = source.readInt() == 1;
+            allowMedia = source.readInt() == 1;
+            allowSystem = source.readInt() == 1;
+            suppressedVisualEffects = source.readInt();
+        }
         areChannelsBypassingDnd = source.readInt() == 1;
-        allowConversations = source.readBoolean();
-        allowConversationsFrom = source.readInt();
-        if (Flags.modesApi()) {
-            allowPriorityChannels = source.readBoolean();
+        if (!Flags.modesUi()) {
+            allowConversations = source.readBoolean();
+            allowConversationsFrom = source.readInt();
+            if (Flags.modesApi()) {
+                allowPriorityChannels = source.readBoolean();
+            }
+        }
+    }
+
+    public static ZenPolicy getDefaultZenPolicy() {
+        ZenPolicy policy = new ZenPolicy.Builder()
+                .allowAlarms(true)
+                .allowMedia(true)
+                .allowSystem(false)
+                .allowCalls(PEOPLE_TYPE_STARRED)
+                .allowMessages(PEOPLE_TYPE_STARRED)
+                .allowReminders(false)
+                .allowEvents(false)
+                .allowRepeatCallers(true)
+                .allowConversations(CONVERSATION_SENDERS_IMPORTANT)
+                .showAllVisualEffects()
+                .showVisualEffect(VISUAL_EFFECT_FULL_SCREEN_INTENT, false)
+                .showVisualEffect(VISUAL_EFFECT_LIGHTS, false)
+                .showVisualEffect(VISUAL_EFFECT_PEEK, false)
+                .showVisualEffect(VISUAL_EFFECT_AMBIENT, false)
+                .allowPriorityChannels(true)
+                .build();
+        return policy;
+    }
+
+    public static ZenModeConfig getDefaultConfig() {
+        ZenModeConfig config = new ZenModeConfig();
+
+        EventInfo eventInfo = new EventInfo();
+        eventInfo.reply = REPLY_YES_OR_MAYBE;
+        ZenRule events = new ZenRule();
+        events.id = EVENTS_DEFAULT_RULE_ID;
+        events.conditionId = toEventConditionId(eventInfo);
+        events.component = ComponentName.unflattenFromString(
+                "android/com.android.server.notification.EventConditionProvider");
+        events.enabled = false;
+        events.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        events.pkg = "android";
+        config.automaticRules.put(EVENTS_DEFAULT_RULE_ID, events);
+
+        ScheduleInfo scheduleInfo = new ScheduleInfo();
+        scheduleInfo.days = new int[] {1, 2, 3, 4, 5, 6, 7};
+        scheduleInfo.startHour = 22;
+        scheduleInfo.endHour = 7;
+        scheduleInfo.exitAtAlarm = true;
+        ZenRule sleeping = new ZenRule();
+        sleeping.id = EVERY_NIGHT_DEFAULT_RULE_ID;
+        sleeping.conditionId = toScheduleConditionId(scheduleInfo);
+        sleeping.component = ComponentName.unflattenFromString(
+                "android/com.android.server.notification.ScheduleConditionProvider");
+        sleeping.enabled = false;
+        sleeping.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        sleeping.pkg = "android";
+        config.automaticRules.put(EVERY_NIGHT_DEFAULT_RULE_ID, sleeping);
+
+        return config;
+    }
+
+    void ensureManualZenRule() {
+        if (manualRule == null) {
+            final ZenRule newRule = new ZenRule();
+            newRule.type = AutomaticZenRule.TYPE_OTHER;
+            newRule.enabled = true;
+            newRule.conditionId = Uri.EMPTY;
+            newRule.allowManualInvocation = true;
+            newRule.zenPolicy = getDefaultZenPolicy();
+            newRule.pkg = "android";
+            manualRule = newRule;
         }
     }
 
@@ -363,28 +455,34 @@ public class ZenModeConfig implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(allowCalls ? 1 : 0);
-        dest.writeInt(allowRepeatCallers ? 1 : 0);
-        dest.writeInt(allowMessages ? 1 : 0);
-        dest.writeInt(allowReminders ? 1 : 0);
-        dest.writeInt(allowEvents ? 1 : 0);
-        dest.writeInt(allowCallsFrom);
-        dest.writeInt(allowMessagesFrom);
+        if (!Flags.modesUi()) {
+            dest.writeInt(allowCalls ? 1 : 0);
+            dest.writeInt(allowRepeatCallers ? 1 : 0);
+            dest.writeInt(allowMessages ? 1 : 0);
+            dest.writeInt(allowReminders ? 1 : 0);
+            dest.writeInt(allowEvents ? 1 : 0);
+            dest.writeInt(allowCallsFrom);
+            dest.writeInt(allowMessagesFrom);
+        }
         dest.writeInt(user);
         dest.writeParcelable(manualRule, 0);
         writeRulesToParcel(automaticRules, dest);
         if (Flags.modesApi()) {
             writeRulesToParcel(deletedRules, dest);
         }
-        dest.writeInt(allowAlarms ? 1 : 0);
-        dest.writeInt(allowMedia ? 1 : 0);
-        dest.writeInt(allowSystem ? 1 : 0);
-        dest.writeInt(suppressedVisualEffects);
+        if (!Flags.modesUi()) {
+            dest.writeInt(allowAlarms ? 1 : 0);
+            dest.writeInt(allowMedia ? 1 : 0);
+            dest.writeInt(allowSystem ? 1 : 0);
+            dest.writeInt(suppressedVisualEffects);
+        }
         dest.writeInt(areChannelsBypassingDnd ? 1 : 0);
-        dest.writeBoolean(allowConversations);
-        dest.writeInt(allowConversationsFrom);
-        if (Flags.modesApi()) {
-            dest.writeBoolean(allowPriorityChannels);
+        if (!Flags.modesUi()) {
+            dest.writeBoolean(allowConversations);
+            dest.writeInt(allowConversationsFrom);
+            if (Flags.modesApi()) {
+                dest.writeBoolean(allowPriorityChannels);
+            }
         }
     }
 
@@ -408,33 +506,249 @@ public class ZenModeConfig implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(ZenModeConfig.class.getSimpleName()).append('[')
-                .append("user=").append(user)
-                .append(",allowAlarms=").append(allowAlarms)
-                .append(",allowMedia=").append(allowMedia)
-                .append(",allowSystem=").append(allowSystem)
-                .append(",allowReminders=").append(allowReminders)
-                .append(",allowEvents=").append(allowEvents)
-                .append(",allowCalls=").append(allowCalls)
-                .append(",allowRepeatCallers=").append(allowRepeatCallers)
-                .append(",allowMessages=").append(allowMessages)
-                .append(",allowConversations=").append(allowConversations)
-                .append(",allowCallsFrom=").append(sourceToString(allowCallsFrom))
-                .append(",allowMessagesFrom=").append(sourceToString(allowMessagesFrom))
-                .append(",allowConvFrom=").append(ZenPolicy.conversationTypeToString
-                        (allowConversationsFrom))
-                .append(",suppressedVisualEffects=").append(suppressedVisualEffects);
+                .append("user=").append(user);
+        if (!Flags.modesUi()) {
+            sb.append(",allowAlarms=").append(allowAlarms)
+                    .append(",allowMedia=").append(allowMedia)
+                    .append(",allowSystem=").append(allowSystem)
+                    .append(",allowReminders=").append(allowReminders)
+                    .append(",allowEvents=").append(allowEvents)
+                    .append(",allowCalls=").append(allowCalls)
+                    .append(",allowRepeatCallers=").append(allowRepeatCallers)
+                    .append(",allowMessages=").append(allowMessages)
+                    .append(",allowConversations=").append(allowConversations)
+                    .append(",allowCallsFrom=").append(sourceToString(allowCallsFrom))
+                    .append(",allowMessagesFrom=").append(sourceToString(allowMessagesFrom))
+                    .append(",allowConvFrom=").append(ZenPolicy.conversationTypeToString
+                            (allowConversationsFrom))
+                    .append("\nsuppressedVisualEffects=").append(suppressedVisualEffects);
+        }
         if (Flags.modesApi()) {
-            sb.append(",hasPriorityChannels=").append(areChannelsBypassingDnd);
+            sb.append("\nhasPriorityChannels=").append(areChannelsBypassingDnd);
             sb.append(",allowPriorityChannels=").append(allowPriorityChannels);
         } else {
-            sb.append(",areChannelsBypassingDnd=").append(areChannelsBypassingDnd);
+            sb.append("\nareChannelsBypassingDnd=").append(areChannelsBypassingDnd);
         }
-        sb.append(",\nautomaticRules=").append(rulesToString(automaticRules))
-                .append(",\nmanualRule=").append(manualRule);
+        sb.append(",\nautomaticRules=").append(rulesToString(automaticRules));
+        sb.append(",\nmanualRule=").append(manualRule);
         if (Flags.modesApi()) {
             sb.append(",\ndeletedRules=").append(rulesToString(deletedRules));
         }
         return sb.append(']').toString();
+    }
+
+    public boolean isAllowPriorityChannels() {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        return allowPriorityChannels;
+    }
+
+    public void setAllowPriorityChannels(boolean allowPriorityChannels) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            this.allowPriorityChannels = allowPriorityChannels;
+        }
+    }
+
+    public int getSuppressedVisualEffects() {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            return this.suppressedVisualEffects;
+        }
+    }
+
+    public void setSuppressedVisualEffects(int suppressedVisualEffects) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            this.suppressedVisualEffects = suppressedVisualEffects;
+        }
+    }
+
+    public @ZenPolicy.ConversationSenders int getAllowConversationsFrom() {
+        if (Flags.modesUi()) {
+            return manualRule.zenPolicy.getPriorityConversationSenders();
+        }
+        return allowConversationsFrom;
+    }
+
+    public void setAllowConversationsFrom(
+            @ZenPolicy.ConversationSenders int allowConversationsFrom) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            this.allowConversationsFrom = allowConversationsFrom;
+        }
+    }
+
+    public void setAllowConversations(boolean allowConversations) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            this.allowConversations = allowConversations;
+        }
+    }
+
+    public boolean isAllowConversations() {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        return allowConversations;
+    }
+
+    public @Policy.PrioritySenders int getAllowMessagesFrom() {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        return allowMessagesFrom;
+    }
+
+    public void setAllowMessagesFrom(@Policy.PrioritySenders int allowMessagesFrom) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            this.allowMessagesFrom = allowMessagesFrom;
+        }
+    }
+
+    public void setAllowMessages(boolean allowMessages) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        this.allowMessages = allowMessages;
+    }
+
+    public @Policy.PrioritySenders int getAllowCallsFrom() {
+        if (Flags.modesUi()) {
+            return peopleTypeToPrioritySenders(
+                    manualRule.zenPolicy.getPriorityCallSenders(), DEFAULT_CALLS_SOURCE);
+        }
+        return allowCallsFrom;
+    }
+
+    public void setAllowCallsFrom(@Policy.PrioritySenders int allowCallsFrom) {
+        if (Flags.modesUi()) {
+            manualRule.zenPolicy = new ZenPolicy.Builder(manualRule.zenPolicy)
+                    .allowCalls(prioritySendersToPeopleType(allowCallsFrom))
+                    .build();
+        } else {
+            this.allowCallsFrom = allowCallsFrom;
+        }
+    }
+
+    public void setAllowCalls(boolean allowCalls) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        this.allowCalls = allowCalls;
+    }
+
+    public boolean isAllowEvents() {
+        if (Flags.modesUi()) {
+            return manualRule.zenPolicy.isCategoryAllowed(
+                    ZenPolicy.PRIORITY_CATEGORY_EVENTS, false);
+        }
+        return allowEvents;
+    }
+
+    public void setAllowEvents(boolean allowEvents) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            this.allowEvents = allowEvents;
+        }
+    }
+
+    public boolean isAllowReminders() {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        return allowReminders;
+    }
+
+    public void setAllowReminders(boolean allowReminders) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            this.allowReminders = allowReminders;
+        }
+    }
+
+    public boolean isAllowMessages() {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        return allowMessages;
+    }
+
+    public boolean isAllowRepeatCallers() {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        return allowRepeatCallers;
+    }
+
+    public void setAllowRepeatCallers(boolean allowRepeatCallers) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            this.allowRepeatCallers = allowRepeatCallers;
+        }
+    }
+
+    public boolean isAllowSystem() {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        return allowSystem;
+    }
+
+    public void setAllowSystem(boolean allowSystem) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            this.allowSystem = allowSystem;
+        }
+    }
+
+    public boolean isAllowMedia() {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        return allowMedia;
+    }
+
+    public void setAllowMedia(boolean allowMedia) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            this.allowMedia = allowMedia;
+        }
+    }
+
+    public boolean isAllowAlarms() {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        return allowAlarms;
+    }
+
+    public void setAllowAlarms(boolean allowAlarms) {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        } else {
+            this.allowAlarms = allowAlarms;
+        }
+    }
+
+    public boolean isAllowCalls() {
+        if (Flags.modesUi()) {
+            throw new IllegalStateException("can't be used with modesUI flag");
+        }
+        return allowCalls;
     }
 
     private static String rulesToString(ArrayMap<String, ZenRule> ruleList) {
@@ -512,6 +826,8 @@ public class ZenModeConfig implements Parcelable {
         if (!(o instanceof ZenModeConfig)) return false;
         if (o == this) return true;
         final ZenModeConfig other = (ZenModeConfig) o;
+        // The policy fields that live on config are compared directly because the fields will
+        // contain data until MODES_UI is rolled out/cleaned up.
         boolean eq = other.allowAlarms == allowAlarms
                 && other.allowMedia == allowMedia
                 && other.allowSystem == allowSystem
@@ -539,6 +855,8 @@ public class ZenModeConfig implements Parcelable {
 
     @Override
     public int hashCode() {
+        // The policy fields that live on config are compared directly because the fields will
+        // contain data until MODES_UI is rolled out/cleaned up.
         if (Flags.modesApi()) {
             return Objects.hash(allowAlarms, allowMedia, allowSystem, allowCalls,
                     allowRepeatCallers, allowMessages,
@@ -619,9 +937,14 @@ public class ZenModeConfig implements Parcelable {
         rt.version = safeInt(parser, ZEN_ATT_VERSION, getCurrentXmlVersion());
         rt.user = safeInt(parser, ZEN_ATT_USER, rt.user);
         boolean readSuppressedEffects = false;
+        boolean readManualRule = false;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             tag = parser.getName();
             if (type == XmlPullParser.END_TAG && ZEN_TAG.equals(tag)) {
+                if (Flags.modesUi() && !readManualRule) {
+                    // migrate from fields on config into manual rule
+                    rt.manualRule.zenPolicy = rt.toZenPolicy();
+                }
                 return rt;
             }
             if (type == XmlPullParser.START_TAG) {
@@ -693,6 +1016,9 @@ public class ZenModeConfig implements Parcelable {
                             DEFAULT_SUPPRESSED_VISUAL_EFFECTS);
                 } else if (MANUAL_TAG.equals(tag)) {
                     rt.manualRule = readRuleXml(parser);
+                    if (rt.manualRule != null) {
+                        readManualRule = true;
+                    }
                 } else if (AUTOMATIC_TAG.equals(tag)
                         || (Flags.modesApi() && AUTOMATIC_DELETED_TAG.equals(tag))) {
                     final String id = parser.getAttributeValue(null, RULE_ATT_ID);
@@ -742,6 +1068,9 @@ public class ZenModeConfig implements Parcelable {
                 ? Integer.toString(xmlVersion) : Integer.toString(version));
         out.attributeInt(null, ZEN_ATT_USER, user);
         out.startTag(null, ALLOW_TAG);
+        // From MODES_UI these fields are only read if the flag has transitioned from off to on
+        // However, we will continue to write these fields until the flag is cleaned up so it's
+        // possible to turn the flag off without losing user data
         out.attributeBoolean(null, ALLOW_ATT_CALLS, allowCalls);
         out.attributeBoolean(null, ALLOW_ATT_REPEAT_CALLERS, allowRepeatCallers);
         out.attributeBoolean(null, ALLOW_ATT_MESSAGES, allowMessages);
@@ -816,11 +1145,11 @@ public class ZenModeConfig implements Parcelable {
         rt.enabler = parser.getAttributeValue(null, RULE_ATT_ENABLER);
         rt.condition = readConditionXml(parser);
 
-        if (!Flags.modesApi() && rt.zenMode != Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+        if (!Flags.modesApi() && rt.zenMode != ZEN_MODE_IMPORTANT_INTERRUPTIONS
                 && Condition.isValidId(rt.conditionId, SYSTEM_AUTHORITY)) {
             // all default rules and user created rules updated to zenMode important interruptions
             Slog.i(TAG, "Updating zenMode of automatic rule " + rt.name);
-            rt.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+            rt.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         }
         rt.modified = safeBoolean(parser, RULE_ATT_MODIFIED, false);
         rt.zenPolicy = readZenPolicyXml(parser);
@@ -838,6 +1167,10 @@ public class ZenModeConfig implements Parcelable {
                     parser.getAttributeValue(null, RULE_ATT_DELETION_INSTANT), null);
             if (deletionInstant != null) {
                 rt.deletionInstant = Instant.ofEpochMilli(deletionInstant);
+            }
+            if (Flags.modesUi()) {
+                rt.disabledOrigin = safeInt(parser, RULE_ATT_DISABLED_ORIGIN,
+                        UPDATE_ORIGIN_UNKNOWN);
             }
         }
         return rt;
@@ -892,6 +1225,9 @@ public class ZenModeConfig implements Parcelable {
             if (rule.deletionInstant != null) {
                 out.attributeLong(null, RULE_ATT_DELETION_INSTANT,
                         rule.deletionInstant.toEpochMilli());
+            }
+            if (Flags.modesUi()) {
+                out.attributeInt(null, RULE_ATT_DISABLED_ORIGIN, rule.disabledOrigin);
             }
         }
     }
@@ -952,7 +1288,7 @@ public class ZenModeConfig implements Parcelable {
         if (Flags.modesApi()) {
             final int channels = safeInt(parser, ALLOW_ATT_CHANNELS, ZenPolicy.STATE_UNSET);
             if (channels != ZenPolicy.STATE_UNSET) {
-                builder.allowPriorityChannels(channels == ZenPolicy.STATE_ALLOW);
+                builder.allowPriorityChannels(channels == STATE_ALLOW);
                 policySet = true;
             }
         }
@@ -966,7 +1302,7 @@ public class ZenModeConfig implements Parcelable {
             policySet = true;
         }
         if (repeatCallers != ZenPolicy.STATE_UNSET) {
-            builder.allowRepeatCallers(repeatCallers == ZenPolicy.STATE_ALLOW);
+            builder.allowRepeatCallers(repeatCallers == STATE_ALLOW);
             policySet = true;
         }
         if (conversations != ZenPolicy.CONVERSATION_SENDERS_UNSET) {
@@ -974,23 +1310,23 @@ public class ZenModeConfig implements Parcelable {
             policySet = true;
         }
         if (alarms != ZenPolicy.STATE_UNSET) {
-            builder.allowAlarms(alarms == ZenPolicy.STATE_ALLOW);
+            builder.allowAlarms(alarms == STATE_ALLOW);
             policySet = true;
         }
         if (media != ZenPolicy.STATE_UNSET) {
-            builder.allowMedia(media == ZenPolicy.STATE_ALLOW);
+            builder.allowMedia(media == STATE_ALLOW);
             policySet = true;
         }
         if (system != ZenPolicy.STATE_UNSET) {
-            builder.allowSystem(system == ZenPolicy.STATE_ALLOW);
+            builder.allowSystem(system == STATE_ALLOW);
             policySet = true;
         }
         if (events != ZenPolicy.STATE_UNSET) {
-            builder.allowEvents(events == ZenPolicy.STATE_ALLOW);
+            builder.allowEvents(events == STATE_ALLOW);
             policySet = true;
         }
         if (reminders != ZenPolicy.STATE_UNSET) {
-            builder.allowReminders(reminders == ZenPolicy.STATE_ALLOW);
+            builder.allowReminders(reminders == STATE_ALLOW);
             policySet = true;
         }
 
@@ -1005,31 +1341,31 @@ public class ZenModeConfig implements Parcelable {
                 ZenPolicy.STATE_UNSET);
 
         if (fullScreenIntent != ZenPolicy.STATE_UNSET) {
-            builder.showFullScreenIntent(fullScreenIntent == ZenPolicy.STATE_ALLOW);
+            builder.showFullScreenIntent(fullScreenIntent == STATE_ALLOW);
             policySet = true;
         }
         if (lights != ZenPolicy.STATE_UNSET) {
-            builder.showLights(lights == ZenPolicy.STATE_ALLOW);
+            builder.showLights(lights == STATE_ALLOW);
             policySet = true;
         }
         if (peek != ZenPolicy.STATE_UNSET) {
-            builder.showPeeking(peek == ZenPolicy.STATE_ALLOW);
+            builder.showPeeking(peek == STATE_ALLOW);
             policySet = true;
         }
         if (statusBar != ZenPolicy.STATE_UNSET) {
-            builder.showStatusBarIcons(statusBar == ZenPolicy.STATE_ALLOW);
+            builder.showStatusBarIcons(statusBar == STATE_ALLOW);
             policySet = true;
         }
         if (badges != ZenPolicy.STATE_UNSET) {
-            builder.showBadges(badges == ZenPolicy.STATE_ALLOW);
+            builder.showBadges(badges == STATE_ALLOW);
             policySet = true;
         }
         if (ambient != ZenPolicy.STATE_UNSET) {
-            builder.showInAmbientDisplay(ambient == ZenPolicy.STATE_ALLOW);
+            builder.showInAmbientDisplay(ambient == STATE_ALLOW);
             policySet = true;
         }
         if (notificationList != ZenPolicy.STATE_UNSET) {
-            builder.showInNotificationList(notificationList == ZenPolicy.STATE_ALLOW);
+            builder.showInNotificationList(notificationList == STATE_ALLOW);
             policySet = true;
         }
 
@@ -1266,17 +1602,22 @@ public class ZenModeConfig implements Parcelable {
         }
     };
 
+    public ZenPolicy getZenPolicy() {
+        return Flags.modesUi() ? manualRule.zenPolicy : toZenPolicy();
+    }
+
     /**
      * Converts a ZenModeConfig to a ZenPolicy
      */
-    public ZenPolicy toZenPolicy() {
+    @VisibleForTesting
+    ZenPolicy toZenPolicy() {
         ZenPolicy.Builder builder = new ZenPolicy.Builder()
                 .allowCalls(allowCalls
-                        ? notificationPolicySendersToZenPolicyPeopleType(allowCallsFrom)
+                        ? prioritySendersToPeopleType(allowCallsFrom)
                         : ZenPolicy.PEOPLE_TYPE_NONE)
                 .allowRepeatCallers(allowRepeatCallers)
                 .allowMessages(allowMessages
-                        ? notificationPolicySendersToZenPolicyPeopleType(allowMessagesFrom)
+                        ? prioritySendersToPeopleType(allowMessagesFrom)
                         : ZenPolicy.PEOPLE_TYPE_NONE)
                 .allowReminders(allowReminders)
                 .allowEvents(allowEvents)
@@ -1336,7 +1677,7 @@ public class ZenModeConfig implements Parcelable {
         if (zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_MESSAGES,
                 isPriorityCategoryEnabled(Policy.PRIORITY_CATEGORY_MESSAGES, defaultPolicy))) {
             priorityCategories |= Policy.PRIORITY_CATEGORY_MESSAGES;
-            messageSenders = zenPolicyPeopleTypeToNotificationPolicySenders(
+            messageSenders = peopleTypeToPrioritySenders(
                     zenPolicy.getPriorityMessageSenders(), messageSenders);
         }
 
@@ -1352,7 +1693,7 @@ public class ZenModeConfig implements Parcelable {
         if (zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_CALLS,
                 isPriorityCategoryEnabled(Policy.PRIORITY_CATEGORY_CALLS, defaultPolicy))) {
             priorityCategories |= Policy.PRIORITY_CATEGORY_CALLS;
-            callSenders = zenPolicyPeopleTypeToNotificationPolicySenders(
+            callSenders = peopleTypeToPrioritySenders(
                     zenPolicy.getPriorityCallSenders(), callSenders);
         }
 
@@ -1452,46 +1793,155 @@ public class ZenModeConfig implements Parcelable {
         return (policy.suppressedVisualEffects & visualEffect) == 0;
     }
 
+    private boolean isVisualEffectAllowed(int suppressedVisualEffects, int visualEffect) {
+        return (suppressedVisualEffects & visualEffect) == 0;
+    }
+
     public Policy toNotificationPolicy() {
         int priorityCategories = 0;
         int priorityCallSenders = Policy.PRIORITY_SENDERS_CONTACTS;
         int priorityMessageSenders = Policy.PRIORITY_SENDERS_CONTACTS;
         int priorityConversationSenders = Policy.CONVERSATION_SENDERS_IMPORTANT;
-        if (allowConversations) {
-            priorityCategories |= Policy.PRIORITY_CATEGORY_CONVERSATIONS;
-        }
-        if (allowCalls) {
-            priorityCategories |= Policy.PRIORITY_CATEGORY_CALLS;
-        }
-        if (allowMessages) {
-            priorityCategories |= Policy.PRIORITY_CATEGORY_MESSAGES;
-        }
-        if (allowEvents) {
-            priorityCategories |= Policy.PRIORITY_CATEGORY_EVENTS;
-        }
-        if (allowReminders) {
-            priorityCategories |= Policy.PRIORITY_CATEGORY_REMINDERS;
-        }
-        if (allowRepeatCallers) {
-            priorityCategories |= Policy.PRIORITY_CATEGORY_REPEAT_CALLERS;
-        }
-        if (allowAlarms) {
-            priorityCategories |= Policy.PRIORITY_CATEGORY_ALARMS;
-        }
-        if (allowMedia) {
-            priorityCategories |= Policy.PRIORITY_CATEGORY_MEDIA;
-        }
-        if (allowSystem) {
-            priorityCategories |= Policy.PRIORITY_CATEGORY_SYSTEM;
-        }
-        priorityCallSenders = sourceToPrioritySenders(allowCallsFrom, priorityCallSenders);
-        priorityMessageSenders = sourceToPrioritySenders(allowMessagesFrom, priorityMessageSenders);
-        priorityConversationSenders = zenPolicyConversationSendersToNotificationPolicy(
-                allowConversationsFrom, priorityConversationSenders);
+        int state = 0;
+        int suppressedVisualEffects = 0;
 
-        int state = areChannelsBypassingDnd ? Policy.STATE_CHANNELS_BYPASSING_DND : 0;
-        if (Flags.modesApi()) {
-            state = Policy.policyState(areChannelsBypassingDnd, allowPriorityChannels);
+        if (Flags.modesUi()) {
+            if (manualRule.zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_EVENTS, false)) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_EVENTS;
+            }
+            if (manualRule.zenPolicy.isCategoryAllowed(
+                    ZenPolicy.PRIORITY_CATEGORY_REMINDERS, false)) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_REMINDERS;
+            }
+            if (manualRule.zenPolicy.isCategoryAllowed(
+                    ZenPolicy.PRIORITY_CATEGORY_REPEAT_CALLERS, false)) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_REPEAT_CALLERS;
+            }
+            if (manualRule.zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_ALARMS, false)) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_ALARMS;
+            }
+            if (manualRule.zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_MEDIA, false)) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_MEDIA;
+            }
+            if (manualRule.zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_SYSTEM, false)) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_SYSTEM;
+            }
+
+            if (manualRule.zenPolicy.getPriorityCategoryConversations() == STATE_ALLOW) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_CONVERSATIONS;
+            }
+            priorityConversationSenders = zenPolicyConversationSendersToNotificationPolicy(
+                    manualRule.zenPolicy.getPriorityConversationSenders(),
+                    CONVERSATION_SENDERS_NONE);
+            if (manualRule.zenPolicy.getPriorityCategoryCalls() == STATE_ALLOW) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_CALLS;
+            }
+            priorityCallSenders = peopleTypeToPrioritySenders(
+                    manualRule.zenPolicy.getPriorityCallSenders(), DEFAULT_CALLS_SOURCE);
+            if (manualRule.zenPolicy.getPriorityCategoryMessages() == STATE_ALLOW) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_MESSAGES;
+            }
+            priorityMessageSenders = peopleTypeToPrioritySenders(
+                    manualRule.zenPolicy.getPriorityMessageSenders(), DEFAULT_SOURCE);
+
+            state = Policy.policyState(areChannelsBypassingDnd,
+                    manualRule.zenPolicy.getPriorityChannelsAllowed() != STATE_DISALLOW);
+
+            boolean suppressFullScreenIntent = !manualRule.zenPolicy.isVisualEffectAllowed(
+                    ZenPolicy.VISUAL_EFFECT_FULL_SCREEN_INTENT,
+                    isVisualEffectAllowed(DEFAULT_SUPPRESSED_VISUAL_EFFECTS,
+                            ZenPolicy.VISUAL_EFFECT_FULL_SCREEN_INTENT));
+
+            boolean suppressLights = !manualRule.zenPolicy.isVisualEffectAllowed(
+                    ZenPolicy.VISUAL_EFFECT_LIGHTS,
+                    isVisualEffectAllowed(DEFAULT_SUPPRESSED_VISUAL_EFFECTS,
+                            ZenPolicy.VISUAL_EFFECT_LIGHTS));
+
+            boolean suppressAmbient = !manualRule.zenPolicy.isVisualEffectAllowed(
+                    ZenPolicy.VISUAL_EFFECT_AMBIENT,
+                    isVisualEffectAllowed(DEFAULT_SUPPRESSED_VISUAL_EFFECTS,
+                            ZenPolicy.VISUAL_EFFECT_AMBIENT));
+
+            if (suppressFullScreenIntent && suppressLights && suppressAmbient) {
+                suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
+            }
+
+            if (suppressFullScreenIntent) {
+                suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+            }
+
+            if (suppressLights) {
+                suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_LIGHTS;
+            }
+
+            if (!manualRule.zenPolicy.isVisualEffectAllowed(ZenPolicy.VISUAL_EFFECT_PEEK,
+                    isVisualEffectAllowed(DEFAULT_SUPPRESSED_VISUAL_EFFECTS,
+                            ZenPolicy.VISUAL_EFFECT_PEEK))) {
+                suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_PEEK;
+                suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_SCREEN_ON;
+            }
+
+            if (!manualRule.zenPolicy.isVisualEffectAllowed(ZenPolicy.VISUAL_EFFECT_STATUS_BAR,
+                    isVisualEffectAllowed(DEFAULT_SUPPRESSED_VISUAL_EFFECTS,
+                            ZenPolicy.VISUAL_EFFECT_STATUS_BAR))) {
+                suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+            }
+
+            if (!manualRule.zenPolicy.isVisualEffectAllowed(ZenPolicy.VISUAL_EFFECT_BADGE,
+                    isVisualEffectAllowed(DEFAULT_SUPPRESSED_VISUAL_EFFECTS,
+                            ZenPolicy.VISUAL_EFFECT_BADGE))) {
+                suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_BADGE;
+            }
+
+            if (suppressAmbient) {
+                suppressedVisualEffects |= SUPPRESSED_EFFECT_AMBIENT;
+            }
+
+            if (!manualRule.zenPolicy.isVisualEffectAllowed(
+                    ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST,
+                    isVisualEffectAllowed(DEFAULT_SUPPRESSED_VISUAL_EFFECTS,
+                            ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST))) {
+                suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
+            }
+        } else {
+            if (isAllowConversations()) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_CONVERSATIONS;
+            }
+            if (isAllowCalls()) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_CALLS;
+            }
+            if (isAllowMessages()) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_MESSAGES;
+            }
+            if (isAllowEvents()) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_EVENTS;
+            }
+            if (isAllowReminders()) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_REMINDERS;
+            }
+            if (isAllowRepeatCallers()) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_REPEAT_CALLERS;
+            }
+            if (isAllowAlarms()) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_ALARMS;
+            }
+            if (isAllowMedia()) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_MEDIA;
+            }
+            if (isAllowSystem()) {
+                priorityCategories |= Policy.PRIORITY_CATEGORY_SYSTEM;
+            }
+            priorityCallSenders = sourceToPrioritySenders(getAllowCallsFrom(), priorityCallSenders);
+            priorityMessageSenders = sourceToPrioritySenders(
+                    getAllowMessagesFrom(), priorityMessageSenders);
+            priorityConversationSenders = zenPolicyConversationSendersToNotificationPolicy(
+                    getAllowConversationsFrom(), priorityConversationSenders);
+
+            state = areChannelsBypassingDnd ? Policy.STATE_CHANNELS_BYPASSING_DND : 0;
+            if (Flags.modesApi()) {
+                state = Policy.policyState(areChannelsBypassingDnd, allowPriorityChannels);
+            }
+            suppressedVisualEffects = getSuppressedVisualEffects();
         }
 
         return new Policy(priorityCategories, priorityCallSenders, priorityMessageSenders,
@@ -1544,31 +1994,38 @@ public class ZenModeConfig implements Parcelable {
 
     public void applyNotificationPolicy(Policy policy) {
         if (policy == null) return;
-        allowAlarms = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_ALARMS) != 0;
-        allowMedia = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_MEDIA) != 0;
-        allowSystem = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_SYSTEM) != 0;
-        allowEvents = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_EVENTS) != 0;
-        allowReminders = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_REMINDERS) != 0;
-        allowCalls = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_CALLS) != 0;
-        allowMessages = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_MESSAGES) != 0;
-        allowRepeatCallers = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_REPEAT_CALLERS)
-                != 0;
-        allowCallsFrom = normalizePrioritySenders(policy.priorityCallSenders, allowCallsFrom);
-        allowMessagesFrom = normalizePrioritySenders(policy.priorityMessageSenders,
-                allowMessagesFrom);
-        if (policy.suppressedVisualEffects != Policy.SUPPRESSED_EFFECTS_UNSET) {
-            suppressedVisualEffects = policy.suppressedVisualEffects;
+        if (Flags.modesUi()) {
+            manualRule.zenPolicy = ZenAdapters.notificationPolicyToZenPolicy(policy);
+        } else {
+            setAllowAlarms((policy.priorityCategories & Policy.PRIORITY_CATEGORY_ALARMS) != 0);
+            allowMedia = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_MEDIA) != 0;
+            allowSystem = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_SYSTEM) != 0;
+            allowEvents = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_EVENTS) != 0;
+            allowReminders = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_REMINDERS) != 0;
+            allowCalls = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_CALLS) != 0;
+            allowMessages = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_MESSAGES) != 0;
+            allowRepeatCallers =
+                    (policy.priorityCategories & Policy.PRIORITY_CATEGORY_REPEAT_CALLERS)
+                            != 0;
+            allowCallsFrom = normalizePrioritySenders(policy.priorityCallSenders, allowCallsFrom);
+            allowMessagesFrom = normalizePrioritySenders(policy.priorityMessageSenders,
+                    allowMessagesFrom);
+            if (policy.suppressedVisualEffects != Policy.SUPPRESSED_EFFECTS_UNSET) {
+                suppressedVisualEffects = policy.suppressedVisualEffects;
+            }
+            allowConversations = (policy.priorityCategories
+                    & Policy.PRIORITY_CATEGORY_CONVERSATIONS) != 0;
+            allowConversationsFrom = normalizeConversationSenders(allowConversations,
+                    policy.priorityConversationSenders,
+                    allowConversationsFrom);
+            if (policy.state != Policy.STATE_UNSET) {
+                if (Flags.modesApi()) {
+                    setAllowPriorityChannels(policy.allowPriorityChannels());
+                }
+            }
         }
-        allowConversations = (policy.priorityCategories
-                & Policy.PRIORITY_CATEGORY_CONVERSATIONS) != 0;
-        allowConversationsFrom = normalizeConversationSenders(allowConversations,
-                policy.priorityConversationSenders,
-                allowConversationsFrom);
         if (policy.state != Policy.STATE_UNSET) {
             areChannelsBypassingDnd = (policy.state & Policy.STATE_CHANNELS_BYPASSING_DND) != 0;
-            if (Flags.modesApi()) {
-                allowPriorityChannels = policy.allowPriorityChannels();
-            }
         }
     }
 
@@ -1921,7 +2378,7 @@ public class ZenModeConfig implements Parcelable {
 
         public int userId = UserHandle.USER_NULL;  // USER_NULL = unspecified - use current user
         public String calName;  // CalendarContract.Calendars.DISPLAY_NAME, or null for any
-        public Long calendarId; // Calendars._ID, or null if restored from < Q calendar
+        @Nullable public Long calendarId; // Calendars._ID, or null if restored from < Q calendar
         public int reply;
 
         @Override
@@ -1951,6 +2408,33 @@ public class ZenModeConfig implements Parcelable {
         public static int resolveUserId(int userId) {
             return userId == UserHandle.USER_NULL ? ActivityManager.getCurrentUser() : userId;
         }
+    }
+
+    // ==== Built-in system condition: custom manual ====
+
+    public static final String CUSTOM_MANUAL_PATH = "custom_manual";
+    private static final Uri CUSTOM_MANUAL_CONDITION_ID =
+            new Uri.Builder().scheme(Condition.SCHEME)
+                    .authority(SYSTEM_AUTHORITY)
+                    .appendPath(CUSTOM_MANUAL_PATH)
+                    .build();
+
+    /** Returns the condition id used for manual (not automatically triggered) custom rules. */
+    public static Uri toCustomManualConditionId() {
+        return CUSTOM_MANUAL_CONDITION_ID;
+    }
+
+    /**
+     * Returns whether the supplied {@link Uri} corresponds to the condition id used for manual (not
+     * automatically triggered) custom rules.
+     */
+    public static boolean isValidCustomManualConditionId(Uri conditionId) {
+        return CUSTOM_MANUAL_CONDITION_ID.equals(conditionId);
+    }
+
+    /** Returns the {@link ComponentName} of the custom manual condition provider. */
+    public static ComponentName getCustomManualConditionProvider() {
+        return new ComponentName(SYSTEM_AUTHORITY, "CustomManualConditionProvider");
     }
 
     // ==== End built-in system conditions ====
@@ -1995,49 +2479,11 @@ public class ZenModeConfig implements Parcelable {
         return "";
     }
 
-    public static String getConditionSummary(Context context, ZenModeConfig config,
-            int userHandle, boolean shortVersion) {
-        return getConditionLine(context, config, userHandle, false /*useLine1*/, shortVersion);
-    }
-
-    private static String getConditionLine(Context context, ZenModeConfig config,
-            int userHandle, boolean useLine1, boolean shortVersion) {
-        if (config == null) return "";
-        String summary = "";
-        if (config.manualRule != null) {
-            final Uri id = config.manualRule.conditionId;
-            if (config.manualRule.enabler != null) {
-                summary = getOwnerCaption(context, config.manualRule.enabler);
-            } else {
-                if (id == null) {
-                    summary = context.getString(com.android.internal.R.string.zen_mode_forever);
-                } else {
-                    final long time = tryParseCountdownConditionId(id);
-                    Condition c = config.manualRule.condition;
-                    if (time > 0) {
-                        final long now = System.currentTimeMillis();
-                        final long span = time - now;
-                        c = toTimeCondition(context, time, Math.round(span / (float) MINUTES_MS),
-                                userHandle, shortVersion);
-                    }
-                    final String rt = c == null ? "" : useLine1 ? c.line1 : c.summary;
-                    summary = TextUtils.isEmpty(rt) ? "" : rt;
-                }
-            }
+    public boolean isManualActive() {
+        if (!Flags.modesUi()) {
+            return manualRule != null;
         }
-        for (ZenRule automaticRule : config.automaticRules.values()) {
-            if (automaticRule.isAutomaticActive()) {
-                if (summary.isEmpty()) {
-                    summary = automaticRule.name;
-                } else {
-                    summary = context.getResources()
-                            .getString(R.string.zen_mode_rule_name_combination, summary,
-                                    automaticRule.name);
-                }
-
-            }
-        }
-        return summary;
+        return manualRule != null && manualRule.isAutomaticActive();
     }
 
     public static class ZenRule implements Parcelable {
@@ -2073,6 +2519,8 @@ public class ZenModeConfig implements Parcelable {
         @ZenPolicy.ModifiableField public int zenPolicyUserModifiedFields;
         @ZenDeviceEffects.ModifiableField public int zenDeviceEffectsUserModifiedFields;
         @Nullable public Instant deletionInstant; // Only set on deleted rules.
+        @FlaggedApi(Flags.FLAG_MODES_UI)
+        @ConfigChangeOrigin public int disabledOrigin = UPDATE_ORIGIN_UNKNOWN;
 
         public ZenRule() { }
 
@@ -2110,6 +2558,9 @@ public class ZenModeConfig implements Parcelable {
                 zenDeviceEffectsUserModifiedFields = source.readInt();
                 if (source.readInt() == 1) {
                     deletionInstant = Instant.ofEpochMilli(source.readLong());
+                }
+                if (Flags.modesUi()) {
+                    disabledOrigin = source.readInt();
                 }
             }
         }
@@ -2185,6 +2636,9 @@ public class ZenModeConfig implements Parcelable {
                 } else {
                     dest.writeInt(0);
                 }
+                if (Flags.modesUi()) {
+                    dest.writeInt(disabledOrigin);
+                }
             }
         }
 
@@ -2229,6 +2683,9 @@ public class ZenModeConfig implements Parcelable {
                 }
                 if (deletionInstant != null) {
                     sb.append(",deletionInstant=").append(deletionInstant);
+                }
+                if (Flags.modesUi()) {
+                    sb.append(",disabledOrigin=").append(disabledOrigin);
                 }
             }
 
@@ -2283,7 +2740,7 @@ public class ZenModeConfig implements Parcelable {
                     && other.modified == modified;
 
             if (Flags.modesApi()) {
-                return finalEquals
+                finalEquals = finalEquals
                         && Objects.equals(other.zenDeviceEffects, zenDeviceEffects)
                         && other.allowManualInvocation == allowManualInvocation
                         && Objects.equals(other.iconResName, iconResName)
@@ -2294,6 +2751,11 @@ public class ZenModeConfig implements Parcelable {
                         && other.zenDeviceEffectsUserModifiedFields
                             == zenDeviceEffectsUserModifiedFields
                         && Objects.equals(other.deletionInstant, deletionInstant);
+
+                if (Flags.modesUi()) {
+                    finalEquals = finalEquals
+                            && other.disabledOrigin == disabledOrigin;
+                }
             }
 
             return finalEquals;
@@ -2302,11 +2764,21 @@ public class ZenModeConfig implements Parcelable {
         @Override
         public int hashCode() {
             if (Flags.modesApi()) {
-                return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
-                        component, configurationActivity, pkg, id, enabler, zenPolicy,
-                        zenDeviceEffects, modified, allowManualInvocation, iconResName,
-                        triggerDescription, type, userModifiedFields, zenPolicyUserModifiedFields,
-                        zenDeviceEffectsUserModifiedFields, deletionInstant);
+                if (Flags.modesUi()) {
+                    return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
+                            component, configurationActivity, pkg, id, enabler, zenPolicy,
+                            zenDeviceEffects, modified, allowManualInvocation, iconResName,
+                            triggerDescription, type, userModifiedFields,
+                            zenPolicyUserModifiedFields,
+                            zenDeviceEffectsUserModifiedFields, deletionInstant, disabledOrigin);
+                } else {
+                    return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
+                            component, configurationActivity, pkg, id, enabler, zenPolicy,
+                            zenDeviceEffects, modified, allowManualInvocation, iconResName,
+                            triggerDescription, type, userModifiedFields,
+                            zenPolicyUserModifiedFields,
+                            zenDeviceEffectsUserModifiedFields, deletionInstant);
+                }
             }
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
                     component, configurationActivity, pkg, id, enabler, zenPolicy, modified);
@@ -2401,7 +2873,7 @@ public class ZenModeConfig implements Parcelable {
     public static boolean isZenOverridingRinger(int zen, Policy consolidatedPolicy) {
         return zen == Global.ZEN_MODE_NO_INTERRUPTIONS
                 || zen == Global.ZEN_MODE_ALARMS
-                || (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                || (zen == ZEN_MODE_IMPORTANT_INTERRUPTIONS
                 && ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(consolidatedPolicy));
     }
 
@@ -2410,21 +2882,40 @@ public class ZenModeConfig implements Parcelable {
      * This includes notification, ringer and system sounds
      */
     public static boolean areAllPriorityOnlyRingerSoundsMuted(ZenModeConfig config) {
-        boolean areChannelsBypassingDnd = config.areChannelsBypassingDnd;
-        if (Flags.modesApi()) {
-            areChannelsBypassingDnd = config.areChannelsBypassingDnd
-                    && config.allowPriorityChannels;
+        if (Flags.modesUi()) {
+            final ZenPolicy policy = config.manualRule.zenPolicy;
+            return !policy.isCategoryAllowed(PRIORITY_CATEGORY_REMINDERS, false)
+                    && !policy.isCategoryAllowed(PRIORITY_CATEGORY_CALLS, false)
+                    && !policy.isCategoryAllowed(PRIORITY_CATEGORY_MESSAGES, false)
+                    && !policy.isCategoryAllowed(PRIORITY_CATEGORY_EVENTS, false)
+                    && !policy.isCategoryAllowed(PRIORITY_CATEGORY_REPEAT_CALLERS, false)
+                    && !policy.isCategoryAllowed(PRIORITY_CATEGORY_SYSTEM, false)
+                    && !(config.areChannelsBypassingDnd && policy.getPriorityChannelsAllowed()
+                    == STATE_ALLOW);
+
+        } else {
+            boolean areChannelsBypassingDnd = config.areChannelsBypassingDnd;
+            if (Flags.modesApi()) {
+                areChannelsBypassingDnd = config.areChannelsBypassingDnd
+                        && config.isAllowPriorityChannels();
+            }
+            return !config.isAllowReminders() && !config.isAllowCalls() && !config.isAllowMessages()
+                    && !config.isAllowEvents() && !config.isAllowRepeatCallers()
+                    && !areChannelsBypassingDnd && !config.isAllowSystem();
         }
-        return !config.allowReminders && !config.allowCalls && !config.allowMessages
-                && !config.allowEvents && !config.allowRepeatCallers
-                && !areChannelsBypassingDnd && !config.allowSystem;
     }
 
     /**
      * Determines whether dnd mutes all sounds
      */
     public static boolean areAllZenBehaviorSoundsMuted(ZenModeConfig config) {
-        return !config.allowAlarms  && !config.allowMedia
+        if (Flags.modesUi()) {
+            final ZenPolicy policy = config.manualRule.zenPolicy;
+            return !policy.isCategoryAllowed(PRIORITY_CATEGORY_ALARMS, false)
+                    && !policy.isCategoryAllowed(PRIORITY_CATEGORY_MEDIA, false)
+                    && areAllPriorityOnlyRingerSoundsMuted(config);
+        }
+        return !config.isAllowAlarms()  && !config.isAllowMedia()
                 && areAllPriorityOnlyRingerSoundsMuted(config);
     }
 

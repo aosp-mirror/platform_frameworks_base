@@ -1318,7 +1318,7 @@
     <string name="volume_call" msgid="7625321655265747433">"Sauti ya simu inayoendelea"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Sauti ya simu inayoendelea ya Bluetooth"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Sauti ya kengele"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Sauti ya notisi"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Sauti ya arifa"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Kiwango"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Sauti ya Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Sauti ya toni mlio"</string>
@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Chagua ili uzime utatuzi usiotumia waya."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Hali ya Muunganisho wa Majaribio imewashwa"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Rejesha mipangilio iliyotoka nayo kiwandani ili uzime hali ya Muunganisho wa Majaribio."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"Muunganisho kupitia mlango umewashwa"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Utendaji unaathirika. lli uzime, teua programu ya kuwasha mfumo wa uendeshaji."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Kipengele cha majaribio cha MTE kimeruhusiwa"</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Vitufe vya sauti vilivyoshikiliwa. Umewasha <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Vitufe vya sauti vimeshikiliwa. Umezima <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Achilia vitufe vya sauti. Ili uwashe <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, bonyeza na ushikilie tena vitufe vyote vya sauti kwa sekunde 3."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Chagua kipengele utakachotumia ukigusa kitufe cha ufikivu:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Chagua kipengele cha kutumia pamoja na ishara ya ufikivu (telezesha vidole viwili kutoka chini kwenda juu kwenye skrini):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Chagua kipengele cha kutumia pamoja na ishara ya ufikivu (telezesha vidole vitatu kutoka chini kwenda juu kwenye skrini):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Ili ubadilishe kati ya vipengele, gusa na ushikilie kitufe cha zana za ufikivu."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Ili ubadilishe kati ya vipengele, telezesha vidole viwili juu na ushikilie."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Ili ubadilishe kati ya vipengele, telezesha vidole vitatu juu na ushikilie."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ukuzaji"</string>
     <string name="user_switched" msgid="7249833311585228097">"Mtumiaji wa sasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Inaenda kwa <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1883,7 +1893,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN ni fupi mno. Lazima iwe angalau tarakimu 4."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Jaribu tena baadaye"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Unatazama skrini nzima"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Ili kuondoka, telezesha kidole kutoka juu hadi chini."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Nimeelewa"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Zungusha ili upate mwonekano bora"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Fungua <xliff:g id="NAME">%s</xliff:g> kwenye skrini nzima ili uone maudhui kwa urahisi"</string>
@@ -1975,6 +1986,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Simu inayoendelea"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Inachuja simu unayopigiwa"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Ambazo aina haijabainishwa"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"Matoleo"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"Mitandao Jamii"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"Habari"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"Mapendekezo"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Uliweka mipangilio ya umuhimu wa arifa hizi."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Hii ni muhimu kwa sababu ya watu waliohusika."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Arifa ya programu maalum"</string>
@@ -2191,6 +2206,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Kichagua Njia ya Mkato ya Ufikivu kwenye Skrini"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Njia ya Mkato ya Ufikivu"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Ondoa Sehemu ya Arifa"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Menyu"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Cheza/Sitisha Maudhui"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Kitufe cha juu cha Dpad"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Kitufe cha chini cha Dpad"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Kitufe cha kushoto cha Dpad"</string>
@@ -2407,8 +2424,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Sehemu ya faragha"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Nakala"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Wasifu wa pamoja"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Sehemu ya faragha"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Maudhui nyeti kwenye arifa yamefichwa"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Maudhui ya programu yamefichwa ili yasionekane kwenye skrini ya pamoja kwa sababu za kiusalama"</string>

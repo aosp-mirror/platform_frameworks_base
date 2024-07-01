@@ -1412,6 +1412,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Izaberite da biste onemogućili bežično otklanjanje grešaka."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Omogućen je režim probnog korišćenja"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Obavite resetovanje na fabrička podešavanja da biste onemogućili režim probnog korišćenja."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serijska konzola je omogućena"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Performanse su smanjene. Da biste onemogući konzolu, proverite pokretački program."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Eksperimentalni MTE je omogućen"</string>
@@ -1756,12 +1760,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Držali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je uključena."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Držali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je isključena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Pustite tastere za jačinu zvuka. Da biste uključili <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, ponovo pritisnite i zadržite oba tastera za jačinu zvuka 3 sekunde."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Izaberite funkciju koja će se koristiti kada dodirnete dugme Pristupačnost:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Odaberite funkciju koja će se koristiti pomoću pokreta za pristupačnost (pomoću dva prsta prevucite nagore od dna ekrana):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Odaberite funkciju koja će se koristiti pomoću pokreta za pristupačnost (pomoću tri prsta prevucite nagore od dna ekrana):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Da biste prelazili sa jedne funkcije na drugu, dodirnite i zadržite dugme Pristupačnost."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Da biste prelazili sa jedne funkcije na drugu, prevucite nagore pomoću dva prsta i zadržite."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Da biste prelazili sa jedne funkcije na drugu, prevucite nagore pomoću tri prsta i zadržite."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Uvećanje"</string>
     <string name="user_switched" msgid="7249833311585228097">"Aktuelni korisnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Prebacivanje na <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1884,7 +1894,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN je prekratak. Mora da ima bar 4 cifre."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Probajte ponovo kasnije"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Prikazuje se ceo ekran"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Da biste izašli, prevucite nadole odozgo."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Važi"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotirajte radi boljeg prikaza"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otvorite aplikaciju <xliff:g id="NAME">%s</xliff:g> preko celog ekrana da biste bolje videli"</string>
@@ -1976,6 +1987,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Poziv je u toku"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Proverava se dolazni poziv"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Nekategorizovano"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"Promocije"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"Društvene mreže"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"Vesti"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"Preporuke"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Vi podešavate važnost ovih obaveštenja."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Ovo je važno zbog ljudi koji učestvuju."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Prilagođeno obaveštenje o aplikaciji"</string>
@@ -2192,6 +2207,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Alatka za biranje prečica za pristupačnost na ekranu"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Prečica za pristupačnost"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Odbaci traku sa obaveštenjima"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Meni"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Pusti/pauziraj medije"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"nagore na D-pad-u"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"nadole na D-pad-u"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"nalevo na D-pad-u"</string>
@@ -2408,8 +2425,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privatan prostor"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klonirano"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Zajedničko"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privatan prostor"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Osetljiv sadržaj obaveštenja je skriven"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Sadržaj aplikacije je skriven za deljenje sadržaja ekrana zbog bezbednosti"</string>

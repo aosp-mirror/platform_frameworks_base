@@ -98,7 +98,7 @@ constructor(
         createAndShow(
             packageName = null,
             aboveStatusBar = false,
-            dialogTransitionAnimatorController = null,
+            dialogTransitionAnimatorController = controller,
             includePlaybackAndAppMetadata = false,
             userHandle = null,
         )

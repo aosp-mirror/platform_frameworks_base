@@ -211,3 +211,12 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "rust_hyphenator"
+  namespace: "text"
+  description: "Reimplement hyphenator for safe file read"
+  # Hyphenator is initialized in Zygote
+  is_fixed_read_only: true
+  bug: "346915432"
+}

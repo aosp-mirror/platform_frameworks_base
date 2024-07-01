@@ -16,13 +16,6 @@
 
 package android.view;
 
-import static android.view.accessibility.Flags.FLAG_FORCE_INVERT_COLOR;
-import static android.view.flags.Flags.FLAG_ADD_SCHANDLE_TO_VRI_SURFACE;
-import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
-import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY;
-import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY;
-import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
-import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
@@ -44,6 +37,13 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.accessibility.Flags.FLAG_FORCE_INVERT_COLOR;
+import static android.view.flags.Flags.FLAG_ADD_SCHANDLE_TO_VRI_SURFACE;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
+import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
@@ -53,6 +53,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -63,15 +64,18 @@ import android.app.Instrumentation;
 import android.app.UiModeManager;
 import android.content.Context;
 import android.graphics.ForceDarkType;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
 import android.os.SystemProperties;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
+import android.sysprop.ViewProperties;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowInsets.Side;
@@ -503,6 +507,9 @@ public class ViewRootImplTest {
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_getDefaultValues() {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         ViewRootImpl viewRootImpl = new ViewRootImpl(sContext,
                 sContext.getDisplayNoVerify());
         assertEquals(FRAME_RATE_CATEGORY_DEFAULT,
@@ -521,6 +528,9 @@ public class ViewRootImplTest {
             FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_visibility_bySize() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         attachViewToWindow(mView);
         mViewRootImpl = mView.getViewRootImpl();
@@ -558,6 +568,9 @@ public class ViewRootImplTest {
             FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_smallSize_bySize() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
@@ -590,6 +603,9 @@ public class ViewRootImplTest {
             FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_normalSize_bySize() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
@@ -627,6 +643,9 @@ public class ViewRootImplTest {
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_visibility_defaultHigh()
             throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
@@ -688,6 +707,9 @@ public class ViewRootImplTest {
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_smallSize_defaultHigh()
             throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
@@ -723,6 +745,9 @@ public class ViewRootImplTest {
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_normalSize_defaultHigh()
             throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
@@ -758,6 +783,9 @@ public class ViewRootImplTest {
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_aggregate() {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         attachViewToWindow(mView);
         mViewRootImpl = mView.getViewRootImpl();
@@ -804,6 +832,9 @@ public class ViewRootImplTest {
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRate_aggregate() {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         attachViewToWindow(mView);
         mViewRootImpl = mView.getViewRootImpl();
@@ -876,6 +907,9 @@ public class ViewRootImplTest {
             FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRate_category() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         attachViewToWindow(mView);
         sInstrumentation.waitForIdleSync();
@@ -930,6 +964,9 @@ public class ViewRootImplTest {
             FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_velocityToHigh() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
@@ -973,6 +1010,9 @@ public class ViewRootImplTest {
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_insetsAnimation() {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
@@ -1010,6 +1050,9 @@ public class ViewRootImplTest {
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_frameRateBoostOnTouch() {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         attachViewToWindow(mView);
         sInstrumentation.waitForIdleSync();
@@ -1043,6 +1086,9 @@ public class ViewRootImplTest {
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateTimeOut() throws InterruptedException {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         final long delay = 200L;
 
         mView = new View(sContext);
@@ -1082,6 +1128,9 @@ public class ViewRootImplTest {
             FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateOnly() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         float frameRate = 20;
         attachViewToWindow(mView);
@@ -1133,6 +1182,9 @@ public class ViewRootImplTest {
             FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_infrequentLayer_defaultHigh() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         final long delay = 200L;
 
         mView = new View(sContext);
@@ -1175,11 +1227,83 @@ public class ViewRootImplTest {
         // Infrequent update
         Thread.sleep(delay);
 
-        // Even though this is not a small View, step 3 is triggered by this flag, which
-        // brings intermittent to LOW
-        int intermittentExpected = toolkitFrameRateBySizeReadOnly()
-                ? FRAME_RATE_CATEGORY_LOW
-                : FRAME_RATE_CATEGORY_NORMAL;
+        // The expected category is normal for intermittent.
+        int intermittentExpected = FRAME_RATE_CATEGORY_NORMAL;
+
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(intermittentExpected,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
+        waitForAfterDraw();
+
+        // When the View vote, it's still considered as intermittent update state
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(intermittentExpected,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
+        waitForAfterDraw();
+
+        // Becomes frequent update state
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(expected,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
+    }
+
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY})
+    public void votePreferredFrameRate_infrequentLayer_smallView_voteForLow() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+        final long delay = 200L;
+
+        mView = new View(sContext);
+        WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+        wmlp.width = 1;
+        wmlp.height = 1;
+
+        // The view is a small view, and it should vote for category low only.
+        int expected = FRAME_RATE_CATEGORY_LOW;
+
+        sInstrumentation.runOnMainSync(() -> {
+            WindowManager wm = sContext.getSystemService(WindowManager.class);
+            wm.addView(mView, wmlp);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        mViewRootImpl = mView.getViewRootImpl();
+        waitForFrameRateCategoryToSettle(mView);
+
+        // In transition from frequent update to infrequent update
+        Thread.sleep(delay);
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(expected,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
+        waitForAfterDraw();
+
+        // In transition from frequent update to infrequent update
+        Thread.sleep(delay);
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(expected,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
+
+        // Infrequent update
+        Thread.sleep(delay);
+
+        // The view is small, the expected category is still low for intermittent.
+        int intermittentExpected = FRAME_RATE_CATEGORY_LOW;
 
         sInstrumentation.runOnMainSync(() -> {
             mView.invalidate();
@@ -1211,6 +1335,9 @@ public class ViewRootImplTest {
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_isFrameRatePowerSavingsBalanced() {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         attachViewToWindow(mView);
         sInstrumentation.waitForIdleSync();
@@ -1245,6 +1372,9 @@ public class ViewRootImplTest {
             FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_applyTextureViewHeuristic() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         final long delay = 30L;
 
         mView = new TextureView(sContext);
@@ -1289,6 +1419,9 @@ public class ViewRootImplTest {
     @Test
     @RequiresFlagsEnabled(FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY)
     public void votePreferredFrameRate_velocityVotedAfterOnDraw() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
         mView = new View(sContext);
         double delta = 0.1;
         float pixelsPerSecond = 1000_000;
@@ -1408,6 +1541,37 @@ public class ViewRootImplTest {
         Log.d(TAG, "mViewRootImpl.mSurface=" + mViewRootImpl.mSurface);
         assertTrue("Could not create ASurfaceControl from VRI surface",
                 nativeCreateASurfaceControlFromSurface(mViewRootImpl.mSurface));
+    }
+
+    @EnableFlags(Flags.FLAG_INSETS_CONTROL_SEQ)
+    @Test
+    public void testHandleInsetsControlChanged() {
+        mView = new View(sContext);
+        attachViewToWindow(mView);
+
+        mViewRootImpl = mView.getViewRootImpl();
+        final InsetsController controller = mViewRootImpl.getInsetsController();
+
+        final InsetsState state0 = new InsetsState();
+        final InsetsState state1 = new InsetsState();
+        state0.setDisplayFrame(new Rect(0, 0, 500, 1000));
+        state0.setSeq(10000);
+        state1.setDisplayFrame(new Rect(0, 0, 1500, 2000));
+        state1.setSeq(10001);
+        final InsetsSourceControl.Array array = new InsetsSourceControl.Array();
+
+        sInstrumentation.runOnMainSync(() -> {
+            mViewRootImpl.handleInsetsControlChanged(state0, array);
+            assertEquals(state0, controller.getLastDispatchedState());
+
+            mViewRootImpl.handleInsetsControlChanged(state1, array);
+            assertEquals(state1, controller.getLastDispatchedState());
+
+            // Skip the stale value.
+            mViewRootImpl.handleInsetsControlChanged(state0, array);
+            assertEquals(state1, controller.getLastDispatchedState());
+            assertNotEquals(state0, controller.getLastDispatchedState());
+        });
     }
 
     private boolean setForceDarkSysProp(boolean isForceDarkEnabled) {

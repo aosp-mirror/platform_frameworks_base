@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"वायरलेस डीबगिंग बंद करण्यासाठी निवडा."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"टेस्ट हार्नेस मोड सुरू केला आहे"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"टेस्ट हार्नेस मोड बंद करण्यासाठी फॅक्टरी रीसेट करा."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"सिरीअल कन्सोल सुरू केला आहे"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"परफॉर्मन्सवर परिणाम होतो. बंद करण्यासाठी, बूटलोडर तपासा."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"प्रायोगिक MTE सुरू केले आहे"</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केले आहे."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"व्हॉल्यूम की रिलीझ करा. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू करण्यासाठी, दोन्ही व्हॉल्यूम की पुन्हा प्रेस करा आणि तीन सेकंदांसाठी धरून ठेवा."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"तुम्ही अ‍ॅक्सेसिबिलिटी बटणावर टॅप केल्यास वापरण्यासाठी एक वैशिष्ट्य निवडा:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"अ‍ॅक्सेसिबिलिटी जेश्चरसोबत वापराचे असलेले वैशिष्‍ट्य निवडा (दोन बोटांनी स्क्रीनच्या तळापासून वर स्वाइप करा):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"अ‍ॅक्सेसिबिलिटी जेश्चरसोबत वापराचे असलेले वैशिष्‍ट्य निवडा (तीनन बोटांनी स्क्रीनच्या तळापासून वर स्वाइप करा):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"वैशिष्टयांदरम्यान स्विच करण्यासाठी अ‍ॅक्सेसिबिलिटी बटणाला स्पर्श करा आणि धरून ठेवा."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"वैशिष्टयांदरम्यान स्विच करण्यासाठी दोन बोटांनी वर स्वाइप करा आणि धरून ठेवा."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"वैशिष्टयांदरम्यान स्विच करण्यासाठी तीन बोटांनी वर स्वाइप करा आणि धरून ठेवा."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"मॅग्निफिकेशन"</string>
     <string name="user_switched" msgid="7249833311585228097">"वर्तमान वापरकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> वर स्विच करत आहे…"</string>
@@ -1883,7 +1893,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"पिन खूप लहान आहे. किमान 4 अंकांचा असणे आवश्‍यक आहे."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"नंतर पुन्हा प्रयत्न करा"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"पूर्ण स्क्रीनवर पाहत आहात"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"बाहेर पडण्यासाठी, वरून खाली स्वाइप करा."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"समजले"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"अधिक चांगल्या दृश्यासाठी फिरवा"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"अधिक चांगल्या दृश्यासाठी <xliff:g id="NAME">%s</xliff:g> हे फुल स्क्रीनमध्ये उघडा"</string>
@@ -1975,6 +1986,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"सुरू असलेला कॉल"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"इनकमिंग कॉल स्क्रीन करत आहे"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"वर्गीकरण न केलेले"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"प्रमोशन"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"सोशल"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"बातम्या"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"शिफारशी"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"तुम्ही या सूचनांचे महत्त्व सेट केले."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"सामील असलेल्या लोकांमुळे हे महत्वाचे आहे."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"कस्टम ॲप सूचना"</string>
@@ -2191,6 +2206,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ऑन-स्क्रीन ॲक्सेसिबिलिटी शॉर्टकट निवडकर्ता"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"अ‍ॅक्सेसिबिलिटी शॉर्टकट"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"सूचना शेड डिसमिस करा"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"मेनू"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"मीडिया प्ले करा/थांबवा"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad चे वरील"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad चे खालचे"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad डावीकडील"</string>
@@ -2407,8 +2424,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"खाजगी स्पेस"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"क्लोन"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"सामुदायिक"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"खाजगी स्पेस"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"संवेदनशील नोटिफिकेशनचा आशय लपवलेला आहे"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"स्क्रीन शेअर करताना सुरक्षेसाठी अ‍ॅपमधील आशय लपवला आहे"</string>

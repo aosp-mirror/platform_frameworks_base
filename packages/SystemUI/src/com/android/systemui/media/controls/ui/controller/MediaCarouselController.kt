@@ -42,6 +42,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
@@ -124,6 +125,7 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 class MediaCarouselController
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     private val context: Context,
     private val mediaControlPanelFactory: Provider<MediaControlPanel>,
     private val visualStabilityProvider: VisualStabilityProvider,
@@ -216,7 +218,7 @@ constructor(
     private var carouselLocale: Locale? = null
 
     private val animationScaleObserver: ContentObserver =
-        object : ContentObserver(null) {
+        object : ContentObserver(executor, 0) {
             override fun onChange(selfChange: Boolean) {
                 if (!mediaFlags.isSceneContainerEnabled()) {
                     MediaPlayerData.players().forEach { it.updateAnimatorDurationScale() }
@@ -388,18 +390,20 @@ constructor(
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listenForAnyStateToGoneKeyguardTransition(this)
                 listenForAnyStateToLockscreenTransition(this)
-                listenForLockscreenSettingChanges(this)
 
                 if (!mediaFlags.isSceneContainerEnabled()) return@repeatOnLifecycle
                 listenForMediaItemsChanges(this)
             }
         }
+        listenForLockscreenSettingChanges(applicationScope)
 
         // Notifies all active players about animation scale changes.
-        globalSettings.registerContentObserverSync(
-            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
-            animationScaleObserver
-        )
+        bgExecutor.execute {
+            globalSettings.registerContentObserverSync(
+                Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+                animationScaleObserver
+            )
+        }
     }
 
     private fun setUpListeners() {
@@ -764,6 +768,7 @@ constructor(
                 mediaContent.addView(viewHolder.recommendations, position)
             }
         }
+        onAddOrUpdateVisibleToUserCard(position, isMediaCardUpdate = false)
         viewController.setListening(mediaCarouselScrollHandler.visibleToUser && currentlyExpanded)
         controllerByViewModel[commonViewModel] = viewController
         updateViewControllerToState(viewController, noAnimation = true)
@@ -781,10 +786,14 @@ constructor(
         commonViewModel.onAdded(commonViewModel)
     }
 
-    private fun onUpdated(commonViewModel: MediaCommonViewModel) {
+    private fun onUpdated(commonViewModel: MediaCommonViewModel, position: Int) {
         commonViewModel.onUpdated(commonViewModel)
         updatePageIndicator()
         mediaCarouselScrollHandler.onPlayersChanged()
+        onAddOrUpdateVisibleToUserCard(
+            position,
+            commonViewModel is MediaCommonViewModel.MediaControl
+        )
     }
 
     private fun onRemoved(commonViewModel: MediaCommonViewModel) {
@@ -819,6 +828,20 @@ constructor(
         }
         updatePageIndicator()
         mediaCarouselScrollHandler.onPlayersChanged()
+    }
+
+    private fun onAddOrUpdateVisibleToUserCard(position: Int, isMediaCardUpdate: Boolean) {
+        if (
+            mediaCarouselScrollHandler.visibleToUser &&
+                mediaCarouselScrollHandler.visibleMediaIndex == position
+        ) {
+            mediaCarouselViewModel.onCardVisibleToUser(
+                mediaCarouselScrollHandler.qsExpanded,
+                mediaCarouselScrollHandler.visibleMediaIndex,
+                currentEndLocation,
+                isMediaCardUpdate
+            )
+        }
     }
 
     private fun setNewViewModelsList(viewModels: List<MediaCommonViewModel>) {
@@ -1434,6 +1457,14 @@ constructor(
 
     /** Log the user impression for media card at visibleMediaIndex. */
     fun logSmartspaceImpression(qsExpanded: Boolean) {
+        if (SceneContainerFlag.isEnabled) {
+            mediaCarouselViewModel.onCardVisibleToUser(
+                qsExpanded,
+                mediaCarouselScrollHandler.visibleMediaIndex,
+                currentEndLocation
+            )
+            return
+        }
         val visibleMediaIndex = mediaCarouselScrollHandler.visibleMediaIndex
         if (MediaPlayerData.players().size > visibleMediaIndex) {
             val mediaControlPanel = MediaPlayerData.getMediaControlPanel(visibleMediaIndex)
@@ -1546,7 +1577,7 @@ constructor(
     @VisibleForTesting
     fun onSwipeToDismiss() {
         if (mediaFlags.isSceneContainerEnabled()) {
-            mediaCarouselViewModel.onSwipeToDismiss()
+            mediaCarouselViewModel.onSwipeToDismiss(currentEndLocation)
             return
         }
         MediaPlayerData.players().forEachIndexed { index, it ->

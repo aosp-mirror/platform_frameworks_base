@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.util.mockTopActivityClassName
 import com.android.systemui.shared.system.ActivityManagerWrapper
+import com.android.systemui.user.domain.UserDomainLayerModule
 import dagger.BindsInstance
 import dagger.Component
 import junit.framework.Assert.assertEquals
@@ -443,6 +444,7 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
             [
                 SysUITestModule::class,
                 BiometricsDomainLayerModule::class,
+                UserDomainLayerModule::class,
             ]
     )
     interface TestComponent {

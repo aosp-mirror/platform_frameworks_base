@@ -39,12 +39,14 @@ import com.android.systemui.biometrics.data.repository.PromptRepositoryImpl
 import com.android.systemui.biometrics.udfps.BoundingBoxOverlapDetector
 import com.android.systemui.biometrics.udfps.EllipseOverlapDetector
 import com.android.systemui.biometrics.udfps.OverlapDetector
+import com.android.systemui.biometrics.ui.binder.DeviceEntryUnlockTrackerViewBinder
 import com.android.systemui.biometrics.ui.binder.SideFpsOverlayViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.binder.AlternateBouncerViewBinder
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds
+import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
@@ -100,6 +102,9 @@ interface BiometricsModule {
     @Binds
     @SysUISingleton
     fun displayStateRepository(impl: DisplayStateRepositoryImpl): DisplayStateRepository
+
+    @BindsOptionalOf
+    fun deviceEntryUnlockTrackerViewBinder(): DeviceEntryUnlockTrackerViewBinder
 
     companion object {
         /** Background [Executor] for HAL related operations. */

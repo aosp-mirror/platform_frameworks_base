@@ -49,12 +49,9 @@ import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.hardware.devicestate.DeviceStateManager;
@@ -74,7 +71,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -136,6 +132,7 @@ import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.emergency.EmergencyGesture;
+import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureIntentFactory;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.ExtensionFragmentListener;
@@ -184,6 +181,7 @@ import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CircleReveal;
 import com.android.systemui.statusbar.CommandQueue;
@@ -247,7 +245,6 @@ import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -598,6 +595,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor;
     private final GlanceableHubContainerController mGlanceableHubContainerController;
 
+    private final EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
+
     /**
      * Public constructor for CentralSurfaces.
      *
@@ -710,7 +709,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Provider<FingerprintManager> fingerprintManager,
             ActivityStarter activityStarter,
             BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor,
-            GlanceableHubContainerController glanceableHubContainerController
+            GlanceableHubContainerController glanceableHubContainerController,
+            EmergencyGestureIntentFactory emergencyGestureIntentFactory
     ) {
         mContext = context;
         mNotificationsController = notificationsController;
@@ -806,6 +806,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mActivityStarter = activityStarter;
         mBrightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor;
         mGlanceableHubContainerController = glanceableHubContainerController;
+        mEmergencyGestureIntentFactory = emergencyGestureIntentFactory;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -1328,7 +1329,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                                                 .putExtra(Intent.EXTRA_TEXT, message.toString()),
                                         "Share rejected touch report")
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                        true /* onlyProvisioned */, true /* dismissShade */);
+                        true /* onlyProvisioned */,
+                        true /* dismissShade */,
+                        null /* customMessage */);
             });
         }
 
@@ -1481,7 +1484,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return (v, event) -> {
             mAutoHideController.checkUserAutoHide(event);
             mRemoteInputManager.checkRemoteInputOutside(event);
-            if (!MigrateClocksToBlueprint.isEnabled()) {
+            if (!MigrateClocksToBlueprint.isEnabled() || mQsController.isCustomizing()) {
+                // For migrate clocks flag, when the user is editing QS tiles they need to be able
+                // to touch outside the customizer to close it, such as on the status or nav bar.
                 mShadeController.onStatusBarTouch(event);
             }
             return getNotificationShadeWindowView().onTouchEvent(event);
@@ -2628,7 +2633,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
             if (mLaunchEmergencyActionWhenFinishedWaking) {
                 mLaunchEmergencyActionWhenFinishedWaking = false;
-                Intent emergencyIntent = getEmergencyActionIntent();
+                Intent emergencyIntent = mEmergencyGestureIntentFactory.invoke(
+                        EmergencyGesture.ACTION_LAUNCH_EMERGENCY);
                 if (emergencyIntent != null) {
                     mContext.startActivityAsUser(emergencyIntent,
                             getActivityUserHandle(emergencyIntent));
@@ -2692,52 +2698,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean isScreenFullyOff() {
         return mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_OFF;
-    }
-
-    @Nullable
-    @Override
-    public Intent getEmergencyActionIntent() {
-        Intent emergencyIntent = new Intent(EmergencyGesture.ACTION_LAUNCH_EMERGENCY);
-        PackageManager pm = mContext.getPackageManager();
-        List<ResolveInfo> emergencyActivities = pm.queryIntentActivities(emergencyIntent,
-                PackageManager.MATCH_SYSTEM_ONLY);
-        ResolveInfo resolveInfo = getTopEmergencySosInfo(emergencyActivities);
-        if (resolveInfo == null) {
-            Log.wtf(TAG, "Couldn't find an app to process the emergency intent.");
-            return null;
-        }
-        emergencyIntent.setComponent(new ComponentName(resolveInfo.activityInfo.packageName,
-                resolveInfo.activityInfo.name));
-        emergencyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        return emergencyIntent;
-    }
-
-    /**
-     * Select and return the "best" ResolveInfo for Emergency SOS Activity.
-     */
-    private @Nullable ResolveInfo getTopEmergencySosInfo(List<ResolveInfo> emergencyActivities) {
-        // No matched activity.
-        if (emergencyActivities == null || emergencyActivities.isEmpty()) {
-            return null;
-        }
-
-        // Of multiple matched Activities, give preference to the pre-set package name.
-        String preferredAppPackageName =
-                mContext.getString(R.string.config_preferredEmergencySosPackage);
-
-        // If there is no preferred app, then return first match.
-        if (TextUtils.isEmpty(preferredAppPackageName)) {
-            return emergencyActivities.get(0);
-        }
-
-        for (ResolveInfo emergencyInfo: emergencyActivities) {
-            // If activity is from the preferred app, use it.
-            if (TextUtils.equals(emergencyInfo.activityInfo.packageName, preferredAppPackageName)) {
-                return emergencyInfo;
-            }
-        }
-        // No matching activity: return first match
-        return emergencyActivities.get(0);
     }
 
     @Override

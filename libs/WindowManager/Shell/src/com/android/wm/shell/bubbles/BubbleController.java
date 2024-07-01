@@ -86,6 +86,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.CollectionUtils;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
@@ -93,6 +94,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.bubbles.properties.BubbleProperties;
+import com.android.wm.shell.bubbles.shortcut.BubbleShortcutHelper;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -510,6 +512,10 @@ public class BubbleController implements ConfigurationChangeListener,
             userProfiles.put(user.id, user);
         }
         mCurrentProfiles = userProfiles;
+
+        if (Flags.enableRetrievableBubbles()) {
+            registerShortcutBroadcastReceiver();
+        }
 
         mShellController.addConfigurationChangeListener(this);
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_BUBBLES,
@@ -987,6 +993,25 @@ public class BubbleController implements ConfigurationChangeListener,
         }
     };
 
+    private void registerShortcutBroadcastReceiver() {
+        IntentFilter shortcutFilter = new IntentFilter();
+        shortcutFilter.addAction(BubbleShortcutHelper.ACTION_SHOW_BUBBLES);
+        ProtoLog.d(WM_SHELL_BUBBLES, "register broadcast receive for bubbles shortcut");
+        mContext.registerReceiver(mShortcutBroadcastReceiver, shortcutFilter,
+                Context.RECEIVER_NOT_EXPORTED);
+    }
+
+    private final BroadcastReceiver mShortcutBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ProtoLog.v(WM_SHELL_BUBBLES, "receive broadcast to show bubbles %s",
+                    intent.getAction());
+            if (BubbleShortcutHelper.ACTION_SHOW_BUBBLES.equals(intent.getAction())) {
+                mMainExecutor.execute(() -> showBubblesFromShortcut());
+            }
+        }
+    };
+
     /**
      * Called by the BubbleStackView and whenever all bubbles have animated out, and none have been
      * added in the meantime.
@@ -1425,6 +1450,8 @@ public class BubbleController implements ConfigurationChangeListener,
             if (b != null) {
                 // It's in the overflow, so remove it & reinflate
                 mBubbleData.dismissBubbleWithKey(appBubbleKey, Bubbles.DISMISS_NOTIF_CANCEL);
+                // Update the bubble entry in the overflow with the latest intent.
+                b.setAppBubbleIntent(intent);
             } else {
                 // App bubble does not exist, lets add and expand it
                 b = Bubble.createAppBubble(intent, user, icon, mMainExecutor);
@@ -2226,6 +2253,34 @@ public class BubbleController implements ConfigurationChangeListener,
     public void isNotificationPanelExpanded(Consumer<Boolean> callback) {
         mSysuiProxy.isNotificationPanelExpand(expanded ->
                 mMainExecutor.execute(() -> callback.accept(expanded)));
+    }
+
+    /**
+     * Show bubbles UI when triggered via shortcut.
+     *
+     * <p>When there are bubbles visible, expands the top-most bubble. When there are no bubbles
+     * visible, opens the bubbles overflow UI.
+     */
+    public void showBubblesFromShortcut() {
+        if (isStackExpanded()) {
+            ProtoLog.v(WM_SHELL_BUBBLES, "showBubblesFromShortcut: stack visible, skip");
+            return;
+        }
+        if (mBubbleData.getSelectedBubble() != null) {
+            ProtoLog.v(WM_SHELL_BUBBLES, "showBubblesFromShortcut: open selected bubble");
+            expandStackWithSelectedBubble();
+            return;
+        }
+        BubbleViewProvider bubbleToSelect = CollectionUtils.firstOrNull(mBubbleData.getBubbles());
+        if (bubbleToSelect == null) {
+            ProtoLog.v(WM_SHELL_BUBBLES, "showBubblesFromShortcut: no bubbles");
+            // make sure overflow bubbles are loaded
+            loadOverflowBubblesFromDisk();
+            bubbleToSelect = mBubbleData.getOverflow();
+        }
+        ProtoLog.v(WM_SHELL_BUBBLES, "showBubblesFromShortcut: select and open %s",
+                bubbleToSelect.getKey());
+        mBubbleData.setSelectedBubbleAndExpandStack(bubbleToSelect);
     }
 
     /**

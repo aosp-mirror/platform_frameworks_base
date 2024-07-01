@@ -139,6 +139,7 @@ import com.android.server.wm.BackgroundActivityStartController.BalCode;
 import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 import com.android.server.wm.TaskFragment.EmbeddingCheckResult;
+import com.android.wm.shell.Flags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -717,13 +718,7 @@ class ActivityStarter {
             onExecutionStarted();
 
             if (mRequest.intent != null) {
-                // Refuse possible leaked file descriptors
-                if (mRequest.intent.hasFileDescriptors()) {
-                    throw new IllegalArgumentException("File descriptors passed in Intent");
-                }
-
-                // Remove existing mismatch flag so it can be properly updated later
-                mRequest.intent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
+                mRequest.intent.prepareToEnterSystemServer();
             }
 
             final LaunchingState launchingState;
@@ -1654,7 +1649,8 @@ class ActivityStarter {
                 // activity, so this isn't just deliver-to-top
                 && mMovedToTopActivity == null
                 && !transitionController.hasOrderChanges()
-                && !transitionController.isTransientHide(startedActivityRootTask)) {
+                && !transitionController.isTransientHide(startedActivityRootTask)
+                && !newTransition.hasChanged(mLastStartActivityRecord)) {
             // We just delivered to top, so there isn't an actual transition here.
             if (!forceTransientTransition) {
                 newTransition.abort();
@@ -1723,7 +1719,14 @@ class ActivityStarter {
         // Get top task at beginning because the order may be changed when reusing existing task.
         final Task prevTopRootTask = mPreferredTaskDisplayArea.getFocusedRootTask();
         final Task prevTopTask = prevTopRootTask != null ? prevTopRootTask.getTopLeafTask() : null;
-        final Task reusedTask = resolveReusableTask();
+        final boolean sourceActivityLaunchedFromBubble =
+                sourceRecord != null && sourceRecord.getLaunchedFromBubble();
+        // if the flag is enabled, allow reusing bubbled tasks only if the source activity is
+        // bubbled.
+        final boolean includeLaunchedFromBubble =
+                Flags.onlyReuseBubbledTaskWhenLaunchedFromBubble()
+                        ? sourceActivityLaunchedFromBubble : true;
+        final Task reusedTask = resolveReusableTask(includeLaunchedFromBubble);
 
         // If requested, freeze the task list
         if (mOptions != null && mOptions.freezeRecentTasksReordering()
@@ -1790,6 +1793,7 @@ class ActivityStarter {
                     activity.destroyIfPossible("Removes redundant singleInstance");
                 }
             }
+            targetTaskTop.mTransitionController.collect(targetTaskTop);
             recordTransientLaunchIfNeeded(targetTaskTop);
             // Recycle the target task for this launch.
             startResult =
@@ -2722,8 +2726,11 @@ class ActivityStarter {
     /**
      * Decide whether the new activity should be inserted into an existing task. Returns null
      * if not or an ActivityRecord with the task into which the new activity should be added.
+     *
+     * @param includeLaunchedFromBubble whether a task whose top activity was launched from a bubble
+     *                                  should be allowed to be reused for the new activity.
      */
-    private Task resolveReusableTask() {
+    private Task resolveReusableTask(boolean includeLaunchedFromBubble) {
         // If a target task is specified, try to reuse that one
         if (mOptions != null && mOptions.getLaunchTaskId() != INVALID_TASK_ID) {
             Task launchTask = mRootWindowContainer.anyTaskForId(mOptions.getLaunchTaskId());
@@ -2767,7 +2774,8 @@ class ActivityStarter {
             } else {
                 // Otherwise find the best task to put the activity in.
                 intentActivity =
-                        mRootWindowContainer.findTask(mStartActivity, mPreferredTaskDisplayArea);
+                        mRootWindowContainer.findTask(mStartActivity, mPreferredTaskDisplayArea,
+                                includeLaunchedFromBubble);
             }
         }
 

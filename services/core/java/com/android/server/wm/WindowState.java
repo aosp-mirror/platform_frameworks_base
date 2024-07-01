@@ -96,6 +96,7 @@ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
+import static android.util.SequenceUtils.getNextSeq;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
@@ -3652,6 +3653,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
         outFrames.compatScale = getCompatScaleForClient();
+        outFrames.seq = getNextSeq(mLastReportedFrames.seq);
         if (mLastReportedFrames != outFrames) {
             mLastReportedFrames.setTo(outFrames);
         }
@@ -3682,7 +3684,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void fillInsetsState(@NonNull InsetsState outInsetsState, boolean copySources) {
+        final int lastSeq = mLastReportedInsetsState.getSeq();
         outInsetsState.set(getCompatInsetsState(), copySources);
+        outInsetsState.setSeq(getNextSeq(lastSeq));
         if (outInsetsState != mLastReportedInsetsState) {
             // No need to copy for the recorded.
             mLastReportedInsetsState.set(outInsetsState, false /* copySources */);
@@ -3691,9 +3695,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void fillInsetsSourceControls(@NonNull InsetsSourceControl.Array outArray,
             boolean copyControls) {
+        final int lastSeq = mLastReportedActiveControls.getSeq();
         final InsetsSourceControl[] controls =
                 getDisplayContent().getInsetsStateController().getControlsForDispatch(this);
         outArray.set(controls, copyControls);
+        outArray.setSeq(getNextSeq(lastSeq));
         if (outArray != mLastReportedActiveControls) {
             // No need to copy for the recorded.
             mLastReportedActiveControls.setTo(outArray, false /* copyControls */);
@@ -3754,31 +3760,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean isDragResizing = isDragResizing();
 
         markRedrawForSyncReported();
-
-        if (Flags.bundleClientTransactionFlag()) {
-            getProcess().scheduleClientTransactionItem(
-                    WindowStateResizeItem.obtain(mClient, mLastReportedFrames, reportDraw,
-                            mLastReportedConfiguration, mLastReportedInsetsState, forceRelayout,
-                            alwaysConsumeSystemBars, displayId,
-                            syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
-                            mLastReportedActivityWindowInfo));
-            onResizePostDispatched(drawPending, prevRotation, displayId);
-        } else {
-            // TODO(b/301870955): cleanup after launch
-            try {
-                mClient.resized(mLastReportedFrames, reportDraw, mLastReportedConfiguration,
-                        mLastReportedInsetsState, forceRelayout, alwaysConsumeSystemBars, displayId,
+        getProcess().scheduleClientTransactionItem(
+                WindowStateResizeItem.obtain(mClient, mLastReportedFrames, reportDraw,
+                        mLastReportedConfiguration, mLastReportedInsetsState, forceRelayout,
+                        alwaysConsumeSystemBars, displayId,
                         syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
-                        mLastReportedActivityWindowInfo);
-                onResizePostDispatched(drawPending, prevRotation, displayId);
-            } catch (RemoteException e) {
-                // Cancel orientation change of this window to avoid blocking unfreeze display.
-                setOrientationChanging(false);
-                mLastFreezeDuration = (int) (SystemClock.elapsedRealtime()
-                        - mWmService.mDisplayFreezeTime);
-                Slog.w(TAG, "Failed to report 'resized' to " + this + " due to " + e);
-            }
-        }
+                        mLastReportedActivityWindowInfo));
+        onResizePostDispatched(drawPending, prevRotation, displayId);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
@@ -5008,12 +4996,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         anim.restrictDuration(MAX_ANIMATION_DURATION);
         anim.scaleCurrentDuration(mWmService.getWindowAnimationScaleLocked());
         final Point position = new Point();
-        if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()) {
-            transformFrameToSurfacePosition(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top,
-                    position);
-        } else {
-            position.set(mSurfacePosition);
-        }
+        transformFrameToSurfacePosition(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top,
+                position);
         final AnimationAdapter adapter = new LocalAnimationAdapter(
                 new WindowAnimationSpec(anim, position, false /* canSkipFirstFrame */,
                         0 /* windowCornerRadius */),
@@ -5791,8 +5775,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     void finishSync(Transaction outMergedTransaction, BLASTSyncEngine.SyncGroup group,
             boolean cancel) {
-        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
-        if (syncGroup != null && group != syncGroup) return;
+        if (isDifferentSyncGroup(group)) return;
         mPrepareSyncSeqId = 0;
         if (cancel) {
             // This is leaving sync so any buffers left in the sync have a chance of

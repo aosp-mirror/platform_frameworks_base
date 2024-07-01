@@ -16,34 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
-import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
-import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION_TO_USER;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
-import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
-import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA;
-import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
-import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
-import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
-import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
-import static android.content.pm.ActivityInfo.isFixedOrientation;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
-import static android.content.pm.ActivityInfo.screenOrientationToString;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_16_9;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_3_2;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_4_3;
@@ -52,22 +27,9 @@ import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_DISPLAY_SI
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_FULLSCREEN;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_SPLIT_SCREEN;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_UNSET;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION;
-import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
-import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
-import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__CENTER;
@@ -103,7 +65,7 @@ import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTy
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
-import android.content.pm.ActivityInfo.ScreenOrientation;
+import android.app.CameraCompatTaskInfo.FreeformCameraCompatMode;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -124,30 +86,16 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
-import com.android.server.wm.utils.OptPropFactory;
-import com.android.server.wm.utils.OptPropFactory.OptProp;
 import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
-import java.util.function.BooleanSupplier;
 
 /** Controls behaviour of the letterbox UI for {@link mActivityRecord}. */
 // TODO(b/185262487): Improve test coverage of this class. Parts of it are tested in
 // SizeCompatTests and LetterboxTests but not all.
-// TODO(b/185264020): Consider making LetterboxUiController applicable to any level of the
-// hierarchy in addition to ActivityRecord (Task, DisplayArea, ...).
-// TODO(b/263021211): Consider renaming to more generic CompatUIController.
 final class LetterboxUiController {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxUiController" : TAG_ATM;
-
-    // Minimum value of mSetOrientationRequestCounter before qualifying as orientation request loop
-    @VisibleForTesting
-    static final int MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP = 2;
-    // Used to determine reset of mSetOrientationRequestCounter if next app requested
-    // orientation is after timeout value
-    @VisibleForTesting
-    static final int SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS = 1000;
 
     private final Point mTmpPoint = new Point();
 
@@ -155,44 +103,7 @@ final class LetterboxUiController {
 
     private final ActivityRecord mActivityRecord;
 
-    // TODO(b/265576778): Cache other overrides as well.
-
-    // Corresponds to OVERRIDE_ANY_ORIENTATION
-    private final boolean mIsOverrideAnyOrientationEnabled;
-    // Corresponds to OVERRIDE_ANY_ORIENTATION_TO_USER
-    private final boolean mIsSystemOverrideToFullscreenEnabled;
-    // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT
-    private final boolean mIsOverrideToPortraitOrientationEnabled;
-    // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR
-    private final boolean mIsOverrideToNosensorOrientationEnabled;
-    // Corresponds to OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE
-    private final boolean mIsOverrideToReverseLandscapeOrientationEnabled;
-    // Corresponds to OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA
-    private final boolean mIsOverrideOrientationOnlyForCameraEnabled;
-    // Corresponds to OVERRIDE_RESPECT_REQUESTED_ORIENTATION
-    private final boolean mIsOverrideRespectRequestedOrientationEnabled;
-
-    @NonNull
-    private final OptProp mAllowOrientationOverrideOptProp;
-    @NonNull
-    private final OptProp mAllowDisplayOrientationOverrideOptProp;
-    @NonNull
-    private final OptProp mAllowMinAspectRatioOverrideOptProp;
-    @NonNull
-    private final OptProp mAllowForceResizeOverrideOptProp;
-
-    @NonNull
-    private final OptProp mAllowUserAspectRatioOverrideOptProp;
-    @NonNull
-    private final OptProp mAllowUserAspectRatioFullscreenOverrideOptProp;
-
     private boolean mShowWallpaperForLetterboxBackground;
-
-    // Updated when ActivityRecord#setRequestedOrientation is called
-    private long mTimeMsLastSetOrientationRequest = 0;
-
-    // Counter for ActivityRecord#setRequestedOrientation
-    private int mSetOrientationRequestCounter = 0;
 
     // TODO(b/315140179): Make mUserAspectRatio final
     // The min aspect ratio override set by user
@@ -202,34 +113,17 @@ final class LetterboxUiController {
     @Nullable
     private Letterbox mLetterbox;
 
-    @NonNull
-    private final OptProp mCameraCompatAllowForceRotationOptProp;
-
-    @NonNull
-    private final OptProp mCameraCompatAllowRefreshOptProp;
-
-    @NonNull
-    private final OptProp mCameraCompatEnableRefreshViaPauseOptProp;
-
     // Whether activity "refresh" was requested but not finished in
     // ActivityRecord#activityResumedLocked following the camera compat force rotation in
     // DisplayRotationCompatPolicy.
     private boolean mIsRefreshRequested;
 
-    @NonNull
-    private final OptProp mIgnoreRequestedOrientationOptProp;
-
-    @NonNull
-    private final OptProp mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp;
-
-    @NonNull
-    private final OptProp mFakeFocusOptProp;
-
-    private boolean mIsRelaunchingAfterRequestedOrientationChanged;
-
     private boolean mLastShouldShowLetterboxUi;
 
     private boolean mDoubleTapEvent;
+
+    @FreeformCameraCompatMode
+    private int mFreeformCameraCompatMode = CAMERA_COMPAT_FREEFORM_NONE;
 
     LetterboxUiController(WindowManagerService wmService, ActivityRecord activityRecord) {
         mLetterboxConfiguration = wmService.mLetterboxConfiguration;
@@ -237,76 +131,6 @@ final class LetterboxUiController {
         // is created in its constructor. It shouldn't be used in this constructor but it's safe
         // to use it after since controller is only used in ActivityRecord.
         mActivityRecord = activityRecord;
-
-        PackageManager packageManager = wmService.mContext.getPackageManager();
-
-        final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
-                activityRecord.packageName);
-
-        final BooleanSupplier isPolicyForIgnoringRequestedOrientationEnabled = asLazy(
-                mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled);
-        mIgnoreRequestedOrientationOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION,
-                isPolicyForIgnoringRequestedOrientationEnabled);
-        mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED,
-                isPolicyForIgnoringRequestedOrientationEnabled);
-
-        mFakeFocusOptProp = optPropBuilder.create(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS,
-                mLetterboxConfiguration::isCompatFakeFocusEnabled);
-
-        final BooleanSupplier isCameraCompatTreatmentEnabled = asLazy(
-                mLetterboxConfiguration::isCameraCompatTreatmentEnabled);
-        mCameraCompatAllowForceRotationOptProp = optPropBuilder.create(
-                PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION,
-                isCameraCompatTreatmentEnabled);
-        mCameraCompatAllowRefreshOptProp = optPropBuilder.create(
-                PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH,
-                isCameraCompatTreatmentEnabled);
-        mCameraCompatEnableRefreshViaPauseOptProp = optPropBuilder.create(
-                PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE,
-                isCameraCompatTreatmentEnabled);
-
-        mAllowOrientationOverrideOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
-
-        mAllowDisplayOrientationOverrideOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE,
-                () -> mActivityRecord.mDisplayContent != null
-                        && mActivityRecord.getTask() != null
-                        && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()
-                        && !mActivityRecord.getTask().inMultiWindowMode()
-                        && mActivityRecord.mDisplayContent.getNaturalOrientation()
-                            == ORIENTATION_LANDSCAPE
-        );
-
-        mAllowMinAspectRatioOverrideOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
-
-        mAllowForceResizeOverrideOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES);
-
-        mAllowUserAspectRatioOverrideOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE,
-                mLetterboxConfiguration::isUserAppAspectRatioSettingsEnabled);
-
-        mAllowUserAspectRatioFullscreenOverrideOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
-                mLetterboxConfiguration::isUserAppAspectRatioFullscreenEnabled);
-
-        mIsOverrideAnyOrientationEnabled = isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION);
-        mIsSystemOverrideToFullscreenEnabled =
-                isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION_TO_USER);
-        mIsOverrideToPortraitOrientationEnabled =
-                isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT);
-        mIsOverrideToReverseLandscapeOrientationEnabled =
-                isCompatChangeEnabled(OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE);
-        mIsOverrideToNosensorOrientationEnabled =
-                isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR);
-        mIsOverrideOrientationOnlyForCameraEnabled =
-                isCompatChangeEnabled(OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA);
-        mIsOverrideRespectRequestedOrientationEnabled =
-                isCompatChangeEnabled(OVERRIDE_RESPECT_REQUESTED_ORIENTATION);
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -315,7 +139,6 @@ final class LetterboxUiController {
             mLetterbox.destroy();
             mLetterbox = null;
         }
-        mActivityRecord.mTransparentPolicy.stop();
     }
 
     void onMovedToDisplay(int displayId) {
@@ -324,103 +147,11 @@ final class LetterboxUiController {
         }
     }
 
-    /**
-     * Whether should ignore app requested orientation in response to an app
-     * calling {@link android.app.Activity#setRequestedOrientation}.
-     *
-     * <p>This is needed to avoid getting into {@link android.app.Activity#setRequestedOrientation}
-     * loop when {@link DisplayContent#getIgnoreOrientationRequest} is enabled or device has
-     * landscape natural orientation which app developers don't expect. For example, the loop can
-     * look like this:
-     * <ol>
-     *     <li>App sets default orientation to "unspecified" at runtime
-     *     <li>App requests to "portrait" after checking some condition (e.g. display rotation).
-     *     <li>(2) leads to fullscreen -> letterboxed bounds change and activity relaunch because
-     *     app can't handle the corresponding config changes.
-     *     <li>Loop goes back to (1)
-     * </ol>
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Flag gating the treatment is enabled
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Opt-in component property or per-app override are enabled
-     *     <li>Activity is relaunched after {@link android.app.Activity#setRequestedOrientation}
-     *     call from an app or camera compat force rotation treatment is active for the activity.
-     *     <li>Orientation request loop detected and is not letterboxed for fixed orientation
-     * </ul>
-     */
-    boolean shouldIgnoreRequestedOrientation(@ScreenOrientation int requestedOrientation) {
-        if (mIgnoreRequestedOrientationOptProp.shouldEnableWithOverrideAndProperty(
-                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION))) {
-            if (mIsRelaunchingAfterRequestedOrientationChanged) {
-                Slog.w(TAG, "Ignoring orientation update to "
-                        + screenOrientationToString(requestedOrientation)
-                        + " due to relaunching after setRequestedOrientation for "
-                        + mActivityRecord);
-                return true;
-            }
-            if (isCameraCompatTreatmentActive()) {
-                Slog.w(TAG, "Ignoring orientation update to "
-                        + screenOrientationToString(requestedOrientation)
-                        + " due to camera compat treatment for " + mActivityRecord);
-                return true;
-            }
-        }
-
-        if (shouldIgnoreOrientationRequestLoop()) {
-            Slog.w(TAG, "Ignoring orientation update to "
-                    + screenOrientationToString(requestedOrientation)
-                    + " as orientation request loop was detected for "
-                    + mActivityRecord);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Whether an app is calling {@link android.app.Activity#setRequestedOrientation}
-     * in a loop and orientation request should be ignored.
-     *
-     * <p>This should only be called once in response to
-     * {@link android.app.Activity#setRequestedOrientation}. See
-     * {@link #shouldIgnoreRequestedOrientation} for more details.
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Flag gating the treatment is enabled
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Per-app override is enabled
-     *     <li>App has requested orientation more than 2 times within 1-second
-     *     timer and activity is not letterboxed for fixed orientation
-     * </ul>
-     */
-    boolean shouldIgnoreOrientationRequestLoop() {
-        final boolean loopDetectionEnabled = isCompatChangeEnabled(
-                OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED);
-        if (!mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp
-                .shouldEnableWithOptInOverrideAndOptOutProperty(loopDetectionEnabled)) {
-            return false;
-        }
-
-        final long currTimeMs = System.currentTimeMillis();
-        if (currTimeMs - mTimeMsLastSetOrientationRequest
-                < SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS) {
-            mSetOrientationRequestCounter += 1;
-        } else {
-            // Resets app setOrientationRequest counter if timed out
-            mSetOrientationRequestCounter = 0;
-        }
-        // Update time last called
-        mTimeMsLastSetOrientationRequest = currTimeMs;
-
-        return mSetOrientationRequestCounter >= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP
-                && !mActivityRecord.isLetterboxedForFixedOrientationAndAspectRatio();
-    }
 
     @VisibleForTesting
     int getSetOrientationRequestCounter() {
-        return mSetOrientationRequestCounter;
+        return getAppCompatOverrides().getAppCompatOrientationOverrides()
+                .getSetOrientationRequestCounter();
     }
 
     /**
@@ -436,8 +167,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldSendFakeFocus() {
-        return mFakeFocusOptProp.shouldEnableWithOverrideAndProperty(
-                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS));
+        return getAppCompatOverrides().shouldSendFakeFocus();
     }
 
     /**
@@ -453,8 +183,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldOverrideMinAspectRatio() {
-        return mAllowMinAspectRatioOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
-                isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO));
+        return getAppCompatOverrides().shouldOverrideMinAspectRatio();
     }
 
     /**
@@ -471,10 +200,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldOverrideMinAspectRatioForCamera() {
-        return mActivityRecord.isCameraActive()
-                && mAllowMinAspectRatioOverrideOptProp
-                .shouldEnableWithOptInOverrideAndOptOutProperty(
-                        isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA));
+        return getAppCompatOverrides().shouldOverrideMinAspectRatioForCamera();
     }
 
     /**
@@ -490,8 +216,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldOverrideForceResizeApp() {
-        return mAllowForceResizeOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
-                isCompatChangeEnabled(FORCE_RESIZE_APP));
+        return getAppCompatOverrides().shouldOverrideForceResizeApp();
     }
 
     /**
@@ -505,8 +230,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldOverrideForceNonResizeApp() {
-        return mAllowForceResizeOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
-                isCompatChangeEnabled(FORCE_NON_RESIZE_APP));
+        return getAppCompatOverrides().shouldOverrideForceNonResizeApp();
     }
 
     /**
@@ -514,7 +238,8 @@ final class LetterboxUiController {
      * android.app.Activity#setRequestedOrientation}.
      */
     void setRelaunchingAfterRequestedOrientationChanged(boolean isRelaunching) {
-        mIsRelaunchingAfterRequestedOrientationChanged = isRelaunching;
+        getAppCompatOverrides().getAppCompatOrientationOverrides()
+                .setRelaunchingAfterRequestedOrientationChanged(isRelaunching);
     }
 
     /**
@@ -529,7 +254,7 @@ final class LetterboxUiController {
     }
 
     boolean isOverrideRespectRequestedOrientationEnabled() {
-        return mIsOverrideRespectRequestedOrientationEnabled;
+        return getAppCompatOverrides().isOverrideRespectRequestedOrientationEnabled();
     }
 
     /**
@@ -546,89 +271,11 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldUseDisplayLandscapeNaturalOrientation() {
-        return mAllowDisplayOrientationOverrideOptProp
-                .shouldEnableWithOptInOverrideAndOptOutProperty(
-                        isCompatChangeEnabled(OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION));
-    }
-
-    @ScreenOrientation
-    int overrideOrientationIfNeeded(@ScreenOrientation int candidate) {
-        final DisplayContent displayContent = mActivityRecord.mDisplayContent;
-        final boolean isIgnoreOrientationRequestEnabled = displayContent != null
-                && displayContent.getIgnoreOrientationRequest();
-        if (shouldApplyUserFullscreenOverride() && isIgnoreOrientationRequestEnabled) {
-            Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_USER)
-                    + " by user aspect ratio settings.");
-            return SCREEN_ORIENTATION_USER;
-        }
-
-        // In some cases (e.g. Kids app) we need to map the candidate orientation to some other
-        // orientation.
-        candidate = mActivityRecord.mWmService.mapOrientationRequest(candidate);
-
-        if (shouldApplyUserMinAspectRatioOverride() && (!isFixedOrientation(candidate)
-                || candidate == SCREEN_ORIENTATION_LOCKED)) {
-            Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_PORTRAIT)
-                    + " by user aspect ratio settings.");
-            return SCREEN_ORIENTATION_PORTRAIT;
-        }
-
-        if (mAllowOrientationOverrideOptProp.isFalse()) {
-            return candidate;
-        }
-
-        if (mIsOverrideOrientationOnlyForCameraEnabled && displayContent != null
-                && (displayContent.mDisplayRotationCompatPolicy == null
-                        || !displayContent.mDisplayRotationCompatPolicy
-                                .isActivityEligibleForOrientationOverride(mActivityRecord))) {
-            return candidate;
-        }
-
-        // mUserAspectRatio is always initialized first in shouldApplyUserFullscreenOverride(),
-        // which will always come first before this check as user override > device
-        // manufacturer override.
-        if (isSystemOverrideToFullscreenEnabled() && isIgnoreOrientationRequestEnabled) {
-            Slog.v(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_USER));
-            return SCREEN_ORIENTATION_USER;
-        }
-
-        if (mIsOverrideToReverseLandscapeOrientationEnabled
-                && (isFixedOrientationLandscape(candidate) || mIsOverrideAnyOrientationEnabled)) {
-            Slog.w(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_REVERSE_LANDSCAPE));
-            return SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-        }
-
-        if (!mIsOverrideAnyOrientationEnabled && isFixedOrientation(candidate)) {
-            return candidate;
-        }
-
-        if (mIsOverrideToPortraitOrientationEnabled) {
-            Slog.w(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_PORTRAIT));
-            return SCREEN_ORIENTATION_PORTRAIT;
-        }
-
-        if (mIsOverrideToNosensorOrientationEnabled) {
-            Slog.w(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_NOSENSOR));
-            return SCREEN_ORIENTATION_NOSENSOR;
-        }
-
-        return candidate;
+        return getAppCompatOverrides().shouldUseDisplayLandscapeNaturalOrientation();
     }
 
     boolean isOverrideOrientationOnlyForCameraEnabled() {
-        return mIsOverrideOrientationOnlyForCameraEnabled;
+        return getAppCompatOverrides().isOverrideOrientationOnlyForCameraEnabled();
     }
 
     /**
@@ -643,8 +290,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldRefreshActivityForCameraCompat() {
-        return mCameraCompatAllowRefreshOptProp.shouldEnableWithOptOutOverrideAndProperty(
-                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH));
+        return getAppCompatOverrides().shouldRefreshActivityForCameraCompat();
     }
 
     /**
@@ -662,8 +308,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldRefreshActivityViaPauseForCameraCompat() {
-        return mCameraCompatEnableRefreshViaPauseOptProp.shouldEnableWithOverrideAndProperty(
-                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE));
+        return getAppCompatOverrides().shouldRefreshActivityViaPauseForCameraCompat();
     }
 
     /**
@@ -678,8 +323,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldForceRotateForCameraCompat() {
-        return mCameraCompatAllowForceRotationOptProp.shouldEnableWithOptOutOverrideAndProperty(
-                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION));
+        return getAppCompatOverrides().shouldForceRotateForCameraCompat();
     }
 
     /**
@@ -697,18 +341,16 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldApplyFreeformTreatmentForCameraCompat() {
-        return Flags.cameraCompatForFreeform() && !isCompatChangeEnabled(
-                        OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
+        return getAppCompatOverrides().shouldApplyFreeformTreatmentForCameraCompat();
     }
 
-    private boolean isCameraCompatTreatmentActive() {
-        DisplayContent displayContent = mActivityRecord.mDisplayContent;
-        if (displayContent == null) {
-            return false;
-        }
-        return displayContent.mDisplayRotationCompatPolicy != null
-                && displayContent.mDisplayRotationCompatPolicy
-                        .isTreatmentEnabledForActivity(mActivityRecord);
+    @FreeformCameraCompatMode
+    int getFreeformCameraCompatMode() {
+        return mFreeformCameraCompatMode;
+    }
+
+    void setFreeformCameraCompatMode(@FreeformCameraCompatMode int freeformCameraCompatMode) {
+        mFreeformCameraCompatMode = freeformCameraCompatMode;
     }
 
     private boolean isCompatChangeEnabled(long overrideChangeId) {
@@ -759,16 +401,18 @@ final class LetterboxUiController {
     }
 
     void updateLetterboxSurfaceIfNeeded(WindowState winHint) {
-        updateLetterboxSurfaceIfNeeded(winHint, mActivityRecord.getSyncTransaction());
+        updateLetterboxSurfaceIfNeeded(winHint, mActivityRecord.getSyncTransaction(),
+                mActivityRecord.getPendingTransaction());
     }
 
-    void updateLetterboxSurfaceIfNeeded(WindowState winHint, Transaction t) {
+    void updateLetterboxSurfaceIfNeeded(WindowState winHint, @NonNull Transaction t,
+            @NonNull Transaction inputT) {
         if (shouldNotLayoutLetterbox(winHint)) {
             return;
         }
         layoutLetterboxIfNeeded(winHint);
         if (mLetterbox != null && mLetterbox.needsApplySurfaceChanges()) {
-            mLetterbox.applySurfaceChanges(t);
+            mLetterbox.applySurfaceChanges(t, inputT);
         }
     }
 
@@ -824,7 +468,8 @@ final class LetterboxUiController {
             // For this reason we use ActivityRecord#getBounds() that the translucent activity
             // inherits from the first opaque activity beneath and also takes care of the scaling
             // in case of activities in size compat mode.
-            final Rect innerFrame = mActivityRecord.mTransparentPolicy.isRunning()
+            final Rect innerFrame = mActivityRecord.mAppCompatController
+                    .getTransparentPolicy().isRunning()
                     ? mActivityRecord.getBounds() : w.getFrame();
             mLetterbox.layout(spaceToFill, innerFrame, mTmpPoint);
             if (mDoubleTapEvent) {
@@ -871,12 +516,14 @@ final class LetterboxUiController {
     // Check if we are in the given pose and in fullscreen mode.
     // Note that we check the task rather than the parent as with ActivityEmbedding the parent might
     // be a TaskFragment, and its windowing mode is always MULTI_WINDOW, even if the task is
-    // actually fullscreen.
+    // actually fullscreen. If display is still in transition e.g. unfolding, don't return true
+    // for HALF_FOLDED state or app will flicker.
     private boolean isDisplayFullScreenAndInPosture(boolean isTabletop) {
         Task task = mActivityRecord.getTask();
         return mActivityRecord.mDisplayContent != null && task != null
                 && mActivityRecord.mDisplayContent.getDisplayRotation().isDeviceInPosture(
                         DeviceStateController.DeviceState.HALF_FOLDED, isTabletop)
+                && !mActivityRecord.mDisplayContent.inTransition()
                 && task.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
     }
 
@@ -959,7 +606,7 @@ final class LetterboxUiController {
         // Don't resize to split screen size when in book mode if letterbox position is centered
         return (isBookMode && isNotCenteredHorizontally || isTabletopMode && isLandscape)
                     || isCameraCompatSplitScreenAspectRatioAllowed()
-                        && isCameraCompatTreatmentActive();
+                        && getAppCompatOverrides().isCameraCompatTreatmentActive();
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {
@@ -1061,13 +708,7 @@ final class LetterboxUiController {
      * Whether we should enable users to resize the current app.
      */
     boolean shouldEnableUserAspectRatioSettings() {
-        // We use mBooleanPropertyAllowUserAspectRatioOverride to allow apps to opt-out which has
-        // effect only if explicitly false. If mBooleanPropertyAllowUserAspectRatioOverride is null,
-        // the current app doesn't opt-out so the first part of the predicate is true.
-        return !mAllowUserAspectRatioOverrideOptProp.isFalse()
-                && mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
-                && mActivityRecord.mDisplayContent != null
-                && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest();
+        return getAppCompatOverrides().shouldEnableUserAspectRatioSettings();
     }
 
     /**
@@ -1086,27 +727,7 @@ final class LetterboxUiController {
                 && mUserAspectRatio != USER_MIN_ASPECT_RATIO_FULLSCREEN;
     }
 
-    boolean isUserFullscreenOverrideEnabled() {
-        if (mAllowUserAspectRatioOverrideOptProp.isFalse()
-                || mAllowUserAspectRatioFullscreenOverrideOptProp.isFalse()
-                || !mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled()) {
-            return false;
-        }
-        return true;
-    }
-
     boolean shouldApplyUserFullscreenOverride() {
-        // Do not override orientation to fullscreen for camera activities.
-        // Fixed-orientation activities are rarely tested in other orientations, and it often
-        // results in sideways or stretched previews. As the camera compat treatment targets
-        // fixed-orientation activities, overriding the orientation disables the treatment.
-        final DisplayContent displayContent = mActivityRecord.mDisplayContent;
-        if (displayContent != null && displayContent.mDisplayRotationCompatPolicy != null
-                && displayContent.mDisplayRotationCompatPolicy
-                .isCameraActive(mActivityRecord, /* mustBeFullscreen= */ true)) {
-            return false;
-        }
-
         if (isUserFullscreenOverrideEnabled()) {
             mUserAspectRatio = getUserMinAspectRatioOverrideCode();
 
@@ -1116,15 +737,17 @@ final class LetterboxUiController {
         return false;
     }
 
+    boolean isUserFullscreenOverrideEnabled() {
+        return getAppCompatOverrides().isUserFullscreenOverrideEnabled();
+    }
+
     boolean isSystemOverrideToFullscreenEnabled() {
-        return mIsSystemOverrideToFullscreenEnabled
-                && !mAllowOrientationOverrideOptProp.isFalse()
-                && (mUserAspectRatio == USER_MIN_ASPECT_RATIO_UNSET
-                    || mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
+        return getAppCompatOverrides().isSystemOverrideToFullscreenEnabled(mUserAspectRatio);
     }
 
     boolean hasFullscreenOverride() {
-        return isSystemOverrideToFullscreenEnabled() || shouldApplyUserFullscreenOverride();
+        // `mUserAspectRatio` is always initialized first in `shouldApplyUserFullscreenOverride()`.
+        return shouldApplyUserFullscreenOverride() || isSystemOverrideToFullscreenEnabled();
     }
 
     float getUserMinAspectRatio() {
@@ -1288,19 +911,21 @@ final class LetterboxUiController {
         if (!allowHorizontalReachabilityForThinLetterbox()) {
             return false;
         }
+        final Rect parentAppBoundsOverride = mActivityRecord.getParentAppBoundsOverride();
+        final Rect parentAppBounds = parentAppBoundsOverride != null
+                ? parentAppBoundsOverride : parentConfiguration.windowConfiguration.getAppBounds();
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty
-        final Rect opaqueActivityBounds = mActivityRecord.mTransparentPolicy
-                .getFirstOpaqueActivity().map(ActivityRecord::getScreenResolvedBounds)
+        final Rect opaqueActivityBounds = mActivityRecord.mAppCompatController
+                .getTransparentPolicy().getFirstOpaqueActivity()
+                .map(ActivityRecord::getScreenResolvedBounds)
                 .orElse(mActivityRecord.getScreenResolvedBounds());
         return mLetterboxConfiguration.getIsHorizontalReachabilityEnabled()
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
                 // Check whether the activity fills the parent vertically.
-                && parentConfiguration.windowConfiguration.getAppBounds().height()
-                        <= opaqueActivityBounds.height()
-                && parentConfiguration.windowConfiguration.getAppBounds().width()
-                        > opaqueActivityBounds.width();
+                && parentAppBounds.height() <= opaqueActivityBounds.height()
+                && parentAppBounds.width() > opaqueActivityBounds.width();
     }
 
     @VisibleForTesting
@@ -1310,6 +935,11 @@ final class LetterboxUiController {
 
     boolean isLetterboxDoubleTapEducationEnabled() {
         return isHorizontalReachabilityEnabled() || isVerticalReachabilityEnabled();
+    }
+
+    // TODO(b/346264992): Remove after AppCompatController refactoring
+    private AppCompatOverrides getAppCompatOverrides() {
+        return mActivityRecord.mAppCompatController.getAppCompatOverrides();
     }
 
     /**
@@ -1326,19 +956,21 @@ final class LetterboxUiController {
         if (!allowVerticalReachabilityForThinLetterbox()) {
             return false;
         }
+        final Rect parentAppBoundsOverride = mActivityRecord.getParentAppBoundsOverride();
+        final Rect parentAppBounds = parentAppBoundsOverride != null
+                ? parentAppBoundsOverride : parentConfiguration.windowConfiguration.getAppBounds();
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty.
-        final Rect opaqueActivityBounds = mActivityRecord.mTransparentPolicy
-                .getFirstOpaqueActivity().map(ActivityRecord::getScreenResolvedBounds)
+        final Rect opaqueActivityBounds = mActivityRecord.mAppCompatController
+                .getTransparentPolicy().getFirstOpaqueActivity()
+                .map(ActivityRecord::getScreenResolvedBounds)
                 .orElse(mActivityRecord.getScreenResolvedBounds());
         return mLetterboxConfiguration.getIsVerticalReachabilityEnabled()
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
                 // Check whether the activity fills the parent horizontally.
-                && parentConfiguration.windowConfiguration.getAppBounds().width()
-                        <= opaqueActivityBounds.width()
-                && parentConfiguration.windowConfiguration.getAppBounds().height()
-                        > opaqueActivityBounds.height();
+                && parentAppBounds.width() <= opaqueActivityBounds.width()
+                && parentAppBounds.height() > opaqueActivityBounds.height();
     }
 
     @VisibleForTesting
@@ -1348,7 +980,8 @@ final class LetterboxUiController {
 
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        if (mIsRelaunchingAfterRequestedOrientationChanged) {
+        if (getAppCompatOverrides().getAppCompatOrientationOverrides()
+                .getIsRelaunchingAfterRequestedOrientationChanged()) {
             return mLastShouldShowLetterboxUi;
         }
 
@@ -1437,7 +1070,7 @@ final class LetterboxUiController {
         // corners because we assume the specific layout would. This is the case when the layout
         // of the translucent activity uses only a part of all the bounds because of the use of
         // LayoutParams.WRAP_CONTENT.
-        if (mActivityRecord.mTransparentPolicy.isRunning()
+        if (mActivityRecord.mAppCompatController.getTransparentPolicy().isRunning()
                 && (cropBounds.width() != mainWindow.mRequestedWidth
                 || cropBounds.height() != mainWindow.mRequestedHeight)) {
             return null;
@@ -1508,7 +1141,8 @@ final class LetterboxUiController {
     }
 
     boolean getIsRelaunchingAfterRequestedOrientationChanged() {
-        return mIsRelaunchingAfterRequestedOrientationChanged;
+        return getAppCompatOverrides().getAppCompatOrientationOverrides()
+                .getIsRelaunchingAfterRequestedOrientationChanged();
     }
 
     private void adjustBoundsForTaskbar(final WindowState mainWindow, final Rect bounds) {
@@ -1693,23 +1327,19 @@ final class LetterboxUiController {
     int getLetterboxPositionForLogging() {
         int positionToLog = APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__UNKNOWN_POSITION;
         if (isHorizontalReachabilityEnabled()) {
-            int letterboxPositionForHorizontalReachability = getLetterboxConfiguration()
+            int letterboxPositionForHorizontalReachability = mLetterboxConfiguration
                     .getLetterboxPositionForHorizontalReachability(
                             isDisplayFullScreenAndInPosture(/* isTabletop */ false));
             positionToLog = letterboxHorizontalReachabilityPositionToLetterboxPosition(
                     letterboxPositionForHorizontalReachability);
         } else if (isVerticalReachabilityEnabled()) {
-            int letterboxPositionForVerticalReachability = getLetterboxConfiguration()
+            int letterboxPositionForVerticalReachability = mLetterboxConfiguration
                     .getLetterboxPositionForVerticalReachability(
                             isDisplayFullScreenAndInPosture(/* isTabletop */ true));
             positionToLog = letterboxVerticalReachabilityPositionToLetterboxPosition(
                     letterboxPositionForVerticalReachability);
         }
         return positionToLog;
-    }
-
-    private LetterboxConfiguration getLetterboxConfiguration() {
-        return mLetterboxConfiguration;
     }
 
     /**
@@ -1740,22 +1370,5 @@ final class LetterboxUiController {
                 letterboxOuterBounds,
                 w.mAttrs.insetsFlags.appearance
         );
-    }
-
-    @NonNull
-    private static BooleanSupplier asLazy(@NonNull BooleanSupplier supplier) {
-        return new BooleanSupplier() {
-            private boolean mRead;
-            private boolean mValue;
-
-            @Override
-            public boolean getAsBoolean() {
-                if (!mRead) {
-                    mRead = true;
-                    mValue = supplier.getAsBoolean();
-                }
-                return mValue;
-            }
-        };
     }
 }

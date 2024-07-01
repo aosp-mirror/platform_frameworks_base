@@ -18,20 +18,35 @@ package com.android.systemui.touchpad.tutorial.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.android.systemui.touchpad.tutorial.domain.interactor.TouchpadGesturesInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
-class TouchpadTutorialViewModel : ViewModel() {
+class TouchpadTutorialViewModel(private val gesturesInteractor: TouchpadGesturesInteractor) :
+    ViewModel() {
 
     private val _screen = MutableStateFlow(Screen.TUTORIAL_SELECTION)
     val screen: StateFlow<Screen> = _screen
 
-    class Factory @Inject constructor() : ViewModelProvider.Factory {
+    fun goTo(screen: Screen) {
+        _screen.value = screen
+    }
+
+    fun onOpened() {
+        gesturesInteractor.disableGestures()
+    }
+
+    fun onClosed() {
+        gesturesInteractor.enableGestures()
+    }
+
+    class Factory @Inject constructor(private val gesturesInteractor: TouchpadGesturesInteractor) :
+        ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return TouchpadTutorialViewModel() as T
+            return TouchpadTutorialViewModel(gesturesInteractor) as T
         }
     }
 }

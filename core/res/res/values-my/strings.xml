@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်းကို ပိတ်ရန် ရွေးပါ။"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"\'စမ်းသပ်ခြင်းစနစ်မုဒ်\' ဖွင့်ထားသည်"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"\'စမ်းသပ်ခြင်းစနစ် မုဒ်\' ကိုပိတ်ရန် စက်ရုံထုတ်အတိုင်း ပြင်ဆင်သတ်မှတ်ပါ။"</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"အမှတ်စဉ် ကွန်ဆိုးလ်ကို ဖွင့်ထားသည်"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"စွမ်းဆောင်ရည်အပေါ် သက်ရောက်မှုရှိနိုင်ပါသည်။ ပိတ်ရန် bootloader ကို စစ်ဆေးပါ။"</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"အစမ်းသုံး MTE ကို ဖွင့်ထားသည်"</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်လိုက်သည်။"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ပိတ်လိုက်သည်။"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"အသံထိန်းခလုတ်များကို လွှတ်လိုက်ပါ။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်ရန် အသံထိန်းခလုတ်နှစ်ခုစလုံးကို ၃ စက္ကန့်ကြာအောင် ထပ်နှိပ်ပါ။"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"သုံးနိုင်မှုခလုတ်ကို တို့ပြီးလျှင် ဝန်ဆောင်မှုတစ်ခု ရွေးပါ−"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"သုံးနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (ဖန်သားပြင်အောက်ခြေမှနေ၍ လက်နှစ်ချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"သုံးနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (ဖန်သားပြင်အောက်ခြေမှနေ၍ လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် အများသုံးစွဲနိုင်မှုခလုတ်ကို ဖိထားပါ။"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်နှစ်ချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ချဲ့ခြင်း"</string>
     <string name="user_switched" msgid="7249833311585228097">"လက်ရှိအသုံးပြုနေသူ <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>သို့ ပြောင်းနေသည်…"</string>
@@ -1883,7 +1893,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ပင် နံပါတ် တိုလွန်းသည်။. အနည်းဆုံး ဂဏန်း ၄ လုံး ဖြစ်ရမည်။"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"နောက်မှ ပြန်ကြိုးစားပါ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"မျက်နှာပြင်အပြည့် ကြည့်နေသည်"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"ထွက်ရန် အပေါ်မှ အောက်သို့ ဆွဲချပါ။"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ရပါပြီ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ပိုကောင်းသောမြင်ကွင်းအတွက် လှည့်ပါ"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ပိုကောင်းသောမြင်ကွင်းအတွက် ဖန်သားပြင်အပြည့်ဖြင့် <xliff:g id="NAME">%s</xliff:g> ကို ဖွင့်ပါ"</string>
@@ -1975,6 +1986,14 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"လက်ရှိခေါ်ဆိုမှု"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"အဝင်ခေါ်ဆိုမှုကို စစ်ဆေးနေသည်"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"အမျိုးအစားမခွဲရသေးပါ"</string>
+    <!-- no translation found for promotional_notification_channel_label (7414844730492860233) -->
+    <skip />
+    <!-- no translation found for social_notification_channel_label (106520267132019945) -->
+    <skip />
+    <!-- no translation found for news_notification_channel_label (4299937455247883311) -->
+    <skip />
+    <!-- no translation found for recs_notification_channel_label (4945985121418684297) -->
+    <skip />
     <string name="importance_from_user" msgid="2782756722448800447">"ဤသတိပေးချက်များ၏ အရေးပါမှုကိုသတ်မှတ်ပြီးပါပြီ။"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ပါဝင်သည့်လူများကြောင့် အရေးပါပါသည်။"</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"စိတ်ကြိုက်အက်ပ် အကြောင်းကြားချက်"</string>
@@ -2191,6 +2210,10 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ဖန်သားပြင်အတွက် အများသုံးစွဲနိုင်မှုဖြတ်လမ်းလင့်ခ် ရွေးချယ်စနစ်"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"အများသုံးနိုင်မှု ဖြတ်လမ်းလင့်ခ်"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"အကြောင်းကြားစာအကွက်ကို ပယ်ရန်"</string>
+    <!-- no translation found for accessibility_system_action_menu_label (3385283204496447040) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_media_play_pause_label (1905647491347119748) -->
+    <skip />
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad အပေါ်"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad အောက်"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ဘယ်"</string>
@@ -2407,8 +2430,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"သီးသန့်နေရာ"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ပုံတူပွားရန်"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"အများသုံး"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"သီးသန့်နေရာ"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"သတိထားရမည့် အကြောင်းကြားချက်ပါ အချက်အလက်ကို ဖျောက်ထားသည်"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"အက်ပ်အကြောင်းအရာသည် လုံခြုံရေးအတွက် မျက်နှာပြင် မျှဝေခြင်းမှ ဖျောက်ထားသည်"</string>

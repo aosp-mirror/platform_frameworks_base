@@ -31,3 +31,24 @@ flag {
     description: "Enables the adaptive haptics feature"
     bug: "305961689"
 }
+
+flag {
+    namespace: "haptics"
+    name: "cancel_by_appops"
+    description: "Cancels ongoing vibrations when the appops mode changes to disallow them"
+    bug: "230745615"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "vibration_xml_apis"
+    description: "Enabled System APIs for vibration effect XML parser and serializer"
+    bug: "347273158"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}

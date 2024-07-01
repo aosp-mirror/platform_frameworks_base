@@ -125,6 +125,29 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"タップすると表示されます"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"画面の録画の保存中にエラーが発生しました"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"画面の録画中にエラーが発生しました"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; の記録を停止します"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; の共有を停止します"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; のキャストを停止します"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"問題記録ツール"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"問題の記録を処理しています"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"問題の収集セッションに関する進行中の通知"</string>
@@ -135,7 +158,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"問題の記録の保存中にエラーが発生しました"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"問題の記録の開始中にエラーが発生しました"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"全画面表示"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"終了するには、上から下にスワイプします。"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"戻る"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ホーム"</string>
@@ -278,11 +302,12 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"保存済み"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"接続を解除"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"有効化"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"明日自動的に ON に戻す"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share や「デバイスを探す」などの機能は Bluetooth を使用します"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"明日の朝に Bluetooth が ON になります"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"音声の共有"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"音声を共有中"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"音声を共有"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"音声を共有中"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"バッテリー <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"オーディオ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ヘッドセット"</string>
@@ -359,17 +384,15 @@
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"停止"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"バグレポート"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"デバイスのどの部分が影響を受けましたか？"</string>
-    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"問題の種類を選択する"</string>
+    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"問題の種類を選択"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"スクリーン レコード"</string>
     <string name="performance" msgid="6552785217174378320">"パフォーマンス"</string>
     <string name="user_interface" msgid="3712869377953950887">"ユーザー インターフェース"</string>
     <string name="thermal" msgid="6758074791325414831">"温度"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"片手モード"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"補聴器"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"アクティブ"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"未接続"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"補聴器"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"新しいデバイスとペア設定"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"クリックすると、新しいデバイスをペア設定できます"</string>
@@ -467,6 +490,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"ウィジェットを選択"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ウィジェットを削除"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"選択したウィジェットを配置"</string>
+    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <skip />
+    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ユーザーを切り替える"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"プルダウン メニュー"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"このセッションでのアプリとデータはすべて削除されます。"</string>
@@ -520,6 +549,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"通知はありません"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"新しい通知はありません"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"通知の自動調整は ON です"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"短期間に多くの通知が届いたときに最長 2 分間デバイスの音量を下げて画面上のポップアップを減らします。"</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"OFF にする"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ロック解除して以前の通知を表示"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"このデバイスは保護者によって管理されています"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"これは組織が所有するデバイスで、ネットワーク トラフィックが監視されることもあります"</string>
@@ -1175,6 +1207,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"タップすると詳細が表示されます"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"アラーム未設定"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"画面ロックを設定"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"指紋認証センサーに触れてください。スマートフォンの側面にある高さが低い方のボタンです。"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"指紋認証センサー"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"認証"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"デバイスを入力"</string>
@@ -1324,8 +1357,19 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"検索ショートカット"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"閉じるアイコン"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"開くアイコン"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"または"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
     <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"戻る"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"戻るには、3 本の指でタッチパッドを左右にスワイプします。"</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"タッチパッドで 3 本の指を左右に動かしている様子"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"デバイスの画面で「戻る」ジェスチャーのアニメーションが表示されている様子"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"キーボード バックライト"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"レベル %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ホーム コントロール"</string>
