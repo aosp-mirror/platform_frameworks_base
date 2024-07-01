@@ -73,7 +73,7 @@ open class YouTubeEnterPipToOtherOrientationTest(flicker: LegacyFlickerTest) :
         setup {
             standardAppHelper.launchViaIntent(
                 wmHelper,
-                YouTubeAppHelper.getYoutubeVideoIntent("HPcEAtoXXLA"),
+                YouTubeAppHelper.getYoutubeVideoIntent("3KtWfp0UopM"),
                 ComponentNameMatcher(YouTubeAppHelper.PACKAGE_NAME, "")
             )
             standardAppHelper.enterFullscreen()
