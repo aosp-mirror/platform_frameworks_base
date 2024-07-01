@@ -30,11 +30,9 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 
 /** Observes one qr scanner state changes providing the [QRCodeScannerTileModel]. */
 class QRCodeScannerTileDataInteractor
@@ -66,11 +64,6 @@ constructor(
             }
             .onStart { emit(generateModel()) }
             .flowOn(bgCoroutineContext)
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                QRCodeScannerTileModel.TemporarilyUnavailable
-            )
 
     override fun availability(user: UserHandle): Flow<Boolean> =
         flowOf(qrController.isCameraAvailable)

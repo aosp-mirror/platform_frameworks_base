@@ -74,9 +74,8 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     @Before
     public void setUp() throws RemoteException {
         super.setUp();
-        mVisibilityApplier =
-                (DefaultImeVisibilityApplier) mInputMethodManagerService.getVisibilityApplier();
         synchronized (ImfLock.class) {
+            mVisibilityApplier = mInputMethodManagerService.getVisibilityApplierLocked();
             mUserId = mInputMethodManagerService.getCurrentImeUserIdLocked();
             mInputMethodManagerService.setAttachedClientForTesting(requireNonNull(
                     mInputMethodManagerService.getClientStateLocked(mMockInputMethodClient)));

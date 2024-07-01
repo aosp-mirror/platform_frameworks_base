@@ -119,6 +119,8 @@ import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.BatteryManager;
+import android.os.BatteryProperty;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.BatteryStatsManager;
@@ -243,6 +245,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -769,6 +772,7 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.FULL_BATTERY_CAPACITY:
                     case FrameworkStatsLog.BATTERY_VOLTAGE:
                     case FrameworkStatsLog.BATTERY_CYCLE_COUNT:
+                    case FrameworkStatsLog.BATTERY_HEALTH:
                         synchronized (mHealthHalLock) {
                             return pullHealthHalLocked(atomTag, data);
                         }
@@ -999,6 +1003,7 @@ public class StatsPullAtomService extends SystemService {
         registerFullBatteryCapacity();
         registerBatteryVoltage();
         registerBatteryCycleCount();
+        registerBatteryHealth();
         registerSettingsStats();
         registerInstalledIncrementalPackages();
         registerKeystoreStorageStats();
@@ -4365,7 +4370,15 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
-    int pullHealthHalLocked(int atomTag, List<StatsEvent> pulledData) {
+    private void registerBatteryHealth() {
+        int tagId = FrameworkStatsLog.BATTERY_HEALTH;
+        mStatsManager.setPullAtomCallback(tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR, mStatsCallbackImpl);
+    }
+
+    @GuardedBy("mHealthHalLock")
+    private int pullHealthHalLocked(int atomTag, List<StatsEvent> pulledData) {
         if (mHealthService == null) {
             return StatsManager.PULL_SKIP;
         }
@@ -4396,6 +4409,44 @@ public class StatsPullAtomService extends SystemService {
             case FrameworkStatsLog.BATTERY_CYCLE_COUNT:
                 pulledValue = healthInfo.batteryCycleCount;
                 break;
+            case FrameworkStatsLog.BATTERY_HEALTH:
+                android.hardware.health.BatteryHealthData bhd;
+                try {
+                    bhd = mHealthService.getBatteryHealthData();
+                } catch (RemoteException | IllegalStateException e) {
+                    return StatsManager.PULL_SKIP;
+                }
+                if (bhd == null) {
+                    return StatsManager.PULL_SKIP;
+                }
+
+                StatsEvent batteryHealthEvent;
+                try {
+                    BatteryProperty chargeStatusProperty = new BatteryProperty();
+                    BatteryProperty chargePolicyProperty = new BatteryProperty();
+
+                    if (0 > mHealthService.getProperty(
+                                BatteryManager.BATTERY_PROPERTY_STATUS, chargeStatusProperty)) {
+                        return StatsManager.PULL_SKIP;
+                    }
+                    if (0 > mHealthService.getProperty(
+                                BatteryManager.BATTERY_PROPERTY_CHARGING_POLICY,
+                                chargePolicyProperty)) {
+                        return StatsManager.PULL_SKIP;
+                    }
+                    int chargeStatus = (int) chargeStatusProperty.getLong();
+                    int chargePolicy = (int) chargePolicyProperty.getLong();
+                    batteryHealthEvent = BatteryHealthUtility.buildStatsEvent(
+                            atomTag, bhd, chargeStatus, chargePolicy);
+                    pulledData.add(batteryHealthEvent);
+
+                    return StatsManager.PULL_SUCCESS;
+                } catch (RemoteException | IllegalStateException e) {
+                    Slog.e(TAG, "Failed to add pulled data", e);
+                } catch (NoSuchAlgorithmException e) {
+                    Slog.e(TAG, "Could not find message digest algorithm", e);
+                }
+                return StatsManager.PULL_SKIP;
             default:
                 return StatsManager.PULL_SKIP;
         }

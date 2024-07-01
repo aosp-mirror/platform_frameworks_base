@@ -18,7 +18,7 @@ package com.android.wm.shell.sysui;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_INIT;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.Arrays;

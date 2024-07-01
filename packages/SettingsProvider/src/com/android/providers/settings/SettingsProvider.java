@@ -1189,6 +1189,8 @@ public class SettingsProvider extends ContentProvider {
 
         synchronized (mLock) {
             if (getSyncDisabledModeConfigLocked() != SYNC_DISABLED_MODE_NONE) {
+                Slog.v(LOG_TAG, "did not write settings for prefix '"
+                                + prefix + "' because sync is disabled");
                 return SET_ALL_RESULT_DISABLED;
             }
             final int key = makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);

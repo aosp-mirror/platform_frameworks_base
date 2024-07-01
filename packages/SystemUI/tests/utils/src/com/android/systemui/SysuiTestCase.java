@@ -43,7 +43,7 @@ import androidx.core.animation.AndroidXAnimatorIsolationRule;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.systemui.broadcast.FakeBroadcastDispatcher;
 import com.android.systemui.flags.SceneContainerRule;
 

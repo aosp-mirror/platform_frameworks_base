@@ -27,7 +27,7 @@ import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.RemoteException;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
