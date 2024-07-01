@@ -16,18 +16,16 @@
 
 package com.android.systemui.keyboard.shortcut.domain.interactor
 
-import android.view.KeyEvent
-import android.view.KeyboardShortcutGroup
-import android.view.KeyboardShortcutInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
-import com.android.systemui.keyboard.shortcut.shared.model.shortcut
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.IME
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MULTI_TASKING
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.SYSTEM
 import com.android.systemui.keyboard.shortcut.shortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.shortcutHelperMultiTaskingShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperSystemShortcutsSource
@@ -56,15 +54,16 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
             it.shortcutHelperSystemShortcutsSource = systemShortcutsSource
             it.shortcutHelperMultiTaskingShortcutsSource = multitaskingShortcutsSource
         }
+
     private val testScope = kosmos.testScope
     private val interactor = kosmos.shortcutHelperCategoriesInteractor
     private val helper = kosmos.shortcutHelperTestHelper
 
     @Before
-    fun setUp() {
-        // Setting these sources as empty temporarily. Will be populated in follow up CL.
-        systemShortcutsSource.setGroups(emptyList())
-        multitaskingShortcutsSource.setGroups(emptyList())
+    fun setShortcuts() {
+        helper.setImeShortcuts(TestShortcuts.imeGroups)
+        systemShortcutsSource.setGroups(TestShortcuts.systemGroups)
+        multitaskingShortcutsSource.setGroups(TestShortcuts.multitaskingGroups)
     }
 
     @Test
@@ -78,12 +77,17 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
     @Test
     fun categories_stateActive_emitsAllCategoriesInOrder() =
         testScope.runTest {
-            helper.setImeShortcuts(imeShortcutGroups)
             val categories by collectLastValue(interactor.shortcutCategories)
 
             helper.showFromActivity()
 
-            assertThat(categories).containsExactly(imeShortcutCategory).inOrder()
+            assertThat(categories)
+                .containsExactly(
+                    TestShortcuts.systemCategory,
+                    TestShortcuts.multitaskingCategory,
+                    TestShortcuts.imeCategory,
+                )
+                .inOrder()
         }
 
     @Test
@@ -96,159 +100,177 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
             assertThat(categories).isEmpty()
         }
 
-    fun categories_stateActive_emitsGroupedShortcuts() =
+    @Test
+    fun categories_stateActive_imeShortcutsWithDuplicateLabels_emitsGroupedShortcuts() =
         testScope.runTest {
-            helper.setImeShortcuts(imeShortcutsGroupsWithDuplicateLabels)
+            helper.setImeShortcuts(TestShortcuts.groupsWithDuplicateShortcutLabels)
+
             val categories by collectLastValue(interactor.shortcutCategories)
 
             helper.showFromActivity()
 
-            assertThat(categories).containsExactly(expectedGroupedShortcutCategories)
-        }
-
-    private val switchToNextLanguageShortcut =
-        shortcut(label = "switch to next language") {
-            command(KeyEvent.META_CTRL_ON, KeyEvent.KEYCODE_SPACE)
-        }
-
-    private val switchToNextLanguageKeyboardShortcutInfo =
-        KeyboardShortcutInfo(
-            /* label = */ switchToNextLanguageShortcut.label,
-            /* keycode = */ switchToNextLanguageShortcut.commands[0].keyCodes[1],
-            /* modifiers = */ switchToNextLanguageShortcut.commands[0].keyCodes[0],
-        )
-
-    private val switchToNextLanguageShortcutAlternative =
-        shortcut("switch to next language") {
-            command(KeyEvent.META_CTRL_ON, KeyEvent.KEYCODE_SPACE)
-        }
-
-    private val switchToNextLanguageKeyboardShortcutInfoAlternative =
-        KeyboardShortcutInfo(
-            /* label = */ switchToNextLanguageShortcutAlternative.label,
-            /* keycode = */ switchToNextLanguageShortcutAlternative.commands[0].keyCodes[1],
-            /* modifiers = */ switchToNextLanguageShortcutAlternative.commands[0].keyCodes[0],
-        )
-
-    private val switchToPreviousLanguageShortcut =
-        shortcut("switch to previous language") {
-            command(
-                KeyEvent.META_SHIFT_ON,
-                KeyEvent.KEYCODE_SPACE,
-            )
-        }
-
-    private val switchToPreviousLanguageKeyboardShortcutInfo =
-        KeyboardShortcutInfo(
-            /* label = */ switchToPreviousLanguageShortcut.label,
-            /* keycode = */ switchToPreviousLanguageShortcut.commands[0].keyCodes[1],
-            /* modifiers = */ switchToPreviousLanguageShortcut.commands[0].keyCodes[0],
-        )
-
-    private val switchToPreviousLanguageShortcutAlternative =
-        shortcut("switch to previous language") {
-            command(
-                KeyEvent.META_SHIFT_ON,
-                KeyEvent.KEYCODE_SPACE,
-            )
-        }
-
-    private val switchToPreviousLanguageKeyboardShortcutInfoAlternative =
-        KeyboardShortcutInfo(
-            /* label = */ switchToPreviousLanguageShortcutAlternative.label,
-            /* keycode = */ switchToPreviousLanguageShortcutAlternative.commands[0].keyCodes[1],
-            /* modifiers = */ switchToPreviousLanguageShortcutAlternative.commands[0].keyCodes[0],
-        )
-
-    private val showOnscreenKeyboardShortcut =
-        shortcut(label = "Show on-screen keyboard") {
-            command(KeyEvent.META_ALT_ON, KeyEvent.KEYCODE_K)
-        }
-
-    private val showOnScreenKeyboardShortcutInfo =
-        KeyboardShortcutInfo(
-            /* label = */ showOnscreenKeyboardShortcut.label,
-            /* keycode = */ showOnscreenKeyboardShortcut.commands[0].keyCodes[1],
-            /* modifiers = */ showOnscreenKeyboardShortcut.commands[0].keyCodes[0],
-        )
-
-    private val accessClipboardShortcut =
-        shortcut(label = "Access clipboard") { command(KeyEvent.META_ALT_ON, KeyEvent.KEYCODE_V) }
-
-    private val accessClipboardShortcutInfo =
-        KeyboardShortcutInfo(
-            /* label = */ accessClipboardShortcut.label,
-            /* keycode = */ accessClipboardShortcut.commands[0].keyCodes[1],
-            /* modifiers = */ accessClipboardShortcut.commands[0].keyCodes[0],
-        )
-
-    private val imeShortcutGroups =
-        listOf(
-            KeyboardShortcutGroup(
-                /* label = */ "input",
-                /* shortcutInfoList = */ listOf(
-                    switchToNextLanguageKeyboardShortcutInfo,
-                    switchToPreviousLanguageKeyboardShortcutInfo
-                )
-            )
-        )
-
-    private val imeShortcutCategory =
-        ShortcutCategory(
-            type = ShortcutCategoryType.IME,
-            subCategories =
-                listOf(
-                    ShortcutSubCategory(
-                        imeShortcutGroups[0].label.toString(),
-                        listOf(switchToNextLanguageShortcut, switchToPreviousLanguageShortcut)
-                    )
-                )
-        )
-
-    private val imeShortcutsGroupsWithDuplicateLabels =
-        listOf(
-            KeyboardShortcutGroup(
-                "input",
-                listOf(
-                    switchToNextLanguageKeyboardShortcutInfo,
-                    switchToNextLanguageKeyboardShortcutInfoAlternative,
-                    switchToPreviousLanguageKeyboardShortcutInfo,
-                    switchToPreviousLanguageKeyboardShortcutInfoAlternative
-                )
-            ),
-            KeyboardShortcutGroup(
-                "Gboard",
-                listOf(
-                    showOnScreenKeyboardShortcutInfo,
-                    accessClipboardShortcutInfo,
-                )
-            )
-        )
-
-    private val expectedGroupedShortcutCategories =
-        ShortcutCategory(
-            type = ShortcutCategoryType.IME,
-            subCategories =
-                listOf(
-                    ShortcutSubCategory(
-                        imeShortcutsGroupsWithDuplicateLabels[0].label.toString(),
-                        listOf(
-                            switchToNextLanguageShortcut.copy(
-                                commands =
-                                    switchToNextLanguageShortcut.commands +
-                                        switchToNextLanguageShortcutAlternative.commands
-                            ),
-                            switchToPreviousLanguageShortcut.copy(
-                                commands =
-                                    switchToPreviousLanguageShortcut.commands +
-                                        switchToPreviousLanguageShortcutAlternative.commands
-                            )
-                        ),
+            assertThat(categories)
+                .containsExactly(
+                    TestShortcuts.systemCategory,
+                    TestShortcuts.multitaskingCategory,
+                    ShortcutCategory(
+                        type = IME,
+                        subCategories =
+                            TestShortcuts.subCategoriesWithGroupedDuplicatedShortcutLabels
                     ),
-                    ShortcutSubCategory(
-                        imeShortcutsGroupsWithDuplicateLabels[1].label.toString(),
-                        listOf(showOnscreenKeyboardShortcut, accessClipboardShortcut),
-                    )
                 )
-        )
+                .inOrder()
+        }
+
+    @Test
+    fun categories_stateActive_systemShortcutsWithDuplicateLabels_emitsGroupedShortcuts() =
+        testScope.runTest {
+            systemShortcutsSource.setGroups(TestShortcuts.groupsWithDuplicateShortcutLabels)
+
+            val categories by collectLastValue(interactor.shortcutCategories)
+
+            helper.showFromActivity()
+
+            assertThat(categories)
+                .containsExactly(
+                    ShortcutCategory(
+                        type = SYSTEM,
+                        subCategories =
+                            TestShortcuts.subCategoriesWithGroupedDuplicatedShortcutLabels
+                    ),
+                    TestShortcuts.multitaskingCategory,
+                    TestShortcuts.imeCategory,
+                )
+                .inOrder()
+        }
+
+    @Test
+    fun categories_stateActive_multiTaskingShortcutsWithDuplicateLabels_emitsGroupedShortcuts() =
+        testScope.runTest {
+            multitaskingShortcutsSource.setGroups(TestShortcuts.groupsWithDuplicateShortcutLabels)
+
+            val categories by collectLastValue(interactor.shortcutCategories)
+
+            helper.showFromActivity()
+
+            assertThat(categories)
+                .containsExactly(
+                    TestShortcuts.systemCategory,
+                    ShortcutCategory(
+                        type = MULTI_TASKING,
+                        subCategories =
+                            TestShortcuts.subCategoriesWithGroupedDuplicatedShortcutLabels
+                    ),
+                    TestShortcuts.imeCategory,
+                )
+                .inOrder()
+        }
+
+    @Test
+    fun categories_stateActive_imeShortcutsWithUnsupportedModifiers_discardUnsupported() =
+        testScope.runTest {
+            helper.setImeShortcuts(TestShortcuts.groupsWithUnsupportedModifier)
+            val categories by collectLastValue(interactor.shortcutCategories)
+
+            helper.showFromActivity()
+
+            assertThat(categories)
+                .containsExactly(
+                    TestShortcuts.systemCategory,
+                    TestShortcuts.multitaskingCategory,
+                    ShortcutCategory(
+                        type = IME,
+                        subCategories = TestShortcuts.subCategoriesWithUnsupportedModifiersRemoved
+                    ),
+                )
+                .inOrder()
+        }
+
+    @Test
+    fun categories_stateActive_systemShortcutsWithUnsupportedModifiers_discardUnsupported() =
+        testScope.runTest {
+            systemShortcutsSource.setGroups(TestShortcuts.groupsWithUnsupportedModifier)
+            val categories by collectLastValue(interactor.shortcutCategories)
+
+            helper.showFromActivity()
+
+            assertThat(categories)
+                .containsExactly(
+                    ShortcutCategory(
+                        type = SYSTEM,
+                        subCategories = TestShortcuts.subCategoriesWithUnsupportedModifiersRemoved
+                    ),
+                    TestShortcuts.multitaskingCategory,
+                    TestShortcuts.imeCategory,
+                )
+                .inOrder()
+        }
+
+    @Test
+    fun categories_stateActive_multitaskingShortcutsWithUnsupportedModifiers_discardUnsupported() =
+        testScope.runTest {
+            multitaskingShortcutsSource.setGroups(TestShortcuts.groupsWithUnsupportedModifier)
+            val categories by collectLastValue(interactor.shortcutCategories)
+
+            helper.showFromActivity()
+
+            assertThat(categories)
+                .containsExactly(
+                    TestShortcuts.systemCategory,
+                    ShortcutCategory(
+                        type = MULTI_TASKING,
+                        subCategories = TestShortcuts.subCategoriesWithUnsupportedModifiersRemoved
+                    ),
+                    TestShortcuts.imeCategory,
+                )
+                .inOrder()
+        }
+
+    @Test
+    fun categories_stateActive_imeShortcutsWitOnlyUnsupportedModifiers_discardsCategory() =
+        testScope.runTest {
+            helper.setImeShortcuts(TestShortcuts.groupsWithOnlyUnsupportedModifiers)
+            val categories by collectLastValue(interactor.shortcutCategories)
+
+            helper.showFromActivity()
+
+            assertThat(categories)
+                .containsExactly(
+                    TestShortcuts.systemCategory,
+                    TestShortcuts.multitaskingCategory,
+                )
+                .inOrder()
+        }
+
+    @Test
+    fun categories_stateActive_systemShortcutsWitOnlyUnsupportedModifiers_discardsCategory() =
+        testScope.runTest {
+            systemShortcutsSource.setGroups(TestShortcuts.groupsWithOnlyUnsupportedModifiers)
+            val categories by collectLastValue(interactor.shortcutCategories)
+
+            helper.showFromActivity()
+
+            assertThat(categories)
+                .containsExactly(
+                    TestShortcuts.multitaskingCategory,
+                    TestShortcuts.imeCategory,
+                )
+                .inOrder()
+        }
+
+    @Test
+    fun categories_stateActive_multitaskingShortcutsWitOnlyUnsupportedModifiers_discardsCategory() =
+        testScope.runTest {
+            multitaskingShortcutsSource.setGroups(TestShortcuts.groupsWithOnlyUnsupportedModifiers)
+            val categories by collectLastValue(interactor.shortcutCategories)
+
+            helper.showFromActivity()
+
+            assertThat(categories)
+                .containsExactly(
+                    TestShortcuts.systemCategory,
+                    TestShortcuts.imeCategory,
+                )
+                .inOrder()
+        }
 }

@@ -16,14 +16,10 @@
 
 package com.android.systemui.keyboard.shortcut.shared.model
 
-data class ShortcutSubCategory(val label: String, val shortcuts: List<Shortcut>)
+import androidx.annotation.DrawableRes
 
-class ShortcutSubCategoryBuilder(val label: String) {
-    private val shortcuts = mutableListOf<Shortcut>()
+sealed interface ShortcutKey {
+    data class Text(val value: String) : ShortcutKey
 
-    fun shortcut(label: String, builder: ShortcutBuilder.() -> Unit) {
-        shortcuts += ShortcutBuilder(label).apply(builder).build()
-    }
-
-    fun build() = ShortcutSubCategory(label, shortcuts)
+    data class Icon(@DrawableRes val drawableResId: Int) : ShortcutKey
 }
