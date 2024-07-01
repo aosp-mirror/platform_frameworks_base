@@ -24,6 +24,9 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
@@ -65,6 +68,12 @@ interface CollapsedStatusBarViewModel {
     val ongoingActivityChip: StateFlow<OngoingActivityChipModel>
 
     /**
+     * True if the current scene can show the home status bar (aka this status bar), and false if
+     * the current scene should never show the home status bar.
+     */
+    val isHomeStatusBarAllowedByScene: StateFlow<Boolean>
+
+    /**
      * Apps can request a low profile mode [android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE] where
      * status bar and navigation icons dim. In this mode, a notification dot appears where the
      * notification icons would appear if they would be shown outside of this mode.
@@ -83,6 +92,8 @@ constructor(
     private val lightsOutInteractor: LightsOutInteractor,
     private val notificationsInteractor: ActiveNotificationsInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    sceneInteractor: SceneInteractor,
+    sceneContainerOcclusionInteractor: SceneContainerOcclusionInteractor,
     ongoingActivityChipsViewModel: OngoingActivityChipsViewModel,
     @Application coroutineScope: CoroutineScope,
 ) : CollapsedStatusBarViewModel {
@@ -98,6 +109,20 @@ constructor(
             .map {}
 
     override val ongoingActivityChip = ongoingActivityChipsViewModel.chip
+
+    override val isHomeStatusBarAllowedByScene: StateFlow<Boolean> =
+        combine(
+                sceneInteractor.currentScene,
+                sceneContainerOcclusionInteractor.invisibleDueToOcclusion,
+            ) { currentScene, isOccluded ->
+                // All scenes have their own status bars, so we should only show the home status bar
+                // if we're not in a scene. The one exception: If the scene is occluded, then the
+                // occluding app needs to show the status bar. (Fullscreen apps actually won't show
+                // the status bar but that's handled with the rest of our fullscreen app logic,
+                // which lives elsewhere.)
+                currentScene == Scenes.Gone || isOccluded
+            }
+            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), initialValue = false)
 
     override fun areNotificationsLightsOut(displayId: Int): Flow<Boolean> =
         if (NotificationsLiveDataStoreRefactor.isUnexpectedlyInLegacyMode()) {
