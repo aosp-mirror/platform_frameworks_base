@@ -841,7 +841,9 @@ public class AudioService extends IAudioService.Stub
     // full scale, and volume control separately) and can be used for multiple use cases reflected
     // by the audio mode (e.g. media playback in MODE_NORMAL, and phone calls in MODE_IN_CALL).
     Set<Integer> mAbsVolumeMultiModeCaseDevices = new HashSet<>(
-            Arrays.asList(AudioSystem.DEVICE_OUT_HEARING_AID));
+            Arrays.asList(AudioSystem.DEVICE_OUT_HEARING_AID,
+                          AudioSystem.DEVICE_OUT_BLE_HEADSET,
+                          AudioSystem.DEVICE_OUT_BLE_SPEAKER));
 
     private final boolean mMonitorRotation;
 
@@ -3815,17 +3817,16 @@ public class AudioService extends IAudioService.Stub
                     mStreamStates[streamType].getMaxIndex(), streamType);
             }
 
-            // Check if volume update should be send to Hearing Aid
-            if (device == AudioSystem.DEVICE_OUT_HEARING_AID) {
-                // only modify the hearing aid attenuation when the stream to modify matches
-                // the one expected by the hearing aid
-                if (streamType == getBluetoothContextualVolumeStream()) {
-                    if (DEBUG_VOL) {
-                        Log.d(TAG, "adjustStreamVolume postSetHearingAidVolumeIndex index="
-                                + newIndex + " stream=" + streamType);
-                    }
-                    mDeviceBroker.postSetHearingAidVolumeIndex(newIndex, streamType);
+            // Check if volume update should be send to Hearing Aid.
+            // Only modify the hearing aid attenuation when the stream to modify matches
+            // the one expected by the hearing aid.
+            if (device == AudioSystem.DEVICE_OUT_HEARING_AID
+                    && streamType == getBluetoothContextualVolumeStream()) {
+                if (DEBUG_VOL) {
+                    Log.d(TAG, "adjustStreamVolume postSetHearingAidVolumeIndex index="
+                            + newIndex + " stream=" + streamType);
                 }
+                mDeviceBroker.postSetHearingAidVolumeIndex(newIndex, streamType);
             }
         }
 
@@ -4631,93 +4632,43 @@ public class AudioService extends IAudioService.Stub
 
     private void onUpdateContextualVolumes() {
         final int streamType = getBluetoothContextualVolumeStream();
-        final int device = getDeviceForStream(streamType);
+
+        final Set<Integer> deviceTypes = getDeviceSetForStreamDirect(streamType);
+        final Set<Integer> absVolumeMultiModeCaseDevices =
+                AudioSystem.intersectionAudioDeviceTypes(
+                        mAbsVolumeMultiModeCaseDevices, deviceTypes);
+        if (absVolumeMultiModeCaseDevices.isEmpty()) {
+            return;
+        }
+        if (absVolumeMultiModeCaseDevices.size() > 1) {
+            Log.w(TAG, "onUpdateContextualVolumes too many active devices: "
+                    + absVolumeMultiModeCaseDevices.stream().map(AudioSystem::getOutputDeviceName)
+                        .collect(Collectors.joining(","))
+                    + ", for stream: " + streamType);
+            return;
+        }
+
+        final int device = absVolumeMultiModeCaseDevices.toArray(new Integer[0])[0].intValue();
+
         final int index = getStreamVolume(streamType, device);
+
+        if (DEBUG_VOL) {
+            Log.i(TAG, "onUpdateContextualVolumes streamType: " + streamType
+                    + ", device: " + AudioSystem.getOutputDeviceName(device)
+                    + ", index: " + index);
+        }
 
         if (AudioSystem.isLeAudioDeviceType(device)) {
             mDeviceBroker.postSetLeAudioVolumeIndex(index * 10,
                     mStreamStates[streamType].getMaxIndex(), streamType);
         } else if (device == AudioSystem.DEVICE_OUT_HEARING_AID) {
             mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
+        } else {
+            return;
         }
+
         sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_VOICE_ACTIVITY_CONTEXTUAL_VOLUME,
                 mVoicePlaybackActive.get(), streamType, index, device));
-    }
-
-    /**
-     * Manage an audio mode change for audio devices that use an "absolute volume" model,
-     * i.e. the framework sends the full scale signal, and the actual volume for the use case
-     * is communicated separately.
-     */
-    void updateAbsVolumeMultiModeDevices(int oldMode, int newMode) {
-        if (oldMode == newMode) {
-            return;
-        }
-        switch (newMode) {
-            case AudioSystem.MODE_IN_COMMUNICATION:
-            case AudioSystem.MODE_IN_CALL:
-            case AudioSystem.MODE_NORMAL:
-            case AudioSystem.MODE_CALL_SCREENING:
-            case AudioSystem.MODE_CALL_REDIRECT:
-            case AudioSystem.MODE_COMMUNICATION_REDIRECT:
-                break;
-            default:
-                // no-op is enough for all other values
-                return;
-        }
-
-        int streamType = getBluetoothContextualVolumeStream(newMode);
-
-        final Set<Integer> deviceTypes = getDeviceSetForStreamDirect(streamType);
-        final Set<Integer> absVolumeMultiModeCaseDevices = AudioSystem.intersectionAudioDeviceTypes(
-                mAbsVolumeMultiModeCaseDevices, deviceTypes);
-        if (absVolumeMultiModeCaseDevices.isEmpty()) {
-            return;
-        }
-
-        // handling of specific interfaces goes here:
-        if (AudioSystem.isSingleAudioDeviceType(
-                absVolumeMultiModeCaseDevices, AudioSystem.DEVICE_OUT_HEARING_AID)) {
-            final int index = getStreamVolume(streamType);
-            sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_MODE_CHANGE_HEARING_AID,
-                    newMode, streamType, index));
-            mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
-        }
-    }
-
-    private void setLeAudioVolumeOnModeUpdate(int mode, int device, int streamType, int index,
-            int maxIndex) {
-        switch (mode) {
-            case AudioSystem.MODE_IN_COMMUNICATION:
-            case AudioSystem.MODE_IN_CALL:
-            case AudioSystem.MODE_NORMAL:
-            case AudioSystem.MODE_CALL_SCREENING:
-            case AudioSystem.MODE_CALL_REDIRECT:
-            case AudioSystem.MODE_COMMUNICATION_REDIRECT:
-            case AudioSystem.MODE_RINGTONE:
-                break;
-            default:
-                // no-op is enough for all other values
-                return;
-        }
-
-        // In some cases (like the outgoing or rejected call) the value of 'device' is not
-        // DEVICE_OUT_BLE_* even when BLE is connected. Changing the volume level in such case
-        // may cuase the other devices volume level leaking into the LeAudio device settings.
-        if (!AudioSystem.isLeAudioDeviceType(device)) {
-            Log.w(TAG, "setLeAudioVolumeOnModeUpdate ignoring invalid device="
-                    + device + ", mode=" + mode + ", index=" + index + " maxIndex=" + maxIndex
-                    + " streamType=" + streamType);
-            return;
-        }
-
-        if (DEBUG_VOL) {
-            Log.d(TAG, "setLeAudioVolumeOnModeUpdate postSetLeAudioVolumeIndex device="
-                    + device + ", mode=" + mode + ", index=" + index + " maxIndex=" + maxIndex
-                    + " streamType=" + streamType);
-        }
-        mDeviceBroker.postSetLeAudioVolumeIndex(index, maxIndex, streamType);
-        mDeviceBroker.postApplyVolumeOnDevice(streamType, device, "setLeAudioVolumeOnModeUpdate");
     }
 
     private void setStreamVolume(int streamType, int index, int flags,
@@ -6254,9 +6205,7 @@ public class AudioService extends IAudioService.Stub
                 updateStreamVolumeAlias(true /*updateVolumes*/, requesterPackage);
 
                 // change of mode may require volume to be re-applied on some devices
-                updateAbsVolumeMultiModeDevices(previousMode, mode);
-
-                setLeAudioVolumeOnModeUpdate(mode, device, streamAlias, index, maxIndex);
+                onUpdateContextualVolumes();
 
                 synchronized (mCachedAbsVolDrivingStreamsLock) {
                     mCachedAbsVolDrivingStreams.replaceAll((absDev, stream) -> {
