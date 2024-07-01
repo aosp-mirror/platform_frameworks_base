@@ -748,7 +748,16 @@ public final class AutofillManager {
 
     // Controls logic around apps changing some properties of their views when activity loses
     // focus due to autofill showing biometric activity, password manager, or password breach check.
-    private boolean mRelayoutFix;
+    // Deprecated. TODO: Remove it after ramp of new solution.
+    private boolean mRelayoutFixDeprecated;
+
+    // Controls logic around apps changing some properties of their views when activity loses
+    // focus due to autofill showing biometric activity, password manager, or password breach check.
+    private final boolean mRelayoutFix;
+
+    // Controls logic around apps changing some properties of their views when activity loses
+    // focus due to autofill showing biometric activity, password manager, or password breach check.
+    private final boolean mRelativePositionForRelayout;
 
     // Indicates whether the credman integration is enabled.
     private final boolean mIsCredmanIntegrationEnabled;
@@ -978,8 +987,28 @@ public final class AutofillManager {
         mShouldIncludeInvisibleViewInAssistStructure =
                 AutofillFeatureFlags.shouldIncludeInvisibleViewInAssistStructure();
 
-        mRelayoutFix = AutofillFeatureFlags.shouldIgnoreRelayoutWhenAuthPending();
+        mRelayoutFixDeprecated = AutofillFeatureFlags.shouldIgnoreRelayoutWhenAuthPending();
+        mRelayoutFix = AutofillFeatureFlags.enableRelayoutFixes();
+        mRelativePositionForRelayout = AutofillFeatureFlags.enableRelativeLocationForRelayout();
         mIsCredmanIntegrationEnabled = Flags.autofillCredmanIntegration();
+    }
+
+    /**
+     * Whether to apply relayout fixes.
+     *
+     * @hide
+     */
+    public boolean isRelayoutFixEnabled() {
+        return mRelayoutFix;
+    }
+
+    /**
+     * Whether to use relative positions and locations of the views for disambiguation.
+     *
+     * @hide
+     */
+    public boolean isRelativePositionForRelayoutEnabled() {
+        return mRelativePositionForRelayout;
     }
 
     /**
@@ -1779,7 +1808,7 @@ public final class AutofillManager {
                 }
                 return;
             }
-            if (mRelayoutFix && mState == STATE_PENDING_AUTHENTICATION) {
+            if (mRelayoutFixDeprecated && mState == STATE_PENDING_AUTHENTICATION) {
                 if (sVerbose) {
                     Log.v(TAG, "notifyViewVisibilityChanged(): ignoring in auth pending mode");
                 }
@@ -2917,7 +2946,7 @@ public final class AutofillManager {
             Intent fillInIntent, boolean authenticateInline) {
         synchronized (mLock) {
             if (sessionId == mSessionId) {
-                if (mRelayoutFix) {
+                if (mRelayoutFixDeprecated) {
                     mState = STATE_PENDING_AUTHENTICATION;
                 }
                 final AutofillClient client = getClient();
@@ -3778,7 +3807,7 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     private boolean isPendingAuthenticationLocked() {
-        return mRelayoutFix && mState == STATE_PENDING_AUTHENTICATION;
+        return mRelayoutFixDeprecated && mState == STATE_PENDING_AUTHENTICATION;
     }
 
     @GuardedBy("mLock")
