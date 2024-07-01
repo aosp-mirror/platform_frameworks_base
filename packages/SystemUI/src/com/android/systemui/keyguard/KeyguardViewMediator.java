@@ -42,6 +42,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.Flags.notifyPowerManagerUserActivityBackground;
 import static com.android.systemui.Flags.refactorGetCurrentUser;
+import static com.android.systemui.Flags.translucentOccludingActivityFix;
 import static com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel.DREAMING_ANIMATION_DURATION_MS;
 
 import android.animation.Animator;
@@ -1036,6 +1037,17 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                                 (int) (fullWidth - initialWidth) /* left */,
                                 fullWidth /* right */,
                                 mWindowCornerRadius, mWindowCornerRadius);
+                    } else if (translucentOccludingActivityFix()
+                            && mOccludingRemoteAnimationTarget != null
+                            && mOccludingRemoteAnimationTarget.isTranslucent) {
+                        // Animating in a transparent window looks really weird. Just let it be
+                        // fullscreen and the app can do an internal animation if it wants to.
+                        return new TransitionAnimator.State(
+                                0,
+                                fullHeight,
+                                0,
+                                fullWidth,
+                                0f, 0f);
                     } else {
                         final float initialHeight = fullHeight / 2f;
                         final float initialWidth = fullWidth / 2f;
@@ -1399,6 +1411,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final Lazy<DreamViewModel> mDreamViewModel;
     private final Lazy<CommunalTransitionViewModel> mCommunalTransitionViewModel;
     private RemoteAnimationTarget mRemoteAnimationTarget;
+
+    /**
+     * The most recent RemoteAnimationTarget provided for an occluding activity animation.
+     */
+    private RemoteAnimationTarget mOccludingRemoteAnimationTarget;
     private boolean mShowCommunalWhenUnoccluding = false;
 
     private final Lazy<WindowManagerLockscreenVisibilityManager> mWmLockscreenVisibilityManager;
@@ -3937,6 +3954,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
                 RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
                 IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
+            // Save mRemoteAnimationTarget for reference in the animation controller. Needs to be
+            // called prior to super.onAnimationStart() since that's the call that eventually asks
+            // the animation controller to configure the animation state.
+            if (apps.length > 0) {
+                mOccludingRemoteAnimationTarget = apps[0];
+            }
+
             super.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
 
             mInteractionJankMonitor.begin(
