@@ -17,10 +17,8 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
-import android.app.DreamManager
 import com.android.app.animation.Interpolators
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -53,10 +51,8 @@ constructor(
     keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
     private val communalInteractor: CommunalInteractor,
-    private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     val deviceEntryRepository: DeviceEntryRepository,
-    private val dreamManager: DreamManager,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DOZING,
@@ -123,8 +119,7 @@ constructor(
                 .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
                 .sample(
                     keyguardInteractor.isKeyguardOccluded,
-                    communalInteractor.isCommunalAvailable,
-                    communalSceneInteractor.isIdleOnCommunal,
+                    communalInteractor.isIdleOnCommunal,
                     canTransitionToGoneOnWake,
                     keyguardInteractor.primaryBouncerShowing,
                 )
@@ -132,7 +127,6 @@ constructor(
                     (
                         _,
                         occluded,
-                        isCommunalAvailable,
                         isIdleOnCommunal,
                         canTransitionToGoneOnWake,
                         primaryBouncerShowing) ->
@@ -146,10 +140,6 @@ constructor(
                         } else if (occluded) {
                             KeyguardState.OCCLUDED
                         } else if (isIdleOnCommunal) {
-                            KeyguardState.GLANCEABLE_HUB
-                        } else if (isCommunalAvailable && dreamManager.canStartDreaming(true)) {
-                            // This case handles tapping the power button to transition through
-                            // dream -> off -> hub.
                             KeyguardState.GLANCEABLE_HUB
                         } else {
                             KeyguardState.LOCKSCREEN
@@ -169,8 +159,7 @@ constructor(
             powerInteractor.detailedWakefulness
                 .filterRelevantKeyguardStateAnd { it.isAwake() }
                 .sample(
-                    communalInteractor.isCommunalAvailable,
-                    communalSceneInteractor.isIdleOnCommunal,
+                    communalInteractor.isIdleOnCommunal,
                     keyguardInteractor.biometricUnlockState,
                     canTransitionToGoneOnWake,
                     keyguardInteractor.primaryBouncerShowing,
@@ -178,7 +167,6 @@ constructor(
                 .collect {
                     (
                         _,
-                        isCommunalAvailable,
                         isIdleOnCommunal,
                         biometricUnlockState,
                         canDismissLockscreen,
@@ -199,10 +187,6 @@ constructor(
                             } else if (primaryBouncerShowing) {
                                 KeyguardState.PRIMARY_BOUNCER
                             } else if (isIdleOnCommunal) {
-                                KeyguardState.GLANCEABLE_HUB
-                            } else if (isCommunalAvailable && dreamManager.canStartDreaming(true)) {
-                                // This case handles tapping the power button to transition through
-                                // dream -> off -> hub.
                                 KeyguardState.GLANCEABLE_HUB
                             } else {
                                 KeyguardState.LOCKSCREEN
