@@ -1485,6 +1485,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     || !mAutomaticBrightnessStrategy.shouldUseAutoBrightness())) {
                 rawBrightnessState = getDozeBrightnessForOffload();
                 brightnessState = clampScreenBrightness(rawBrightnessState);
+                updateScreenBrightnessSetting = false;
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_MANUAL);
                 mTempBrightnessEvent.setFlags(
                         mTempBrightnessEvent.getFlags() | BrightnessEvent.FLAG_DOZE_SCALE);
