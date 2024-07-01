@@ -24,6 +24,7 @@ import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAUL
 import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
@@ -720,6 +721,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     }
                 }
                 break;
+            case POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR:
+                if (android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+                    synchronized (mVirtualDeviceLock) {
+                        mDevicePolicies.put(policyType, devicePolicy);
+                    }
+                }
+                break;
             default:
                 throw new IllegalArgumentException("Device policy " + policyType
                         + " cannot be changed at runtime. ");
@@ -1321,14 +1329,15 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     private void onActivityBlocked(int displayId, ActivityInfo activityInfo) {
         Intent intent = BlockedAppStreamingActivity.createIntent(activityInfo, getDisplayName());
-        if (!android.companion.virtualdevice.flags.Flags.activityControlApi()
-                || !Objects.equals(activityInfo.getComponentName(), intent.getComponent())) {
+        if (shouldShowBlockedActivityDialog(
+                activityInfo.getComponentName(), intent.getComponent())) {
             mContext.startActivityAsUser(
                     intent.addFlags(
                             Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
                     ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle(),
                     UserHandle.SYSTEM);
         }
+
         if (android.companion.virtualdevice.flags.Flags.activityControlApi()) {
             mActivityListenerAdapter.onActivityLaunchBlocked(
                     displayId,
@@ -1336,6 +1345,20 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     UserHandle.getUserHandleForUid(
                             activityInfo.applicationInfo.uid).getIdentifier());
         }
+    }
+
+    private boolean shouldShowBlockedActivityDialog(ComponentName blockedComponent,
+            ComponentName blockedAppStreamingActivityComponent) {
+        if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+            return true;
+        }
+        if (Objects.equals(blockedComponent, blockedAppStreamingActivityComponent)) {
+            // Do not show the dialog if it was blocked for some reason already to avoid
+            // infinite blocking loop.
+            return false;
+        }
+        // Do not show the dialog if disabled by policy.
+        return getDevicePolicy(POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR) == DEVICE_POLICY_DEFAULT;
     }
 
     private void onSecureWindowShown(int displayId, int uid) {
