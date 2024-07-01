@@ -237,10 +237,12 @@ class InstallRepository(private val context: Context) {
         intent: Intent,
         callingUid: Int,
     ): Boolean {
-        val isNotUnknownSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false)
-        return (sourceInfo != null && sourceInfo.isPrivilegedApp
-            && (isNotUnknownSource
-            || isPermissionGranted(context, Manifest.permission.INSTALL_PACKAGES, callingUid)))
+        val isPrivilegedAndKnown = sourceInfo != null && sourceInfo.isPrivilegedApp &&
+            intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false)
+        val isInstallPkgPermissionGranted =
+            isPermissionGranted(context, Manifest.permission.INSTALL_PACKAGES, callingUid)
+
+        return isPrivilegedAndKnown || isInstallPkgPermissionGranted
     }
 
     private fun getDevicePolicyRestrictions(isTrustedSource: Boolean): String? {
