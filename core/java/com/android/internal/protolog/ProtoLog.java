@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.internal.protolog.common;
+package com.android.internal.protolog;
+
+import com.android.internal.protolog.common.IProtoLog;
+import com.android.internal.protolog.common.IProtoLogGroup;
+import com.android.internal.protolog.common.LogLevel;
 
 /**
  * ProtoLog API - exposes static logging methods. Usage of this API is similar
