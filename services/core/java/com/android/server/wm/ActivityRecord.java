@@ -10803,6 +10803,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return true;
             }
         }
+        if (mAtmService.mBackNavigationController.isStartingSurfaceShown(this)) {
+            return true;
+        }
         if (!super.isSyncFinished(group)) return false;
         if (mDisplayContent != null && mDisplayContent.mUnknownAppVisibilityController
                 .isVisibilityUnknown(this)) {

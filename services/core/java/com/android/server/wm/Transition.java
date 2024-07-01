@@ -1763,7 +1763,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         // Check whether the participants were animated from back navigation.
         mController.mAtm.mBackNavigationController.onTransactionReady(this, mTargets,
-                transaction);
+                transaction, mFinishTransaction);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, transaction);
         info.setDebugId(mSyncId);
         mController.assignTrack(this, info);
