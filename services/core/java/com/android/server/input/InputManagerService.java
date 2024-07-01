@@ -312,6 +312,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages Keyboard modifier keys remapping
     private final KeyRemapper mKeyRemapper;
 
+    // Manages Keyboard glyphs for specific keyboards
+    private final KeyboardGlyphManager mKeyboardGlyphManager;
+
     // Manages loading PointerIcons
     private final PointerIconCache mPointerIconCache;
 
@@ -461,6 +464,7 @@ public class InputManagerService extends IInputManager.Stub
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
                 mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
+        mKeyboardGlyphManager = new KeyboardGlyphManager(mContext, injector.getLooper());
         mPointerIconCache = new PointerIconCache(mContext, mNative);
 
         mUseDevInputEventForAudioJack =
@@ -577,6 +581,7 @@ public class InputManagerService extends IInputManager.Stub
         mKeyboardLedController.systemRunning();
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
+        mKeyboardGlyphManager.systemRunning();
     }
 
     private void reloadDeviceAliases() {
@@ -1211,8 +1216,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public KeyGlyphMap getKeyGlyphMap(int deviceId) {
-        // TODO(b/345440920): Implementation
-        return null;
+        return mKeyboardGlyphManager.getKeyGlyphMap(deviceId);
     }
 
     public void setFocusedApplication(int displayId, InputApplicationHandle application) {
@@ -2084,6 +2088,7 @@ public class InputManagerService extends IInputManager.Stub
         mBatteryController.dump(ipw);
         mKeyboardBacklightController.dump(ipw);
         mKeyboardLedController.dump(ipw);
+        mKeyboardGlyphManager.dump(ipw);
     }
 
     private void dumpAssociations(IndentingPrintWriter pw) {
