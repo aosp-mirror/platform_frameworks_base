@@ -61,15 +61,14 @@ class ShortcutHelperCategoriesRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun stateActive_imeShortcuts_discardUnsupportedShortcutInfoModifiers() =
+    fun stateActive_imeShortcuts_onlyUnsupportedShortcuts_discardsAll() =
         testScope.runTest {
             helper.setImeShortcuts(imeShortcutsGroupWithUnsupportedShortcutModifiers)
             val imeShortcutCategory by collectLastValue(repo.imeShortcutsCategory)
 
             helper.showFromActivity()
 
-            assertThat(imeShortcutCategory)
-                .isEqualTo(expectedImeShortcutCategoryWithDiscardedUnsupportedShortcuts)
+            assertThat(imeShortcutCategory).isEqualTo(null)
         }
 
     private val switchToPreviousLanguageCommand =

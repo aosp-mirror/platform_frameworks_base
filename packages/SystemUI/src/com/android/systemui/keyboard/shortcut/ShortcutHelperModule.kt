@@ -20,6 +20,11 @@ import android.app.Activity
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags.keyboardShortcutHelperRewrite
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
+import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
+import com.android.systemui.keyboard.shortcut.data.source.MultitaskingShortcutsSource
+import com.android.systemui.keyboard.shortcut.data.source.SystemShortcutsSource
+import com.android.systemui.keyboard.shortcut.qualifiers.MultitaskingShortcuts
+import com.android.systemui.keyboard.shortcut.qualifiers.SystemShortcuts
 import com.android.systemui.keyboard.shortcut.ui.ShortcutHelperActivityStarter
 import com.android.systemui.keyboard.shortcut.ui.view.ShortcutHelperActivity
 import dagger.Binds
@@ -36,6 +41,14 @@ interface ShortcutHelperModule {
     @IntoMap
     @ClassKey(ShortcutHelperActivity::class)
     fun activity(impl: ShortcutHelperActivity): Activity
+
+    @Binds
+    @SystemShortcuts
+    fun systemShortcutsSource(impl: SystemShortcutsSource): KeyboardShortcutGroupsSource
+
+    @Binds
+    @MultitaskingShortcuts
+    fun multitaskingShortcutsSource(impl: MultitaskingShortcutsSource): KeyboardShortcutGroupsSource
 
     companion object {
         @Provides

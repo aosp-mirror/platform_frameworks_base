@@ -25,53 +25,53 @@ import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CTRL_ON
 import android.view.KeyEvent.META_META_ON
 import android.view.KeyEvent.META_SHIFT_ON
+import android.view.KeyboardShortcutGroup
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MULTI_TASKING
-import com.android.systemui.keyboard.shortcut.shared.model.shortcut
-import com.android.systemui.keyboard.shortcut.shared.model.shortcutCategory
+import com.android.systemui.keyboard.shortcut.data.model.shortcutInfo
 import com.android.systemui.res.R
 import javax.inject.Inject
 
-class MultitaskingShortcutsSource @Inject constructor(@Main private val resources: Resources) {
+class MultitaskingShortcutsSource @Inject constructor(@Main private val resources: Resources) :
+    KeyboardShortcutGroupsSource {
 
-    fun multitaskingShortcutCategory() =
-        shortcutCategory(MULTI_TASKING) {
-            subCategory(
+    override fun shortcutGroups() =
+        listOf(
+            KeyboardShortcutGroup(
                 resources.getString(R.string.shortcutHelper_category_recent_apps),
                 recentsShortcuts()
-            )
-            subCategory(
+            ),
+            KeyboardShortcutGroup(
                 resources.getString(R.string.shortcutHelper_category_split_screen),
                 splitScreenShortcuts()
             )
-        }
+        )
 
     private fun splitScreenShortcuts() =
         listOf(
             //  Enter Split screen with current app to RHS:
             //   - Meta + Ctrl + Right arrow
-            shortcut(resources.getString(R.string.system_multitasking_rhs)) {
-                command(META_META_ON, META_CTRL_ON, KEYCODE_DPAD_RIGHT)
+            shortcutInfo(resources.getString(R.string.system_multitasking_rhs)) {
+                command(META_META_ON or META_CTRL_ON, KEYCODE_DPAD_RIGHT)
             },
             //  Enter Split screen with current app to LHS:
             //   - Meta + Ctrl + Left arrow
-            shortcut(resources.getString(R.string.system_multitasking_lhs)) {
-                command(META_META_ON, META_CTRL_ON, KEYCODE_DPAD_LEFT)
+            shortcutInfo(resources.getString(R.string.system_multitasking_lhs)) {
+                command(META_META_ON or META_CTRL_ON, KEYCODE_DPAD_LEFT)
             },
             //  Switch from Split screen to full screen:
             //   - Meta + Ctrl + Up arrow
-            shortcut(resources.getString(R.string.system_multitasking_full_screen)) {
-                command(META_META_ON, META_CTRL_ON, KEYCODE_DPAD_UP)
+            shortcutInfo(resources.getString(R.string.system_multitasking_full_screen)) {
+                command(META_META_ON or META_CTRL_ON, KEYCODE_DPAD_UP)
             },
             //  Change split screen focus to RHS:
             //   - Meta + Alt + Right arrow
-            shortcut(resources.getString(R.string.system_multitasking_splitscreen_focus_rhs)) {
-                command(META_META_ON, META_ALT_ON, KEYCODE_DPAD_RIGHT)
+            shortcutInfo(resources.getString(R.string.system_multitasking_splitscreen_focus_rhs)) {
+                command(META_META_ON or META_ALT_ON, KEYCODE_DPAD_RIGHT)
             },
             //  Change split screen focus to LHS:
             //   - Meta + Alt + Left arrow
-            shortcut(resources.getString(R.string.system_multitasking_splitscreen_focus_rhs)) {
-                command(META_META_ON, META_ALT_ON, KEYCODE_DPAD_LEFT)
+            shortcutInfo(resources.getString(R.string.system_multitasking_splitscreen_focus_rhs)) {
+                command(META_META_ON or META_ALT_ON, KEYCODE_DPAD_LEFT)
             },
         )
 
@@ -79,13 +79,13 @@ class MultitaskingShortcutsSource @Inject constructor(@Main private val resource
         listOf(
             // Cycle through recent apps (forward):
             //  - Alt + Tab
-            shortcut(resources.getString(R.string.group_system_cycle_forward)) {
+            shortcutInfo(resources.getString(R.string.group_system_cycle_forward)) {
                 command(META_ALT_ON, KEYCODE_TAB)
             },
             // Cycle through recent apps (back):
             //  - Shift + Alt + Tab
-            shortcut(resources.getString(R.string.group_system_cycle_back)) {
-                command(META_SHIFT_ON, META_ALT_ON, KEYCODE_TAB)
+            shortcutInfo(resources.getString(R.string.group_system_cycle_back)) {
+                command(META_SHIFT_ON or META_ALT_ON, KEYCODE_TAB)
             },
         )
 }
