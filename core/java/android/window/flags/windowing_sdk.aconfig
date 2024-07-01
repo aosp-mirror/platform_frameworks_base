@@ -181,3 +181,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "per_user_display_window_settings"
+    description: "Whether to store display window settings per user to avoid conflicts"
+    bug: "346668297"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
