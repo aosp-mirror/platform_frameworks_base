@@ -4045,7 +4045,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (!calledWithValidTokenLocked(token, userId)) {
                 return;
             }
-            final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+            final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
             final InputMethodInfo imi = settings.getMethodMap().get(id);
             if (imi == null || !canCallerAccessInputMethod(
                     imi.getPackageName(), callingUid, userId, settings)) {
@@ -4063,7 +4063,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (!calledWithValidTokenLocked(token, userId)) {
                 return;
             }
-            final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+            final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
             final InputMethodInfo imi = settings.getMethodMap().get(id);
             if (imi == null || !canCallerAccessInputMethod(
                     imi.getPackageName(), callingUid, userId, settings)) {
