@@ -68,8 +68,6 @@ public class VibrationConfig {
     @VibrationIntensity
     private final int mDefaultRingVibrationIntensity;
 
-    private final boolean mDefaultKeyboardVibrationEnabled;
-
     private final boolean mKeyboardVibrationSettingsSupported;
 
     /** @hide */
@@ -87,8 +85,6 @@ public class VibrationConfig {
 
         mIgnoreVibrationsOnWirelessCharger = loadBoolean(resources,
                 com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger, false);
-        mDefaultKeyboardVibrationEnabled = loadBoolean(resources,
-                com.android.internal.R.bool.config_defaultKeyboardVibrationEnabled, true);
         mKeyboardVibrationSettingsSupported = loadBoolean(resources,
                 com.android.internal.R.bool.config_keyboardVibrationSettingsSupported, false);
 
@@ -194,14 +190,6 @@ public class VibrationConfig {
     }
 
     /**
-     * Whether keyboard vibration settings is enabled by default.
-     * @hide
-     */
-    public boolean isDefaultKeyboardVibrationEnabled() {
-        return mDefaultKeyboardVibrationEnabled;
-    }
-
-    /**
      * Whether the device support keyboard vibration settings.
      * @hide
      */
@@ -248,7 +236,6 @@ public class VibrationConfig {
                 + ", mDefaultMediaIntensity=" + mDefaultMediaVibrationIntensity
                 + ", mDefaultNotificationIntensity=" + mDefaultNotificationVibrationIntensity
                 + ", mDefaultRingIntensity=" + mDefaultRingVibrationIntensity
-                + ", mDefaultKeyboardVibrationEnabled=" + mDefaultKeyboardVibrationEnabled
                 + ", mKeyboardVibrationSettingsSupported=" + mKeyboardVibrationSettingsSupported
                 + "}";
     }
