@@ -1105,6 +1105,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 if (activity.isVisible() || activity.isVisibleRequested()) {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
                     // Prevent the transition from being executed too early if the activity is
                     // visible.
                     activity.finishIfPossible("finish-activity-op", false /* oomAdj */);
@@ -1122,6 +1123,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
                 final SafeActivityOptions safeOptions =
                         SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid);
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 waitAsyncStart(() -> mService.mTaskSupervisor.startActivityFromRecents(
                         caller.mPid, caller.mUid, taskId, safeOptions));
                 break;
