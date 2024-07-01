@@ -24,6 +24,7 @@ android_test {
         "flag-junit",
         "testng",
         "truth",
+        "collector-device-lib-platform",
     ],
     jni_libs: [
         "libdexmakerjvmtiagent",
