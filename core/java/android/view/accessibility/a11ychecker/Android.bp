@@ -1,7 +1,0 @@
-java_library_static {
-    name: "A11yChecker",
-    srcs: [
-        "*.java",
-    ],
-    visibility: ["//visibility:public"],
-}
