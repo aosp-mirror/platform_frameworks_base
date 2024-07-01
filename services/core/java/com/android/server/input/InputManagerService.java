@@ -53,6 +53,7 @@ import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.input.InputSettings;
+import android.hardware.input.KeyGlyphMap;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.KeyboardLayoutSelectionResult;
 import android.hardware.input.TouchCalibration;
@@ -1206,6 +1207,12 @@ public class InputManagerService extends IInputManager.Stub
             @Nullable InputMethodSubtype imeSubtype) {
         return mKeyboardLayoutManager.getKeyboardLayoutListForInputDevice(identifier, userId,
                 imeInfo, imeSubtype);
+    }
+
+    @Override // Binder call
+    public KeyGlyphMap getKeyGlyphMap(int deviceId) {
+        // TODO(b/345440920): Implementation
+        return null;
     }
 
     public void setFocusedApplication(int displayId, InputApplicationHandle application) {
