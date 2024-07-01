@@ -1336,12 +1336,16 @@ class BackNavigationController {
                 }
                 // If there is only one adaptor, attach the windowless window to top activity,
                 // because fixed rotation only applies on activity.
-                // Note that embedded activity won't use fixed rotation.
-                final Configuration openConfig = mAdaptors.length == 1
+                // Note that embedded activity won't use fixed rotation. Also, there is only one
+                // animation target for closing task.
+                final boolean chooseActivity = mAdaptors.length == 1
+                        && (switchType == ACTIVITY_SWITCH || mainActivity.mDisplayContent
+                                .isFixedRotationLaunchingApp(mainActivity));
+                final Configuration openConfig = chooseActivity
                         ? mainActivity.getConfiguration() : openTask.getConfiguration();
                 mRequestedStartingSurfaceId = openTask.mAtmService.mTaskOrganizerController
                         .addWindowlessStartingSurface(openTask, mainActivity,
-                                mAdaptors.length == 1 ? mainActivity.getSurfaceControl()
+                                chooseActivity ? mainActivity.getSurfaceControl()
                                         : mRemoteAnimationTarget.leash, snapshot, openConfig,
                             new IWindowlessStartingSurfaceCallback.Stub() {
                             // Once the starting surface has been created in shell, it will call
