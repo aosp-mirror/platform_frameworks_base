@@ -606,7 +606,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Se ha producido un problema al obtener tus tarjetas. Inténtalo de nuevo más tarde."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Ajustes de pantalla de bloqueo"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Escáner de códigos QR"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Escáner QR"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Actualizando"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabajo"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo Avión"</string>
@@ -972,7 +972,7 @@
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Quitar"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"activar/desactivar"</string>
     <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"Editar"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Control de dispositivos"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Control disposit."</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Elige una aplicación para añadir controles"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# control añadido.}many{# controles añadidos.}other{# controles añadidos.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Quitado"</string>
