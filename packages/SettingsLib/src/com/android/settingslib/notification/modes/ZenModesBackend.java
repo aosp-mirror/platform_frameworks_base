@@ -192,15 +192,7 @@ public class ZenModesBackend {
      */
     @Nullable
     public ZenMode addCustomManualMode(String name, @DrawableRes int iconResId) {
-        AutomaticZenRule rule = new AutomaticZenRule.Builder(name,
-                ZenModeConfig.toCustomManualConditionId())
-                .setPackage(ZenModeConfig.getCustomManualConditionProvider().getPackageName())
-                .setType(AutomaticZenRule.TYPE_OTHER)
-                .setOwner(ZenModeConfig.getCustomManualConditionProvider())
-                .setIconResId(iconResId)
-                .setManualInvocationAllowed(true)
-                .build();
-
+        AutomaticZenRule rule = ZenMode.newCustomManual(name, iconResId).getRule();
         String ruleId = mNotificationManager.addAutomaticZenRule(rule);
         return getMode(ruleId);
     }
