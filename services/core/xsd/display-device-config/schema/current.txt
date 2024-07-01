@@ -35,9 +35,11 @@ package com.android.server.display.config {
     method public final com.android.server.display.config.BlockingZoneThreshold getBlockingZoneThreshold();
     method public final java.math.BigInteger getDefaultRefreshRate();
     method @Nullable public final String getRefreshRateThermalThrottlingId();
+    method @Nullable public final com.android.server.display.config.NonNegativeFloatToFloatMap getSupportedModes();
     method public final void setBlockingZoneThreshold(com.android.server.display.config.BlockingZoneThreshold);
     method public final void setDefaultRefreshRate(java.math.BigInteger);
     method public final void setRefreshRateThermalThrottlingId(@Nullable String);
+    method public final void setSupportedModes(@Nullable com.android.server.display.config.NonNegativeFloatToFloatMap);
   }
 
   public class BlockingZoneThreshold {

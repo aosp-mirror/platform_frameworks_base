@@ -29,8 +29,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.window.flags.Flags.FLAG_OFFLOAD_COLOR_EXTRACTION;
 import static com.android.window.flags.Flags.noConsecutiveVisibilityEvents;
+import static com.android.window.flags.Flags.noVisibilityEventOnDisplayStateChange;
 import static com.android.window.flags.Flags.offloadColorExtraction;
-import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
 
 import android.animation.AnimationHandler;
 import android.animation.Animator;
@@ -301,13 +301,10 @@ public abstract class WallpaperService extends Service {
         final InsetsState mInsetsState = new InsetsState();
         final InsetsSourceControl.Array mTempControls = new InsetsSourceControl.Array();
         final MergedConfiguration mMergedConfiguration = new MergedConfiguration();
-        final Bundle mSyncSeqIdBundle = windowSessionRelayoutInfo() ? null : new Bundle();
 
         SurfaceControl mSurfaceControl = new SurfaceControl();
-        WindowRelayoutResult mRelayoutResult = windowSessionRelayoutInfo()
-                ? new WindowRelayoutResult(mWinFrames, mMergedConfiguration, mSurfaceControl,
-                        mInsetsState, mTempControls)
-                : null;
+        WindowRelayoutResult mRelayoutResult = new WindowRelayoutResult(
+                mWinFrames, mMergedConfiguration, mSurfaceControl, mInsetsState, mTempControls);
 
         private final Point mSurfaceSize = new Point();
         private final Point mLastSurfaceSize = new Point();
@@ -1276,15 +1273,8 @@ public abstract class WallpaperService extends Service {
                     } else {
                         mLayout.surfaceInsets.set(0, 0, 0, 0);
                     }
-                    final int relayoutResult;
-                    if (windowSessionRelayoutInfo()) {
-                        relayoutResult = mSession.relayout(mWindow, mLayout, mWidth, mHeight,
-                                View.VISIBLE, 0, 0, 0, mRelayoutResult);
-                    } else {
-                        relayoutResult = mSession.relayoutLegacy(mWindow, mLayout, mWidth, mHeight,
-                                View.VISIBLE, 0, 0, 0, mWinFrames, mMergedConfiguration,
-                                mSurfaceControl, mInsetsState, mTempControls, mSyncSeqIdBundle);
-                    }
+                    final int relayoutResult = mSession.relayout(mWindow, mLayout, mWidth, mHeight,
+                            View.VISIBLE, 0, 0, 0, mRelayoutResult);
                     final Rect outMaxBounds = mMergedConfiguration.getMergedConfiguration()
                             .windowConfiguration.getMaxBounds();
                     if (!outMaxBounds.equals(maxBounds)) {
@@ -2387,8 +2377,10 @@ public abstract class WallpaperService extends Service {
                     @Override
                     public void onDisplayChanged(int displayId) {
                         if (mDisplay.getDisplayId() == displayId) {
-                            boolean forceReport = mIsWearOs
-                                    && mDisplay.getState() != Display.STATE_DOZE_SUSPEND;
+                            boolean forceReport =
+                                    !noVisibilityEventOnDisplayStateChange()
+                                            && mIsWearOs
+                                            && mDisplay.getState() != Display.STATE_DOZE_SUSPEND;
                             reportVisibility(forceReport);
                         }
                     }

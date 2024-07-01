@@ -209,7 +209,7 @@ public class FingerprintAuthenticationClient
             Slog.d(TAG, "Lockout is implemented by the HAL");
             return;
         }
-        if (authenticated) {
+        if (authenticated && !isBiometricPrompt()) {
             getLockoutTracker().resetFailedAttemptsForUser(true /* clearAttemptCounter */,
                     getTargetUserId());
         } else {
@@ -316,6 +316,8 @@ public class FingerprintAuthenticationClient
 
                 if (getBiometricContext().isAwake()) {
                     mALSProbeCallback.getProbe().enable();
+                } else {
+                    mALSProbeCallback.getProbe().disable();
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);

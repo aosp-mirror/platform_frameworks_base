@@ -240,7 +240,7 @@ final class PolicyDefinition<V> {
                     POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE
                             | POLICY_FLAG_NON_COEXISTABLE_POLICY
                             | POLICY_FLAG_SKIP_ENFORCEMENT_IF_UNCHANGED,
-                    PolicyEnforcerCallbacks::noOp,
+                    PolicyEnforcerCallbacks::setApplicationRestrictions,
                     new BundlePolicySerializer());
 
     /**
@@ -545,7 +545,7 @@ final class PolicyDefinition<V> {
             USER_RESTRICTION_FLAGS.put(
                     UserManager.DISALLOW_THREAD_NETWORK, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         }
-
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ASSIST_CONTENT, /* flags= */ 0);
         for (String key : USER_RESTRICTION_FLAGS.keySet()) {
             createAndAddUserRestrictionPolicyDefinition(key, USER_RESTRICTION_FLAGS.get(key));
         }

@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Salli GPU:n virheenkorjauskerrosten lataus"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Käytä laajennettua kirjausta"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sisällytä virheraportteihin muita laitekohtaisia myyjälokeja, jotka voivat sisältää yksityisiä tietoja, käyttää enemmän akkua ja/tai käyttää enemmän tallennustilaa"</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Ikkuna"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Siirtymä"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animaattori"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Herätykset ja muistutukset"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Anna sovelluksen lisätä herätyksiä ja ajoittaa kiireellisiä tapahtumia. Näin sovellus voi toimia taustalla, mikä voi kuluttaa enemmän virtaa.\n\nIlman tätä lupaa sovelluksen ajoittamat herätykset ja aikaan perustuvat tapahtumat eivät toimi."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ajoitus, herätys, muistutus, kello"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"Älä häiritse"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ota käyttöön"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Laita Älä häiritse ‑tila päälle"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Ei koskaan"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Kesto"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Kysy aina"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Kunnes laitat pois päältä"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(Ei nimeä)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Äsken"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Tämä puhelin"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Tämä tabletti"</string>
@@ -632,7 +646,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profiilin tiedot"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Ennen kuin voit luoda rajoitetun profiilin, määritä näytön lukitus, joka suojelee sovelluksiasi ja henkilökohtaisia tietojasi."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Aseta lukitus"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Vaihda tähän käyttäjään: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Vaihda käyttäjään: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Luodaan uutta käyttäjää…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Luodaan uutta vierasta…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Uuden käyttäjän luominen epäonnistui"</string>

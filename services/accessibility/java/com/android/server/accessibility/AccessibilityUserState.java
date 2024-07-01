@@ -98,9 +98,9 @@ class AccessibilityUserState {
 
     final Set<ComponentName> mTouchExplorationGrantedServices = new HashSet<>();
 
-    final ArraySet<String> mAccessibilityShortcutKeyTargets = new ArraySet<>();
+    private final ArraySet<String> mAccessibilityShortcutKeyTargets = new ArraySet<>();
 
-    final ArraySet<String> mAccessibilityButtonTargets = new ArraySet<>();
+    private final ArraySet<String> mAccessibilityButtonTargets = new ArraySet<>();
     private final ArraySet<String> mAccessibilityQsTargets = new ArraySet<>();
 
     /**
@@ -771,18 +771,23 @@ class AccessibilityUserState {
 
     /**
      * Returns a set which contains the flattened component names and the system class names
-     * assigned to the given shortcut.
+     * assigned to the given shortcut. The set is a defensive copy. To apply any changes to the set,
+     * use {@link #updateShortcutTargetsLocked(Set, int)}
      *
      * @param shortcutType The shortcut type.
      * @return The array set of the strings
      */
     public ArraySet<String> getShortcutTargetsLocked(@UserShortcutType int shortcutType) {
+        return new ArraySet<>(getShortcutTargetsInternalLocked(shortcutType));
+    }
+
+    private ArraySet<String> getShortcutTargetsInternalLocked(@UserShortcutType int shortcutType) {
         if (shortcutType == UserShortcutType.HARDWARE) {
             return mAccessibilityShortcutKeyTargets;
         } else if (shortcutType == UserShortcutType.SOFTWARE) {
             return mAccessibilityButtonTargets;
         } else if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
-            return getA11yQsTargets();
+            return mAccessibilityQsTargets;
         } else if ((shortcutType == UserShortcutType.TRIPLETAP
                 && isMagnificationSingleFingerTripleTapEnabledLocked()) || (
                 shortcutType == UserShortcutType.TWOFINGER_DOUBLETAP
@@ -792,6 +797,32 @@ class AccessibilityUserState {
             return targets;
         }
         return new ArraySet<>();
+    }
+
+    /**
+     * Updates the corresponding shortcut targets with the provided set.
+     * Tap shortcuts don't operate using sets of targets,
+     * so trying to update {@code TRIPLETAP} or {@code TWOFINGER_DOUBLETAP}
+     * will instead throw an {@code IllegalArgumentException}
+     * @param newTargets set of targets to replace the existing set.
+     * @param shortcutType type to be replaced.
+     * @return {@code true} if the set was changed, or {@code false} if the elements are the same.
+     * @throws IllegalArgumentException if {@code TRIPLETAP} or {@code TWOFINGER_DOUBLETAP} is used.
+     */
+    boolean updateShortcutTargetsLocked(
+            Set<String> newTargets, @UserShortcutType int shortcutType) {
+        final int mask = UserShortcutType.TRIPLETAP | UserShortcutType.TWOFINGER_DOUBLETAP;
+        if ((shortcutType & mask) != 0) {
+            throw new IllegalArgumentException("Tap shortcuts cannot be updated with target sets.");
+        }
+
+        final Set<String> currentTargets = getShortcutTargetsInternalLocked(shortcutType);
+        if (newTargets.equals(currentTargets)) {
+            return false;
+        }
+        currentTargets.clear();
+        currentTargets.addAll(newTargets);
+        return true;
     }
 
     /**
@@ -828,7 +859,7 @@ class AccessibilityUserState {
     }
 
     /**
-     * Removes given shortcut target in the list.
+     * Removes given shortcut target in the set.
      *
      * @param shortcutType The shortcut type.
      * @param target The component name of the shortcut target.
@@ -844,8 +875,9 @@ class AccessibilityUserState {
             );
         }
 
-        Set<String> targets = getShortcutTargetsLocked(shortcutType);
-        boolean result = targets.removeIf(name -> {
+        // getting internal set lets us directly modify targets, as it's not a copy.
+        Set<String> targets = getShortcutTargetsInternalLocked(shortcutType);
+        return targets.removeIf(name -> {
             ComponentName componentName;
             if (name == null
                     || (componentName = ComponentName.unflattenFromString(name)) == null) {
@@ -853,11 +885,6 @@ class AccessibilityUserState {
             }
             return componentName.equals(target);
         });
-        if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
-            updateA11yQsTargetLocked(targets);
-        }
-
-        return result;
     }
 
     /**
@@ -1112,11 +1139,6 @@ class AccessibilityUserState {
                     }
                 }
         );
-    }
-
-    public void updateA11yQsTargetLocked(Set<String> targets) {
-        mAccessibilityQsTargets.clear();
-        mAccessibilityQsTargets.addAll(targets);
     }
 
     /**

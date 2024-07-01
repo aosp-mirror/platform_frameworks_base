@@ -24,12 +24,9 @@ import static com.android.systemui.Flags.validateKeyboardShortcutHelperIconUri;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.Dialog;
-import android.app.SynchronousUserSwitchObserver;
-import android.app.UserSwitchObserver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -136,13 +133,6 @@ public final class KeyboardShortcuts {
 
     @Nullable private List<KeyboardShortcutGroup> mReceivedAppShortcutGroups = null;
     @Nullable private List<KeyboardShortcutGroup> mReceivedImeShortcutGroups = null;
-
-    private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
-            @Override
-            public void onUserSwitching(int newUserId) throws RemoteException {
-                dismiss();
-            }
-    };
 
     @VisibleForTesting
     KeyboardShortcuts(Context context, WindowManager windowManager) {
@@ -394,14 +384,6 @@ public final class KeyboardShortcuts {
             mBackgroundHandler = new Handler(mHandlerThread.getLooper());
         }
 
-        if (validateKeyboardShortcutHelperIconUri()) {
-            try {
-                ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);
-            } catch (RemoteException e) {
-                Log.e(TAG, "could not register user switch observer", e);
-            }
-        }
-
         retrieveKeyCharacterMap(deviceId);
 
         mReceivedAppShortcutGroups = null;
@@ -455,7 +437,7 @@ public final class KeyboardShortcuts {
         if (mReceivedAppShortcutGroups == null || mReceivedImeShortcutGroups == null) {
             return;
         }
-        List<KeyboardShortcutGroup> shortcutGroups = mReceivedAppShortcutGroups;
+        List<KeyboardShortcutGroup> shortcutGroups = new ArrayList<>(mReceivedAppShortcutGroups);
         shortcutGroups.addAll(mReceivedImeShortcutGroups);
         mReceivedAppShortcutGroups = null;
         mReceivedImeShortcutGroups = null;
@@ -476,13 +458,6 @@ public final class KeyboardShortcuts {
             mKeyboardShortcutsDialog = null;
         }
         mHandlerThread.quit();
-        if (validateKeyboardShortcutHelperIconUri()) {
-            try {
-                ActivityManager.getService().unregisterUserSwitchObserver(mUserSwitchObserver);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Could not unregister user switch observer", e);
-            }
-        }
     }
 
     private KeyboardShortcutGroup getSystemShortcuts() {

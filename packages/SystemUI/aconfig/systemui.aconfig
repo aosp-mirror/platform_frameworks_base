@@ -217,6 +217,17 @@ flag {
 }
 
 flag {
+    name: "notification_group_hun_removal_animation_fix"
+    namespace: "systemui"
+    description: "Fix the lack of hun removal animation for group notifications"
+        "(not GROUP_ALERT_SUMMARY)"
+    bug: "343475993"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "scene_container"
     namespace: "systemui"
     description: "Enables the scene container framework go/flexiglass."
@@ -421,10 +432,13 @@ flag {
 }
 
 flag {
-   name: "fast_unlock_transition"
+   name: "faster_unlock_transition"
    namespace: "systemui"
    description: "Faster wallpaper unlock transition"
    bug: "298186160"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -864,6 +878,13 @@ flag {
 }
 
 flag {
+    name: "keyboard_touchpad_contextual_education"
+    namespace: "systemui"
+    description: "Allow showing education for physical keyboard and touchpad"
+    bug: "317496783"
+}
+
+flag {
   name: "dream_overlay_bouncer_swipe_direction_filtering"
   namespace: "systemui"
   description: "do not initiate bouncer swipe when the direction is opposite of the expansion"
@@ -878,16 +899,6 @@ flag {
     namespace: "systemui"
     description: "Pilfer at most once per input session"
     bug: "333596426"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    name: "shade_collapse_activity_launch_fix"
-    namespace: "systemui"
-    description: "Avoid collapsing the shade on activity launch if it is already collapsed, as this causes a flicker."
-    bug: "331591373"
     metadata {
       purpose: PURPOSE_BUGFIX
     }
@@ -981,10 +992,30 @@ flag {
 }
 
 flag {
+  name: "media_controls_lockscreen_shade_bug_fix"
+  namespace: "systemui"
+  description: "Use ShadeInteractor for media location changes"
+  bug: "319244625"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   namespace: "systemui"
   name: "enable_view_capture_tracing"
   description: "Enables view capture tracing in System UI."
   bug: "336521992"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  namespace: "systemui"
+  name: "privacy_dot_unfold_wrong_corner_fix"
+  description: "Fixes an issue where the privacy dot is at the wrong corner after unfolding/folding."
+  bug: "339335643"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
@@ -1001,20 +1032,6 @@ flag {
 }
 
 flag {
-  name: "glanceable_hub_fullscreen_swipe"
-  namespace: "systemui"
-  description: "Increase swipe area for gestures to bring in glanceable hub"
-  bug: "339665673"
-}
-
-flag {
-  name: "glanceable_hub_shortcut_button"
-  namespace: "systemui"
-  description: "Shows a button over the dream and lock screen to open the glanceable hub"
-  bug: "339667383"
-}
-
-flag {
   name: "glanceable_hub_gesture_handle"
   namespace: "systemui"
   description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
@@ -1027,6 +1044,7 @@ flag {
   description: "Allows users to exit dream to keyguard with glanceable hub enabled"
   bug: "343505271"
 }
+
 
 flag {
   name: "new_touchpad_gestures_tutorial"
@@ -1046,10 +1064,60 @@ flag {
 }
 
 flag {
+   name: "enable_efficient_display_repository"
+   namespace: "systemui"
+   description: "Decide whether to use the new implementation of DisplayRepository that minimizes binder calls and background lock contention."
+   bug: "345472038"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
   name: "notification_media_manager_background_execution"
   namespace: "systemui"
   description: "Decide whether to execute binder calls in background thread"
   bug: "336612071"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "dozeui_scheduling_alarms_background_execution"
+  namespace: "systemui"
+  description: "Decide whether to execute binder calls to schedule alarms in background thread"
+  bug: "330492575"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "notification_pulsing_fix"
+  namespace: "systemui"
+  description: "Allow showing new pulsing notifications when the device is already pulsing."
+  bug: "335560575"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "media_lockscreen_launch_animation"
+    namespace : "systemui"
+    description : "Enable the origin launch animation for UMO when opening on top of lockscreen."
+    bug : "346865769"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "expand_heads_up_on_inline_reply"
+  namespace: "systemui"
+  description: "Expands heads up notification when users clicks reply button and activate inline reply"
+  bug: "346976443"
   metadata {
     purpose: PURPOSE_BUGFIX
   }

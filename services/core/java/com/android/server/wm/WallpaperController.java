@@ -60,6 +60,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -334,13 +335,13 @@ class WallpaperController {
         }
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
-            token.setVisibility(false);
             if (token.isVisible()) {
                 ProtoLog.d(WM_DEBUG_WALLPAPER,
                         "Hiding wallpaper %s from %s target=%s prev=%s callers=%s",
                         token, winGoingAway, mWallpaperTarget, mPrevWallpaperTarget,
                         Debug.getCallers(5));
             }
+            token.setVisibility(false);
         }
     }
 
@@ -764,10 +765,19 @@ class WallpaperController {
 
     void collectTopWallpapers(Transition transition) {
         if (mFindResults.hasTopShowWhenLockedWallpaper()) {
-            transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper);
+            if (Flags.ensureWallpaperInTransitions()) {
+                transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper.mToken);
+            } else {
+                transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper);
+            }
+
         }
         if (mFindResults.hasTopHideWhenLockedWallpaper()) {
-            transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper);
+            if (Flags.ensureWallpaperInTransitions()) {
+                transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper.mToken);
+            } else {
+                transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper);
+            }
         }
     }
 

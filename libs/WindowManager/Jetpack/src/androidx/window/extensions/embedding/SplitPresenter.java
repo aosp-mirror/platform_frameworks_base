@@ -374,7 +374,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         updateTaskFragmentWindowingModeIfRegistered(wct, secondaryContainer, windowingMode);
         updateAnimationParams(wct, primaryContainer.getTaskFragmentToken(), splitAttributes);
         updateAnimationParams(wct, secondaryContainer.getTaskFragmentToken(), splitAttributes);
-        mController.updateDivider(wct, taskContainer);
+        mController.updateDivider(wct, taskContainer, false /* isTaskFragmentVanished */);
     }
 
     private void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
@@ -658,27 +658,28 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     /**
-     * Returns the expanded bounds if the {@code bounds} violate minimum dimension or are not fully
-     * covered by the task bounds. Otherwise, returns {@code bounds}.
+     * Returns the expanded bounds if the {@code relBounds} violate minimum dimension or are not
+     * fully covered by the task bounds. Otherwise, returns {@code relBounds}.
      */
     @NonNull
-    static Rect sanitizeBounds(@NonNull Rect bounds, @Nullable Size minDimension,
+    static Rect sanitizeBounds(@NonNull Rect relBounds, @Nullable Size minDimension,
                         @NonNull TaskFragmentContainer container) {
-        if (bounds.isEmpty()) {
+        if (relBounds.isEmpty()) {
             // Don't need to check if the bounds follows the task bounds.
-            return bounds;
+            return relBounds;
         }
-        if (boundsSmallerThanMinDimensions(bounds, minDimension)) {
+        if (boundsSmallerThanMinDimensions(relBounds, minDimension)) {
             // Expand the bounds if the bounds are smaller than minimum dimensions.
             return new Rect();
         }
         final TaskContainer taskContainer = container.getTaskContainer();
-        final Rect taskBounds = taskContainer.getBounds();
-        if (!taskBounds.contains(bounds)) {
+        final Rect relTaskBounds = new Rect(taskContainer.getBounds());
+        relTaskBounds.offsetTo(0, 0);
+        if (!relTaskBounds.contains(relBounds)) {
             // Expand the bounds if the bounds exceed the task bounds.
             return new Rect();
         }
-        return bounds;
+        return relBounds;
     }
 
     @Override
@@ -756,7 +757,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     void expandTaskFragment(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container) {
         super.expandTaskFragment(wct, container);
-        mController.updateDivider(wct, container.getTaskContainer());
+        mController.updateDivider(
+                wct, container.getTaskContainer(), false /* isTaskFragmentVanished */);
     }
 
     static boolean shouldShowSplit(@NonNull SplitContainer splitContainer) {

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// InputMonitor is deprecated, but we still need to test it.
+@file:Suppress("DEPRECATION")
+
 package com.android.test.input
 
 import android.app.Activity
@@ -43,6 +46,7 @@ class UnresponsiveGestureMonitorActivity : Activity() {
     }
     private lateinit var mInputEventReceiver: InputEventReceiver
     private lateinit var mInputMonitor: InputMonitor
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val inputManager = checkNotNull(getSystemService(InputManager::class.java))

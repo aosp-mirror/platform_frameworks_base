@@ -16,6 +16,7 @@
 
 package com.android.systemui.battery
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.battery.BatterySpecs.BATTERY_HEIGHT
@@ -24,8 +25,10 @@ import com.android.systemui.battery.BatterySpecs.BATTERY_WIDTH
 import com.android.systemui.battery.BatterySpecs.BATTERY_WIDTH_WITH_SHIELD
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class AccessorizedBatteryDrawableTest : SysuiTestCase() {
     @Test
     fun intrinsicSize_shieldFalse_isBatterySize() {

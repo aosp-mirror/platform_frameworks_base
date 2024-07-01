@@ -53,6 +53,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.model.Scenes;
@@ -114,6 +115,7 @@ public class StatusBarStateControllerImpl implements
     private final Lazy<ShadeInteractor> mShadeInteractorLazy;
     private final Lazy<DeviceUnlockedInteractor> mDeviceUnlockedInteractorLazy;
     private final Lazy<SceneInteractor> mSceneInteractorLazy;
+    private final Lazy<SceneContainerOcclusionInteractor> mSceneContainerOcclusionInteractorLazy;
     private final Lazy<KeyguardClockInteractor> mKeyguardClockInteractorLazy;
     private int mState;
     private int mLastState;
@@ -182,6 +184,7 @@ public class StatusBarStateControllerImpl implements
             Lazy<ShadeInteractor> shadeInteractorLazy,
             Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy,
             Lazy<SceneInteractor> sceneInteractorLazy,
+            Lazy<SceneContainerOcclusionInteractor> sceneContainerOcclusionInteractor,
             Lazy<KeyguardClockInteractor> keyguardClockInteractorLazy) {
         mUiEventLogger = uiEventLogger;
         mInteractionJankMonitorLazy = interactionJankMonitorLazy;
@@ -190,6 +193,7 @@ public class StatusBarStateControllerImpl implements
         mShadeInteractorLazy = shadeInteractorLazy;
         mDeviceUnlockedInteractorLazy = deviceUnlockedInteractorLazy;
         mSceneInteractorLazy = sceneInteractorLazy;
+        mSceneContainerOcclusionInteractorLazy = sceneContainerOcclusionInteractor;
         mKeyguardClockInteractorLazy = keyguardClockInteractorLazy;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
@@ -214,6 +218,7 @@ public class StatusBarStateControllerImpl implements
                     combineFlows(
                         mDeviceUnlockedInteractorLazy.get().getDeviceUnlockStatus(),
                         mSceneInteractorLazy.get().getCurrentScene(),
+                        mSceneContainerOcclusionInteractorLazy.get().getInvisibleDueToOcclusion(),
                         this::calculateStateFromSceneFramework),
                     this::onStatusBarStateChanged);
         }
@@ -664,10 +669,11 @@ public class StatusBarStateControllerImpl implements
 
     private int calculateStateFromSceneFramework(
             DeviceUnlockStatus deviceUnlockStatus,
-            SceneKey currentScene) {
+            SceneKey currentScene,
+            boolean isOccluded) {
         SceneContainerFlag.isUnexpectedlyInLegacyMode();
 
-        if (deviceUnlockStatus.isUnlocked()) {
+        if (deviceUnlockStatus.isUnlocked() || isOccluded) {
             return StatusBarState.SHADE;
         } else {
             return Preconditions.checkNotNull(sStatusBarStateByLockedSceneKey.get(currentScene));

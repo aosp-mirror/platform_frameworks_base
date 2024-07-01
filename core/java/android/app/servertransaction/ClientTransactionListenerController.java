@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.areConfigurationsEqualForDisplay;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.window.flags.Flags.activityWindowInfoFlag;
-import static com.android.window.flags.Flags.bundleClientTransactionFlag;
 
 import static java.util.Objects.requireNonNull;
 
@@ -196,7 +195,7 @@ public class ClientTransactionListenerController {
 
     /** Called before updating the Configuration of the given {@code context}. */
     public void onContextConfigurationPreChanged(@NonNull Context context) {
-        if (!bundleClientTransactionFlag() || ActivityThread.isSystem()) {
+        if (ActivityThread.isSystem()) {
             // Not enable for system server.
             return;
         }
@@ -212,7 +211,7 @@ public class ClientTransactionListenerController {
 
     /** Called after updating the Configuration of the given {@code context}. */
     public void onContextConfigurationPostChanged(@NonNull Context context) {
-        if (!bundleClientTransactionFlag() || ActivityThread.isSystem()) {
+        if (ActivityThread.isSystem()) {
             // Not enable for system server.
             return;
         }

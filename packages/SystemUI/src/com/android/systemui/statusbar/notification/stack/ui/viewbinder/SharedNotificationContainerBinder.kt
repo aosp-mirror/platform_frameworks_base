@@ -154,6 +154,14 @@ constructor(
                         }
                     }
 
+                    if (!SceneContainerFlag.isEnabled) {
+                        launch {
+                            // For when the entire view should fade, such as with the brightness
+                            // slider
+                            viewModel.panelAlpha.collect { controller.setMaxAlphaFromView(it) }
+                        }
+                    }
+
                     if (communalHub()) {
                         launch {
                             viewModel.glanceableHubAlpha.collect {

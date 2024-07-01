@@ -23,8 +23,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
-import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE;
+import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_BOTTOM_OF_TASK;
@@ -609,11 +609,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         int effects = TRANSACT_EFFECTS_NONE;
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
+        mService.mTaskSupervisor.beginDeferResume();
+        boolean deferResume = true;
         mService.mTaskSupervisor.setDeferRootVisibilityUpdate(true /* deferUpdate */);
-        final boolean shouldDeferTransitionReady = transition != null && !t.isEmpty()
-                && (transition.isCollecting() || Flags.alwaysDeferTransitionWhenApplyWct());
-        if (shouldDeferTransitionReady) {
-            transition.deferTransitionReady();
+        boolean deferTransitionReady = false;
+        if (transition != null && !t.isEmpty()) {
+            if (transition.isCollecting()) {
+                deferTransitionReady = true;
+                transition.deferTransitionReady();
+            } else if (Flags.alwaysDeferTransitionWhenApplyWct()) {
+                Slog.w(TAG, "Transition is not collecting when applyTransaction."
+                        + " transition=" + transition + " state=" + transition.getState());
+                transition = null;
+            }
         }
         try {
             final ArraySet<WindowContainer<?>> haveConfigChanges = new ArraySet<>();
@@ -750,6 +758,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
                 mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
+                mService.mTaskSupervisor.endDeferResume();
+                deferResume = false;
                 // Already calls ensureActivityConfig
                 mService.mRootWindowContainer.ensureActivitiesVisible();
                 mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -767,10 +777,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 mService.mWindowManager.mWindowPlacerLocked.requestTraversal();
             }
         } finally {
-            if (shouldDeferTransitionReady) {
+            if (deferTransitionReady) {
                 transition.continueTransitionReady();
             }
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
+            if (deferResume) {
+                mService.mTaskSupervisor.endDeferResume();
+            }
             mService.continueWindowLayout();
         }
         return effects;
@@ -1595,11 +1608,31 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             }
             case OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE: {
-                taskFragment.getTask().moveOrCreateDecorSurfaceFor(taskFragment);
+                final Task task = taskFragment.getTask();
+                if (task == null) {
+                    break;
+                }
+                // If any TaskFragment in the Task is collected by the transition, we make the decor
+                // surface visible in sync with the TaskFragment transition. Otherwise, we make the
+                // decor surface visible immediately.
+                final TaskFragment syncTaskFragment = transition != null
+                        ? task.getTaskFragment(transition.mParticipants::contains)
+                        : null;
+
+                if (syncTaskFragment != null) {
+                    task.moveOrCreateDecorSurfaceFor(taskFragment, false /* visible */);
+                    task.setDecorSurfaceVisible(syncTaskFragment.getSyncTransaction());
+                } else {
+                    task.moveOrCreateDecorSurfaceFor(taskFragment, true /* visible */);
+                }
                 break;
             }
             case OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE: {
-                taskFragment.getTask().removeDecorSurface();
+                final Task task = taskFragment.getTask();
+                if (task == null) {
+                    break;
+                }
+                task.removeDecorSurface();
                 break;
             }
             case OP_TYPE_SET_DIM_ON_TASK: {
@@ -1627,21 +1660,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         clientTransaction.sanitize(caller.mPid, caller.mUid);
                     }
 
-                    if (transition != null) {
-                        // The decor surface boost/unboost must happen after the transition is
-                        // completed. Otherwise, the decor surface could be moved before Shell
-                        // completes the transition, causing flicker.
-                        transition.addTransitionEndedListener(() ->
-                                task.setDecorSurfaceBoosted(
-                                        taskFragment,
-                                        operation.getBooleanValue() /* isBoosted */,
-                                        clientTransaction));
-                    } else {
-                        task.setDecorSurfaceBoosted(
-                                taskFragment,
-                                operation.getBooleanValue() /* isBoosted */,
-                                clientTransaction);
-                    }
+                    task.requestDecorSurfaceBoosted(
+                            taskFragment,
+                            operation.getBooleanValue() /* isBoosted */,
+                            clientTransaction);
+
+                    // The decor surface boost/unboost must be applied after the transition is
+                    // completed. Otherwise, the decor surface could be moved before Shell completes
+                    // the transition, causing flicker.
+                    runAfterTransition(transition, task::commitDecorSurfaceBoostedState);
                 }
                 break;
             }
@@ -1652,6 +1679,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
         return effects;
+    }
+
+    /**
+     * Executes the provided {@code runnable} after the {@code transition}. If the
+     * {@code transition} is {@code null}, the {@code runnable} is executed immediately.
+     */
+    private static void runAfterTransition(
+            @Nullable Transition transition, @NonNull Runnable runnable) {
+        if (transition == null) {
+            runnable.run();
+        } else {
+            transition.addTransitionEndedListener(runnable);
+        }
     }
 
     private boolean validateTaskFragmentOperation(
@@ -1835,7 +1875,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
             task.getParent().positionChildAt(
                     hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
-                    task, false /* includingParents */);
+                    task, hop.includingParents());
         }
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
@@ -2361,6 +2401,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             position = POSITION_TOP;
         }
         ownerTask.addChild(taskFragment, position);
+        EventLogTags.writeWmTfCreated(System.identityHashCode(taskFragment), ownerTask.mTaskId);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         if (!creationParams.getInitialRelativeBounds().isEmpty()) {
             // The surface operations for the task fragment should sync with the transition.

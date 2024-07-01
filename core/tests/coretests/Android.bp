@@ -63,6 +63,7 @@ android_test {
         "-c fa",
     ],
     static_libs: [
+        "A11yChecker",
         "collector-device-lib-platform",
         "frameworks-base-testutils",
         "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
@@ -85,6 +86,7 @@ android_test {
         "kotlin-test",
         "mockito-target-minus-junit4",
         "androidx.test.uiautomator_uiautomator",
+        "platform-parametric-runner-lib",
         "platform-test-annotations",
         "platform-compat-test-rules",
         "truth",

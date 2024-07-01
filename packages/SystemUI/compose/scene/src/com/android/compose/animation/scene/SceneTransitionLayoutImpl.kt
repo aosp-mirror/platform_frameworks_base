@@ -107,6 +107,13 @@ internal class SceneTransitionLayoutImpl(
                     _userActionDistanceScope = it
                 }
 
+    /**
+     * The [LookaheadScope] of this layout, that can be used to compute offsets relative to the
+     * layout.
+     */
+    internal lateinit var lookaheadScope: LookaheadScope
+        private set
+
     init {
         updateScenes(builder)
 
@@ -195,6 +202,8 @@ internal class SceneTransitionLayoutImpl(
                 .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
+                lookaheadScope = this
+
                 BackHandler()
 
                 scenesToCompose().fastForEach { scene -> key(scene.key) { scene.Content() } }
@@ -284,7 +293,15 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
                 width = fromSize.width
                 height = fromSize.height
             } else {
-                val size = lerp(fromSize, toSize, transition.progress)
+                val overscrollSpec = transition.currentOverscrollSpec
+                val progress =
+                    when {
+                        overscrollSpec == null -> transition.progress
+                        overscrollSpec.scene == transition.toScene -> 1f
+                        else -> 0f
+                    }
+
+                val size = lerp(fromSize, toSize, progress)
                 width = size.width.coerceAtLeast(0)
                 height = size.height.coerceAtLeast(0)
             }

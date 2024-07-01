@@ -19,8 +19,6 @@ package com.android.systemui.qs.tileimpl
 import android.content.Context
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.service.quicksettings.Tile
 import android.testing.TestableLooper
 import android.text.TextUtils
@@ -30,13 +28,12 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.haptics.qs.QSLongPressEffect
 import com.android.systemui.haptics.qs.qsLongPressEffect
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.qsTileFactory
+import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -50,8 +47,7 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class QSTileViewImplTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var customDrawable: Drawable
+    @Mock private lateinit var customDrawable: Drawable
 
     private lateinit var tileView: FakeTileView
     private lateinit var customDrawableView: View
@@ -134,9 +130,8 @@ class QSTileViewImplTest : SysuiTestCase() {
 
         tileView.changeState(state)
 
-        assertThat(state.secondaryLabel as CharSequence).isEqualTo(
-            context.getString(R.string.tile_unavailable)
-        )
+        assertThat(state.secondaryLabel as CharSequence)
+            .isEqualTo(context.getString(R.string.tile_unavailable))
     }
 
     @Test
@@ -147,9 +142,8 @@ class QSTileViewImplTest : SysuiTestCase() {
 
         tileView.changeState(state)
 
-        assertThat(state.secondaryLabel as CharSequence).isEqualTo(
-            context.getString(R.string.switch_bar_off)
-        )
+        assertThat(state.secondaryLabel as CharSequence)
+            .isEqualTo(context.getString(R.string.switch_bar_off))
     }
 
     @Test
@@ -160,9 +154,8 @@ class QSTileViewImplTest : SysuiTestCase() {
 
         tileView.changeState(state)
 
-        assertThat(state.secondaryLabel as CharSequence).isEqualTo(
-            context.getString(R.string.switch_bar_on)
-        )
+        assertThat(state.secondaryLabel as CharSequence)
+            .isEqualTo(context.getString(R.string.switch_bar_on))
     }
 
     @Test
@@ -240,11 +233,10 @@ class QSTileViewImplTest : SysuiTestCase() {
         val offString = "${spec}_off"
         val onString = "${spec}_on"
 
-        context.orCreateTestableResources.addOverride(R.array.tile_states_internet, arrayOf(
-            unavailableString,
-            offString,
-            onString
-        ))
+        context.orCreateTestableResources.addOverride(
+            R.array.tile_states_internet,
+            arrayOf(unavailableString, offString, onString)
+        )
 
         // State UNAVAILABLE
         state.secondaryLabel = ""
@@ -346,11 +338,10 @@ class QSTileViewImplTest : SysuiTestCase() {
     @Test
     fun testDisabledByPolicy_secondaryLabelText() {
         val testA11yLabel = "TEST_LABEL"
-        context.orCreateTestableResources
-                .addOverride(
-                        R.string.accessibility_tile_disabled_by_policy_action_description,
-                        testA11yLabel
-                )
+        context.orCreateTestableResources.addOverride(
+            R.string.accessibility_tile_disabled_by_policy_action_description,
+            testA11yLabel
+        )
 
         val stateDisabledByPolicy = QSTile.State()
         stateDisabledByPolicy.state = Tile.STATE_INACTIVE
@@ -361,10 +352,11 @@ class QSTileViewImplTest : SysuiTestCase() {
         val info = AccessibilityNodeInfo(tileView)
         tileView.onInitializeAccessibilityNodeInfo(info)
         assertThat(
-                info.actionList.find {
-                        it.id == AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id
-                }?.label
-        ).isEqualTo(testA11yLabel)
+                info.actionList
+                    .find { it.id == AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id }
+                    ?.label
+            )
+            .isEqualTo(testA11yLabel)
     }
 
     @Test
@@ -379,11 +371,10 @@ class QSTileViewImplTest : SysuiTestCase() {
         val offString = "${spec}_off"
         val onString = "${spec}_on"
 
-        context.orCreateTestableResources.addOverride(R.array.tile_states_internet, arrayOf(
-                unavailableString,
-                offString,
-                onString
-        ))
+        context.orCreateTestableResources.addOverride(
+            R.array.tile_states_internet,
+            arrayOf(unavailableString, offString, onString)
+        )
 
         tileView.changeState(state)
         assertThat(tileView.stateDescription?.contains(unavailableString)).isTrue()
@@ -416,7 +407,7 @@ class QSTileViewImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun onStateChange_fromLongPress_to_noLongPress_unBoundsTile() {
+    fun onStateChange_fromLongPress_to_noLongPress_clearsResources() {
         // GIVEN a state that no longer handles long-press
         val state = QSTile.State()
         state.handlesLongClick = false
@@ -424,12 +415,12 @@ class QSTileViewImplTest : SysuiTestCase() {
         // WHEN the state changes
         tileView.changeState(state)
 
-        // THEN the view binder no longer binds the view to the long-press effect
-        assertThat(tileView.isLongPressEffectBound).isFalse()
+        // THEN the long-press effect resources are not set
+        assertThat(tileView.areLongPressEffectPropertiesSet).isFalse()
     }
 
     @Test
-    fun onStateChange_fromNoLongPress_to_longPress_bindsTile() {
+    fun onStateChange_fromNoLongPress_to_longPress_setsProperties() {
         // GIVEN that the tile has changed to a state that does not handle long-press
         val state = QSTile.State()
         state.handlesLongClick = false
@@ -439,12 +430,12 @@ class QSTileViewImplTest : SysuiTestCase() {
         state.handlesLongClick = true
         tileView.changeState(state)
 
-        // THEN the view is bounded to the long-press effect
-        assertThat(tileView.isLongPressEffectBound).isTrue()
+        // THEN the long-press effect resources are set
+        assertThat(tileView.areLongPressEffectPropertiesSet).isTrue()
     }
 
     @Test
-    fun onStateChange_withoutLongPressEffect_fromLongPress_to_noLongPress_neverBindsEffect() {
+    fun onStateChange_withoutLongPressEffect_fromLongPress_to_noLongPress_neverSetsProperties() {
         // GIVEN a tile where the long-press effect is null
         tileView = FakeTileView(context, false, null)
 
@@ -455,13 +446,13 @@ class QSTileViewImplTest : SysuiTestCase() {
         // WHEN the state changes
         tileView.changeState(state)
 
-        // THEN the view binder does not bind the view and no effect is initialized
-        assertThat(tileView.isLongPressEffectBound).isFalse()
+        // THEN the effect properties are not set and the effect is not initialized
+        assertThat(tileView.areLongPressEffectPropertiesSet).isFalse()
         assertThat(tileView.isLongPressEffectInitialized).isFalse()
     }
 
     @Test
-    fun onStateChange_withoutLongPressEffect_fromNoLongPress_to_longPress_neverBindsEffect() {
+    fun onStateChange_withoutLongPressEffect_fromNoLongPress_to_longPress_neverSetsProperties() {
         // GIVEN a tile where the long-press effect is null
         tileView = FakeTileView(context, false, null)
 
@@ -474,8 +465,8 @@ class QSTileViewImplTest : SysuiTestCase() {
         state.handlesLongClick = true
         tileView.changeState(state)
 
-        // THEN the view binder does not bind the view and no effect is initialized
-        assertThat(tileView.isLongPressEffectBound).isFalse()
+        // THEN the effect properties are not set and the effect is not initialized
+        assertThat(tileView.areLongPressEffectPropertiesSet).isFalse()
         assertThat(tileView.isLongPressEffectInitialized).isFalse()
     }
 
@@ -494,14 +485,15 @@ class QSTileViewImplTest : SysuiTestCase() {
 
         // THE animation padding corresponds to the tile's growth due to the effect
         val padding = tileView.getPaddingForLaunchAnimation()
-        assertThat(padding).isEqualTo(
-            Rect(
-                -deltaWidth.toInt() / 2,
-                -deltaHeight.toInt() / 2,
-                deltaWidth.toInt() / 2,
-                deltaHeight.toInt() / 2,
+        assertThat(padding)
+            .isEqualTo(
+                Rect(
+                    -deltaWidth.toInt() / 2,
+                    -deltaHeight.toInt() / 2,
+                    deltaWidth.toInt() / 2,
+                    deltaHeight.toInt() / 2,
+                )
             )
-        )
     }
 
     @Test
@@ -541,7 +533,6 @@ class QSTileViewImplTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
     fun onInit_withLongPressEffect_longPressEffectHasTileAndExpandable() {
         val tile = kosmos.qsTileFactory.createTile("Test Tile")
         tileView.init(tile)
@@ -551,8 +542,8 @@ class QSTileViewImplTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
     fun onInit_withoutLongPressEffect_longPressEffectDoesNotHaveTileAndExpandable() {
+        tileView = FakeTileView(context, false, null)
         val tile = kosmos.qsTileFactory.createTile("Test Tile")
         tileView.init(tile)
 
@@ -564,19 +555,21 @@ class QSTileViewImplTest : SysuiTestCase() {
         context: Context,
         collapsed: Boolean,
         private val longPressEffect: QSLongPressEffect?,
-    ) : QSTileViewImpl(
+    ) :
+        QSTileViewImpl(
             ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings),
             collapsed,
             longPressEffect,
-    ) {
+        ) {
         var constantLongPressEffectDuration = 500
-
         val isTileAddedToLongPress: Boolean
             get() = longPressEffect?.qsTile != null
+
         val isExpandableAddedToLongPress: Boolean
             get() = longPressEffect?.expandable != null
 
         override fun getLongPressEffectDuration(): Int = constantLongPressEffectDuration
+
         fun changeState(state: QSTile.State) {
             handleStateChanged(state)
         }

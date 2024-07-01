@@ -443,7 +443,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         boolean isTransferringToTheSelectedRoute =
                                 mPendingTransferRequest.isTargetRoute(selectedRoute);
                         boolean canBePotentiallyTransferred =
-                                mPendingTransferRequest.isTargetRouteIdInList(transferableRoutes);
+                                mPendingTransferRequest.isTargetRouteIdInRouteOriginalIdList(
+                                        transferableRoutes);
 
                         if (isTransferringToTheSelectedRoute) {
                             transferReason = mPendingTransferRequest.mTransferReason;

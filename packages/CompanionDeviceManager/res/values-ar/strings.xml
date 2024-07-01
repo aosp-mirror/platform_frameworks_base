@@ -20,7 +20,7 @@
     <string name="confirmation_title" msgid="2244241995958340998">"‏هل تريد السماح لـ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بالوصول إلى &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;؟"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"الساعة"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"‏اختيار جهاز ليديره تطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="chooser_title" msgid="2235819929238267637">"اختيار \"<xliff:g id="PROFILE_NAME">%1$s</xliff:g>\" لإعداده"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"اختيار \"<xliff:g id="PROFILE_NAME">%1$s</xliff:g>\" للإعداد"</string>
     <string name="summary_watch" msgid="7962014927042971830">"سيتم السماح لهذا التطبيق بمزامنة المعلومات، مثلاً اسم المتصل، والوصول إلى هذه الأذونات على \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"‏هل تريد السماح لتطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بإدارة &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;؟"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"جهاز"</string>

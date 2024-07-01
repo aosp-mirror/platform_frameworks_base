@@ -2157,8 +2157,19 @@ public class DisplayModeDirector {
             }
         }
 
+        private boolean hasLowLightVrrConfig() {
+            DisplayDeviceConfig config;
+            synchronized (mLock) {
+                config = mDefaultDisplayDeviceConfig;
+            }
+            return mVsyncLowLightBlockingVoteEnabled
+                    && config != null
+                    && config.isVrrSupportEnabled()
+                    && !config.getRefreshRateData().lowLightBlockingZoneSupportedModes.isEmpty();
+        }
+
         private void restartObserver() {
-            if (mRefreshRateInLowZone > 0) {
+            if (mRefreshRateInLowZone > 0 || hasLowLightVrrConfig()) {
                 mShouldObserveDisplayLowChange = hasValidThreshold(
                         mLowDisplayBrightnessThresholds);
                 mShouldObserveAmbientLowChange = hasValidThreshold(
@@ -2300,6 +2311,7 @@ public class DisplayModeDirector {
             return false;
         }
 
+        @GuardedBy("mLock")
         private void onBrightnessChangedLocked() {
             if (!mRefreshRateChangeable || mLowPowerModeEnabled) {
                 return;
@@ -2315,8 +2327,14 @@ public class DisplayModeDirector {
 
             boolean insideLowZone = hasValidLowZone() && isInsideLowZone(mBrightness, mAmbientLux);
             if (insideLowZone) {
-                refreshRateVote =
-                        Vote.forPhysicalRefreshRates(mRefreshRateInLowZone, mRefreshRateInLowZone);
+                if (hasLowLightVrrConfig()) {
+                    refreshRateVote = Vote.forSupportedRefreshRates(mDefaultDisplayDeviceConfig
+                            .getRefreshRateData().lowLightBlockingZoneSupportedModes);
+                } else {
+                    refreshRateVote = Vote.forPhysicalRefreshRates(
+                            mRefreshRateInLowZone, mRefreshRateInLowZone);
+                    refreshRateSwitchingVote = Vote.forDisableRefreshRateSwitching();
+                }
                 if (mLowZoneRefreshRateForThermals != null) {
                     RefreshRateRange range = SkinThermalStatusObserver
                             .findBestMatchingRefreshRateRange(mThermalStatus,
@@ -2325,18 +2343,6 @@ public class DisplayModeDirector {
                         refreshRateVote =
                                 Vote.forPhysicalRefreshRates(range.min, range.max);
                     }
-                }
-
-                if (mVsyncLowLightBlockingVoteEnabled
-                        && isVrrSupportedLocked(Display.DEFAULT_DISPLAY)) {
-                    refreshRateSwitchingVote = Vote.forSupportedRefreshRatesAndDisableSwitching(
-                            List.of(
-                                    new SupportedRefreshRatesVote.RefreshRates(
-                                            /* peakRefreshRate= */ 60f, /* vsyncRate= */ 60f),
-                                    new SupportedRefreshRatesVote.RefreshRates(
-                                            /* peakRefreshRate= */120f, /* vsyncRate= */ 120f)));
-                } else {
-                    refreshRateSwitchingVote = Vote.forDisableRefreshRateSwitching();
                 }
             }
 
@@ -2368,7 +2374,7 @@ public class DisplayModeDirector {
         }
 
         private boolean hasValidLowZone() {
-            return mRefreshRateInLowZone > 0
+            return (mRefreshRateInLowZone > 0 || hasLowLightVrrConfig())
                     && (mShouldObserveDisplayLowChange || mShouldObserveAmbientLowChange);
         }
 

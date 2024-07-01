@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone
 
-import android.content.Intent
 import android.view.MotionEvent
 import androidx.lifecycle.LifecycleRegistry
 import com.android.keyguard.AuthKeyguardMessageArea
@@ -71,7 +70,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun getNavigationBarView(): NavigationBarView? = null
     override fun setBouncerShowing(bouncerShowing: Boolean) {}
     override fun isScreenFullyOff() = false
-    override fun getEmergencyActionIntent(): Intent? = null
     override fun isCameraAllowedByAdmin() = false
     override fun isGoingToSleep() = false
     override fun notifyBiometricAuthModeChanged() {}
@@ -80,7 +78,7 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun updateScrimController() {}
     override fun shouldIgnoreTouch() = false
     override fun isDeviceInteractive() = false
-    override fun handleDreamTouch(event: MotionEvent?) {}
+    override fun handleExternalShadeWindowTouch(event: MotionEvent?) {}
     override fun handleCommunalHubTouch(event: MotionEvent?) {}
     override fun awakenDreams() {}
     override fun isBouncerShowing() = false

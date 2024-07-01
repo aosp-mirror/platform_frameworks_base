@@ -42,12 +42,4 @@ oneway interface IPinnedTaskListener {
      * with fromImeAdjustement set to {@code true}.
      */
     void onImeVisibilityChanged(boolean imeVisible, int imeHeight);
-
-    /**
-     * Called by the window manager to notify the listener that Activity (was or is in pinned mode)
-     * is hidden (either stopped or removed). This is generally used as a signal to reset saved
-     * reentry fraction and size.
-     * {@param componentName} represents the application component of PiP window.
-     */
-    void onActivityHidden(in ComponentName componentName);
 }

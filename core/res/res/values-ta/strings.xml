@@ -1411,6 +1411,10 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"வைஃபை பிழைதிருத்தத்தை முடக்க தேர்ந்தெடுக்கவும்."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"\'தன்னியக்க சோதனைப்\' பயன்முறை இயக்கப்பட்டது"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"’தன்னியக்க சோதனைப்\' பயன்முறையை முடக்க ஆரம்பநிலைக்கு மீட்டமைக்கவும்."</string>
+    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
+    <skip />
+    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
+    <skip />
     <string name="console_running_notification_title" msgid="6087888939261635904">"சீரியல் கன்சோல் இயக்கப்பட்டது"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"செயல்திறன் பாதிக்கப்பட்டுள்ளது. முடக்குவதற்கு பூட்லோடரைத் தேர்வுசெய்யவும்."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"பரிசோதனை MTE இயக்கப்பட்டது"</string>
@@ -1755,12 +1759,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆன் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆஃப் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ஒலியளவு பட்டன்களை அழுத்துவதை நிறுத்துங்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> சேவையை இயக்க, ஒலியளவு பட்டன்கள் இரண்டையும் 3 வினாடிகளுக்கு மீண்டும் அழுத்திப் பிடிக்கவும்."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"அணுகல்தன்மை பட்டனைத் தட்டுவதன் மூலம் பயன்படுத்த விரும்பும் அம்சத்தைத் தேர்ந்தெடுக்கவும்:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"அணுகல்தன்மை சைகைக்கான அம்சத்தைத் தேர்வுசெய்யவும் (இரண்டு விரல்களால் திரையின் கீழிருந்து மேல் நோக்கி ஸ்வைப் செய்யவும்):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"அணுகல்தன்மை சைகைக்கான அம்சத்தைத் தேர்வுசெய்யவும் (மூன்று விரல்களால் திரையின் கீழிருந்து மேல் நோக்கி ஸ்வைப் செய்யவும்):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"அம்சங்களுக்கு இடையே மாற அணுகல்தன்மை பட்டனைத் தொட்டுப் பிடித்திருக்கவும்."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"அம்சங்களுக்கு இடையே மாற இரண்டு விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடித்திருக்கவும்."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"அம்சங்களுக்கு இடையே மாற மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடித்திருக்கவும்."</string>
+    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"பெரிதாக்கல்"</string>
     <string name="user_switched" msgid="7249833311585228097">"நடப்பு பயனர் <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>க்கு மாறுகிறது…"</string>
@@ -1883,7 +1893,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"பின் மிகவும் சிறியதாக உள்ளது. குறைந்தது 4 இலக்கங்கள் இருக்க வேண்டும்."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"மீண்டும் முயற்சிக்கவும்"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"முழுத் திரையில் காட்டுகிறது"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"வெளியேற, மேலிருந்து கீழே ஸ்வைப் செய்யவும்"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"புரிந்தது"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"சிறந்த காட்சிக்கு சுழற்றுங்கள்"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"சிறந்த காட்சிக்கு, <xliff:g id="NAME">%s</xliff:g> ஆப்ஸை முழுத்திரைப் பயன்முறையில் திறக்கவும்"</string>
@@ -1975,6 +1986,14 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"செயலில் இருக்கும் அழைப்பு"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"உள்வரும் அழைப்பை மதிப்பாய்வு செய்கிறது"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"வகைப்படுத்தப்படாதவை"</string>
+    <!-- no translation found for promotional_notification_channel_label (7414844730492860233) -->
+    <skip />
+    <!-- no translation found for social_notification_channel_label (106520267132019945) -->
+    <skip />
+    <!-- no translation found for news_notification_channel_label (4299937455247883311) -->
+    <skip />
+    <!-- no translation found for recs_notification_channel_label (4945985121418684297) -->
+    <skip />
     <string name="importance_from_user" msgid="2782756722448800447">"இந்த அறிவிப்புகளின் முக்கியத்துவத்தை அமைத்துள்ளீர்கள்."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ஈடுபட்டுள்ளவர்களின் காரணமாக, இது முக்கியமானது."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"பிரத்தியேக ஆப்ஸ் அறிவிப்பு"</string>
@@ -2191,6 +2210,10 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"திரையிலுள்ள அணுகல்தன்மை ஷார்ட்கட்டிற்கான தேர்வி"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"அணுகல்தன்மை ஷார்ட்கட்"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"அறிவிப்பு விவரத்தை நிராகரி"</string>
+    <!-- no translation found for accessibility_system_action_menu_label (3385283204496447040) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_media_play_pause_label (1905647491347119748) -->
+    <skip />
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"மேல் திசை காட்டும் பட்டன்"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"கீழ் திசை காட்டும் பட்டன்"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"இடது திசை காட்டும் பட்டன்"</string>
@@ -2396,7 +2419,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"கீபோர்டு தளவமைப்பு <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… ஆகிய மொழிகளில் அமைக்கப்பட்டது, மாற்ற தட்டவும்."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"கீபோர்டுகள் உள்ளமைக்கப்பட்டன"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"கீபோர்டுகளைப் பார்க்க தட்டவும்"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"தனிப்பட்டது"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"இரகசியமானவை"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"குளோன்"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"பணி"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"பணி 2"</string>
@@ -2407,6 +2430,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ரகசிய இடம்"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"குளோன்"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"பொது"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"ரகசிய இடம்"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"உணர்வுபூர்வமான அறிவிப்பு உள்ளடக்கம் மறைக்கப்பட்டது"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"பாதுகாப்பிற்காக, திரைப் பகிர்வில் இருந்து ஆப்ஸ் உள்ளடக்கம் மறைக்கப்பட்டுள்ளது"</string>

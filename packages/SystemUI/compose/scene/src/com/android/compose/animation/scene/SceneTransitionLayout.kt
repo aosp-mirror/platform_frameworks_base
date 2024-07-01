@@ -56,7 +56,7 @@ fun SceneTransitionLayout(
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
-    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
+    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0.05f,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
     SceneTransitionLayoutForTesting(
@@ -459,9 +459,16 @@ data class UserActionResult(
 
     /** The key of the transition that should be used. */
     val transitionKey: TransitionKey? = null,
+
+    /**
+     * If `true`, the swipe will be committed and we will settle to [toScene] if only if the user
+     * swiped at least the swipe distance, i.e. the transition progress was already equal to or
+     * bigger than 100% when the user released their finger. `
+     */
+    val requiresFullDistanceSwipe: Boolean = false,
 )
 
-interface UserActionDistance {
+fun interface UserActionDistance {
     /**
      * Return the **absolute** distance of the user action given the size of the scene we are
      * animating from and the [orientation].

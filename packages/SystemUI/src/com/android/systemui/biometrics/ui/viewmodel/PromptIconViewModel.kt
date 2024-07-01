@@ -17,11 +17,9 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
-import android.annotation.DrawableRes
 import android.annotation.RawRes
 import android.content.res.Configuration
 import android.graphics.Rect
-import android.hardware.face.Face
 import android.util.RotationUtils
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
@@ -137,7 +135,7 @@ constructor(
                         displayStateInteractor.currentRotation,
                         displayStateInteractor.isFolded,
                         displayStateInteractor.isInRearDisplayMode,
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.showingError
@@ -183,7 +181,7 @@ constructor(
                         displayStateInteractor.currentRotation,
                         displayStateInteractor.isFolded,
                         displayStateInteractor.isInRearDisplayMode,
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.isPendingConfirmation,
@@ -268,7 +266,7 @@ constructor(
                 }
         }
 
-    @DrawableRes
+    @RawRes
     private fun getFaceIconViewAsset(
         authState: PromptAuthState,
         isAuthenticating: Boolean,
@@ -276,17 +274,17 @@ constructor(
         showingError: Boolean
     ): Int =
         if (authState.isAuthenticated && isPendingConfirmation) {
-            R.drawable.face_dialog_wink_from_dark
+            R.raw.face_dialog_wink_from_dark
         } else if (authState.isAuthenticated) {
-            R.drawable.face_dialog_dark_to_checkmark
+            R.raw.face_dialog_dark_to_checkmark
         } else if (isAuthenticating) {
             R.raw.face_dialog_authenticating
         } else if (showingError) {
-            R.drawable.face_dialog_dark_to_error
+            R.raw.face_dialog_dark_to_error
         } else if (_previousIconWasError.value) {
-            R.drawable.face_dialog_error_to_idle
+            R.raw.face_dialog_error_to_idle
         } else {
-            R.drawable.face_dialog_idle_static
+            R.raw.face_dialog_idle_static
         }
 
     @RawRes
@@ -330,7 +328,7 @@ constructor(
                 AuthType.Coex ->
                     combine(
                         displayStateInteractor.currentRotation,
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.showingError
@@ -430,7 +428,7 @@ constructor(
                 AuthType.Fingerprint,
                 AuthType.Coex ->
                     combine(
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.isPendingConfirmation,
@@ -508,7 +506,7 @@ constructor(
             when (activeAuthType) {
                 AuthType.Fingerprint ->
                     combine(
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.showingError
@@ -546,7 +544,7 @@ constructor(
                     }
                 AuthType.Coex ->
                     combine(
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.isPendingConfirmation,
@@ -606,7 +604,7 @@ constructor(
                 AuthType.Fingerprint,
                 AuthType.Coex ->
                     combine(
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.showingError
@@ -642,7 +640,7 @@ constructor(
                 AuthType.Fingerprint,
                 AuthType.Coex ->
                     combine(
-                        promptSelectorInteractor.sensorType,
+                        promptSelectorInteractor.fingerprintSensorType,
                         displayStateInteractor.currentRotation
                     ) { sensorType: FingerprintSensorType, rotation: DisplayRotation ->
                         when (sensorType) {

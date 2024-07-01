@@ -21,10 +21,25 @@ import com.android.systemui.animation.dialogTransitionAnimator
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.model.sysUiState
+import com.android.systemui.util.mockito.mock
 
-val Kosmos.systemUIDialogFactory by
+val Kosmos.systemUIDialogFactory: SystemUIDialogFactory by
     Kosmos.Fixture {
         SystemUIDialogFactory(
+            applicationContext,
+            systemUIDialogManager,
+            sysUiState,
+            broadcastDispatcher,
+            dialogTransitionAnimator,
+        )
+    }
+
+val Kosmos.mockSystemUIDialogFactory: SystemUIDialog.Factory by
+    Kosmos.Fixture { mock<SystemUIDialog.Factory>() }
+
+val Kosmos.systemUIDialogDotFactory by
+    Kosmos.Fixture {
+        SystemUIDialog.Factory(
             applicationContext,
             systemUIDialogManager,
             sysUiState,

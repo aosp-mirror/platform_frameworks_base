@@ -122,12 +122,17 @@ import com.android.server.net.BaseNetworkObserver;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.power.optimization.Flags;
 import com.android.server.power.stats.AggregatedPowerStatsConfig;
+import com.android.server.power.stats.AudioPowerStatsProcessor;
 import com.android.server.power.stats.BatteryExternalStatsWorker;
 import com.android.server.power.stats.BatteryStatsDumpHelperImpl;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.power.stats.BatteryUsageStatsProvider;
 import com.android.server.power.stats.BluetoothPowerStatsProcessor;
+import com.android.server.power.stats.CameraPowerStatsProcessor;
 import com.android.server.power.stats.CpuPowerStatsProcessor;
+import com.android.server.power.stats.CustomEnergyConsumerPowerStatsProcessor;
+import com.android.server.power.stats.FlashlightPowerStatsProcessor;
+import com.android.server.power.stats.GnssPowerStatsProcessor;
 import com.android.server.power.stats.MobileRadioPowerStatsProcessor;
 import com.android.server.power.stats.PhoneCallPowerStatsProcessor;
 import com.android.server.power.stats.PowerStatsAggregator;
@@ -136,6 +141,7 @@ import com.android.server.power.stats.PowerStatsScheduler;
 import com.android.server.power.stats.PowerStatsStore;
 import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
+import com.android.server.power.stats.VideoPowerStatsProcessor;
 import com.android.server.power.stats.WifiPowerStatsProcessor;
 import com.android.server.power.stats.wakeups.CpuWakeupStats;
 
@@ -194,7 +200,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private final BatteryUsageStatsProvider mBatteryUsageStatsProvider;
     private final AtomicFile mConfigFile;
     private final BatteryStats.BatteryStatsDumpHelper mDumpHelper;
-    private final PowerStatsUidResolver mPowerStatsUidResolver;
+    private final PowerStatsUidResolver mPowerStatsUidResolver = new PowerStatsUidResolver();
     private final AggregatedPowerStatsConfig mAggregatedPowerStatsConfig;
 
     private volatile boolean mMonitorEnabled = true;
@@ -422,7 +428,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         setPowerStatsThrottlePeriods(batteryStatsConfigBuilder, context.getResources().getString(
                 com.android.internal.R.string.config_powerStatsThrottlePeriods));
         mBatteryStatsConfig = batteryStatsConfigBuilder.build();
-        mPowerStatsUidResolver = new PowerStatsUidResolver();
         mStats = new BatteryStatsImpl(mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
                 systemDir, mHandler, this, this, mUserManagerUserInfoProvider, mPowerProfile,
                 mCpuScalingPolicies, mPowerStatsUidResolver);
@@ -516,6 +521,69 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
                 .setProcessor(
                         new BluetoothPowerStatsProcessor(mPowerProfile));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_AUDIO)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(
+                        new AudioPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_VIDEO)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(new VideoPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(
+                        new FlashlightPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CAMERA)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(
+                        new CameraPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_GNSS)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(
+                        new GnssPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+
+        config.trackCustomPowerComponents(CustomEnergyConsumerPowerStatsProcessor::new)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE);
         return config;
     }
 
@@ -582,6 +650,34 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
                 BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
                 Flags.streamlinedConnectivityBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_AUDIO,
+                Flags.streamlinedMiscBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_AUDIO,
+                Flags.streamlinedMiscBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_VIDEO,
+                Flags.streamlinedMiscBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_VIDEO,
+                Flags.streamlinedMiscBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT,
+                Flags.streamlinedMiscBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_FLASHLIGHT,
+                Flags.streamlinedMiscBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_CAMERA,
+                Flags.streamlinedMiscBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_CAMERA,
+                Flags.streamlinedMiscBatteryStats());
+
+        // By convention POWER_COMPONENT_ANY represents custom Energy Consumers
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_ANY,
+                Flags.streamlinedMiscBatteryStats());
 
         mWorker.systemServicesReady();
         mStats.systemServicesReady(mContext);
@@ -752,6 +848,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     private void syncStats(String reason, int flags) {
+        mStats.collectPowerStatsSamples();
         awaitUninterruptibly(mWorker.scheduleSync(reason, flags));
     }
 

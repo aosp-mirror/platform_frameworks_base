@@ -21,7 +21,6 @@ import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIO
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -45,6 +44,7 @@ import com.android.systemui.display.data.repository.DisplayMetricsRepository;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.util.Compile;
 
@@ -261,9 +261,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable
 
     boolean isScreenFullyOff();
 
-    @Nullable
-    Intent getEmergencyActionIntent();
-
     boolean isCameraAllowedByAdmin();
 
     boolean isGoingToSleep();
@@ -288,11 +285,12 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable
     void awakenDreams();
 
     /**
-     * Handle a touch event while dreaming when the touch was initiated within a prescribed
-     * swipeable area. This method is provided for cases where swiping in certain areas of a dream
-     * should be handled by CentralSurfaces instead (e.g. swiping communal hub open).
+     * Handle a touch event while dreaming or on the glanceable hub when the touch was initiated
+     * within a prescribed swipeable area. This method is provided for cases where swiping in
+     * certain areas should be handled by CentralSurfaces instead (e.g. swiping hub open, opening
+     * the notification shade over dream or hub).
      */
-    void handleDreamTouch(MotionEvent event);
+    void handleExternalShadeWindowTouch(MotionEvent event);
 
     boolean isBouncerShowing();
 

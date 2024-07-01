@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.isVisible
 import com.android.systemui.keyguard.ui.binder.KeyguardSettingsViewBinder
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
@@ -42,7 +42,7 @@ class SettingsMenuSection
 @Inject
 constructor(
     private val viewModel: KeyguardSettingsMenuViewModel,
-    private val longPressViewModel: KeyguardLongPressViewModel,
+    private val touchHandlingViewModel: KeyguardTouchHandlingViewModel,
     private val vibratorHelper: VibratorHelper,
     private val activityStarter: ActivityStarter,
 ) {
@@ -69,7 +69,7 @@ constructor(
                             KeyguardSettingsViewBinder.bind(
                                 view = this,
                                 viewModel = viewModel,
-                                longPressViewModel = longPressViewModel,
+                                touchHandlingViewModel = touchHandlingViewModel,
                                 rootViewModel = null,
                                 vibratorHelper = vibratorHelper,
                                 activityStarter = activityStarter,

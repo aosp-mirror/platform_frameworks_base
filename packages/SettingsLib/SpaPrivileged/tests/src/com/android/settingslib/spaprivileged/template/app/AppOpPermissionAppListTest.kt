@@ -278,7 +278,7 @@ class AppOpPermissionAppListTest {
         const val PERMISSION = "PERMISSION"
         const val BROADER_PERMISSION = "BROADER_PERMISSION"
         val APP = ApplicationInfo().apply { packageName = PACKAGE_NAME }
-        val NOT_CHANGEABLE_APP = ApplicationInfo().apply { packageName = "android" }
+        val NOT_CHANGEABLE_APP = ApplicationInfo().apply { packageName = "com.android.systemui" }
     }
 }
 

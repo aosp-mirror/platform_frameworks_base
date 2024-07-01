@@ -147,6 +147,40 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testFindTask_includeLaunchedFromBubbled() {
+        final ComponentName component = ComponentName.createRelative(
+                DEFAULT_COMPONENT_PACKAGE_NAME, ".BubbledActivity");
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        final ActivityRecord activity = new ActivityBuilder(mWm.mAtmService)
+                .setComponent(component)
+                .setActivityOptions(opts)
+                .setCreateTask(true)
+                .build();
+
+        assertEquals(activity, mWm.mRoot.findTask(activity, activity.getTaskDisplayArea(),
+                true /* includeLaunchedFromBubble */));
+    }
+
+    @Test
+    public void testFindTask_ignoreLaunchedFromBubbled() {
+        final ComponentName component = ComponentName.createRelative(
+                DEFAULT_COMPONENT_PACKAGE_NAME, ".BubbledActivity");
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        final ActivityRecord activity = new ActivityBuilder(mWm.mAtmService)
+                .setComponent(component)
+                .setActivityOptions(opts)
+                .setCreateTask(true)
+                .build();
+
+        assertNull(mWm.mRoot.findTask(activity, activity.getTaskDisplayArea(),
+                false /* includeLaunchedFromBubble */));
+    }
+
+    @Test
     public void testAllPausedActivitiesComplete() {
         DisplayContent displayContent = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
         ActivityRecord activity = createActivityRecord(displayContent);
@@ -904,6 +938,24 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertTrue(mRootWindowContainer.canStartHomeOnDisplayArea(info, defaultTaskDisplayArea,
                 true /* allowInstrumenting*/));
     }
+
+    /**
+     * Tests whether home can be started if it's not allowed by policy.
+     */
+    @Test
+    public void testCanStartHome_returnsFalse_ifDisallowedByPolicy() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        final WindowProcessController app = mock(WindowProcessController.class);
+        doReturn(app).when(mAtm).getProcessController(any(), anyInt());
+        doReturn(false).when(app).isInstrumenting();
+        final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
+        doReturn(false).when(taskDisplayArea).canHostHomeTask();
+
+        assertFalse(mRootWindowContainer.canStartHomeOnDisplayArea(info, taskDisplayArea,
+                false /* allowInstrumenting*/));
+    }
+
 
     /**
      * Tests that secondary home activity should not be resolved if device is still locked.

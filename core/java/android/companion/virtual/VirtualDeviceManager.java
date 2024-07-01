@@ -56,6 +56,8 @@ import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualNavigationTouchpad;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualRotaryEncoder;
+import android.hardware.input.VirtualRotaryEncoderConfig;
 import android.hardware.input.VirtualStylus;
 import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualTouchscreen;
@@ -573,6 +575,12 @@ public final class VirtualDeviceManager {
                     new VirtualDeviceInternal(service, context, associationId, params);
         }
 
+        /** @hide */
+        public VirtualDevice(IVirtualDeviceManager service, Context context,
+                IVirtualDevice virtualDevice) {
+            mVirtualDeviceInternal = new VirtualDeviceInternal(service, context, virtualDevice);
+        }
+
         /**
          * Returns the unique ID of this virtual device.
          */
@@ -947,6 +955,23 @@ public final class VirtualDeviceManager {
         }
 
         /**
+         * Creates a virtual rotary encoder.
+         *
+         * @param config the configuration for the virtual rotary encoder.
+         * @see android.view.InputDevice#SOURCE_ROTARY_ENCODER
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_VIRTUAL_ROTARY)
+        public VirtualRotaryEncoder createVirtualRotaryEncoder(
+                @NonNull VirtualRotaryEncoderConfig config) {
+            if (!android.companion.virtualdevice.flags.Flags.virtualRotary()) {
+                throw new UnsupportedOperationException("Virtual rotary support not enabled");
+            }
+            return mVirtualDeviceInternal.createVirtualRotaryEncoder(config);
+        }
+
+        /**
          * Creates a VirtualAudioDevice, capable of recording audio emanating from this device,
          * or injecting audio from another device.
          *
@@ -1101,7 +1126,7 @@ public final class VirtualDeviceManager {
     }
 
     /**
-     * Listener for activity changes in this virtual device.
+     * Listener for activity changes and other activity events on a virtual device.
      *
      * @hide
      */
@@ -1142,6 +1167,20 @@ public final class VirtualDeviceManager {
          * @param displayId The display ID that became empty.
          */
         void onDisplayEmpty(int displayId);
+
+        /**
+         * Called when an activity launch was blocked due to a policy violation.
+         *
+         * @param displayId The display ID on which the activity tried to launch.
+         * @param componentName The component name of the blocked activity.
+         * @param userId The user ID associated with the blocked activity.
+         *
+         * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
+         * @see VirtualDevice#addActivityPolicyExemption(ComponentName)
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        default void onActivityLaunchBlocked(int displayId, @NonNull ComponentName componentName,
+                @UserIdInt int userId) {}
     }
 
     /**

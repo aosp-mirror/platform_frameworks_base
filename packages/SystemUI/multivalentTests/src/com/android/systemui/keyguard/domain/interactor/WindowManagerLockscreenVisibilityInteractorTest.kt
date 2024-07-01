@@ -197,7 +197,7 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun surfaceBehindVisibility_fromLockscreenToGone_trueThroughout() =
+    fun surfaceBehindVisibility_fromLockscreenToGone_noUserInput_trueThroughout() =
         testScope.runTest {
             val isSurfaceBehindVisible by collectLastValue(underTest.value.surfaceBehindVisibility)
             val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
@@ -244,6 +244,43 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
             kosmos.setSceneTransition(ObservableTransitionState.Idle(Scenes.Gone))
             kosmos.sceneInteractor.changeScene(Scenes.Gone, "")
             assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(isSurfaceBehindVisible).isTrue()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun surfaceBehindVisibility_fromLockscreenToGone_withUserInput_falseUntilInputStops() =
+        testScope.runTest {
+            val isSurfaceBehindVisible by collectLastValue(underTest.value.surfaceBehindVisibility)
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+
+            // Before the transition, we start on Lockscreen so the surface should start invisible.
+            kosmos.setSceneTransition(ObservableTransitionState.Idle(Scenes.Lockscreen))
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(isSurfaceBehindVisible).isFalse()
+
+            // Unlocked with fingerprint.
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+
+            // Start the transition to Gone, the surface should not be visible while
+            // isUserInputOngoing is true
+            val isUserInputOngoing = MutableStateFlow(true)
+            kosmos.setSceneTransition(
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Gone,
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = isUserInputOngoing,
+                    progress = flowOf(0.51f),
+                    currentScene = flowOf(Scenes.Gone),
+                )
+            )
+            assertThat(isSurfaceBehindVisible).isFalse()
+
+            // When isUserInputOngoing becomes false, then the surface should become visible.
+            isUserInputOngoing.value = false
             assertThat(isSurfaceBehindVisible).isTrue()
         }
 

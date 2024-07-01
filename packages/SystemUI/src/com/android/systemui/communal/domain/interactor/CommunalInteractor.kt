@@ -28,7 +28,6 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
-import com.android.systemui.communal.data.repository.CommunalPrefsRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
@@ -38,6 +37,7 @@ import com.android.systemui.communal.shared.model.CommunalContentSize.HALF
 import com.android.systemui.communal.shared.model.CommunalContentSize.THIRD
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
@@ -46,6 +46,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -97,8 +98,8 @@ constructor(
     @Background val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
     private val widgetRepository: CommunalWidgetRepository,
-    private val communalPrefsRepository: CommunalPrefsRepository,
-    mediaRepository: CommunalMediaRepository,
+    private val communalPrefsInteractor: CommunalPrefsInteractor,
+    private val mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
@@ -164,7 +165,7 @@ constructor(
     /** Whether to start dreaming when returning from occluded */
     val dreamFromOccluded: Flow<Boolean> =
         keyguardTransitionInteractor
-            .transitionStepsToState(KeyguardState.OCCLUDED)
+            .transition(Edge.create(to = KeyguardState.OCCLUDED))
             .map { it.from == KeyguardState.DREAMING }
             .stateIn(scope = applicationScope, SharingStarted.Eagerly, false)
 
@@ -306,6 +307,7 @@ constructor(
         preselectedKey: String? = null,
         shouldOpenWidgetPickerOnStart: Boolean = false,
     ) {
+        communalSceneInteractor.setEditModeState(EditModeState.STARTING)
         editWidgetsActivityStarter.startActivity(preselectedKey, shouldOpenWidgetPickerOnStart)
     }
 
@@ -322,7 +324,7 @@ constructor(
     }
 
     /** Dismiss the CTA tile from the hub in view mode. */
-    suspend fun dismissCtaTile() = communalPrefsRepository.setCtaDismissedForCurrentUser()
+    suspend fun dismissCtaTile() = communalPrefsInteractor.setCtaDismissed()
 
     /** Add a widget at the specified position. */
     fun addWidget(
@@ -390,26 +392,17 @@ constructor(
                     allowedForWorkProfile ->
                     filterWidgetsAllowedByDevicePolicy(widgets, allowedForWorkProfile)
                 },
-            communalSettingsInteractor.communalWidgetCategories,
             updateOnWorkProfileBroadcastReceived,
-        ) { widgets, allowedCategories, _ ->
+        ) { widgets, _ ->
             widgets.map { widget ->
                 when (widget) {
                     is CommunalWidgetContentModel.Available -> {
-                        if (widget.providerInfo.widgetCategory and allowedCategories != 0) {
-                            // At least one category this widget specified is allowed, so show it
-                            WidgetContent.Widget(
-                                appWidgetId = widget.appWidgetId,
-                                providerInfo = widget.providerInfo,
-                                appWidgetHost = appWidgetHost,
-                                inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
-                            )
-                        } else {
-                            WidgetContent.DisabledWidget(
-                                appWidgetId = widget.appWidgetId,
-                                providerInfo = widget.providerInfo,
-                            )
-                        }
+                        WidgetContent.Widget(
+                            appWidgetId = widget.appWidgetId,
+                            providerInfo = widget.providerInfo,
+                            appWidgetHost = appWidgetHost,
+                            inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
+                        )
                     }
                     is CommunalWidgetContentModel.Pending -> {
                         WidgetContent.PendingWidget(
@@ -458,7 +451,7 @@ constructor(
 
     /** CTA tile to be displayed in the glanceable hub (view mode). */
     val ctaTileContent: Flow<List<CommunalContentModel.CtaTileInViewMode>> =
-        communalPrefsRepository.isCtaDismissed.map { isDismissed ->
+        communalPrefsInteractor.isCtaDismissed.map { isDismissed ->
             if (isDismissed) emptyList() else listOf(CommunalContentModel.CtaTileInViewMode())
         }
 
@@ -479,40 +472,41 @@ constructor(
      * A flow of ongoing content, including smartspace timers and umo, ordered by creation time and
      * sized dynamically.
      */
-    val ongoingContent: Flow<List<CommunalContentModel.Ongoing>> =
+    fun getOngoingContent(mediaHostVisible: Boolean): Flow<List<CommunalContentModel.Ongoing>> =
         combine(smartspaceTargets, mediaRepository.mediaModel) { smartspace, media ->
-            val ongoingContent = mutableListOf<CommunalContentModel.Ongoing>()
+                val ongoingContent = mutableListOf<CommunalContentModel.Ongoing>()
 
-            // Add smartspace
-            ongoingContent.addAll(
-                smartspace.map { target ->
-                    CommunalContentModel.Smartspace(
-                        smartspaceTargetId = target.smartspaceTargetId,
-                        remoteViews = target.remoteViews!!,
-                        createdTimestampMillis = target.creationTimeMillis,
+                // Add smartspace
+                ongoingContent.addAll(
+                    smartspace.map { target ->
+                        CommunalContentModel.Smartspace(
+                            smartspaceTargetId = target.smartspaceTargetId,
+                            remoteViews = target.remoteViews!!,
+                            createdTimestampMillis = target.creationTimeMillis,
+                        )
+                    }
+                )
+
+                // Add UMO
+                if (mediaHostVisible && media.hasActiveMediaOrRecommendation) {
+                    ongoingContent.add(
+                        CommunalContentModel.Umo(
+                            createdTimestampMillis = media.createdTimestampMillis,
+                        )
                     )
                 }
-            )
 
-            // Add UMO
-            if (media.hasActiveMediaOrRecommendation) {
-                ongoingContent.add(
-                    CommunalContentModel.Umo(
-                        createdTimestampMillis = media.createdTimestampMillis,
-                    )
-                )
+                // Order by creation time descending
+                ongoingContent.sortByDescending { it.createdTimestampMillis }
+
+                // Dynamic sizing
+                ongoingContent.forEachIndexed { index, model ->
+                    model.size = dynamicContentSize(ongoingContent.size, index)
+                }
+
+                ongoingContent
             }
-
-            // Order by creation time descending
-            ongoingContent.sortByDescending { it.createdTimestampMillis }
-
-            // Dynamic sizing
-            ongoingContent.forEachIndexed { index, model ->
-                model.size = dynamicContentSize(ongoingContent.size, index)
-            }
-
-            return@combine ongoingContent
-        }
+            .flowOn(bgDispatcher)
 
     /**
      * Filter and retain widgets associated with an existing user, safeguarding against displaying

@@ -174,7 +174,7 @@ public class FooterPreference extends Preference {
 
     /** Return the content description of footer preference. */
     @VisibleForTesting
-    CharSequence getContentDescription() {
+    public CharSequence getContentDescription() {
         return mContentDescription;
     }
 

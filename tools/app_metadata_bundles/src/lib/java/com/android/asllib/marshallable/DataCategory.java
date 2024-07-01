@@ -23,6 +23,7 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,11 @@ public class DataCategory implements AslMarshallable {
     public DataCategory(String categoryName, Map<String, DataType> dataTypes) {
         this.mCategoryName = categoryName;
         this.mDataTypes = dataTypes;
+    }
+
+    public DataCategory(String categoryName) {
+        this.mCategoryName = categoryName;
+        this.mDataTypes = new LinkedHashMap<String, DataType>();
     }
 
     public String getCategoryName() {

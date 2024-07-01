@@ -224,7 +224,16 @@ sealed interface TransitionState {
 
         /** The scene this transition is going to. Can't be the same as fromScene */
         val toScene: SceneKey,
+
+        /** The transition that `this` transition is replacing, if any. */
+        internal val replacedTransition: Transition? = null,
     ) : TransitionState {
+        /**
+         * The key of this transition. This should usually be null, but it can be specified to use a
+         * specific set of transformations associated to this transition.
+         */
+        open val key: TransitionKey? = null
+
         /**
          * The progress of the transition. This is usually in the `[0; 1]` range, but it can also be
          * less than `0` or greater than `1` when using transitions with a spring AnimationSpec or
@@ -273,6 +282,11 @@ sealed interface TransitionState {
 
         init {
             check(fromScene != toScene)
+            check(
+                replacedTransition == null ||
+                    (replacedTransition.fromScene == fromScene &&
+                        replacedTransition.toScene == toScene)
+            )
         }
 
         /**
@@ -313,6 +327,10 @@ sealed interface TransitionState {
         ): Float {
             if (!layoutImpl.state.enableInterruptions) {
                 return 0f
+            }
+
+            if (replacedTransition != null) {
+                return replacedTransition.interruptionProgress(layoutImpl)
             }
 
             fun create(): Animatable<Float, AnimationVector1D> {
@@ -455,11 +473,7 @@ internal abstract class BaseSceneTransitionLayoutState(
      *
      * Important: you *must* call [finishTransition] once the transition is finished.
      */
-    internal fun startTransition(
-        transition: TransitionState.Transition,
-        transitionKey: TransitionKey? = null,
-        chain: Boolean = true,
-    ) {
+    internal fun startTransition(transition: TransitionState.Transition, chain: Boolean = true) {
         checkThread()
 
         // Compute the [TransformationSpec] when the transition starts.
@@ -469,7 +483,9 @@ internal abstract class BaseSceneTransitionLayoutState(
 
         // Update the transition specs.
         transition.transformationSpec =
-            transitions.transitionSpec(fromScene, toScene, key = transitionKey).transformationSpec()
+            transitions
+                .transitionSpec(fromScene, toScene, key = transition.key)
+                .transformationSpec()
         if (orientation != null) {
             transition.updateOverscrollSpecs(
                 fromSpec = transitions.overscrollSpec(fromScene, orientation),
@@ -517,6 +533,10 @@ internal abstract class BaseSceneTransitionLayoutState(
                     check(transitionStates.size == 1)
                     check(transitionStates[0] is TransitionState.Idle)
                     transitionStates = listOf(transition)
+                } else if (currentState == transition.replacedTransition) {
+                    // Replace the transition.
+                    transitionStates =
+                        transitionStates.subList(0, transitionStates.lastIndex) + transition
                 } else {
                     // Append the new transition.
                     transitionStates = transitionStates + transition
@@ -568,9 +588,10 @@ internal abstract class BaseSceneTransitionLayoutState(
                     originalTransition = transitionState,
                     fromScene = targetCurrentScene,
                     toScene = matchingLink.targetTo,
+                    key = matchingLink.targetTransitionKey,
                 )
 
-            stateLink.target.startTransition(linkedTransition, matchingLink.targetTransitionKey)
+            stateLink.target.startTransition(linkedTransition)
             activeTransitionLinks[stateLink] = linkedTransition
         }
     }
@@ -763,7 +784,7 @@ internal class HoistedSceneTransitionLayoutState(
 /** A [MutableSceneTransitionLayoutState] that holds the value for the current scene. */
 internal class MutableSceneTransitionLayoutStateImpl(
     initialScene: SceneKey,
-    override var transitions: SceneTransitions,
+    override var transitions: SceneTransitions = transitions {},
     private val canChangeScene: (SceneKey) -> Boolean = { true },
     stateLinks: List<StateLink> = emptyList(),
     enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,

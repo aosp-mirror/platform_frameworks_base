@@ -756,7 +756,7 @@ final class InstallPackageHelper {
                             Process.INVALID_UID /* previousAppId */,
                             permissionParamsBuilder.build(), userId);
 
-                    synchronized (mPm.mInstallLock) {
+                    try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
                         // We don't need to freeze for a brand new install
                         mAppDataHelper.prepareAppDataPostCommitLIF(
                                 pkgSetting, /* previousAppId= */0, new int[] { userId });
@@ -985,13 +985,11 @@ final class InstallPackageHelper {
     }
 
     void installPackagesTraced(List<InstallRequest> requests) {
-        mPm.mInstallLock.lock();
-        try {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackages");
             installPackagesLI(requests);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            mPm.mInstallLock.unlock();
         }
     }
 
@@ -2506,13 +2504,13 @@ final class InstallPackageHelper {
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    private void enableRestrictedSettings(String pkgName, int appId, int userId) {
+    private void setAccessRestrictedSettingsMode(String pkgName, int appId, int userId, int mode) {
         final AppOpsManager appOpsManager = mPm.mContext.getSystemService(AppOpsManager.class);
         final int uid = UserHandle.getUid(userId, appId);
         appOpsManager.setMode(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
                 uid,
                 pkgName,
-                AppOpsManager.MODE_ERRORED);
+                mode);
     }
 
     /**
@@ -2592,7 +2590,8 @@ final class InstallPackageHelper {
             if (performDexopt) {
                 // dexopt can take long, and ArtService doesn't require installd, so we release
                 // the lock here and re-acquire the lock after dexopt is finished.
-                mPm.mInstallLock.unlock();
+                PackageManagerTracedLock.RawLock installLock = mPm.mInstallLock.getRawLock();
+                installLock.unlock();
                 try {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
@@ -2612,7 +2611,7 @@ final class InstallPackageHelper {
                     installRequest.onDexoptFinished(dexOptResult);
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 } finally {
-                    mPm.mInstallLock.lock();
+                    installLock.lock();
                 }
             }
         }
@@ -2889,8 +2888,21 @@ final class InstallPackageHelper {
                 mPm.notifyPackageChanged(packageName, request.getAppId());
             }
 
-            if (!android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
-                    || !android.security.Flags.extendEcmToAllSettings()) {
+            // Set the OP_ACCESS_RESTRICTED_SETTINGS op, which is used by ECM (see {@link
+            // EnhancedConfirmationManager}) as a persistent state denoting whether an app is
+            // currently guarded by ECM, not guarded by ECM, or (in Android V+) that this should
+            // be decided later.
+            if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                    && android.security.Flags.extendEcmToAllSettings()) {
+                final int appId = request.getAppId();
+                mPm.mHandler.post(() -> {
+                    for (int userId : firstUserIds) {
+                        // MODE_DEFAULT means that the app's guardedness will be decided lazily
+                        setAccessRestrictedSettingsMode(packageName, appId, userId,
+                                AppOpsManager.MODE_DEFAULT);
+                    }
+                });
+            } else {
                 // Apply restricted settings on potentially dangerous packages. Needs to happen
                 // after appOpsManager is notified of the new package
                 if (request.getPackageSource() == PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE
@@ -2899,7 +2911,9 @@ final class InstallPackageHelper {
                     final int appId = request.getAppId();
                     mPm.mHandler.post(() -> {
                         for (int userId : firstUserIds) {
-                            enableRestrictedSettings(packageName, appId, userId);
+                            // MODE_ERRORED means that the app is explicitly guarded
+                            setAccessRestrictedSettingsMode(packageName, appId, userId,
+                                    AppOpsManager.MODE_ERRORED);
                         }
                     });
                 }
@@ -2921,7 +2935,7 @@ final class InstallPackageHelper {
                     // propagated to all application threads.
                     mPm.scheduleDeferredNoKillPostDelete(args);
                     if (Flags.improveInstallDontKill()) {
-                        synchronized (mPm.mInstallLock) {
+                        try (var installLock = mPm.mInstallLock.acquireLock()) {
                             PackageManagerServiceUtils.linkFilesToOldDirs(mPm.mInstaller,
                                     packageName, pkgSetting.getPath(), pkgSetting.getOldPaths());
                         }
@@ -3068,7 +3082,7 @@ final class InstallPackageHelper {
             @NonNull PackageSetting stubPkgSetting) {
         final int parseFlags = mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_CHATTY
                 | ParsingPackageUtils.PARSE_ENFORCE_CODE;
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             final AndroidPackage pkg;
             try (PackageFreezer freezer =
                          mPm.freezePackage(stubPkg.getPackageName(), UserHandle.USER_ALL,
@@ -3231,12 +3245,10 @@ final class InstallPackageHelper {
         }
         // Install the system package
         if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
-        try {
-            synchronized (mPm.mInstallLock) {
-                final int[] origUsers = outInfo == null ? null : outInfo.mOrigUsers;
-                installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
-                        origUsers, writeSettings);
-            }
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+            final int[] origUsers = outInfo == null ? null : outInfo.mOrigUsers;
+            installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
+                    origUsers, writeSettings);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
                     + e.getMessage());
@@ -3466,12 +3478,9 @@ final class InstallPackageHelper {
                 if (ps != null) {
                     ps.getPkgState().setUpdatedSystemApp(false);
                 }
-
-                try {
-                    final File codePath = new File(pkg.getPath());
-                    synchronized (mPm.mInstallLock) {
-                        initPackageTracedLI(codePath, 0, scanFlags);
-                    }
+                final File codePath = new File(pkg.getPath());
+                try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+                    initPackageTracedLI(codePath, 0, scanFlags);
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "Failed to parse updated, ex-system package: "
                             + e.getMessage());
@@ -3679,14 +3688,12 @@ final class InstallPackageHelper {
             }
             mPm.mSettings.enableSystemPackageLPw(packageName);
 
-            try {
-                synchronized (mPm.mInstallLock) {
-                    final AndroidPackage newPkg = initPackageTracedLI(
-                            scanFile, reparseFlags, rescanFlags);
-                    // We rescanned a stub, add it to the list of stubbed system packages
-                    if (newPkg.isStub()) {
-                        stubSystemApps.add(packageName);
-                    }
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+                final AndroidPackage newPkg = initPackageTracedLI(
+                         scanFile, reparseFlags, rescanFlags);
+                 // We rescanned a stub, add it to the list of stubbed system packages
+                if (newPkg.isStub()) {
+                    stubSystemApps.add(packageName);
                 }
             } catch (PackageManagerException e) {
                 Slog.e(TAG, "Failed to parse original system package: "

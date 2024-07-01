@@ -237,7 +237,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Ընտրեք պրոֆիլ"</string>
     <string name="category_personal" msgid="6236798763159385225">"Անձնական"</string>
     <string name="category_work" msgid="4014193632325996115">"Աշխատանքային"</string>
-    <string name="category_private" msgid="4244892185452788977">"Անձնական"</string>
+    <string name="category_private" msgid="4244892185452788977">"Մասնավոր"</string>
     <string name="category_clone" msgid="1554511758987195974">"Կլոն"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Մշակողի ընտրանքներ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Միացնել մշակողի ընտրանքները"</string>
@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Թույլատրել GPU վրիպազերծման շերտերի բեռնումը վրիպազերծման հավելվածների համար"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Մատակարարի մանրամասն գրանցամատյան"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Վրիպակների հաշվետվություններում ներառել կոնկրետ սարքի վերաբերյալ մատակարարի լրացուցիչ մատյանները։ Դա կարող է պարունակել խիստ անձնական տեղեկություններ, ավելի արագ սպառել մարտկոցի լիցքը և/կամ ավելի շատ տարածք օգտագործել։"</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Պատուհանի շարժապատկեր"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Անցումների շարժապատկեր"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Շարժանկարի տևողության սանդղակ"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Զարթուցիչներ և հիշեցումներ"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Թույլատրել այս հավելվածին զարթուցիչներ կարգավորել և որոշակի ժամանակի համար գործողություններ պլանավորել։ Այդ դեպքում հավելվածն աշխատում է ֆոնային ռեժիմում, և արդյունքում մարտկոցի լիցքն ավելի արագ է սպառվում։\n\nԵթե այս թույլտվությունն անջատված է, հավելվածի կողմից կարգավորված զարթուցիչները և գործողությունների ժամանակացույցները չեն աշխատի։"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ժամանակացույց, զարթուցիչ, հիշեցում, ժամացույց"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"Չանհանգստացնել"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Միացնել"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Միացրեք «Չանհանգստացնել» ռեժիմը"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Երբեք"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Տևողություն"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Ամեն անգամ հարցնել"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Մինչև անջատեք"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(Անանուն)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Հենց նոր"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Այս հեռախոսը"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Այս պլանշետը"</string>

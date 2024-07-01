@@ -713,11 +713,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             new InsetsState.OnTraverseCallbacks() {
 
                 private @InsetsType int mTypes;
+                private InsetsState mFromState;
                 private InsetsState mToState;
 
                 @Override
                 public void onStart(InsetsState state1, InsetsState state2) {
                     mTypes = 0;
+                    mFromState = null;
                     mToState = null;
                 }
 
@@ -734,9 +736,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                         return;
                     }
                     mTypes |= source1.getType();
+                    if (mFromState == null) {
+                        mFromState = new InsetsState();
+                    }
                     if (mToState == null) {
                         mToState = new InsetsState();
                     }
+                    mFromState.addSource(new InsetsSource(source1));
                     mToState.addSource(new InsetsSource(source2));
                 }
 
@@ -747,7 +753,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     }
                     cancelExistingControllers(mTypes);
                     final InsetsAnimationControlRunner runner = new InsetsResizeAnimationRunner(
-                            mFrame, state1, mToState, RESIZE_INTERPOLATOR,
+                            mFrame, mFromState, mToState, RESIZE_INTERPOLATOR,
                             ANIMATION_DURATION_RESIZE, mTypes, InsetsController.this);
                     if (mRunningAnimations.isEmpty()) {
                         mHost.notifyAnimationRunningStateChanged(true);
@@ -811,7 +817,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     Collections.unmodifiableList(runningAnimations));
             if (DEBUG) {
                 for (WindowInsetsAnimation anim : runningAnimations) {
-                    Log.d(TAG, String.format("Running animation type: %d, progress: %f",
+                    Log.d(TAG, String.format("Running animation on insets type: %d, progress: %f",
                             anim.getTypeMask(), anim.getInterpolatedFraction()));
                 }
             }

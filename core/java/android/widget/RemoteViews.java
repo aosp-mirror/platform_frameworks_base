@@ -17,8 +17,10 @@
 package android.widget;
 
 import static android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL;
+import static android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO;
 import static android.appwidget.flags.Flags.drawDataParcel;
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
+import static android.util.proto.ProtoInputStream.NO_MORE_FIELDS;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
 
 import android.annotation.AttrRes;
@@ -60,6 +62,7 @@ import android.content.res.TypedArray;
 import android.content.res.loader.ResourcesLoader;
 import android.content.res.loader.ResourcesProvider;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.BlendMode;
 import android.graphics.Outline;
 import android.graphics.PorterDuff;
@@ -88,12 +91,17 @@ import android.util.DisplayMetrics;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.LongArray;
+import android.util.LongSparseArray;
 import android.util.Pair;
 import android.util.SizeF;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.util.TypedValue.ComplexDimensionUnit;
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoStream;
+import android.util.proto.ProtoUtils;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.LayoutInflater.Filter;
@@ -135,10 +143,12 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -1044,11 +1054,6 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_PENDING_INTENT_TEMPLATE_TAG;
         }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mPendingIntentTemplate.visitUris(visitor);
-        }
     }
 
     /**
@@ -1236,8 +1241,8 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * @hide
      */
-    public CompletableFuture<Void> collectAllIntents() {
-        return mCollectionCache.collectAllIntentsNoComplete(this);
+    public CompletableFuture<Void> collectAllIntents(int bitmapSizeLimit) {
+        return mCollectionCache.collectAllIntentsNoComplete(this, bitmapSizeLimit);
     }
 
     private class RemoteCollectionCache {
@@ -1264,10 +1269,15 @@ public class RemoteViews implements Parcelable, Filter {
                 int intentId = in.readInt();
                 String intentUri = in.readString8();
                 RemoteCollectionItems items = new RemoteCollectionItems(in, currentRootData);
-                mIdToUriMapping.put(intentId, intentUri);
-                mUriToCollectionMapping.put(intentUri, items);
+                addMapping(intentId, intentUri, items);
             }
         }
+
+        void addMapping(int intentId, String intentUri, RemoteCollectionItems items) {
+            mIdToUriMapping.put(intentId, intentUri);
+            mUriToCollectionMapping.put(intentUri, items);
+        }
+
 
         void setHierarchyDataForId(int intentId, HierarchyRootData data) {
             String uri = mIdToUriMapping.get(intentId);
@@ -1286,7 +1296,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         public @NonNull CompletableFuture<Void> collectAllIntentsNoComplete(
-                @NonNull RemoteViews inViews) {
+                @NonNull RemoteViews inViews, int bitmapSizeLimit) {
             SparseArray<Intent> idToIntentMapping = new SparseArray<>();
             // Collect the number of uinque Intent (which is equal to the number of new connections
             // to make) for size allocation and exclude certain collections from being written to
@@ -1314,7 +1324,11 @@ public class RemoteViews implements Parcelable, Filter {
                     ? 0
                     : remainingSize / numOfIntents;
 
-            return connectAllUniqueIntents(individualSize, idToIntentMapping);
+            int individualBitmapSizeLimit = (bitmapSizeLimit - getBitmapMemoryUsedByActions())
+                    / numOfIntents;
+
+            return connectAllUniqueIntents(individualSize, individualBitmapSizeLimit,
+                    idToIntentMapping);
         }
 
         private void collectAllIntentsInternal(@NonNull RemoteViews inViews,
@@ -1380,13 +1394,13 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         private @NonNull CompletableFuture<Void> connectAllUniqueIntents(int individualSize,
-                @NonNull SparseArray<Intent> idToIntentMapping) {
+                int individualBitmapSize, @NonNull SparseArray<Intent> idToIntentMapping) {
             List<CompletableFuture<Void>> intentFutureList = new ArrayList<>();
             for (int i = 0; i < idToIntentMapping.size(); i++) {
                 String currentIntentUri = mIdToUriMapping.get(idToIntentMapping.keyAt(i));
                 Intent currentIntent = idToIntentMapping.valueAt(i);
                 intentFutureList.add(getItemsFutureFromIntentWithTimeout(currentIntent,
-                        individualSize)
+                        individualSize, individualBitmapSize)
                         .thenAccept(items -> {
                             items.setHierarchyRootData(getHierarchyRootData());
                             mUriToCollectionMapping.put(currentIntentUri, items);
@@ -1397,7 +1411,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         private static CompletableFuture<RemoteCollectionItems> getItemsFutureFromIntentWithTimeout(
-                Intent intent, int individualSize) {
+                Intent intent, int individualSize, int individualBitmapSize) {
             if (intent == null) {
                 Log.e(LOG_TAG, "Null intent received when generating adapter future");
                 return CompletableFuture.completedFuture(new RemoteCollectionItems
@@ -1415,13 +1429,18 @@ public class RemoteViews implements Parcelable, Filter {
                             RemoteCollectionItems items;
                             try {
                                 items = IRemoteViewsFactory.Stub.asInterface(iBinder)
-                                        .getRemoteCollectionItems(individualSize);
+                                        .getRemoteCollectionItems(individualSize,
+                                                individualBitmapSize);
                             } catch (RemoteException re) {
                                 items = new RemoteCollectionItems.Builder().build();
                                 Log.e(LOG_TAG, "Error getting collection items from the"
                                         + " factory", re);
                             } finally {
                                 context.unbindService(this);
+                            }
+
+                            if (items == null) {
+                                items = new RemoteCollectionItems.Builder().build();
                             }
 
                             result.complete(items);
@@ -1454,6 +1473,87 @@ public class RemoteViews implements Parcelable, Filter {
                 mUriToCollectionMapping.get(intentUri).writeToParcel(out, flags, true);
             }
         }
+
+        public void writeToProto(Context context, ProtoOutputStream out) {
+            final long token = out.start(RemoteViewsProto.REMOTE_COLLECTION_CACHE);
+            for (int i = 0; i < mIdToUriMapping.size(); i++) {
+                final long entryToken = out.start(RemoteViewsProto.RemoteCollectionCache.ENTRIES);
+                out.write(RemoteViewsProto.RemoteCollectionCache.Entry.ID,
+                        mIdToUriMapping.keyAt(i));
+                String intentUri = mIdToUriMapping.valueAt(i);
+                out.write(RemoteViewsProto.RemoteCollectionCache.Entry.URI, intentUri);
+                final long itemsToken = out.start(
+                        RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS);
+                mUriToCollectionMapping.get(intentUri).writeToProto(context, out, /* attached= */
+                        true);
+                out.end(itemsToken);
+                out.end(entryToken);
+            }
+            out.end(token);
+        }
+    }
+
+    private PendingResources<RemoteCollectionCache> populateRemoteCollectionCacheFromProto(
+            ProtoInputStream in) throws Exception {
+        final ArrayList<LongSparseArray<Object>> entries = new ArrayList<>();
+        final long token = in.start(RemoteViewsProto.REMOTE_COLLECTION_CACHE);
+        while (in.nextField() != NO_MORE_FIELDS) {
+            switch (in.getFieldNumber()) {
+                case (int) RemoteViewsProto.RemoteCollectionCache.ENTRIES:
+                    final LongSparseArray<Object> entry = new LongSparseArray<>();
+                    final long entryToken = in.start(
+                            RemoteViewsProto.RemoteCollectionCache.ENTRIES);
+                    while (in.nextField() != NO_MORE_FIELDS) {
+                        switch (in.getFieldNumber()) {
+                            case (int) RemoteViewsProto.RemoteCollectionCache.Entry.ID:
+                                entry.put(RemoteViewsProto.RemoteCollectionCache.Entry.ID,
+                                        in.readInt(
+                                                RemoteViewsProto.RemoteCollectionCache.Entry.ID));
+                                break;
+                            case (int) RemoteViewsProto.RemoteCollectionCache.Entry.URI:
+                                entry.put(RemoteViewsProto.RemoteCollectionCache.Entry.URI,
+                                        in.readString(
+                                                RemoteViewsProto.RemoteCollectionCache.Entry.URI));
+                                break;
+                            case (int) RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS:
+                                final long itemsToken = in.start(
+                                        RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS);
+                                entry.put(RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS,
+                                        RemoteCollectionItems.createFromProto(in));
+                                in.end(itemsToken);
+                                break;
+                            default:
+                                Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                        + ProtoUtils.currentFieldToString(in));
+                        }
+                    }
+                    in.end(entryToken);
+                    checkContainsKeys(entry,
+                            new long[]{RemoteViewsProto.RemoteCollectionCache.Entry.ID,
+                                    RemoteViewsProto.RemoteCollectionCache.Entry.URI,
+                                    RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS});
+                    entries.add(entry);
+                    break;
+                default:
+                    Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                            + ProtoUtils.currentFieldToString(in));
+            }
+        }
+        in.end(token);
+
+        return (context, resources, rootData, depth) -> {
+            for (LongSparseArray<Object> entry : entries) {
+                int id = (int) entry.get(RemoteViewsProto.RemoteCollectionCache.Entry.ID);
+                String uri = (String) entry.get(RemoteViewsProto.RemoteCollectionCache.Entry.URI);
+                // Depth resets to 0 for RemoteCollectionItems
+                RemoteCollectionItems items = ((PendingResources<RemoteCollectionItems>) entry.get(
+                        RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS)).create(context,
+                        resources, rootData, depth);
+                rootData.mRemoteCollectionCache.addMapping(id, uri, items);
+            }
+            // Redundant return, but type signature requires we return something.
+            return rootData.mRemoteCollectionCache;
+        };
     }
 
     private class SetRemoteViewsAdapterIntent extends Action {
@@ -1523,11 +1623,6 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_REMOTE_VIEW_ADAPTER_INTENT_TAG;
-        }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mIntent.visitUris(visitor);
         }
     }
 
@@ -1607,11 +1702,6 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_ON_CLICK_RESPONSE_TAG;
         }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mResponse.visitUris(visitor);
-        }
     }
 
     /** Helper action to configure handwriting delegation via {@link PendingIntent}. */
@@ -1658,11 +1748,6 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_ON_STYLUS_HANDWRITING_RESPONSE_TAG;
-        }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mPendingIntent.visitUris(visitor);
         }
     }
 
@@ -1733,11 +1818,6 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_ON_CHECKED_CHANGE_RESPONSE_TAG;
-        }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mResponse.visitUris(visitor);
         }
     }
 
@@ -2023,7 +2103,14 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private static class BitmapCache {
+    /**
+     * @hide
+     */
+    @NonNull BitmapCache getBitmapCache() {
+        return mBitmapCache;
+    }
+
+    static class BitmapCache {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ArrayList<Bitmap> mBitmaps;
         SparseIntArray mBitmapHashes;
@@ -2043,6 +2130,11 @@ public class RemoteViews implements Parcelable, Filter {
                     mBitmapHashes.put(b.hashCode(), i);
                 }
             }
+        }
+
+        BitmapCache(BitmapCache other) {
+            mBitmaps = new ArrayList<>(other.mBitmaps);
+            mBitmapHashes = other.mBitmapHashes.clone();
         }
 
         public int getBitmapId(Bitmap b) {
@@ -2077,6 +2169,15 @@ public class RemoteViews implements Parcelable, Filter {
             dest.writeTypedList(mBitmaps, flags);
         }
 
+        public void writeBitmapsToProto(ProtoOutputStream out) {
+            for (int i = 0; i < mBitmaps.size(); i++) {
+                final Bitmap bitmap = mBitmaps.get(i);
+                final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, bytes);
+                out.write(RemoteViewsProto.BITMAP_CACHE, bytes.toByteArray());
+            }
+        }
+
         public int getBitmapMemory() {
             if (mBitmapMemory < 0) {
                 mBitmapMemory = 0;
@@ -2086,6 +2187,12 @@ public class RemoteViews implements Parcelable, Filter {
                 }
             }
             return mBitmapMemory;
+        }
+
+        public void mergeWithCache(BitmapCache other) {
+            for (int i = 0; i < other.mBitmaps.size(); i++) {
+                getBitmapId(other.mBitmaps.get(i));
+            }
         }
     }
 
@@ -2297,10 +2404,6 @@ public class RemoteViews implements Parcelable, Filter {
                 case ICON:
                     final Icon icon = (Icon) getParameterValue(null);
                     if (icon != null) visitIconUri(icon, visitor);
-                    break;
-                case INTENT:
-                    final Intent intent = (Intent) getParameterValue(null);
-                    if (intent != null) intent.visitUris(visitor);
                     break;
                 // TODO(b/281044385): Should we do anything about type BUNDLE?
             }
@@ -7222,20 +7325,6 @@ public class RemoteViews implements Parcelable, Filter {
             mElementNames = parcel.createStringArrayList();
         }
 
-        /**
-         * See {@link RemoteViews#visitUris(Consumer)}.
-         *
-         * @hide
-         */
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mPendingIntent != null) {
-                mPendingIntent.visitUris(visitor);
-            }
-            if (mFillIntent != null) {
-                mFillIntent.visitUris(visitor);
-            }
-        }
-
         private void handleViewInteraction(
                 View v,
                 InteractionHandler handler) {
@@ -7377,6 +7466,38 @@ public class RemoteViews implements Parcelable, Filter {
         return true;
     }
 
+    private int getBitmapMemoryUsedByActions() {
+        Set<Integer> bitmapIdSet = getBitmapIdsUsedByActions(new HashSet<>());
+        int result = 0;
+        for (int bitmapId: bitmapIdSet) {
+            result += mBitmapCache.getBitmapForId(bitmapId).getAllocationByteCount();
+        }
+
+        return result;
+    }
+
+    private Set<Integer> getBitmapIdsUsedByActions(@NonNull Set<Integer> intSet) {
+        if (hasSizedRemoteViews()) {
+            for (RemoteViews views: mSizedRemoteViews) {
+                views.getBitmapIdsUsedByActions(intSet);
+            }
+        } else if (hasLandscapeAndPortraitLayouts()) {
+            mLandscape.getBitmapIdsUsedByActions(intSet);
+            mPortrait.getBitmapIdsUsedByActions(intSet);
+        } else if (mActions != null) {
+            for (Action action: mActions) {
+                if (action instanceof ViewGroupActionAdd vgaa
+                        && vgaa.mNestedViews != null) {
+                    vgaa.mNestedViews.getBitmapIdsUsedByActions(intSet);
+                } else if (action instanceof BitmapReflectionAction bitmapAction) {
+                    intSet.add(bitmapAction.mBitmapId);
+                }
+            }
+        }
+
+        return intSet;
+    }
+
     /** Representation of a fixed list of items to be displayed in a RemoteViews collection. */
     public static final class RemoteCollectionItems implements Parcelable {
         private final long[] mIds;
@@ -7497,6 +7618,127 @@ public class RemoteViews implements Parcelable, Filter {
 
             if (restoreRoot) mViews[0].mIsRoot = false;
             dest.restoreAllowSquashing(prevAllowSquashing);
+        }
+
+        /** @hide */
+        public void writeToProto(Context context, ProtoOutputStream out) {
+            writeToProto(context, out, /* attached= */ false);
+        }
+
+        private void writeToProto(Context context, ProtoOutputStream out, boolean attached) {
+            for (long id : mIds) {
+                out.write(RemoteViewsProto.RemoteCollectionItems.IDS, id);
+            }
+
+            boolean restoreRoot = false;
+            out.write(RemoteViewsProto.RemoteCollectionItems.ATTACHED, attached);
+            if (!attached && mViews.length > 0 && !mViews[0].mIsRoot) {
+                restoreRoot = true;
+                mViews[0].mIsRoot = true;
+            }
+            for (RemoteViews view : mViews) {
+                final long viewsToken = out.start(RemoteViewsProto.RemoteCollectionItems.VIEWS);
+                view.writePreviewToProto(context, out);
+                out.end(viewsToken);
+            }
+            if (restoreRoot) mViews[0].mIsRoot = false;
+            out.write(RemoteViewsProto.RemoteCollectionItems.HAS_STABLE_IDS, mHasStableIds);
+            out.write(RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT, mViewTypeCount);
+        }
+
+        /**
+         * Overload used for testing unattached RemoteCollectionItems serialization.
+         *
+         * @hide
+         */
+        public static RemoteCollectionItems createFromProto(Context context, ProtoInputStream in)
+                throws Exception {
+            return createFromProto(in).create(context, context.getResources(), /* rootData= */
+                    null, 0);
+        }
+
+        /** @hide */
+        public static PendingResources<RemoteCollectionItems> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+            values.put(RemoteViewsProto.RemoteCollectionItems.IDS, new ArrayList<Long>());
+            values.put(RemoteViewsProto.RemoteCollectionItems.VIEWS,
+                    new ArrayList<PendingResources<RemoteViews>>());
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.RemoteCollectionItems.IDS:
+                        ((ArrayList<Long>) values.get(
+                                RemoteViewsProto.RemoteCollectionItems.IDS)).add(
+                                in.readLong(RemoteViewsProto.RemoteCollectionItems.IDS));
+                        break;
+                    case (int) RemoteViewsProto.RemoteCollectionItems.VIEWS:
+                        final long viewsToken = in.start(
+                                RemoteViewsProto.RemoteCollectionItems.VIEWS);
+                        ((ArrayList<PendingResources<RemoteViews>>) values.get(
+                                RemoteViewsProto.RemoteCollectionItems.VIEWS)).add(
+                                RemoteViews.createFromProto(in));
+                        in.end(viewsToken);
+                        break;
+                    case (int) RemoteViewsProto.RemoteCollectionItems.HAS_STABLE_IDS:
+                        values.put(RemoteViewsProto.RemoteCollectionItems.HAS_STABLE_IDS,
+                                in.readBoolean(
+                                        RemoteViewsProto.RemoteCollectionItems.HAS_STABLE_IDS));
+                        break;
+                    case (int) RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT:
+                        values.put(RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT,
+                                in.readInt(RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT));
+                        break;
+                    case (int) RemoteViewsProto.RemoteCollectionItems.ATTACHED:
+                        values.put(RemoteViewsProto.RemoteCollectionItems.ATTACHED,
+                                in.readBoolean(RemoteViewsProto.RemoteCollectionItems.ATTACHED));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+
+            checkContainsKeys(values,
+                    new long[]{RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT});
+            return (context, resources, rootData, depth) -> {
+                List<Long> idList = (List<Long>) values.get(
+                        RemoteViewsProto.RemoteCollectionItems.IDS);
+                long[] ids = new long[idList.size()];
+                for (int i = 0; i < idList.size(); i++) {
+                    ids[i] = idList.get(i);
+                }
+                boolean attached = (boolean) values.get(
+                        RemoteViewsProto.RemoteCollectionItems.ATTACHED, false);
+                List<PendingResources<RemoteViews>> pendingViews =
+                        (List<PendingResources<RemoteViews>>) values.get(
+                                RemoteViewsProto.RemoteCollectionItems.VIEWS);
+                RemoteViews[] views = new RemoteViews[pendingViews.size()];
+
+                if (attached && rootData == null) {
+                    throw new IllegalStateException("Cannot create a RemoteCollectionItems from "
+                            + "proto that was attached without providing HierarchyRootData");
+                }
+
+                int firstChildIndex = 0;
+                if (!attached && pendingViews.size() > 0) {
+                    // If written as unattached, get HierarchyRootData from first view
+                    views[0] = pendingViews.get(0).create(context, resources, /* rootData= */ null,
+                            /* depth= */ 0);
+                    rootData = views[0].getHierarchyRootData();
+                    firstChildIndex = 1;
+                }
+                for (int i = firstChildIndex; i < views.length; i++) {
+                    // Depth is reset to 0 for RemoteCollectionItems item views, see Parcel
+                    // constructor.
+                    views[i] = pendingViews.get(i).create(context, resources, rootData,
+                            /* depth= */ 0);
+                }
+                return new RemoteCollectionItems(ids, views,
+                        (boolean) values.get(RemoteViewsProto.RemoteCollectionItems.HAS_STABLE_IDS,
+                                false),
+                        (int) values.get(RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT,
+                                0));
+            };
         }
 
         /**
@@ -7860,5 +8102,309 @@ public class RemoteViews implements Parcelable, Filter {
             mApplicationInfoCache = applicationInfoCache;
             mClassCookies = classCookies;
         }
+    }
+
+    /**
+     * Write this RemoteViews to proto.
+     * @hide
+     */
+    @FlaggedApi(FLAG_REMOTE_VIEWS_PROTO)
+    public void writePreviewToProto(@NonNull Context context, @NonNull ProtoOutputStream out) {
+        if (mApplication != null) {
+            // mApplication may be null if this was created with DrawInstructions constructor.
+            out.write(RemoteViewsProto.PACKAGE_NAME, mApplication.packageName);
+        }
+        Resources appResources = getContextForResourcesEnsuringCorrectCachedApkPaths(
+                context).getResources();
+        if (mLayoutId != 0) {
+            out.write(RemoteViewsProto.LAYOUT_ID, appResources.getResourceName(mLayoutId));
+        }
+        if (mLightBackgroundLayoutId != 0) {
+            out.write(RemoteViewsProto.LIGHT_BACKGROUND_LAYOUT_ID,
+                    appResources.getResourceName(mLightBackgroundLayoutId));
+        }
+        if (mViewId != 0 && mViewId != -1) {
+            out.write(RemoteViewsProto.VIEW_ID, appResources.getResourceName(mViewId));
+        }
+        if (mIsRoot) {
+            mBitmapCache.writeBitmapsToProto(out);
+            mCollectionCache.writeToProto(context, out);
+        }
+        out.write(RemoteViewsProto.IS_ROOT, mIsRoot);
+        out.write(RemoteViewsProto.APPLY_FLAGS, mApplyFlags);
+        out.write(RemoteViewsProto.HAS_DRAW_INSTRUCTIONS, mHasDrawInstructions);
+        if (mProviderInstanceId != -1) {
+            out.write(RemoteViewsProto.PROVIDER_INSTANCE_ID, mProviderInstanceId);
+        }
+
+        if (!hasMultipleLayouts()) {
+            out.write(RemoteViewsProto.MODE, MODE_NORMAL);
+            if (mIdealSize != null) {
+                final long token = out.start(RemoteViewsProto.IDEAL_SIZE);
+                out.write(SizeFProto.WIDTH, mIdealSize.getWidth());
+                out.write(SizeFProto.HEIGHT, mIdealSize.getHeight());
+                out.end(token);
+            }
+        } else if (hasSizedRemoteViews()) {
+            out.write(RemoteViewsProto.MODE, MODE_HAS_SIZED_REMOTEVIEWS);
+            for (RemoteViews view : mSizedRemoteViews) {
+                final long sizedViewToken = out.start(RemoteViewsProto.SIZED_REMOTEVIEWS);
+                view.writePreviewToProto(context, out);
+                out.end(sizedViewToken);
+            }
+        } else {
+            out.write(RemoteViewsProto.MODE, MODE_HAS_LANDSCAPE_AND_PORTRAIT);
+            final long landscapeViewToken = out.start(RemoteViewsProto.LANDSCAPE_REMOTEVIEWS);
+            mLandscape.writePreviewToProto(context, out);
+            out.end(landscapeViewToken);
+            final long portraitViewToken = out.start(RemoteViewsProto.PORTRAIT_REMOTEVIEWS);
+            mPortrait.writePreviewToProto(context, out);
+            out.end(portraitViewToken);
+        }
+    }
+
+    /**
+     * Create a RemoteViews from proto input.
+     * @hide
+     */
+    @FlaggedApi(FLAG_REMOTE_VIEWS_PROTO)
+    public static RemoteViews createPreviewFromProto(Context context, ProtoInputStream in)
+            throws Exception {
+        return createFromProto(in).create(context, context.getResources(), /* rootData= */ null,
+                /* depth= */ 0);
+    }
+
+    private static PendingResources<RemoteViews> createFromProto(ProtoInputStream in)
+            throws Exception {
+        // Grouping these variables into an anonymous object allows us to access them through `ref`
+        // (which is final) later in the lambda.
+        final var ref = new Object() {
+            final RemoteViews mRv = new RemoteViews();
+            int mMode = 0;
+            int mApplyFlags = 0;
+            long mProviderInstanceId = -1;
+            String mPackageName = null;
+            SizeF mIdealSize = null;
+            String mLayoutResName = null;
+            String mLightBackgroundResName = null;
+            String mViewResName = null;
+            final List<PendingResources<RemoteViews>> mSizedRemoteViews = new ArrayList<>();
+            PendingResources<RemoteViews> mLandscapeViews = null;
+            PendingResources<RemoteViews> mPortraitViews = null;
+            PendingResources<RemoteCollectionCache> mPopulateRemoteCollectionCache = null;
+            boolean mIsRoot = false;
+            boolean mHasDrawInstructions = false;
+        };
+
+        try {
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.MODE:
+                        ref.mMode = in.readInt(RemoteViewsProto.MODE);
+                        break;
+                    case (int) RemoteViewsProto.PACKAGE_NAME:
+                        ref.mPackageName = in.readString(RemoteViewsProto.PACKAGE_NAME);
+                        break;
+                    case (int) RemoteViewsProto.IDEAL_SIZE:
+                        final long idealSizeToken = in.start(RemoteViewsProto.IDEAL_SIZE);
+                        ref.mIdealSize = createSizeFFromProto(in);
+                        in.end(idealSizeToken);
+                        break;
+                    case (int) RemoteViewsProto.LAYOUT_ID:
+                        ref.mLayoutResName = in.readString(RemoteViewsProto.LAYOUT_ID);
+                        break;
+                    case (int) RemoteViewsProto.LIGHT_BACKGROUND_LAYOUT_ID:
+                        ref.mLightBackgroundResName = in.readString(
+                                RemoteViewsProto.LIGHT_BACKGROUND_LAYOUT_ID);
+                        break;
+                    case (int) RemoteViewsProto.VIEW_ID:
+                        ref.mViewResName = in.readString(RemoteViewsProto.VIEW_ID);
+                        break;
+                    case (int) RemoteViewsProto.APPLY_FLAGS:
+                        ref.mApplyFlags = in.readInt(RemoteViewsProto.APPLY_FLAGS);
+                        break;
+                    case (int) RemoteViewsProto.PROVIDER_INSTANCE_ID:
+                        ref.mProviderInstanceId = in.readInt(RemoteViewsProto.PROVIDER_INSTANCE_ID);
+                        break;
+                    case (int) RemoteViewsProto.SIZED_REMOTEVIEWS:
+                        final long sizedToken = in.start(RemoteViewsProto.SIZED_REMOTEVIEWS);
+                        ref.mSizedRemoteViews.add(createFromProto(in));
+                        in.end(sizedToken);
+                        break;
+                    case (int) RemoteViewsProto.LANDSCAPE_REMOTEVIEWS:
+                        final long landscapeToken = in.start(
+                                RemoteViewsProto.LANDSCAPE_REMOTEVIEWS);
+                        ref.mLandscapeViews = createFromProto(in);
+                        in.end(landscapeToken);
+                        break;
+                    case (int) RemoteViewsProto.PORTRAIT_REMOTEVIEWS:
+                        final long portraitToken = in.start(RemoteViewsProto.PORTRAIT_REMOTEVIEWS);
+                        ref.mPortraitViews = createFromProto(in);
+                        in.end(portraitToken);
+                        break;
+                    case (int) RemoteViewsProto.BITMAP_CACHE:
+                        byte[] src = in.readBytes(RemoteViewsProto.BITMAP_CACHE);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(src, 0, src.length);
+                        ref.mRv.mBitmapCache.getBitmapId(bitmap);
+                        break;
+                    case (int) RemoteViewsProto.REMOTE_COLLECTION_CACHE:
+                        final long collectionToken = in.start(
+                                RemoteViewsProto.REMOTE_COLLECTION_CACHE);
+                        ref.mPopulateRemoteCollectionCache =
+                                ref.mRv.populateRemoteCollectionCacheFromProto(in);
+                        in.end(collectionToken);
+                        break;
+                    case (int) RemoteViewsProto.IS_ROOT:
+                        ref.mIsRoot = in.readBoolean(RemoteViewsProto.IS_ROOT);
+                        break;
+                    case (int) RemoteViewsProto.HAS_DRAW_INSTRUCTIONS:
+                        ref.mHasDrawInstructions = in.readBoolean(
+                                RemoteViewsProto.HAS_DRAW_INSTRUCTIONS);
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return (context, resources, rootData, depth) -> {
+            if (depth > MAX_NESTED_VIEWS && (UserHandle.getAppId(Binder.getCallingUid())
+                    != Process.SYSTEM_UID)) {
+                throw new IllegalArgumentException("Too many nested views.");
+            }
+            depth++;
+
+            RemoteViews rv = ref.mRv;
+            rv.mApplyFlags = ref.mApplyFlags;
+            rv.mIsRoot = ref.mIsRoot;
+            rv.mHasDrawInstructions = ref.mHasDrawInstructions;
+
+            // The root view will read its HierarchyRootData (bitmap cache, collection cache) from
+            // proto; all nested views will instead get it through the rootData parameter.
+            if (rootData == null) {
+                if (!rv.mIsRoot || depth != 1) {
+                    throw new IllegalStateException(
+                            "A nested view did not receive HierarchyRootData");
+                }
+                rootData = rv.getHierarchyRootData();
+            } else {
+                rv.configureAsChild(rootData);
+            }
+
+            Context appContext = null;
+            Resources appResources = null;
+            if (!ref.mHasDrawInstructions) {
+                checkProtoResultNotNull(ref.mPackageName, "No application info");
+                rv.mApplication = context.getPackageManager().getApplicationInfo(ref.mPackageName,
+                        /* flags= */ 0);
+                appContext = rv.getContextForResourcesEnsuringCorrectCachedApkPaths(context);
+                appResources = appContext.getResources();
+
+                checkProtoResultNotNull(ref.mLayoutResName, "No layout id");
+                rv.mLayoutId = appResources.getIdentifier(ref.mLayoutResName, /* defType= */ null,
+                        /* defPackage= */ null);
+                checkValidResource(rv.mLayoutId, "Invalid layout id", ref.mLayoutResName);
+
+                if (ref.mViewResName != null) {
+                    rv.mViewId = appResources.getIdentifier(ref.mViewResName, /* defType= */ null,
+                            /* defPackage= */ null);
+                    checkValidResource(rv.mViewId, "Invalid view id", ref.mViewResName);
+                }
+
+                if (ref.mLightBackgroundResName != null) {
+                    int lightBackgroundLayoutId = appResources.getIdentifier(
+                            ref.mLightBackgroundResName,
+                            /* defType= */ null, /* defPackage= */ null);
+                    checkValidResource(lightBackgroundLayoutId,
+                            "Invalid light background layout id", ref.mLightBackgroundResName);
+                    rv.setLightBackgroundLayoutId(lightBackgroundLayoutId);
+                }
+            }
+            if (ref.mPopulateRemoteCollectionCache != null) {
+                ref.mPopulateRemoteCollectionCache.create(context, resources, rootData, depth);
+            }
+            if (ref.mProviderInstanceId != -1) {
+                rv.mProviderInstanceId = ref.mProviderInstanceId;
+            }
+            if (ref.mMode == MODE_NORMAL) {
+                rv.setIdealSize(ref.mIdealSize);
+                return rv;
+            } else if (ref.mMode == MODE_HAS_SIZED_REMOTEVIEWS) {
+                List<RemoteViews> sizedViews = new ArrayList<>();
+                for (RemoteViews.PendingResources<RemoteViews> pendingViews :
+                        ref.mSizedRemoteViews) {
+                    RemoteViews views = pendingViews.create(context, resources, rootData, depth);
+                    sizedViews.add(views);
+                }
+                rv.initializeSizedRemoteViews(sizedViews.iterator());
+                return rv;
+            } else if (ref.mMode == MODE_HAS_LANDSCAPE_AND_PORTRAIT) {
+                checkProtoResultNotNull(ref.mLandscapeViews, "Missing landscape views");
+                checkProtoResultNotNull(ref.mPortraitViews, "Missing portrait views");
+                RemoteViews parentRv = new RemoteViews(
+                        ref.mLandscapeViews.create(context, resources, rootData, depth),
+                        ref.mPortraitViews.create(context, resources, rootData, depth));
+                parentRv.initializeFrom(/* src= */ rv, /* hierarchyRoot= */ rv);
+                return parentRv;
+            } else {
+                throw new InvalidProtoException(ref.mMode + " is not a valid mode.");
+            }
+        };
+    }
+
+    private static class InvalidProtoException extends Exception {
+        InvalidProtoException(String message) {
+            super(message);
+        }
+    }
+
+    private interface PendingResources<T> {
+        T create(Context context, Resources appResources, HierarchyRootData rootData, int depth)
+                throws Exception;
+    }
+
+    private static void checkValidResource(int id, String message, String resName)
+            throws Exception {
+        if (id == 0) throw new Exception(message + ": " + resName);
+    }
+
+    private static void checkProtoResultNotNull(Object o, String message)
+            throws InvalidProtoException {
+        if (o == null) {
+            throw new InvalidProtoException(message);
+        }
+    }
+
+    private static void checkContainsKeys(LongSparseArray<?> array, long[] requiredFields) {
+        for (long requiredField : requiredFields) {
+            if (array.indexOfKey(requiredField) < 0) {
+                throw new IllegalArgumentException(
+                        "RemoteViews proto missing field: " + ProtoStream.getFieldIdString(
+                                requiredField));
+            }
+        }
+    }
+
+    private static SizeF createSizeFFromProto(ProtoInputStream in) throws Exception {
+        float width = 0;
+        float height = 0;
+        while (in.nextField() != NO_MORE_FIELDS) {
+            switch (in.getFieldNumber()) {
+                case (int) SizeFProto.WIDTH:
+                    width = in.readFloat(SizeFProto.WIDTH);
+                    break;
+                case (int) SizeFProto.HEIGHT:
+                    height = in.readFloat(SizeFProto.HEIGHT);
+                    break;
+                default:
+                    Log.w(LOG_TAG, "Unhandled field while reading SizeF proto!\n"
+                            + ProtoUtils.currentFieldToString(in));
+            }
+        }
+
+        return new SizeF(width, height);
     }
 }

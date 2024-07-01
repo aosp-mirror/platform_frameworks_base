@@ -324,6 +324,7 @@ abstract class CrossActivityBackAnimation(
         enteringHasSameLetterbox = false
         lastPostCommitFlingScale = SPRING_SCALE
         gestureProgress = 0f
+        triggerBack = false
     }
 
     protected fun applyTransform(
@@ -354,7 +355,7 @@ abstract class CrossActivityBackAnimation(
         matrix.postScale(scale, scale, scalePivotX, 0f)
         matrix.postTranslate(tempRectF.left, tempRectF.top)
         transaction
-            .setAlpha(leash, keepMinimumAlpha(alpha))
+            .setAlpha(leash, alpha)
             .setMatrix(leash, matrix, tmpFloat9)
             .setCrop(leash, cropRect)
             .setCornerRadius(leash, cornerRadius)
@@ -499,10 +500,12 @@ abstract class CrossActivityBackAnimation(
         }
 
         override fun onBackCancelled() {
+            triggerBack = false
             progressAnimator.onBackCancelled { finishAnimation() }
         }
 
         override fun onBackInvoked() {
+            triggerBack = true
             progressAnimator.reset()
             onGestureCommitted(progressAnimator.velocity)
         }
@@ -561,9 +564,6 @@ abstract class CrossActivityBackAnimation(
         FLING_BOUNCE
     }
 }
-
-// The target will loose focus when alpha == 0, so keep a minimum value for it.
-private fun keepMinimumAlpha(transAlpha: Float) = max(transAlpha, 0.005f)
 
 private fun isDarkMode(context: Context): Boolean {
     return context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==

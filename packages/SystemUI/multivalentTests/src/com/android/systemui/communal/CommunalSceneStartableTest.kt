@@ -111,6 +111,25 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun keyguardGoesAway_whenInEditMode_doesNotChangeScene() =
+        with(kosmos) {
+            testScope.runTest {
+                val scene by collectLastValue(communalSceneInteractor.currentScene)
+                communalSceneInteractor.changeScene(CommunalScenes.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                communalInteractor.setEditModeOpen(true)
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    to = KeyguardState.GONE,
+                    testScope = this
+                )
+                // Scene change will be handled in EditWidgetsActivity not here
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+            }
+        }
+
     @Ignore("Ignored until custom animations are implemented in b/322787129")
     @Test
     fun deviceDocked_forceCommunalScene() =
@@ -429,6 +448,24 @@ class CommunalSceneStartableTest : SysuiTestCase() {
 
                 advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
                 assertThat(scene).isEqualTo(CommunalScenes.Blank)
+            }
+        }
+
+    @Test
+    fun transitionFromDozingToGlanceableHub_forcesCommunal() =
+        with(kosmos) {
+            testScope.runTest {
+                val scene by collectLastValue(communalSceneInteractor.currentScene)
+                communalSceneInteractor.changeScene(CommunalScenes.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
+
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.DOZING,
+                    to = KeyguardState.GLANCEABLE_HUB,
+                    testScope = this
+                )
+
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
             }
         }
 

@@ -91,7 +91,7 @@ class ToggleButtonComponent(
                             contentDescription = label
                         },
                     onClick = { onCheckedChange(!viewModel.isActive) },
-                    shape = RoundedCornerShape(28.dp),
+                    shape = RoundedCornerShape(20.dp),
                     colors = colors,
                     contentPadding = PaddingValues(0.dp)
                 ) {

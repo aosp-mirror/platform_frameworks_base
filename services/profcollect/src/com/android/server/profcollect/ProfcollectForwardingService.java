@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
@@ -49,6 +50,7 @@ import com.android.server.wm.ActivityMetricsLaunchObserver;
 import com.android.server.wm.ActivityMetricsLaunchObserverRegistry;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -258,6 +260,7 @@ public final class ProfcollectForwardingService extends SystemService {
         BackgroundThread.get().getThreadHandler().post(
                 () -> {
                     registerAppLaunchObserver();
+                    registerCameraOpenObserver();
                     registerDex2oatObserver();
                     registerOTAObserver();
                 });
@@ -321,16 +324,14 @@ public final class ProfcollectForwardingService extends SystemService {
                 "dex2oat_trace_freq", 25);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
-            BackgroundThread.get().getThreadHandler().post(() -> {
+            // Dex2oat could take a while before it starts. Add a short delay before start tracing.
+            BackgroundThread.get().getThreadHandler().postDelayed(() -> {
                 try {
-                    // Dex2oat could take a while before it starts. Add a short delay before start
-                    // tracing.
-                    Thread.sleep(1000);
                     mIProfcollect.trace_once("dex2oat");
-                } catch (RemoteException | InterruptedException e) {
+                } catch (RemoteException e) {
                     Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                 }
-            });
+            }, 1000);
         }
     }
 
@@ -370,5 +371,42 @@ public final class ProfcollectForwardingService extends SystemService {
                     .putExtra("filename", reportName);
             pfs.getContext().sendBroadcast(intent);
         });
+    }
+
+    private void registerCameraOpenObserver() {
+        CameraManager cm = getContext().getSystemService(CameraManager.class);
+        cm.registerAvailabilityCallback(new CameraManager.AvailabilityCallback() {
+            @Override
+            public void onCameraOpened(String cameraId, String packageId) {
+                Log.d(LOG_TAG, "Received camera open event from: " + packageId);
+                // Skip face auth since it triggers way too often.
+                if (packageId.startsWith("client.pid")) {
+                    return;
+                }
+                // Additional vendor specific list of apps to skip.
+                String[] cameraSkipPackages =
+                    getContext().getResources().getStringArray(
+                        R.array.config_profcollectOnCameraOpenedSkipPackages);
+                if (Arrays.asList(cameraSkipPackages).contains(packageId)) {
+                    return;
+                }
+                // Sample for a fraction of camera events.
+                final int traceFrequency =
+                        DeviceConfig.getInt(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
+                        "camera_trace_freq", 10);
+                int randomNum = ThreadLocalRandom.current().nextInt(100);
+                if (randomNum >= traceFrequency) {
+                    return;
+                }
+                // Wait for 1s before starting tracing.
+                BackgroundThread.get().getThreadHandler().postDelayed(() -> {
+                    try {
+                        mIProfcollect.trace_once("camera");
+                    } catch (RemoteException e) {
+                        Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
+                    }
+                }, 1000);
+            }
+        }, null);
     }
 }

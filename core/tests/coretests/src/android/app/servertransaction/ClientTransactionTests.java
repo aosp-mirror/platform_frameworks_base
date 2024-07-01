@@ -16,22 +16,16 @@
 
 package android.app.servertransaction;
 
-import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
-
-import static com.android.window.flags.Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG;
-
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.app.ClientTransactionHandler;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -49,24 +43,8 @@ import org.junit.runner.RunWith;
 @Presubmit
 public class ClientTransactionTests {
 
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
-
     @Test
     public void testPreExecute() {
-        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testPreExecuteInner();
-    }
-
-    @Test
-    public void testPreExecute_bundleClientTransaction() {
-        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testPreExecuteInner();
-    }
-
-    private void testPreExecuteInner() {
         final ClientTransactionItem callback1 = mock(ClientTransactionItem.class);
         final ClientTransactionItem callback2 = mock(ClientTransactionItem.class);
         final ActivityLifecycleItem stateRequest = mock(ActivityLifecycleItem.class);

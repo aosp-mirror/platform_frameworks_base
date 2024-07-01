@@ -663,6 +663,7 @@ public final class TransitionInfo implements Parcelable {
         private final Rect mStartAbsBounds = new Rect();
         private final Rect mEndAbsBounds = new Rect();
         private final Point mEndRelOffset = new Point();
+        private final Point mEndParentSize = new Point();
         private ActivityManager.RunningTaskInfo mTaskInfo = null;
         private boolean mAllowEnterPip;
         private int mStartDisplayId = INVALID_DISPLAY;
@@ -697,6 +698,7 @@ public final class TransitionInfo implements Parcelable {
             mStartAbsBounds.readFromParcel(in);
             mEndAbsBounds.readFromParcel(in);
             mEndRelOffset.readFromParcel(in);
+            mEndParentSize.readFromParcel(in);
             mTaskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
             mAllowEnterPip = in.readBoolean();
             mStartDisplayId = in.readInt();
@@ -721,6 +723,7 @@ public final class TransitionInfo implements Parcelable {
             out.mStartAbsBounds.set(mStartAbsBounds);
             out.mEndAbsBounds.set(mEndAbsBounds);
             out.mEndRelOffset.set(mEndRelOffset);
+            out.mEndParentSize.set(mEndParentSize);
             out.mTaskInfo = mTaskInfo;
             out.mAllowEnterPip = mAllowEnterPip;
             out.mStartDisplayId = mStartDisplayId;
@@ -778,6 +781,13 @@ public final class TransitionInfo implements Parcelable {
         /** Sets the offset of this container from its parent surface */
         public void setEndRelOffset(int left, int top) {
             mEndRelOffset.set(left, top);
+        }
+
+        /**
+         * Sets the size of its parent container after the change.
+         */
+        public void setEndParentSize(int width, int height) {
+            mEndParentSize.set(width, height);
         }
 
         /**
@@ -916,6 +926,14 @@ public final class TransitionInfo implements Parcelable {
             return mEndRelOffset;
         }
 
+        /**
+         * Returns the size of parent container after the change.
+         */
+        @NonNull
+        public Point getEndParentSize() {
+            return mEndParentSize;
+        }
+
         /** @return the leash or surface to animate for this container */
         @NonNull
         public SurfaceControl getLeash() {
@@ -1003,6 +1021,7 @@ public final class TransitionInfo implements Parcelable {
             mStartAbsBounds.writeToParcel(dest, flags);
             mEndAbsBounds.writeToParcel(dest, flags);
             mEndRelOffset.writeToParcel(dest, flags);
+            mEndParentSize.writeToParcel(dest, flags);
             dest.writeTypedObject(mTaskInfo, flags);
             dest.writeBoolean(mAllowEnterPip);
             dest.writeInt(mStartDisplayId);
@@ -1054,6 +1073,9 @@ public final class TransitionInfo implements Parcelable {
             sb.append(" eb="); sb.append(mEndAbsBounds);
             if (mEndRelOffset.x != 0 || mEndRelOffset.y != 0) {
                 sb.append(" eo="); sb.append(mEndRelOffset);
+            }
+            if (!mEndParentSize.equals(0, 0)) {
+                sb.append(" epz=").append(mEndParentSize);
             }
             sb.append(" d=");
             if (mStartDisplayId != mEndDisplayId) {
@@ -1107,13 +1129,14 @@ public final class TransitionInfo implements Parcelable {
 
         private int mType;
         private @AnimRes int mEnterResId = DEFAULT_ANIMATION_RESOURCES_ID;
+        private @AnimRes int mChangeResId = DEFAULT_ANIMATION_RESOURCES_ID;
         private @AnimRes int mExitResId = DEFAULT_ANIMATION_RESOURCES_ID;
         private boolean mOverrideTaskTransition;
         private String mPackageName;
         private final Rect mTransitionBounds = new Rect();
         private HardwareBuffer mThumbnail;
         private int mAnimations;
-        // TODO(b/295805497): Extract it from AnimationOptions
+        // TODO(b/295805497): Extract mBackgroundColor from AnimationOptions
         private @ColorInt int mBackgroundColor;
         // Customize activity transition animation
         private CustomActivityTransition mCustomActivityOpenTransition;
@@ -1126,6 +1149,7 @@ public final class TransitionInfo implements Parcelable {
         private AnimationOptions(Parcel in) {
             mType = in.readInt();
             mEnterResId = in.readInt();
+            mChangeResId = in.readInt();
             mExitResId = in.readInt();
             mBackgroundColor = in.readInt();
             mOverrideTaskTransition = in.readBoolean();
@@ -1189,9 +1213,27 @@ public final class TransitionInfo implements Parcelable {
         public static AnimationOptions makeCustomAnimOptions(@NonNull String packageName,
                 @AnimRes int enterResId, @AnimRes int exitResId, @ColorInt int backgroundColor,
                 boolean overrideTaskTransition) {
+            return makeCustomAnimOptions(packageName, enterResId, DEFAULT_ANIMATION_RESOURCES_ID,
+                    exitResId, backgroundColor, overrideTaskTransition);
+        }
+
+        /**
+         * Creates a {@link android.app.ActivityOptions#ANIM_CUSTOM} {@link AnimationOptions}.
+         *
+         * @param packageName the package name that includes the animation resources.
+         * @param enterResId the resources ID of open animation.
+         * @param changeResId the resources ID of change animation.
+         * @param exitResId the resources ID of close animation.
+         * @param overrideTaskTransition indicates whether to override task transition.
+         */
+        @NonNull
+        public static AnimationOptions makeCustomAnimOptions(@NonNull String packageName,
+                @AnimRes int enterResId, @AnimRes int changeResId, @AnimRes int exitResId,
+                @ColorInt int backgroundColor, boolean overrideTaskTransition) {
             AnimationOptions options = new AnimationOptions(ANIM_CUSTOM);
             options.mPackageName = packageName;
             options.mEnterResId = enterResId;
+            options.mChangeResId = changeResId;
             options.mExitResId = exitResId;
             options.mBackgroundColor = backgroundColor;
             options.mOverrideTaskTransition = overrideTaskTransition;
@@ -1251,6 +1293,11 @@ public final class TransitionInfo implements Parcelable {
         }
 
         @AnimRes
+        public int getChangeResId() {
+            return mChangeResId;
+        }
+
+        @AnimRes
         public int getExitResId() {
             return mExitResId;
         }
@@ -1292,6 +1339,7 @@ public final class TransitionInfo implements Parcelable {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(mType);
             dest.writeInt(mEnterResId);
+            dest.writeInt(mChangeResId);
             dest.writeInt(mExitResId);
             dest.writeInt(mBackgroundColor);
             dest.writeBoolean(mOverrideTaskTransition);
@@ -1351,6 +1399,9 @@ public final class TransitionInfo implements Parcelable {
             }
             if (mEnterResId != DEFAULT_ANIMATION_RESOURCES_ID) {
                 sb.append(" enterResId=").append(mEnterResId);
+            }
+            if (mChangeResId != DEFAULT_ANIMATION_RESOURCES_ID) {
+                sb.append(" changeResId=").append(mChangeResId);
             }
             if (mExitResId != DEFAULT_ANIMATION_RESOURCES_ID) {
                 sb.append(" exitResId=").append(mExitResId);

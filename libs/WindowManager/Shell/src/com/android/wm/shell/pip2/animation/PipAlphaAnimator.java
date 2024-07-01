@@ -19,11 +19,13 @@ package com.android.wm.shell.pip2.animation;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.content.Context;
 import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 
 import java.lang.annotation.Retention;
@@ -45,6 +47,7 @@ public class PipAlphaAnimator extends ValueAnimator implements ValueAnimator.Ani
     public static final int FADE_IN = 0;
     public static final int FADE_OUT = 1;
 
+    private final int mEnterAnimationDuration;
     private final SurfaceControl mLeash;
     private final SurfaceControl.Transaction mStartTransaction;
 
@@ -55,7 +58,8 @@ public class PipAlphaAnimator extends ValueAnimator implements ValueAnimator.Ani
     private final PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
 
-    public PipAlphaAnimator(SurfaceControl leash,
+    public PipAlphaAnimator(Context context,
+            SurfaceControl leash,
             SurfaceControl.Transaction tx,
             @Fade int direction) {
         mLeash = leash;
@@ -67,6 +71,9 @@ public class PipAlphaAnimator extends ValueAnimator implements ValueAnimator.Ani
         }
         mSurfaceControlTransactionFactory =
                 new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
+        mEnterAnimationDuration = context.getResources()
+                .getInteger(R.integer.config_pipEnterAnimationDuration);
+        setDuration(mEnterAnimationDuration);
         addListener(this);
         addUpdateListener(this);
     }

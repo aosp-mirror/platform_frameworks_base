@@ -193,6 +193,14 @@ public final class SatelliteManager {
 
     /**
      * Bundle key to get the response from
+     * {@link #requestSessionStats(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+
+    public static final String KEY_SESSION_STATS = "session_stats";
+
+    /**
+     * Bundle key to get the response from
      * {@link #requestIsProvisioned(Executor, OutcomeReceiver)}.
      * @hide
      */
@@ -363,6 +371,24 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_MODEM_TIMEOUT = 24;
 
+    /**
+     * Telephony framework needs to access the current location of the device to perform the
+     * request. However, location in the settings is disabled by users.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_RESULT_LOCATION_DISABLED = 25;
+
+    /**
+     * Telephony framework needs to access the current location of the device to perform the
+     * request. However, Telephony fails to fetch the current location from location service.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_RESULT_LOCATION_NOT_AVAILABLE = 26;
+
     /** @hide */
     @IntDef(prefix = {"SATELLITE_RESULT_"}, value = {
             SATELLITE_RESULT_SUCCESS,
@@ -389,7 +415,9 @@ public final class SatelliteManager {
             SATELLITE_RESULT_REQUEST_IN_PROGRESS,
             SATELLITE_RESULT_MODEM_BUSY,
             SATELLITE_RESULT_ILLEGAL_STATE,
-            SATELLITE_RESULT_MODEM_TIMEOUT
+            SATELLITE_RESULT_MODEM_TIMEOUT,
+            SATELLITE_RESULT_LOCATION_DISABLED,
+            SATELLITE_RESULT_LOCATION_NOT_AVAILABLE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteResult {}
@@ -2490,6 +2518,65 @@ public final class SatelliteManager {
         } catch (RemoteException ex) {
             loge("unregisterForCommunicationAllowedStateChanged() RemoteException: " + ex);
             ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Request to get the {@link SatelliteSessionStats} of the satellite service.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
+     *                 will return the {@link SatelliteSessionStats} of the satellite service.
+     *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
+     *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @hide
+     */
+    @RequiresPermission(allOf = {Manifest.permission.PACKAGE_USAGE_STATS,
+            Manifest.permission.MODIFY_PHONE_STATE})
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public void requestSessionStats(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<SatelliteSessionStats, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            if (resultData.containsKey(KEY_SESSION_STATS)) {
+                                SatelliteSessionStats stats =
+                                        resultData.getParcelable(KEY_SESSION_STATS,
+                                                SatelliteSessionStats.class);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(stats)));
+                            } else {
+                                loge("KEY_SESSION_STATS does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(new SatelliteException(
+                                                SATELLITE_RESULT_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestSatelliteSessionStats(mSubId, receiver);
+            } else {
+                loge("requestSessionStats() invalid telephony");
+                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+            }
+        } catch (RemoteException ex) {
+            loge("requestSessionStats() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }
     }
 

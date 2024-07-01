@@ -304,6 +304,7 @@ public class CrossProfileApps {
      * <li>It is not equal to the calling user</li>
      * <li>It is in the same profile group of calling user profile</li>
      * <li>It is enabled</li>
+     * <li>It is not hidden (ex. profile type {@link UserManager#USER_TYPE_PROFILE_PRIVATE})</li>
      * </ul>
      *
      * @see UserManager#getUserProfiles()
@@ -460,8 +461,8 @@ public class CrossProfileApps {
      *
      * <p>Specifically, returns whether the following are all true:
      * <ul>
-     * <li>{@code UserManager#getEnabledProfileIds(int)} returns at least one other profile for the
-     * calling user.</li>
+     * <li>{@code UserManager#getProfileIdsExcludingHidden(int)} returns at least one other
+     * profile for the calling user.</li>
      * <li>The calling app has requested
      * {@code android.Manifest.permission.INTERACT_ACROSS_PROFILES} in its manifest.</li>
      * <li>The calling app is not a profile owner within the profile group of the calling user.</li>

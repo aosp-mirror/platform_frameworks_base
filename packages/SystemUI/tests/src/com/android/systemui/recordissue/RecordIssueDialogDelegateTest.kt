@@ -17,8 +17,6 @@
 package com.android.systemui.recordissue
 
 import android.app.Dialog
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.UserHandle
 import android.testing.TestableLooper
 import android.widget.Button
@@ -35,9 +33,8 @@ import com.android.systemui.mediaprojection.SessionCreationSource
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate
 import com.android.systemui.model.SysUiState
-import com.android.systemui.qs.tiles.RecordIssueTile
+import com.android.systemui.recordissue.IssueRecordingState.Companion.ISSUE_TYPE_NOT_SET
 import com.android.systemui.res.R
-import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
@@ -59,6 +56,7 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -72,8 +70,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
     @Mock private lateinit var dprLazy: dagger.Lazy<ScreenCaptureDevicePolicyResolver>
     @Mock private lateinit var mediaProjectionMetricsLogger: MediaProjectionMetricsLogger
     @Mock private lateinit var userTracker: UserTracker
-    @Mock private lateinit var userFileManager: UserFileManager
-    @Mock private lateinit var sharedPreferences: SharedPreferences
+    @Mock private lateinit var state: IssueRecordingState
     @Mock
     private lateinit var screenCaptureDisabledDialogDelegate: ScreenCaptureDisabledDialogDelegate
     @Mock private lateinit var screenCaptureDisabledDialog: SystemUIDialog
@@ -90,7 +87,6 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
     private lateinit var dialog: SystemUIDialog
     private lateinit var factory: SystemUIDialog.Factory
     private lateinit var latch: CountDownLatch
-    private var issueRecordingState = IssueRecordingState()
 
     @Before
     fun setup() {
@@ -99,14 +95,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         whenever(sysuiState.setFlag(anyLong(), anyBoolean())).thenReturn(sysuiState)
         whenever(screenCaptureDisabledDialogDelegate.createSysUIDialog())
             .thenReturn(screenCaptureDisabledDialog)
-        whenever(
-                userFileManager.getSharedPreferences(
-                    eq(RecordIssueTile.TILE_SPEC),
-                    eq(Context.MODE_PRIVATE),
-                    anyInt()
-                )
-            )
-            .thenReturn(sharedPreferences)
+        whenever(state.issueTypeRes).thenReturn(ISSUE_TYPE_NOT_SET)
 
         factory =
             spy(
@@ -129,9 +118,8 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                     mainExecutor,
                     dprLazy,
                     mediaProjectionMetricsLogger,
-                    userFileManager,
                     screenCaptureDisabledDialogDelegate,
-                    issueRecordingState,
+                    state,
                     traceurMessageSender
                 ) {
                     latch.countDown()
@@ -190,8 +178,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         whenever(devicePolicyResolver.isScreenCaptureCompletelyDisabled(any<UserHandle>()))
             .thenReturn(false)
         whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
-        whenever(sharedPreferences.getBoolean(HAS_APPROVED_SCREEN_RECORDING, false))
-            .thenReturn(false)
+        whenever(state.hasUserApprovedScreenRecording).thenReturn(false)
 
         val screenRecordSwitch = dialog.requireViewById<Switch>(R.id.screenrecord_switch)
         screenRecordSwitch.isChecked = true
@@ -204,7 +191,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                 anyInt(),
                 eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER)
             )
-        verify(factory).create(any<ScreenCapturePermissionDialogDelegate>())
+        verify(factory, times(2)).create(any(SystemUIDialog.Delegate::class.java))
     }
 
     @Test
@@ -225,7 +212,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                 anyInt(),
                 eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER)
             )
-        verify(factory, never()).create(any<ScreenCapturePermissionDialogDelegate>())
+        verify(factory, never()).create()
     }
 
     @Test

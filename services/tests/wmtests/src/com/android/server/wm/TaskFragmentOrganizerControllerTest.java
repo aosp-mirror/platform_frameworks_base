@@ -26,8 +26,8 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE;
+import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_BOTTOM_OF_TASK;
@@ -220,30 +220,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testOnTaskFragmentAppeared_throughTaskFragmentOrganizer() throws RemoteException {
-        mSetFlagsRule.disableFlags(Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        // No-op when the TaskFragment is not attached.
-        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
-        mController.dispatchPendingEvents();
-
-        verify(mOrganizer, never()).onTransactionReady(any());
-        verify(mAppThread, never()).scheduleTaskFragmentTransaction(any(), any());
-
-        // Send callback when the TaskFragment is attached.
-        setupMockParent(mTaskFragment, mTask);
-
-        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
-        mController.dispatchPendingEvents();
-
-        assertTaskFragmentParentInfoChangedTransaction(mTask);
-        assertTaskFragmentAppearedTransaction(false /* hasSurfaceControl */);
-        verify(mAppThread, never()).scheduleTaskFragmentTransaction(any(), any());
-    }
-
-    @Test
     public void testOnTaskFragmentAppeared_throughApplicationThread() throws RemoteException  {
-        mSetFlagsRule.enableFlags(Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
         // Re-register the organizer in case the flag was disabled during setup.
         mController.unregisterOrganizer(mIOrganizer);
         registerTaskFragmentOrganizer(mIOrganizer);
@@ -1902,7 +1879,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         assertApplyTransactionAllowed(mTransaction);
 
-        verify(task).moveOrCreateDecorSurfaceFor(tf);
+        verify(task).moveOrCreateDecorSurfaceFor(tf, true /* visible */);
     }
 
     @Test

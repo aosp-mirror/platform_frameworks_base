@@ -35,6 +35,8 @@ import static android.os.Binder.getCallingUid;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.getCallingUserId;
 
+import static com.android.server.companion.utils.RolesUtils.isRoleHolder;
+
 import static java.util.Collections.unmodifiableMap;
 
 import android.Manifest;
@@ -44,6 +46,7 @@ import android.annotation.UserIdInt;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
@@ -203,11 +206,9 @@ public final class PermissionsUtils {
     /**
      * Require the caller to hold necessary permission to observe device presence by UUID.
      */
-    public static void enforceCallerCanObserveDevicePresenceByUuid(@NonNull Context context) {
-        if (context.checkCallingPermission(REQUEST_OBSERVE_DEVICE_UUID_PRESENCE)
-                != PERMISSION_GRANTED
-                || context.checkCallingPermission(BLUETOOTH_SCAN) != PERMISSION_GRANTED
-                || context.checkCallingPermission(BLUETOOTH_CONNECT) != PERMISSION_GRANTED) {
+    public static void enforceCallerCanObserveDevicePresenceByUuid(@NonNull Context context,
+            String packageName, int userId) {
+        if (!hasRequirePermissions(context, packageName, userId)) {
             throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
                     + "permissions to request observing device presence base on the UUID");
         }
@@ -232,6 +233,17 @@ public final class PermissionsUtils {
             }
         }
         return sAppOpsService;
+    }
+
+    private static boolean hasRequirePermissions(
+            @NonNull Context context, String packageName, int userId) {
+        return context.checkCallingPermission(
+                REQUEST_OBSERVE_DEVICE_UUID_PRESENCE) == PERMISSION_GRANTED
+                && context.checkCallingPermission(BLUETOOTH_SCAN) == PERMISSION_GRANTED
+                && context.checkCallingPermission(BLUETOOTH_CONNECT) == PERMISSION_GRANTED
+                && Boolean.TRUE.equals(Binder.withCleanCallingIdentity(
+                        () -> isRoleHolder(context, userId, packageName,
+                                DEVICE_PROFILE_AUTOMOTIVE_PROJECTION)));
     }
 
     // DO NOT USE DIRECTLY! Access via getAppOpsService().
