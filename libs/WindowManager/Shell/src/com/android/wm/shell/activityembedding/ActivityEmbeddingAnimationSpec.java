@@ -46,7 +46,6 @@ import com.android.window.flags.Flags;
 import com.android.wm.shell.shared.TransitionUtil;
 
 /** Animation spec for ActivityEmbedding transition. */
-// TODO(b/206557124): provide an easier way to customize animation
 class ActivityEmbeddingAnimationSpec {
 
     private static final String TAG = "ActivityEmbeddingAnimSpec";
@@ -95,8 +94,14 @@ class ActivityEmbeddingAnimationSpec {
 
     /** Animation for window that is opening in a change transition. */
     @NonNull
-    Animation createChangeBoundsOpenAnimation(@NonNull TransitionInfo.Change change,
-            @NonNull Rect parentBounds) {
+    Animation createChangeBoundsOpenAnimation(@NonNull TransitionInfo info,
+            @NonNull TransitionInfo.Change change, @NonNull Rect parentBounds) {
+        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+            final Animation customAnimation = loadCustomAnimation(info, change);
+            if (customAnimation != null) {
+                return customAnimation;
+            }
+        }
         // Use end bounds for opening.
         final Rect bounds = change.getEndAbsBounds();
         final int startLeft;
@@ -123,8 +128,14 @@ class ActivityEmbeddingAnimationSpec {
 
     /** Animation for window that is closing in a change transition. */
     @NonNull
-    Animation createChangeBoundsCloseAnimation(@NonNull TransitionInfo.Change change,
-            @NonNull Rect parentBounds) {
+    Animation createChangeBoundsCloseAnimation(@NonNull TransitionInfo info,
+            @NonNull TransitionInfo.Change change, @NonNull Rect parentBounds) {
+        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+            final Animation customAnimation = loadCustomAnimation(info, change);
+            if (customAnimation != null) {
+                return customAnimation;
+            }
+        }
         // Use start bounds for closing.
         final Rect bounds = change.getStartAbsBounds();
         final int endTop;
@@ -155,8 +166,17 @@ class ActivityEmbeddingAnimationSpec {
      *         the second one is for the end leash.
      */
     @NonNull
-    Animation[] createChangeBoundsChangeAnimations(@NonNull TransitionInfo.Change change,
-            @NonNull Rect parentBounds) {
+    Animation[] createChangeBoundsChangeAnimations(@NonNull TransitionInfo info,
+            @NonNull TransitionInfo.Change change, @NonNull Rect parentBounds) {
+        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+            // TODO(b/293658614): Support more complicated animations that may need more than a noop
+            // animation as the start leash.
+            final Animation noopAnimation = createNoopAnimation(change);
+            final Animation customAnimation = loadCustomAnimation(info, change);
+            if (customAnimation != null) {
+                return new Animation[]{noopAnimation, customAnimation};
+            }
+        }
         // Both start bounds and end bounds are in screen coordinates. We will post translate
         // to the local coordinates in ActivityEmbeddingAnimationAdapter#onAnimationUpdate
         final Rect startBounds = change.getStartAbsBounds();
