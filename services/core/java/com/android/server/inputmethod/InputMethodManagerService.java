@@ -320,6 +320,19 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 && Flags.concurrentInputMethods();
     }
 
+    /**
+     * Figures out the target IME user ID for a given {@link Binder} IPC.
+     *
+     * @param callingProcessUserId the user ID of the calling process
+     * @return User ID to be used for this {@link Binder} call.
+     */
+    @GuardedBy("ImfLock.class")
+    @UserIdInt
+    @BinderThread
+    private int resolveImeUserIdLocked(@UserIdInt int callingProcessUserId) {
+        return mExperimentalConcurrentMultiUserModeEnabled ? callingProcessUserId : mCurrentUserId;
+    }
+
     final Context mContext;
     final Resources mRes;
     private final Handler mHandler;
@@ -3101,19 +3114,19 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             int lastClickToolType, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
-        int uid = Binder.getCallingUid();
+        final int uid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(uid);
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#showSoftInput", mDumper);
         synchronized (ImfLock.class) {
-            if (!canInteractWithImeLocked(uid, client, "showSoftInput", statsToken)) {
+            final int userId = resolveImeUserIdLocked(callingUserId);
+            if (!canInteractWithImeLocked(uid, client, "showSoftInput", statsToken,
+                    userId)) {
                 ImeTracker.forLogging().onFailed(
                         statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 return false;
             }
-            // TODO(b/305849394): Create a utility method for the following policy.
-            final int userId = mExperimentalConcurrentMultiUserModeEnabled
-                    ? UserHandle.getCallingUserId() : mCurrentUserId;
             final long ident = Binder.clearCallingIdentity();
             final var userData = getUserData(userId);
             try {
@@ -3265,13 +3278,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         try {
             ImeTracing.getInstance().triggerManagerServiceDump(
                     "InputMethodManagerService#startStylusHandwriting", mDumper);
-            int uid = Binder.getCallingUid();
+            final int uid = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getUserId(uid);
             synchronized (ImfLock.class) {
+                final int userId = resolveImeUserIdLocked(callingUserId);
                 if (!acceptingDelegation) {
                     mHwController.clearPendingHandwritingDelegation();
                 }
                 if (!canInteractWithImeLocked(uid, client, "startStylusHandwriting",
-                        null /* statsToken */)) {
+                        null /* statsToken */, userId)) {
                     return false;
                 }
                 if (!hasSupportedStylusLocked()) {
@@ -3281,7 +3296,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    final var bindingController = getInputMethodBindingController(mCurrentUserId);
+                    final var bindingController = getInputMethodBindingController(userId);
                     if (!bindingController.supportsStylusHandwriting()) {
                         Slog.w(TAG,
                                 "Stylus HW unsupported by IME. Ignoring startStylusHandwriting()");
@@ -3531,11 +3546,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
-        int uid = Binder.getCallingUid();
+        final int uid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(uid);
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#hideSoftInput", mDumper);
         synchronized (ImfLock.class) {
-            if (!canInteractWithImeLocked(uid, client, "hideSoftInput", statsToken)) {
+            final int userId = resolveImeUserIdLocked(callingUserId);
+            if (!canInteractWithImeLocked(uid, client, "hideSoftInput", statsToken, userId)) {
                 if (isInputShownLocked()) {
                     ImeTracker.forLogging().onFailed(
                             statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
@@ -3545,9 +3562,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
                 return false;
             }
-            // TODO(b/305849394): Create a utility method for the following policy.
-            final int userId = mExperimentalConcurrentMultiUserModeEnabled
-                    ? UserHandle.getCallingUserId() : mCurrentUserId;
             final long ident = Binder.clearCallingIdentity();
             final var userData = getUserData(userId);
             try {
@@ -3582,9 +3596,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @Override
     @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
     public void hideSoftInputFromServerForTest() {
+        final int callingUserId = UserHandle.getCallingUserId();
         synchronized (ImfLock.class) {
-            // TODO(b/305849394): Get userId from caller.
-            final int userId = mCurrentUserId;
+            final int userId = resolveImeUserIdLocked(callingUserId);
             final var userData = getUserData(userId);
             hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow, 0 /* flags */,
                     SoftInputShowHideReason.HIDE_SOFT_INPUT, userId);
@@ -3945,9 +3959,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     private boolean canInteractWithImeLocked(int uid, IInputMethodClient client, String methodName,
-            @Nullable ImeTracker.Token statsToken) {
-        // TODO(b/305849394): Get userId from callers.
-        final int userId = mCurrentUserId;
+            @Nullable ImeTracker.Token statsToken, @UserIdInt int userId) {
         final var userData = getUserData(userId);
         if (userData.mCurClient == null || client == null
                 || userData.mCurClient.mClient.asBinder() != client.asBinder()) {
@@ -3994,15 +4006,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @Override
     public void showInputMethodPickerFromClient(IInputMethodClient client,
             int auxiliarySubtypeMode) {
+        final int callingUserId = UserHandle.getCallingUserId();
         synchronized (ImfLock.class) {
             if (!canShowInputMethodPickerLocked(client)) {
                 Slog.w(TAG, "Ignoring showInputMethodPickerFromClient of uid "
                         + Binder.getCallingUid() + ": " + client);
                 return;
             }
-            // TODO(b/305849394): Create a utility method for the following policy.
-            final int userId = mExperimentalConcurrentMultiUserModeEnabled
-                    ? UserHandle.getCallingUserId() : mCurrentUserId;
+            final int userId = resolveImeUserIdLocked(callingUserId);
             final var userData = getUserData(userId);
             // Always call subtype picker, because subtype picker is a superset of input method
             // picker.
@@ -4045,7 +4056,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (!calledWithValidTokenLocked(token, userId)) {
                 return;
             }
-            final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+            final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
             final InputMethodInfo imi = settings.getMethodMap().get(id);
             if (imi == null || !canCallerAccessInputMethod(
                     imi.getPackageName(), callingUid, userId, settings)) {
@@ -4318,13 +4329,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return Binder.withCleanCallingIdentity(() -> {
             final int curTokenDisplayId;
             synchronized (ImfLock.class) {
+                final int userId = resolveImeUserIdLocked(callingUserId);
                 if (!canInteractWithImeLocked(callingUid, client,
-                        "getInputMethodWindowVisibleHeight", null /* statsToken */)) {
+                        "getInputMethodWindowVisibleHeight", null /* statsToken */, userId)) {
                     return 0;
                 }
-                // TODO(b/305849394): Create a utility method for the following policy.
-                final int userId = mExperimentalConcurrentMultiUserModeEnabled
-                        ? callingUserId : mCurrentUserId;
                 final var bindingController = getInputMethodBindingController(userId);
                 // This should probably use the caller's display id, but because this is unsupported
                 // and maintained only for compatibility, there's no point in fixing it.
@@ -4453,10 +4462,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
     @Override
     public void addVirtualStylusIdForTestSession(IInputMethodClient client) {
-        int uid = Binder.getCallingUid();
+        final int uid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(uid);
         synchronized (ImfLock.class) {
+            final int userId = resolveImeUserIdLocked(callingUserId);
             if (!canInteractWithImeLocked(uid, client, "addVirtualStylusIdForTestSession",
-                    null /* statsToken */)) {
+                    null /* statsToken */, userId)) {
                 return;
             }
             final long ident = Binder.clearCallingIdentity();
@@ -4480,10 +4491,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @Override
     public void setStylusWindowIdleTimeoutForTest(
             IInputMethodClient client, @DurationMillisLong long timeout) {
-        int uid = Binder.getCallingUid();
+        final int uid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(uid);
         synchronized (ImfLock.class) {
+            final int userId = resolveImeUserIdLocked(callingUserId);
             if (!canInteractWithImeLocked(uid, client, "setStylusWindowIdleTimeoutForTest",
-                    null /* statsToken */)) {
+                    null /* statsToken */, userId)) {
                 return;
             }
             final long ident = Binder.clearCallingIdentity();
