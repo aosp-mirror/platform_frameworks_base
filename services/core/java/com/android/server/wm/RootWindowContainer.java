@@ -2158,6 +2158,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // Use Task#setBoundsUnchecked to skip checking windowing mode as the windowing mode
                 // will be updated later after this is collected in transition.
                 rootTask.setBoundsUnchecked(taskFragment.getBounds());
+                // The exit-PIP activity resumes early for seamless transition. In certain
+                // scenarios, this introduces unintended addition to recents. To address this,
+                // we mark the root task for automatic removal from recents. This ensures that
+                // after the pinned activity reparents to its original task, the root task is
+                // automatically removed from the recents list.
+                rootTask.autoRemoveRecents = true;
 
                 // Move the last recents animation transaction from original task to the new one.
                 if (task.mLastRecentsAnimationTransaction != null) {

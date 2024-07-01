@@ -42,6 +42,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.TaskFragment.EMBEDDED_DIM_AREA_PARENT_TASK;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
@@ -219,6 +220,27 @@ public class TaskTests extends WindowTestsBase {
         assertEquals(taskController2, task.getParent());
         assertEquals(0, task.getParent().mChildren.indexOf(task));
         assertEquals(1, task2.getParent().mChildren.indexOf(task2));
+    }
+
+    @Test
+    public void testReparentPinnedActivityBackToOriginalTask() {
+        final ActivityRecord activityMain = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task originalTask = activityMain.getTask();
+        final ActivityRecord activityPip = new ActivityBuilder(mAtm).setTask(originalTask).build();
+        activityPip.setState(RESUMED, "test");
+        mAtm.mRootWindowContainer.moveActivityToPinnedRootTask(activityPip,
+                null /* launchIntoPipHostActivity */, "test");
+        final Task pinnedActivityTask = activityPip.getTask();
+
+        // Simulate pinnedActivityTask unintentionally added to recent during top activity resume.
+        mAtm.getRecentTasks().getRawTasks().add(pinnedActivityTask);
+
+        // Reparent the activity back to its original task when exiting PIP mode.
+        pinnedActivityTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        assertThat(activityPip.getTask()).isEqualTo(originalTask);
+        assertThat(originalTask.autoRemoveRecents).isFalse();
+        assertThat(mAtm.getRecentTasks().getRawTasks()).containsExactly(originalTask);
     }
 
     @Test
