@@ -1052,6 +1052,16 @@ flag {
 }
 
 flag {
+  name: "glanceable_hub_back_gesture"
+  namespace: "systemui"
+  description: "Enables back gesture on the glanceable hub"
+  bug: "346331399"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "glanceable_hub_allow_keyguard_when_dreaming"
   namespace: "systemui"
   description: "Allows users to exit dream to keyguard with glanceable hub enabled"
