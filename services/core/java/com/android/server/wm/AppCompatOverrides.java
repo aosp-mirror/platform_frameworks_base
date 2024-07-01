@@ -18,20 +18,13 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
 import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
-import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION_TO_USER;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
-import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
 import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
-import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_FULLSCREEN;
-import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_UNSET;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
@@ -61,17 +54,13 @@ public class AppCompatOverrides {
     @NonNull
     private final OptPropFactory.OptProp mAllowDisplayOrientationOverrideOptProp;
     @NonNull
-    private final OptPropFactory.OptProp mAllowMinAspectRatioOverrideOptProp;
-    @NonNull
     private final OptPropFactory.OptProp mAllowForceResizeOverrideOptProp;
-    @NonNull
-    private final OptPropFactory.OptProp mAllowUserAspectRatioOverrideOptProp;
-    @NonNull
-    private final OptPropFactory.OptProp mAllowUserAspectRatioFullscreenOverrideOptProp;
     @NonNull
     private final AppCompatOrientationOverrides mAppCompatOrientationOverrides;
     @NonNull
     private final AppCompatCameraOverrides mAppCompatCameraOverrides;
+    @NonNull
+    private final AppCompatAspectRatioOverrides mAppCompatAspectRatioOverrides;
 
     AppCompatOverrides(@NonNull ActivityRecord activityRecord,
             @NonNull LetterboxConfiguration letterboxConfiguration,
@@ -83,6 +72,11 @@ public class AppCompatOverrides {
                 mLetterboxConfiguration, optPropBuilder);
         mAppCompatOrientationOverrides = new AppCompatOrientationOverrides(mActivityRecord,
                 mLetterboxConfiguration, optPropBuilder, mAppCompatCameraOverrides);
+        // TODO(b/341903757) Remove BooleanSuppliers after fixing dependency with reachability.
+        mAppCompatAspectRatioOverrides = new AppCompatAspectRatioOverrides(activityRecord,
+                mLetterboxConfiguration, optPropBuilder,
+                activityRecord.mLetterboxUiController::isDisplayFullScreenAndInPosture,
+                activityRecord.mLetterboxUiController::getHorizontalPositionMultiplier);
 
         mFakeFocusOptProp = optPropBuilder.create(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS,
                 mLetterboxConfiguration::isCompatFakeFocusEnabled);
@@ -101,16 +95,8 @@ public class AppCompatOverrides {
                             == ORIENTATION_LANDSCAPE
         );
 
-        mAllowMinAspectRatioOverrideOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
         mAllowForceResizeOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES);
-        mAllowUserAspectRatioOverrideOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE,
-                mLetterboxConfiguration::isUserAppAspectRatioSettingsEnabled);
-        mAllowUserAspectRatioFullscreenOverrideOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
-                mLetterboxConfiguration::isUserAppAspectRatioFullscreenEnabled);
     }
 
     @NonNull
@@ -121,6 +107,11 @@ public class AppCompatOverrides {
     @NonNull
     AppCompatCameraOverrides getAppCompatCameraOverrides() {
         return mAppCompatCameraOverrides;
+    }
+
+    @NonNull
+    AppCompatAspectRatioOverrides getAppCompatAspectRatioOverrides() {
+        return mAppCompatAspectRatioOverrides;
     }
 
     /**
@@ -140,32 +131,8 @@ public class AppCompatOverrides {
                 isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS));
     }
 
-    boolean isSystemOverrideToFullscreenEnabled(int userAspectRatio) {
-        return isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION_TO_USER)
-                && !mAllowOrientationOverrideOptProp.isFalse()
-                && (userAspectRatio == USER_MIN_ASPECT_RATIO_UNSET
-                    || userAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
-    }
-
     boolean isAllowOrientationOverrideOptOut() {
         return mAllowOrientationOverrideOptProp.isFalse();
-    }
-
-    /**
-     * Whether we should apply the min aspect ratio per-app override. When this override is applied
-     * the min aspect ratio given in the app's manifest will be overridden to the largest enabled
-     * aspect ratio treatment unless the app's manifest value is higher. The treatment will also
-     * apply if no value is provided in the manifest.
-     *
-     * <p>This method returns {@code true} when the following conditions are met:
-     * <ul>
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Per-app override is enabled
-     * </ul>
-     */
-    boolean shouldOverrideMinAspectRatio() {
-        return mAllowMinAspectRatioOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
-                isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO));
     }
 
     boolean isOverrideRespectRequestedOrientationEnabled() {
@@ -206,28 +173,6 @@ public class AppCompatOverrides {
     boolean shouldOverrideForceResizeApp() {
         return mAllowForceResizeOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
                 isCompatChangeEnabled(FORCE_RESIZE_APP));
-    }
-
-    /**
-     * Whether we should enable users to resize the current app.
-     */
-    boolean shouldEnableUserAspectRatioSettings() {
-        // We use mBooleanPropertyAllowUserAspectRatioOverride to allow apps to opt-out which has
-        // effect only if explicitly false. If mBooleanPropertyAllowUserAspectRatioOverride is null,
-        // the current app doesn't opt-out so the first part of the predicate is true.
-        return !mAllowUserAspectRatioOverrideOptProp.isFalse()
-                && mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
-                && mActivityRecord.mDisplayContent != null
-                && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest();
-    }
-
-    boolean isUserFullscreenOverrideEnabled() {
-        if (mAllowUserAspectRatioOverrideOptProp.isFalse()
-                || mAllowUserAspectRatioFullscreenOverrideOptProp.isFalse()
-                || !mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled()) {
-            return false;
-        }
-        return true;
     }
 
     /**

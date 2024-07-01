@@ -324,6 +324,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
                 /* value */ true);
 
+        mActivity = setUpActivityWithComponent();
         mController = new LetterboxUiController(mWm, mActivity);
         doReturn(false).when(mLetterboxConfiguration).isUserAppAspectRatioFullscreenEnabled();
 
@@ -337,6 +338,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
                 /* value */ false);
 
+        mActivity = setUpActivityWithComponent();
         mController = new LetterboxUiController(mWm, mActivity);
 
         assertFalse(mController.shouldApplyUserFullscreenOverride());
@@ -348,6 +350,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         prepareActivityThatShouldApplyUserFullscreenOverride();
         mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ false);
 
+        mActivity = setUpActivityWithComponent();
         mController = new LetterboxUiController(mWm, mActivity);
 
         assertFalse(mController.shouldApplyUserFullscreenOverride());
@@ -369,18 +372,22 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mActivity = setUpActivityWithComponent();
         mController = new LetterboxUiController(mWm, mActivity);
 
-        assertFalse(mController.shouldEnableUserAspectRatioSettings());
+        assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides()
+                .shouldEnableUserAspectRatioSettings());
     }
 
     @Test
     public void testShouldEnableUserAspectRatioSettings_trueProperty_returnsTrue()
             throws Exception {
-        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
+
         mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ true);
+        mActivity = setUpActivityWithComponent();
+        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
 
         mController = new LetterboxUiController(mWm, mActivity);
 
-        assertTrue(mController.shouldEnableUserAspectRatioSettings());
+        assertTrue(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides()
+                .shouldEnableUserAspectRatioSettings());
     }
 
     @Test
@@ -391,7 +398,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         mController = new LetterboxUiController(mWm, mActivity);
 
-        assertFalse(mController.shouldEnableUserAspectRatioSettings());
+        assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides()
+                .shouldEnableUserAspectRatioSettings());
     }
 
     @Test
@@ -400,9 +408,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         prepareActivityThatShouldApplyUserMinAspectRatioOverride();
         mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ false);
 
-        mController = new LetterboxUiController(mWm, mActivity);
+        mActivity = setUpActivityWithComponent();
 
-        assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
+        assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides()
+                .shouldEnableUserAspectRatioSettings());
     }
 
     @Test
@@ -411,6 +420,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(false).when(mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
         mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ true);
 
+        mActivity = setUpActivityWithComponent();
         mController = new LetterboxUiController(mWm, mActivity);
 
         assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
@@ -440,11 +450,13 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
     private void prepareActivityForShouldApplyUserMinAspectRatioOverride(
             boolean orientationRequest) {
-        spyOn(mController);
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
         doReturn(orientationRequest).when(
                 mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
         mDisplayContent.setIgnoreOrientationRequest(true);
-        doReturn(USER_MIN_ASPECT_RATIO_3_2).when(mController).getUserMinAspectRatioOverrideCode();
+        doReturn(USER_MIN_ASPECT_RATIO_3_2)
+                .when(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                .getUserMinAspectRatioOverrideCode();
     }
 
     private void prepareActivityThatShouldApplyUserMinAspectRatioOverride() {
@@ -452,10 +464,11 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     }
 
     private void prepareActivityThatShouldApplyUserFullscreenOverride() {
-        spyOn(mController);
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
         doReturn(true).when(mLetterboxConfiguration).isUserAppAspectRatioFullscreenEnabled();
         mDisplayContent.setIgnoreOrientationRequest(true);
-        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN).when(mController)
+        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN)
+                .when(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
                 .getUserMinAspectRatioOverrideCode();
     }
 
@@ -860,8 +873,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(true).when(mDisplayContent.mAppCompatCameraPolicy)
                 .isTreatmentEnabledForActivity(eq(mActivity));
 
-        assertEquals(mController.getSplitScreenAspectRatio(),
-                mController.getFixedOrientationLetterboxAspectRatio(
+        final AppCompatAspectRatioOverrides aspectRatioOverrides =
+                mActivity.mAppCompatController.getAppCompatAspectRatioOverrides();
+        assertEquals(aspectRatioOverrides.getSplitScreenAspectRatio(),
+                aspectRatioOverrides.getFixedOrientationLetterboxAspectRatio(
                         mActivity.getParent().getConfiguration()), /* delta */  0.01);
     }
 

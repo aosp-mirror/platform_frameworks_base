@@ -3453,7 +3453,8 @@ class Task extends TaskFragment {
         }
         appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton = top != null
                 && !appCompatTaskInfo.topActivityInSizeCompat
-                && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings()
+                && top.mAppCompatController.getAppCompatAspectRatioOverrides()
+                    .shouldEnableUserAspectRatioSettings()
                 && !info.isTopActivityTransparent;
         appCompatTaskInfo.topActivityBoundsLetterboxed = top != null && top.areBoundsLetterboxed();
         appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode = top == null

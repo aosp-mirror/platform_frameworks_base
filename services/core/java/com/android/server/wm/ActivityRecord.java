@@ -89,12 +89,6 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN;
-import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE;
-import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM;
-import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY;
-import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_SMALL;
-import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN;
 import static android.content.pm.ActivityInfo.PERSIST_ACROSS_REBOOTS;
 import static android.content.pm.ActivityInfo.PERSIST_ROOT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
@@ -9889,60 +9883,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Returns the min aspect ratio of this activity.
      */
     float getMinAspectRatio() {
-        if (mAppCompatController.getTransparentPolicy().isRunning()) {
-            return mAppCompatController.getTransparentPolicy().getInheritedMinAspectRatio();
-        }
-        if (info.applicationInfo == null) {
-            return info.getMinAspectRatio();
-        }
-        if (mLetterboxUiController.shouldApplyUserMinAspectRatioOverride()) {
-            return mLetterboxUiController.getUserMinAspectRatio();
-        }
-        if (!mLetterboxUiController.shouldOverrideMinAspectRatio()
-                && !mAppCompatController.getAppCompatCameraOverrides()
-                    .shouldOverrideMinAspectRatioForCamera()) {
-            return info.getMinAspectRatio();
-        }
-        if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY)
-                && !ActivityInfo.isFixedOrientationPortrait(
-                        getOverrideOrientation())) {
-            return info.getMinAspectRatio();
-        }
-
-        if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN)
-                && isParentFullscreenPortrait()) {
-            // We are using the parent configuration here as this is the most recent one that gets
-            // passed to onConfigurationChanged when a relevant change takes place
-            return info.getMinAspectRatio();
-        }
-
-        if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN)) {
-            return Math.max(mLetterboxUiController.getSplitScreenAspectRatio(),
-                    info.getMinAspectRatio());
-        }
-
-        if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_LARGE)) {
-            return Math.max(ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
-                    info.getMinAspectRatio());
-        }
-
-        if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM)) {
-            return Math.max(ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE,
-                    info.getMinAspectRatio());
-        }
-
-        if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_SMALL)) {
-            return Math.max(ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_SMALL_VALUE,
-                    info.getMinAspectRatio());
-        }
-        return info.getMinAspectRatio();
-    }
-
-    private boolean isParentFullscreenPortrait() {
-        final WindowContainer parent = getParent();
-        return parent != null
-                && parent.getConfiguration().orientation == ORIENTATION_PORTRAIT
-                && parent.getWindowConfiguration().getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
+        return mAppCompatController.getAppCompatAspectRatioPolicy().getMinAspectRatio();
     }
 
     float getMaxAspectRatio() {
@@ -10825,14 +10766,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAppCompatController.getAppCompatCameraOverrides()
                         .shouldRefreshActivityViaPauseForCameraCompat());
         proto.write(SHOULD_OVERRIDE_MIN_ASPECT_RATIO,
-                mLetterboxUiController.shouldOverrideMinAspectRatio());
+                mAppCompatController.getAppCompatAspectRatioOverrides()
+                        .shouldOverrideMinAspectRatio());
         proto.write(SHOULD_IGNORE_ORIENTATION_REQUEST_LOOP,
                 mAppCompatController.getAppCompatOrientationOverrides()
                         .shouldIgnoreOrientationRequestLoop());
         proto.write(SHOULD_OVERRIDE_FORCE_RESIZE_APP,
                 mLetterboxUiController.shouldOverrideForceResizeApp());
         proto.write(SHOULD_ENABLE_USER_ASPECT_RATIO_SETTINGS,
-                mLetterboxUiController.shouldEnableUserAspectRatioSettings());
+                mAppCompatController.getAppCompatAspectRatioOverrides()
+                        .shouldEnableUserAspectRatioSettings());
         proto.write(IS_USER_FULLSCREEN_OVERRIDE_ENABLED,
                 mLetterboxUiController.isUserFullscreenOverrideEnabled());
     }
