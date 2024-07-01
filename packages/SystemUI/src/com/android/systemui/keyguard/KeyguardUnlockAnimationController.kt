@@ -102,14 +102,14 @@ const val DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD = 0.3f
  * swiped away via a touch gesture, or when it's flinging expanded/collapsed after a swipe.
  */
 const val LEGACY_UNLOCK_ANIMATION_DURATION_MS = 200L
-const val UNLOCK_ANIMATION_DURATION_MS = 167L
+const val UNLOCK_ANIMATION_DURATION_MS = 300L
 
 /**
  * If there are two different wallpapers on home and lock screen, duration and delay of the lock
  * wallpaper fade out.
  */
-const val LOCK_WALLPAPER_FADE_OUT_DURATION = 140L
-const val LOCK_WALLPAPER_FADE_OUT_START_DELAY = 0L
+const val LOCK_WALLPAPER_FADE_OUT_DURATION = 150L
+const val LOCK_WALLPAPER_FADE_OUT_START_DELAY = 150L
 
 /**
  * How long the in-window launcher icon animation takes. This is used if the launcher is underneath
@@ -166,7 +166,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         private val statusBarStateController: SysuiStatusBarStateController,
         private val notificationShadeWindowController: NotificationShadeWindowController,
         private val powerManager: PowerManager,
-        private val wallpaperManager: WallpaperManager
+        private val wallpaperManager: WallpaperManager,
 ) : KeyguardStateController.Callback, ISysuiUnlockAnimationController.Stub() {
 
     interface KeyguardUnlockAnimationListener {
@@ -379,7 +379,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
                     else LAUNCHER_ICONS_ANIMATION_DURATION_MS
             interpolator = if (fasterUnlockTransition()) Interpolators.LINEAR
                     else Interpolators.ALPHA_OUT
-            if (fasterUnlockTransition()) startDelay = CANNED_UNLOCK_START_DELAY
             addUpdateListener { valueAnimator: ValueAnimator ->
                 setWallpaperAppearAmount(
                         valueAnimator.animatedValue as Float, openingWallpaperTargets)
@@ -641,14 +640,12 @@ class KeyguardUnlockAnimationController @Inject constructor(
         val isWakeAndUnlockNotFromDream = biometricUnlockControllerLazy.get().isWakeAndUnlock &&
             biometricUnlockControllerLazy.get().mode != MODE_WAKE_AND_UNLOCK_FROM_DREAM
 
-        val duration = if (fasterUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
-                else LAUNCHER_ICONS_ANIMATION_DURATION_MS
         listeners.forEach {
             it.onUnlockAnimationStarted(
                 playingCannedUnlockAnimation /* playingCannedAnimation */,
                 isWakeAndUnlockNotFromDream /* isWakeAndUnlockNotFromDream */,
                 cannedUnlockStartDelayMs() /* unlockStartDelay */,
-                duration /* unlockAnimationDuration */) }
+                LAUNCHER_ICONS_ANIMATION_DURATION_MS /* unlockAnimationDuration */) }
 
         // Finish the keyguard remote animation if the dismiss amount has crossed the threshold.
         // Check it here in case there is no more change to the dismiss amount after the last change
@@ -740,6 +737,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // As soon as the shade starts animating out of the way, start the canned unlock animation,
         // which will finish keyguard exit when it completes. The in-window animations in the
         // Launcher window will end on their own.
+        if (fasterUnlockTransition() && openingWallpaperTargets?.isNotEmpty() == true) {
+            fadeOutWallpaper()
+        }
+
         handler.postDelayed({
             if (keyguardViewMediator.get().isShowingAndNotOccluded &&
                 !keyguardStateController.isKeyguardGoingAway) {
@@ -748,9 +749,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 return@postDelayed
             }
 
-            if ((openingWallpaperTargets?.isNotEmpty() == true)) {
+            if (openingWallpaperTargets?.isNotEmpty() == true) {
                 fadeInWallpaper()
-                if (fasterUnlockTransition()) fadeOutWallpaper()
                 hideKeyguardViewAfterRemoteAnimation()
             } else {
                 keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
@@ -1032,6 +1032,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         surfaceBehindAlphaAnimator.cancel()
         surfaceBehindEntryAnimator.cancel()
         wallpaperCannedUnlockAnimator.cancel()
+        if (fasterUnlockTransition()) wallpaperFadeOutUnlockAnimator.cancel()
 
         // That target is no longer valid since the animation finished, null it out.
         surfaceBehindRemoteAnimationTargets = null
