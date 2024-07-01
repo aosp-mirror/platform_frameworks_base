@@ -6173,7 +6173,19 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         p.println("      hasMainConnection="
                                 + u.mBindingController.hasMainConnection());
                         p.println("      isVisibleBound=" + u.mBindingController.isVisibleBound());
-                        p.println("      mSwitchingController:");
+                        p.println("      boundToMethod=" + u.mBoundToMethod);
+                        p.println("      curClient=" + u.mCurClient);
+                        if (u.mCurEditorInfo != null) {
+                            p.println("      curEditorInfo:");
+                            u.mCurEditorInfo.dump(p, "        ", false /* dumpExtras */);
+                        } else {
+                            p.println("      curEditorInfo: null");
+                        }
+                        p.println("      imeBindingState:");
+                        u.mImeBindingState.dump("        ", p);
+                        p.println("      enabledSession=" + u.mEnabledSession);
+                        p.println("      inFullscreenMode=" + u.mInFullscreenMode);
+                        p.println("      switchingController:");
                         u.mSwitchingController.dump(p, "        ");
                     };
             mUserDataRepository.forAllUserData(userDataDump);
