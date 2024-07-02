@@ -59,6 +59,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
+import android.window.WindowContainerToken;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
@@ -234,8 +235,13 @@ public class DragAndDropPolicy {
         return null;
     }
 
+    /**
+     * Handles the drop on a given {@param target}.  If a {@param hideTaskToken} is set, then the
+     * handling of the drop will attempt to hide the given task as a part of the same window
+     * container transaction if possible.
+     */
     @VisibleForTesting
-    void handleDrop(Target target) {
+    void handleDrop(Target target, @Nullable WindowContainerToken hideTaskToken) {
         if (target == null || !mTargets.contains(target)) {
             return;
         }
@@ -254,16 +260,17 @@ public class DragAndDropPolicy {
                 ? mFullscreenStarter
                 : mSplitscreenStarter;
         if (mSession.appData != null) {
-            launchApp(mSession, starter, position);
+            launchApp(mSession, starter, position, hideTaskToken);
         } else {
-            launchIntent(mSession, starter, position);
+            launchIntent(mSession, starter, position, hideTaskToken);
         }
     }
 
     /**
      * Launches an app provided by SysUI.
      */
-    private void launchApp(DragSession session, Starter starter, @SplitPosition int position) {
+    private void launchApp(DragSession session, Starter starter, @SplitPosition int position,
+            @Nullable WindowContainerToken hideTaskToken) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Launching app data at position=%d",
                 position);
         final ClipDescription description = session.getClipDescription();
@@ -283,8 +290,12 @@ public class DragAndDropPolicy {
 
         if (isTask) {
             final int taskId = session.appData.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID);
-            starter.startTask(taskId, position, opts);
+            starter.startTask(taskId, position, opts, hideTaskToken);
         } else if (isShortcut) {
+            if (hideTaskToken != null) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                        "Can not hide task token with starting shortcut");
+            }
             final String packageName = session.appData.getStringExtra(EXTRA_PACKAGE_NAME);
             final String id = session.appData.getStringExtra(EXTRA_SHORTCUT_ID);
             starter.startShortcut(packageName, id, position, opts, user);
@@ -297,14 +308,15 @@ public class DragAndDropPolicy {
                 }
             }
             starter.startIntent(launchIntent, user.getIdentifier(), null /* fillIntent */,
-                    position, opts);
+                    position, opts, hideTaskToken);
         }
     }
 
     /**
      * Launches an intent sender provided by an application.
      */
-    private void launchIntent(DragSession session, Starter starter, @SplitPosition int position) {
+    private void launchIntent(DragSession session, Starter starter, @SplitPosition int position,
+            @Nullable WindowContainerToken hideTaskToken) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Launching intent at position=%d",
                 position);
         final ActivityOptions baseActivityOpts = ActivityOptions.makeBasic();
@@ -319,18 +331,20 @@ public class DragAndDropPolicy {
         final Bundle opts = baseActivityOpts.toBundle();
         starter.startIntent(session.launchableIntent,
                 session.launchableIntent.getCreatorUserHandle().getIdentifier(),
-                null /* fillIntent */, position, opts);
+                null /* fillIntent */, position, opts, hideTaskToken);
     }
 
     /**
      * Interface for actually committing the task launches.
      */
     public interface Starter {
-        void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options);
+        void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options,
+                @Nullable WindowContainerToken hideTaskToken);
         void startShortcut(String packageName, String shortcutId, @SplitPosition int position,
                 @Nullable Bundle options, UserHandle user);
         void startIntent(PendingIntent intent, int userId, Intent fillInIntent,
-                @SplitPosition int position, @Nullable Bundle options);
+                @SplitPosition int position, @Nullable Bundle options,
+                @Nullable WindowContainerToken hideTaskToken);
         void enterSplitScreen(int taskId, boolean leftOrTop);
 
         /**
@@ -352,7 +366,12 @@ public class DragAndDropPolicy {
         }
 
         @Override
-        public void startTask(int taskId, int position, @Nullable Bundle options) {
+        public void startTask(int taskId, int position, @Nullable Bundle options,
+                @Nullable WindowContainerToken hideTaskToken) {
+            if (hideTaskToken != null) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                        "Default starter does not support hide task token");
+            }
             try {
                 ActivityTaskManager.getService().startActivityFromRecents(taskId, options);
             } catch (RemoteException e) {
@@ -375,7 +394,12 @@ public class DragAndDropPolicy {
 
         @Override
         public void startIntent(PendingIntent intent, int userId, @Nullable Intent fillInIntent,
-                int position, @Nullable Bundle options) {
+                int position, @Nullable Bundle options,
+                @Nullable WindowContainerToken hideTaskToken) {
+            if (hideTaskToken != null) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                        "Default starter does not support hide task token");
+            }
             try {
                 intent.send(mContext, 0, fillInIntent, null, null, null, options);
             } catch (PendingIntent.CanceledException e) {

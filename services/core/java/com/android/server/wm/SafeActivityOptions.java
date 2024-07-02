@@ -438,7 +438,10 @@ public class SafeActivityOptions {
         return taskDisplayArea;
     }
 
-    private boolean isAssistant(ActivityTaskManagerService atmService, int callingUid) {
+    /**
+     * Returns whether the given UID caller is the assistant.
+     */
+    public static boolean isAssistant(ActivityTaskManagerService atmService, int callingUid) {
         if (atmService.mActiveVoiceInteractionServiceComponent == null) {
             return false;
         }
