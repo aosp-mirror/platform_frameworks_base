@@ -727,8 +727,6 @@ public final class ViewRootImpl implements ViewParent,
     boolean mUpcomingWindowFocus;
     @GuardedBy("this")
     boolean mUpcomingInTouchMode;
-    // While set, allow this VRI to handle back key without drop it.
-    private boolean mProcessingBackKey;
     /**
      * Compatibility {@link OnBackInvokedCallback} for windowless window, to forward the back
      * key event host app.
@@ -7265,7 +7263,7 @@ public final class ViewRootImpl implements ViewParent,
             // Find a reason for dropping or canceling the event.
             final String reason;
             // The embedded window is focused, allow this VRI to handle back key.
-            if (!mAttachInfo.mHasWindowFocus && !(mProcessingBackKey && isBack(q.mEvent))
+            if (!mAttachInfo.mHasWindowFocus && !isBack(q.mEvent)
                     && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)
                     && !isAutofillUiShowing()) {
                 // This is a non-pointer event and the window doesn't currently have input focus
@@ -11213,11 +11211,6 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.obtainMessage(MSG_REQUEST_SCROLL_CAPTURE, listener).sendToTarget();
     }
 
-    // Make this VRI able to process back key without drop it.
-    void processingBackKey(boolean processing) {
-        mProcessingBackKey = processing;
-    }
-
     /**
      * Collect and include any ScrollCaptureCallback instances registered with the window.
      *
@@ -12549,15 +12542,8 @@ public final class ViewRootImpl implements ViewParent,
      * @return whether the event was handled (i.e. onKeyPreIme consumed it if preImeOnly=true)
      */
     public boolean injectBackKeyEvents(boolean preImeOnly) {
-        boolean consumed;
-        try {
-            processingBackKey(true);
-            sendBackKeyEvent(KeyEvent.ACTION_DOWN, preImeOnly);
-            consumed = sendBackKeyEvent(KeyEvent.ACTION_UP, preImeOnly);
-        } finally {
-            processingBackKey(false);
-        }
-        return consumed;
+        sendBackKeyEvent(KeyEvent.ACTION_DOWN, preImeOnly);
+        return sendBackKeyEvent(KeyEvent.ACTION_UP, preImeOnly);
     }
 
     private boolean sendBackKeyEvent(int action, boolean preImeOnly) {

@@ -67,6 +67,7 @@ import android.window.IOnBackInvokedCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedCallbackInfo;
 import android.window.OnBackInvokedDispatcher;
+import android.window.TaskFragmentOrganizer;
 import android.window.TaskSnapshot;
 import android.window.WindowOnBackInvokedDispatcher;
 
@@ -670,25 +671,29 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAdjacentFocusInActivityEmbedding() {
+    public void testBackOnMostRecentWindowInActivityEmbedding() {
         mSetFlagsRule.enableFlags(Flags.FLAG_EMBEDDED_ACTIVITY_BACK_NAV_FLAG);
         final Task task = createTask(mDefaultDisplay);
-        final TaskFragment primaryTf = createTaskFragmentWithActivity(task);
-        final TaskFragment secondaryTf = createTaskFragmentWithActivity(task);
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final TaskFragment primaryTf = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment secondaryTf = createTaskFragmentWithEmbeddedActivity(task, organizer);
         final ActivityRecord primaryActivity = primaryTf.getTopMostActivity();
         final ActivityRecord secondaryActivity = secondaryTf.getTopMostActivity();
         primaryTf.setAdjacentTaskFragment(secondaryTf);
         secondaryTf.setAdjacentTaskFragment(primaryTf);
 
-        final WindowState windowState = mock(WindowState.class);
-        windowState.mActivityRecord = primaryActivity;
-        doReturn(windowState).when(mWm).getFocusedWindowLocked();
-        doReturn(primaryTf).when(windowState).getTaskFragment();
+        final WindowState primaryWindow = mock(WindowState.class);
+        final WindowState secondaryWindow = mock(WindowState.class);
+        doReturn(primaryActivity).when(primaryWindow).getActivityRecord();
+        doReturn(secondaryActivity).when(secondaryWindow).getActivityRecord();
         doReturn(1L).when(primaryActivity).getLastWindowCreateTime();
         doReturn(2L).when(secondaryActivity).getLastWindowCreateTime();
+        doReturn(mDisplayContent).when(primaryActivity).getDisplayContent();
+        doReturn(secondaryWindow).when(mDisplayContent).findFocusedWindow(eq(secondaryActivity));
 
-        startBackNavigation();
-        verify(mWm).moveFocusToActivity(eq(secondaryActivity));
+        final WindowState mostRecentUsedWindow =
+                mWm.getMostRecentUsedEmbeddedWindowForBack(primaryWindow);
+        assertThat(mostRecentUsedWindow).isEqualTo(secondaryWindow);
     }
 
     /**
