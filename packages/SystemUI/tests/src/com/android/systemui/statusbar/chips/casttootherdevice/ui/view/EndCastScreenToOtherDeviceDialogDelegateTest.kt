@@ -48,10 +48,10 @@ import org.mockito.kotlin.whenever
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
-class EndCastToOtherDeviceDialogDelegateTest : SysuiTestCase() {
+class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val sysuiDialog = mock<SystemUIDialog>()
-    private lateinit var underTest: EndCastToOtherDeviceDialogDelegate
+    private lateinit var underTest: EndCastScreenToOtherDeviceDialogDelegate
 
     @Test
     fun icon() {
@@ -68,7 +68,7 @@ class EndCastToOtherDeviceDialogDelegateTest : SysuiTestCase() {
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
-        verify(sysuiDialog).setTitle(R.string.cast_to_other_device_stop_dialog_title)
+        verify(sysuiDialog).setTitle(R.string.cast_screen_to_other_device_stop_dialog_title)
     }
 
     @Test
@@ -78,7 +78,7 @@ class EndCastToOtherDeviceDialogDelegateTest : SysuiTestCase() {
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
         verify(sysuiDialog)
-            .setMessage(context.getString(R.string.cast_to_other_device_stop_dialog_message))
+            .setMessage(context.getString(R.string.cast_screen_to_other_device_stop_dialog_message))
     }
 
     @Test
@@ -99,7 +99,7 @@ class EndCastToOtherDeviceDialogDelegateTest : SysuiTestCase() {
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
-        // It'd be nice to use R.string.cast_to_other_device_stop_dialog_message_specific_app
+        // It'd be nice to use R.string.cast_screen_to_other_device_stop_dialog_message_specific_app
         // directly, but it includes the <b> tags which aren't in the returned string.
         val result = argumentCaptor<CharSequence>()
         verify(sysuiDialog).setMessage(result.capture())
@@ -142,7 +142,7 @@ class EndCastToOtherDeviceDialogDelegateTest : SysuiTestCase() {
 
     private fun createAndSetDelegate(state: MediaProjectionState.Projecting) {
         underTest =
-            EndCastToOtherDeviceDialogDelegate(
+            EndCastScreenToOtherDeviceDialogDelegate(
                 kosmos.endMediaProjectionDialogHelper,
                 stopAction = kosmos.mediaProjectionChipInteractor::stopProjecting,
                 ProjectionChipModel.Projecting(

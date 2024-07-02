@@ -341,13 +341,17 @@
     <string name="share_to_app_stop_dialog_button">Stop sharing</string>
 
     <!-- Content description for the status bar chip shown to the user when they're casting their screen to a different device [CHAR LIMIT=NONE] -->
-    <string name="cast_to_other_device_chip_accessibility_label">Casting screen</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label">Casting screen</string>
     <!-- Title for a dialog shown to the user that will let them stop casting their screen to a different device [CHAR LIMIT=50] -->
-    <string name="cast_to_other_device_stop_dialog_title">Stop casting screen?</string>
+    <string name="cast_screen_to_other_device_stop_dialog_title">Stop casting screen?</string>
+    <!-- Title for a dialog shown to the user that will let them stop casting to a different device [CHAR LIMIT=50] -->
+    <string name="cast_to_other_device_stop_dialog_title">Stop casting?</string>
     <!-- Text telling a user that they will stop casting their screen to a different device if they click the "Stop casting" button [CHAR LIMIT=100] -->
-    <string name="cast_to_other_device_stop_dialog_message">You will stop casting your screen</string>
+    <string name="cast_screen_to_other_device_stop_dialog_message">You will stop casting your screen</string>
     <!-- Text telling a user that they will stop casting the contents of the specified [app_name] to a different device if they click the "Stop casting" button. Note that the app name will appear in bold.  [CHAR LIMIT=100] -->
-    <string name="cast_to_other_device_stop_dialog_message_specific_app">You will stop casting &lt;b><xliff:g id="app_name" example="Photos App">%1$s</xliff:g>&lt;/b></string>
+    <string name="cast_screen_to_other_device_stop_dialog_message_specific_app">You will stop casting &lt;b><xliff:g id="app_name" example="Photos App">%1$s</xliff:g>&lt;/b></string>
+    <!-- Text telling a user that they're currently casting to a different device [CHAR LIMIT=100] -->
+    <string name="cast_to_other_device_stop_dialog_message">You\'re currently casting</string>
     <!-- Button to stop screen casting to a different device [CHAR LIMIT=35] -->
     <string name="cast_to_other_device_stop_dialog_button">Stop casting</string>
 
