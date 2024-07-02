@@ -632,7 +632,6 @@ java_library {
         "core/java/com/android/internal/util/AsyncService.java",
         "core/java/com/android/internal/util/Protocol.java",
         "telephony/java/android/telephony/Annotation.java",
-        ":net-utils-framework-wifi-common-srcs",
     ],
     libs: [
         "framework-annotations-lib",
