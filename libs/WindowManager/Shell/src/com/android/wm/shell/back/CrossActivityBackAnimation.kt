@@ -48,7 +48,7 @@ import com.android.internal.dynamicanimation.animation.SpringForce
 import com.android.internal.jank.Cuj
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.policy.SystemBarUtils
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.animation.Interpolators

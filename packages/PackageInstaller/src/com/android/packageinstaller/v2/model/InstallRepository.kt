@@ -97,6 +97,7 @@ class InstallRepository(private val context: Context) {
         private set
     private var callingUid = Process.INVALID_UID
     private var originatingUid = Process.INVALID_UID
+    private var originatingUidFromSessionInfo = Process.INVALID_UID
     private var callingPackage: String? = null
     private var sessionStager: SessionStager? = null
     private lateinit var intent: Intent
@@ -136,17 +137,25 @@ class InstallRepository(private val context: Context) {
 
         callingPackage = callerInfo.packageName
 
-        if (sessionId != SessionInfo.INVALID_ID) {
-            val sessionInfo: SessionInfo? = packageInstaller.getSessionInfo(sessionId)
-            callingPackage = sessionInfo?.getInstallerPackageName()
-            callingAttributionTag = sessionInfo?.getInstallerAttributionTag()
-        }
-
         // Uid of the source package, coming from ActivityManager
         callingUid = callerInfo.uid
         if (callingUid == Process.INVALID_UID) {
             Log.e(LOG_TAG, "Could not determine the launching uid.")
         }
+
+        originatingUidFromSessionInfo = callingUid
+        val sessionInfo: SessionInfo? =
+            if (sessionId != SessionInfo.INVALID_ID)
+                packageInstaller.getSessionInfo(sessionId)
+            else null
+        if (sessionInfo != null) {
+            callingPackage = sessionInfo.installerPackageName
+            callingAttributionTag = sessionInfo.installerAttributionTag
+            if (sessionInfo.originatingUid != Process.INVALID_UID) {
+                originatingUidFromSessionInfo = sessionInfo.originatingUid
+            }
+        }
+
         val sourceInfo: ApplicationInfo? = getSourceInfo(callingPackage)
         // Uid of the source package, with a preference to uid from ApplicationInfo
         originatingUid = sourceInfo?.uid ?: callingUid
@@ -651,7 +660,12 @@ class InstallRepository(private val context: Context) {
     private fun getUpdateMessage(pkgInfo: PackageInfo, userActionReason: Int): String? {
         if (isAppUpdating(pkgInfo)) {
             val existingUpdateOwnerLabel = getExistingUpdateOwnerLabel(pkgInfo)
-            val requestedUpdateOwnerLabel = getApplicationLabel(callingPackage)
+
+            val originatingPackageNameFromSessionInfo =
+                getPackageNameForUid(context, originatingUidFromSessionInfo, callingPackage)
+            val requestedUpdateOwnerLabel =
+                getApplicationLabel(originatingPackageNameFromSessionInfo)
+
             if (!TextUtils.isEmpty(existingUpdateOwnerLabel)
                 && userActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP
             ) {

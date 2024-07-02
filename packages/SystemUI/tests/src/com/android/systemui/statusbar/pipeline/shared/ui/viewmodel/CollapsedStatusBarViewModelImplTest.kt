@@ -24,6 +24,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -36,6 +37,10 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.assertLogsWtf
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
+import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
@@ -84,6 +89,8 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
             kosmos.lightsOutInteractor,
             kosmos.activeNotificationsInteractor,
             kosmos.keyguardTransitionInteractor,
+            kosmos.sceneInteractor,
+            kosmos.sceneContainerOcclusionInteractor,
             kosmos.ongoingActivityChipsViewModel,
             kosmos.applicationCoroutineScope,
         )
@@ -424,6 +431,68 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
 
             assertIsShareToAppChip(latest)
+        }
+
+    @Test
+    fun isHomeStatusBarAllowedByScene_sceneLockscreen_notOccluded_false() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
+
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
+            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(false, taskInfo = null)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isHomeStatusBarAllowedByScene_sceneLockscreen_occluded_true() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
+
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
+            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true, taskInfo = null)
+
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun isHomeStatusBarAllowedByScene_sceneBouncer_false() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
+
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Bouncer)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isHomeStatusBarAllowedByScene_sceneCommunal_false() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
+
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Communal)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isHomeStatusBarAllowedByScene_sceneShade_false() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
+
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Shade)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isHomeStatusBarAllowedByScene_sceneGone_true() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
+
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Gone)
+
+            assertThat(latest).isTrue()
         }
 
     private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =

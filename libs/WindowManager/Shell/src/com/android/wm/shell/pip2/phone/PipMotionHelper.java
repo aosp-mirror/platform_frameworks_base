@@ -35,7 +35,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.view.SurfaceControl;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.common.FloatingContentCoordinator;

@@ -92,7 +92,8 @@ class QSTileViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(states()).isNotEmpty()
-            assertThat(states().first().label).isEqualTo(testTileData)
+            assertThat(states().last()).isNotNull()
+            assertThat(states().last()!!.label).isEqualTo(testTileData)
             verify(qsTileLogger).logInitialRequest(eq(tileConfig.tileSpec))
         }
 
@@ -195,6 +196,7 @@ class QSTileViewModelTest : SysuiTestCase() {
             qsTileAnalytics,
             qsTileLogger,
             FakeSystemClock(),
+            testCoroutineDispatcher,
             testCoroutineDispatcher,
             scope.backgroundScope,
         )
