@@ -26,7 +26,7 @@ import android.os.RemoteException;
  * receive this error from an app, at a minimum, you should
  * recover by resetting the connection. For instance, you should
  * drop the binder, clean up associated state, and reset your
- * connection to the service which through this error. In order
+ * connection to the service which threw this error. In order
  * to simplify your error recovery paths, you may also want to
  * "simply" restart your process. However, this may not be an
  * option if the service you are talking to is unreliable or
