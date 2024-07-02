@@ -6748,6 +6748,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();
+        // This is unlikely to happen because the sequence of lifecycle should invoke
+        // finishRelaunching before being stopped. Reset the potential unpaired count in case
+        // the binder transaction of relaunch is failed, so the transition won't be blocked.
+        if (mPendingRelaunchCount > 0) {
+            Slog.i(TAG, "Clear pending relaunch count on stopped " + this);
+            clearRelaunching();
+        }
 
         if (finishing) {
             abortAndClearOptionsAnimation();
