@@ -96,6 +96,32 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class") private int mDisplayIdToShowIme = INVALID_DISPLAY;
     @GuardedBy("ImfLock.class") private int mDeviceIdToShowIme = DEVICE_ID_DEFAULT;
 
+    /**
+     * A set of status bits regarding the active IME.
+     *
+     * <p>This value is a combination of following two bits:</p>
+     * <dl>
+     * <dt>{@link InputMethodService#IME_ACTIVE}</dt>
+     * <dd>
+     *   If this bit is ON, connected IME is ready to accept touch/key events.
+     * </dd>
+     * <dt>{@link InputMethodService#IME_VISIBLE}</dt>
+     * <dd>
+     *   If this bit is ON, some of IME view, e.g. software input, candidate view, is visible.
+     * </dd>
+     * <dt>{@link InputMethodService#IME_INVISIBLE}</dt>
+     * <dd> If this bit is ON, IME is ready with views from last EditorInfo but is
+     *    currently invisible.
+     * </dd>
+     * </dl>
+     * <em>Do not update this value outside of {@link #setImeWindowStatus(IBinder, int, int)} and
+     * {@link InputMethodBindingController#unbindCurrentMethod()}.</em>
+     */
+    @GuardedBy("ImfLock.class") private int mImeWindowVis;
+
+    @GuardedBy("ImfLock.class")
+    private int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
+
     @Nullable private CountDownLatch mLatchForTesting;
 
     /**
@@ -473,7 +499,7 @@ final class InputMethodBindingController {
 
         if (getCurToken() != null) {
             removeCurrentToken();
-            mService.resetSystemUiLocked();
+            mService.resetSystemUiLocked(this);
             mAutofillController.onResetSystemUi();
         }
 
@@ -661,5 +687,25 @@ final class InputMethodBindingController {
     @UserIdInt
     int getUserId() {
         return mUserId;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void setImeWindowVis(int imeWindowVis) {
+        mImeWindowVis = imeWindowVis;
+    }
+
+    @GuardedBy("ImfLock.class")
+    int getImeWindowVis() {
+        return mImeWindowVis;
+    }
+
+    @GuardedBy("ImfLock.class")
+    int getBackDisposition() {
+        return mBackDisposition;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void setBackDisposition(int backDisposition) {
+        mBackDisposition = backDisposition;
     }
 }
