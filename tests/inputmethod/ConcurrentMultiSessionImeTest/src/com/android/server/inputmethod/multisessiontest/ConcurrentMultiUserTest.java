@@ -95,7 +95,6 @@ public final class ConcurrentMultiUserTest {
         }
     }
 
-    @Ignore("b/345557347")
     @Test
     public void driverShowImeNotAffectPassenger() {
         assertDriverImeHidden();
