@@ -2126,6 +2126,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     }
 
     /**
+
+     * Wallpaper will set itself as target if it wants to keep itself visible without a target.
+     */
+    private static boolean wallpaperIsOwnTarget(WallpaperWindowToken wallpaper) {
+        final WindowState target =
+                wallpaper.getDisplayContent().mWallpaperController.getWallpaperTarget();
+        return target != null && target.isDescendantOf(wallpaper);
+    }
+
+    /**
      * Reset waitingToshow for all wallpapers, and commit the visibility of the visible ones
      */
     private void commitVisibleWallpapers(SurfaceControl.Transaction t) {
@@ -2133,8 +2143,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WallpaperWindowToken wallpaper = mParticipants.valueAt(i).asWallpaperToken();
             if (wallpaper != null) {
-                if (!wallpaper.isVisible() && wallpaper.isVisibleRequested()) {
+                if (!wallpaper.isVisible() && (wallpaper.isVisibleRequested()
+                        || (Flags.ensureWallpaperInTransitions() && showWallpaper))) {
                     wallpaper.commitVisibility(showWallpaper);
+                } else if (Flags.ensureWallpaperInTransitions() && wallpaper.isVisible()
+                        && !showWallpaper && !wallpaper.getDisplayContent().isKeyguardLocked()
+                        && !wallpaperIsOwnTarget(wallpaper)) {
+                    wallpaper.setVisibleRequested(false);
                 }
                 if (showWallpaper && Flags.ensureWallpaperInTransitions()
                         && wallpaper.isVisibleRequested()
@@ -2556,11 +2571,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (wc.asWindowState() != null) continue;
 
             final ChangeInfo changeInfo = changes.get(wc);
-            // Reject no-ops, unless wallpaper
-            if (!changeInfo.hasChanged()
-                    && (!Flags.ensureWallpaperInTransitions() || wc.asWallpaperToken() == null)) {
+            // Reject no-ops
+            if (!changeInfo.hasChanged()) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                        "  Rejecting as no-op: %s", wc);
+                        "  Rejecting as no-op: %s  vis: %b", wc, wc.isVisibleRequested());
                 continue;
             }
             targets.add(changeInfo);
