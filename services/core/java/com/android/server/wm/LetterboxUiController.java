@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_16_9;
@@ -65,7 +64,6 @@ import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTy
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
-import android.app.CameraCompatTaskInfo.FreeformCameraCompatMode;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -113,17 +111,9 @@ final class LetterboxUiController {
     @Nullable
     private Letterbox mLetterbox;
 
-    // Whether activity "refresh" was requested but not finished in
-    // ActivityRecord#activityResumedLocked following the camera compat force rotation in
-    // DisplayRotationCompatPolicy.
-    private boolean mIsRefreshRequested;
-
     private boolean mLastShouldShowLetterboxUi;
 
     private boolean mDoubleTapEvent;
-
-    @FreeformCameraCompatMode
-    private int mFreeformCameraCompatMode = CAMERA_COMPAT_FREEFORM_NONE;
 
     LetterboxUiController(WindowManagerService wmService, ActivityRecord activityRecord) {
         mLetterboxConfiguration = wmService.mLetterboxConfiguration;
@@ -145,13 +135,6 @@ final class LetterboxUiController {
         if (mLetterbox != null) {
             mLetterbox.onMovedToDisplay(displayId);
         }
-    }
-
-
-    @VisibleForTesting
-    int getSetOrientationRequestCounter() {
-        return getAppCompatOverrides().getAppCompatOrientationOverrides()
-                .getSetOrientationRequestCounter();
     }
 
     /**
@@ -184,23 +167,6 @@ final class LetterboxUiController {
      */
     boolean shouldOverrideMinAspectRatio() {
         return getAppCompatOverrides().shouldOverrideMinAspectRatio();
-    }
-
-    /**
-     * Whether we should apply the min aspect ratio per-app override only when an app is connected
-     * to the camera.
-     * When this override is applied the min aspect ratio given in the app's manifest will be
-     * overridden to the largest enabled aspect ratio treatment unless the app's manifest value
-     * is higher. The treatment will also apply if no value is provided in the manifest.
-     *
-     * <p>This method returns {@code true} when the following conditions are met:
-     * <ul>
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Per-app override is enabled
-     * </ul>
-     */
-    boolean shouldOverrideMinAspectRatioForCamera() {
-        return getAppCompatOverrides().shouldOverrideMinAspectRatioForCamera();
     }
 
     /**
@@ -242,16 +208,6 @@ final class LetterboxUiController {
                 .setRelaunchingAfterRequestedOrientationChanged(isRelaunching);
     }
 
-    /**
-     * Whether activity "refresh" was requested but not finished in {@link #activityResumedLocked}.
-     */
-    boolean isRefreshRequested() {
-        return mIsRefreshRequested;
-    }
-
-    void setIsRefreshRequested(boolean isRequested) {
-        mIsRefreshRequested = isRequested;
-    }
 
     boolean isOverrideRespectRequestedOrientationEnabled() {
         return getAppCompatOverrides().isOverrideRespectRequestedOrientationEnabled();
@@ -272,85 +228,6 @@ final class LetterboxUiController {
      */
     boolean shouldUseDisplayLandscapeNaturalOrientation() {
         return getAppCompatOverrides().shouldUseDisplayLandscapeNaturalOrientation();
-    }
-
-    boolean isOverrideOrientationOnlyForCameraEnabled() {
-        return getAppCompatOverrides().isOverrideOrientationOnlyForCameraEnabled();
-    }
-
-    /**
-     * Whether activity is eligible for activity "refresh" after camera compat force rotation
-     * treatment. See {@link DisplayRotationCompatPolicy} for context.
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Flag gating the camera compat treatment is enabled.
-     *     <li>Activity isn't opted out by the device manufacturer with override or by the app
-     *     developers with the component property.
-     * </ul>
-     */
-    boolean shouldRefreshActivityForCameraCompat() {
-        return getAppCompatOverrides().shouldRefreshActivityForCameraCompat();
-    }
-
-    /**
-     * Whether activity should be "refreshed" after the camera compat force rotation treatment
-     * using the "resumed -> paused -> resumed" cycle rather than the "resumed -> ... -> stopped
-     * -> ... -> resumed" cycle. See {@link DisplayRotationCompatPolicy} for context.
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Flag gating the camera compat treatment is enabled.
-     *     <li>Activity "refresh" via "resumed -> paused -> resumed" cycle isn't disabled with the
-     *     component property by the app developers.
-     *     <li>Activity "refresh" via "resumed -> paused -> resumed" cycle is enabled by the device
-     *     manufacturer with override / by the app developers with the component property.
-     * </ul>
-     */
-    boolean shouldRefreshActivityViaPauseForCameraCompat() {
-        return getAppCompatOverrides().shouldRefreshActivityViaPauseForCameraCompat();
-    }
-
-    /**
-     * Whether activity is eligible for camera compat force rotation treatment. See {@link
-     * DisplayRotationCompatPolicy} for context.
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Flag gating the camera compat treatment is enabled.
-     *     <li>Activity isn't opted out by the device manufacturer with override or by the app
-     *     developers with the component property.
-     * </ul>
-     */
-    boolean shouldForceRotateForCameraCompat() {
-        return getAppCompatOverrides().shouldForceRotateForCameraCompat();
-    }
-
-    /**
-     * Whether activity is eligible for camera compatibility free-form treatment.
-     *
-     * <p>The treatment is applied to a fixed-orientation camera activity in free-form windowing
-     * mode. The treatment letterboxes or pillarboxes the activity to the expected orientation and
-     * provides changes to the camera and display orientation signals to match those expected on a
-     * portrait device in that orientation (for example, on a standard phone).
-     *
-     * <p>The treatment is enabled when the following conditions are met:
-     * <ul>
-     * <li>Property gating the camera compatibility free-form treatment is enabled.
-     * <li>Activity isn't opted out by the device manufacturer with override.
-     * </ul>
-     */
-    boolean shouldApplyFreeformTreatmentForCameraCompat() {
-        return getAppCompatOverrides().shouldApplyFreeformTreatmentForCameraCompat();
-    }
-
-    @FreeformCameraCompatMode
-    int getFreeformCameraCompatMode() {
-        return mFreeformCameraCompatMode;
-    }
-
-    void setFreeformCameraCompatMode(@FreeformCameraCompatMode int freeformCameraCompatMode) {
-        mFreeformCameraCompatMode = freeformCameraCompatMode;
     }
 
     private boolean isCompatChangeEnabled(long overrideChangeId) {
@@ -574,25 +451,8 @@ final class LetterboxUiController {
                         : getDefaultMinAspectRatio();
     }
 
-    void recomputeConfigurationForCameraCompatIfNeeded() {
-        if (isOverrideOrientationOnlyForCameraEnabled()
-                || isCameraCompatSplitScreenAspectRatioAllowed()
-                || shouldOverrideMinAspectRatioForCamera()) {
-            mActivityRecord.recomputeConfiguration();
-        }
-    }
-
     boolean isLetterboxEducationEnabled() {
         return mLetterboxConfiguration.getIsEducationEnabled();
-    }
-
-    /**
-     * Whether we use split screen aspect ratio for the activity when camera compat treatment
-     * is active because the corresponding config is enabled and activity supports resizing.
-     */
-    boolean isCameraCompatSplitScreenAspectRatioAllowed() {
-        return mLetterboxConfiguration.isCameraCompatSplitScreenAspectRatioEnabled()
-                && !mActivityRecord.shouldCreateCompatDisplayInsets();
     }
 
     private boolean shouldUseSplitScreenAspectRatio(@NonNull Configuration parentConfiguration) {
@@ -605,8 +465,9 @@ final class LetterboxUiController {
 
         // Don't resize to split screen size when in book mode if letterbox position is centered
         return (isBookMode && isNotCenteredHorizontally || isTabletopMode && isLandscape)
-                    || isCameraCompatSplitScreenAspectRatioAllowed()
-                        && getAppCompatOverrides().isCameraCompatTreatmentActive();
+                    || mActivityRecord.mAppCompatController.getAppCompatCameraOverrides()
+                            .isCameraCompatSplitScreenAspectRatioAllowed()
+                                && getAppCompatOverrides().isCameraCompatTreatmentActive();
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {

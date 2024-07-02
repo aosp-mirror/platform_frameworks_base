@@ -228,9 +228,11 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                 != lastReportedConfig.windowConfiguration.getDisplayRotation());
         return isTreatmentEnabledForDisplay()
                 && isTreatmentEnabledForActivity(activity)
-                && activity.mLetterboxUiController.shouldRefreshActivityForCameraCompat()
+                && activity.mAppCompatController.getAppCompatCameraOverrides()
+                    .shouldRefreshActivityForCameraCompat()
                 && (displayRotationChanged
-                || activity.mLetterboxUiController.isCameraCompatSplitScreenAspectRatioAllowed());
+                || activity.mAppCompatController.getAppCompatCameraOverrides()
+                        .isCameraCompatSplitScreenAspectRatioAllowed());
     }
 
     /**
@@ -254,7 +256,8 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
         return isTreatmentEnabledForDisplay()
                 && isCameraActive(activity, /* mustBeFullscreen */ true)
-                && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
+                && activity.mAppCompatController.getAppCompatCameraOverrides()
+                    .shouldForceRotateForCameraCompat();
     }
 
     /**
@@ -286,7 +289,8 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                 // handle dynamic changes so we shouldn't force rotate them.
                 && activity.getOverrideOrientation() != SCREEN_ORIENTATION_NOSENSOR
                 && activity.getOverrideOrientation() != SCREEN_ORIENTATION_LOCKED
-                && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
+                && activity.mAppCompatController.getAppCompatCameraOverrides()
+                    .shouldForceRotateForCameraCompat();
     }
 
     @Override
@@ -295,7 +299,8 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
         // Checking whether an activity in fullscreen rather than the task as this camera
         // compat treatment doesn't cover activity embedding.
         if (cameraActivity.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-            cameraActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
+            cameraActivity.mAppCompatController
+                    .getAppCompatCameraPolicy().recomputeConfigurationForCameraCompatIfNeeded();
             mDisplayContent.updateOrientation();
             return true;
         }
@@ -362,7 +367,8 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                 || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
             return true;
         }
-        topActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
+        topActivity.mAppCompatController
+                .getAppCompatCameraPolicy().recomputeConfigurationForCameraCompatIfNeeded();
         mDisplayContent.updateOrientation();
         return true;
     }

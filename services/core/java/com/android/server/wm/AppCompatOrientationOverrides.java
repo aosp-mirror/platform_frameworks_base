@@ -28,7 +28,7 @@ import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENT
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.AppCompatOverrides.asLazy;
+import static com.android.server.wm.AppCompatUtils.asLazy;
 
 import android.annotation.NonNull;
 import android.content.pm.ActivityInfo;
@@ -60,9 +60,9 @@ class AppCompatOrientationOverrides {
     @NonNull
     final OrientationOverridesState mOrientationOverridesState;
 
-    AppCompatOrientationOverrides(@NonNull OptPropFactory optPropBuilder,
-                                   @NonNull LetterboxConfiguration letterboxConfiguration,
-                                   @NonNull ActivityRecord activityRecord) {
+    AppCompatOrientationOverrides(@NonNull ActivityRecord activityRecord,
+            @NonNull LetterboxConfiguration letterboxConfiguration,
+            @NonNull OptPropFactory optPropBuilder) {
         mActivityRecord = activityRecord;
         mOrientationOverridesState = new OrientationOverridesState(mActivityRecord,
                 System::currentTimeMillis);
