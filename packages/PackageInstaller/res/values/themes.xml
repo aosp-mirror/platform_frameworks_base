@@ -19,7 +19,6 @@
 
     <style name="Theme.AlertDialogActivity"
         parent="@android:style/Theme.DeviceDefault.Light.Dialog.Alert">
-        <item name="alertDialogStyle">@style/AlertDialog</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowAnimationStyle">@null</item>
