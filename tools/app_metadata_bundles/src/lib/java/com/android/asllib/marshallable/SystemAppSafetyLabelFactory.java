@@ -36,8 +36,9 @@ public class SystemAppSafetyLabelFactory implements AslMarshallableFactory<Syste
             return null;
         }
 
-        String url = XmlUtils.getStringAttr(systemAppSafetyLabelEle, XmlUtils.HR_ATTR_URL, true);
-        return new SystemAppSafetyLabel(url);
+        Boolean declaration =
+                XmlUtils.getBoolAttr(systemAppSafetyLabelEle, XmlUtils.HR_ATTR_DECLARATION, true);
+        return new SystemAppSafetyLabel(declaration);
     }
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
@@ -49,7 +50,8 @@ public class SystemAppSafetyLabelFactory implements AslMarshallableFactory<Syste
             AslgenUtil.logI("No SystemAppSafetyLabel found in od format.");
             return null;
         }
-        String url = XmlUtils.getOdStringEle(systemAppSafetyLabelEle, XmlUtils.OD_NAME_URL, true);
-        return new SystemAppSafetyLabel(url);
+        Boolean declaration =
+                XmlUtils.getOdBoolEle(systemAppSafetyLabelEle, XmlUtils.OD_NAME_DECLARATION, true);
+        return new SystemAppSafetyLabel(declaration);
     }
 }

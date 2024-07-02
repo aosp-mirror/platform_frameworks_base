@@ -44,5 +44,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         />
 
-    <include layout="@layout/dream_overlay_status_bar_view" />
+    <include layout="@layout/ambient_status_bar_view" />
 </com.android.systemui.dreams.DreamOverlayContainerView>

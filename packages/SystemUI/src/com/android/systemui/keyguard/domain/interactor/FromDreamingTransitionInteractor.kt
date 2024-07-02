@@ -118,7 +118,6 @@ constructor(
 
     fun startToLockscreenTransition() {
         scope.launch {
-            KeyguardWmStateRefactor.isUnexpectedlyInLegacyMode()
             if (
                 transitionInteractor.startedKeyguardState.replayCache.last() ==
                     KeyguardState.DREAMING

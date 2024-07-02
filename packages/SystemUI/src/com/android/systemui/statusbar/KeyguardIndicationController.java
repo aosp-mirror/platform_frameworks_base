@@ -1630,6 +1630,7 @@ public class KeyguardIndicationController {
                         "skip showing FACE_ERROR_TIMEOUT due to co-ex logic");
             }
         } else if (deferredFaceMessage != null) {
+            mBouncerMessageInteractor.setFaceAcquisitionMessage(deferredFaceMessage.toString());
             // Face-only: The face timeout message is not very actionable, let's ask the
             // user to manually retry.
             showBiometricMessage(

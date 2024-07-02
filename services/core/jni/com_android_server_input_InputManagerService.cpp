@@ -362,6 +362,7 @@ public:
     void notifyDropWindow(const sp<IBinder>& token, float x, float y) override;
     void notifyDeviceInteraction(int32_t deviceId, nsecs_t timestamp,
                                  const std::set<gui::Uid>& uids) override;
+    void notifyFocusedDisplayChanged(ui::LogicalDisplayId displayId) override;
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
@@ -1106,6 +1107,10 @@ void NativeInputManager::notifyVibratorState(int32_t deviceId, bool isOn) {
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyVibratorState,
                         static_cast<jint>(deviceId), static_cast<jboolean>(isOn));
     checkAndClearExceptionFromCallback(env, "notifyVibratorState");
+}
+
+void NativeInputManager::notifyFocusedDisplayChanged(ui::LogicalDisplayId displayId) {
+    mInputManager->getChoreographer().setFocusedDisplay(displayId);
 }
 
 void NativeInputManager::displayRemoved(JNIEnv* env, ui::LogicalDisplayId displayId) {

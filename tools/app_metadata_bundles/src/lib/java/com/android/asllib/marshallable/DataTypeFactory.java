@@ -25,12 +25,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DataTypeFactory implements AslMarshallableFactory<DataType> {
+public class DataTypeFactory {
     /** Creates a {@link DataType} from the human-readable DOM element. */
-    @Override
-    public DataType createFromHrElements(List<Element> elements) throws MalformedXmlException {
-        Element hrDataTypeEle = XmlUtils.getSingleElement(elements);
-        String dataTypeName = hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_DATA_TYPE);
+    public DataType createFromHrElements(Element hrDataTypeEle, Boolean ephemeral)
+            throws MalformedXmlException {
+        String dataCategoryAndTypeCombinedStr =
+                hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_DATA_TYPE);
+        String[] strs = dataCategoryAndTypeCombinedStr.split(XmlUtils.DATA_TYPE_SEPARATOR);
+        if (strs.length != 2) {
+            throw new MalformedXmlException(
+                    String.format(
+                            "Could not parse human-readable data type string (expecting substring"
+                                    + " of _data_type_): %s",
+                            dataCategoryAndTypeCombinedStr));
+        }
+        String dataTypeName = strs[1];
+
         List<DataType.Purpose> purposes =
                 XmlUtils.getPipelineSplitAttr(hrDataTypeEle, XmlUtils.HR_ATTR_PURPOSES, true)
                         .stream()
@@ -47,13 +57,13 @@ public class DataTypeFactory implements AslMarshallableFactory<DataType> {
                 XmlUtils.getBoolAttr(hrDataTypeEle, XmlUtils.HR_ATTR_IS_COLLECTION_OPTIONAL, false);
         Boolean isSharingOptional =
                 XmlUtils.getBoolAttr(hrDataTypeEle, XmlUtils.HR_ATTR_IS_SHARING_OPTIONAL, false);
-        Boolean ephemeral = XmlUtils.getBoolAttr(hrDataTypeEle, XmlUtils.HR_ATTR_EPHEMERAL, false);
+        // Boolean ephemeral = XmlUtils.getBoolAttr(hrDataTypeEle, XmlUtils.HR_ATTR_EPHEMERAL,
+        // false);
         return new DataType(
                 dataTypeName, purposes, isCollectionOptional, isSharingOptional, ephemeral);
     }
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
-    @Override
     public DataType createFromOdElements(List<Element> elements) throws MalformedXmlException {
         Element odDataTypeEle = XmlUtils.getSingleElement(elements);
         String dataTypeName = odDataTypeEle.getAttribute(XmlUtils.OD_ATTR_NAME);

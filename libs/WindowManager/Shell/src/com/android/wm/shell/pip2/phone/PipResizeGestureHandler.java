@@ -38,6 +38,7 @@ import android.view.ViewConfiguration;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.util.Preconditions;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
@@ -45,6 +46,7 @@ import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipPinchResizingAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
+import com.android.wm.shell.pip2.animation.PipResizeAnimator;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -82,6 +84,7 @@ public class PipResizeGestureHandler implements
     private final Rect mLastResizeBounds = new Rect();
     private final Rect mUserResizeBounds = new Rect();
     private final Rect mDownBounds = new Rect();
+    private final Rect mStartBoundsAfterRelease = new Rect();
     private final Runnable mUpdateMovementBoundsRunnable;
     private final Consumer<Rect> mUpdateResizeBoundsCallback;
 
@@ -418,7 +421,9 @@ public class PipResizeGestureHandler implements
         if (!mOngoingPinchToResize) {
             return;
         }
-        final Rect startBounds = new Rect(mLastResizeBounds);
+
+        // Cache initial bounds after release for animation before mLastResizeBounds are modified.
+        mStartBoundsAfterRelease.set(mLastResizeBounds);
 
         // If user resize is pretty close to max size, just auto resize to max.
         if (mLastResizeBounds.width() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.x
@@ -527,28 +532,39 @@ public class PipResizeGestureHandler implements
                     int offsetY = inTopHalf ? 1 : -1;
                     mLastResizeBounds.offset(0 /* dx */, offsetY);
                 }
-
                 mWaitingForBoundsChangeTransition = true;
-                mPipScheduler.scheduleAnimateResizePip(mLastResizeBounds);
+
+                // Schedule PiP resize transition, but delay any config updates until very end.
+                mPipScheduler.scheduleAnimateResizePip(mLastResizeBounds, true /* configAtEnd */);
                 break;
             case PipTransitionState.CHANGING_PIP_BOUNDS:
                 if (!mWaitingForBoundsChangeTransition) break;
-
-                // If bounds change transition was scheduled from this class, handle leash updates.
+                // If resize transition was scheduled from this component, handle leash updates.
                 mWaitingForBoundsChangeTransition = false;
+
+                SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+                Preconditions.checkState(pipLeash != null,
+                        "No leash cached by mPipTransitionState=" + mPipTransitionState);
 
                 SurfaceControl.Transaction startTx = extra.getParcelable(
                         PipTransition.PIP_START_TX, SurfaceControl.Transaction.class);
-                Rect destinationBounds = extra.getParcelable(
-                        PipTransition.PIP_DESTINATION_BOUNDS, Rect.class);
-                startTx.apply();
+                SurfaceControl.Transaction finishTx = extra.getParcelable(
+                        PipTransition.PIP_FINISH_TX, SurfaceControl.Transaction.class);
+                startTx.setWindowCrop(pipLeash, mPipBoundsState.getBounds().width(),
+                        mPipBoundsState.getBounds().height());
 
-                // All motion operations have actually finished, so make bounds cache updates.
-                mUpdateResizeBoundsCallback.accept(destinationBounds);
-                cleanUpHighPerfSessionMaybe();
+                PipResizeAnimator animator = new PipResizeAnimator(mContext, pipLeash,
+                        startTx, finishTx, mPipBoundsState.getBounds(), mStartBoundsAfterRelease,
+                        mLastResizeBounds, PINCH_RESIZE_SNAP_DURATION, mAngle);
+                animator.setAnimationEndCallback(() -> {
+                    // All motion operations have actually finished, so make bounds cache updates.
+                    mUpdateResizeBoundsCallback.accept(mLastResizeBounds);
+                    cleanUpHighPerfSessionMaybe();
 
-                // Setting state to CHANGED_PIP_BOUNDS applies finishTx and notifies Core.
-                mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
+                    // Signal that we are done with resize transition
+                    mPipScheduler.scheduleFinishResizePip(true /* configAtEnd */);
+                });
+                animator.start();
                 break;
         }
     }

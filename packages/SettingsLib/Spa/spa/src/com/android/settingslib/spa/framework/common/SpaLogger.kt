@@ -45,6 +45,7 @@ internal const val LOG_DATA_DISPLAY_NAME = "name"
 internal const val LOG_DATA_SWITCH_STATUS = "switch"
 
 const val LOG_DATA_SESSION_NAME = "session"
+const val LOG_DATA_METRICS_CATEGORY = "metricsCategory"
 
 /**
  * The interface of logger in Spa

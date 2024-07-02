@@ -20,6 +20,7 @@ import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.ScreenRecordTile
+import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.impl.screenrecord.domain.interactor.ScreenRecordTileDataInteractor
 import com.android.systemui.qs.tiles.impl.screenrecord.domain.interactor.ScreenRecordTileUserActionInteractor
@@ -47,6 +48,13 @@ interface ScreenRecordModule {
     @IntoMap
     @StringKey(ScreenRecordTile.TILE_SPEC)
     fun bindScreenRecordTile(screenRecordTile: ScreenRecordTile): QSTileImpl<*>
+
+    @Binds
+    @IntoMap
+    @StringKey(SCREEN_RECORD_TILE_SPEC)
+    fun provideScreenRecordAvailabilityInteractor(
+            impl: ScreenRecordTileDataInteractor
+    ): QSTileAvailabilityInteractor
 
     companion object {
         private const val SCREEN_RECORD_TILE_SPEC = "screenrecord"

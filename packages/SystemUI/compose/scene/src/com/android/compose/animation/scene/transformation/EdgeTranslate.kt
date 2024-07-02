@@ -20,7 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.Scene
+import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.TransitionState
 
@@ -32,13 +32,13 @@ internal class EdgeTranslate(
 ) : PropertyTransformation<Offset> {
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: Scene,
+        scene: SceneKey,
         element: Element,
         sceneState: Element.SceneState,
         transition: TransitionState.Transition,
         value: Offset
     ): Offset {
-        val sceneSize = scene.targetSize
+        val sceneSize = layoutImpl.scene(scene).targetSize
         val elementSize = sceneState.targetSize
         if (elementSize == Element.SizeUnspecified) {
             return value

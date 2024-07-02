@@ -3502,10 +3502,11 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard")) {
             throw new SecurityException("Requires CONTROL_KEYGUARD permission");
         }
-        if (!dreamHandlesConfirmKeys() && mAtmService.mKeyguardController.isShowingDream()) {
-            mAtmService.mTaskSupervisor.wakeUp("leaveDream");
-        }
         synchronized (mGlobalLock) {
+            if (!dreamHandlesConfirmKeys()
+                    && getDefaultDisplayContentLocked().getDisplayPolicy().isShowingDreamLw()) {
+                mAtmService.mTaskSupervisor.wakeUp("leaveDream");
+            }
             mPolicy.dismissKeyguardLw(callback, message);
         }
     }

@@ -33,6 +33,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PRE_APPROVAL_NOT_AVAILABLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_SESSION_INVALID;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
@@ -3459,11 +3460,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        if (mHasAppMetadataFile && !getStagedAppMetadataFile().exists()) {
-            throw new PackageManagerException(INSTALL_FAILED_VERIFICATION_FAILURE,
-                    "App metadata file expected but not found in " + stageDir.getAbsolutePath());
-        }
-
         final List<ApkLite> addedFiles = getAddedApkLitesLocked();
         if (addedFiles.isEmpty()
                 && (removeSplitList.size() == 0 || mHasAppMetadataFile)) {
@@ -3593,6 +3589,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        File stagedAppMetadataFile = isIncrementalInstallation()
+                ? getTmpAppMetadataFile() : getStagedAppMetadataFile();
+        if (mHasAppMetadataFile && !stagedAppMetadataFile.exists()) {
+            throw new PackageManagerException(INSTALL_FAILED_SESSION_INVALID,
+                    "App metadata file expected but not found in " + stageDir.getAbsolutePath());
+        }
+
         if (isIncrementalInstallation()) {
             if (!isIncrementalInstallationAllowed(existingPkgSetting)) {
                 throw new PackageManagerException(
@@ -3601,8 +3604,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             // Since we moved the staged app metadata file so that incfs can be initialized, lets
             // now move it back.
-            File appMetadataFile = getTmpAppMetadataFile();
-            if (appMetadataFile.exists()) {
+            if (mHasAppMetadataFile) {
+                File appMetadataFile = getTmpAppMetadataFile();
                 final IncrementalFileStorages incrementalFileStorages =
                         getIncrementalFileStorages();
                 try {

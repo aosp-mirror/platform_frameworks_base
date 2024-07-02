@@ -22,8 +22,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.PersistableBundle
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.whenever
 import java.io.IOException

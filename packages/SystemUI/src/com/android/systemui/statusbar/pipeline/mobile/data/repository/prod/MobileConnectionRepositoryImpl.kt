@@ -310,6 +310,7 @@ class MobileConnectionRepositoryImpl(
             .stateIn(scope, SharingStarted.WhileSubscribed(), UnknownNetworkType)
 
     override val inflateSignalStrength = systemUiCarrierConfig.shouldInflateSignalStrength
+    override val allowNetworkSliceIndicator = systemUiCarrierConfig.allowNetworkSliceIndicator
 
     override val numberOfLevels =
         inflateSignalStrength

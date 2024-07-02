@@ -19,6 +19,7 @@ package com.android.systemui.rotationlock
 import com.android.systemui.camera.CameraRotationModule
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.impl.rotation.domain.interactor.RotationLockTileDataInteractor
 import com.android.systemui.qs.tiles.impl.rotation.domain.interactor.RotationLockTileUserActionInteractor
@@ -28,6 +29,7 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.res.R
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoMap
@@ -35,6 +37,13 @@ import dagger.multibindings.StringKey
 
 @Module(includes = [CameraRotationModule::class])
 interface RotationLockNewModule {
+
+    @Binds
+    @IntoMap
+    @StringKey(ROTATION_TILE_SPEC)
+    fun provideRotationAvailabilityInteractor(
+            impl: RotationLockTileDataInteractor
+    ): QSTileAvailabilityInteractor
     companion object {
         private const val ROTATION_TILE_SPEC = "rotation"
 

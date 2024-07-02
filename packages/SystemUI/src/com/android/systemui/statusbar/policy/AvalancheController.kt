@@ -35,10 +35,7 @@ import javax.inject.Inject
 @SysUISingleton
 class AvalancheController
 @Inject
-constructor(
-    dumpManager: DumpManager,
-    private val uiEventLogger: UiEventLogger
-) : Dumpable {
+constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) : Dumpable {
 
     private val tag = "AvalancheController"
     private val debug = Compile.IS_DEBUG && Log.isLoggable(tag, Log.DEBUG)
@@ -69,14 +66,11 @@ constructor(
     @VisibleForTesting var debugDropSet: MutableSet<HeadsUpEntry> = HashSet()
 
     enum class ThrottleEvent(private val id: Int) : UiEventLogger.UiEventEnum {
-        @UiEvent(doc = "HUN was shown.")
-        SHOWN(1812),
-
+        @UiEvent(doc = "HUN was shown.") AVALANCHE_THROTTLING_HUN_SHOWN(1821),
         @UiEvent(doc = "HUN was dropped to show higher priority HUNs.")
-        DROPPED(1813),
-
+        AVALANCHE_THROTTLING_HUN_DROPPED(1822),
         @UiEvent(doc = "HUN was removed while waiting to show.")
-        REMOVED(1814);
+        AVALANCHE_THROTTLING_HUN_REMOVED(1823);
 
         override fun getId(): Int {
             return id
@@ -97,7 +91,7 @@ constructor(
             runnable.run()
             return
         }
-        log { "\n "}
+        log { "\n " }
         val fn = "$label => AvalancheController.update ${getKey(entry)}"
         if (entry == null) {
             log { "Entry is NULL, stop update." }
@@ -129,9 +123,10 @@ constructor(
                 // HeadsUpEntry.updateEntry recursively calls AvalancheController#update
                 // and goes to the isShowing case above
                 headsUpEntryShowing!!.updateEntry(
-                        /* updatePostTime= */ false,
-                        /* updateEarliestRemovalTime= */ false,
-                        /* reason= */ "avalanche duration update")
+                    /* updatePostTime= */ false,
+                    /* updateEarliestRemovalTime= */ false,
+                    /* reason= */ "avalanche duration update"
+                )
             }
         }
         logState("after $fn")
@@ -152,7 +147,7 @@ constructor(
             runnable.run()
             return
         }
-        log { "\n "}
+        log { "\n " }
         val fn = "$label => AvalancheController.delete " + getKey(entry)
         if (entry == null) {
             log { "$fn => entry NULL, running runnable" }
@@ -163,7 +158,7 @@ constructor(
             log { "$fn => remove from next" }
             if (entry in nextMap) nextMap.remove(entry)
             if (entry in nextList) nextList.remove(entry)
-            uiEventLogger.log(ThrottleEvent.REMOVED)
+            uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_REMOVED)
         } else if (entry in debugDropSet) {
             log { "$fn => remove from dropset" }
             debugDropSet.remove(entry)
@@ -287,7 +282,7 @@ constructor(
     private fun showNow(entry: HeadsUpEntry, runnableList: MutableList<Runnable>) {
         log { "SHOW: " + getKey(entry) }
 
-        uiEventLogger.log(ThrottleEvent.SHOWN)
+        uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_SHOWN)
         headsUpEntryShowing = entry
 
         runnableList.forEach {
@@ -318,7 +313,7 @@ constructor(
 
         // Log dropped HUNs
         for (e in listToDrop) {
-            uiEventLogger.log(ThrottleEvent.DROPPED)
+            uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_DROPPED)
         }
 
         if (debug) {

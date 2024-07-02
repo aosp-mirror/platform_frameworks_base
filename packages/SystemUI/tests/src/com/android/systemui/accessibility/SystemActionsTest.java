@@ -28,10 +28,10 @@ import android.hardware.input.InputManager;
 import android.os.RemoteException;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.KeyEvent;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -55,7 +55,7 @@ import java.util.Optional;
 
 @TestableLooper.RunWithLooper
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class SystemActionsTest extends SysuiTestCase {
     @Mock
     private UserTracker mUserTracker;

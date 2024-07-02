@@ -19,11 +19,11 @@ package com.android.systemui.accessibility.floatingmenu;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.res.Resources;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 
 /** Tests for {@link MenuEduTooltipView}. */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class MenuEduTooltipViewTest extends SysuiTestCase {
     private MenuViewAppearance mMenuViewAppearance;

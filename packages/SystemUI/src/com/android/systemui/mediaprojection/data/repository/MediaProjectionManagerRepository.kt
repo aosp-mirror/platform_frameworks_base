@@ -64,6 +64,10 @@ constructor(
         }
     }
 
+    override suspend fun stopProjecting() {
+        withContext(backgroundDispatcher) { mediaProjectionManager.stopActiveProjection() }
+    }
+
     override val mediaProjectionState: Flow<MediaProjectionState> =
         conflatedCallbackFlow {
                 val callback =
@@ -83,7 +87,9 @@ constructor(
                             session: ContentRecordingSession?
                         ) {
                             Log.d(TAG, "MediaProjectionManager.Callback#onSessionStarted: $session")
-                            launch { trySendWithFailureLogging(stateForSession(session), TAG) }
+                            launch {
+                                trySendWithFailureLogging(stateForSession(info, session), TAG)
+                            }
                         }
                     }
                 mediaProjectionManager.addCallback(callback, handler)
@@ -95,19 +101,23 @@ constructor(
                 initialValue = MediaProjectionState.NotProjecting,
             )
 
-    private suspend fun stateForSession(session: ContentRecordingSession?): MediaProjectionState {
+    private suspend fun stateForSession(
+        info: MediaProjectionInfo,
+        session: ContentRecordingSession?
+    ): MediaProjectionState {
         if (session == null) {
             return MediaProjectionState.NotProjecting
         }
+
+        val hostPackage = info.packageName
         if (session.contentToRecord == RECORD_CONTENT_DISPLAY || session.tokenToRecord == null) {
-            return MediaProjectionState.EntireScreen
+            return MediaProjectionState.Projecting.EntireScreen(hostPackage)
         }
         val matchingTask =
             tasksRepository.findRunningTaskFromWindowContainerToken(
                 checkNotNull(session.tokenToRecord)
-            )
-                ?: return MediaProjectionState.EntireScreen
-        return MediaProjectionState.SingleTask(matchingTask)
+            ) ?: return MediaProjectionState.Projecting.EntireScreen(hostPackage)
+        return MediaProjectionState.Projecting.SingleTask(hostPackage, matchingTask)
     }
 
     companion object {

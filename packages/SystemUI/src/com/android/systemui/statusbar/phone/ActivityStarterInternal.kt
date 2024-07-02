@@ -39,6 +39,7 @@ interface ActivityStarterInternal {
         associatedView: View? = null,
         animationController: ActivityTransitionAnimator.Controller? = null,
         showOverLockscreen: Boolean = false,
+        skipLockscreenChecks: Boolean = false,
         fillInIntent: Intent? = null,
         extraOptions: Bundle? = null,
     )

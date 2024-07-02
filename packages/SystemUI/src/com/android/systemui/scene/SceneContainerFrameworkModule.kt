@@ -21,6 +21,9 @@ import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlagsModule
 import com.android.systemui.notifications.ui.composable.NotificationsShadeSessionModule
 import com.android.systemui.scene.domain.SceneDomainModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
+import com.android.systemui.scene.domain.resolver.HomeSceneFamilyResolverModule
+import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolverModule
+import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolverModule
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.domain.startable.ScrimStartable
 import com.android.systemui.scene.shared.model.SceneContainerConfig
@@ -48,6 +51,11 @@ import dagger.multibindings.IntoMap
             NotificationsShadeSceneModule::class,
             NotificationsShadeSessionModule::class,
             SceneDomainModule::class,
+
+            // List SceneResolver modules for supported SceneFamilies
+            HomeSceneFamilyResolverModule::class,
+            NotifShadeSceneFamilyResolverModule::class,
+            QuickSettingsSceneFamilyResolverModule::class,
         ],
 )
 interface SceneContainerFrameworkModule {

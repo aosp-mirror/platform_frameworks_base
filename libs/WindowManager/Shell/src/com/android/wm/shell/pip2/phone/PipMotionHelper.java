@@ -731,8 +731,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
                 cleanUpHighPerfSessionMaybe();
 
-                // Setting state to CHANGED_PIP_BOUNDS applies finishTx and notifies Core.
-                mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
+                // Signal that the transition is done - should update transition state by default.
+                mPipScheduler.scheduleFinishResizePip(false /* configAtEnd */);
                 break;
             case PipTransitionState.EXITING_PIP:
                 // We need to force finish any local animators if about to leave PiP, to avoid

@@ -681,6 +681,53 @@ public class HearingAidDeviceManagerTest {
         verify(mCachedDevice1).refresh();
     }
 
+
+    /**
+     * Test onProfileConnectionStateChangedIfProcessed.
+     * When main device is disconnected, to verify switch() result for member device connected
+     * event
+     */
+    @Test
+    public void onProfileConnectionStateChanged_connect_member_mainDisconnected_switch() {
+        when(mCachedDevice1.isConnected()).thenReturn(false);
+        when(mCachedDevice1.getGroupId()).thenReturn(GROUP_ID_1);
+        when(mCachedDevice2.getGroupId()).thenReturn(GROUP_ID_1);
+        mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+        mCachedDevice1.addMemberDevice(mCachedDevice2);
+
+        assertThat(mCachedDevice1.mDevice).isEqualTo(mDevice1);
+        assertThat(mCachedDevice2.mDevice).isEqualTo(mDevice2);
+        assertThat(mHearingAidDeviceManager.onProfileConnectionStateChangedIfProcessed(
+                mCachedDevice2, BluetoothProfile.STATE_CONNECTED)).isTrue();
+
+        assertThat(mCachedDevice1.mDevice).isEqualTo(mDevice2);
+        assertThat(mCachedDevice2.mDevice).isEqualTo(mDevice1);
+        verify(mCachedDevice1).refresh();
+    }
+
+    /**
+     * Test onProfileConnectionStateChangedIfProcessed.
+     * When member device is connected, to verify switch() result for main device disconnected
+     * event
+     */
+    @Test
+    public void onProfileConnectionStateChanged_disconnect_main_subDeviceConnected_switch() {
+        when(mCachedDevice2.isConnected()).thenReturn(true);
+        when(mCachedDevice1.getGroupId()).thenReturn(GROUP_ID_1);
+        when(mCachedDevice2.getGroupId()).thenReturn(GROUP_ID_1);
+        mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+        mCachedDevice1.addMemberDevice(mCachedDevice2);
+
+        assertThat(mCachedDevice1.mDevice).isEqualTo(mDevice1);
+        assertThat(mCachedDevice2.mDevice).isEqualTo(mDevice2);
+        assertThat(mHearingAidDeviceManager.onProfileConnectionStateChangedIfProcessed(
+                mCachedDevice1, BluetoothProfile.STATE_DISCONNECTED)).isTrue();
+
+        assertThat(mCachedDevice1.mDevice).isEqualTo(mDevice2);
+        assertThat(mCachedDevice2.mDevice).isEqualTo(mDevice1);
+        verify(mCachedDevice1).refresh();
+    }
+
     @Test
     public void onActiveDeviceChanged_connected_callSetStrategies() {
         when(mHelper.getMatchedHearingDeviceAttributes(mCachedDevice1)).thenReturn(

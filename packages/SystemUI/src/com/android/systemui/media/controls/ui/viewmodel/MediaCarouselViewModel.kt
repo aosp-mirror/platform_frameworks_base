@@ -155,13 +155,17 @@ constructor(
                             mediaFlags.isPersistentSsCardEnabled(),
                     recsViewModel = recommendationsViewModel,
                     onAdded = { commonViewModel ->
-                        onMediaRecommendationAddedOrUpdated(commonViewModel)
+                        onMediaRecommendationAddedOrUpdated(
+                            commonViewModel as MediaCommonViewModel.MediaRecommendations
+                        )
                     },
                     onRemoved = { immediatelyRemove ->
                         onMediaRecommendationRemoved(commonModel, immediatelyRemove)
                     },
                     onUpdated = { commonViewModel ->
-                        onMediaRecommendationAddedOrUpdated(commonViewModel)
+                        onMediaRecommendationAddedOrUpdated(
+                            commonViewModel as MediaCommonViewModel.MediaRecommendations
+                        )
                     },
                 )
                 .also { mediaRecs = it }
@@ -185,7 +189,9 @@ constructor(
         }
     }
 
-    private fun onMediaRecommendationAddedOrUpdated(commonViewModel: MediaCommonViewModel) {
+    private fun onMediaRecommendationAddedOrUpdated(
+        commonViewModel: MediaCommonViewModel.MediaRecommendations
+    ) {
         if (!interactor.isRecommendationActive()) {
             if (!mediaFlags.isPersistentSsCardEnabled()) {
                 commonViewModel.onRemoved(true)
@@ -201,6 +207,7 @@ constructor(
     ) {
         if (immediatelyRemove || isReorderingAllowed()) {
             interactor.dismissSmartspaceRecommendation(commonModel.recsLoadingModel.key, 0L)
+            mediaRecs = null
             if (!immediatelyRemove) {
                 // Although it wasn't requested, we were able to process the removal
                 // immediately since reordering is allowed. So, notify hosts to update

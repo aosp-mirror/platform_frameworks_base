@@ -33,7 +33,6 @@ import com.airbnb.lottie.LottieProperty
 import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardPINView
 import com.android.systemui.CoreStartable
-import com.android.systemui.biometrics.FpsUnlockTracker
 import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
@@ -65,7 +64,6 @@ constructor(
     private val biometricStatusInteractor: Lazy<BiometricStatusInteractor>,
     private val displayStateInteractor: Lazy<DisplayStateInteractor>,
     private val deviceEntrySideFpsOverlayInteractor: Lazy<DeviceEntrySideFpsOverlayInteractor>,
-    private val fpsUnlockTracker: Lazy<FpsUnlockTracker>,
     private val layoutInflater: Lazy<LayoutInflater>,
     private val sideFpsProgressBarViewModel: Lazy<SideFpsProgressBarViewModel>,
     private val sfpsSensorInteractor: Lazy<SideFpsSensorInteractor>,
@@ -114,7 +112,6 @@ constructor(
                     }
                 }
             }
-            .invokeOnCompletion { fpsUnlockTracker.get().stopTracking() }
     }
 
     private var overlayView: View? = null
@@ -138,7 +135,7 @@ constructor(
                 displayStateInteractor.get(),
                 sfpsSensorInteractor.get(),
             )
-        bind(overlayView!!, overlayViewModel, fpsUnlockTracker.get(), windowManager.get())
+        bind(overlayView!!, overlayViewModel, windowManager.get())
         overlayView!!.visibility = View.INVISIBLE
         Log.d(TAG, "show(): adding overlayView $overlayView")
         windowManager.get().addView(overlayView, overlayViewModel.defaultOverlayViewParams)
@@ -163,12 +160,9 @@ constructor(
         fun bind(
             overlayView: View,
             viewModel: SideFpsOverlayViewModel,
-            fpsUnlockTracker: FpsUnlockTracker,
             windowManager: WindowManager
         ) {
             overlayView.repeatWhenAttached {
-                fpsUnlockTracker.startTracking()
-
                 val lottie = it.requireViewById<LottieAnimationView>(R.id.sidefps_animation)
                 lottie.addLottieOnCompositionLoadedListener { composition: LottieComposition ->
                     if (overlayView.visibility != View.VISIBLE) {

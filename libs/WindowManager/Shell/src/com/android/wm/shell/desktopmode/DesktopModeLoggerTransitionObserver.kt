@@ -35,15 +35,16 @@ import androidx.core.util.plus
 import androidx.core.util.putAll
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.InstanceIdSequence
+import com.android.internal.protolog.common.ProtoLog
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
-import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_HANDLE_MENU_BUTTON
-import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT
-import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_HANDLE_MENU_BUTTON
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.shared.TransitionUtil
@@ -80,6 +81,9 @@ class DesktopModeLoggerTransitionObserver(
     // animation was cancelled, we restore these tasks to calculate the post-Transition state
     private val tasksSavedForRecents: SparseArray<TaskInfo> = SparseArray()
 
+    // Caching whether the previous transition was exit to overview.
+    private var wasPreviousTransitionExitToOverview: Boolean = false
+
     // The instanceId for the current logging session
     private var loggerInstanceId: InstanceId? = null
 
@@ -101,7 +105,7 @@ class DesktopModeLoggerTransitionObserver(
         finishTransaction: SurfaceControl.Transaction
     ) {
         // this was a new recents animation
-        if (info.isRecentsTransition() && tasksSavedForRecents.isEmpty()) {
+        if (info.isExitToRecentsTransition() && tasksSavedForRecents.isEmpty()) {
             KtProtoLog.v(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopModeLogger: Recents animation running, saving tasks for later"
@@ -143,6 +147,7 @@ class DesktopModeLoggerTransitionObserver(
             preTransitionVisibleFreeformTasks = visibleFreeformTaskInfos,
             postTransitionVisibleFreeformTasks = postTransitionVisibleFreeformTasks
         )
+        wasPreviousTransitionExitToOverview = info.isExitToRecentsTransition()
     }
 
     override fun onTransitionStarting(transition: IBinder) {}
@@ -309,22 +314,40 @@ class DesktopModeLoggerTransitionObserver(
     }
 
     /** Get [EnterReason] for this session enter */
-    private fun getEnterReason(transitionInfo: TransitionInfo): EnterReason {
-        return when (transitionInfo.type) {
-            WindowManager.TRANSIT_WAKE -> EnterReason.SCREEN_ON
-            Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP -> EnterReason.APP_HANDLE_DRAG
-            TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON -> EnterReason.APP_HANDLE_MENU_BUTTON
-            // TODO(b/344822506): Create and update EnterReason to APP_FROM_OVERVIEW
-            TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW -> EnterReason.UNKNOWN_ENTER
-            TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT -> EnterReason.KEYBOARD_SHORTCUT_ENTER
-            WindowManager.TRANSIT_OPEN -> EnterReason.APP_FREEFORM_INTENT
-            else -> EnterReason.UNKNOWN_ENTER
+    private fun getEnterReason(transitionInfo: TransitionInfo): EnterReason =
+        when {
+            transitionInfo.type == WindowManager.TRANSIT_WAKE -> EnterReason.SCREEN_ON
+            transitionInfo.type == Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP ->
+                EnterReason.APP_HANDLE_DRAG
+            transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON ->
+                EnterReason.APP_HANDLE_MENU_BUTTON
+            transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW ->
+                EnterReason.APP_FROM_OVERVIEW
+            transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT ->
+                EnterReason.KEYBOARD_SHORTCUT_ENTER
+            // NOTE: the below condition also applies for EnterReason quickswitch
+            transitionInfo.type == WindowManager.TRANSIT_TO_FRONT -> EnterReason.OVERVIEW
+            // Enter desktop mode from cancelled recents has no transition. Enter is detected on the
+            // next transition involving freeform windows.
+            // TODO(b/346564416): Modify logging for cancelled recents once it transition is
+            //  changed. Also see how to account to time difference between actual enter time and
+            //  time of this log. Also account for the missed session when exit happens just after
+            //  a cancelled recents.
+            wasPreviousTransitionExitToOverview -> EnterReason.OVERVIEW
+            transitionInfo.type == WindowManager.TRANSIT_OPEN -> EnterReason.APP_FREEFORM_INTENT
+            else -> {
+                ProtoLog.w(
+                    WM_SHELL_DESKTOP_MODE,
+                    "Unknown enter reason for transition type ${transitionInfo.type}",
+                    transitionInfo.type
+                )
+                EnterReason.UNKNOWN_ENTER
+            }
         }
-    }
 
     /** Get [ExitReason] for this session exit */
-    private fun getExitReason(transitionInfo: TransitionInfo): ExitReason {
-        return when {
+    private fun getExitReason(transitionInfo: TransitionInfo): ExitReason =
+         when {
             transitionInfo.type == WindowManager.TRANSIT_SLEEP -> ExitReason.SCREEN_OFF
             transitionInfo.type == WindowManager.TRANSIT_CLOSE -> ExitReason.TASK_FINISHED
             transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG -> ExitReason.DRAG_TO_EXIT
@@ -332,10 +355,16 @@ class DesktopModeLoggerTransitionObserver(
                 ExitReason.APP_HANDLE_MENU_BUTTON_EXIT
             transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT ->
                 ExitReason.KEYBOARD_SHORTCUT_EXIT
-            transitionInfo.isRecentsTransition() -> ExitReason.RETURN_HOME_OR_OVERVIEW
-            else -> ExitReason.UNKNOWN_EXIT
+            transitionInfo.isExitToRecentsTransition() -> ExitReason.RETURN_HOME_OR_OVERVIEW
+            else -> {
+                ProtoLog.w(
+                    WM_SHELL_DESKTOP_MODE,
+                    "Unknown exit reason for transition type ${transitionInfo.type}",
+                    transitionInfo.type
+                )
+                ExitReason.UNKNOWN_EXIT
+            }
         }
-    }
 
     /** Adds tasks to the saved copy of freeform taskId, taskInfo. Only used for testing. */
     @VisibleForTesting
@@ -358,7 +387,7 @@ class DesktopModeLoggerTransitionObserver(
         return this.windowingMode == WINDOWING_MODE_FREEFORM
     }
 
-    private fun TransitionInfo.isRecentsTransition(): Boolean {
+    private fun TransitionInfo.isExitToRecentsTransition(): Boolean {
         return this.type == WindowManager.TRANSIT_TO_FRONT &&
             this.flags == WindowManager.TRANSIT_FLAG_IS_RECENTS
     }

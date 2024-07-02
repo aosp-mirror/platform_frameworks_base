@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.phone.DozeScrimController
 import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -112,6 +113,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var shadeLogger: ShadeLogger
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var pulsingGestureListener: PulsingGestureListener
+    @Mock private lateinit var sysUiUnfoldComponent: SysUIUnfoldComponent
     @Mock
     private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
     @Mock private lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
@@ -181,6 +183,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 dozeScrimController,
                 notificationShadeWindowController,
                 unfoldTransitionProgressProvider,
+                Optional.of(sysUiUnfoldComponent),
                 keyguardUnlockAnimationController,
                 notificationInsetsController,
                 ambientState,

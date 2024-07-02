@@ -401,10 +401,10 @@ private fun SceneScope.NotificationPlaceholder(
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
 ) {
-    Element(
-        Notifications.Elements.NotificationStackPlaceholder,
+    Box(
         modifier =
             modifier
+                .element(Notifications.Elements.NotificationStackPlaceholder)
                 .debugBackground(viewModel, DEBUG_STACK_COLOR)
                 .onSizeChanged { size -> debugLog(viewModel) { "STACK onSizeChanged: size=$size" } }
                 .onGloballyPositioned { coordinates: LayoutCoordinates ->
@@ -419,9 +419,7 @@ private fun SceneScope.NotificationPlaceholder(
                     stackScrollView.setStackTop(positionInWindow.y)
                     stackScrollView.setStackBottom(positionInWindow.y + coordinates.size.height)
                 }
-    ) {
-        content {}
-    }
+    )
 }
 
 private fun calculateCornerRadius(

@@ -111,6 +111,7 @@ cc_defaults {
             "allocator_may_return_null = 1",
         ],
     },
+    dictionary: "fuzz/imagedecoder_fuzzer.dict",
     host_supported: true,
 }
 

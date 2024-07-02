@@ -373,6 +373,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     @NonNull
     final Rect mAppBounds = new Rect();
 
+    /** The source rect hint from stopSwipePipToHome(). */
+    @Nullable
+    private Rect mSwipeSourceRectHint;
+
     public PipTaskOrganizer(Context context,
             @NonNull SyncTransactionQueue syncTransactionQueue,
             @NonNull PipTransitionState pipTransitionState,
@@ -504,7 +508,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Expect {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)} afterwards.
      */
     public void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
-            SurfaceControl overlay, Rect appBounds) {
+            SurfaceControl overlay, Rect appBounds, Rect sourceRectHint) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "stopSwipePipToHome: %s, stat=%s", componentName, mPipTransitionState);
         // do nothing if there is no startSwipePipToHome being called before
@@ -513,6 +517,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
         mPipBoundsState.setBounds(destinationBounds);
         setContentOverlay(overlay, appBounds);
+        mSwipeSourceRectHint = sourceRectHint;
         if (ENABLE_SHELL_TRANSITIONS && overlay != null) {
             // With Shell transition, the overlay was attached to the remote transition leash, which
             // will be removed when the current transition is finished, so we need to reparent it
@@ -527,6 +532,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // We want to make sure the overlay passed from Launcher gets removed eventually.
             mayRemoveContentOverlay(overlay);
         }
+    }
+
+    /**
+     * Returns non-null Rect if the pip is entering from swipe-to-home with a specified source hint.
+     * This also consumes the rect hint.
+     */
+    @Nullable
+    Rect takeSwipeSourceRectHint() {
+        final Rect sourceRectHint = mSwipeSourceRectHint;
+        if (sourceRectHint == null || sourceRectHint.isEmpty()) {
+            return null;
+        }
+        mSwipeSourceRectHint = null;
+        return mPipTransitionState.getInSwipePipToHomeTransition() ? sourceRectHint : null;
     }
 
     private void mayRemoveContentOverlay(SurfaceControl overlay) {
@@ -980,7 +999,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void onEndOfSwipePipToHomeTransition() {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mPipTransitionController.setEnterAnimationType(ANIM_TYPE_BOUNDS);
             return;
         }
 

@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.UserHandle
 import com.android.systemui.CoreStartable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
@@ -47,6 +48,10 @@ constructor(
         )
         registerBroadcastReceiver(
             action = Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS,
+            onReceive = { state.value = Inactive }
+        )
+        registerBroadcastReceiver(
+            action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS,
             onReceive = { state.value = Inactive }
         )
         commandQueue.addCallback(
@@ -80,7 +85,8 @@ constructor(
                     }
                 },
             filter = IntentFilter(action),
-            flags = Context.RECEIVER_EXPORTED or Context.RECEIVER_VISIBLE_TO_INSTANT_APPS
+            flags = Context.RECEIVER_EXPORTED or Context.RECEIVER_VISIBLE_TO_INSTANT_APPS,
+            user = UserHandle.ALL,
         )
     }
 }

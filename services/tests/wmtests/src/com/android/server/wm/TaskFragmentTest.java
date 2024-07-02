@@ -56,6 +56,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 
+import android.app.ActivityOptions;
 import android.content.pm.SigningDetails;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -288,6 +289,30 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Ensure the activity below is visible
         mTaskFragment.getTask().ensureActivitiesVisible(null /* starting */);
         assertEquals(true, activityBelow.isVisibleRequested());
+    }
+
+    @Test
+    public void testFindTopNonFinishingActivity_ignoresLaunchedFromBubbleActivities() {
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setUid(DEFAULT_TASK_FRAGMENT_ORGANIZER_UID).setActivityOptions(opts).build();
+        mTaskFragment.addChild(activity);
+
+        assertNull(mTaskFragment.getTopNonFinishingActivity(true, false));
+    }
+
+    @Test
+    public void testFindTopNonFinishingActivity_includesLaunchedFromBubbleActivities() {
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setUid(DEFAULT_TASK_FRAGMENT_ORGANIZER_UID).setActivityOptions(opts).build();
+        mTaskFragment.addChild(activity);
+
+        assertEquals(mTaskFragment.getTopNonFinishingActivity(true, true), activity);
     }
 
     @Test

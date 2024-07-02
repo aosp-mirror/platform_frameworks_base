@@ -440,6 +440,29 @@ public class ProgramInfoCacheTest {
                 TEST_DAB_UNIQUE_ID_ALTERNATIVE);
     }
 
+    @Test
+    public void filterAndApplyChunkInternal_withInvalidProgramInfoAndIdentifiers()
+            throws RemoteException {
+        ProgramInfoCache cache = new ProgramInfoCache(/* filter= */ null,
+                /* complete= */ false, TEST_FM_INFO, TEST_RDS_INFO, TEST_DAB_INFO);
+        ProgramInfo[] halModified = new android.hardware.broadcastradio.ProgramInfo[1];
+        halModified[0] = AidlTestUtils.makeHalProgramInfo(
+                ConversionUtils.programSelectorToHalProgramSelector(TEST_DAB_SELECTOR_ALTERNATIVE),
+                ConversionUtils.identifierToHalProgramIdentifier(TEST_DAB_FREQUENCY_ID_ALTERNATIVE),
+                ConversionUtils.identifierToHalProgramIdentifier(TEST_DAB_FREQUENCY_ID_ALTERNATIVE),
+                TEST_SIGNAL_QUALITY);
+        ProgramIdentifier[] halRemoved = new android.hardware.broadcastradio.ProgramIdentifier[1];
+        halRemoved[0] = new android.hardware.broadcastradio.ProgramIdentifier();
+        ProgramListChunk halChunk = AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, halModified, halRemoved);
+
+        List<ProgramList.Chunk> programListChunks = cache.filterAndApplyChunkInternal(halChunk,
+                TEST_MAX_NUM_MODIFIED_PER_CHUNK, TEST_MAX_NUM_REMOVED_PER_CHUNK);
+
+        expect.withMessage("Program list chunk applied with invalid program and identifiers")
+                .that(programListChunks).isEmpty();
+    }
+
     private void verifyChunkListPurge(List<ProgramList.Chunk> chunks, boolean purge) {
         if (chunks.isEmpty()) {
             return;

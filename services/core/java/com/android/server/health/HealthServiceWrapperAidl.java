@@ -212,6 +212,16 @@ class HealthServiceWrapperAidl extends HealthServiceWrapper {
         }
     }
 
+    public void setChargingPolicy(int policy) throws RemoteException {
+        IHealth service = mLastService.get();
+        if (service == null) return;
+        try {
+            service.setChargingPolicy(policy);
+        } catch (UnsupportedOperationException | ServiceSpecificException ex) {
+            return;
+        }
+    }
+
     private static void traceBegin(String name) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, name);
     }

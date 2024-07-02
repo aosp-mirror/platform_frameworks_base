@@ -44,6 +44,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.clearInvocations
 import java.util.function.Predicate
 
 @RunWith(AndroidJUnit4::class)
@@ -336,6 +337,10 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
                 false /* requestedShowSurfaceBehindKeyguard */
         )
 
+        // Cancel the animator so we can verify only the setSurfaceBehind call below.
+        keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.end()
+        clearInvocations(surfaceTransactionApplier)
+
         // Set appear to 50%, we'll just verify that we're not applying the identity matrix which
         // means an animation is in progress.
         keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(0.5f)
@@ -377,6 +382,10 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
                 false /* requestedShowSurfaceBehindKeyguard */
         )
 
+        // Cancel the animator so we can verify only the setSurfaceBehind call below.
+        keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.end()
+        clearInvocations(surfaceTransactionApplier)
+
         keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(1f)
         keyguardUnlockAnimationController.setWallpaperAppearAmount(1f)
 
@@ -408,6 +417,10 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
+
+        // Stop the animator - we just want to test whether the override is not applied.
+        keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.end()
+        clearInvocations(surfaceTransactionApplier)
 
         keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(1f)
         keyguardUnlockAnimationController.setWallpaperAppearAmount(1f)

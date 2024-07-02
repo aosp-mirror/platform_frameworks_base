@@ -241,7 +241,6 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             statusBarWinController,
             sysUiState,
             mock(),
-            mock(),
             userTracker,
             wakefulnessLifecycle,
             uiEventLogger,

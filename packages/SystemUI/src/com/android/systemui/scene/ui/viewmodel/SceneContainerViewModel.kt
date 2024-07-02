@@ -147,6 +147,20 @@ constructor(
         } ?: true
     }
 
+    /**
+     * Immediately resolves any scene families present in [actionResultMap] to their current
+     * resolution target.
+     */
+    fun resolveSceneFamilies(
+        actionResultMap: Map<UserAction, UserActionResult>,
+    ): Map<UserAction, UserActionResult> {
+        return actionResultMap.mapValues { (_, actionResult) ->
+            sceneInteractor.resolveSceneFamilyOrNull(actionResult.toScene)?.value?.let {
+                actionResult.copy(toScene = it)
+            } ?: actionResult
+        }
+    }
+
     private fun replaceSceneFamilies(
         destinationScenes: Map<UserAction, UserActionResult>,
     ): Flow<Map<UserAction, UserActionResult>> {

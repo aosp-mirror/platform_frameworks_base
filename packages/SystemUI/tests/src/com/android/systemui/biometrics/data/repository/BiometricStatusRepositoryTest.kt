@@ -29,6 +29,7 @@ import android.hardware.biometrics.BiometricSourceType
 import android.hardware.biometrics.events.AuthenticationAcquiredInfo
 import android.hardware.biometrics.events.AuthenticationStartedInfo
 import android.hardware.biometrics.events.AuthenticationStoppedInfo
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
@@ -46,7 +47,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
@@ -54,7 +54,7 @@ import org.mockito.junit.MockitoRule
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class BiometricStatusRepositoryTest : SysuiTestCase() {
     @JvmField @Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
     @Mock private lateinit var biometricManager: BiometricManager

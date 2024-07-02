@@ -227,6 +227,7 @@ java_library_static {
         "connectivity_flags_lib",
         "dreams_flags_lib",
         "aconfig_new_storage_flags_lib",
+        "powerstats_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [

@@ -25,7 +25,11 @@ import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX
 import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Insets
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.hardware.biometrics.BiometricManager.Authenticators
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.SensorPropertiesInternal
@@ -121,5 +125,27 @@ object Utils {
         val windowMetrics: WindowMetrics? = windowManager?.maximumWindowMetrics
         return windowMetrics?.windowInsets?.getInsets(WindowInsets.Type.navigationBars())
             ?: Insets.NONE
+    }
+
+    /** Converts `drawable` to a [Bitmap]. */
+    @JvmStatic
+    fun Drawable?.toBitmap(): Bitmap? {
+        if (this == null) {
+            return null
+        }
+        if (this is BitmapDrawable) {
+            return bitmap
+        }
+        val bitmap: Bitmap =
+            if (intrinsicWidth <= 0 || intrinsicHeight <= 0) {
+                Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+                // Single color bitmap will be created of 1x1 pixel
+            } else {
+                Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+            }
+        val canvas = Canvas(bitmap)
+        setBounds(0, 0, canvas.width, canvas.height)
+        draw(canvas)
+        return bitmap
     }
 }

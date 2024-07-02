@@ -19,6 +19,7 @@ package com.android.systemui.screenshot
 import android.content.ComponentName
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.MATCH_ANY_USER
 import android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS
 import android.testing.AndroidTestingRunner
 import android.view.Display
@@ -169,12 +170,12 @@ class ScreenshotDetectionControllerTest {
 
     private class ComponentInfoFlagMatcher(
         @PackageManager.ComponentInfoFlagsBits val mask: Int, val value: Int
-    ): ArgumentMatcher<PackageManager.ComponentInfoFlags> {
+    ) : ArgumentMatcher<PackageManager.ComponentInfoFlags> {
         override fun matches(flags: PackageManager.ComponentInfoFlags?): Boolean {
             return flags != null && (mask.toLong() and flags.value) == value.toLong()
         }
 
-        override fun toString(): String{
+        override fun toString(): String {
             return "mask 0x%08x == 0x%08x".format(mask, value)
         }
     }
@@ -191,16 +192,16 @@ class ScreenshotDetectionControllerTest {
         whenever(
             packageManager.getActivityInfo(
                 eq(component),
-                argThat(includesFlagBits(MATCH_DISABLED_COMPONENTS))
+                argThat(includesFlagBits(MATCH_DISABLED_COMPONENTS or MATCH_ANY_USER))
             )
-        ).thenReturn(activityInfo);
+        ).thenReturn(activityInfo)
 
         whenever(
             packageManager.getActivityInfo(
                 eq(component),
                 argThat(excludesFlagBits(MATCH_DISABLED_COMPONENTS))
             )
-        ).thenThrow(PackageManager.NameNotFoundException::class.java);
+        ).thenThrow(PackageManager.NameNotFoundException::class.java)
 
         whenever(windowManager.notifyScreenshotListeners(eq(Display.DEFAULT_DISPLAY)))
             .thenReturn(listOf(component))
@@ -212,5 +213,4 @@ class ScreenshotDetectionControllerTest {
         assertEquals(1, list.size)
         assertEquals(appName, list[0])
     }
-
 }

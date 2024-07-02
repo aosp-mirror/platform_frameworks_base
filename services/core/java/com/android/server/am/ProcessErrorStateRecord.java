@@ -60,6 +60,7 @@ import com.android.server.ResourcePressureUtil;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.wm.WindowProcessController;
+import com.android.server.utils.AnrTimer;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -301,6 +302,9 @@ class ProcessErrorStateRecord {
         ArrayList<Integer> firstPids = new ArrayList<>(5);
         SparseBooleanArray lastPids = new SparseBooleanArray(20);
         ActivityManagerService.VolatileDropboxEntryStates volatileDropboxEntriyStates = null;
+
+        // Release the expired timer preparatory to starting the dump or returning without dumping.
+        timeoutRecord.closeExpiredTimer();
 
         if (mApp.isDebugging()) {
             Slog.i(TAG, "Skipping debugged app ANR: " + this + " " + annotation);

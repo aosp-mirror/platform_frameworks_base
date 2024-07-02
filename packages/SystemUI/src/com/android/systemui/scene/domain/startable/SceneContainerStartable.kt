@@ -39,6 +39,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor
 import com.android.systemui.model.SceneContainerPlugin
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.updateFlags
@@ -81,6 +82,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -120,6 +122,7 @@ constructor(
     private val uiEventLogger: UiEventLogger,
     private val sceneBackInteractor: SceneBackInteractor,
     private val shadeSessionStorage: SessionStorage,
+    private val windowMgrLockscreenVisInteractor: WindowManagerLockscreenVisibilityInteractor,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -227,6 +230,25 @@ constructor(
         handleDeviceUnlockStatus()
         handlePowerState()
         handleShadeTouchability()
+        handleSurfaceBehindKeyguardVisibility()
+    }
+
+    private fun handleSurfaceBehindKeyguardVisibility() {
+        applicationScope.launch {
+            sceneInteractor.currentScene.collectLatest { currentScene ->
+                if (currentScene == Scenes.Lockscreen) {
+                    // Wait for surface to become visible
+                    windowMgrLockscreenVisInteractor.surfaceBehindVisibility.first { it }
+                    // Make sure the device is actually unlocked before force-changing the scene
+                    deviceUnlockedInteractor.deviceUnlockStatus.first { it.isUnlocked }
+                    // Override the current transition, if any, by forcing the scene to Gone
+                    sceneInteractor.changeScene(
+                        toScene = Scenes.Gone,
+                        loggingReason = "surface behind keyguard is visible",
+                    )
+                }
+            }
+        }
     }
 
     private fun handleBouncerImeVisibility() {
@@ -329,8 +351,7 @@ constructor(
                                 Scenes.Gone to "device was unlocked in Bouncer scene"
                             } else {
                                 val prevScene = previousScene.value
-                                (prevScene
-                                    ?: Scenes.Gone) to
+                                (prevScene ?: Scenes.Gone) to
                                     "device was unlocked in Bouncer scene, from sceneKey=$prevScene"
                             }
                         isOnLockscreen ->

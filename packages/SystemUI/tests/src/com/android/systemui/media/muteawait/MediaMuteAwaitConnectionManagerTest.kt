@@ -62,7 +62,7 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         context.addMockSystemService(Context.AUDIO_SERVICE, audioManager)
         icon = context.getDrawable(R.drawable.ic_cake)!!
-        whenever(deviceIconUtil.getIconFromAudioDeviceType(any(), any())).thenReturn(icon)
+        whenever(deviceIconUtil.getIconFromAudioDeviceType(any())).thenReturn(icon)
 
         muteAwaitConnectionManager = MediaMuteAwaitConnectionManager(
             FakeExecutor(FakeSystemClock()),

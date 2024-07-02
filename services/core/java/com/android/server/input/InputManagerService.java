@@ -3352,6 +3352,10 @@ public class InputManagerService extends IInputManager.Stub
         mPointerIconCache.setPointerFillStyle(fillStyle);
     }
 
+    void setPointerScale(float scale) {
+        mPointerIconCache.setPointerScale(scale);
+    }
+
     interface KeyboardBacklightControllerInterface {
         default void incrementKeyboardBacklight(int deviceId) {}
         default void decrementKeyboardBacklight(int deviceId) {}

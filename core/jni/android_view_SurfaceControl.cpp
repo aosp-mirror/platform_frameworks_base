@@ -358,7 +358,8 @@ public:
 
         jobject stats =
                 env->NewObject(gTransactionStatsClassInfo.clazz, gTransactionStatsClassInfo.ctor,
-                               latchTime, presentFence.get());
+                               latchTime,
+                               static_cast<jlong>(reinterpret_cast<uintptr_t>(presentFence.get())));
         env->CallVoidMethod(mTransactionCompletedListenerObject, gConsumerClassInfo.accept, stats);
         env->DeleteLocalRef(stats);
         DieIfException(env, "Uncaught exception in TransactionCompletedListener.");

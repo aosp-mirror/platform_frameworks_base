@@ -23,7 +23,7 @@
         android:id="@+id/suggestionWindowContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/floatingToolbarPopupBackgroundDrawable"
+        android:background="@drawable/floating_popup_background"
         android:elevation="@android:dimen/text_edit_floating_toolbar_elevation"
         android:layout_margin="@android:dimen/text_edit_floating_toolbar_margin"
         android:orientation="vertical"

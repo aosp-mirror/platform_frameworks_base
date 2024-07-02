@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
@@ -174,10 +175,18 @@ public final class ImeTrackerService extends IImeTracker.Stub {
 
     @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
     @Override
-    public void finishTrackingPendingImeVisibilityRequests() {
+    public void finishTrackingPendingImeVisibilityRequests(
+            @NonNull AndroidFuture completionSignal /* T=Void */) {
         super.finishTrackingPendingImeVisibilityRequests_enforcePermission();
-        synchronized (mLock) {
-            mHistory.mLiveEntries.clear();
+        @SuppressWarnings("unchecked")
+        final AndroidFuture<Void> typedCompletionSignal = completionSignal;
+        try {
+            synchronized (mLock) {
+                mHistory.mLiveEntries.clear();
+            }
+            typedCompletionSignal.complete(null);
+        } catch (Throwable e) {
+            typedCompletionSignal.completeExceptionally(e);
         }
     }
 

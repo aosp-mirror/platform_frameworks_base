@@ -256,6 +256,26 @@ public final class ImsRegistrationAttributes implements Parcelable {
     }
 
     /**
+     * Get the attribute flag ATTR_REGISTRATION_TYPE_EMERGENCY.
+     * @return {@code true} if the ATTR_REGISTRATION_TYPE_EMERGENCY attribute has been set, or
+     * {@code false} if it has not been set.
+     */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_REGISTRATION_STATE)
+    public boolean getFlagRegistrationTypeEmergency() {
+        return (mImsAttributeFlags & ATTR_REGISTRATION_TYPE_EMERGENCY) != 0;
+    }
+
+    /**
+     * Get the attribute flag ATTR_VIRTUAL_FOR_ANONYMOUS_EMERGENCY_CALL.
+     * @return {@code true} if the ATTR_VIRTUAL_FOR_ANONYMOUS_EMERGENCY_CALL attribute has been set,
+     * or {@code false} if it has not been set.
+     */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_REGISTRATION_STATE)
+    public boolean getFlagVirtualRegistrationForEmergencyCall() {
+        return (mImsAttributeFlags & ATTR_VIRTUAL_FOR_ANONYMOUS_EMERGENCY_CALL) != 0;
+    }
+
+    /**
      * Gets the Set of feature tags associated with the current IMS registration, if the IMS
      * service supports supplying this information.
      * <p>

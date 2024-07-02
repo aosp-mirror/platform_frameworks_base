@@ -24,6 +24,7 @@ import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.interruption.AvalancheSuppressor.AvalancheEvent
 import javax.inject.Inject
 
 // Class to track avalanche trigger event time.
@@ -31,37 +32,41 @@ import javax.inject.Inject
 class AvalancheProvider
 @Inject
 constructor(
-        private val broadcastDispatcher: BroadcastDispatcher,
-        private val logger: VisualInterruptionDecisionLogger,
-        private val uiEventLogger: UiEventLogger,
+    private val broadcastDispatcher: BroadcastDispatcher,
+    private val logger: VisualInterruptionDecisionLogger,
+    private val uiEventLogger: UiEventLogger,
 ) {
     val TAG = "AvalancheProvider"
     val timeoutMs = 120000
     var startTime: Long = 0L
 
-    private val avalancheTriggerIntents = mutableSetOf(
+    private val avalancheTriggerIntents =
+        mutableSetOf(
             Intent.ACTION_AIRPLANE_MODE_CHANGED,
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_MANAGED_PROFILE_AVAILABLE,
             Intent.ACTION_USER_SWITCHED
-    )
+        )
 
-    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action in avalancheTriggerIntents) {
+    private val broadcastReceiver: BroadcastReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action in avalancheTriggerIntents) {
 
-                // Ignore when airplane mode turned on
-                if (intent.action == Intent.ACTION_AIRPLANE_MODE_CHANGED
-                        && intent.getBooleanExtra(/* name= */ "state", /* defaultValue */ false)) {
-                    Log.d(TAG, "broadcastReceiver: ignore airplane mode on")
-                    return
+                    // Ignore when airplane mode turned on
+                    if (
+                        intent.action == Intent.ACTION_AIRPLANE_MODE_CHANGED &&
+                            intent.getBooleanExtra(/* name= */ "state", /* defaultValue */ false)
+                    ) {
+                        Log.d(TAG, "broadcastReceiver: ignore airplane mode on")
+                        return
+                    }
+                    Log.d(TAG, "broadcastReceiver received intent.action=" + intent.action)
+                    uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_RECEIVED_TRIGGERING_EVENT)
+                    startTime = System.currentTimeMillis()
                 }
-                Log.d(TAG, "broadcastReceiver received intent.action=" + intent.action)
-                uiEventLogger.log(AvalancheSuppressor.AvalancheEvent.START);
-                startTime = System.currentTimeMillis()
             }
         }
-    }
 
     fun register() {
         val intentFilter = IntentFilter()

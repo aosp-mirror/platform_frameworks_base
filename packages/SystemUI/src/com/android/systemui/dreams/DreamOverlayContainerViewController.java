@@ -40,6 +40,7 @@ import android.view.ViewGroup;
 
 import com.android.app.animation.Interpolators;
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController;
 import com.android.systemui.ambient.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
@@ -55,6 +56,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.ViewController;
 
 import kotlinx.coroutines.CoroutineDispatcher;
@@ -72,10 +74,12 @@ import javax.inject.Named;
 public class DreamOverlayContainerViewController extends
         ViewController<DreamOverlayContainerView> implements
         LowLightTransitionCoordinator.LowLightEnterListener {
-    private final DreamOverlayStatusBarViewController mStatusBarViewController;
+    private final AmbientStatusBarViewController mStatusBarViewController;
+    private final TouchInsetManager.TouchInsetSession mTouchInsetSession;
     private final BlurUtils mBlurUtils;
     private final DreamOverlayAnimationsController mDreamOverlayAnimationsController;
     private final DreamOverlayStateController mStateController;
+
     private final LowLightTransitionCoordinator mLowLightTransitionCoordinator;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final ShadeInteractor mShadeInteractor;
@@ -188,8 +192,9 @@ public class DreamOverlayContainerViewController extends
             ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
             @Named(DreamOverlayModule.HUB_GESTURE_INDICATOR_VIEW) View hubGestureIndicatorView,
-            DreamOverlayStatusBarViewController statusBarViewController,
+            AmbientStatusBarViewController statusBarViewController,
             LowLightTransitionCoordinator lowLightTransitionCoordinator,
+            TouchInsetManager.TouchInsetSession touchInsetSession,
             BlurUtils blurUtils,
             @Main Handler handler,
             @Background CoroutineDispatcher backgroundDispatcher,
@@ -209,6 +214,7 @@ public class DreamOverlayContainerViewController extends
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
+        mTouchInsetSession = touchInsetSession;
         mBlurUtils = blurUtils;
         mDreamOverlayAnimationsController = animationsController;
         mStateController = stateController;
@@ -294,6 +300,7 @@ public class DreamOverlayContainerViewController extends
         mHandler.removeCallbacksAndMessages(null);
         mPrimaryBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
         mBouncerlessScrimController.removeCallback(mBouncerlessExpansionCallback);
+        mTouchInsetSession.clear();
 
         mDreamOverlayAnimationsController.cancelAnimations();
     }

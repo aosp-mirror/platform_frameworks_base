@@ -111,3 +111,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "animate_bubble_size_change"
+    namespace: "multitasking"
+    description: "Turns on the animation for bubble bar icons size change"
+    bug: "335575529"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

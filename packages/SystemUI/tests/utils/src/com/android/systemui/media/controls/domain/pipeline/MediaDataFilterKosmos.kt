@@ -45,5 +45,6 @@ val Kosmos.mediaDataFilter by
             logger = mediaUiEventLogger,
             mediaFlags = mediaFlags,
             mediaFilterRepository = mediaFilterRepository,
+            mediaLoadingLogger = mediaLoadingLogger,
         )
     }

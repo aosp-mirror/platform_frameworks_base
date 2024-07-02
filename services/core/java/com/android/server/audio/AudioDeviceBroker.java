@@ -275,7 +275,7 @@ public class AudioDeviceBroker {
      * Handle BluetoothHeadset intents where the action is one of
      *   {@link BluetoothHeadset#ACTION_ACTIVE_DEVICE_CHANGED} or
      *   {@link BluetoothHeadset#ACTION_AUDIO_STATE_CHANGED}.
-     * @param intent
+     * @param intent the Intent received from BT service
      */
     private void onReceiveBtEvent(@NonNull Intent intent) {
         mBtHelper.onReceiveBtEvent(intent);
@@ -296,7 +296,7 @@ public class AudioDeviceBroker {
 
     /**
      * Turns speakerphone on/off
-     * @param on
+     * @param on true to enable speakerphone
      * @param eventSource for logging purposes
      */
     /*package*/ void setSpeakerphoneOn(
@@ -310,21 +310,21 @@ public class AudioDeviceBroker {
                 on, BtHelper.SCO_MODE_UNDEFINED, eventSource, isPrivileged));
     }
 
+    private static final long SET_COMMUNICATION_DEVICE_TIMEOUT_MS = 3000;
+
+    /** synchronization for setCommunicationDevice() and getCommunicationDevice */
+    private final Object mCommunicationDeviceLock = new Object();
+    @GuardedBy("mCommunicationDeviceLock")
+    private int mCommunicationDeviceUpdateCount = 0;
+
     /**
      * Select device for use for communication use cases.
      * @param cb Client binder for death detection
      * @param uid Client uid
      * @param device Device selected or null to unselect.
      * @param eventSource for logging purposes
+     * @return false if there is no device and no communication client
      */
-
-    private static final long SET_COMMUNICATION_DEVICE_TIMEOUT_MS = 3000;
-
-    /** synchronization for setCommunicationDevice() and getCommunicationDevice */
-    private Object mCommunicationDeviceLock = new Object();
-    @GuardedBy("mCommunicationDeviceLock")
-    private int mCommunicationDeviceUpdateCount = 0;
-
     /*package*/ boolean setCommunicationDevice(IBinder cb, int uid, AudioDeviceInfo device,
                                                boolean isPrivileged, String eventSource) {
 
@@ -355,7 +355,6 @@ public class AudioDeviceBroker {
      * Sets or resets the communication device for matching client. If no client matches and the
      * request is to reset for a given device (deviceInfo.mOn == false), the method is a noop.
      * @param deviceInfo information on the device and requester {@link #CommunicationDeviceInfo}
-     * @return true if the communication device is set or reset
      */
     @GuardedBy("mDeviceStateLock")
     /*package*/ void onSetCommunicationDeviceForClient(CommunicationDeviceInfo deviceInfo) {
@@ -742,15 +741,6 @@ public class AudioDeviceBroker {
     }
 
     /**
-     * Helper method on top of isDeviceRequestedForCommunication() indicating if
-     * speakerphone ON is currently requested or not.
-     * @return true if speakerphone ON requested, false otherwise.
-     */
-    private boolean isSpeakerphoneRequested() {
-        return isDeviceRequestedForCommunication(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
-    }
-
-    /**
      * Indicates if preferred route selection for communication is speakerphone.
      * @return true if speakerphone is active, false otherwise.
      */
@@ -929,6 +919,12 @@ public class AudioDeviceBroker {
         }
 
         @Override
+        public int hashCode() {
+            // only hashing on the fields used in equals()
+            return Objects.hash(mProfile, mDevice);
+        }
+
+        @Override
         public String toString() {
             return "BtDeviceInfo: device=" + mDevice.toString()
                             + " state=" + mState
@@ -990,7 +986,7 @@ public class AudioDeviceBroker {
     /**
      * will block on mDeviceStateLock, which is held during an A2DP (dis) connection
      * not just a simple message post
-     * @param info struct with the (dis)connection information
+     * @param data struct with the (dis)connection information
      */
     /*package*/ void queueOnBluetoothActiveDeviceChanged(@NonNull BtDeviceChangedData data) {
         if (data.mPreviousDevice != null
@@ -1379,6 +1375,7 @@ public class AudioDeviceBroker {
                 mCommDevDispatchers.getBroadcastItem(i)
                         .dispatchCommunicationDeviceChanged(portId);
             } catch (RemoteException e) {
+                Log.e(TAG, "dispatchCommunicationDevice error", e);
             }
         }
         mCommDevDispatchers.finishBroadcast();
@@ -1581,6 +1578,12 @@ public class AudioDeviceBroker {
         }
 
         @Override
+        public int hashCode() {
+            // only hashing on the fields used in equals()
+            return Objects.hash(mCb.hashCode(), mUid);
+        }
+
+        @Override
         public String toString() {
             return "CommunicationDeviceInfo mCb=" + mCb.toString()
                     + " mUid=" + mUid
@@ -1600,9 +1603,9 @@ public class AudioDeviceBroker {
     //@GuardedBy("mConnectedDevices")
     /*package*/ void setBluetoothA2dpOnInt(boolean on, boolean fromA2dp, String source) {
         // for logging only
-        final String eventSource = new StringBuilder("setBluetoothA2dpOn(").append(on)
-                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
-                .append(Binder.getCallingPid()).append(" src:").append(source).toString();
+        final String eventSource = "setBluetoothA2dpOn(" + on
+                + ") from u/pid:" + Binder.getCallingUid() + "/"
+                + Binder.getCallingPid() + " src:" + source;
 
         mBluetoothA2dpEnabled.set(on);
         onSetForceUse(
@@ -2201,10 +2204,6 @@ public class AudioDeviceBroker {
 
     private void sendLMsg(int msg, int existingMsgPolicy, Object obj, int delay) {
         sendIILMsg(msg, existingMsgPolicy, 0, 0, obj, delay);
-    }
-
-    private void sendIMsg(int msg, int existingMsgPolicy, int arg, int delay) {
-        sendIILMsg(msg, existingMsgPolicy, arg, 0, null, delay);
     }
 
     private void sendMsgNoDelay(int msg, int existingMsgPolicy) {

@@ -58,8 +58,8 @@
   </string-array>
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"Indisponible"</item>
-    <item msgid="5044688398303285224">"Désactivée"</item>
-    <item msgid="8527389108867454098">"Activée"</item>
+    <item msgid="5044688398303285224">"Désactivé"</item>
+    <item msgid="8527389108867454098">"Activé"</item>
   </string-array>
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"Indisponible"</item>

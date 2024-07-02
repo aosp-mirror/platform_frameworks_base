@@ -1004,8 +1004,11 @@ public class PipTransition extends PipTransitionController {
         final Rect currentBounds = pipChange.getStartAbsBounds();
 
         int rotationDelta = deltaRotation(startRotation, endRotation);
-        Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
-                taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
+        Rect sourceHintRect = mPipOrganizer.takeSwipeSourceRectHint();
+        if (sourceHintRect == null) {
+            sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
+                    taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
+        }
         if (rotationDelta != Surface.ROTATION_0
                 && endRotation != mPipDisplayLayoutState.getRotation()) {
             // Computes the destination bounds in new rotation.
@@ -1080,6 +1083,8 @@ public class PipTransition extends PipTransitionController {
             mSurfaceTransactionHelper
                     .crop(finishTransaction, leash, destinationBounds)
                     .round(finishTransaction, leash, true /* applyCornerRadius */);
+            // Always reset to bounds animation type afterwards.
+            setEnterAnimationType(ANIM_TYPE_BOUNDS);
         } else {
             throw new RuntimeException("Unrecognized animation type: " + enterAnimationType);
         }

@@ -58,6 +58,19 @@ public interface ActivityStarter {
             @Nullable ActivityTransitionAnimator.Controller animationController);
 
     /**
+     * Similar to {@link #startPendingIntentMaybeDismissingKeyguard(PendingIntent, Runnable,
+     * ActivityTransitionAnimator.Controller)} but will always not dismiss the keyguard when
+     * launching activities. This should be avoided and other alternatives should be used.
+     */
+    void startPendingIntentWithoutDismissing(
+            PendingIntent intent,
+            boolean dismissShade,
+            Runnable intentSentUiThreadCallback,
+            @Nullable ActivityTransitionAnimator.Controller animationController,
+            @Nullable Intent fillInIntent,
+            @Nullable Bundle extraOptions);
+
+    /**
      * Similar to {@link #startPendingIntentDismissingKeyguard}, except that it supports launching
      * activities on top of the keyguard. If the activity supports {@code showOverLockscreen}, it
      * will show over keyguard without first dimissing it. If it doesn't support it, calling this

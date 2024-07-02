@@ -548,6 +548,20 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Request to power a display ON or OFF.
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public boolean requestDisplayPower(int displayId, boolean on) {
+        try {
+            return mDm.requestDisplayPower(displayId, on);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error trying to request display power " + on, ex);
+            return false;
+        }
+    }
+
     public void startWifiDisplayScan() {
         synchronized (mLock) {
             if (mWifiDisplayScanNestCount++ == 0) {

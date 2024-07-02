@@ -31,8 +31,6 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnec
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
-import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
-import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
@@ -55,9 +53,6 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
         )
 
     private val repo = FakeDeviceBasedSatelliteRepository()
-    private val deviceProvisionedRepository = FakeDeviceProvisioningRepository()
-    private val deviceProvisioningInteractor =
-        DeviceProvisioningInteractor(deviceProvisionedRepository)
     private val connectivityRepository = FakeConnectivityRepository()
     private val wifiRepository = FakeWifiRepository()
     private val wifiInteractor =
@@ -69,7 +64,6 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
             DeviceBasedSatelliteInteractor(
                 repo,
                 iconsInteractor,
-                deviceProvisioningInteractor,
                 wifiInteractor,
                 testScope.backgroundScope,
                 FakeLogBuffer.Factory.create(),
@@ -113,7 +107,6 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 DeviceBasedSatelliteInteractor(
                     repo,
                     iconsInteractor,
-                    deviceProvisioningInteractor,
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
@@ -162,7 +155,6 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 DeviceBasedSatelliteInteractor(
                     repo,
                     iconsInteractor,
-                    deviceProvisioningInteractor,
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
@@ -219,7 +211,6 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 DeviceBasedSatelliteInteractor(
                     repo,
                     iconsInteractor,
-                    deviceProvisioningInteractor,
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
@@ -538,7 +529,6 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 DeviceBasedSatelliteInteractor(
                     repo,
                     iconsInteractor,
-                    deviceProvisioningInteractor,
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),

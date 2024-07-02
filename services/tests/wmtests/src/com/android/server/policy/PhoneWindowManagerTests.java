@@ -54,6 +54,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.policy.keyguard.KeyguardServiceDelegate;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.DisplayPolicy;
 import com.android.server.wm.DisplayRotation;
@@ -68,7 +70,7 @@ import org.junit.Test;
  * Test class for {@link PhoneWindowManager}.
  *
  * Build/Install/Run:
- *  atest WmTests:PhoneWindowManagerTests
+ * atest WmTests:PhoneWindowManagerTests
  */
 @SmallTest
 public class PhoneWindowManagerTests {
@@ -78,6 +80,7 @@ public class PhoneWindowManagerTests {
 
     PhoneWindowManager mPhoneWindowManager;
     private ActivityTaskManagerInternal mAtmInternal;
+    private StatusBarManagerInternal mStatusBarManagerInternal;
     private Context mContext;
 
     @Before
@@ -90,6 +93,9 @@ public class PhoneWindowManagerTests {
         LocalServices.addService(ActivityTaskManagerInternal.class, mAtmInternal);
         mPhoneWindowManager.mActivityTaskManagerInternal = mAtmInternal;
         LocalServices.addService(WindowManagerInternal.class, mock(WindowManagerInternal.class));
+        mStatusBarManagerInternal = mock(StatusBarManagerInternal.class);
+        LocalServices.addService(StatusBarManagerInternal.class, mStatusBarManagerInternal);
+        mPhoneWindowManager.mKeyguardDelegate = mock(KeyguardServiceDelegate.class);
     }
 
     @After
@@ -98,6 +104,7 @@ public class PhoneWindowManagerTests {
         reset(mContext);
         LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
+        LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
     }
 
     @Test
@@ -204,6 +211,20 @@ public class PhoneWindowManagerTests {
         assertEquals(ADD_OKAY, mPhoneWindowManager.checkAddPermission(TYPE_ACCESSIBILITY_OVERLAY,
                 /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp));
         assertThat(outAppOp[0]).isEqualTo(AppOpsManager.OP_NONE);
+    }
+
+    @Test
+    public void userSwitching_keyboardShortcutHelperDismissed() {
+        mPhoneWindowManager.setSwitchingUser(true);
+
+        verify(mStatusBarManagerInternal).dismissKeyboardShortcutsMenu();
+    }
+
+    @Test
+    public void userNotSwitching_keyboardShortcutHelperDismissed() {
+        mPhoneWindowManager.setSwitchingUser(false);
+
+        verify(mStatusBarManagerInternal, never()).dismissKeyboardShortcutsMenu();
     }
 
     private void mockStartDockOrHome() throws Exception {

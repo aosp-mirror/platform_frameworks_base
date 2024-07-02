@@ -32,6 +32,7 @@ import android.view.WindowManager
 import android.view.WindowMetrics
 import android.view.layoutInflater
 import android.view.windowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
 import com.android.keyguard.keyguardUpdateMonitor
@@ -61,7 +62,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.any
@@ -76,7 +76,7 @@ import org.mockito.junit.MockitoRule
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class SideFpsOverlayViewBinderTest : SysuiTestCase() {
     private val kosmos = testKosmos()

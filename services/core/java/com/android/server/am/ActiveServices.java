@@ -775,7 +775,8 @@ public final class ActiveServices {
         this.mFGSLogger = new ForegroundServiceTypeLoggerModule();
         this.mActiveServiceAnrTimer = new ProcessAnrTimer(service,
                 ActivityManagerService.SERVICE_TIMEOUT_MSG,
-                "SERVICE_TIMEOUT");
+                "SERVICE_TIMEOUT",
+                new AnrTimer.Args().freeze(true));
         this.mShortFGSAnrTimer = new ServiceAnrTimer(service,
                 ActivityManagerService.SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG,
                 "SHORT_FGS_TIMEOUT");
@@ -3892,9 +3893,10 @@ public final class ActiveServices {
                 return;
             }
 
-            final long lastTopTime = sr.app.mState.getLastTopTime();
-            final long constantTimeLimit = getTimeLimitForFgsType(fgsType);
+            final boolean currentlyTop = sr.app.mState.getCurProcState() <= PROCESS_STATE_TOP;
             final long nowUptime = SystemClock.uptimeMillis();
+            final long lastTopTime = currentlyTop ? nowUptime : sr.app.mState.getLastTopTime();
+            final long constantTimeLimit = getTimeLimitForFgsType(fgsType);
             if (lastTopTime != Long.MIN_VALUE && constantTimeLimit > (nowUptime - lastTopTime)) {
                 // Discard any other messages for this service
                 mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_FGS_TIMEOUT_MSG, sr);
@@ -6290,7 +6292,7 @@ public final class ActiveServices {
                 final ComponentName clientSideComponentName =
                         cr.aliasComponent != null ? cr.aliasComponent : r.name;
                 try {
-                    cr.conn.connected(r.name, null, true);
+                    cr.conn.connected(clientSideComponentName, null, true);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failure disconnecting service " + r.shortInstanceName
                           + " to connection " + c.get(i).conn.asBinder()
@@ -7520,7 +7522,7 @@ public final class ActiveServices {
                     }
                 }
                 if (timeout != null && mAm.mProcessList.isInLruListLOSP(proc)) {
-                    mActiveServiceAnrTimer.accept(proc);
+                    final AutoCloseable timer = mActiveServiceAnrTimer.accept(proc);
                     Slog.w(TAG, "Timeout executing service: " + timeout);
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new FastPrintWriter(sw, false, 1024);
@@ -7533,7 +7535,7 @@ public final class ActiveServices {
                             LAST_ANR_LIFETIME_DURATION_MSECS);
                     long waitedMillis = now - timeout.executingStart;
                     timeoutRecord = TimeoutRecord.forServiceExec(timeout.shortInstanceName,
-                            waitedMillis);
+                            waitedMillis).setExpiredTimer(timer);
                 } else {
                     mActiveServiceAnrTimer.discard(proc);
                     final long delay = psr.shouldExecServicesFg()
@@ -7636,6 +7638,11 @@ public final class ActiveServices {
 
         ProcessAnrTimer(ActivityManagerService am, int msg, String label) {
             super(Objects.requireNonNull(am).mHandler, msg, label);
+        }
+
+        ProcessAnrTimer(ActivityManagerService am, int msg, String label,
+                @NonNull AnrTimer.Args args) {
+            super(Objects.requireNonNull(am).mHandler, msg, label, args);
         }
 
         @Override

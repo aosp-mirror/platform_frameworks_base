@@ -768,7 +768,7 @@ internal class HoistedSceneTransitionLayoutState(
 /** A [MutableSceneTransitionLayoutState] that holds the value for the current scene. */
 internal class MutableSceneTransitionLayoutStateImpl(
     initialScene: SceneKey,
-    override var transitions: SceneTransitions,
+    override var transitions: SceneTransitions = transitions {},
     private val canChangeScene: (SceneKey) -> Boolean = { true },
     stateLinks: List<StateLink> = emptyList(),
     enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,

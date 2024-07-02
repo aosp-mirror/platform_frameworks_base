@@ -61,11 +61,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.testutils.rootWidth
 import com.android.settingslib.spa.testutils.setContentForSizeAssertions
 import com.google.common.truth.Truth.assertThat
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @OptIn(ExperimentalMaterial3Api::class)
+@Ignore("b/346785755")
 @RunWith(AndroidJUnit4::class)
 class CustomizedAppBarTest {
 

@@ -336,6 +336,11 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 setTouching();
                 mStartPos = touchPos;
                 mMoving = false;
+                // This triggers initialization of things like the resize veil in preparation for
+                // showing it when the user moves the divider past the slop, and has to be done
+                // before onStartDragging() which starts the jank interaction tracing
+                mSplitLayout.updateDividerBounds(mSplitLayout.getDividerPosition(),
+                        false /* shouldUseParallaxEffect */);
                 mSplitLayout.onStartDragging();
                 break;
             case MotionEvent.ACTION_MOVE:

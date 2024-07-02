@@ -944,6 +944,9 @@
     <!-- Padding between signal cluster and battery icon -->
     <dimen name="signal_cluster_battery_padding">6dp</dimen>
 
+    <!-- end padding for battery icon in status bar -->
+    <dimen name="status_bar_battery_end_padding">0dp</dimen>
+
     <!-- Screen pinning request width -->
     <dimen name="screen_pinning_request_width">@dimen/match_parent</dimen>
     <!-- Screen pinning request nav button circle heights -->
@@ -1122,6 +1125,8 @@
     <dimen name="biometric_prompt_panel_max_width">640dp</dimen>
     <dimen name="biometric_prompt_land_small_horizontal_guideline_padding">344dp</dimen>
     <dimen name="biometric_prompt_two_pane_udfps_horizontal_guideline_padding">114dp</dimen>
+    <dimen name="biometric_prompt_two_pane_udfps_shorter_content_width">216dp</dimen>
+    <dimen name="biometric_prompt_two_pane_udfps_shorter_horizontal_guideline_padding">661dp</dimen>
     <dimen name="biometric_prompt_two_pane_medium_horizontal_guideline_padding">640dp</dimen>
     <dimen name="biometric_prompt_one_pane_medium_top_guideline_padding">119dp</dimen>
     <dimen name="biometric_prompt_one_pane_medium_horizontal_guideline_padding">0dp</dimen>

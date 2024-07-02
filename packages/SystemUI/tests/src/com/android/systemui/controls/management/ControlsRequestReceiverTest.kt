@@ -30,7 +30,7 @@ import android.os.Parcelable
 import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.ControlsProviderService
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import org.junit.Assert.assertEquals
@@ -49,7 +49,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ControlsRequestReceiverTest : SysuiTestCase() {
 
     @Mock

@@ -32,8 +32,6 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnec
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
-import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
-import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
@@ -55,9 +53,6 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
 
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
 
-    private val deviceProvisionedRepository = FakeDeviceProvisioningRepository()
-    private val deviceProvisioningInteractor =
-        DeviceProvisioningInteractor(deviceProvisionedRepository)
     private val connectivityRepository = FakeConnectivityRepository()
     private val wifiRepository = FakeWifiRepository()
     private val wifiInteractor =
@@ -72,7 +67,6 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             DeviceBasedSatelliteInteractor(
                 repo,
                 mobileIconsInteractor,
-                deviceProvisioningInteractor,
                 wifiInteractor,
                 testScope.backgroundScope,
                 FakeLogBuffer.Factory.create(),
@@ -252,14 +246,14 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // GIVEN apm is disabled
             airplaneModeRepository.setIsAirplaneMode(false)
 
-            // GIVEN device is not provisioned
-            deviceProvisionedRepository.setDeviceProvisioned(false)
+            // GIVEN satellite is not provisioned
+            repo.isSatelliteProvisioned.value = false
 
             // THEN icon is null because the device is not provisioned
             assertThat(latest).isNull()
 
-            // GIVEN device becomes provisioned
-            deviceProvisionedRepository.setDeviceProvisioned(true)
+            // GIVEN satellite becomes provisioned
+            repo.isSatelliteProvisioned.value = true
 
             // Wait for delay to be completed
             advanceTimeBy(10.seconds)
@@ -285,8 +279,8 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // GIVEN apm is disabled
             airplaneModeRepository.setIsAirplaneMode(false)
 
-            // GIVEN device is provisioned
-            deviceProvisionedRepository.setDeviceProvisioned(true)
+            // GIVEN satellite is provisioned
+            repo.isSatelliteProvisioned.value = true
 
             // GIVEN wifi network is active
             wifiRepository.setWifiNetwork(WifiNetworkModel.Active(networkId = 0, level = 1))
@@ -474,14 +468,14 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // GIVEN apm is disabled
             airplaneModeRepository.setIsAirplaneMode(false)
 
-            // GIVEN device is not provisioned
-            deviceProvisionedRepository.setDeviceProvisioned(false)
+            // GIVEN satellite is not provisioned
+            repo.isSatelliteProvisioned.value = false
 
             // THEN carrier text is null because the device is not provisioned
             assertThat(latest).isNull()
 
-            // GIVEN device becomes provisioned
-            deviceProvisionedRepository.setDeviceProvisioned(true)
+            // GIVEN satellite becomes provisioned
+            repo.isSatelliteProvisioned.value = true
 
             // Wait for delay to be completed
             advanceTimeBy(10.seconds)
@@ -508,8 +502,8 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // GIVEN apm is disabled
             airplaneModeRepository.setIsAirplaneMode(false)
 
-            // GIVEN device is provisioned
-            deviceProvisionedRepository.setDeviceProvisioned(true)
+            // GIVEN satellite is provisioned
+            repo.isSatelliteProvisioned.value = true
 
             // GIVEN wifi network is active
             wifiRepository.setWifiNetwork(WifiNetworkModel.Active(networkId = 0, level = 1))

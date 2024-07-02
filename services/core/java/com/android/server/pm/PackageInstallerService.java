@@ -1423,7 +1423,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         DevicePolicyManagerInternal dpmi =
                 LocalServices.getService(DevicePolicyManagerInternal.class);
         final boolean canSilentlyInstallPackage =
-                dpmi != null && dpmi.canSilentlyInstallPackage(callerPackageName, callingUid);
+                (dpmi != null && dpmi.canSilentlyInstallPackage(callerPackageName, callingUid))
+                        || PackageInstallerSession.isEmergencyInstallerEnabled(
+                        versionedPackage.getPackageName(), snapshot, userId, callingUid);
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
@@ -1445,15 +1447,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     .createEvent(DevicePolicyEnums.UNINSTALL_PACKAGE)
                     .setAdmin(callerPackageName)
                     .write();
-        } else if (PackageInstallerSession.isEmergencyInstallerEnabled(callerPackageName, snapshot,
-                userId, callingUid)) {
-            // Need to clear the calling identity to get DELETE_PACKAGES permission
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
         } else {
             ApplicationInfo appInfo = snapshot.getApplicationInfo(callerPackageName, 0, userId);
             if (appInfo.targetSdkVersion >= Build.VERSION_CODES.P) {

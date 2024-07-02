@@ -27,23 +27,19 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.util.mockito.eq
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.refEq
-import org.mockito.Mock
-import org.mockito.Mockito.isNull
-import org.mockito.Mockito.notNull
-import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.notNull
+import org.mockito.kotlin.refEq
+import org.mockito.kotlin.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class WidgetInteractionHandlerTest : SysuiTestCase() {
-    @Mock private lateinit var activityStarter: ActivityStarter
-
-    private lateinit var underTest: WidgetInteractionHandler
+    private val activityStarter = mock<ActivityStarter>()
 
     private val testIntent =
         PendingIntent.getActivity(
@@ -54,10 +50,8 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
         )
     private val testResponse = RemoteResponse.fromPendingIntent(testIntent)
 
-    @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
-        underTest = WidgetInteractionHandler(activityStarter)
+    private val underTest: WidgetInteractionHandler by lazy {
+        WidgetInteractionHandler(activityStarter)
     }
 
     @Test
@@ -69,14 +63,15 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
 
         underTest.onInteraction(view, testIntent, testResponse)
 
+        // Verify that we pass in a non-null animation controller
         verify(activityStarter)
             .startPendingIntentMaybeDismissingKeyguard(
-                eq(testIntent),
-                eq(false),
-                isNull(),
-                notNull(),
-                refEq(fillInIntent),
-                refEq(activityOptions.toBundle()),
+                /* intent = */ eq(testIntent),
+                /* dismissShade = */ eq(false),
+                /* intentSentUiThreadCallback = */ isNull(),
+                /* animationController = */ notNull(),
+                /* fillInIntent = */ refEq(fillInIntent),
+                /* extraOptions = */ refEq(activityOptions.toBundle()),
             )
     }
 
@@ -89,14 +84,15 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
 
         underTest.onInteraction(view, testIntent, testResponse)
 
+        // Verify null is used as the animation controller
         verify(activityStarter)
             .startPendingIntentMaybeDismissingKeyguard(
-                eq(testIntent),
-                eq(false),
-                isNull(),
-                isNull(),
-                refEq(fillInIntent),
-                refEq(activityOptions.toBundle()),
+                /* intent = */ eq(testIntent),
+                /* dismissShade = */ eq(false),
+                /* intentSentUiThreadCallback = */ isNull(),
+                /* animationController = */ isNull(),
+                /* fillInIntent = */ refEq(fillInIntent),
+                /* extraOptions = */ refEq(activityOptions.toBundle()),
             )
     }
 }

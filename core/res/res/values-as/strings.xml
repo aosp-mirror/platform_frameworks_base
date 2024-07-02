@@ -1865,7 +1865,7 @@
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
     <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"অজ্ঞাত প\'ৰ্ট্ৰেইট"</string>
-    <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"অজ্ঞাত লেণ্ডস্কেইপ"</string>
+    <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"অজ্ঞাত লেণ্ডস্কে’প"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"বাতিল কৰা হ’ল"</string>
     <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"সমল লিখাত আসোঁৱাহ"</string>
     <string name="reason_unknown" msgid="5599739807581133337">"অজ্ঞাত"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"পিনটো অতি চুটি। কমেও ৪টা সংখ্যাৰ হ\'ব লাগিব।"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"পাছত আকৌ চেষ্টা কৰক"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"স্ক্ৰীন পূৰ্ণৰূপত চাই আছে"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"বাহিৰ হ\'বলৈ ওপৰৰপৰা তললৈ ছোৱাইপ কৰক।"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুজি পালোঁ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ভালকৈ চাবলৈ ঘূৰাওক"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ভালকৈ চাবলৈ <xliff:g id="NAME">%s</xliff:g> পূৰ্ণ স্ক্ৰীনত খোলক"</string>
@@ -2407,8 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"প্ৰাইভেট স্পে’চ"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ক্ল’ন"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"সম্প্ৰদায়ৰ সৈতে জড়িত"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"প্ৰাইভেট স্পে’চ"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"সংবেদনশীল জাননী লুকুওৱা হৈছে"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"সুৰক্ষাৰ বাবে এপৰ সমল স্ক্ৰীণ শ্বেয়াৰ কৰাৰ পৰা লুকুৱাই ৰখা হৈছে"</string>

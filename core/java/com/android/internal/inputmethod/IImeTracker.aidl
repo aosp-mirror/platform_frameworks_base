@@ -18,6 +18,8 @@ package com.android.internal.inputmethod;
 
 import android.view.inputmethod.ImeTracker;
 
+import com.android.internal.infra.AndroidFuture;
+
 /**
  * Interface to the global IME tracker service, used by all client applications.
  * {@hide}
@@ -98,9 +100,12 @@ interface IImeTracker {
     /**
      * Finishes the tracking of any pending IME visibility requests. This won't stop the actual
      * requests, but allows resetting the state when starting up test runs.
+     *
+     * @param completionSignal used to signal when the tracking has been finished.
      */
     @EnforcePermission("TEST_INPUT_METHOD")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.TEST_INPUT_METHOD)")
-    oneway void finishTrackingPendingImeVisibilityRequests();
+    oneway void finishTrackingPendingImeVisibilityRequests(
+        in AndroidFuture completionSignal /* T=Void */);
 }

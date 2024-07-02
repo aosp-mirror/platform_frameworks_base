@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockMode.Companion.
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
@@ -65,6 +66,7 @@ constructor(
 
     override fun start() {
         listenForDozingToAny()
+        listenForDozingToGoneViaBiometrics()
         listenForWakeFromDozing()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
@@ -77,6 +79,35 @@ constructor(
             isKeyguardDismissible && !isKeyguardShowing
         }
 
+    private fun listenForDozingToGoneViaBiometrics() {
+        if (KeyguardWmStateRefactor.isEnabled) {
+            return
+        }
+
+        // This is separate from `listenForDozingToAny` because any delay on wake and unlock will
+        // cause a noticeable issue with animations
+        scope.launch {
+            powerInteractor.isAwake
+                .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
+                .sample(
+                    keyguardInteractor.biometricUnlockState,
+                    ::Pair,
+                )
+                .collect {
+                    (
+                        _,
+                        biometricUnlockState,
+                    ) ->
+                    if (isWakeAndUnlock(biometricUnlockState.mode)) {
+                        startTransitionTo(
+                            KeyguardState.GONE,
+                            ownerReason = "biometric wake and unlock",
+                        )
+                    }
+                }
+        }
+    }
+
     private fun listenForDozingToAny() {
         if (KeyguardWmStateRefactor.isEnabled) {
             return
@@ -87,7 +118,6 @@ constructor(
                 .debounce(50L)
                 .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
                 .sample(
-                    keyguardInteractor.biometricUnlockState,
                     keyguardInteractor.isKeyguardOccluded,
                     communalInteractor.isIdleOnCommunal,
                     canTransitionToGoneOnWake,
@@ -96,15 +126,12 @@ constructor(
                 .collect {
                     (
                         _,
-                        biometricUnlockState,
                         occluded,
                         isIdleOnCommunal,
                         canTransitionToGoneOnWake,
                         primaryBouncerShowing) ->
                     startTransitionTo(
                         if (!deviceEntryRepository.isLockscreenEnabled()) {
-                            KeyguardState.GONE
-                        } else if (isWakeAndUnlock(biometricUnlockState.mode)) {
                             KeyguardState.GONE
                         } else if (canTransitionToGoneOnWake) {
                             KeyguardState.GONE

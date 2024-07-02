@@ -121,10 +121,13 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
             val expandFraction by collectLastValue(scrollViewModel.expandFraction)
             assertThat(expandFraction).isEqualTo(0f)
+
+            fakeSceneDataSource.changeScene(toScene = Scenes.Gone)
             val isScrollable by collectLastValue(scrollViewModel.isScrollable)
             assertThat(isScrollable).isFalse()
 
             fakeSceneDataSource.pause()
+
             sceneInteractor.changeScene(Scenes.Shade, "reason")
             val transitionProgress = MutableStateFlow(0f)
             transitionState.value =
@@ -159,8 +162,10 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
             val expandFraction by collectLastValue(scrollViewModel.expandFraction)
             assertThat(expandFraction).isEqualTo(1f)
+
+            fakeSceneDataSource.changeScene(toScene = Scenes.Lockscreen)
             val isScrollable by collectLastValue(scrollViewModel.isScrollable)
-            assertThat(isScrollable).isFalse()
+            assertThat(isScrollable).isTrue()
         }
 
     @Test

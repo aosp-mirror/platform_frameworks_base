@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN is te kort. Moet ten minste 4 syfers wees."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Probeer later weer"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Bekyk tans volskerm"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Swiep van bo na onder as jy wil uitgaan."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Het dit"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Draai vir ’n beter aansig"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Maak <xliff:g id="NAME">%s</xliff:g> in volskerm oop vir ’n beter aansig"</string>
@@ -2407,8 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privaat ruimte"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Kloon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Gemeenskaplik"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privaat ruimte"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Sensitiewe kennisgewinginhoud is versteek"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Appinhoud is weens sekuriteit van skermdeling verberg"</string>

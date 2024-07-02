@@ -16,21 +16,30 @@
 
 package com.android.server.display.brightness.clamper;
 
+import static android.view.Display.STATE_ON;
+
 import static com.android.server.display.brightness.clamper.BrightnessClamper.Type;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Resources;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.DisplayDeviceConfig;
@@ -41,20 +50,30 @@ import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.feature.DisplayManagerFlags;
+import com.android.server.display.utils.AmbientFilter;
+import com.android.server.display.utils.AmbientFilterFactory;
+import com.android.server.display.utils.DebugUtils;
+import com.android.server.display.utils.SensorUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Clampers controller, all in DisplayControllerHandler
  */
 public class BrightnessClamperController {
     private static final String TAG = "BrightnessClamperController";
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.BrightnessClamperController DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
+    public static final float INVALID_LUX = -1f;
 
     private final DeviceConfigParameterProvider mDeviceConfigParameterProvider;
     private final Handler mHandler;
+    private final SensorManager mSensorManager;
     private final ClamperChangeListener mClamperChangeListenerExternal;
     private final Executor mExecutor;
     private final List<BrightnessClamper<? super DisplayDeviceData>> mClampers;
@@ -66,24 +85,55 @@ public class BrightnessClamperController {
     private float mCustomAnimationRate = DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
     @Nullable
     private Type mClamperType = null;
-    private int mAutoBrightnessState = -1;
+    private final SensorEventListener mLightSensorListener;
+    private Sensor mRegisteredLightSensor = null;
+    private Sensor mLightSensor;
+    private String mLightSensorType;
+    private String mLightSensorName;
+    private AmbientFilter mAmbientFilter;
+    private final DisplayDeviceConfig mDisplayDeviceConfig;
+    private final Resources mResources;
+    private final int mLightSensorRate;
 
+    private final Injector mInjector;
     private boolean mClamperApplied = false;
 
     public BrightnessClamperController(Handler handler,
             ClamperChangeListener clamperChangeListener, DisplayDeviceData data, Context context,
-            DisplayManagerFlags flags) {
-        this(new Injector(), handler, clamperChangeListener, data, context, flags);
+            DisplayManagerFlags flags, SensorManager sensorManager) {
+        this(null, handler, clamperChangeListener, data, context, flags, sensorManager);
     }
 
     @VisibleForTesting
     BrightnessClamperController(Injector injector, Handler handler,
             ClamperChangeListener clamperChangeListener, DisplayDeviceData data, Context context,
-            DisplayManagerFlags flags) {
-        mDeviceConfigParameterProvider = injector.getDeviceConfigParameterProvider();
+            DisplayManagerFlags flags, SensorManager sensorManager) {
+        mInjector = injector == null ? new Injector() : injector;
+        mDeviceConfigParameterProvider = mInjector.getDeviceConfigParameterProvider();
         mHandler = handler;
+        mSensorManager = sensorManager;
+        mDisplayDeviceConfig = data.mDisplayDeviceConfig;
+        mLightSensorListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                long now = SystemClock.elapsedRealtime();
+                mAmbientFilter.addValue(TimeUnit.NANOSECONDS.toMillis(event.timestamp),
+                        event.values[0]);
+                final float lux = mAmbientFilter.getEstimate(now);
+                mModifiers.forEach(mModifier -> mModifier.setAmbientLux(lux));
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                // unused
+            }
+        };
+
         mClamperChangeListenerExternal = clamperChangeListener;
         mExecutor = new HandlerExecutor(handler);
+        mResources = context.getResources();
+        mLightSensorRate = context.getResources().getInteger(
+                R.integer.config_autoBrightnessLightSensorRate);
 
         Runnable clamperChangeRunnableInternal = this::recalculateBrightnessCap;
 
@@ -93,10 +143,10 @@ public class BrightnessClamperController {
             }
         };
 
-        mClampers = injector.getClampers(handler, clamperChangeListenerInternal, data, flags,
+        mClampers = mInjector.getClampers(handler, clamperChangeListenerInternal, data, flags,
                 context);
-        mModifiers = injector.getModifiers(flags, context, handler, clamperChangeListener,
-                data.mDisplayDeviceConfig);
+        mModifiers = mInjector.getModifiers(flags, context, handler, clamperChangeListener,
+                data.mDisplayDeviceConfig, mSensorManager);
         mOnPropertiesChangedListener =
                 properties -> mClampers.forEach(BrightnessClamper::onDeviceConfigChanged);
         start();
@@ -114,7 +164,7 @@ public class BrightnessClamperController {
      * Called in DisplayControllerHandler
      */
     public DisplayBrightnessState clamp(DisplayManagerInternal.DisplayPowerRequest request,
-            float brightnessValue, boolean slowChange) {
+            float brightnessValue, boolean slowChange, int displayState) {
         float cappedBrightness = Math.min(brightnessValue, mBrightnessCap);
 
         DisplayBrightnessState.Builder builder = DisplayBrightnessState.builder();
@@ -131,6 +181,12 @@ public class BrightnessClamperController {
             mClamperApplied = true;
         } else {
             mClamperApplied = false;
+        }
+
+        if (displayState != STATE_ON) {
+            unregisterSensorListener();
+        } else {
+            maybeRegisterLightSensor();
         }
 
         for (int i = 0; i < mModifiers.size(); i++) {
@@ -175,6 +231,8 @@ public class BrightnessClamperController {
         writer.println("  mBrightnessCap: " + mBrightnessCap);
         writer.println("  mClamperType: " + mClamperType);
         writer.println("  mClamperApplied: " + mClamperApplied);
+        writer.println("  mLightSensor=" + mLightSensor);
+        writer.println("  mRegisteredLightSensor=" + mRegisteredLightSensor);
         IndentingPrintWriter ipw = new IndentingPrintWriter(writer, "    ");
         mClampers.forEach(clamper -> clamper.dump(ipw));
         mModifiers.forEach(modifier -> modifier.dump(ipw));
@@ -191,26 +249,6 @@ public class BrightnessClamperController {
         mModifiers.forEach(BrightnessStateModifier::stop);
     }
 
-    /**
-     * Notifies modifiers that ambient lux has changed.
-     * @param ambientLux current lux, debounced
-     */
-    public void onAmbientLuxChange(float ambientLux) {
-        mModifiers.forEach(modifier -> modifier.onAmbientLuxChange(ambientLux));
-    }
-
-    /**
-     * Sets the autobrightness state for clampers that need to be aware of the state.
-     * @param state autobrightness state
-     */
-    public void setAutoBrightnessState(int state) {
-        if (state == mAutoBrightnessState) {
-            return;
-        }
-        mModifiers.forEach(modifier -> modifier.setAutoBrightnessState(state));
-        mAutoBrightnessState = state;
-        recalculateBrightnessCap();
-    }
 
     // Called in DisplayControllerHandler
     private void recalculateBrightnessCap() {
@@ -243,6 +281,10 @@ public class BrightnessClamperController {
         if (!mClampers.isEmpty()) {
             mDeviceConfigParameterProvider.addOnPropertiesChangedListener(
                     mExecutor, mOnPropertiesChangedListener);
+            reloadLightSensorData(mDisplayDeviceConfig);
+            mLightSensor = mInjector.getLightSensor(
+                    mSensorManager, mLightSensorType, mLightSensorName);
+            maybeRegisterLightSensor();
         }
     }
 
@@ -281,7 +323,7 @@ public class BrightnessClamperController {
 
         List<BrightnessStateModifier> getModifiers(DisplayManagerFlags flags, Context context,
                 Handler handler, ClamperChangeListener listener,
-                DisplayDeviceConfig displayDeviceConfig) {
+                DisplayDeviceConfig displayDeviceConfig, SensorManager sensorManager) {
             List<BrightnessStateModifier> modifiers = new ArrayList<>();
             modifiers.add(new DisplayDimModifier(context));
             modifiers.add(new BrightnessLowPowerModeModifier());
@@ -292,13 +334,19 @@ public class BrightnessClamperController {
             }
             return modifiers;
         }
+
+        Sensor getLightSensor(SensorManager sensorManager, String type, String name) {
+            return SensorUtils.findSensor(sensorManager, type,
+                    name, Sensor.TYPE_LIGHT);
+        }
+
     }
 
     /**
      * Config Data for clampers
      */
     public static class DisplayDeviceData implements BrightnessThermalClamper.ThermalData,
-                BrightnessPowerClamper.PowerData,
+            BrightnessPowerClamper.PowerData,
             BrightnessWearBedtimeModeClamper.WearBedtimeModeData {
         @NonNull
         private final String mUniqueDisplayId;
@@ -366,6 +414,53 @@ public class BrightnessClamperController {
         @NonNull
         public SensorData getTempSensor() {
             return mDisplayDeviceConfig.getTempSensor();
+        }
+    }
+
+    private void maybeRegisterLightSensor() {
+        if (mModifiers.stream().noneMatch(BrightnessStateModifier::shouldListenToLightSensor)) {
+            return;
+        }
+
+        if (mRegisteredLightSensor == mLightSensor) {
+            return;
+        }
+
+        if (mRegisteredLightSensor != null) {
+            unregisterSensorListener();
+        }
+
+        mAmbientFilter = AmbientFilterFactory.createBrightnessFilter(TAG, mResources);
+        mSensorManager.registerListener(mLightSensorListener,
+                mLightSensor, mLightSensorRate * 1000, mHandler);
+        mRegisteredLightSensor = mLightSensor;
+
+        if (DEBUG) {
+            Slog.d(TAG, "maybeRegisterLightSensor");
+        }
+    }
+
+    private void unregisterSensorListener() {
+        mSensorManager.unregisterListener(mLightSensorListener);
+        mRegisteredLightSensor = null;
+        mModifiers.forEach(mModifier -> mModifier.setAmbientLux(INVALID_LUX)); // set lux to invalid
+        if (DEBUG) {
+            Slog.d(TAG, "unregisterSensorListener");
+        }
+    }
+
+    private void reloadLightSensorData(DisplayDeviceConfig displayDeviceConfig) {
+        // The displayDeviceConfig (ddc) contains display specific preferences. When loaded,
+        // it naturally falls back to the global config.xml.
+        if (displayDeviceConfig != null
+                && displayDeviceConfig.getAmbientLightSensor() != null) {
+            // This covers both the ddc and the config.xml fallback
+            mLightSensorType = displayDeviceConfig.getAmbientLightSensor().type;
+            mLightSensorName = displayDeviceConfig.getAmbientLightSensor().name;
+        } else if (mLightSensorName == null && mLightSensorType == null) {
+            mLightSensorType = mResources.getString(
+                    com.android.internal.R.string.config_displayLightSensorType);
+            mLightSensorName = "";
         }
     }
 }

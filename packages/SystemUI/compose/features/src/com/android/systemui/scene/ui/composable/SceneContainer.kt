@@ -99,7 +99,7 @@ fun SceneContainer(
                         if (sceneKey == currentSceneKey) {
                             currentDestinations
                         } else {
-                            composableScene.destinationScenes.value
+                            viewModel.resolveSceneFamilies(composableScene.destinationScenes.value)
                         },
                 ) {
                     with(composableScene) {

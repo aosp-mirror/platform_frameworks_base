@@ -712,7 +712,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // As soon as the shade starts animating out of the way, start the canned unlock animation,
         // which will finish keyguard exit when it completes. The in-window animations in the
         // Launcher window will end on their own.
-        if (fastUnlockTransition()) hideKeyguardViewAfterRemoteAnimation()
         handler.postDelayed({
             if (keyguardViewMediator.get().isShowingAndNotOccluded &&
                 !keyguardStateController.isKeyguardGoingAway) {
@@ -723,7 +722,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
             if ((wallpaperTargets?.isNotEmpty() == true)) {
                 fadeInWallpaper()
-                if (!fastUnlockTransition()) hideKeyguardViewAfterRemoteAnimation()
+                hideKeyguardViewAfterRemoteAnimation()
             } else {
                 keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                     false /* cancelled */)

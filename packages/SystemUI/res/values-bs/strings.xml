@@ -125,6 +125,26 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Dodirnite da vidite"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Greška prilikom pohranjivanja snimka ekrana"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Greška pri pokretanju snimanja ekrana"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Snimač problema"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Obrada snimka problema"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Obavještenje o aktivnosti u pozadini za sesiju prikupljanja podataka o problemu"</string>
@@ -135,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Došlo je do greške prilikom pohranjivanja snimka problema"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Došlo je do greške prilikom pokretanja snimanja problema"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Prikazivanje preko cijelog ekrana"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"Da izađete, prevucite s vrha nadolje."</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Razumijem"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Nazad"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Dugme za početnu stranicu"</string>
@@ -278,11 +299,12 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Sačuvano"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"prekid veze"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktiviranje"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Automatski uključi ponovo sutra"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Funkcije kao što su Quick Share i Pronađi moj uređaj koriste Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth će se uključiti sutra ujutro"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Dijeljenje zvuka"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Dijeljenje zvuka"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Dijeli zvuk"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Zajedničko slušanje"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> baterije"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvuk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Slušalice"</string>
@@ -361,18 +383,13 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Koji dio uređaja je imao problem?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Odaberite vrstu problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Snimanje ekrana"</string>
-    <!-- no translation found for performance (6552785217174378320) -->
-    <skip />
-    <!-- no translation found for user_interface (3712869377953950887) -->
-    <skip />
-    <!-- no translation found for thermal (6758074791325414831) -->
-    <skip />
+    <string name="performance" msgid="6552785217174378320">"Performanse"</string>
+    <string name="user_interface" msgid="3712869377953950887">"Korisnički interfejs"</string>
+    <string name="thermal" msgid="6758074791325414831">"Termalno"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Način rada jednom rukom"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Slušni aparati"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktivno"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Veza je prekinuta"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Slušni aparati"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Uparite novi uređaj"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliknite da uparite novi uređaj"</string>
@@ -1201,7 +1218,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi se trenutno ne može automatski povezati"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da promijenite mrežu, isključite ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi poboljšanja iskustva s uređajem aplikacije i usluge i dalje mogu tražiti WiFi mreže bilo kada, čak i kada je WiFi isključen. Ovo možete promijeniti u Postavkama traženja WiFi mreže. "<annotation id="link">"Promijeni"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi poboljšanja iskustva s uređajem aplikacije i usluge i dalje mogu tražiti WiFi mreže bilo kada, čak i kada je WiFi isključen. Ovo možete promijeniti u postavkama traženja WiFi-ja. "<annotation id="link">"Promijeni"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Isključi način rada u avionu"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> želi dodati sljedeću karticu u Brze postavke"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj karticu"</string>
@@ -1210,7 +1227,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# aplikacija je aktivna}one{# aplikacija je aktivna}few{# aplikacije su aktivne}other{# aplikacija je aktivno}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nove informacije"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ove aplikacije su aktivne i pokrenute, čak i kada ih ne koristite. Ovim se poboljšava njihova funkcionalnost, ali može uticati i na vijek trajanja baterije."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ove aplikacije su aktivne i pokrenute, čak i kada ih ne koristite. Ovim se poboljšava njihova funkcionalnost, ali to može uticati i na vijek trajanja baterije."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zaustavi"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zaustavljeno"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gotovo"</string>
@@ -1275,8 +1292,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"sklopljeno"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"otklopljeno"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"Baterija pisaljke <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Priključite pisaljku na punjač"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Baterija pisaljke je slaba"</string>
     <string name="video_camera" msgid="7654002575156149298">"Video kamera"</string>
@@ -1328,10 +1344,17 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Prečica pretraživanja"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona sužavanja"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona proširivanja"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ili"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Pozadinsko osvjetljenje tastature"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. nivo od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrole za dom"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Brzo pristupajte kontrolama za dom kao čuvaru ekrana"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Brzo pristupajte kontrolama za dom putem čuvara ekrana"</string>
 </resources>

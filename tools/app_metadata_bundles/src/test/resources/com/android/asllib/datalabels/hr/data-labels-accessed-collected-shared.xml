@@ -1,11 +1,8 @@
 <data-labels>
-    <data-accessed dataCategory="location"
-        dataType="approx_location"
+    <data-accessed dataType="location_data_type_approx_location"
         purposes="app_functionality" />
-    <data-collected dataCategory="location"
-        dataType="precise_location"
+    <data-collected dataType="location_data_type_precise_location"
         purposes="app_functionality" />
-    <data-shared dataCategory="personal"
-        dataType="name"
+    <data-shared dataType="personal_data_type_name"
         purposes="app_functionality" />
 </data-labels>

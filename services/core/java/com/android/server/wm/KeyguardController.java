@@ -538,13 +538,6 @@ class KeyguardController {
                 || !mWindowManager.isKeyguardSecure(mService.getCurrentUserId());
     }
 
-    /**
-     * @return Whether the dream activity is on top of default display.
-     */
-    boolean isShowingDream() {
-        return getDisplayState(DEFAULT_DISPLAY).mShowingDream;
-    }
-
     private void updateKeyguardSleepToken() {
         for (int displayNdx = mRootWindowContainer.getChildCount() - 1;
              displayNdx >= 0; displayNdx--) {
@@ -631,7 +624,6 @@ class KeyguardController {
          * Note that this can be true even if the keyguard is disabled or not showing.
          */
         private boolean mOccluded;
-        private boolean mShowingDream;
 
         private ActivityRecord mTopOccludesActivity;
         private ActivityRecord mDismissingKeyguardActivity;
@@ -669,7 +661,6 @@ class KeyguardController {
 
             mRequestDismissKeyguard = false;
             mOccluded = false;
-            mShowingDream = false;
 
             mTopOccludesActivity = null;
             mDismissingKeyguardActivity = null;
@@ -697,21 +688,18 @@ class KeyguardController {
 
                 // Only the top activity may control occluded, as we can't occlude the Keyguard
                 // if the top app doesn't want to occlude it.
-                occludedByActivity = mTopOccludesActivity != null
+                mOccluded = mTopOccludesActivity != null
                         || (mDismissingKeyguardActivity != null
                         && task.topRunningActivity() == mDismissingKeyguardActivity
                         && controller.canShowWhileOccluded(
                                 true /* dismissKeyguard */, false /* showWhenLocked */));
                 // FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD only apply for secondary display.
                 if (mDisplayId != DEFAULT_DISPLAY) {
-                    occludedByActivity |= display.canShowWithInsecureKeyguard()
+                    mOccluded |= display.canShowWithInsecureKeyguard()
                             && controller.canDismissKeyguard();
                 }
             }
 
-            mShowingDream = display.getDisplayPolicy().isShowingDreamLw() && (top != null
-                    && top.getActivityType() == ACTIVITY_TYPE_DREAM);
-            mOccluded = mShowingDream || occludedByActivity;
             mRequestDismissKeyguard = lastDismissKeyguardActivity != mDismissingKeyguardActivity
                     && !mOccluded && !mKeyguardGoingAway
                     && mDismissingKeyguardActivity != null;

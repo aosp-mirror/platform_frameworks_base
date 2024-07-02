@@ -27,6 +27,10 @@ class TouchpadTutorialViewModel : ViewModel() {
     private val _screen = MutableStateFlow(Screen.TUTORIAL_SELECTION)
     val screen: StateFlow<Screen> = _screen
 
+    fun goTo(screen: Screen) {
+        _screen.value = screen
+    }
+
     class Factory @Inject constructor() : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")

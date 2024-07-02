@@ -73,6 +73,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInte
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.keyguard.shared.model.DismissAction;
+import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.KeyguardDone;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -508,8 +509,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mListenForCanShowAlternateBouncer = null;
         if (!DeviceEntryUdfpsRefactor.isEnabled()) {
             mListenForAlternateBouncerTransitionSteps = mJavaAdapter.alwaysCollectFlow(
-                    mKeyguardTransitionInteractor.transitionStepsFromState(
-                            KeyguardState.ALTERNATE_BOUNCER),
+                    mKeyguardTransitionInteractor
+                            .transition(Edge.create(KeyguardState.ALTERNATE_BOUNCER)),
                     this::consumeFromAlternateBouncerTransitionSteps
             );
 

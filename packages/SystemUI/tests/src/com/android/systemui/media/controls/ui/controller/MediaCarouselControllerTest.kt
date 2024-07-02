@@ -193,11 +193,12 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         whenever(panel.mediaViewController).thenReturn(mediaViewController)
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         MediaPlayerData.clear()
+        FakeExecutor.exhaustExecutors(bgExecutor)
         verify(globalSettings)
-            .registerContentObserverSync(
-                eq(Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE)),
-                capture(settingsObserverCaptor)
-            )
+                .registerContentObserverSync(
+                        eq(Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE)),
+                        capture(settingsObserverCaptor)
+                )
     }
 
     @After

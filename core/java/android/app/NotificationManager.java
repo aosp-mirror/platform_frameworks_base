@@ -57,6 +57,7 @@ import android.provider.Settings.Global;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 import android.util.Log;
@@ -1824,6 +1825,18 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.getDefaultZenPolicy();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_UI)
+    public void setManualZenRuleDeviceEffects(@NonNull ZenDeviceEffects effects) {
+        INotificationManager service = getService();
+        try {
+            service.setManualZenRuleDeviceEffects(effects);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

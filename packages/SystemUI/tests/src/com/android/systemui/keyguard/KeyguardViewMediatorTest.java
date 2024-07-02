@@ -1240,6 +1240,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null);
+        mViewMediator.onBootCompleted();
     }
 
     private void captureKeyguardStateControllerCallback() {

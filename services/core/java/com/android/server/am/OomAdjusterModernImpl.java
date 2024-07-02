@@ -68,7 +68,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal.OomAdjReason;
 import android.content.pm.ServiceInfo;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -764,6 +763,11 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         super(service, processList, activeUids, adjusterThread);
     }
 
+    OomAdjusterModernImpl(ActivityManagerService service, ProcessList processList,
+            ActiveUids activeUids, Injector injector) {
+        super(service, processList, activeUids, injector);
+    }
+
     private final ProcessRecordNodes mProcessRecordProcStateNodes = new ProcessRecordNodes(
             ProcessRecordNode.NODE_TYPE_PROC_STATE, PROC_STATE_SLOTS.length);
     private final ProcessRecordNodes mProcessRecordAdjNodes = new ProcessRecordNodes(
@@ -924,8 +928,8 @@ public class OomAdjusterModernImpl extends OomAdjuster {
     @GuardedBy({"mService", "mProcLock"})
     private void fullUpdateLSP(@OomAdjReason int oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
-        final long now = SystemClock.uptimeMillis();
-        final long nowElapsed = SystemClock.elapsedRealtime();
+        final long now = mInjector.getUptimeMillis();
+        final long nowElapsed = mInjector.getElapsedRealtimeMillis();
         final long oldTime = now - mConstants.mMaxEmptyTimeMillis;
 
         mAdjSeq++;
@@ -1015,8 +1019,8 @@ public class OomAdjusterModernImpl extends OomAdjuster {
     @GuardedBy({"mService", "mProcLock"})
     private void partialUpdateLSP(@OomAdjReason int oomAdjReason, ArraySet<ProcessRecord> targets) {
         final ProcessRecord topApp = mService.getTopApp();
-        final long now = SystemClock.uptimeMillis();
-        final long nowElapsed = SystemClock.elapsedRealtime();
+        final long now = mInjector.getUptimeMillis();
+        final long nowElapsed = mInjector.getElapsedRealtimeMillis();
         final long oldTime = now - mConstants.mMaxEmptyTimeMillis;
 
         ActiveUids activeUids = mTmpUidRecords;

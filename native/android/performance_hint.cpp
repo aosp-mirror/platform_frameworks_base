@@ -51,6 +51,9 @@ struct APerformanceHintSession;
 constexpr int64_t SEND_HINT_TIMEOUT = std::chrono::nanoseconds(100ms).count();
 struct AWorkDuration : public hal::WorkDuration {};
 
+// Shared lock for the whole PerformanceHintManager and sessions
+static std::mutex sHintMutex = std::mutex{};
+
 struct APerformanceHintManager {
 public:
     static APerformanceHintManager* getInstance();
@@ -192,6 +195,7 @@ APerformanceHintSession* APerformanceHintManager::createSession(
     }
     auto out = new APerformanceHintSession(mHintManager, std::move(session), mPreferredRateNanos,
                                            initialTargetWorkDurationNanos, sessionConfig);
+    std::scoped_lock lock(sHintMutex);
     out->traceThreads(tids);
     out->traceTargetDuration(initialTargetWorkDurationNanos);
     out->tracePowerEfficient(false);
@@ -219,6 +223,7 @@ APerformanceHintSession::APerformanceHintSession(std::shared_ptr<IHintManager> h
     if (sessionConfig->id > INT32_MAX) {
         ALOGE("Session ID too large, must fit 32-bit integer");
     }
+    std::scoped_lock lock(sHintMutex);
     constexpr int numEnums =
             ndk::enum_range<hal::SessionHint>().end() - ndk::enum_range<hal::SessionHint>().begin();
     mLastHintSentTimestamp = std::vector<int64_t>(numEnums, 0);
@@ -244,6 +249,7 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
               ret.getMessage());
         return EPIPE;
     }
+    std::scoped_lock lock(sHintMutex);
     mTargetDurationNanos = targetDurationNanos;
     /**
      * Most of the workload is target_duration dependent, so now clear the cached samples
@@ -267,6 +273,7 @@ int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNano
 }
 
 int APerformanceHintSession::sendHint(SessionHint hint) {
+    std::scoped_lock lock(sHintMutex);
     if (hint < 0 || hint >= static_cast<int32_t>(mLastHintSentTimestamp.size())) {
         ALOGE("%s: invalid session hint %d", __FUNCTION__, hint);
         return EINVAL;
@@ -305,6 +312,7 @@ int APerformanceHintSession::setThreads(const int32_t* threadIds, size_t size) {
         return EPIPE;
     }
 
+    std::scoped_lock lock(sHintMutex);
     traceThreads(tids);
 
     return 0;
@@ -343,6 +351,7 @@ int APerformanceHintSession::setPreferPowerEfficiency(bool enabled) {
               ret.getMessage());
         return EPIPE;
     }
+    std::scoped_lock lock(sHintMutex);
     tracePowerEfficient(enabled);
     return OK;
 }
@@ -355,6 +364,7 @@ int APerformanceHintSession::reportActualWorkDurationInternal(AWorkDuration* wor
     int64_t actualTotalDurationNanos = workDuration->durationNanos;
     int64_t now = uptimeNanos();
     workDuration->timeStampNanos = now;
+    std::scoped_lock lock(sHintMutex);
     traceActualDuration(workDuration->durationNanos);
     mActualWorkDurations.push_back(std::move(*workDuration));
 

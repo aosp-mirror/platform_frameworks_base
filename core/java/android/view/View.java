@@ -7152,7 +7152,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setPendingCredentialRequest(@NonNull GetCredentialRequest request,
             @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
         Preconditions.checkNotNull(request, "request must not be null");
-        Preconditions.checkNotNull(callback, "request must not be null");
+        Preconditions.checkNotNull(callback, "callback must not be null");
 
         for (CredentialOption option : request.getCredentialOptions()) {
             ArrayList<AutofillId> ids = option.getCandidateQueryData()

@@ -20,6 +20,7 @@ package android.app;
 import static android.location.flags.Flags.FLAG_LOCATION_BYPASS;
 import static android.media.audio.Flags.roForegroundAudioControl;
 import static android.permission.flags.Flags.FLAG_OP_ENABLE_MOBILE_DATA_BY_USER;
+import static android.service.notification.Flags.FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS;
 import static android.view.contentprotection.flags.Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED;
 import static android.view.contentprotection.flags.Flags.FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED;
 
@@ -1597,9 +1598,19 @@ public class AppOpsManager {
      */
     public static final int OP_EMERGENCY_LOCATION = AppProtoEnums.APP_OP_EMERGENCY_LOCATION;
 
+    /**
+     * Allows apps with a NotificationListenerService to receive notifications with sensitive
+     * information
+     * <p>Apps with a NotificationListenerService without this permission will not be able
+     * to view certain types of sensitive information contained in notifications
+     * @hide
+     */
+    public static final int OP_RECEIVE_SENSITIVE_NOTIFICATIONS =
+            AppProtoEnums.APP_OP_RECEIVE_SENSITIVE_NOTIFICATIONS;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 148;
+    public static final int _NUM_OP = 149;
 
     /**
      * All app ops represented as strings.
@@ -1751,6 +1762,7 @@ public class AppOpsManager {
             OPSTR_ARCHIVE_ICON_OVERLAY,
             OPSTR_UNARCHIVAL_CONFIRMATION,
             OPSTR_EMERGENCY_LOCATION,
+            OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS,
     })
     public @interface AppOpString {}
 
@@ -2476,6 +2488,18 @@ public class AppOpsManager {
     @FlaggedApi(FLAG_LOCATION_BYPASS)
     public static final String OPSTR_EMERGENCY_LOCATION = "android:emergency_location";
 
+    /**
+     * Allows apps with a NotificationListenerService to receive notifications with sensitive
+     * information
+     * <p>Apps with a NotificationListenerService without this permission will not be able
+     * to view certain types of sensitive information contained in notifications
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
+    public static final String OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS =
+            "android:receive_sensitive_notifications";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -3055,6 +3079,9 @@ public class AppOpsManager {
                 // even though this has a permission associated, this op is only used for tracking,
                 // and the client is responsible for checking the LOCATION_BYPASS permission.
                 .setPermission(Manifest.permission.LOCATION_BYPASS).build(),
+        new AppOpInfo.Builder(OP_RECEIVE_SENSITIVE_NOTIFICATIONS,
+                OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS, "RECEIVE_SENSITIVE_NOTIFICATIONS")
+                .setDefaultMode(MODE_IGNORED).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops

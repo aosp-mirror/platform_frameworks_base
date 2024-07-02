@@ -125,6 +125,8 @@ constructor(
                 logger.d({ "Content updated: $str1" }) { str1 = models.joinToString { it.key } }
             }
 
+    override val isCommunalContentVisible: Flow<Boolean> = MutableStateFlow(true)
+
     /**
      * Freeze the content flow, when an activity is about to show, like starting a timer via voice:
      * 1) in handheld mode, use the keyguard occluded state;

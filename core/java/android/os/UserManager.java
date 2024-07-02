@@ -1907,6 +1907,31 @@ public class UserManager {
             "no_near_field_communication_radio";
 
     /**
+     * This user restriction specifies if Near-field communication is disallowed to change
+     * on the device. If Near-field communication is disallowed it cannot be changed via Settings.
+     *
+     * <p>This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile on the parent profile.
+     * In both cases, the restriction applies globally on the device and will not allow Near-field
+     * communication state being changed.
+     *
+     * <p>
+     * Near-field communication (NFC) is a radio technology that allows two devices (like your phone
+     * and a payments terminal) to communicate with each other when they're close together.
+     *
+     * <p>Default is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_USER_RESTRICTION)
+    public static final String DISALLOW_CHANGE_NEAR_FIELD_COMMUNICATION_RADIO =
+            "no_change_near_field_communication_radio";
+
+    /**
      * This user restriction specifies if Thread network is disallowed on the device. If Thread
      * network is disallowed it cannot be turned on via Settings.
      *
@@ -2007,6 +2032,7 @@ public class UserManager {
             DISALLOW_CAMERA,
             DISALLOW_CAMERA_TOGGLE,
             DISALLOW_CELLULAR_2G,
+            DISALLOW_CHANGE_NEAR_FIELD_COMMUNICATION_RADIO,
             DISALLOW_CHANGE_WIFI_STATE,
             DISALLOW_CONFIG_BLUETOOTH,
             DISALLOW_CONFIG_BRIGHTNESS,
@@ -5551,8 +5577,8 @@ public class UserManager {
     }
 
     /**
-     * Enables or disables quiet mode for a managed profile. If quiet mode is enabled, apps in a
-     * managed profile don't run, generate notifications, or consume data or battery.
+     * Enables or disables quiet mode for a profile. If quiet mode is enabled, apps in the profile
+     * don't run, generate notifications, or consume data or battery.
      * <p>
      * If a user's credential is needed to turn off quiet mode, a confirm credential screen will be
      * shown to the user.
@@ -5560,8 +5586,11 @@ public class UserManager {
      * The change may not happen instantly, however apps can listen for
      * {@link Intent#ACTION_MANAGED_PROFILE_AVAILABLE} and
      * {@link Intent#ACTION_MANAGED_PROFILE_UNAVAILABLE} broadcasts in order to be notified of
-     * the change of the quiet mode. Apps can also check the current state of quiet mode by
-     * calling {@link #isQuietModeEnabled(UserHandle)}.
+     * the change of the quiet mode for managed profile.
+     * Apps can listen to generic broadcasts {@link Intent#ACTION_PROFILE_AVAILABLE} and
+     * {@link Intent#ACTION_PROFILE_UNAVAILABLE} to be notified of the change in quiet mode for
+     * any profiles. Apps can also check the current state of quiet mode by calling
+     * {@link #isQuietModeEnabled(UserHandle)}.
      * <p>
      * The caller must either be the foreground default launcher or have one of these permissions:
      * {@code MANAGE_USERS} or {@code MODIFY_QUIET_MODE}.
@@ -5571,7 +5600,7 @@ public class UserManager {
      * @return {@code false} if user's credential is needed in order to turn off quiet mode,
      *         {@code true} otherwise
      * @throws SecurityException if the caller is invalid
-     * @throws IllegalArgumentException if {@code userHandle} is not a managed profile
+     * @throws IllegalArgumentException if {@code userHandle} is not a profile
      *
      * @see #isQuietModeEnabled(UserHandle)
      */
@@ -5636,7 +5665,6 @@ public class UserManager {
 
     /**
      * Returns whether the given profile is in quiet mode or not.
-     * Notes: Quiet mode is only supported for managed profiles.
      *
      * @param userHandle The user handle of the profile to be queried.
      * @return true if the profile is in quiet mode, false otherwise.

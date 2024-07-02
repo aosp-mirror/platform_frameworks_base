@@ -97,6 +97,10 @@ constructor(
                 // Server could throw TimeoutException, InterruptedException or ExecutionException
                 Log.e(TAG, "Error calling isAutoOnSupported", e)
                 false
+            } catch (e: NoSuchMethodError) {
+                // TODO(b/346716614): Remove this when the flag is cleaned up.
+                Log.e(TAG, "Non-existed api isAutoOnSupported", e)
+                false
             }
         }
 
@@ -109,6 +113,9 @@ constructor(
                 // Server could throw IllegalStateException, TimeoutException, InterruptedException
                 // or ExecutionException
                 Log.e(TAG, "Error calling setAutoOnEnabled", e)
+            } catch (e: NoSuchMethodError) {
+                // TODO(b/346716614): Remove this when the flag is cleaned up.
+                Log.e(TAG, "Non-existed api setAutoOn", e)
             }
         }
     }
@@ -121,6 +128,10 @@ constructor(
                 // Server could throw IllegalStateException, TimeoutException, InterruptedException
                 // or ExecutionException
                 Log.e(TAG, "Error calling isAutoOnEnabled", e)
+                false
+            } catch (e: NoSuchMethodError) {
+                // TODO(b/346716614): Remove this when the flag is cleaned up.
+                Log.e(TAG, "Non-existed api isAutoOnEnabled", e)
                 false
             }
         }

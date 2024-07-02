@@ -60,6 +60,16 @@ import java.util.Objects;
  * start times, throttling, and other useful diagnostic data can be obtained from
  * {@link ApplicationStartInfo} records.
  * </p>
+ *
+ * <p>
+*  ApplicationStartInfo objects can be retrieved via:
+*  - {@link ActivityManager#getHistoricalProcessStartReasons}, which can be called during or after
+ *      a application's startup. Using this method, an app can retrieve information about an
+ *      in-progress app start.
+*  - {@link ActivityManager#addApplicationStartInfoCompletionListener}, which returns an
+ *      ApplicationStartInfo object via a callback when the startup is complete, or immediately
+ *      if requested after the startup is complete.
+ * </p>
  */
 @FlaggedApi(Flags.FLAG_APP_START_INFO)
 public final class ApplicationStartInfo implements Parcelable {

@@ -39,7 +39,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
-import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
@@ -59,7 +58,6 @@ import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** Class that coordinates non-HBM animations during keyguard authentication. */
@@ -307,27 +305,12 @@ open class UdfpsKeyguardViewControllerLegacy(
     @VisibleForTesting
     suspend fun listenForLockscreenAodTransitions(scope: CoroutineScope): Job {
         return scope.launch {
-            transitionInteractor.dozeAmountTransition.collect { transitionStep ->
-                if (
-                    transitionStep.from == AOD &&
-                        transitionStep.transitionState == TransitionState.CANCELED
-                ) {
-                    if (transitionInteractor.startedKeyguardTransitionStep.first().to != AOD) {
-                        // If the next started transition isn't transitioning back to AOD, force
-                        // doze amount to be 0f (as if the transition to the lockscreen completed).
-                        view.onDozeAmountChanged(
-                            0f,
-                            0f,
-                            UdfpsKeyguardViewLegacy.ANIMATION_NONE,
-                        )
-                    }
-                } else {
-                    view.onDozeAmountChanged(
-                        transitionStep.value,
-                        transitionStep.value,
-                        UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
-                    )
-                }
+            transitionInteractor.transitionValue(AOD).collect {
+                view.onDozeAmountChanged(
+                    it,
+                    it,
+                    UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
+                )
             }
         }
     }

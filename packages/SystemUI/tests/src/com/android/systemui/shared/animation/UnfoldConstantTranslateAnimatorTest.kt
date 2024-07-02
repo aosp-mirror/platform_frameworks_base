@@ -27,6 +27,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.anyFloat
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
@@ -75,6 +78,22 @@ class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
         whenever(parent.findViewById<View>(START_VIEW_ID)).thenReturn(view)
 
         moveAndValidate(listOf(view to START), View.LAYOUT_DIRECTION_LTR)
+    }
+
+    @Test
+    fun initMultipleTimes_onTransition_translationIsSetOnlyOnce() {
+        animator.init(parent, MAX_TRANSLATION)
+        animator.init(parent, MAX_TRANSLATION)
+        animator.init(parent, MAX_TRANSLATION)
+
+        // GIVEN one view with a matching id
+        val view = spy(View(context))
+        whenever(parent.findViewById<View>(START_VIEW_ID)).thenReturn(view)
+        progressProvider.onTransitionStarted()
+
+        // WHEN the transition progresses, translation is updated once
+        progressProvider.onTransitionProgress(.5f)
+        verify(view).translationX = anyFloat()
     }
 
     @Test

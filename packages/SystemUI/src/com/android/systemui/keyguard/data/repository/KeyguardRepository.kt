@@ -148,7 +148,7 @@ interface KeyguardRepository {
      * Dozing/AOD is a specific type of dream, but it is also possible for other non-systemui dreams
      * to be active, such as screensavers.
      */
-    val isDreaming: Flow<Boolean>
+    val isDreaming: MutableStateFlow<Boolean>
 
     /** Observable for whether the device is dreaming with an overlay, see [DreamOverlayService] */
     val isDreamingWithOverlay: Flow<Boolean>
@@ -249,6 +249,9 @@ interface KeyguardRepository {
 
     /** Sets the current amount of alpha that should be used for rendering the keyguard. */
     fun setKeyguardAlpha(alpha: Float)
+
+    /** Whether the device is actively dreaming */
+    fun setDreaming(isDreaming: Boolean)
 
     /**
      * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
@@ -509,25 +512,7 @@ constructor(
             }
             .distinctUntilChanged()
 
-    override val isDreaming: Flow<Boolean> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : KeyguardUpdateMonitorCallback() {
-                        override fun onDreamingStateChanged(isDreaming: Boolean) {
-                            trySendWithFailureLogging(isDreaming, TAG, "updated isDreaming")
-                        }
-                    }
-                keyguardUpdateMonitor.registerCallback(callback)
-                trySendWithFailureLogging(
-                    keyguardUpdateMonitor.isDreaming,
-                    TAG,
-                    "initial isDreaming",
-                )
-
-                awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
-            }
-            .flowOn(mainDispatcher)
-            .distinctUntilChanged()
+    override val isDreaming: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override val linearDozeAmount: Flow<Float> = conflatedCallbackFlow {
         val callback =
@@ -672,6 +657,10 @@ constructor(
 
     override fun setKeyguardAlpha(alpha: Float) {
         _keyguardAlpha.value = alpha
+    }
+
+    override fun setDreaming(isDreaming: Boolean) {
+        this.isDreaming.value = isDreaming
     }
 
     override fun isUdfpsSupported(): Boolean = keyguardUpdateMonitor.isUdfpsSupported

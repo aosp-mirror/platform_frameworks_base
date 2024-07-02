@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import static android.app.Flags.FLAG_MODES_UI;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -27,8 +29,10 @@ import static junit.framework.Assert.fail;
 
 import android.app.AutomaticZenRule;
 import android.app.Flags;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.net.Uri;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.service.notification.Condition;
@@ -37,7 +41,6 @@ import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeDiff;
 import android.service.notification.ZenModeDiff.RuleDiff;
 import android.service.notification.ZenPolicy;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
 
@@ -60,8 +63,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper
 public class ZenModeDiffTest extends UiServiceTestCase {
     // Base set of exempt fields independent of fields that are enabled/disabled via flags.
@@ -90,6 +96,16 @@ public class ZenModeDiffTest extends UiServiceTestCase {
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(
+                FLAG_MODES_UI);
+    }
+
+    public ZenModeDiffTest(FlagsParameterization flags) {
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Test
     public void testRuleDiff_addRemoveSame() {
@@ -220,21 +236,35 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         ZenModeConfig c2 = new ZenModeConfig();
 
         // set c1 and c2 to have some different senders
-        c1.allowMessagesFrom = ZenModeConfig.SOURCE_STAR;
-        c2.allowMessagesFrom = ZenModeConfig.SOURCE_CONTACT;
-        c1.allowConversationsFrom = ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
-        c2.allowConversationsFrom = ZenPolicy.CONVERSATION_SENDERS_NONE;
+        NotificationManager.Policy c1Policy = c1.toNotificationPolicy();
+        c1.applyNotificationPolicy(new NotificationManager.Policy(
+                c1Policy.priorityCategories, c1Policy.priorityCallSenders,
+                c1Policy.PRIORITY_SENDERS_STARRED, c1Policy.suppressedVisualEffects,
+                c1Policy.state, ZenPolicy.CONVERSATION_SENDERS_IMPORTANT));
+
+        NotificationManager.Policy c2Policy = c1.toNotificationPolicy();
+        c2.applyNotificationPolicy(new NotificationManager.Policy(
+                c2Policy.priorityCategories, c2Policy.priorityCallSenders,
+                c2Policy.PRIORITY_SENDERS_CONTACTS, c2Policy.suppressedVisualEffects,
+                c2Policy.state, ZenPolicy.CONVERSATION_SENDERS_NONE));
 
         ZenModeDiff.ConfigDiff d = new ZenModeDiff.ConfigDiff(c1, c2);
         assertTrue(d.hasDiff());
 
-        // Diff in top-level fields
-        assertTrue(d.getDiffForField("allowMessagesFrom").hasDiff());
-        assertTrue(d.getDiffForField("allowConversationsFrom").hasDiff());
+        if (!Flags.modesUi()) {
+            // Diff in top-level fields
+            assertTrue(d.getDiffForField("allowMessagesFrom").hasDiff());
+            assertTrue(d.getDiffForField("allowConversationsFrom").hasDiff());
 
-        // Bonus testing of stringification of people senders and conversation senders
-        assertTrue(d.toString().contains("allowMessagesFrom:stars->contacts"));
-        assertTrue(d.toString().contains("allowConversationsFrom:important->none"));
+            // Bonus testing of stringification of people senders and conversation senders
+            assertTrue(d.toString().contains("allowMessagesFrom:stars->contacts"));
+            assertTrue(d.toString().contains("allowConversationsFrom:important->none"));
+        } else {
+            RuleDiff r = d.getManualRuleDiff();
+            assertNotNull(r);
+            ZenModeDiff.FieldDiff p = r.getDiffForField(RuleDiff.FIELD_ZEN_POLICY);
+            assertNotNull(p);
+        }
     }
 
     @Test

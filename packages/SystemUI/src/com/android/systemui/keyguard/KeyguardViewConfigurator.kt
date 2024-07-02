@@ -39,6 +39,7 @@ import com.android.keyguard.LegacyLockIconViewController
 import com.android.keyguard.LockIconView
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
+import com.android.systemui.biometrics.ui.binder.DeviceEntryUnlockTrackerViewBinder
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
@@ -70,6 +71,7 @@ import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import dagger.Lazy
+import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -105,6 +107,7 @@ constructor(
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
     private val clockInteractor: KeyguardClockInteractor,
     private val keyguardViewMediator: KeyguardViewMediator,
+    private val deviceEntryUnlockTrackerViewBinder: Optional<DeviceEntryUnlockTrackerViewBinder>,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -156,6 +159,9 @@ constructor(
                     smartspaceViewModel,
                 )
             }
+        }
+        if (deviceEntryUnlockTrackerViewBinder.isPresent) {
+            deviceEntryUnlockTrackerViewBinder.get().bind(keyguardRootView)
         }
     }
 

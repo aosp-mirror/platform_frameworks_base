@@ -51,25 +51,42 @@ constructor(
     override val resolvedScene: StateFlow<SceneKey> =
         combine(
                 deviceEntryInteractor.canSwipeToEnter,
+                deviceEntryInteractor.isDeviceEntered,
                 deviceEntryInteractor.isUnlocked,
                 transform = ::homeScene,
             )
             .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
+                started = SharingStarted.Eagerly,
                 initialValue =
                     homeScene(
                         deviceEntryInteractor.canSwipeToEnter.value,
+                        deviceEntryInteractor.isDeviceEntered.value,
                         deviceEntryInteractor.isUnlocked.value,
                     )
             )
 
-    private fun homeScene(canSwipeToEnter: Boolean?, isUnlocked: Boolean): SceneKey =
+    override fun includesScene(scene: SceneKey): Boolean = scene in homeScenes
+
+    private fun homeScene(
+        canSwipeToEnter: Boolean?,
+        isDeviceEntered: Boolean,
+        isUnlocked: Boolean,
+    ): SceneKey =
         when {
             canSwipeToEnter == true -> Scenes.Lockscreen
-            isUnlocked -> Scenes.Gone
-            else -> Scenes.Lockscreen
+            !isDeviceEntered -> Scenes.Lockscreen
+            !isUnlocked -> Scenes.Lockscreen
+            else -> Scenes.Gone
         }
+
+    companion object {
+        val homeScenes =
+            setOf(
+                Scenes.Gone,
+                Scenes.Lockscreen,
+            )
+    }
 }
 
 @Module

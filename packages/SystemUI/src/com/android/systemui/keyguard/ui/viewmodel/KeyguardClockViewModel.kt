@@ -32,6 +32,7 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +49,7 @@ class KeyguardClockViewModel
 constructor(
     keyguardClockInteractor: KeyguardClockInteractor,
     @Application private val applicationScope: CoroutineScope,
+    aodNotificationIconViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     notifsKeyguardInteractor: NotificationsKeyguardInteractor,
     @get:VisibleForTesting val shadeInteractor: ShadeInteractor,
     private val systemBarUtils: SystemBarUtilsProxy,
@@ -105,8 +107,13 @@ constructor(
             initialValue = false
         )
 
-    val isAodIconsVisible: StateFlow<Boolean> =
-        notifsKeyguardInteractor.areNotificationsFullyHidden.stateIn(
+    // To translate elements below smartspace in weather clock to avoid overlapping between date
+    // element in weather clock and aod icons
+    val isAodIconsVisible: StateFlow<Boolean> = combine(aodNotificationIconViewModel.icons.map {
+        it.visibleIcons.isNotEmpty()
+    }, notifsKeyguardInteractor.areNotificationsFullyHidden) { hasIcons, visible ->
+        hasIcons && visible
+    }.stateIn(
             scope = applicationScope,
             started = SharingStarted.WhileSubscribed(),
             initialValue = false

@@ -19,30 +19,27 @@ package com.android.systemui.qs.panels.ui.viewmodel
 import android.R
 import android.content.ComponentName
 import android.graphics.drawable.TestStubDrawable
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.FakeQSFactory
 import com.android.systemui.qs.FakeQSTile
 import com.android.systemui.qs.panels.data.repository.stockTilesRepository
-import com.android.systemui.qs.panels.domain.interactor.editTilesListInteractor
-import com.android.systemui.qs.panels.domain.interactor.gridLayoutMap
-import com.android.systemui.qs.panels.domain.interactor.gridLayoutTypeInteractor
-import com.android.systemui.qs.panels.domain.interactor.infiniteGridLayout
+import com.android.systemui.qs.panels.domain.interactor.FakeTileAvailabilityInteractor
+import com.android.systemui.qs.panels.domain.interactor.tileAvailabilityInteractorsMap
 import com.android.systemui.qs.panels.shared.model.EditTileData
 import com.android.systemui.qs.pipeline.data.repository.FakeInstalledTilesComponentRepository
 import com.android.systemui.qs.pipeline.data.repository.MinimumTilesFixedRepository
 import com.android.systemui.qs.pipeline.data.repository.fakeInstalledTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.fakeMinimumTilesRepository
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
-import com.android.systemui.qs.pipeline.domain.interactor.minimumTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.qsTileFactory
 import com.android.systemui.qs.tiles.impl.alarm.qsAlarmTileConfig
@@ -57,14 +54,23 @@ import com.android.systemui.qs.tiles.viewmodel.qSTileConfigProvider
 import com.android.systemui.settings.userTracker
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
-class EditModeViewModelTest : SysuiTestCase() {
+class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
     private val kosmos = testKosmos()
 
     // Only have some configurations so we can test the effect of missing configurations.
@@ -98,17 +104,7 @@ class EditModeViewModelTest : SysuiTestCase() {
         )
 
     private val underTest: EditModeViewModel by lazy {
-        with(kosmos) {
-            EditModeViewModel(
-                editTilesListInteractor,
-                currentTilesInteractor,
-                minimumTilesInteractor,
-                infiniteGridLayout,
-                applicationCoroutineScope,
-                gridLayoutTypeInteractor,
-                gridLayoutMap,
-            )
-        }
+        kosmos.editModeViewModel
     }
 
     @Before
@@ -464,18 +460,45 @@ class EditModeViewModelTest : SysuiTestCase() {
             }
         }
 
-    private companion object {
-        val drawable1 = TestStubDrawable("drawable1")
-        val appName1 = "App1"
-        val tileService1 = "Tile Service 1"
-        val component1 = ComponentName("pkg1", "srv1")
+    @Test
+    fun tileNotAvailable_notShowing() = with(kosmos) {
+        testScope.runTest {
+            val unavailableTile = "work"
+            qsTileFactory = FakeQSFactory { spec ->
+                FakeQSTile(userTracker.userId, spec != unavailableTile)
+            }
+            tileAvailabilityInteractorsMap = mapOf(
+                    unavailableTile to FakeTileAvailabilityInteractor(
+                            emptyMap<Int, Flow<Boolean>>().withDefault { flowOf(false) }
+                    )
+            )
+            val tiles by collectLastValue(underTest.tiles)
+            val currentTiles =
+                    mutableListOf(
+                            TileSpec.create("flashlight"),
+                            TileSpec.create("airplane"),
+                            TileSpec.create("alarm"),
+                    )
+            currentTilesInteractor.setTiles(currentTiles)
 
-        val drawable2 = TestStubDrawable("drawable2")
-        val appName2 = "App2"
-        val tileService2 = "Tile Service 2"
-        val component2 = ComponentName("pkg2", "srv2")
+            underTest.startEditing()
 
-        fun TileSpec.missingConfigEditTileData(): EditTileData {
+            assertThat(tiles!!.none { it.tileSpec == TileSpec.create(unavailableTile) }).isTrue()
+        }
+    }
+
+    companion object {
+        private val drawable1 = TestStubDrawable("drawable1")
+        private val appName1 = "App1"
+        private val tileService1 = "Tile Service 1"
+        private val component1 = ComponentName("pkg1", "srv1")
+
+        private val drawable2 = TestStubDrawable("drawable2")
+        private val appName2 = "App2"
+        private val tileService2 = "Tile Service 2"
+        private val component2 = ComponentName("pkg2", "srv2")
+
+        private fun TileSpec.missingConfigEditTileData(): EditTileData {
             return EditTileData(
                 tileSpec = this,
                 icon = Icon.Resource(R.drawable.star_on, ContentDescription.Loaded(spec)),
@@ -484,7 +507,7 @@ class EditModeViewModelTest : SysuiTestCase() {
             )
         }
 
-        fun QSTileConfig.toEditTileData(): EditTileData {
+        private fun QSTileConfig.toEditTileData(): EditTileData {
             return EditTileData(
                 tileSpec = tileSpec,
                 icon =
@@ -494,7 +517,7 @@ class EditModeViewModelTest : SysuiTestCase() {
             )
         }
 
-        fun Kosmos.getEditTileData(tileSpec: TileSpec): EditTileData {
+        private fun Kosmos.getEditTileData(tileSpec: TileSpec): EditTileData {
             return if (qSTileConfigProvider.hasConfig(tileSpec.spec)) {
                 qSTileConfigProvider.getConfig(tileSpec.spec).toEditTileData()
             } else {
@@ -502,6 +525,12 @@ class EditModeViewModelTest : SysuiTestCase() {
             }
         }
 
-        val minNumberOfTiles = 3
+        private val minNumberOfTiles = 3
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf(Flags.FLAG_QS_NEW_TILES)
+        }
     }
 }

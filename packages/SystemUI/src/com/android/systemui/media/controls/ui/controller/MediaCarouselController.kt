@@ -106,7 +106,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -216,7 +215,7 @@ constructor(
     private var carouselLocale: Locale? = null
 
     private val animationScaleObserver: ContentObserver =
-        object : ContentObserver(null) {
+        object : ContentObserver(executor, 0) {
             override fun onChange(selfChange: Boolean) {
                 if (!mediaFlags.isSceneContainerEnabled()) {
                     MediaPlayerData.players().forEach { it.updateAnimatorDurationScale() }
@@ -396,10 +395,12 @@ constructor(
         }
 
         // Notifies all active players about animation scale changes.
-        globalSettings.registerContentObserverSync(
-            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
-            animationScaleObserver
-        )
+        bgExecutor.execute {
+            globalSettings.registerContentObserverSync(
+                    Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+                    animationScaleObserver
+            )
+        }
     }
 
     private fun setUpListeners() {
@@ -695,7 +696,6 @@ constructor(
                 .onStart { emit(Unit) }
                 .map { getMediaLockScreenSetting() }
                 .distinctUntilChanged()
-                .flowOn(backgroundDispatcher)
                 .collectLatest {
                     allowMediaPlayerOnLockScreen = it
                     updateHostVisibility()
@@ -884,7 +884,8 @@ constructor(
                     val previousVisibleIndex =
                         MediaPlayerData.playerKeys().indexOfFirst { key -> it == key }
                     mediaCarouselScrollHandler.scrollToPlayer(previousVisibleIndex, mediaIndex)
-                } ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
+                }
+                    ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
             }
         } else if (isRtl && mediaContent.childCount > 0) {
             // In RTL, Scroll to the first player as it is the rightmost player in media carousel.

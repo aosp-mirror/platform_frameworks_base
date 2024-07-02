@@ -1870,6 +1870,11 @@ public class TrustManagerService extends SystemService {
 
         @Override
         public boolean isInSignificantPlace() {
+            if (android.security.Flags.significantPlaces()) {
+                mSignificantPlaceServiceWatcher.runOnBinder(
+                        binder -> ISignificantPlaceProvider.Stub.asInterface(binder)
+                                .onSignificantPlaceCheck());
+            }
             return mIsInSignificantPlace;
         }
 

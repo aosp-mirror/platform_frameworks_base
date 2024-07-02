@@ -7,3 +7,9 @@ flag {
   description: "Flag to enable the service"
   bug: "309689654"
 }
+flag {
+  name: "enable_token_refresh"
+  namespace: "machine_learning"
+  description: "Flag to refresh the token to the callback"
+  bug: "309689654"
+}

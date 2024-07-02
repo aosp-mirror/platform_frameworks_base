@@ -21,15 +21,12 @@ import com.android.systemui.assist.AssistManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.dagger.ShadeTouchLog
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.ShadeController.ShadeVisibilityListener
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.VibratorHelper
@@ -60,7 +57,6 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
     private val notificationStackScrollLayout: NotificationStackScrollLayout,
-    @ShadeTouchLog private val touchLog: LogBuffer,
     private val vibratorHelper: VibratorHelper,
     commandQueue: CommandQueue,
     statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
@@ -176,19 +172,14 @@ constructor(
     }
 
     override fun expandToNotifications() {
-        val shadeMode = shadeInteractor.shadeMode.value
         sceneInteractor.changeScene(
-            if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade,
-            "ShadeController.animateExpandShade"
+            SceneFamilies.NotifShade,
+            "ShadeController.animateExpandShade",
         )
     }
 
     override fun expandToQs() {
-        val shadeMode = shadeInteractor.shadeMode.value
-        sceneInteractor.changeScene(
-            if (shadeMode is ShadeMode.Dual) Scenes.QuickSettingsShade else Scenes.QuickSettings,
-            "ShadeController.animateExpandQs"
-        )
+        sceneInteractor.changeScene(SceneFamilies.QuickSettings, "ShadeController.animateExpandQs")
     }
 
     override fun setVisibilityListener(listener: ShadeVisibilityListener) {

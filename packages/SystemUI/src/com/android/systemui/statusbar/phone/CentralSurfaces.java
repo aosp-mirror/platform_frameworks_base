@@ -21,7 +21,6 @@ import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIO
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -260,9 +259,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable
     void setBouncerShowing(boolean bouncerShowing);
 
     boolean isScreenFullyOff();
-
-    @Nullable
-    Intent getEmergencyActionIntent();
 
     boolean isCameraAllowedByAdmin();
 

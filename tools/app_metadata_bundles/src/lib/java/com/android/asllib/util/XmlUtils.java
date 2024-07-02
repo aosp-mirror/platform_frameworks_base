@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class XmlUtils {
+    public static final String DATA_TYPE_SEPARATOR = "_data_type_";
+
     public static final String HR_TAG_APP_METADATA_BUNDLES = "app-metadata-bundles";
     public static final String HR_TAG_SYSTEM_APP_SAFETY_LABEL = "system-app-safety-label";
     public static final String HR_TAG_SAFETY_LABELS = "safety-labels";
@@ -38,6 +40,7 @@ public class XmlUtils {
     public static final String HR_TAG_THIRD_PARTY_VERIFICATION = "third-party-verification";
     public static final String HR_TAG_DATA_ACCESSED = "data-accessed";
     public static final String HR_TAG_DATA_COLLECTED = "data-collected";
+    public static final String HR_TAG_DATA_COLLECTED_EPHEMERAL = "data-collected-ephemeral";
     public static final String HR_TAG_DATA_SHARED = "data-shared";
     public static final String HR_ATTR_NAME = "name";
     public static final String HR_ATTR_EMAIL = "email";
@@ -52,10 +55,11 @@ public class XmlUtils {
     public static final String HR_ATTR_IS_SHARING_OPTIONAL = "isSharingOptional";
     public static final String HR_ATTR_IS_DATA_DELETABLE = "isDataDeletable";
     public static final String HR_ATTR_IS_DATA_ENCRYPTED = "isDataEncrypted";
-    public static final String HR_ATTR_EPHEMERAL = "ephemeral";
+    // public static final String HR_ATTR_EPHEMERAL = "ephemeral";
     public static final String HR_ATTR_PURPOSES = "purposes";
     public static final String HR_ATTR_VERSION = "version";
     public static final String HR_ATTR_URL = "url";
+    public static final String HR_ATTR_DECLARATION = "declaration";
     public static final String HR_ATTR_TITLE = "title";
     public static final String HR_ATTR_DESCRIPTION = "description";
     public static final String HR_ATTR_CONTAINS_ADS = "containsAds";
@@ -103,6 +107,7 @@ public class XmlUtils {
     public static final String OD_NAME_CATEGORY = "category";
     public static final String OD_NAME_VERSION = "version";
     public static final String OD_NAME_URL = "url";
+    public static final String OD_NAME_DECLARATION = "declaration";
     public static final String OD_NAME_SYSTEM_APP_SAFETY_LABEL = "system_app_safety_label";
     public static final String OD_NAME_SECURITY_LABELS = "security_labels";
     public static final String OD_NAME_THIRD_PARTY_VERIFICATION = "third_party_verification";
@@ -299,12 +304,13 @@ public class XmlUtils {
                         .toList();
         if (boolEles.size() > 1) {
             throw new MalformedXmlException(
-                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+                    String.format(
+                            "Found more than one boolean %s in %s.", nameName, ele.getTagName()));
         }
         if (boolEles.isEmpty()) {
             if (required) {
                 throw new MalformedXmlException(
-                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+                        String.format("Found no boolean %s in %s.", nameName, ele.getTagName()));
             }
             return null;
         }
@@ -329,12 +335,13 @@ public class XmlUtils {
                         .toList();
         if (longEles.size() > 1) {
             throw new MalformedXmlException(
-                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+                    String.format(
+                            "Found more than one long %s in %s.", nameName, ele.getTagName()));
         }
         if (longEles.isEmpty()) {
             if (required) {
                 throw new MalformedXmlException(
-                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+                        String.format("Found no long %s in %s.", nameName, ele.getTagName()));
             }
             return null;
         }
@@ -359,12 +366,13 @@ public class XmlUtils {
                         .toList();
         if (eles.size() > 1) {
             throw new MalformedXmlException(
-                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+                    String.format(
+                            "Found more than one string %s in %s.", nameName, ele.getTagName()));
         }
         if (eles.isEmpty()) {
             if (required) {
                 throw new MalformedXmlException(
-                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+                        String.format("Found no string %s in %s.", nameName, ele.getTagName()));
             }
             return null;
         }
@@ -386,12 +394,13 @@ public class XmlUtils {
                         .toList();
         if (eles.size() > 1) {
             throw new MalformedXmlException(
-                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+                    String.format(
+                            "Found more than one pbundle %s in %s.", nameName, ele.getTagName()));
         }
         if (eles.isEmpty()) {
             if (required) {
                 throw new MalformedXmlException(
-                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+                        String.format("Found no pbundle %s in %s.", nameName, ele.getTagName()));
             }
             return null;
         }
@@ -456,12 +465,15 @@ public class XmlUtils {
                         .toList();
         if (arrayEles.size() > 1) {
             throw new MalformedXmlException(
-                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+                    String.format(
+                            "Found more than one string array %s in %s.",
+                            nameName, ele.getTagName()));
         }
         if (arrayEles.isEmpty()) {
             if (required) {
                 throw new MalformedXmlException(
-                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+                        String.format(
+                                "Found no string array %s in %s.", nameName, ele.getTagName()));
             }
             return null;
         }

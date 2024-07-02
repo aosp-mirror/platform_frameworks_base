@@ -47,6 +47,7 @@ constructor(
             viewsIdToTranslate =
                 setOf(
                     ViewIdToTranslate(R.id.quick_settings_panel, START, filterShade),
+                    ViewIdToTranslate(R.id.qs_footer_actions, START, filterShade),
                     ViewIdToTranslate(R.id.notification_stack_scroller, END, filterShade)),
             progressProvider = progressProvider)
     }
@@ -55,9 +56,8 @@ constructor(
         UnfoldConstantTranslateAnimator(
             viewsIdToTranslate =
             setOf(
-                ViewIdToTranslate(R.id.statusIcons, END, filterShade),
+                ViewIdToTranslate(R.id.shade_header_system_icons, END, filterShade),
                 ViewIdToTranslate(R.id.privacy_container, END, filterShade),
-                ViewIdToTranslate(R.id.batteryRemainingIcon, END, filterShade),
                 ViewIdToTranslate(R.id.carrier_group, END, filterShade),
                 ViewIdToTranslate(R.id.clock, START, filterShade),
                 ViewIdToTranslate(R.id.date, START, filterShade)

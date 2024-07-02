@@ -1170,9 +1170,9 @@ public class BubbleDataTest extends ShellTestCase {
         // Verify the update has the removals.
         BubbleData.Update update = mUpdateCaptor.getValue();
         assertThat(update.removedBubbles.get(0)).isEqualTo(
-                Pair.create(mBubbleA2, Bubbles.DISMISS_USER_REMOVED));
+                Pair.create(mBubbleA2, Bubbles.DISMISS_USER_ACCOUNT_REMOVED));
         assertThat(update.removedBubbles.get(1)).isEqualTo(
-                Pair.create(mBubbleA1, Bubbles.DISMISS_USER_REMOVED));
+                Pair.create(mBubbleA1, Bubbles.DISMISS_USER_ACCOUNT_REMOVED));
 
         // Verify no A bubbles in active or overflow.
         assertBubbleListContains(mBubbleC1, mBubbleB3);

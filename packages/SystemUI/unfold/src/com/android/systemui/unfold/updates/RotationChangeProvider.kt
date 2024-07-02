@@ -27,6 +27,7 @@ import com.android.systemui.unfold.util.CallbackController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Allows to subscribe to rotation changes. Updates are provided for the display associated to
@@ -41,7 +42,7 @@ constructor(
     @Assisted private val callbackHandler: Handler,
 ) : CallbackController<RotationChangeProvider.RotationListener> {
 
-    private val listeners = mutableListOf<RotationListener>()
+    private val listeners = CopyOnWriteArrayList<RotationListener>()
 
     private val displayListener = RotationDisplayListener()
     private var lastRotation: Int? = null

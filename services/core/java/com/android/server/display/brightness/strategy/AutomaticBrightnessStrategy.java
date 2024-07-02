@@ -102,6 +102,9 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
 
     private DisplayManagerFlags mDisplayManagerFlags;
 
+    // Indicates if the current auto-brightness should be ramped up or down slowly.
+    private boolean mIsSlowChange;
+
     @VisibleForTesting
     AutomaticBrightnessStrategy(Context context, int displayId, Injector injector,
             DisplayManagerFlags displayManagerFlags) {
@@ -172,6 +175,11 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
                 isValid = true;
             }
         }
+
+        // A change is slow when the auto-brightness was already applied, and there are no new
+        // auto-brightness adjustments from an external client(e.g. Moving the slider). As such,
+        // it is important to record this value before applying the current auto-brightness.
+        mIsSlowChange = hasAppliedAutoBrightness() && !getAutoBrightnessAdjustmentChanged();
         setAutoBrightnessApplied(isValid);
         return isValid;
     }
@@ -284,8 +292,7 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
                 .setSdrBrightness(brightness)
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(getName())
-                .setIsSlowChange(hasAppliedAutoBrightness()
-                        && !getAutoBrightnessAdjustmentChanged())
+                .setIsSlowChange(mIsSlowChange)
                 .setBrightnessEvent(brightnessEvent)
                 .setBrightnessAdjustmentFlag(mAutoBrightnessAdjustmentReasonsFlags)
                 .setShouldUpdateScreenBrightnessSetting(

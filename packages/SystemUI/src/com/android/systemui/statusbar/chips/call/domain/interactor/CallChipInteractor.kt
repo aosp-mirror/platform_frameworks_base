@@ -17,16 +17,15 @@
 package com.android.systemui.statusbar.chips.call.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 /** Interactor for the ongoing phone call chip shown in the status bar. */
 @SysUISingleton
-open class CallChipInteractor @Inject constructor() : OngoingActivityChipInteractor {
-    // TODO(b/332662551): Implement this flow.
-    override val chip: StateFlow<OngoingActivityChipModel> =
-        MutableStateFlow(OngoingActivityChipModel.Hidden)
+class CallChipInteractor
+@Inject
+constructor(
+    repository: OngoingCallRepository,
+) {
+    val ongoingCallState = repository.ongoingCallState
 }

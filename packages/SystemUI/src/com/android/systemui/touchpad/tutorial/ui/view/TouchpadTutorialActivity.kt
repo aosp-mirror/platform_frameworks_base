@@ -19,6 +19,7 @@ package com.android.systemui.touchpad.tutorial.ui.view
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle.State.STARTED
@@ -33,8 +34,6 @@ import com.android.systemui.touchpad.tutorial.ui.Screen.BACK_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.Screen.HOME_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.Screen.TUTORIAL_SELECTION
 import com.android.systemui.touchpad.tutorial.ui.TouchpadTutorialViewModel
-import com.android.systemui.touchpad.tutorial.ui.TutorialSelectionViewModel
-import com.android.systemui.touchpad.tutorial.ui.TutorialSelectionViewModelFactory
 import javax.inject.Inject
 
 class TouchpadTutorialActivity
@@ -45,24 +44,28 @@ constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { PlatformTheme { TouchpadTutorialScreen(viewModelFactory) } }
+        enableEdgeToEdge()
+        setContent {
+            PlatformTheme { TouchpadTutorialScreen(viewModelFactory, closeTutorial = { finish() }) }
+        }
     }
 }
 
 @Composable
-fun TouchpadTutorialScreen(viewModelFactory: ViewModelProvider.Factory) {
+fun TouchpadTutorialScreen(viewModelFactory: ViewModelProvider.Factory, closeTutorial: () -> Unit) {
     val vm = viewModel<TouchpadTutorialViewModel>(factory = viewModelFactory)
     val activeScreen by vm.screen.collectAsStateWithLifecycle(STARTED)
     when (activeScreen) {
-        TUTORIAL_SELECTION -> TutorialSelectionScreen()
+        TUTORIAL_SELECTION ->
+            TutorialSelectionScreen(
+                onBackTutorialClicked = { vm.goTo(BACK_GESTURE) },
+                onHomeTutorialClicked = { vm.goTo(HOME_GESTURE) },
+                onActionKeyTutorialClicked = {},
+                onDoneButtonClicked = closeTutorial
+            )
         BACK_GESTURE -> BackGestureTutorialScreen()
         HOME_GESTURE -> HomeGestureTutorialScreen()
     }
-}
-
-@Composable
-fun TutorialSelectionScreen() {
-    val vm = viewModel<TutorialSelectionViewModel>(factory = TutorialSelectionViewModelFactory())
 }
 
 @Composable

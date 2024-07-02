@@ -115,7 +115,7 @@ object Shade {
     object Dimensions {
         val ScrimCornerSize = 32.dp
         val HorizontalPadding = 16.dp
-        const val ScrimOverscrollLimit = 100f
+        val ScrimOverscrollLimit = 32.dp
         const val ScrimVisibilityThreshold = 5f
     }
 

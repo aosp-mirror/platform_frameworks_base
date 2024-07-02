@@ -56,11 +56,15 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             underTest.addSelectedUserMediaEntry(userMedia)
 
             assertThat(selectedUserEntries?.get(instanceId)).isEqualTo(userMedia)
+            assertThat(underTest.hasActiveMedia()).isTrue()
+            assertThat(underTest.hasAnyMedia()).isTrue()
 
             underTest.addSelectedUserMediaEntry(userMedia.copy(active = false))
 
             assertThat(selectedUserEntries?.get(instanceId)).isNotEqualTo(userMedia)
             assertThat(selectedUserEntries?.get(instanceId)?.active).isFalse()
+            assertThat(underTest.hasActiveMedia()).isFalse()
+            assertThat(underTest.hasAnyMedia()).isTrue()
         }
 
     @Test
@@ -74,8 +78,12 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             underTest.addSelectedUserMediaEntry(userMedia)
 
             assertThat(selectedUserEntries?.get(instanceId)).isEqualTo(userMedia)
+            assertThat(underTest.hasActiveMedia()).isTrue()
+            assertThat(underTest.hasAnyMedia()).isTrue()
 
             assertThat(underTest.removeSelectedUserMediaEntry(instanceId, userMedia)).isTrue()
+            assertThat(underTest.hasActiveMedia()).isFalse()
+            assertThat(underTest.hasAnyMedia()).isFalse()
         }
 
     @Test
@@ -144,7 +152,7 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             underTest.setRecommendation(mediaRecommendation.copy(isActive = false))
 
             assertThat(smartspaceMediaData).isNotEqualTo(mediaRecommendation)
-            assertThat(smartspaceMediaData?.isActive).isFalse()
+            assertThat(underTest.isRecommendationActive()).isFalse()
         }
 
     @Test
@@ -348,6 +356,14 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
                 )
                 .inOrder()
         }
+
+    @Test
+    fun hasAnyMedia_noMediaSet_returnsFalse() =
+        testScope.runTest { assertThat(underTest.hasAnyMedia()).isFalse() }
+
+    @Test
+    fun hasActiveMedia_noMediaSet_returnsFalse() =
+        testScope.runTest { assertThat(underTest.hasActiveMedia()).isFalse() }
 
     private fun createMediaData(
         app: String,

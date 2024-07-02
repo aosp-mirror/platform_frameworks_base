@@ -39,7 +39,9 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shadeTestUtil
@@ -290,6 +292,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
                 testScope,
             )
 
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
             // Make sure the value hasn't changed since we're GONE
             keyguardRepository.topClippingBounds.value = 5
             assertThat(topClippingBounds).isEqualTo(1000)
@@ -518,11 +521,14 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
                 to = KeyguardState.GONE,
                 testScope = testScope,
             )
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
             assertThat(alpha).isEqualTo(0f)
 
-            // Try pulling down shade and ensure the value doesn't change
-            shadeTestUtil.setQsExpansion(0.5f)
-            assertThat(alpha).isEqualTo(0f)
+            if (!SceneContainerFlag.isEnabled) {
+                // Try pulling down shade and ensure the value doesn't change
+                shadeTestUtil.setQsExpansion(0.5f)
+                assertThat(alpha).isEqualTo(0f)
+            }
         }
 
     @Test

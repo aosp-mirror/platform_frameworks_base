@@ -963,7 +963,7 @@ public interface WindowManager extends ViewManager {
      * true:
      * <ul>
      *     <li>Activity has requested orientation more than two times within one-second timer
-     *     <li>Activity is not letterboxed for fixed orientation
+     *     <li>Activity is not letterboxed for fixed-orientation apps
      * </ul>
      *
      * <p>Setting this property to {@code false} informs the system that the app must be
@@ -1055,22 +1055,22 @@ public interface WindowManager extends ViewManager {
      * for an app to inform the system that the app should be excluded from the camera compatibility
      * force rotation treatment.
      *
-     * <p>The camera compatibility treatment aligns orientations of portrait app window and natural
-     * orientation of the device and set opposite to natural orientation for a landscape app
-     * window. Mismatch between them can lead to camera issues like sideways or stretched
+     * <p>The camera compatibility treatment aligns portrait app windows with the natural
+     * orientation of the device and landscape app windows opposite the device natural orientation.
+     * Mismatch between the orientations can lead to camera issues like a sideways or stretched
      * viewfinder since this is one of the strongest assumptions that apps make when they implement
-     * camera previews. Since app and natural display orientations aren't guaranteed to match, the
-     * rotation can cause letterboxing. The forced rotation is triggered as soon as app opens to
+     * camera previews. Since app and device natural orientations aren't guaranteed to match, the
+     * rotation can cause letterboxing. The forced rotation is triggered as soon as an app opens the
      * camera and is removed once camera is closed.
      *
-     * <p>The camera compatibility can be enabled by device manufacturers on displays that have the
-     * ignore requested orientation display setting enabled (enables compatibility mode for fixed
-     * orientation on Android 12 (API level 31) or higher; see
-     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
-     * letterboxing</a> for more details).
+     * <p>Camera compatibility can be enabled by device manufacturers on displays that have the
+     * ignore requested orientation display setting enabled, which enables compatibility mode for
+     * fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>With this property set to {@code true} or unset, the system may apply the force rotation
-     * treatment to fixed orientation activities. Device manufacturers can exclude packages from the
+     * treatment to fixed-orientation activities. Device manufacturers can exclude packages from the
      * treatment using their discretion to improve display compatibility.
      *
      * <p>With this property set to {@code false}, the system will not apply the force rotation
@@ -1093,12 +1093,12 @@ public interface WindowManager extends ViewManager {
      * for an app to inform the system that the app should be excluded from the activity "refresh"
      * after the camera compatibility force rotation treatment.
      *
-     * <p>The camera compatibility treatment aligns orientations of portrait app window and natural
-     * orientation of the device and set opposite to natural orientation for a landscape app
-     * window. Mismatch between them can lead to camera issues like sideways or stretched
+     * <p>The camera compatibility treatment aligns portrait app windows with the natural
+     * orientation of the device and landscape app windows opposite the device natural orientation.
+     * Mismatch between the orientations can lead to camera issues like a sideways or stretched
      * viewfinder since this is one of the strongest assumptions that apps make when they implement
-     * camera previews. Since app and natural display orientations aren't guaranteed to match, the
-     * rotation can cause letterboxing. The forced rotation is triggered as soon as app opens to
+     * camera previews. Since app and device natural orientations aren't guaranteed to match, the
+     * rotation can cause letterboxing. The forced rotation is triggered as soon as an app opens the
      * camera and is removed once camera is closed.
      *
      * <p>Force rotation is followed by the "Refresh" of the activity by going through "resumed ->
@@ -1109,10 +1109,10 @@ public interface WindowManager extends ViewManager {
      * rotation.
      *
      * <p>The camera compatibility can be enabled by device manufacturers on displays that have the
-     * ignore requested orientation display setting enabled (enables compatibility mode for fixed
-     * orientation on Android 12 (API level 31) or higher; see
-     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
-     * letterboxing</a> for more details).
+     * ignore requested orientation display setting enabled, which enables compatibility mode for
+     * fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>With this property set to {@code true} or unset, the system may "refresh" activity after
      * the force rotation treatment. Device manufacturers can exclude packages from the "refresh"
@@ -1140,12 +1140,11 @@ public interface WindowManager extends ViewManager {
      * "stopped -> resumed".
      *
      * <p>The camera compatibility treatment aligns orientations of portrait app window and natural
-     * orientation of the device and set opposite to natural orientation for a landscape app
-     * window. Mismatch between them can lead to camera issues like sideways or stretched
-     * viewfinder since this is one of the strongest assumptions that apps make when they implement
-     * camera previews. Since app and natural display orientations aren't guaranteed to match, the
-     * rotation can cause letterboxing. The forced rotation is triggered as soon as app opens to
-     * camera and is removed once camera is closed.
+     * orientation of the device. Mismatch between the orientations can lead to camera issues like a
+     * sideways or stretched viewfinder since this is one of the strongest assumptions that apps
+     * make when they implement camera previews. Since app and natural display orientations aren't
+     * guaranteed to match, the rotation can cause letterboxing. The forced rotation is triggered as
+     * soon as app opens the camera and is removed once camera is closed.
      *
      * <p>Force rotation is followed by the "Refresh" of the activity by going through "resumed ->
      * ... -> stopped -> ... -> resumed" cycle (by default) or "resumed -> paused -> resumed" cycle
@@ -1154,10 +1153,10 @@ public interface WindowManager extends ViewManager {
      * to sideways or stretching issues persisting even after force rotation.
      *
      * <p>The camera compatibility can be enabled by device manufacturers on displays that have the
-     * ignore requested orientation display setting enabled (enables compatibility mode for fixed
-     * orientation on Android 12 (API level 31) or higher; see
-     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
-     * letterboxing</a> for more details).
+     * ignore requested orientation display setting enabled, which enables compatibility mode for
+     * fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>Device manufacturers can override packages to "refresh" via "resumed -> paused -> resumed"
      * cycle using their discretion to improve display compatibility.
@@ -1203,7 +1202,7 @@ public interface WindowManager extends ViewManager {
      * <p>With this property set to {@code true} or unset, device manufacturers can override
      * orientation for the app using their discretion to improve display compatibility.
      *
-     * <p>With this property set to {@code false}, device manufactured per-app override for
+     * <p>With this property set to {@code false}, device manufacturer per-app override for
      * orientation won't be applied.
      *
      * <p><b>Syntax:</b>
@@ -1227,15 +1226,15 @@ public interface WindowManager extends ViewManager {
      * <p>When this compat override is enabled and while display is fixed to the landscape natural
      * orientation, the orientation requested by the activity will be still respected by bounds
      * resolution logic. For instance, if an activity requests portrait orientation, then activity
-     * will appear in the letterbox mode for fixed orientation with the display rotated to the
-     * lanscape natural orientation.
+     * appears in letterbox mode for fixed-orientation apps with the display rotated to the lanscape
+     * natural orientation.
      *
      * <p>The treatment is disabled by default but device manufacturers can enable the treatment
      * using their discretion to improve display compatibility on displays that have the ignore
-     * orientation request display setting enabled by OEMs on the device (enables compatibility mode
-     * for fixed orientation on Android 12 (API level 31) or higher; see
-     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
-     * letterboxing</a> for more details).
+     * orientation request display setting enabled by OEMs on the device, which enables
+     * compatibility mode for fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>With this property set to {@code true} or unset, the system wiil use landscape display
      * orientation when the following conditions are met:
@@ -1246,7 +1245,7 @@ public interface WindowManager extends ViewManager {
      *     <li>Device manufacturer enabled the treatment.
      * </ul>
      *
-     * <p>With this property set to {@code false}, device manufactured per-app override for
+     * <p>With this property set to {@code false}, device manufacturer per-app override for
      * display orientation won't be applied.
      *
      * <p><b>Syntax:</b>
@@ -1344,13 +1343,11 @@ public interface WindowManager extends ViewManager {
      * see {@link #PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE} to
      * disable the full-screen option only.
      *
-     * <p>The user override is intended to improve the app experience on devices
-     * that have the ignore orientation request display setting enabled by OEMs
-     * (enables compatibility mode for fixed orientation on Android 12 (API
-     * level 31) or higher; see
-     * <a href="https://developer.android.com/guide/topics/large-screens/large-screen-compatibility-mode">
-     * Large screen compatibility mode</a>
-     * for more details).
+     * <p>The user override is intended to improve the app experience on devices that have the
+     * ignore orientation request display setting enabled by OEMs, which enables compatibility mode
+     * for fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>To opt out of the user aspect ratio compatibility override, add this property
      * to your app manifest and set the value to {@code false}. Your app will be excluded
@@ -1383,13 +1380,11 @@ public interface WindowManager extends ViewManager {
      * <p>When users apply the full-screen compatibility override, the orientation
      * of the activity is forced to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER}.
      *
-     * <p>The user override is intended to improve the app experience on devices
-     * that have the ignore orientation request display setting enabled by OEMs
-     * (enables compatibility mode for fixed orientation on Android 12 (API
-     * level 31) or higher; see
-     * <a href="https://developer.android.com/guide/topics/large-screens/large-screen-compatibility-mode">
-     * Large screen compatibility mode</a>
-     * for more details).
+     * <p>The user override is intended to improve the app experience on devices that have the
+     * ignore orientation request display setting enabled by OEMs, which enables compatibility mode
+     * for fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>To opt out of the full-screen option of the user aspect ratio compatibility
      * override, add this property to your app manifest and set the value to {@code false}.
@@ -3312,6 +3307,11 @@ public interface WindowManager extends ViewManager {
         @UnsupportedAppUsage
         public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 1 << 6;
 
+        /** Window flag: the client side view can intercept back progress, so system does not
+         * need to pilfer pointers.
+         * {@hide} */
+        public static final int PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED = 1 << 7;
+
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
          * it is created.
@@ -3505,6 +3505,7 @@ public interface WindowManager extends ViewManager {
                 SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
                 PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION,
                 PRIVATE_FLAG_NO_MOVE_ANIMATION,
+                PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED,
                 PRIVATE_FLAG_SYSTEM_ERROR,
                 PRIVATE_FLAG_OPTIMIZE_MEASURE,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,

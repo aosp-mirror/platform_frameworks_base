@@ -20,10 +20,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 
 import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
+import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
+import com.android.internal.widget.remotecompose.core.operations.ShaderData;
+
+import java.util.HashMap;
 
 /**
  * An implementation of Context for Android.
- *
+ * <p>
  * This is used to play the RemoteCompose operations on Android.
  */
 class AndroidRemoteContext extends RemoteContext {
@@ -33,6 +38,7 @@ class AndroidRemoteContext extends RemoteContext {
             mPaintContext = new AndroidPaintContext(this, canvas);
         } else {
             // need to make sure to update the canvas for the current one
+            mPaintContext.reset();
             ((AndroidPaintContext) mPaintContext).setCanvas(canvas);
         }
         mWidth = canvas.getWidth();
@@ -50,13 +56,32 @@ class AndroidRemoteContext extends RemoteContext {
         }
     }
 
+    static class VarName {
+        String mName;
+        int mId;
+        int mType;
+
+        VarName(String name, int id, int type) {
+            mName = name;
+            mId = id;
+            mType = type;
+        }
+    }
+
+    HashMap<String, VarName> mVarNameHashMap = new HashMap<>();
+
+    @Override
+    public void loadVariableName(String varName, int varId, int varType) {
+        mVarNameHashMap.put(varName, new VarName(varName, varId, varType));
+    }
+
     /**
      * Decode a byte array into an image and cache it using the given imageId
      *
-     * @oaram imageId the id of the image
-     * @param width with of image to be loaded
+     * @param width  with of image to be loaded
      * @param height height of image to be loaded
      * @param bitmap a byte array containing the image information
+     * @oaram imageId the id of the image
      */
     @Override
     public void loadBitmap(int imageId, int width, int height, byte[] bitmap) {
@@ -70,13 +95,65 @@ class AndroidRemoteContext extends RemoteContext {
     public void loadText(int id, String text) {
         if (!mRemoteComposeState.containsId(id)) {
             mRemoteComposeState.cache(id, text);
+        } else {
+            mRemoteComposeState.update(id, text);
         }
+    }
+
+    @Override
+    public String getText(int id) {
+        return (String) mRemoteComposeState.getFromId(id);
+    }
+
+    @Override
+    public void loadFloat(int id, float value) {
+        mRemoteComposeState.updateFloat(id, value);
+    }
+
+
+    @Override
+    public void loadColor(int id, int color) {
+        mRemoteComposeState.updateColor(id, color);
+    }
+
+    @Override
+    public void loadAnimatedFloat(int id, FloatExpression animatedFloat) {
+        mRemoteComposeState.cache(id, animatedFloat);
+    }
+
+    @Override
+    public void loadShader(int id, ShaderData value) {
+        mRemoteComposeState.cache(id, value);
+    }
+
+    @Override
+    public float getFloat(int id) {
+        return (float) mRemoteComposeState.getFloat(id);
+    }
+
+    @Override
+    public int getColor(int id) {
+        return mRemoteComposeState.getColor(id);
+    }
+
+    @Override
+    public void listensTo(int id, VariableSupport variableSupport) {
+        mRemoteComposeState.listenToVar(id, variableSupport);
+    }
+
+    @Override
+    public int updateOps() {
+        return mRemoteComposeState.getOpsToUpdate(this);
+    }
+
+    @Override
+    public ShaderData getShader(int id) {
+        return (ShaderData) mRemoteComposeState.getFromId(id);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling
     ///////////////////////////////////////////////////////////////////////////////////////////////
-
 
     @Override
     public void addClickArea(int id,
@@ -87,7 +164,7 @@ class AndroidRemoteContext extends RemoteContext {
                              float bottom,
                              int metadataId) {
         String contentDescription = (String) mRemoteComposeState.getFromId(contentDescriptionId);
-        String  metadata = (String) mRemoteComposeState.getFromId(metadataId);
+        String metadata = (String) mRemoteComposeState.getFromId(metadataId);
         mDocument.addClickArea(id, contentDescription, left, top, right, bottom, metadata);
     }
 }

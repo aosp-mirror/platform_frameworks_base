@@ -3406,6 +3406,31 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    boolean requestDisplayPower(int displayId, boolean on) {
+        synchronized (mSyncRoot) {
+            final var display = mLogicalDisplayMapper.getDisplayLocked(displayId);
+            if (display == null) {
+                Slog.w(TAG, "requestDisplayPower: Cannot find a display with displayId="
+                        + displayId);
+                return false;
+            }
+            final BrightnessPair brightnessPair = mDisplayBrightnesses.get(displayId);
+            var runnable = display.getPrimaryDisplayDeviceLocked().requestDisplayStateLocked(
+                    on ? Display.STATE_ON : Display.STATE_OFF,
+                    on ? brightnessPair.brightness : PowerManager.BRIGHTNESS_OFF_FLOAT,
+                    brightnessPair.sdrBrightness,
+                    display.getDisplayOffloadSessionLocked());
+            if (runnable == null) {
+                Slog.w(TAG, "requestDisplayPower: Cannot update the power state to ON=" + on
+                        + " for a display with displayId=" + displayId + ", runnable is null");
+                return false;
+            }
+            runnable.run();
+            Slog.i(TAG, "requestDisplayPower(displayId=" + displayId + ", on=" + on + ")");
+        }
+        return true;
+    }
+
     /**
      * This is the object that everything in the display manager locks on.
      * We make it an inner class within the {@link DisplayManagerService} to so that it is
@@ -4627,6 +4652,12 @@ public final class DisplayManagerService extends SystemService {
         public void disableConnectedDisplay(int displayId) {
             disableConnectedDisplay_enforcePermission();
             DisplayManagerService.this.enableConnectedDisplay(displayId, false);
+        }
+
+        @EnforcePermission(MANAGE_DISPLAYS)
+        public boolean requestDisplayPower(int displayId, boolean on) {
+            requestDisplayPower_enforcePermission();
+            return DisplayManagerService.this.requestDisplayPower(displayId, on);
         }
 
         @EnforcePermission(RESTRICT_DISPLAY_MODES)

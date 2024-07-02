@@ -29,9 +29,9 @@ import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.res.Resources;
-import android.testing.AndroidTestingRunner;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -62,7 +62,7 @@ import java.util.List;
 import java.util.Optional;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     @Mock
     private DreamHomeControlsComplication mComplication;

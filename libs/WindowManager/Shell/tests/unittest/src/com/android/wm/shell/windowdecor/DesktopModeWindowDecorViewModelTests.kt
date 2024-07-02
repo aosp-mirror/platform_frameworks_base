@@ -22,7 +22,9 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
+import android.content.ComponentName
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
@@ -341,12 +343,28 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
-    fun testDescorationIsNotCreatedForTopTranslucentActivities() {
+    fun testDecorationIsNotCreatedForTopTranslucentActivities() {
         setFlagsRule.enableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true).apply {
             isTopActivityTransparent = true
             numActivities = 1
         }
+        onTaskOpening(task)
+
+        verify(mockDesktopModeWindowDecorFactory, never())
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+    }
+
+    @Test
+    fun testDecorationIsNotCreatedForSystemUIActivities() {
+        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
+
+        // Set task as systemUI package
+        val systemUIPackageName = context.resources.getString(
+            com.android.internal.R.string.config_systemUi)
+        val baseComponent = ComponentName(systemUIPackageName, /* class */ "")
+        task.baseActivity = baseComponent
+
         onTaskOpening(task)
 
         verify(mockDesktopModeWindowDecorFactory, never())
@@ -522,7 +540,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             displayId: Int = DEFAULT_DISPLAY,
             @WindowConfiguration.WindowingMode windowingMode: Int,
             activityType: Int = ACTIVITY_TYPE_STANDARD,
-            focused: Boolean = true
+            focused: Boolean = true,
+            activityInfo: ActivityInfo = ActivityInfo()
     ): RunningTaskInfo {
         return TestRunningTaskInfoBuilder()
                 .setDisplayId(displayId)
@@ -530,6 +549,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 .setVisible(true)
                 .setActivityType(activityType)
                 .build().apply {
+                    topActivityInfo = activityInfo
                     isFocused = focused
                 }
     }

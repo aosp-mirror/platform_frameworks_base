@@ -112,13 +112,21 @@ final class AidlTestUtils {
             android.hardware.broadcastradio.ProgramSelector hwSel,
             ProgramIdentifier logicallyTunedTo, ProgramIdentifier physicallyTunedTo,
             int hwSignalQuality) {
+        return makeHalProgramInfo(hwSel, logicallyTunedTo, physicallyTunedTo, hwSignalQuality,
+                new ProgramIdentifier[]{}, new Metadata[]{});
+    }
+
+    static ProgramInfo makeHalProgramInfo(
+            android.hardware.broadcastradio.ProgramSelector hwSel,
+            ProgramIdentifier logicallyTunedTo, ProgramIdentifier physicallyTunedTo,
+            int hwSignalQuality, ProgramIdentifier[] relatedContent, Metadata[] metadata) {
         ProgramInfo hwInfo = new ProgramInfo();
         hwInfo.selector = hwSel;
         hwInfo.logicallyTunedTo = logicallyTunedTo;
         hwInfo.physicallyTunedTo = physicallyTunedTo;
         hwInfo.signalQuality = hwSignalQuality;
-        hwInfo.relatedContent = new ProgramIdentifier[]{};
-        hwInfo.metadata = new Metadata[]{};
+        hwInfo.relatedContent = relatedContent;
+        hwInfo.metadata = metadata;
         return hwInfo;
     }
 

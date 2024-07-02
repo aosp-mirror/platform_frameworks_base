@@ -231,10 +231,14 @@ public abstract class PowerStatsCollector {
     }
 
     interface ConsumedEnergyRetriever {
-        int[] getEnergyConsumerIds(@EnergyConsumerType int energyConsumerType);
+        int[] getEnergyConsumerIds(@EnergyConsumerType int energyConsumerType, String name);
 
         @Nullable
         long[] getConsumedEnergyUws(int[] energyConsumerIds);
+
+        default int[] getEnergyConsumerIds(@EnergyConsumerType int energyConsumerType) {
+            return getEnergyConsumerIds(energyConsumerType, null);
+        }
     }
 
     static class ConsumedEnergyRetrieverImpl implements ConsumedEnergyRetriever {
@@ -245,7 +249,7 @@ public abstract class PowerStatsCollector {
         }
 
         @Override
-        public int[] getEnergyConsumerIds(int energyConsumerType) {
+        public int[] getEnergyConsumerIds(int energyConsumerType, String name) {
             if (mPowerStatsInternal == null) {
                 return new int[0];
             }
@@ -257,7 +261,8 @@ public abstract class PowerStatsCollector {
 
             List<EnergyConsumer> energyConsumers = new ArrayList<>();
             for (EnergyConsumer energyConsumer : energyConsumerInfo) {
-                if (energyConsumer.type == energyConsumerType) {
+                if (energyConsumer.type == energyConsumerType
+                        && (name == null || name.equals(energyConsumer.name))) {
                     energyConsumers.add(energyConsumer);
                 }
             }

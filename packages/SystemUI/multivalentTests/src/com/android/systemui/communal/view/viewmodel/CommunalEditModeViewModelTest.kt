@@ -38,14 +38,17 @@ import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepositor
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
@@ -86,6 +89,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
     private lateinit var mediaRepository: FakeCommunalMediaRepository
+    private lateinit var communalSceneInteractor: CommunalSceneInteractor
 
     private val testableResources = context.orCreateTestableResources
 
@@ -99,6 +103,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         widgetRepository = kosmos.fakeCommunalWidgetRepository
         smartspaceRepository = kosmos.fakeSmartspaceRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
+        communalSceneInteractor = kosmos.communalSceneInteractor
         kosmos.fakeUserTracker.set(
             userInfos = listOf(MAIN_USER_INFO),
             selectedUserIndex = 0,
@@ -107,9 +112,10 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
 
         underTest =
             CommunalEditModeViewModel(
-                kosmos.communalSceneInteractor,
+                communalSceneInteractor,
                 kosmos.communalInteractor,
                 kosmos.communalSettingsInteractor,
+                kosmos.keyguardTransitionInteractor,
                 mediaHost,
                 uiEventLogger,
                 logcatLogBuffer("CommunalEditModeViewModelTest"),
@@ -169,6 +175,22 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
 
             underTest.onReorderWidgetStart()
             assertThat(selectedKey).isNull()
+        }
+
+    @Test
+    fun isCommunalContentVisible_isTrue_whenEditModeShowing() =
+        testScope.runTest {
+            val isCommunalContentVisible by collectLastValue(underTest.isCommunalContentVisible)
+            communalSceneInteractor.setEditModeState(EditModeState.SHOWING)
+            assertThat(isCommunalContentVisible).isEqualTo(true)
+        }
+
+    @Test
+    fun isCommunalContentVisible_isFalse_whenEditModeNotShowing() =
+        testScope.runTest {
+            val isCommunalContentVisible by collectLastValue(underTest.isCommunalContentVisible)
+            communalSceneInteractor.setEditModeState(null)
+            assertThat(isCommunalContentVisible).isEqualTo(false)
         }
 
     @Test

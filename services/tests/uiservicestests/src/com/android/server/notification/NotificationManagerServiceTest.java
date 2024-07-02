@@ -208,6 +208,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
@@ -511,7 +512,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     TestableNotificationManagerService.StrongAuthTrackerFake mStrongAuthTracker;
 
     TestableFlagResolver mTestFlagResolver = new TestableFlagResolver();
-    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
     @Mock
@@ -626,7 +628,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPackageManagerClient.getPackageUidAsUser(any(), anyInt())).thenReturn(mUid);
         when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenAnswer(
                 (Answer<Boolean>) invocation -> {
-                    // TODO: b/317957802 - This is overly broad and basically makes ANY 
+                    // TODO: b/317957802 - This is overly broad and basically makes ANY
                     //  isSameApp() check pass,  requiring Mockito.reset() for meaningful
                     //  tests! Make it more precise.
                     Object[] args = invocation.getArguments();
@@ -6892,22 +6894,15 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(visitor, times(1)).accept(eq(personIcon3.getUri()));
     }
 
-    private PendingIntent getPendingIntentWithUri(Uri uri) {
-        return PendingIntent.getActivity(mContext, 0,
-                new Intent("action", uri),
-                PendingIntent.FLAG_IMMUTABLE);
-    }
-
     @Test
-    @EnableFlags({android.app.Flags.FLAG_VISIT_RISKY_URIS})
-    public void testVisitUris_callStyle_ongoingCall() {
+    public void testVisitUris_callStyle() {
         Icon personIcon = Icon.createWithContentUri("content://media/person");
         Icon verificationIcon = Icon.createWithContentUri("content://media/verification");
         Person callingPerson = new Person.Builder().setName("Someone")
                 .setIcon(personIcon)
                 .build();
-        Uri hangUpUri = Uri.parse("content://intent/hangup");
-        PendingIntent hangUpIntent = getPendingIntentWithUri(hangUpUri);
+        PendingIntent hangUpIntent = PendingIntent.getActivity(mContext, 0, new Intent(),
+                PendingIntent.FLAG_IMMUTABLE);
         Notification n = new Notification.Builder(mContext, "a")
                 .setStyle(Notification.CallStyle.forOngoingCall(callingPerson, hangUpIntent)
                         .setVerificationIcon(verificationIcon))
@@ -6920,39 +6915,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(visitor, times(1)).accept(eq(personIcon.getUri()));
         verify(visitor, times(1)).accept(eq(verificationIcon.getUri()));
-        verify(visitor, times(1)).accept(eq(hangUpUri));
         hangUpIntent.cancel();
-    }
-
-    @Test
-    @EnableFlags({android.app.Flags.FLAG_VISIT_RISKY_URIS})
-    public void testVisitUris_callStyle_incomingCall() {
-        Icon personIcon = Icon.createWithContentUri("content://media/person");
-        Icon verificationIcon = Icon.createWithContentUri("content://media/verification");
-        Person callingPerson = new Person.Builder().setName("Someone")
-                .setIcon(personIcon)
-                .build();
-        Uri answerUri = Uri.parse("content://intent/answer");
-        PendingIntent answerIntent = getPendingIntentWithUri(answerUri);
-        Uri declineUri = Uri.parse("content://intent/decline");
-        PendingIntent declineIntent = getPendingIntentWithUri(declineUri);
-        Notification n = new Notification.Builder(mContext, "a")
-                .setStyle(Notification.CallStyle.forIncomingCall(callingPerson, declineIntent,
-                                answerIntent)
-                        .setVerificationIcon(verificationIcon))
-                .setContentTitle("Calling...")
-                .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .build();
-
-        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
-        n.visitUris(visitor);
-
-        verify(visitor, times(1)).accept(eq(personIcon.getUri()));
-        verify(visitor, times(1)).accept(eq(verificationIcon.getUri()));
-        verify(visitor, times(1)).accept(eq(answerIntent.getIntent().getData()));
-        verify(visitor, times(1)).accept(eq(declineUri));
-        answerIntent.cancel();
-        declineIntent.cancel();
     }
 
     @Test
@@ -7001,87 +6964,23 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags({android.app.Flags.FLAG_VISIT_RISKY_URIS})
     public void testVisitUris_wearableExtender() {
         Icon actionIcon = Icon.createWithContentUri("content://media/action");
         Icon wearActionIcon = Icon.createWithContentUri("content://media/wearAction");
-        Uri displayIntentUri = Uri.parse("content://intent/display");
-        PendingIntent displayIntent = getPendingIntentWithUri(displayIntentUri);
-        Uri actionIntentUri = Uri.parse("content://intent/action");
-        PendingIntent actionIntent = getPendingIntentWithUri(actionIntentUri);
-        Uri wearActionIntentUri = Uri.parse("content://intent/wear");
-        PendingIntent wearActionIntent = getPendingIntentWithUri(wearActionIntentUri);
+        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent(),
+                PendingIntent.FLAG_IMMUTABLE);
         Notification n = new Notification.Builder(mContext, "a")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .addAction(
-                        new Notification.Action.Builder(actionIcon, "Hey!", actionIntent).build())
-                .extend(new Notification.WearableExtender()
-                        .setDisplayIntent(displayIntent)
-                        .addAction(new Notification.Action.Builder(wearActionIcon, "Wear!",
-                                wearActionIntent)
-                                .build()))
+                .addAction(new Notification.Action.Builder(actionIcon, "Hey!", intent).build())
+                .extend(new Notification.WearableExtender().addAction(
+                        new Notification.Action.Builder(wearActionIcon, "Wear!", intent).build()))
                 .build();
 
         Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
         n.visitUris(visitor);
 
         verify(visitor).accept(eq(actionIcon.getUri()));
-        verify(visitor, times(1)).accept(eq(actionIntentUri));
         verify(visitor).accept(eq(wearActionIcon.getUri()));
-        verify(visitor, times(1)).accept(eq(wearActionIntentUri));
-        displayIntent.cancel();
-        actionIntent.cancel();
-        wearActionIntent.cancel();
-    }
-
-    @Test
-    @EnableFlags({android.app.Flags.FLAG_VISIT_RISKY_URIS})
-    public void testVisitUris_tvExtender() {
-        Uri contentIntentUri = Uri.parse("content://intent/content");
-        PendingIntent contentIntent = getPendingIntentWithUri(contentIntentUri);
-        Uri deleteIntentUri = Uri.parse("content://intent/delete");
-        PendingIntent deleteIntent = getPendingIntentWithUri(deleteIntentUri);
-        Notification n = new Notification.Builder(mContext, "a")
-                .extend(
-                        new Notification.TvExtender()
-                                .setContentIntent(contentIntent)
-                                .setDeleteIntent(deleteIntent))
-                .build();
-
-        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
-        n.visitUris(visitor);
-
-        verify(visitor, times(1)).accept(eq(contentIntentUri));
-        verify(visitor, times(1)).accept(eq(deleteIntentUri));
-        contentIntent.cancel();
-        deleteIntent.cancel();
-    }
-
-    @Test
-    @EnableFlags({android.app.Flags.FLAG_VISIT_RISKY_URIS})
-    public void testVisitUris_carExtender() {
-        final String testParticipant = "testParticipant";
-        Uri readPendingIntentUri = Uri.parse("content://intent/read");
-        PendingIntent readPendingIntent = getPendingIntentWithUri(readPendingIntentUri);
-        Uri replyPendingIntentUri = Uri.parse("content://intent/reply");
-        PendingIntent replyPendingIntent = getPendingIntentWithUri(replyPendingIntentUri);
-        final RemoteInput testRemoteInput = new RemoteInput.Builder("key").build();
-
-        Notification n = new Notification.Builder(mContext, "a")
-                .extend(new Notification.CarExtender().setUnreadConversation(
-                        new Notification.CarExtender.Builder(testParticipant)
-                                .setReadPendingIntent(readPendingIntent)
-                                .setReplyAction(replyPendingIntent, testRemoteInput)
-                                .build()))
-                .build();
-
-        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
-        n.visitUris(visitor);
-
-        verify(visitor, times(1)).accept(eq(readPendingIntentUri));
-        verify(visitor, times(1)).accept(eq(replyPendingIntentUri));
-        readPendingIntent.cancel();
-        replyPendingIntent.cancel();
     }
 
     @Test
@@ -12171,6 +12070,127 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(mBinderService.getNotificationChannelsBypassingDnd(mPkg, mUid).getList())
                 .isEmpty();
         verify(mPreferencesHelper, never()).getNotificationChannelsBypassingDnd(mPkg, mUid);
+    }
+
+    @Test
+    public void testGetPackagesBypassingDnd_empty() throws RemoteException {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        List<String> result = mBinderService.getPackagesBypassingDnd(mUserId, true);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testGetPackagesBypassingDnd_excludeConversationChannels() throws RemoteException {
+        mService.setPreferencesHelper(mPreferencesHelper);
+
+        // Set packages
+        PackageInfo pkg0 = new PackageInfo();
+        pkg0.packageName = "pkg0";
+        pkg0.applicationInfo = new ApplicationInfo();
+        pkg0.applicationInfo.uid = mUid;
+        PackageInfo pkg1 = new PackageInfo();
+        pkg1.packageName = "pkg1";
+        pkg1.applicationInfo = new ApplicationInfo();
+        pkg1.applicationInfo.uid = mUid;
+        PackageInfo pkg2 = new PackageInfo();
+        pkg2.packageName = "pkg2";
+        pkg2.applicationInfo = new ApplicationInfo();
+        pkg2.applicationInfo.uid = mUid;
+
+        when(mPackageManagerClient.getInstalledPackagesAsUser(0, mUserId))
+                .thenReturn(List.of(pkg0, pkg1, pkg2));
+
+        // Conversation channels
+        NotificationChannel nc0 = new NotificationChannel("id0", "id0",
+                NotificationManager.IMPORTANCE_HIGH);
+        nc0.setConversationId("parentChannel", "conversationId");
+
+        // Demoted conversation channel
+        NotificationChannel nc1 = new NotificationChannel("id1", "id1",
+                NotificationManager.IMPORTANCE_HIGH);
+        nc1.setConversationId("parentChannel", "conversationId");
+        nc1.setDemoted(true);
+
+        // Non-conversation channels
+        NotificationChannel nc2 = new NotificationChannel("id2", "id2",
+                NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel nc3 = new NotificationChannel("id3", "id3",
+                NotificationManager.IMPORTANCE_HIGH);
+
+        ParceledListSlice<NotificationChannel> pls0 =
+                new ParceledListSlice(ImmutableList.of(nc0));
+        ParceledListSlice<NotificationChannel> pls1 =
+                new ParceledListSlice(ImmutableList.of(nc1));
+        ParceledListSlice<NotificationChannel> pls2 =
+                new ParceledListSlice(ImmutableList.of(nc2, nc3));
+
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg0", mUid))
+                .thenReturn(pls0);
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg1", mUid))
+                .thenReturn(pls1);
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg2", mUid))
+                .thenReturn(pls2);
+
+        List<String> result = mBinderService.getPackagesBypassingDnd(mUserId, false);
+
+        assertThat(result).containsExactly("pkg1", "pkg2");
+    }
+
+    @Test
+    public void testGetPackagesBypassingDnd_includeConversationChannels() throws RemoteException {
+        mService.setPreferencesHelper(mPreferencesHelper);
+
+        // Set packages
+        PackageInfo pkg0 = new PackageInfo();
+        pkg0.packageName = "pkg0";
+        pkg0.applicationInfo = new ApplicationInfo();
+        pkg0.applicationInfo.uid = mUid;
+        PackageInfo pkg1 = new PackageInfo();
+        pkg1.packageName = "pkg1";
+        pkg1.applicationInfo = new ApplicationInfo();
+        pkg1.applicationInfo.uid = mUid;
+        PackageInfo pkg2 = new PackageInfo();
+        pkg2.packageName = "pkg2";
+        pkg2.applicationInfo = new ApplicationInfo();
+        pkg2.applicationInfo.uid = mUid;
+
+        when(mPackageManagerClient.getInstalledPackagesAsUser(0, mUserId))
+                .thenReturn(List.of(pkg0, pkg1, pkg2));
+
+        // Conversation channels
+        NotificationChannel nc0 = new NotificationChannel("id0", "id0",
+                NotificationManager.IMPORTANCE_HIGH);
+        nc0.setConversationId("parentChannel", "conversationId");
+
+        // Demoted conversation channel
+        NotificationChannel nc1 = new NotificationChannel("id1", "id1",
+                NotificationManager.IMPORTANCE_HIGH);
+        nc1.setConversationId("parentChannel", "conversationId");
+        nc1.setDemoted(true);
+
+        // Non-conversation channels
+        NotificationChannel nc2 = new NotificationChannel("id2", "id2",
+                NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel nc3 = new NotificationChannel("id3", "id3",
+                NotificationManager.IMPORTANCE_HIGH);
+
+        ParceledListSlice<NotificationChannel> pls0 =
+                new ParceledListSlice(ImmutableList.of(nc0));
+        ParceledListSlice<NotificationChannel> pls1 =
+                new ParceledListSlice(ImmutableList.of(nc1));
+        ParceledListSlice<NotificationChannel> pls2 =
+                new ParceledListSlice(ImmutableList.of(nc2, nc3));
+
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg0", mUid))
+                .thenReturn(pls0);
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg1", mUid))
+                .thenReturn(pls1);
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg2", mUid))
+                .thenReturn(pls2);
+
+        List<String> result = mBinderService.getPackagesBypassingDnd(mUserId, true);
+
+        assertThat(result).containsExactly("pkg0", "pkg1", "pkg2");
     }
 
     @Test

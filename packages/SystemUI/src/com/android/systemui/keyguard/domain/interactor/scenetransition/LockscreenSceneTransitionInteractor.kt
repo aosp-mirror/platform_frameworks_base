@@ -131,7 +131,7 @@ constructor(
         val newTransition =
             TransitionInfo(
                 ownerName = this::class.java.simpleName,
-                from = transitionInteractor.currentTransitionInfo.value.to,
+                from = transitionInteractor.currentTransitionInfoInternal.value.to,
                 to = state,
                 animator = null,
                 modeOnCanceled = TransitionModeOnCanceled.REVERSE
@@ -150,7 +150,7 @@ constructor(
     private suspend fun handleTransition(transition: ObservableTransitionState.Transition) {
         if (transition.fromScene == Scenes.Lockscreen) {
             if (currentTransitionId != null) {
-                val currentToState = transitionInteractor.currentTransitionInfo.value.to
+                val currentToState = transitionInteractor.currentTransitionInfoInternal.value.to
                 if (currentToState == UNDEFINED) {
                     transitionKtfTo(transitionInteractor.getStartedFromState())
                 }
@@ -201,7 +201,7 @@ constructor(
     }
 
     private suspend fun startTransitionFromLockscreen() {
-        val currentState = transitionInteractor.currentTransitionInfo.value.to
+        val currentState = transitionInteractor.currentTransitionInfoInternal.value.to
         val newTransition =
             TransitionInfo(
                 ownerName = this::class.java.simpleName,

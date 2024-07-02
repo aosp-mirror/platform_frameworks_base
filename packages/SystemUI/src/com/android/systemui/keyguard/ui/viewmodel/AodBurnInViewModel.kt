@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.res.R
 import javax.inject.Inject
@@ -111,8 +112,8 @@ constructor(
         params: BurnInParameters,
     ): Flow<BurnInModel> {
         return combine(
-            keyguardTransitionInteractor.dozeAmountTransition.map {
-                Interpolators.FAST_OUT_SLOW_IN.getInterpolation(it.value)
+            keyguardTransitionInteractor.transitionValue(KeyguardState.AOD).map {
+                Interpolators.FAST_OUT_SLOW_IN.getInterpolation(it)
             },
             burnInInteractor.burnIn(
                 xDimenResourceId = R.dimen.burn_in_prevention_offset_x,

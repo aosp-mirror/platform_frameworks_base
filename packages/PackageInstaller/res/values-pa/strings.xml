@@ -63,7 +63,7 @@
     <string name="archive_application_text_all_users" msgid="3151229641681672580">"ਕੀ ਇਸ ਐਪ ਨੂੰ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਲਈ ਪੁਰਾਲੇਖਬੱਧ ਕਰਨਾ ਹੈ? ਤੁਹਾਡਾ ਨਿੱਜੀ ਡਾਟਾ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
     <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"ਕੀ ਇਸ ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ \'ਤੇ ਪੁਰਾਲੇਖਬੱਧ ਕਰਨਾ ਹੈ? ਤੁਹਾਡਾ ਨਿੱਜੀ ਡਾਟਾ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
     <string name="archive_application_text_user" msgid="2586558895535581451">"ਕੀ ਇਸ ਐਪ ਨੂੰ <xliff:g id="USERNAME">%1$s</xliff:g> ਲਈ ਪੁਰਾਲੇਖਬੱਧ ਕਰਨਾ ਹੈ? ਤੁਹਾਡਾ ਨਿੱਜੀ ਡਾਟਾ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
-    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਆਪਣੀ ਨਿੱਜੀ ਸਪੇਸ ਤੋਂ ਪੁਰਾਲੇਖਬੱਧ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਤੁਹਾਡਾ ਨਿੱਜੀ ਡਾਟਾ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਆਪਣੀ ਪ੍ਰਾਈਵੇਟ ਸਪੇਸ ਤੋਂ ਪੁਰਾਲੇਖਬੱਧ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਤੁਹਾਡਾ ਨਿੱਜੀ ਡਾਟਾ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ "<b>"ਸਾਰੇ"</b>" ਵਰਤੋਂਕਾਰਾਂ ਲਈ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਐਪਲੀਕੇਸ਼ਨ ਅਤੇ ਇਸਦਾ ਡਾਟਾ ਡੀਵਾਈਸ \'ਤੇ "<b>"ਸਾਰੇ"</b>" ਵਰਤੋਂਕਾਰਾਂ ਵੱਲੋਂ ਹਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"ਕੀ ਤੁਸੀਂ ਵਰਤੋਂਕਾਰ <xliff:g id="USERNAME">%1$s</xliff:g> ਲਈ ਇਸ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਆਪਣੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਤੋਂ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>

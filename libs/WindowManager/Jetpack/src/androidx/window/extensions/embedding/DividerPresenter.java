@@ -1394,10 +1394,16 @@ class DividerPresenter implements View.OnTouchListener {
                 primaryBounds = mProperties.mIsReversedLayout ? boundsBottom : boundsTop;
                 secondaryBounds = mProperties.mIsReversedLayout ? boundsTop : boundsBottom;
             }
-            t.setWindowCrop(mPrimaryVeil, primaryBounds.width(), primaryBounds.height());
-            t.setWindowCrop(mSecondaryVeil, secondaryBounds.width(), secondaryBounds.height());
-            t.setPosition(mPrimaryVeil, primaryBounds.left, primaryBounds.top);
-            t.setPosition(mSecondaryVeil, secondaryBounds.left, secondaryBounds.top);
+            if (mPrimaryVeil != null) {
+                t.setWindowCrop(mPrimaryVeil, primaryBounds.width(), primaryBounds.height());
+                t.setPosition(mPrimaryVeil, primaryBounds.left, primaryBounds.top);
+                t.setVisibility(mPrimaryVeil, !primaryBounds.isEmpty());
+            }
+            if (mSecondaryVeil != null) {
+                t.setWindowCrop(mSecondaryVeil, secondaryBounds.width(), secondaryBounds.height());
+                t.setPosition(mSecondaryVeil, secondaryBounds.left, secondaryBounds.top);
+                t.setVisibility(mSecondaryVeil, !secondaryBounds.isEmpty());
+            }
         }
 
         private static float[] colorToFloatArray(@NonNull Color color) {

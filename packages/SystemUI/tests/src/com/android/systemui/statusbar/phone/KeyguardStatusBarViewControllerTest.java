@@ -223,7 +223,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mFakeExecutor,
                 mBackgroundExecutor,
                 mLogger,
-                mStatusOverlayHoverListenerFactory
+                mStatusOverlayHoverListenerFactory,
+                mKosmos.getCommunalSceneInteractor()
         );
     }
 

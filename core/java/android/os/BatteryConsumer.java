@@ -200,6 +200,8 @@ public abstract class BatteryConsumer {
             POWER_COMPONENT_AUDIO,
             POWER_COMPONENT_VIDEO,
             POWER_COMPONENT_FLASHLIGHT,
+            POWER_COMPONENT_CAMERA,
+            POWER_COMPONENT_GNSS,
     };
 
     static final int COLUMN_INDEX_BATTERY_CONSUMER_TYPE = 0;

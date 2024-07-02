@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.notification.NotificationUtils.interpolate
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -77,6 +78,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
 
 /**
  * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
@@ -91,7 +93,7 @@ constructor(
     bouncerRepository: KeyguardBouncerRepository,
     configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
-    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     sceneInteractorProvider: Provider<SceneInteractor>,
     private val fromGoneTransitionInteractor: Provider<FromGoneTransitionInteractor>,
     private val fromLockscreenTransitionInteractor: Provider<FromLockscreenTransitionInteractor>,
@@ -110,7 +112,7 @@ constructor(
                 keyguardTransitionInteractor.transitionState.map { step ->
                     val startingProgress = lastChangeStep.value
                     val progress = step.value
-                    if (step.to == AOD && progress >= startingProgress) {
+                    if (step.to == AOD && progress >= startingProgress && startingProgress < 1f) {
                         val adjustedProgress =
                             ((progress - startingProgress) / (1F - startingProgress)).coerceIn(
                                 0F,
@@ -248,21 +250,17 @@ constructor(
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
 
     /** Keyguard can be clipped at the top as the shade is dragged */
-    val topClippingBounds: Flow<Int?> =
-        combineTransform(
-                configurationInteractor.onAnyConfigurationChange,
+    val topClippingBounds: Flow<Int?> by lazy {
+        repository.topClippingBounds
+            .sampleFilter(
                 keyguardTransitionInteractor
-                    .transitionValue(GONE)
-                    .map { it == 1f }
-                    .onStart { emit(false) }
-                    .distinctUntilChanged(),
-                repository.topClippingBounds
-            ) { _, isGone, topClippingBounds ->
-                if (!isGone) {
-                    emit(topClippingBounds)
-                }
+                    .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
+                    .onStart { emit(0f) }
+            ) { goneValue ->
+                goneValue != 1f
             }
             .distinctUntilChanged()
+    }
 
     /** Last point that [KeyguardRootView] view was tapped */
     val lastRootViewTapPosition: Flow<Point?> = repository.lastRootViewTapPosition.asStateFlow()
@@ -330,28 +328,35 @@ constructor(
      * This uses legacyShadeExpansion to process swipe up events. In the future, the touch input
      * signal should be sent directly to transitions.
      */
-    val dismissAlpha: Flow<Float?> =
+    val dismissAlpha: Flow<Float> =
         shadeRepository.legacyShadeExpansion
-            .filter { it < 1f }
             .sampleCombine(
                 statusBarState,
                 keyguardTransitionInteractor.currentKeyguardState,
+                keyguardTransitionInteractor.transitionState,
                 isKeyguardDismissible,
             )
-            .map {
-                (legacyShadeExpansion, statusBarState, currentKeyguardState, isKeyguardDismissible)
-                ->
+            .filter { (_, _, _, step, _) -> !step.transitionState.isTransitioning() }
+            .transform {
+                (
+                    legacyShadeExpansion,
+                    statusBarState,
+                    currentKeyguardState,
+                    step,
+                    isKeyguardDismissible) ->
                 if (
                     statusBarState == StatusBarState.KEYGUARD &&
                         isKeyguardDismissible &&
-                        currentKeyguardState == LOCKSCREEN
+                        currentKeyguardState == LOCKSCREEN &&
+                        legacyShadeExpansion != 1f
                 ) {
-                    MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, legacyShadeExpansion)
-                } else {
-                    null
+                    emit(MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, legacyShadeExpansion))
+                } else if (legacyShadeExpansion == 0f || legacyShadeExpansion == 1f) {
+                    // Resets alpha state
+                    emit(1f)
                 }
             }
-            .onStart { emit(null) }
+            .onStart { emit(1f) }
             .distinctUntilChanged()
 
     val keyguardTranslationY: Flow<Float> =
@@ -475,6 +480,10 @@ constructor(
 
     fun setTopClippingBounds(top: Int?) {
         repository.topClippingBounds.value = top
+    }
+
+    fun setDreaming(isDreaming: Boolean) {
+        repository.setDreaming(isDreaming)
     }
 
     /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */

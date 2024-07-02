@@ -35,6 +35,7 @@ import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx
 import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
+import com.android.systemui.screenrecord.data.repository.ScreenRecordRepositoryImpl
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -72,11 +73,18 @@ class ScreenRecordTileUserActionInteractorTest : SysuiTestCase() {
                 .thenReturn(dialog)
         }
 
+    private val screenRecordRepository =
+        ScreenRecordRepositoryImpl(
+            bgCoroutineContext = testScope.testScheduler,
+            recordingController = recordingController,
+        )
+
     private val underTest =
         ScreenRecordTileUserActionInteractor(
             context,
             testScope.testScheduler,
             testScope.testScheduler,
+            screenRecordRepository,
             recordingController,
             keyguardInteractor,
             keyguardDismissUtil,

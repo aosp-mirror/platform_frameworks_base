@@ -638,13 +638,15 @@ public final class OutputConfiguration implements Parcelable {
 
     /**
      * Create a list of {@link OutputConfiguration} instances for a
-     * {@link android.hardware.camera2.params.MultiResolutionImageReader}.
+     * {@link MultiResolutionImageReader}.
      *
      * <p>This method can be used to create query OutputConfigurations for a
      * MultiResolutionImageReader that can be included in a SessionConfiguration passed into
-     * {@link CameraDeviceSetup#isSessionConfigurationSupported} before opening and setting up
-     * a camera device in full, at which point {@link #setSurfacesForMultiResolutionOutput}
-     * can be used to link to the actual MultiResolutionImageReader.</p>
+     * {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * before opening and setting up a camera device in full, at which point {@link
+     * #setSurfacesForMultiResolutionOutput} can be used to link to the actual
+     * MultiResolutionImageReader.</p>
      *
      * <p>This constructor takes same arguments used to create a {@link
      * MultiResolutionImageReader}: a collection of {@link MultiResolutionStreamInfo}
@@ -655,12 +657,12 @@ public final class OutputConfiguration implements Parcelable {
      * @param format The format of the MultiResolutionImageReader. This must be one of the {@link
      *               android.graphics.ImageFormat} or {@link android.graphics.PixelFormat} constants
      *               supported by the camera device. Note that not all formats are supported, like
-     *               {@link ImageFormat.NV21}. The supported multi-resolution reader format can be
+     *               {@link ImageFormat#NV21}. The supported multi-resolution reader format can be
      *               queried by {@link MultiResolutionStreamConfigurationMap#getOutputFormats}.
      *
      * @return The list of {@link OutputConfiguration} objects for a MultiResolutionImageReader.
      *
-     * @throws IllegaArgumentException If the {@code streams} is null or doesn't contain
+     * @throws IllegalArgumentException If the {@code streams} is null or doesn't contain
      *                                 at least 2 items, or if {@code format} isn't a valid camera
      *                                 format.
      *
@@ -710,7 +712,7 @@ public final class OutputConfiguration implements Parcelable {
      * instances.</p>
      *
      * @param outputConfigurations The OutputConfiguration objects created by {@link
-     *                             #createInstancesFromMultiResolutionOutput}
+     *                             #createInstancesForMultiResolutionOutput}
      * @param multiResolutionImageReader The MultiResolutionImageReader object created from the same
      *                                   MultiResolutionStreamInfo parameters as
      *                                   {@code outputConfigurations}.
@@ -759,31 +761,33 @@ public final class OutputConfiguration implements Parcelable {
      * the deferred Surface can be obtained: (1) from {@link android.view.SurfaceView}
      * by calling {@link android.view.SurfaceHolder#getSurface}, (2) from
      * {@link android.graphics.SurfaceTexture} via
-     * {@link android.view.Surface#Surface(android.graphics.SurfaceTexture)}, (3) from {@link
-     * android.media.MediaRecorder} via {@link android.media.MediaRecorder.getSurface} or {@link
-     * android.media.MediaCodec#createPersistentInputSurface}, or (4) from {@link
-     * android.media.MediaCodce} via {@link android.media.MediaCodec#createInputSurface} or {@link
-     * android.media.MediaCodec#createPersistentInputSource}.</p>
+     * {@link android.view.Surface#Surface(android.graphics.SurfaceTexture)}, (3) from
+     * {@link android.media.MediaRecorder} via {@link android.media.MediaRecorder#getSurface} or
+     * {@link android.media.MediaCodec#createPersistentInputSurface}, or (4) from
+     * {@link android.media.MediaCodec} via {@link android.media.MediaCodec#createInputSurface} or
+     * {@link android.media.MediaCodec#createPersistentInputSurface}.</p>
      *
      * <ul>
      * <li>Surfaces for {@link android.view.SurfaceView} and {@link android.graphics.SurfaceTexture}
      * can be deferred until after {@link CameraDevice#createCaptureSession}. In that case, the
      * output Surface must be set via {@link #addSurface}, and the Surface configuration must be
-     * finalized via {@link CameraCaptureSession#finalizeOutputConfiguration} before submitting
+     * finalized via {@link CameraCaptureSession#finalizeOutputConfigurations} before submitting
      * a request with the Surface target.</li>
      * <li>For all other target types, the output Surface must be set by {@link #addSurface},
-     * and {@link CameraCaptureSession#finalizeOutputConfiguration} is not needed because the
+     * and {@link CameraCaptureSession#finalizeOutputConfigurations} is not needed because the
      * OutputConfiguration used to create the session will contain the actual Surface.</li>
      * </ul>
      *
      * <p>Before {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM Android V}, only {@link
      * android.view.SurfaceView} and {@link android.graphics.SurfaceTexture} are supported. Both
      * kind of outputs can be deferred until after {@link
-     * CameraDevice#createCaptureSessionByOutputConfiguration}.</p>
+     * CameraDevice#createCaptureSessionByOutputConfigurations}.</p>
      *
      * <p>An OutputConfiguration object created by this constructor can be used for {@link
-     * CameraDeviceSetup.isSessionConfigurationSupported} and {@link
-     * CameraDeviceSetup.getSessionCharacteristics} without having called {@link #addSurface}.</p>
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * and {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#getSessionCharacteristics} without
+     * having called {@link #addSurface}.</p>
      *
      * @param surfaceSize Size for the deferred surface.
      * @param klass a non-{@code null} {@link Class} object reference that indicates the source of
@@ -849,8 +853,10 @@ public final class OutputConfiguration implements Parcelable {
      * before creating the capture session.</p>
      *
      * <p>An OutputConfiguration object created by this constructor can be used for {@link
-     * CameraDeviceSetup.isSessionConfigurationSupported} and {@link
-     * CameraDeviceSetup.getSessionCharacteristics} without having called {@link #addSurface}.</p>
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * and {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#getSessionCharacteristics} without
+     * having called {@link #addSurface}.</p>
      *
      * @param format The format of the ImageReader output. This must be one of the
      *               {@link android.graphics.ImageFormat} or {@link android.graphics.PixelFormat}
@@ -873,8 +879,10 @@ public final class OutputConfiguration implements Parcelable {
      * before creating the capture session.</p>
      *
      * <p>An OutputConfiguration object created by this constructor can be used for {@link
-     * CameraDeviceSetup.isSessionConfigurationSupported} and {@link
-     * CameraDeviceSetup.getSessionCharacteristics} without having called {@link #addSurface}.</p>
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * and {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#getSessionCharacteristics} without
+     * having called {@link #addSurface}.</p>
      *
      * @param surfaceGroupId A group ID for this output, used for sharing memory between multiple
      *                       outputs.
@@ -899,8 +907,10 @@ public final class OutputConfiguration implements Parcelable {
      * before creating the capture session.</p>
      *
      * <p>An OutputConfiguration object created by this constructor can be used for {@link
-     * CameraDeviceSetup.isSessionConfigurationSupported} and {@link
-     * CameraDeviceSetup.getSessionCharacteristics} without having called {@link #addSurface}.</p>
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * and {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#getSessionCharacteristics} without
+     * having called {@link #addSurface}.</p>
      *
      * @param format The format of the ImageReader output. This must be one of the
      *               {@link android.graphics.ImageFormat} or {@link android.graphics.PixelFormat}
@@ -923,8 +933,10 @@ public final class OutputConfiguration implements Parcelable {
      * before creating the capture session.</p>
      *
      * <p>An OutputConfiguration object created by this constructor can be used for {@link
-     * CameraDeviceSetup.isSessionConfigurationSupported} and {@link
-     * CameraDeviceSetup.getSessionCharacteristics} without having called {@link #addSurface}.</p>
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * and {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#getSessionCharacteristics} without
+     * having called {@link #addSurface}.</p>
      *
      * @param surfaceGroupId A group ID for this output, used for sharing memory between multiple
      *                       outputs.
@@ -1171,9 +1183,9 @@ public final class OutputConfiguration implements Parcelable {
      * <li>from {@link android.media.MediaRecorder} by calling
      * {@link android.media.MediaRecorder#getSurface} or {@link
      * android.media.MediaCodec#createPersistentInputSurface}</li>
-     * <li>from {@link android.media.MediaCodce} by calling
-     * {@link android.media.MediaCodec#createInputSurface} or {@link
-     * android.media.MediaCodec#createPersistentInputSource}</li>
+     * <li>from {@link android.media.MediaCodec} by calling
+     * {@link android.media.MediaCodec#createInputSurface} or
+     * {@link android.media.MediaCodec#createPersistentInputSurface()}</li>
      * </ul>
      *
      * <p> If the OutputConfiguration was constructed by {@link #OutputConfiguration(int, Size)}

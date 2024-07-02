@@ -673,7 +673,7 @@ public class RescueParty {
                 case RESCUE_LEVEL_SCOPED_DEVICE_CONFIG_RESET:
                     return PackageHealthObserverImpact.USER_IMPACT_LEVEL_10;
                 case RESCUE_LEVEL_ALL_DEVICE_CONFIG_RESET:
-                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_20;
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_40;
                 case RESCUE_LEVEL_WARM_REBOOT:
                     return PackageHealthObserverImpact.USER_IMPACT_LEVEL_50;
                 case RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:

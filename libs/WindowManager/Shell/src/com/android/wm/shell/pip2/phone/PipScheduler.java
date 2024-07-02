@@ -153,12 +153,43 @@ public class PipScheduler {
      * Animates resizing of the pinned stack given the duration.
      */
     public void scheduleAnimateResizePip(Rect toBounds) {
+        scheduleAnimateResizePip(toBounds, false /* configAtEnd */);
+    }
+
+    /**
+     * Animates resizing of the pinned stack given the duration.
+     *
+     * @param configAtEnd true if we are delaying config updates until the transition ends.
+     */
+    public void scheduleAnimateResizePip(Rect toBounds, boolean configAtEnd) {
         if (mPipTransitionState.mPipTaskToken == null || !mPipTransitionState.isInPip()) {
             return;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setBounds(mPipTransitionState.mPipTaskToken, toBounds);
+        if (configAtEnd) {
+            wct.deferConfigToTransitionEnd(mPipTransitionState.mPipTaskToken);
+        }
         mPipTransitionController.startResizeTransition(wct);
+    }
+
+    /**
+     * Signals to Core to finish the PiP resize transition.
+     * Note that we do not allow any actual WM Core changes at this point.
+     *
+     * @param configAtEnd true if we are waiting for config updates at the end of the transition.
+     */
+    public void scheduleFinishResizePip(boolean configAtEnd) {
+        SurfaceControl.Transaction tx = null;
+        if (configAtEnd) {
+            tx = new SurfaceControl.Transaction();
+            tx.addTransactionCommittedListener(mMainExecutor, () -> {
+                mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
+            });
+        } else {
+            mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
+        }
+        mPipTransitionController.finishTransition(tx);
     }
 
     /**

@@ -20,8 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Tests for {@link RadiiAnimator}. */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class RadiiAnimatorTest extends SysuiTestCase {
     float[] mResultRadii = new float[RadiiAnimator.RADII_COUNT];
     final AtomicBoolean mAnimationStarted = new AtomicBoolean(false);

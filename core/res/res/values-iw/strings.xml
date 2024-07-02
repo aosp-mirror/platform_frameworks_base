@@ -1884,7 +1884,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"קוד הגישה קצר מדי. חייב להיות באורך 4 ספרות לפחות."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"יש לנסות שוב מאוחר יותר"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"צפייה במסך מלא"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"כדי לצאת, פשוט מחליקים אצבע מלמעלה למטה."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"הבנתי"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"מסובבים כדי לראות טוב יותר"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"צריך לפתוח את <xliff:g id="NAME">%s</xliff:g> במסך מלא כדי לראות טוב יותר"</string>
@@ -2039,7 +2040,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"הצמדה של‏ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"ביטול הצמדה"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"ביטול ההצמדה של <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"פרטי אפליקציה"</string>
+    <string name="app_info" msgid="6113278084877079851">"פרטי האפליקציה"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"תהליך ההדגמה מתחיל…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"מתבצע איפוס של המכשיר…"</string>
@@ -2408,8 +2409,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"המרחב הפרטי"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"שכפול"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"שיתופי"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"המרחב הפרטי"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"יש תוכן רגיש בהתראה שהוסתר"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"תוכן האפליקציה מוסתר משיתוף המסך מטעמי אבטחה"</string>

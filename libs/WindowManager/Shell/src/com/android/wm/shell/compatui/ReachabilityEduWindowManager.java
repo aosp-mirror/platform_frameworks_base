@@ -53,7 +53,7 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
 
     private final ShellExecutor mMainExecutor;
 
-    private boolean mIsActivityLetterboxed;
+    private boolean mIsLetterboxDoubleTapEnabled;
 
     private int mLetterboxVerticalPosition;
 
@@ -91,7 +91,7 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
             Function<Integer, Integer> disappearTimeSupplier) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         final AppCompatTaskInfo appCompatTaskInfo = taskInfo.appCompatTaskInfo;
-        mIsActivityLetterboxed = appCompatTaskInfo.isLetterboxDoubleTapEnabled;
+        mIsLetterboxDoubleTapEnabled = appCompatTaskInfo.isLetterboxDoubleTapEnabled;
         mLetterboxVerticalPosition = appCompatTaskInfo.topActivityLetterboxVerticalPosition;
         mLetterboxHorizontalPosition = appCompatTaskInfo.topActivityLetterboxHorizontalPosition;
         mTopActivityLetterboxWidth = appCompatTaskInfo.topActivityLetterboxWidth;
@@ -119,7 +119,7 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected boolean eligibleToShowLayout() {
-        return mIsActivityLetterboxed
+        return mIsLetterboxDoubleTapEnabled
                 && (mLetterboxVerticalPosition != -1 || mLetterboxHorizontalPosition != -1);
     }
 
@@ -142,13 +142,13 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
     @Override
     public boolean updateCompatInfo(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener,
             boolean canShow) {
-        final boolean prevIsActivityLetterboxed = mIsActivityLetterboxed;
+        final boolean prevIsLetterboxDoubleTapEnabled = mIsLetterboxDoubleTapEnabled;
         final int prevLetterboxVerticalPosition = mLetterboxVerticalPosition;
         final int prevLetterboxHorizontalPosition = mLetterboxHorizontalPosition;
         final int prevTopActivityLetterboxWidth = mTopActivityLetterboxWidth;
         final int prevTopActivityLetterboxHeight = mTopActivityLetterboxHeight;
         final AppCompatTaskInfo appCompatTaskInfo = taskInfo.appCompatTaskInfo;
-        mIsActivityLetterboxed = appCompatTaskInfo.isLetterboxDoubleTapEnabled;
+        mIsLetterboxDoubleTapEnabled = appCompatTaskInfo.isLetterboxDoubleTapEnabled;
         mLetterboxVerticalPosition = appCompatTaskInfo.topActivityLetterboxVerticalPosition;
         mLetterboxHorizontalPosition = appCompatTaskInfo.topActivityLetterboxHorizontalPosition;
         mTopActivityLetterboxWidth = appCompatTaskInfo.topActivityLetterboxWidth;
@@ -162,7 +162,7 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
         mHasLetterboxSizeChanged = prevTopActivityLetterboxWidth != mTopActivityLetterboxWidth
                 || prevTopActivityLetterboxHeight != mTopActivityLetterboxHeight;
 
-        if (mHasUserDoubleTapped || prevIsActivityLetterboxed != mIsActivityLetterboxed
+        if (mHasUserDoubleTapped || prevIsLetterboxDoubleTapEnabled != mIsLetterboxDoubleTapEnabled
                 || prevLetterboxVerticalPosition != mLetterboxVerticalPosition
                 || prevLetterboxHorizontalPosition != mLetterboxHorizontalPosition
                 || prevTopActivityLetterboxWidth != mTopActivityLetterboxWidth
@@ -249,7 +249,7 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
                     && (mLetterboxVerticalPosition == REACHABILITY_LEFT_OR_UP_POSITION
                         || mLetterboxVerticalPosition == REACHABILITY_RIGHT_OR_BOTTOM_POSITION));
 
-        if (mIsActivityLetterboxed && (eligibleForDisplayHorizontalEducation
+        if (mIsLetterboxDoubleTapEnabled && (eligibleForDisplayHorizontalEducation
                 || eligibleForDisplayVerticalEducation)) {
             int availableWidth = getTaskBounds().width() - mTopActivityLetterboxWidth;
             int availableHeight = getTaskBounds().height() - mTopActivityLetterboxHeight;

@@ -23,7 +23,7 @@
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"PIN кодуңузду киргизиңиз"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"PIN кодду киргизиңиз"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Графикалык ачкычты тартыңыз"</string>
-    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Графикалык ачкчты тартңыз"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Графикалык ачкычты тартыңыз"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Сырсөзүңүздү киргизиңиз"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Сырсөздү киргизиңиз"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"SIM-карта жараксыз."</string>

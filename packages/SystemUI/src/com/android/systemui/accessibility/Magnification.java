@@ -34,6 +34,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.IWindowManager;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.WindowManager;
@@ -148,13 +149,19 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
             DisplayIdIndexSupplier<FullscreenMagnificationController> {
 
         private final Context mContext;
+        private final Handler mHandler;
         private final Executor mExecutor;
+        private final IWindowManager mIWindowManager;
 
-        FullscreenMagnificationControllerSupplier(Context context, DisplayManager displayManager,
-                Executor executor) {
+        FullscreenMagnificationControllerSupplier(Context context,
+                DisplayManager displayManager,
+                Handler handler,
+                Executor executor, IWindowManager iWindowManager) {
             super(displayManager);
             mContext = context;
+            mHandler = handler;
             mExecutor = executor;
+            mIWindowManager = iWindowManager;
         }
 
         @Override
@@ -166,9 +173,11 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
             windowContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
             return new FullscreenMagnificationController(
                     windowContext,
+                    mHandler,
                     mExecutor,
                     windowContext.getSystemService(AccessibilityManager.class),
                     windowContext.getSystemService(WindowManager.class),
+                    mIWindowManager,
                     scvhSupplier);
         }
     }
@@ -211,14 +220,16 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     DisplayIdIndexSupplier<MagnificationSettingsController> mMagnificationSettingsSupplier;
 
     @Inject
-    public Magnification(Context context, @Main Handler mainHandler, @Main Executor executor,
+    public Magnification(Context context,
+            @Main Handler mainHandler, @Main Executor executor,
             CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
             SysUiState sysUiState, OverviewProxyService overviewProxyService,
             SecureSettings secureSettings, DisplayTracker displayTracker,
-            DisplayManager displayManager, AccessibilityLogger a11yLogger) {
+            DisplayManager displayManager, AccessibilityLogger a11yLogger,
+            IWindowManager iWindowManager) {
         this(context, mainHandler.getLooper(), executor, commandQueue,
                 modeSwitchesController, sysUiState, overviewProxyService, secureSettings,
-                displayTracker, displayManager, a11yLogger);
+                displayTracker, displayManager, a11yLogger, iWindowManager);
     }
 
     @VisibleForTesting
@@ -226,7 +237,8 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
             CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
             SysUiState sysUiState, OverviewProxyService overviewProxyService,
             SecureSettings secureSettings, DisplayTracker displayTracker,
-            DisplayManager displayManager, AccessibilityLogger a11yLogger) {
+            DisplayManager displayManager, AccessibilityLogger a11yLogger,
+            IWindowManager iWindowManager) {
         mContext = context;
         mHandler = new Handler(looper) {
             @Override
@@ -248,7 +260,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
                 mHandler, mWindowMagnifierCallback,
                 displayManager, sysUiState, secureSettings);
         mFullscreenMagnificationControllerSupplier = new FullscreenMagnificationControllerSupplier(
-                context, displayManager, mExecutor);
+                context, displayManager, mHandler, mExecutor, iWindowManager);
         mMagnificationSettingsSupplier = new SettingsSupplier(context,
                 mMagnificationSettingsControllerCallback, displayManager, secureSettings);
 

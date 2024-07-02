@@ -34,6 +34,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -87,6 +88,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 @RunWith(AndroidJUnit4.class)
+@EnableFlags(Flags.FLAG_VISIT_PERSON_URI)
 public class NotificationVisitUrisTest extends UiServiceTestCase {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -153,10 +155,6 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
                     .put(Notification.Action.Builder.class, "extend")
                     // Overwrites icon supplied to constructor.
                     .put(Notification.BubbleMetadata.Builder.class, "setIcon")
-                    // Overwrites intent supplied to constructor.
-                    .put(Notification.BubbleMetadata.Builder.class, "setIntent")
-                    // Overwrites intent supplied to constructor.
-                    .put(Notification.BubbleMetadata.Builder.class, "setDeleteIntent")
                     // Discards previously-added actions.
                     .put(RemoteViews.class, "mergeRemoteViews")
                     .build();
@@ -172,7 +170,6 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
-        mSetFlagsRule.enableFlags(Flags.FLAG_VISIT_RISKY_URIS);
     }
 
     @After
@@ -700,14 +697,13 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
             }
 
             if (clazz == Intent.class) {
-                return new Intent("action", generateUri(where.plus(Intent.class)));
+                return new Intent("action");
             }
 
             if (clazz == PendingIntent.class) {
-                // PendingIntent can have an Intent with a Uri.
-                Uri intentUri = generateUri(where.plus(PendingIntent.class));
-                return PendingIntent.getActivity(mContext, 0,
-                        new Intent("action", intentUri),
+                // PendingIntent can have an Intent with a Uri but those are inaccessible and
+                // not inspected.
+                return PendingIntent.getActivity(mContext, 0, new Intent("action"),
                         PendingIntent.FLAG_IMMUTABLE);
             }
 

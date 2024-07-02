@@ -27,11 +27,13 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
+import com.android.systemui.util.kotlin.filterValuesNotNull
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -89,37 +91,36 @@ constructor(
         isCommunalAvailable: Boolean,
         shadeMode: ShadeMode,
     ): Map<UserAction, UserActionResult> {
-        val shadeSceneKey =
+        val notifShadeSceneKey =
             UserActionResult(
-                toScene =
-                    if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade,
+                toScene = SceneFamilies.NotifShade,
                 transitionKey = ToSplitShade.takeIf { shadeMode is ShadeMode.Split },
             )
-
-        val quickSettingsIfSingleShade =
-            if (shadeMode is ShadeMode.Single) UserActionResult(Scenes.QuickSettings)
-            else shadeSceneKey
 
         return mapOf(
                 Swipe.Left to UserActionResult(Scenes.Communal).takeIf { isCommunalAvailable },
                 Swipe.Up to if (isDeviceUnlocked) Scenes.Gone else Scenes.Bouncer,
 
                 // Swiping down from the top edge goes to QS (or shade if in split shade mode).
-                swipeDownFromTop(pointerCount = 1) to quickSettingsIfSingleShade,
-                swipeDownFromTop(pointerCount = 2) to
-                    // TODO(b/338577208): Remove 'Dual' once we add Dual Shade invocation zones.
-                    if (shadeMode is ShadeMode.Dual) {
-                        UserActionResult(Scenes.QuickSettingsShade)
+                swipeDownFromTop(pointerCount = 1) to
+                    if (shadeMode is ShadeMode.Single) {
+                        UserActionResult(Scenes.QuickSettings)
                     } else {
-                        quickSettingsIfSingleShade
+                        notifShadeSceneKey
                     },
 
-                // Swiping down, not from the edge, always navigates to the shade scene.
-                swipeDown(pointerCount = 1) to shadeSceneKey,
-                swipeDown(pointerCount = 2) to shadeSceneKey,
+                // TODO(b/338577208): Remove once we add Dual Shade invocation zones.
+                swipeDownFromTop(pointerCount = 2) to
+                    UserActionResult(
+                        toScene = SceneFamilies.QuickSettings,
+                        transitionKey = ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
+                    ),
+
+                // Swiping down, not from the edge, always navigates to the notif shade scene.
+                swipeDown(pointerCount = 1) to notifShadeSceneKey,
+                swipeDown(pointerCount = 2) to notifShadeSceneKey,
             )
-            .filterValues { it != null }
-            .mapValues { checkNotNull(it.value) }
+            .filterValuesNotNull()
     }
 
     private fun swipeDownFromTop(pointerCount: Int): Swipe {

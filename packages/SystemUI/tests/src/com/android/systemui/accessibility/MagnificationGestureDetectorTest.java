@@ -26,11 +26,11 @@ import static org.mockito.Mockito.verify;
 
 import android.os.Handler;
 import android.os.SystemClock;
-import android.testing.AndroidTestingRunner;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -45,7 +45,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class MagnificationGestureDetectorTest extends SysuiTestCase {
 
     private static final float ACTION_DOWN_X = 100;

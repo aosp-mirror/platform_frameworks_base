@@ -194,6 +194,50 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun networkSlice_configOn_hasPrioritizedCaps_showsSlice() =
+        testScope.runTest {
+            connectionRepository.allowNetworkSliceIndicator.value = true
+            val latest by collectLastValue(underTest.showSliceAttribution)
+
+            connectionRepository.hasPrioritizedNetworkCapabilities.value = true
+
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun networkSlice_configOn_noPrioritizedCaps_noSlice() =
+        testScope.runTest {
+            connectionRepository.allowNetworkSliceIndicator.value = true
+            val latest by collectLastValue(underTest.showSliceAttribution)
+
+            connectionRepository.hasPrioritizedNetworkCapabilities.value = false
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun networkSlice_configOff_hasPrioritizedCaps_noSlice() =
+        testScope.runTest {
+            connectionRepository.allowNetworkSliceIndicator.value = false
+            val latest by collectLastValue(underTest.showSliceAttribution)
+
+            connectionRepository.hasPrioritizedNetworkCapabilities.value = true
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun networkSlice_configOff_noPrioritizedCaps_noSlice() =
+        testScope.runTest {
+            connectionRepository.allowNetworkSliceIndicator.value = false
+            val latest by collectLastValue(underTest.showSliceAttribution)
+
+            connectionRepository.hasPrioritizedNetworkCapabilities.value = false
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
     fun iconGroup_three_g() =
         testScope.runTest {
             connectionRepository.resolvedNetworkType.value =

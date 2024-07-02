@@ -312,6 +312,15 @@
     <integer name="config_oem_enabled_satellite_location_fresh_duration">300</integer>
     <java-symbol type="integer" name="config_oem_enabled_satellite_location_fresh_duration" />
 
+    <!-- The time duration in seconds which is used to decide whether satellite is in emergency
+         mode.
+
+         If the duration from the last time when an emergency call is made to the current time is
+         less than or equal to this duration, satellite is considered as in emergency mode.
+         -->
+    <integer name="config_satellite_emergency_mode_duration">300</integer>
+    <java-symbol type="integer" name="config_satellite_emergency_mode_duration" />
+
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
          will not perform handover if the target transport is out of service, or VoPS not
          supported. The network will be torn down on the source transport, and will be

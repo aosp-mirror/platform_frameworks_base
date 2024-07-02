@@ -256,8 +256,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private ViewRootImpl mViewRootImpl;
     @Mock
-    private FpsUnlockTracker mFpsUnlockTracker;
-    @Mock
     private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Mock
     private Lazy<DeviceEntryUdfpsTouchOverlayViewModel> mDeviceEntryUdfpsTouchOverlayViewModel;
@@ -368,7 +366,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mock(DeviceEntryFaceAuthInteractor.class),
                 mUdfpsKeyguardAccessibilityDelegate,
                 mSelectedUserInteractor,
-                mFpsUnlockTracker,
                 mKeyguardTransitionInteractor,
                 mDeviceEntryUdfpsTouchOverlayViewModel,
                 mDefaultUdfpsTouchOverlayViewModel,

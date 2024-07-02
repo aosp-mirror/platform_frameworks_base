@@ -30,7 +30,6 @@ import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepositor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.DisableSceneContainer
@@ -570,13 +569,13 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             // WHEN biometrics succeeds with wake and unlock mode
             powerInteractor.setAwakeForTest()
             keyguardRepository.setBiometricUnlockState(BiometricUnlockMode.WAKE_AND_UNLOCK)
-            advanceTimeBy(60L)
+            runCurrent()
 
             assertThat(transitionRepository)
                 .startedTransition(
                     to = KeyguardState.GONE,
                     from = KeyguardState.DOZING,
-                    ownerName = "FromDozingTransitionInteractor",
+                    ownerName = "FromDozingTransitionInteractor(biometric wake and unlock)",
                     animatorAssertion = { it.isNotNull() }
                 )
 
@@ -599,31 +598,6 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             assertThat(transitionRepository)
                 .startedTransition(
                     to = KeyguardState.PRIMARY_BOUNCER,
-                    from = KeyguardState.DOZING,
-                    animatorAssertion = { it.isNotNull() }
-                )
-
-            coroutineContext.cancelChildren()
-        }
-
-    /** This handles security method NONE and screen off with lock timeout */
-    @Test
-    fun dozingToGoneWithKeyguardNotShowing() =
-        testScope.runTest {
-            // GIVEN a prior transition has run to DOZING
-            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DOZING)
-            runCurrent()
-
-            // WHEN the device wakes up without a keyguard
-            keyguardRepository.setKeyguardShowing(false)
-            keyguardRepository.setKeyguardDismissible(true)
-            kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(false)
-            powerInteractor.setAwakeForTest()
-            advanceTimeBy(60L)
-
-            assertThat(transitionRepository)
-                .startedTransition(
-                    to = KeyguardState.GONE,
                     from = KeyguardState.DOZING,
                     animatorAssertion = { it.isNotNull() }
                 )

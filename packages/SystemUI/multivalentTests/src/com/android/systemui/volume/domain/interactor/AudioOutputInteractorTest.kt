@@ -71,6 +71,7 @@ class AudioOutputInteractorTest : SysuiTestCase() {
                 addOverride(R.drawable.ic_headphone, testIcon)
                 addOverride(R.drawable.ic_smartphone, testIcon)
                 addOverride(R.drawable.ic_media_speaker_device, testIcon)
+                addOverride(R.drawable.ic_media_tablet, testIcon)
 
                 addOverride(com.android.internal.R.drawable.ic_bt_hearing_aid, testIcon)
 

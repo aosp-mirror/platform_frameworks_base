@@ -155,6 +155,8 @@ class DesktopTasksController(
                 visualIndicator = null
             }
         }
+    private val sysUIPackageName = context.resources.getString(
+        com.android.internal.R.string.config_systemUi)
 
     private val transitionAreaHeight
         get() =
@@ -212,6 +214,11 @@ class DesktopTasksController(
     @VisibleForTesting
     fun getVisualIndicator(): DesktopModeVisualIndicator? {
         return visualIndicator
+    }
+
+    // TODO(b/347289970): Consider replacing with API
+    private fun isSystemUIApplication(taskInfo: RunningTaskInfo): Boolean {
+        return taskInfo.baseActivity?.packageName == sysUIPackageName
     }
 
     fun setOnTaskResizeAnimationListener(listener: OnTaskResizeAnimationListener) {
@@ -346,6 +353,14 @@ class DesktopTasksController(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopTasksController: Cannot enter desktop, " +
                     "translucent top activity found. This is likely a modal dialog."
+            )
+            return
+        }
+        if (isSystemUIApplication(task)) {
+            KtProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopTasksController: Cannot enter desktop, " +
+                        "systemUI top activity found."
             )
             return
         }
@@ -896,7 +911,9 @@ class DesktopTasksController(
                 when {
                     request.type == TRANSIT_TO_BACK -> handleBackNavigation(task)
                     // Check if the task has a top transparent activity
-                    shouldLaunchAsModal(task) -> handleTransparentTaskLaunch(task)
+                    shouldLaunchAsModal(task) -> handleIncompatibleTaskLaunch(task)
+                    // Check if the task has a top systemUI activity
+                    isSystemUIApplication(task) -> handleIncompatibleTaskLaunch(task)
                     // Check if fullscreen task should be updated
                     task.isFullscreen -> handleFullscreenTaskLaunch(task, transition)
                     // Check if freeform task should be updated
@@ -930,6 +947,7 @@ class DesktopTasksController(
             .forEach { finishTransaction.setCornerRadius(it.leash, cornerRadius) }
     }
 
+    // TODO(b/347289970): Consider replacing with API
     private fun shouldLaunchAsModal(task: TaskInfo) =
         Flags.enableDesktopWindowingModalsPolicy() && isSingleTopActivityTranslucent(task)
 
@@ -996,8 +1014,11 @@ class DesktopTasksController(
         return null
     }
 
-    // Always launch transparent tasks in fullscreen.
-    private fun handleTransparentTaskLaunch(task: RunningTaskInfo): WindowContainerTransaction? {
+    /**
+     * If a task is not compatible with desktop mode freeform, it should always be launched in
+     * fullscreen.
+     */
+    private fun handleIncompatibleTaskLaunch(task: RunningTaskInfo): WindowContainerTransaction? {
         // Already fullscreen, no-op.
         if (task.isFullscreen) return null
         return WindowContainerTransaction().also { wct -> addMoveToFullscreenChanges(wct, task) }

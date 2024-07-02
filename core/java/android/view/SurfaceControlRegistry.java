@@ -342,12 +342,14 @@ public class SurfaceControlRegistry {
             return false;
         }
         final boolean matchName = !sCallStackDebuggingMatchName.isEmpty();
-        if (matchName && (name == null
-                || !sCallStackDebuggingMatchName.contains(name.toLowerCase()))) {
-            // Skip if target surface doesn't match requested surface
+        if (!matchName) {
+            return true;
+        }
+        if (name == null) {
             return false;
         }
-        return true;
+        return sCallStackDebuggingMatchName.contains(name.toLowerCase()) ||
+                        name.toLowerCase().contains(sCallStackDebuggingMatchName);
     }
 
     /**

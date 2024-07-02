@@ -37,14 +37,15 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
+import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -67,7 +68,7 @@ import org.mockito.MockitoAnnotations;
  * {@link Magnification}
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class IMagnificationConnectionTest extends SysuiTestCase {
 
@@ -99,6 +100,8 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock
     private AccessibilityLogger mA11yLogger;
+    @Mock
+    private IWindowManager mIWindowManager;
 
     private IMagnificationConnection mIMagnificationConnection;
     private Magnification mMagnification;
@@ -117,9 +120,10 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         assertNotNull(mTestableLooper);
         mMagnification = new Magnification(getContext(),
-                mTestableLooper.getLooper(), getContext().getMainExecutor(), mCommandQueue,
+                mTestableLooper.getLooper(), mContext.getMainExecutor(), mCommandQueue,
                 mModeSwitchesController, mSysUiState, mOverviewProxyService, mSecureSettings,
-                mDisplayTracker, getContext().getSystemService(DisplayManager.class), mA11yLogger);
+                mDisplayTracker, getContext().getSystemService(DisplayManager.class),
+                mA11yLogger, mIWindowManager);
         mMagnification.mWindowMagnificationControllerSupplier =
                 new FakeWindowMagnificationControllerSupplier(
                         mContext.getSystemService(DisplayManager.class));
