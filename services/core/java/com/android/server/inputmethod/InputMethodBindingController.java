@@ -664,6 +664,36 @@ final class InputMethodBindingController {
         }
     }
 
+    /**
+     * Returns the current {@link InputMethodSubtype}.
+     *
+     * <p>Also this method has had questionable behaviors:</p>
+     * <ul>
+     *     <li>Calling this method can update {@link #mCurrentSubtype}.</li>
+     *     <li>This method may return {@link #mCurrentSubtype} as-is, even if it does not belong to
+     *     the current IME.</li>
+     * </ul>
+     * <p>TODO(b/347083680): Address above issues.</p>
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    InputMethodSubtype getCurrentInputMethodSubtype() {
+        final var selectedMethodId = getSelectedMethodId();
+        if (selectedMethodId == null) {
+            return null;
+        }
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(mUserId);
+        final InputMethodInfo imi = settings.getMethodMap().get(selectedMethodId);
+        if (imi == null || imi.getSubtypeCount() == 0) {
+            return null;
+        }
+        final var subtype = SubtypeUtils.getCurrentInputMethodSubtype(imi, settings,
+                mCurrentSubtype);
+        mCurrentSubtype = subtype;
+        return subtype;
+    }
+
+
     @GuardedBy("ImfLock.class")
     void setDisplayIdToShowIme(int displayId) {
         mDisplayIdToShowIme = displayId;
