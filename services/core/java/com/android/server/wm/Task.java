@@ -404,8 +404,6 @@ class Task extends TaskFragment {
     String mCallingPackage;
     String mCallingFeatureId;
 
-    private static final Rect sTmpBounds = new Rect();
-
     // Last non-fullscreen bounds the task was launched in or resized to.
     // The information is persisted and used to determine the appropriate root task to launch the
     // task into on restore.
@@ -2862,69 +2860,6 @@ class Task extends TaskFragment {
         } else {
             super.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
         }
-    }
-
-    /**
-     * Calculate the maximum visible area of this task. If the task has only one app,
-     * the result will be visible frame of that app. If the task has more than one apps,
-     * we search from top down if the next app got different visible area.
-     *
-     * This effort is to handle the case where some task (eg. GMail composer) might pop up
-     * a dialog that's different in size from the activity below, in which case we should
-     * be dimming the entire task area behind the dialog.
-     *
-     * @param out the union of visible bounds.
-     */
-    private static void getMaxVisibleBounds(ActivityRecord token, Rect out, boolean[] foundTop) {
-        // skip hidden (or about to hide) apps
-        if (token.mIsExiting || !token.isClientVisible() || !token.isVisibleRequested()) {
-            return;
-        }
-        final WindowState win = token.findMainWindow();
-        if (win == null) {
-            return;
-        }
-        if (!foundTop[0]) {
-            foundTop[0] = true;
-            out.setEmpty();
-        }
-
-        final Rect visibleFrame = sTmpBounds;
-        final WindowManager.LayoutParams attrs = win.mAttrs;
-        visibleFrame.set(win.getFrame());
-        visibleFrame.inset(win.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                visibleFrame, attrs.type, win.getActivityType(), attrs.softInputMode,
-                attrs.flags));
-        out.union(visibleFrame);
-    }
-
-    /** Bounds of the task to be used for dimming, as well as touch related tests. */
-    @Override
-    void getDimBounds(@NonNull Rect out) {
-        if (isRootTask()) {
-            getBounds(out);
-            return;
-        }
-
-        final Task rootTask = getRootTask();
-        if (inFreeformWindowingMode()) {
-            boolean[] foundTop = { false };
-            forAllActivities(a -> { getMaxVisibleBounds(a, out, foundTop); });
-            if (foundTop[0]) {
-                return;
-            }
-        }
-
-        if (!matchParentBounds()) {
-            // When minimizing the root docked task when going home, we don't adjust the task bounds
-            // so we need to intersect the task bounds with the root task bounds here..
-            rootTask.getBounds(mTmpRect);
-            mTmpRect.intersect(getBounds());
-            out.set(mTmpRect);
-        } else {
-            out.set(getBounds());
-        }
-        return;
     }
 
     void setDragResizing(boolean dragResizing) {
@@ -6152,11 +6087,6 @@ class Task extends TaskFragment {
         }
 
         return setBoundsUnchecked(!inMultiWindowMode() ? null : bounds);
-    }
-
-    @Override
-    public void getBounds(Rect bounds) {
-        bounds.set(getBounds());
     }
 
     /**
