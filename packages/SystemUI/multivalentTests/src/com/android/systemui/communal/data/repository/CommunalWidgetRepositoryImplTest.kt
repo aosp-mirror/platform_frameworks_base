@@ -48,7 +48,6 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,6 +63,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
@@ -79,6 +79,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var communalWidgetDao: CommunalWidgetDao
     @Mock private lateinit var backupManager: BackupManager
 
+    private val communalHubStateCaptor = argumentCaptor<CommunalHubState>()
+    private val componentNameCaptor = argumentCaptor<ComponentName>()
+
     private lateinit var backupUtils: CommunalBackupUtils
     private lateinit var logBuffer: LogBuffer
     private lateinit var fakeWidgets: MutableStateFlow<Map<CommunalItemRank, CommunalWidgetItem>>
@@ -90,6 +93,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     private val userManager = kosmos.userManager
 
     private val mainUser = UserHandle(0)
+    private val workProfile = UserHandle(10)
 
     private val fakeAllowlist =
         listOf(
@@ -114,8 +118,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
         whenever(communalWidgetDao.getWidgets()).thenReturn(fakeWidgets)
         whenever(communalWidgetHost.appWidgetProviders).thenReturn(fakeProviders)
-        whenever(userManager.getUserSerialNumber(mainUser.identifier))
-            .thenReturn(testUserSerialNumber(mainUser))
+        whenever(userManager.mainUser).thenReturn(mainUser)
+
+        restoreUser(mainUser)
 
         underTest =
             CommunalWidgetRepositoryImpl(
@@ -452,11 +457,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             // Verify state restored, and widget 2 skipped
-            val restoredState =
-                withArgCaptor<CommunalHubState> {
-                    verify(communalWidgetDao).restoreCommunalHubState(capture())
-                }
-            val restoredWidgets = restoredState.widgets.toList()
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
             assertThat(restoredWidgets).hasSize(1)
 
             val restoredWidget = restoredWidgets.first()
@@ -482,11 +484,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             // Verify widget 1 and 2 are restored, and are now 11 and 12.
-            val restoredState =
-                withArgCaptor<CommunalHubState> {
-                    verify(communalWidgetDao).restoreCommunalHubState(capture())
-                }
-            val restoredWidgets = restoredState.widgets.toList()
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
             assertThat(restoredWidgets).hasSize(2)
 
             val restoredWidget1 = restoredWidgets[0]
@@ -520,11 +519,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             // Verify widget 1 and 2 are restored, and are now 1 and 12.
-            val restoredState =
-                withArgCaptor<CommunalHubState> {
-                    verify(communalWidgetDao).restoreCommunalHubState(capture())
-                }
-            val restoredWidgets = restoredState.widgets.toList()
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
             assertThat(restoredWidgets).hasSize(2)
 
             val restoredWidget1 = restoredWidgets[0]
@@ -538,6 +534,126 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             assertThat(restoredWidget2.widgetId).isEqualTo(12)
             assertThat(restoredWidget2.componentName).isEqualTo(expectedWidget2.componentName)
             assertThat(restoredWidget2.rank).isEqualTo(expectedWidget2.rank)
+        }
+
+    @Test
+    fun restoreWidgets_undefinedUser_restoredAsMain() =
+        testScope.runTest {
+            // Write two widgets to file, both of which have user serial number undefined.
+            val fakeState =
+                CommunalHubState().apply {
+                    widgets =
+                        listOf(
+                                CommunalHubState.CommunalWidgetItem().apply {
+                                    widgetId = 1
+                                    componentName = "pk_name/fake_widget_1"
+                                    rank = 1
+                                    userSerialNumber =
+                                        CommunalWidgetItem.USER_SERIAL_NUMBER_UNDEFINED
+                                },
+                                CommunalHubState.CommunalWidgetItem().apply {
+                                    widgetId = 2
+                                    componentName = "pk_name/fake_widget_2"
+                                    rank = 2
+                                    userSerialNumber =
+                                        CommunalWidgetItem.USER_SERIAL_NUMBER_UNDEFINED
+                                },
+                            )
+                            .toTypedArray()
+                }
+            backupUtils.writeBytesToDisk(fakeState.toByteArray())
+
+            // Set up app widget host with widget ids.
+            setAppWidgetIds(listOf(11, 12))
+
+            // Restore widgets.
+            underTest.restoreWidgets(mapOf(Pair(1, 11), Pair(2, 12)))
+            runCurrent()
+
+            // Verify widget 1 and 2 are restored with the main user.
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
+            assertThat(restoredWidgets).hasSize(2)
+
+            val restoredWidget1 = restoredWidgets[0]
+            assertThat(restoredWidget1.widgetId).isEqualTo(11)
+            assertThat(restoredWidget1.userSerialNumber).isEqualTo(testUserSerialNumber(mainUser))
+
+            val restoredWidget2 = restoredWidgets[1]
+            assertThat(restoredWidget2.widgetId).isEqualTo(12)
+            assertThat(restoredWidget2.userSerialNumber).isEqualTo(testUserSerialNumber(mainUser))
+        }
+
+    @Test
+    fun restoreWidgets_workProfileNotRestored_widgetSkipped() =
+        testScope.runTest {
+            // Write fake state to file
+            backupUtils.writeBytesToDisk(fakeStateWithWorkProfile.toByteArray())
+
+            // Set up app widget host with widget ids.
+            // (b/349852237) It's possible that the platform restores widgets even though their user
+            // is not restored.
+            setAppWidgetIds(listOf(11, 12))
+
+            // Restore widgets.
+            underTest.restoreWidgets(mapOf(Pair(1, 11), Pair(2, 12)))
+            runCurrent()
+
+            // Verify only widget 1 is restored. Widget 2 is skipped because it belongs to a work
+            // profile, which is not restored.
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
+            assertThat(restoredWidgets).hasSize(1)
+
+            val restoredWidget = restoredWidgets[0]
+            assertThat(restoredWidget.widgetId).isEqualTo(11)
+            assertThat(restoredWidget.userSerialNumber).isEqualTo(testUserSerialNumber(mainUser))
+        }
+
+    @Test
+    fun restoreWidgets_workProfileRestored_manuallyBindWidget() =
+        testScope.runTest {
+            // Write fake state to file
+            backupUtils.writeBytesToDisk(fakeStateWithWorkProfile.toByteArray())
+
+            // Set up app widget host with widget ids.
+            // (b/349852237) It's possible that the platform restores widgets even though their user
+            // is not restored.
+            setAppWidgetIds(listOf(11, 12))
+
+            // Restore work profile.
+            restoreUser(workProfile)
+
+            val newWidgetId = 13
+            whenever(communalWidgetHost.allocateIdAndBindWidget(any(), any()))
+                .thenReturn(newWidgetId)
+
+            // Restore widgets.
+            underTest.restoreWidgets(mapOf(Pair(1, 11), Pair(2, 12)))
+            runCurrent()
+
+            // Verify widget 1 is restored.
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
+            assertThat(restoredWidgets).hasSize(1)
+
+            val restoredWidget = restoredWidgets[0]
+            assertThat(restoredWidget.widgetId).isEqualTo(11)
+            assertThat(restoredWidget.userSerialNumber).isEqualTo(testUserSerialNumber(mainUser))
+
+            // Verify widget 2 (now 12) is removed from platform
+            verify(appWidgetHost).deleteAppWidgetId(12)
+
+            // Verify work profile widget is manually bound
+            verify(communalWidgetDao)
+                .addWidget(
+                    eq(newWidgetId),
+                    componentNameCaptor.capture(),
+                    eq(2),
+                    eq(testUserSerialNumber(workProfile))
+                )
+            assertThat(componentNameCaptor.firstValue)
+                .isEqualTo(ComponentName("pk_name", "fake_widget_2"))
         }
 
     @Test
@@ -648,6 +764,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         return user.identifier + 100
     }
 
+    private fun restoreUser(user: UserHandle) {
+        whenever(backupManager.getUserForAncestralSerialNumber(user.identifier.toLong()))
+            .thenReturn(user)
+        whenever(userManager.getUserSerialNumber(user.identifier))
+            .thenReturn(testUserSerialNumber(user))
+    }
+
     private companion object {
         val PROVIDER_INFO_REQUIRES_CONFIGURATION =
             AppWidgetProviderInfo().apply { configure = ComponentName("test.pkg", "test.cmp") }
@@ -672,6 +795,25 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                                 componentName = "pk_name/fake_widget_2"
                                 rank = 2
                                 userSerialNumber = 0
+                            },
+                        )
+                        .toTypedArray()
+            }
+        val fakeStateWithWorkProfile =
+            CommunalHubState().apply {
+                widgets =
+                    listOf(
+                            CommunalHubState.CommunalWidgetItem().apply {
+                                widgetId = 1
+                                componentName = "pk_name/fake_widget_1"
+                                rank = 1
+                                userSerialNumber = 0
+                            },
+                            CommunalHubState.CommunalWidgetItem().apply {
+                                widgetId = 2
+                                componentName = "pk_name/fake_widget_2"
+                                rank = 2
+                                userSerialNumber = 10
                             },
                         )
                         .toTypedArray()
