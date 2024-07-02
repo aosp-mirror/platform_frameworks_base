@@ -399,7 +399,7 @@ class DesktopTasksController(
         )
         val wct = WindowContainerTransaction()
         exitSplitIfApplicable(wct, taskInfo)
-        moveHomeTaskToFront(wct)
+        moveHomeTask(wct, true /* toTop */)
         val taskToMinimize =
             bringDesktopAppsToFrontBeforeShowingNewTask(taskInfo.displayId, wct, taskInfo.taskId)
         addMoveToDesktopChanges(wct, taskInfo)
@@ -749,7 +749,7 @@ class DesktopTasksController(
             addWallpaperActivity(wct)
         } else {
             // Move home to front
-            moveHomeTaskToFront(wct)
+            moveHomeTask(wct, true /* toTop */)
         }
 
         val nonMinimizedTasksOrderedFrontToBack =
@@ -775,11 +775,11 @@ class DesktopTasksController(
         return taskToMinimize
     }
 
-    private fun moveHomeTaskToFront(wct: WindowContainerTransaction) {
+    private fun moveHomeTask(wct: WindowContainerTransaction, toTop: Boolean) {
         shellTaskOrganizer
             .getRunningTasks(context.displayId)
             .firstOrNull { task -> task.activityType == ACTIVITY_TYPE_HOME }
-            ?.let { homeTask -> wct.reorder(homeTask.getToken(), true /* onTop */) }
+            ?.let { homeTask -> wct.reorder(homeTask.getToken(), toTop /* onTop */) }
     }
 
     private fun addWallpaperActivity(wct: WindowContainerTransaction) {
@@ -987,6 +987,9 @@ class DesktopTasksController(
             )
             return WindowContainerTransaction().also { wct ->
                 addMoveToDesktopChanges(wct, task)
+                // In some launches home task is moved behind new task being launched. Make sure
+                // that's not the case for launches in desktop.
+                moveHomeTask(wct, false /* toTop */)
                 // Desktop Mode is already showing and we're launching a new Task - we might need to
                 // minimize another Task.
                 val taskToMinimize = addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task)
