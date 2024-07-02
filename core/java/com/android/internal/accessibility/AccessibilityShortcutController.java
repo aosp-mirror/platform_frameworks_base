@@ -36,6 +36,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
@@ -63,6 +64,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.accessibility.util.ShortcutUtils;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.annotation.Retention;
@@ -122,6 +124,13 @@ public class AccessibilityShortcutController {
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
             .build();
+
+    /**
+     * An intent action to launch Extra Dim dialog.
+     */
+    @VisibleForTesting
+    static final String ACTION_LAUNCH_REMOVE_EXTRA_DIM_DIALOG =
+            "com.android.systemui.action.LAUNCH_REMOVE_EXTRA_DIM_DIALOG";
     private static Map<ComponentName, FrameworkFeatureInfo> sFrameworkShortcutFeaturesMap;
 
     private final Context mContext;
@@ -846,7 +855,7 @@ public class AccessibilityShortcutController {
             if (com.android.server.display.feature.flags.Flags.evenDimmer()
                     && context.getResources().getBoolean(
                     com.android.internal.R.bool.config_evenDimmerEnabled)) {
-                launchExtraDimDialog();
+                launchExtraDimDialog(context);
                 return true;
             } else {
                 // Assuming that the default state will be to have the feature off
@@ -863,8 +872,12 @@ public class AccessibilityShortcutController {
             }
         }
 
-        private void launchExtraDimDialog() {
-            // TODO: launch Extra dim dialog for feature migration
+        private void launchExtraDimDialog(Context context) {
+            final Intent intent = new Intent(ACTION_LAUNCH_REMOVE_EXTRA_DIM_DIALOG);
+            intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            intent.setPackage(
+                    context.getString(com.android.internal.R.string.config_systemUi));
+            context.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
         }
     }
 
