@@ -61,4 +61,11 @@ class AppCompatLetterboxConfigurationRobot {
     void enableUserAppAspectRatioSettings(boolean enabled) {
         doReturn(enabled).when(mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
     }
+
+    void enableCameraCompatSplitScreenAspectRatio(boolean enabled) {
+        doReturn(enabled).when(mLetterboxConfiguration)
+                .isCameraCompatSplitScreenAspectRatioEnabled();
+    }
+
+
 }
