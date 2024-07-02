@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.qs.panels.domain.interactor
 
-import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
+import com.android.systemui.qs.panels.data.repository.QuickQuickSettingsRowRepository
 import javax.inject.Inject
 
 @SysUISingleton
-class QuickSettingsContainerViewModel
+class QuickQuickSettingsRowInteractor
 @Inject
 constructor(
-    val brightnessSliderViewModel: BrightnessSliderViewModel,
-    val tileGridViewModel: TileGridViewModel,
-    val editModeViewModel: EditModeViewModel,
-    val quickQuickSettingsViewModel: QuickQuickSettingsViewModel,
-)
+    quickQuickSettingsRowRepository: QuickQuickSettingsRowRepository,
+) {
+    val rows = quickQuickSettingsRowRepository.rows
+
+    val defaultRows = 2
+}
