@@ -497,13 +497,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return getUserData(userId).mBindingController;
     }
 
-
-    @GuardedBy("ImfLock.class")
-    @Nullable
-    InputMethodInfo queryInputMethodForCurrentUserLocked(@NonNull String imeId) {
-        return InputMethodSettingsRepository.get(mCurrentUserId).getMethodMap().get(imeId);
-    }
-
     /**
      * The last window token that we confirmed that IME started talking to.  This is always updated
      * upon reports from the input method.  If the window state is already changed before the report
