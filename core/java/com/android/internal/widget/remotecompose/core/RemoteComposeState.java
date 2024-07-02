@@ -33,11 +33,13 @@ import java.util.HashMap;
 public class RemoteComposeState {
     public static final int START_ID = 42;
     private static final int MAX_FLOATS = 500;
+    private static final int MAX_COLORS = 200;
     private final IntMap<Object> mIntDataMap = new IntMap<>();
     private final IntMap<Boolean> mIntWrittenMap = new IntMap<>();
     private final HashMap<Object, Integer> mDataIntMap = new HashMap();
     private final float[] mFloatMap = new float[MAX_FLOATS]; // efficient cache
-    private final int[] mColorMap = new int[MAX_FLOATS]; // efficient cache
+    private final int[] mColorMap = new int[MAX_COLORS]; // efficient cache
+    private final boolean[] mColorOverride = new boolean[MAX_COLORS];
     private int mNextId = START_ID;
 
     {
@@ -49,6 +51,7 @@ public class RemoteComposeState {
     /**
      * Get Object based on id. The system will cache things like bitmaps
      * Paths etc. They can be accessed with this command
+     *
      * @param id
      * @return
      */
@@ -58,6 +61,7 @@ public class RemoteComposeState {
 
     /**
      * true if the cache contain this id
+     *
      * @param id
      * @return
      */
@@ -150,9 +154,32 @@ public class RemoteComposeState {
      * @param color
      */
     public void updateColor(int id, int color) {
+        if (mColorOverride[id]) {
+            return;
+        }
         mColorMap[id] = color;
     }
 
+    /**
+     * Adds a colorOverride.
+     * This is a list of ids and there colors optimized for playback;
+     *
+     * @param id
+     * @param color
+     */
+    public void overrideColor(int id, int color) {
+        mColorOverride[id] = true;
+        mColorMap[id] = color;
+    }
+
+    /**
+     * Clear the color Overrides
+     */
+    public void clearColorOverride() {
+        for (int i = 0; i < mColorOverride.length; i++) {
+            mColorOverride[i] = false;
+        }
+    }
 
     /**
      * Method to determine if a cached value has been written to the documents WireBuffer based on

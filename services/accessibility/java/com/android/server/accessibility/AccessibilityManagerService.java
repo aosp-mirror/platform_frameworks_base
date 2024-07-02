@@ -2220,10 +2220,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private void sendAccessibilityButtonToInputFilter(int displayId) {
+    private void notifyMagnificationShortcutTriggered(int displayId) {
         synchronized (mLock) {
             if (mHasInputFilter && mInputFilter != null) {
-                mInputFilter.notifyAccessibilityButtonClicked(displayId);
+                mInputFilter.notifyMagnificationShortcutTriggered(displayId);
             }
         }
     }
@@ -3898,7 +3898,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             .isActivated(displayId);
             logAccessibilityShortcutActivated(mContext, MAGNIFICATION_COMPONENT_NAME, shortcutType,
                     enabled);
-            sendAccessibilityButtonToInputFilter(displayId);
+            notifyMagnificationShortcutTriggered(displayId);
             return;
         }
         final ComponentName targetComponentName = ComponentName.unflattenFromString(targetName);

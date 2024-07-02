@@ -91,7 +91,6 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
-                systemSettings = FakeSettings(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         client1 = FakeCustomizationProviderClient()

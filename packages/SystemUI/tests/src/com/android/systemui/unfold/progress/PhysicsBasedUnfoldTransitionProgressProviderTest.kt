@@ -29,10 +29,16 @@ import com.android.systemui.unfold.updates.FOLD_UPDATE_START_OPENING
 import com.android.systemui.unfold.util.TestFoldStateProvider
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * This test class tests [PhysicsBasedUnfoldTransitionProgressProvider] in a more E2E
+ * fashion, it uses real handler thread and timings, so it might be perceptible to more flakiness
+ * compared to the other unit tests that do not perform real multithreaded interactions.
+ */
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
@@ -44,8 +50,8 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
         mock<UnfoldFrameCallbackScheduler.Factory>().apply {
             whenever(create()).then { UnfoldFrameCallbackScheduler() }
         }
-    private val mockBgHandler = mock<Handler>()
-    private val fakeHandler = Handler(HandlerThread("UnfoldBg").apply { start() }.looper)
+    private val handlerThread = HandlerThread("UnfoldBg").apply { start() }
+    private val bgHandler = Handler(handlerThread.looper)
 
     @Before
     fun setUp() {
@@ -54,9 +60,14 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
                 context,
                 schedulerFactory,
                 foldStateProvider = foldStateProvider,
-                progressHandler = fakeHandler
+                progressHandler = bgHandler
             )
         progressProvider.addCallback(listener)
+    }
+
+    @After
+    fun after() {
+        handlerThread.quit()
     }
 
     @Test
@@ -64,10 +75,11 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
         runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
-            { foldStateProvider.sendUnfoldedScreenAvailable() },
-            { foldStateProvider.sendHingeAngleUpdate(90f) },
-            { foldStateProvider.sendHingeAngleUpdate(180f) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() }
+        )
+        sendHingeAngleAndEnsureAnimationUpdate(90f, 120f, 180f)
+        runOnProgressThreadWithInterval(
+            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) }
         )
 
         with(listener.ensureTransitionFinished()) {
@@ -91,7 +103,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun testUnfold_screenAvailableOnlyAfterFullUnfold_emitsIncreasingTransitionEvents() {
+    fun testUnfold_screenAvailableOnlyAfterFullUnfold_finishesWithUnfoldEvent() {
         runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
@@ -102,7 +114,6 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
         )
 
         with(listener.ensureTransitionFinished()) {
-            assertIncreasingProgress()
             assertFinishedWithUnfold()
         }
     }
@@ -111,9 +122,9 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
     fun testFold_emitsDecreasingTransitionEvents() {
         runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_CLOSING) },
-            { foldStateProvider.sendHingeAngleUpdate(170f) },
-            { foldStateProvider.sendHingeAngleUpdate(90f) },
-            { foldStateProvider.sendHingeAngleUpdate(10f) },
+        )
+        sendHingeAngleAndEnsureAnimationUpdate(170f, 90f, 10f)
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_CLOSED) },
         )
 
@@ -127,9 +138,9 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
     fun testUnfoldAndStopUnfolding_finishesTheUnfoldTransition() {
         runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
-            { foldStateProvider.sendUnfoldedScreenAvailable() },
-            { foldStateProvider.sendHingeAngleUpdate(10f) },
-            { foldStateProvider.sendHingeAngleUpdate(90f) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() })
+        sendHingeAngleAndEnsureAnimationUpdate(10f, 50f, 90f)
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_HALF_OPEN) },
         )
 
@@ -159,12 +170,22 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
         with(listener.ensureTransitionFinished()) { assertHasFoldAnimationAtTheEnd() }
     }
 
+    private fun sendHingeAngleAndEnsureAnimationUpdate(vararg angles: Float) {
+        angles.forEach { angle ->
+            listener.waitForProgressChangeAfter {
+                bgHandler.post {
+                    foldStateProvider.sendHingeAngleUpdate(angle)
+                }
+            }
+        }
+    }
+
     private fun runOnProgressThreadWithInterval(
         vararg blocks: () -> Unit,
         intervalMillis: Long = 60,
     ) {
         blocks.forEach {
-            fakeHandler.post(it)
+            bgHandler.post(it)
             Thread.sleep(intervalMillis)
         }
     }

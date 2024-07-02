@@ -24,9 +24,14 @@ import static android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.wm.shell.MockSurfaceControlHelper.createMockSurfaceControlTransaction;
+import static com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.CLOSE_MAXIMIZE_MENU_DELAY_MS;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -38,11 +43,13 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.PointF;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.platform.test.annotations.DisableFlags;
@@ -62,6 +69,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
@@ -76,6 +84,10 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams;
+import com.android.wm.shell.windowdecor.common.OnTaskActionClickListener;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,6 +96,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 
@@ -112,8 +125,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Mock
     private ShellTaskOrganizer mMockShellTaskOrganizer;
     @Mock
-    private Handler mMockHandler;
-    @Mock
     private Choreographer mMockChoreographer;
     @Mock
     private SyncTransactionQueue mMockSyncQueue;
@@ -131,13 +142,18 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private WindowDecoration.SurfaceControlViewHostFactory mMockSurfaceControlViewHostFactory;
     @Mock
     private TypedArray mMockRoundedCornersRadiusArray;
-
     @Mock
     private TestTouchEventListener mMockTouchEventListener;
     @Mock
     private DesktopModeWindowDecoration.ExclusionRegionListener mMockExclusionRegionListener;
     @Mock
     private PackageManager mMockPackageManager;
+    @Mock
+    private Handler mMockHandler;
+    @Captor
+    private ArgumentCaptor<Function1<Boolean, Unit>> mOnMaxMenuHoverChangeListener;
+    @Captor
+    private ArgumentCaptor<Runnable> mCloseMaxMenuRunnable;
 
     private final InsetsState mInsetsState = new InsetsState();
     private SurfaceControl.Transaction mMockTransaction;
@@ -459,6 +475,92 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         verify(mMockHandler).removeCallbacks(runnableArgument.getValue());
     }
 
+    @Test
+    public void createMaximizeMenu_showsMenu() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+        assertFalse(decoration.isMaximizeMenuActive());
+
+        createMaximizeMenu(decoration, menu);
+
+        assertTrue(decoration.isMaximizeMenuActive());
+    }
+
+    @Test
+    public void maximizeMenu_unHoversMenu_schedulesCloseMenu() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+        decoration.setAppHeaderMaximizeButtonHovered(false);
+        createMaximizeMenu(decoration, menu);
+
+        mOnMaxMenuHoverChangeListener.getValue().invoke(false);
+
+        verify(mMockHandler)
+                .postDelayed(mCloseMaxMenuRunnable.capture(), eq(CLOSE_MAXIMIZE_MENU_DELAY_MS));
+
+        mCloseMaxMenuRunnable.getValue().run();
+        verify(menu).close();
+        assertFalse(decoration.isMaximizeMenuActive());
+    }
+
+    @Test
+    public void maximizeMenu_unHoversButton_schedulesCloseMenu() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+        decoration.setAppHeaderMaximizeButtonHovered(true);
+        createMaximizeMenu(decoration, menu);
+
+        decoration.setAppHeaderMaximizeButtonHovered(false);
+
+        verify(mMockHandler)
+                .postDelayed(mCloseMaxMenuRunnable.capture(), eq(CLOSE_MAXIMIZE_MENU_DELAY_MS));
+
+        mCloseMaxMenuRunnable.getValue().run();
+        verify(menu).close();
+        assertFalse(decoration.isMaximizeMenuActive());
+    }
+
+    @Test
+    public void maximizeMenu_hoversMenu_cancelsCloseMenu() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+        createMaximizeMenu(decoration, menu);
+
+        mOnMaxMenuHoverChangeListener.getValue().invoke(true);
+
+        verify(mMockHandler).removeCallbacks(any());
+    }
+
+    @Test
+    public void maximizeMenu_hoversButton_cancelsCloseMenu() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+        createMaximizeMenu(decoration, menu);
+
+        decoration.setAppHeaderMaximizeButtonHovered(true);
+
+        verify(mMockHandler).removeCallbacks(any());
+    }
+
+    private void createMaximizeMenu(DesktopModeWindowDecoration decoration, MaximizeMenu menu) {
+        final OnTaskActionClickListener l = (taskId, tag) -> {};
+        decoration.setOnMaximizeOrRestoreClickListener(l);
+        decoration.setOnLeftSnapClickListener(l);
+        decoration.setOnRightSnapClickListener(l);
+        decoration.createMaximizeMenu();
+        verify(menu).show(any(), any(), any(), mOnMaxMenuHoverChangeListener.capture());
+    }
+
     private void fillRoundedCornersResources(int fillValue) {
         when(mMockRoundedCornersRadiusArray.getDimensionPixelSize(anyInt(), anyInt()))
                 .thenReturn(fillValue);
@@ -479,12 +581,19 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     private DesktopModeWindowDecoration createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo) {
-        DesktopModeWindowDecoration windowDecor = new DesktopModeWindowDecoration(mContext,
+        return createWindowDecoration(taskInfo, new FakeMaximizeMenuFactory());
+    }
+
+    private DesktopModeWindowDecoration createWindowDecoration(
+            ActivityManager.RunningTaskInfo taskInfo,
+            MaximizeMenuFactory maximizeMenuFactory) {
+        final DesktopModeWindowDecoration windowDecor = new DesktopModeWindowDecoration(mContext,
                 mMockDisplayController, mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl,
                 mMockHandler, mMockChoreographer, mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
                 SurfaceControl.Builder::new, mMockTransactionSupplier,
                 WindowContainerTransaction::new, SurfaceControl::new,
-                mMockSurfaceControlViewHostFactory);
+                mMockSurfaceControlViewHostFactory,
+                maximizeMenuFactory);
         windowDecor.setCaptionListeners(mMockTouchEventListener, mMockTouchEventListener,
                 mMockTouchEventListener, mMockTouchEventListener);
         windowDecor.setExclusionRegionListener(mMockExclusionRegionListener);
@@ -539,6 +648,29 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         @Override
         public boolean handleMotionEvent(@Nullable View v, MotionEvent ev) {
             return false;
+        }
+    }
+
+    private static final class FakeMaximizeMenuFactory implements MaximizeMenuFactory {
+        private final MaximizeMenu mMaximizeMenu;
+
+        FakeMaximizeMenuFactory() {
+            this(mock(MaximizeMenu.class));
+        }
+
+        FakeMaximizeMenuFactory(MaximizeMenu menu) {
+            mMaximizeMenu = menu;
+        }
+
+        @NonNull
+        @Override
+        public MaximizeMenu create(@NonNull SyncTransactionQueue syncQueue,
+                @NonNull RootTaskDisplayAreaOrganizer rootTdaOrganizer,
+                @NonNull DisplayController displayController,
+                @NonNull ActivityManager.RunningTaskInfo taskInfo,
+                @NonNull Context decorWindowContext, @NonNull PointF menuPosition,
+                @NonNull Supplier<SurfaceControl.Transaction> transactionSupplier) {
+            return mMaximizeMenu;
         }
     }
 }

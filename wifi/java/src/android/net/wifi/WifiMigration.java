@@ -19,16 +19,23 @@ package android.net.wifi;
 import static android.os.Environment.getDataMiscCeDirectory;
 import static android.os.Environment.getDataMiscDirectory;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.net.wifi.flags.Flags;
+import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
+import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.security.legacykeystore.ILegacyKeystore;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.SparseArray;
 
 import java.io.File;
@@ -36,7 +43,11 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Class used to provide one time hooks for existing OEM devices to migrate their config store
@@ -45,6 +56,8 @@ import java.util.Objects;
  */
 @SystemApi
 public final class WifiMigration {
+    private static final String TAG = "WifiMigration";
+
     /**
      * Directory to read the wifi config store files from under.
      */
@@ -554,5 +567,50 @@ public final class WifiMigration {
                 context.getContentResolver(), Settings.Global.WIFI_MIGRATION_COMPLETED, 1);
         return data;
 
+    }
+
+    /**
+     * Migrate any certificates in Legacy Keystore to the newer WifiBlobstore database.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static void migrateLegacyKeystoreToWifiBlobstore() {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            ILegacyKeystore legacyKeystore = WifiBlobStore.getLegacyKeystore();
+            String[] legacyAliases = legacyKeystore.list("", Process.WIFI_UID);
+            if (legacyAliases == null || legacyAliases.length == 0) {
+                Log.i(TAG, "No aliases need to be migrated");
+                return;
+            }
+
+            WifiBlobStore wifiBlobStore = WifiBlobStore.getInstance();
+            List<String> blobstoreAliasList = Arrays.asList(wifiBlobStore.list(""));
+            Set<String> blobstoreAliases = new HashSet<>();
+            blobstoreAliases.addAll(blobstoreAliasList);
+
+            for (String legacyAlias : legacyAliases) {
+                // Only migrate if the alias is not already in WifiBlobstore,
+                // since WifiBlobstore should already contain the latest value.
+                if (!blobstoreAliases.contains(legacyAlias)) {
+                    byte[] value = legacyKeystore.get(legacyAlias, Process.WIFI_UID);
+                    wifiBlobStore.put(legacyAlias, value);
+                }
+                legacyKeystore.remove(legacyAlias, Process.WIFI_UID);
+            }
+            Log.i(TAG, "Successfully migrated aliases from Legacy Keystore");
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ILegacyKeystore.ERROR_SYSTEM_ERROR) {
+                Log.i(TAG, "Legacy Keystore service has been deprecated");
+            } else {
+                Log.e(TAG, "Encountered an exception while migrating aliases. " + e);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Encountered an exception while migrating aliases. " + e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 }

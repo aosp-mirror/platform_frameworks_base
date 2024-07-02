@@ -20,6 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Handler;
+import android.os.Process;
+import android.os.Trace;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
@@ -29,6 +32,7 @@ import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Low-level class holding the list of messages to be dispatched by a
@@ -44,6 +48,7 @@ import java.util.ArrayList;
 public final class MessageQueue {
     private static final String TAG = "MessageQueue";
     private static final boolean DEBUG = false;
+    private static final boolean TRACE = false;
 
     // True if the message queue can be quit.
     @UnsupportedAppUsage
@@ -326,6 +331,8 @@ public final class MessageQueue {
         return newWatchedEvents;
     }
 
+    private static final AtomicLong mMessagesDelivered = new AtomicLong();
+
     @UnsupportedAppUsage
     Message next() {
         // Return here if the message loop has already quit and been disposed.
@@ -380,6 +387,9 @@ public final class MessageQueue {
                         msg.markInUse();
                         if (msg.isAsynchronous()) {
                             mAsyncMessageCount--;
+                        }
+                        if (TRACE) {
+                            Trace.setCounter("MQ.Delivered", mMessagesDelivered.incrementAndGet());
                         }
                         return msg;
                     }
@@ -794,7 +804,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 if (n != null) {
                     if (n.target == h && n.what == what
-                        && (object == null || n.obj == object)) {
+                            && (object == null || n.obj == object)) {
                         Message nn = n.next;
                         if (n.isAsynchronous()) {
                             mAsyncMessageCount--;
@@ -841,7 +851,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 if (n != null) {
                     if (n.target == h && n.what == what
-                        && (object == null || object.equals(n.obj))) {
+                            && (object == null || object.equals(n.obj))) {
                         Message nn = n.next;
                         if (n.isAsynchronous()) {
                             mAsyncMessageCount--;
@@ -888,7 +898,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 if (n != null) {
                     if (n.target == h && n.callback == r
-                        && (object == null || n.obj == object)) {
+                            && (object == null || n.obj == object)) {
                         Message nn = n.next;
                         if (n.isAsynchronous()) {
                             mAsyncMessageCount--;
@@ -935,7 +945,7 @@ public final class MessageQueue {
                 Message n = p.next;
                 if (n != null) {
                     if (n.target == h && n.callback == r
-                        && (object == null || object.equals(n.obj))) {
+                            && (object == null || object.equals(n.obj))) {
                         Message nn = n.next;
                         if (n.isAsynchronous()) {
                             mAsyncMessageCount--;
@@ -1093,6 +1103,7 @@ public final class MessageQueue {
 
     void dump(Printer pw, String prefix, Handler h) {
         synchronized (this) {
+            pw.println(prefix + "(MessageQueue is using Legacy implementation)");
             long now = SystemClock.uptimeMillis();
             int n = 0;
             for (Message msg = mMessages; msg != null; msg = msg.next) {

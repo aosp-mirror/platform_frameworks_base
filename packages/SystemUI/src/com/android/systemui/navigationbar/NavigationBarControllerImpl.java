@@ -56,11 +56,11 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
-import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.settings.SecureSettings;
@@ -431,6 +431,8 @@ public class NavigationBarControllerImpl implements
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
             navBar.checkNavBarModes();
+        } else {
+            mTaskbarDelegate.checkNavBarModes();
         }
     }
 
@@ -439,6 +441,8 @@ public class NavigationBarControllerImpl implements
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
             navBar.finishBarAnimations();
+        } else {
+            mTaskbarDelegate.finishBarAnimations();
         }
     }
 
@@ -447,6 +451,8 @@ public class NavigationBarControllerImpl implements
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
             navBar.touchAutoDim();
+        } else {
+            mTaskbarDelegate.touchAutoDim();
         }
     }
 
@@ -455,6 +461,8 @@ public class NavigationBarControllerImpl implements
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
             navBar.transitionTo(barMode, animate);
+        } else {
+            mTaskbarDelegate.transitionTo(barMode, animate);
         }
     }
 

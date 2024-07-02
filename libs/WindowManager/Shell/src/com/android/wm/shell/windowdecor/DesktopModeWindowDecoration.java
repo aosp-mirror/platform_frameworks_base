@@ -69,6 +69,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.windowdecor.common.OnTaskActionClickListener;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
@@ -87,6 +88,9 @@ import java.util.function.Supplier;
 public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLinearLayout> {
     private static final String TAG = "DesktopModeWindowDecoration";
 
+    @VisibleForTesting
+    static final long CLOSE_MAXIMIZE_MENU_DELAY_MS = 150L;
+
     private final Handler mHandler;
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
@@ -96,6 +100,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private View.OnTouchListener mOnCaptionTouchListener;
     private View.OnLongClickListener mOnCaptionLongClickListener;
     private View.OnGenericMotionListener mOnCaptionGenericMotionListener;
+    private OnTaskActionClickListener mOnMaximizeOrRestoreClickListener;
+    private OnTaskActionClickListener mOnLeftSnapClickListener;
+    private OnTaskActionClickListener mOnRightSnapClickListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
     private DragDetector mDragDetector;
@@ -120,6 +127,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private ExclusionRegionListener mExclusionRegionListener;
 
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
+    private final MaximizeMenuFactory mMaximizeMenuFactory;
+
+    // Hover state for the maximize menu and button. The menu will remain open as long as either of
+    // these is true. See {@link #onMaximizeHoverStateChanged()}.
+    private boolean mIsAppHeaderMaximizeButtonHovered = false;
+    private boolean mIsMaximizeMenuHovered = false;
+    // Used to schedule the closing of the maximize menu when neither of the button or menu are
+    // being hovered. There's a small delay after stopping the hover, to allow a quick reentry
+    // to cancel the close.
+    private final Runnable mCloseMaximizeWindowRunnable = this::closeMaximizeMenu;
 
     DesktopModeWindowDecoration(
             Context context,
@@ -135,7 +152,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 handler, choreographer, syncQueue, rootTaskDisplayAreaOrganizer,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
                 WindowContainerTransaction::new, SurfaceControl::new,
-                new SurfaceControlViewHostFactory() {});
+                new SurfaceControlViewHostFactory() {},
+                DefaultMaximizeMenuFactory.INSTANCE);
     }
 
     DesktopModeWindowDecoration(
@@ -152,7 +170,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
             Supplier<SurfaceControl> surfaceControlSupplier,
-            SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
+            SurfaceControlViewHostFactory surfaceControlViewHostFactory,
+            MaximizeMenuFactory maximizeMenuFactory) {
         super(context, displayController, taskOrganizer, taskInfo, taskSurface,
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
@@ -161,6 +180,31 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
+        mMaximizeMenuFactory = maximizeMenuFactory;
+    }
+
+    /**
+     * Register a listener to be called back when one of the tasks' maximize/restore action is
+     * triggered.
+     * TODO(b/346441962): hook this up to double-tap and the header's maximize button, instead of
+     *  having the ViewModel deal with parsing motion events.
+     */
+    void setOnMaximizeOrRestoreClickListener(OnTaskActionClickListener listener) {
+        mOnMaximizeOrRestoreClickListener = listener;
+    }
+
+    /**
+     * Register a listener to be called back when one of the tasks snap-left action is triggered.
+     */
+    void setOnLeftSnapClickListener(OnTaskActionClickListener listener) {
+        mOnLeftSnapClickListener = listener;
+    }
+
+    /**
+     * Register a listener to be called back when one of the tasks' snap-right action is triggered.
+     */
+    void setOnRightSnapClickListener(OnTaskActionClickListener listener) {
+        mOnRightSnapClickListener = listener;
     }
 
     void setCaptionListeners(
@@ -714,11 +758,41 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Create and display maximize menu window
      */
     void createMaximizeMenu() {
-        mMaximizeMenu = new MaximizeMenu(mSyncQueue, mRootTaskDisplayAreaOrganizer,
-                mDisplayController, mTaskInfo, mOnCaptionButtonClickListener,
-                mOnCaptionGenericMotionListener, mOnCaptionTouchListener, mContext,
+        mMaximizeMenu = mMaximizeMenuFactory.create(mSyncQueue, mRootTaskDisplayAreaOrganizer,
+                mDisplayController, mTaskInfo, mContext,
                 calculateMaximizeMenuPosition(), mSurfaceControlTransactionSupplier);
-        mMaximizeMenu.show();
+        mMaximizeMenu.show(
+                mOnMaximizeOrRestoreClickListener,
+                mOnLeftSnapClickListener,
+                mOnRightSnapClickListener,
+                hovered -> {
+                    mIsMaximizeMenuHovered = hovered;
+                    onMaximizeHoverStateChanged();
+                    return null;
+                }
+        );
+    }
+
+    /** Set whether the app header's maximize button is hovered. */
+    void setAppHeaderMaximizeButtonHovered(boolean hovered) {
+        mIsAppHeaderMaximizeButtonHovered = hovered;
+        onMaximizeHoverStateChanged();
+    }
+
+    /**
+     * Called when either one of the maximize button in the app header or the maximize menu has
+     * changed its hover state.
+     */
+    void onMaximizeHoverStateChanged() {
+        if (!mIsMaximizeMenuHovered && !mIsAppHeaderMaximizeButtonHovered) {
+            // Neither is hovered, close the menu.
+            if (isMaximizeMenuActive()) {
+                mHandler.postDelayed(mCloseMaximizeWindowRunnable, CLOSE_MAXIMIZE_MENU_DELAY_MS);
+            }
+            return;
+        }
+        // At least one of the two is hovered, cancel the close if needed.
+        mHandler.removeCallbacks(mCloseMaximizeWindowRunnable);
     }
 
     /**
@@ -992,33 +1066,21 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .setAnimatingTaskResize(animatingTaskResize);
     }
 
-    /** Called when there is a {@Link ACTION_HOVER_EXIT} on the maximize window button. */
-    void onMaximizeWindowHoverExit() {
+    /**
+     * Called when there is a {@link MotionEvent#ACTION_HOVER_EXIT} on the maximize window button.
+     */
+    void onMaximizeButtonHoverExit() {
         ((AppHeaderViewHolder) mWindowDecorViewHolder)
                 .onMaximizeWindowHoverExit();
     }
 
-    /** Called when there is a {@Link ACTION_HOVER_ENTER} on the maximize window button. */
-    void onMaximizeWindowHoverEnter() {
+    /**
+     * Called when there is a {@link MotionEvent#ACTION_HOVER_ENTER} on the maximize window button.
+     */
+    void onMaximizeButtonHoverEnter() {
         ((AppHeaderViewHolder) mWindowDecorViewHolder)
                 .onMaximizeWindowHoverEnter();
     }
-
-    /** Called when there is a {@Link ACTION_HOVER_ENTER} on a view in the maximize menu. */
-    void onMaximizeMenuHoverEnter(int id, MotionEvent ev) {
-        mMaximizeMenu.onMaximizeMenuHoverEnter(id, ev);
-    }
-
-    /** Called when there is a {@Link ACTION_HOVER_MOVE} on a view in the maximize menu. */
-    void onMaximizeMenuHoverMove(int id, MotionEvent ev) {
-        mMaximizeMenu.onMaximizeMenuHoverMove(id, ev);
-    }
-
-    /** Called when there is a {@Link ACTION_HOVER_EXIT} on a view in the maximize menu. */
-    void onMaximizeMenuHoverExit(int id, MotionEvent ev) {
-        mMaximizeMenu.onMaximizeMenuHoverExit(id, ev);
-    }
-
 
     @Override
     public String toString() {

@@ -28,7 +28,7 @@ import com.android.systemui.navigationbar.NavigationBarComponent.NavigationBarSc
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
-import com.android.systemui.statusbar.phone.BarTransitions;
+import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 
 import java.io.PrintWriter;

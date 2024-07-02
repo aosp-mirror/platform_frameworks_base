@@ -111,6 +111,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
                 .thenReturn(List.of(createTaskInfoForBacklinksTask()));
         when(mPackageManager.resolveActivity(mPackageManagerIntentCaptor.capture(), anyInt()))
                 .thenReturn(createBacklinksTaskResolveInfo());
+        when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
 
         mViewModel = new AppClipsViewModel.Factory(mAppClipsCrossProcessHelper, mImageExporter,
                 mAtmService, mAssistContentRequester, mPackageManager,
@@ -202,12 +203,14 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         assertThat(queriedIntent.getData()).isEqualTo(expectedUri);
         assertThat(queriedIntent.getAction()).isEqualTo(ACTION_VIEW);
 
-        ClipData result = mViewModel.getBacklinksLiveData().getValue();
-        ClipDescription resultDescription = result.getDescription();
+        InternalBacklinksData result = mViewModel.getBacklinksLiveData().getValue();
+        assertThat(result.getAppIcon()).isEqualTo(FAKE_DRAWABLE);
+        ClipData clipData = result.getClipData();
+        ClipDescription resultDescription = clipData.getDescription();
         assertThat(resultDescription.getLabel().toString()).isEqualTo(BACKLINKS_TASK_APP_NAME);
         assertThat(resultDescription.getMimeType(0)).isEqualTo(MIMETYPE_TEXT_URILIST);
-        assertThat(result.getItemCount()).isEqualTo(1);
-        assertThat(result.getItemAt(0).getUri()).isEqualTo(expectedUri);
+        assertThat(clipData.getItemCount()).isEqualTo(1);
+        assertThat(clipData.getItemAt(0).getUri()).isEqualTo(expectedUri);
     }
 
     @Test
@@ -245,12 +248,14 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         Intent queriedIntent = mPackageManagerIntentCaptor.getValue();
         assertThat(queriedIntent.getPackage()).isEqualTo(expectedIntent.getPackage());
 
-        ClipData result = mViewModel.getBacklinksLiveData().getValue();
-        ClipDescription resultDescription = result.getDescription();
+        InternalBacklinksData result = mViewModel.getBacklinksLiveData().getValue();
+        assertThat(result.getAppIcon()).isEqualTo(FAKE_DRAWABLE);
+        ClipData clipData = result.getClipData();
+        ClipDescription resultDescription = clipData.getDescription();
         assertThat(resultDescription.getLabel().toString()).isEqualTo(BACKLINKS_TASK_APP_NAME);
         assertThat(resultDescription.getMimeType(0)).isEqualTo(MIMETYPE_TEXT_INTENT);
-        assertThat(result.getItemCount()).isEqualTo(1);
-        assertThat(result.getItemAt(0).getIntent()).isEqualTo(expectedIntent);
+        assertThat(clipData.getItemCount()).isEqualTo(1);
+        assertThat(clipData.getItemAt(0).getIntent()).isEqualTo(expectedIntent);
     }
 
     @Test
@@ -330,6 +335,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
 
     private void resetPackageManagerMockingForUsingFallbackBacklinks() {
         reset(mPackageManager);
+        when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
         when(mPackageManager.resolveActivity(any(Intent.class), anyInt()))
                 // First the logic queries whether a package has a launcher activity, this should
                 // resolve otherwise the logic filters out the task.
@@ -340,14 +346,17 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     }
 
     private void verifyMainLauncherBacklinksIntent() {
-        ClipData result = mViewModel.getBacklinksLiveData().getValue();
-        assertThat(result.getItemCount()).isEqualTo(1);
+        InternalBacklinksData result = mViewModel.getBacklinksLiveData().getValue();
+        assertThat(result.getAppIcon()).isEqualTo(FAKE_DRAWABLE);
 
-        ClipDescription resultDescription = result.getDescription();
+        ClipData clipData = result.getClipData();
+        assertThat(clipData.getItemCount()).isEqualTo(1);
+
+        ClipDescription resultDescription = clipData.getDescription();
         assertThat(resultDescription.getLabel().toString()).isEqualTo(BACKLINKS_TASK_APP_NAME);
         assertThat(resultDescription.getMimeType(0)).isEqualTo(MIMETYPE_TEXT_INTENT);
 
-        Intent actualBacklinksIntent = result.getItemAt(0).getIntent();
+        Intent actualBacklinksIntent = clipData.getItemAt(0).getIntent();
         assertThat(actualBacklinksIntent.getPackage()).isEqualTo(BACKLINKS_TASK_PACKAGE_NAME);
         assertThat(actualBacklinksIntent.getAction()).isEqualTo(ACTION_MAIN);
         assertThat(actualBacklinksIntent.getCategories()).containsExactly(CATEGORY_LAUNCHER);

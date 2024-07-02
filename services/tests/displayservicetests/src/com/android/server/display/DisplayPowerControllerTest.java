@@ -1700,14 +1700,17 @@ public final class DisplayPowerControllerTest {
         verify(mDisplayOffloadSession, never()).cancelBlockScreenOn();
     }
 
-    @RequiresFlagsEnabled(Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON)
     @Test
     public void testOffloadBlocker_turnON_thenOFF_cancelBlockScreenOnNotCalledIfUnblocked() {
         // Set up.
+        when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isOffloadSessionCancelBlockScreenOnEnabled())
+                .thenReturn(true);
         int initState = Display.STATE_OFF;
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
-        when(mDisplayOffloadSession.blockScreenOn(any())).thenReturn(true);
+        ArgumentCaptor<Runnable> argumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        when(mDisplayOffloadSession.blockScreenOn(argumentCaptor.capture())).thenReturn(true);
 
         // Start with OFF.
         when(mHolder.displayPowerState.getScreenState()).thenReturn(initState);
@@ -1721,8 +1724,7 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        ArgumentCaptor<Runnable> argumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(mDisplayOffloadSession).blockScreenOn(argumentCaptor.capture());
+        verify(mDisplayOffloadSession).blockScreenOn(any());
 
         // Unblocked
         argumentCaptor.getValue().run();
@@ -1737,10 +1739,12 @@ public final class DisplayPowerControllerTest {
         verify(mDisplayOffloadSession, never()).cancelBlockScreenOn();
     }
 
-    @RequiresFlagsEnabled(Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON)
     @Test
     public void testOffloadBlocker_turnON_thenOFF_cancelBlockScreenOn() {
         // Set up.
+        when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isOffloadSessionCancelBlockScreenOnEnabled())
+                .thenReturn(true);
         int initState = Display.STATE_OFF;
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);

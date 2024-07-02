@@ -18,7 +18,7 @@ package com.android.systemui.navigationbar
 
 import com.android.internal.statusbar.RegisterStatusBarResult
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.phone.BarTransitions
+import com.android.systemui.shared.statusbar.phone.BarTransitions
 import javax.inject.Inject
 
 /** A no-op version of [NavigationBarController] for variants like Arc and TV. */

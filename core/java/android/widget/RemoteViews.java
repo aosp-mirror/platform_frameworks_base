@@ -62,6 +62,7 @@ import android.content.res.TypedArray;
 import android.content.res.loader.ResourcesLoader;
 import android.content.res.loader.ResourcesProvider;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.BlendMode;
 import android.graphics.Outline;
 import android.graphics.PorterDuff;
@@ -90,6 +91,7 @@ import android.util.DisplayMetrics;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.LongArray;
+import android.util.LongSparseArray;
 import android.util.Pair;
 import android.util.SizeF;
 import android.util.SparseArray;
@@ -98,6 +100,7 @@ import android.util.TypedValue;
 import android.util.TypedValue.ComplexDimensionUnit;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoStream;
 import android.util.proto.ProtoUtils;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -1266,10 +1269,15 @@ public class RemoteViews implements Parcelable, Filter {
                 int intentId = in.readInt();
                 String intentUri = in.readString8();
                 RemoteCollectionItems items = new RemoteCollectionItems(in, currentRootData);
-                mIdToUriMapping.put(intentId, intentUri);
-                mUriToCollectionMapping.put(intentUri, items);
+                addMapping(intentId, intentUri, items);
             }
         }
+
+        void addMapping(int intentId, String intentUri, RemoteCollectionItems items) {
+            mIdToUriMapping.put(intentId, intentUri);
+            mUriToCollectionMapping.put(intentUri, items);
+        }
+
 
         void setHierarchyDataForId(int intentId, HierarchyRootData data) {
             String uri = mIdToUriMapping.get(intentId);
@@ -1465,6 +1473,87 @@ public class RemoteViews implements Parcelable, Filter {
                 mUriToCollectionMapping.get(intentUri).writeToParcel(out, flags, true);
             }
         }
+
+        public void writeToProto(Context context, ProtoOutputStream out) {
+            final long token = out.start(RemoteViewsProto.REMOTE_COLLECTION_CACHE);
+            for (int i = 0; i < mIdToUriMapping.size(); i++) {
+                final long entryToken = out.start(RemoteViewsProto.RemoteCollectionCache.ENTRIES);
+                out.write(RemoteViewsProto.RemoteCollectionCache.Entry.ID,
+                        mIdToUriMapping.keyAt(i));
+                String intentUri = mIdToUriMapping.valueAt(i);
+                out.write(RemoteViewsProto.RemoteCollectionCache.Entry.URI, intentUri);
+                final long itemsToken = out.start(
+                        RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS);
+                mUriToCollectionMapping.get(intentUri).writeToProto(context, out, /* attached= */
+                        true);
+                out.end(itemsToken);
+                out.end(entryToken);
+            }
+            out.end(token);
+        }
+    }
+
+    private PendingResources<RemoteCollectionCache> populateRemoteCollectionCacheFromProto(
+            ProtoInputStream in) throws Exception {
+        final ArrayList<LongSparseArray<Object>> entries = new ArrayList<>();
+        final long token = in.start(RemoteViewsProto.REMOTE_COLLECTION_CACHE);
+        while (in.nextField() != NO_MORE_FIELDS) {
+            switch (in.getFieldNumber()) {
+                case (int) RemoteViewsProto.RemoteCollectionCache.ENTRIES:
+                    final LongSparseArray<Object> entry = new LongSparseArray<>();
+                    final long entryToken = in.start(
+                            RemoteViewsProto.RemoteCollectionCache.ENTRIES);
+                    while (in.nextField() != NO_MORE_FIELDS) {
+                        switch (in.getFieldNumber()) {
+                            case (int) RemoteViewsProto.RemoteCollectionCache.Entry.ID:
+                                entry.put(RemoteViewsProto.RemoteCollectionCache.Entry.ID,
+                                        in.readInt(
+                                                RemoteViewsProto.RemoteCollectionCache.Entry.ID));
+                                break;
+                            case (int) RemoteViewsProto.RemoteCollectionCache.Entry.URI:
+                                entry.put(RemoteViewsProto.RemoteCollectionCache.Entry.URI,
+                                        in.readString(
+                                                RemoteViewsProto.RemoteCollectionCache.Entry.URI));
+                                break;
+                            case (int) RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS:
+                                final long itemsToken = in.start(
+                                        RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS);
+                                entry.put(RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS,
+                                        RemoteCollectionItems.createFromProto(in));
+                                in.end(itemsToken);
+                                break;
+                            default:
+                                Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                        + ProtoUtils.currentFieldToString(in));
+                        }
+                    }
+                    in.end(entryToken);
+                    checkContainsKeys(entry,
+                            new long[]{RemoteViewsProto.RemoteCollectionCache.Entry.ID,
+                                    RemoteViewsProto.RemoteCollectionCache.Entry.URI,
+                                    RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS});
+                    entries.add(entry);
+                    break;
+                default:
+                    Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                            + ProtoUtils.currentFieldToString(in));
+            }
+        }
+        in.end(token);
+
+        return (context, resources, rootData, depth) -> {
+            for (LongSparseArray<Object> entry : entries) {
+                int id = (int) entry.get(RemoteViewsProto.RemoteCollectionCache.Entry.ID);
+                String uri = (String) entry.get(RemoteViewsProto.RemoteCollectionCache.Entry.URI);
+                // Depth resets to 0 for RemoteCollectionItems
+                RemoteCollectionItems items = ((PendingResources<RemoteCollectionItems>) entry.get(
+                        RemoteViewsProto.RemoteCollectionCache.Entry.ITEMS)).create(context,
+                        resources, rootData, depth);
+                rootData.mRemoteCollectionCache.addMapping(id, uri, items);
+            }
+            // Redundant return, but type signature requires we return something.
+            return rootData.mRemoteCollectionCache;
+        };
     }
 
     private class SetRemoteViewsAdapterIntent extends Action {
@@ -2078,6 +2167,15 @@ public class RemoteViews implements Parcelable, Filter {
 
         public void writeBitmapsToParcel(Parcel dest, int flags) {
             dest.writeTypedList(mBitmaps, flags);
+        }
+
+        public void writeBitmapsToProto(ProtoOutputStream out) {
+            for (int i = 0; i < mBitmaps.size(); i++) {
+                final Bitmap bitmap = mBitmaps.get(i);
+                final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, bytes);
+                out.write(RemoteViewsProto.BITMAP_CACHE, bytes.toByteArray());
+            }
         }
 
         public int getBitmapMemory() {
@@ -7522,6 +7620,127 @@ public class RemoteViews implements Parcelable, Filter {
             dest.restoreAllowSquashing(prevAllowSquashing);
         }
 
+        /** @hide */
+        public void writeToProto(Context context, ProtoOutputStream out) {
+            writeToProto(context, out, /* attached= */ false);
+        }
+
+        private void writeToProto(Context context, ProtoOutputStream out, boolean attached) {
+            for (long id : mIds) {
+                out.write(RemoteViewsProto.RemoteCollectionItems.IDS, id);
+            }
+
+            boolean restoreRoot = false;
+            out.write(RemoteViewsProto.RemoteCollectionItems.ATTACHED, attached);
+            if (!attached && mViews.length > 0 && !mViews[0].mIsRoot) {
+                restoreRoot = true;
+                mViews[0].mIsRoot = true;
+            }
+            for (RemoteViews view : mViews) {
+                final long viewsToken = out.start(RemoteViewsProto.RemoteCollectionItems.VIEWS);
+                view.writePreviewToProto(context, out);
+                out.end(viewsToken);
+            }
+            if (restoreRoot) mViews[0].mIsRoot = false;
+            out.write(RemoteViewsProto.RemoteCollectionItems.HAS_STABLE_IDS, mHasStableIds);
+            out.write(RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT, mViewTypeCount);
+        }
+
+        /**
+         * Overload used for testing unattached RemoteCollectionItems serialization.
+         *
+         * @hide
+         */
+        public static RemoteCollectionItems createFromProto(Context context, ProtoInputStream in)
+                throws Exception {
+            return createFromProto(in).create(context, context.getResources(), /* rootData= */
+                    null, 0);
+        }
+
+        /** @hide */
+        public static PendingResources<RemoteCollectionItems> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+            values.put(RemoteViewsProto.RemoteCollectionItems.IDS, new ArrayList<Long>());
+            values.put(RemoteViewsProto.RemoteCollectionItems.VIEWS,
+                    new ArrayList<PendingResources<RemoteViews>>());
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.RemoteCollectionItems.IDS:
+                        ((ArrayList<Long>) values.get(
+                                RemoteViewsProto.RemoteCollectionItems.IDS)).add(
+                                in.readLong(RemoteViewsProto.RemoteCollectionItems.IDS));
+                        break;
+                    case (int) RemoteViewsProto.RemoteCollectionItems.VIEWS:
+                        final long viewsToken = in.start(
+                                RemoteViewsProto.RemoteCollectionItems.VIEWS);
+                        ((ArrayList<PendingResources<RemoteViews>>) values.get(
+                                RemoteViewsProto.RemoteCollectionItems.VIEWS)).add(
+                                RemoteViews.createFromProto(in));
+                        in.end(viewsToken);
+                        break;
+                    case (int) RemoteViewsProto.RemoteCollectionItems.HAS_STABLE_IDS:
+                        values.put(RemoteViewsProto.RemoteCollectionItems.HAS_STABLE_IDS,
+                                in.readBoolean(
+                                        RemoteViewsProto.RemoteCollectionItems.HAS_STABLE_IDS));
+                        break;
+                    case (int) RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT:
+                        values.put(RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT,
+                                in.readInt(RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT));
+                        break;
+                    case (int) RemoteViewsProto.RemoteCollectionItems.ATTACHED:
+                        values.put(RemoteViewsProto.RemoteCollectionItems.ATTACHED,
+                                in.readBoolean(RemoteViewsProto.RemoteCollectionItems.ATTACHED));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+
+            checkContainsKeys(values,
+                    new long[]{RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT});
+            return (context, resources, rootData, depth) -> {
+                List<Long> idList = (List<Long>) values.get(
+                        RemoteViewsProto.RemoteCollectionItems.IDS);
+                long[] ids = new long[idList.size()];
+                for (int i = 0; i < idList.size(); i++) {
+                    ids[i] = idList.get(i);
+                }
+                boolean attached = (boolean) values.get(
+                        RemoteViewsProto.RemoteCollectionItems.ATTACHED, false);
+                List<PendingResources<RemoteViews>> pendingViews =
+                        (List<PendingResources<RemoteViews>>) values.get(
+                                RemoteViewsProto.RemoteCollectionItems.VIEWS);
+                RemoteViews[] views = new RemoteViews[pendingViews.size()];
+
+                if (attached && rootData == null) {
+                    throw new IllegalStateException("Cannot create a RemoteCollectionItems from "
+                            + "proto that was attached without providing HierarchyRootData");
+                }
+
+                int firstChildIndex = 0;
+                if (!attached && pendingViews.size() > 0) {
+                    // If written as unattached, get HierarchyRootData from first view
+                    views[0] = pendingViews.get(0).create(context, resources, /* rootData= */ null,
+                            /* depth= */ 0);
+                    rootData = views[0].getHierarchyRootData();
+                    firstChildIndex = 1;
+                }
+                for (int i = firstChildIndex; i < views.length; i++) {
+                    // Depth is reset to 0 for RemoteCollectionItems item views, see Parcel
+                    // constructor.
+                    views[i] = pendingViews.get(i).create(context, resources, rootData,
+                            /* depth= */ 0);
+                }
+                return new RemoteCollectionItems(ids, views,
+                        (boolean) values.get(RemoteViewsProto.RemoteCollectionItems.HAS_STABLE_IDS,
+                                false),
+                        (int) values.get(RemoteViewsProto.RemoteCollectionItems.VIEW_TYPE_COUNT,
+                                0));
+            };
+        }
+
         /**
          * Returns the id for {@code position}. See {@link #hasStableIds()} for whether this id
          * should be considered meaningful across collection updates.
@@ -7907,6 +8126,10 @@ public class RemoteViews implements Parcelable, Filter {
         if (mViewId != 0 && mViewId != -1) {
             out.write(RemoteViewsProto.VIEW_ID, appResources.getResourceName(mViewId));
         }
+        if (mIsRoot) {
+            mBitmapCache.writeBitmapsToProto(out);
+            mCollectionCache.writeToProto(context, out);
+        }
         out.write(RemoteViewsProto.IS_ROOT, mIsRoot);
         out.write(RemoteViewsProto.APPLY_FLAGS, mApplyFlags);
         out.write(RemoteViewsProto.HAS_DRAW_INSTRUCTIONS, mHasDrawInstructions);
@@ -7968,6 +8191,7 @@ public class RemoteViews implements Parcelable, Filter {
             final List<PendingResources<RemoteViews>> mSizedRemoteViews = new ArrayList<>();
             PendingResources<RemoteViews> mLandscapeViews = null;
             PendingResources<RemoteViews> mPortraitViews = null;
+            PendingResources<RemoteCollectionCache> mPopulateRemoteCollectionCache = null;
             boolean mIsRoot = false;
             boolean mHasDrawInstructions = false;
         };
@@ -8017,6 +8241,18 @@ public class RemoteViews implements Parcelable, Filter {
                         final long portraitToken = in.start(RemoteViewsProto.PORTRAIT_REMOTEVIEWS);
                         ref.mPortraitViews = createFromProto(in);
                         in.end(portraitToken);
+                        break;
+                    case (int) RemoteViewsProto.BITMAP_CACHE:
+                        byte[] src = in.readBytes(RemoteViewsProto.BITMAP_CACHE);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(src, 0, src.length);
+                        ref.mRv.mBitmapCache.getBitmapId(bitmap);
+                        break;
+                    case (int) RemoteViewsProto.REMOTE_COLLECTION_CACHE:
+                        final long collectionToken = in.start(
+                                RemoteViewsProto.REMOTE_COLLECTION_CACHE);
+                        ref.mPopulateRemoteCollectionCache =
+                                ref.mRv.populateRemoteCollectionCacheFromProto(in);
+                        in.end(collectionToken);
                         break;
                     case (int) RemoteViewsProto.IS_ROOT:
                         ref.mIsRoot = in.readBoolean(RemoteViewsProto.IS_ROOT);
@@ -8087,6 +8323,9 @@ public class RemoteViews implements Parcelable, Filter {
                     rv.setLightBackgroundLayoutId(lightBackgroundLayoutId);
                 }
             }
+            if (ref.mPopulateRemoteCollectionCache != null) {
+                ref.mPopulateRemoteCollectionCache.create(context, resources, rootData, depth);
+            }
             if (ref.mProviderInstanceId != -1) {
                 rv.mProviderInstanceId = ref.mProviderInstanceId;
             }
@@ -8136,6 +8375,16 @@ public class RemoteViews implements Parcelable, Filter {
             throws InvalidProtoException {
         if (o == null) {
             throw new InvalidProtoException(message);
+        }
+    }
+
+    private static void checkContainsKeys(LongSparseArray<?> array, long[] requiredFields) {
+        for (long requiredField : requiredFields) {
+            if (array.indexOfKey(requiredField) < 0) {
+                throw new IllegalArgumentException(
+                        "RemoteViews proto missing field: " + ProtoStream.getFieldIdString(
+                                requiredField));
+            }
         }
     }
 

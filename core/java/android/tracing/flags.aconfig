@@ -38,3 +38,11 @@ flag {
     is_fixed_read_only: true
     bug: "323166383"
 }
+
+flag {
+    name: "perfetto_wm_tracing"
+    namespace: "windowing_tools"
+    description: "Migrate WindowManager tracing to Perfetto"
+    is_fixed_read_only: true
+    bug: "323165543"
+}

@@ -19,6 +19,7 @@ import com.android.internal.widget.remotecompose.core.operations.BitmapData;
 import com.android.internal.widget.remotecompose.core.operations.ClickArea;
 import com.android.internal.widget.remotecompose.core.operations.ClipPath;
 import com.android.internal.widget.remotecompose.core.operations.ClipRect;
+import com.android.internal.widget.remotecompose.core.operations.ColorConstant;
 import com.android.internal.widget.remotecompose.core.operations.ColorExpression;
 import com.android.internal.widget.remotecompose.core.operations.DrawArc;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmap;
@@ -42,6 +43,7 @@ import com.android.internal.widget.remotecompose.core.operations.MatrixSave;
 import com.android.internal.widget.remotecompose.core.operations.MatrixScale;
 import com.android.internal.widget.remotecompose.core.operations.MatrixSkew;
 import com.android.internal.widget.remotecompose.core.operations.MatrixTranslate;
+import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.PaintData;
 import com.android.internal.widget.remotecompose.core.operations.PathData;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
@@ -899,6 +901,20 @@ public class RemoteComposeBuffer {
     }
 
     /**
+     * Add a simple color
+     * @param color
+     * @return id that represents that color
+     */
+    public int addColor(int color) {
+        ColorConstant c = new ColorConstant(0, color);
+        short id = (short) mRemoteComposeState.cache(c);
+        c.mColorId = id;
+        c.write(mBuffer);
+        return id;
+    }
+
+
+    /**
      * Add a color that represents the tween between two colors
      * @param color1
      * @param color2
@@ -1013,5 +1029,14 @@ public class RemoteComposeBuffer {
         return FloatAnimation.packToFloatArray(duration, type, spec, initialValue, wrap);
     }
 
+    /**
+     * This defines the name of the color given the id.
+     * @param id of the color
+     * @param name Name of the color
+     */
+    public void setColorName(int id, String name) {
+        NamedVariable.COMPANION.apply(mBuffer, id,
+                NamedVariable.COLOR_TYPE, name);
+    }
 }
 

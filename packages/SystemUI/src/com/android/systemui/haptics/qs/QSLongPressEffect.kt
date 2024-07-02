@@ -160,7 +160,7 @@ constructor(
     }
 
     fun onTileClick(): Boolean {
-        if (state == State.TIMEOUT_WAIT) {
+        if (state == State.TIMEOUT_WAIT || state == State.IDLE) {
             setState(State.IDLE)
             qsTile?.let {
                 it.click(expandable)

@@ -32,7 +32,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.logging.testing.UiEventLoggerFake
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.Flags
 import com.android.wm.shell.R

@@ -13859,6 +13859,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     })
     @ResolvedLayoutDir
     public int getLayoutDirection() {
+        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED;
+            return LAYOUT_DIRECTION_RESOLVED_DEFAULT;
+        }
         return ((mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ==
                 PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ? LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR;
     }

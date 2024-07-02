@@ -27,6 +27,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
+import android.content.AttributionSourceState;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.ICameraService;
@@ -54,6 +55,7 @@ import android.view.Surface;
 import androidx.test.filters.SmallTest;
 
 import com.android.mediaframeworktest.MediaFrameworkIntegrationTestRunner;
+import com.android.mediaframeworktest.helpers.CameraTestUtils;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
@@ -245,10 +247,14 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
         mMockCb = spy(dummyCallbacks);
 
+        AttributionSourceState clientAttribution = CameraTestUtils.getClientAttribution(mContext);
+        clientAttribution.deviceId = DEVICE_ID_DEFAULT;
+        clientAttribution.uid = ICameraService.USE_CALLING_UID;
+
         mCameraUser = mUtils.getCameraService().connectDevice(mMockCb, mCameraId,
-                clientPackageName, clientAttributionTag, ICameraService.USE_CALLING_UID,
+                clientPackageName, clientAttributionTag,
                 /*oomScoreOffset*/0, getContext().getApplicationInfo().targetSdkVersion,
-                ICameraService.ROTATION_OVERRIDE_NONE, DEVICE_ID_DEFAULT, DEVICE_POLICY_DEFAULT);
+                ICameraService.ROTATION_OVERRIDE_NONE, clientAttribution, DEVICE_POLICY_DEFAULT);
         assertNotNull(String.format("Camera %s was null", mCameraId), mCameraUser);
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
@@ -414,10 +420,13 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
     @SmallTest
     public void testCameraCharacteristics() throws RemoteException {
+        AttributionSourceState clientAttribution = CameraTestUtils.getClientAttribution(mContext);
+        clientAttribution.deviceId = DEVICE_ID_DEFAULT;
+
         CameraMetadataNative info = mUtils.getCameraService().getCameraCharacteristics(mCameraId,
                 getContext().getApplicationInfo().targetSdkVersion,
                 ICameraService.ROTATION_OVERRIDE_NONE,
-                DEVICE_ID_DEFAULT, DEVICE_POLICY_DEFAULT);
+                clientAttribution, DEVICE_POLICY_DEFAULT);
 
         assertFalse(info.isEmpty());
         assertNotNull(info.get(CameraCharacteristics.SCALER_AVAILABLE_FORMATS));

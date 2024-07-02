@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2024 The Android Open Source Project
   ~
@@ -13,14 +12,9 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
--->
-<com.android.systemui.animation.view.LaunchableImageView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="@dimen/dream_overlay_bottom_affordance_height"
-    android:layout_width="@dimen/dream_overlay_bottom_affordance_width"
-    android:layout_gravity="bottom|start"
-    android:padding="@dimen/dream_overlay_bottom_affordance_padding"
-    android:scaleType="fitCenter"
-    android:tint="?android:attr/textColorPrimary"
-    android:src="@drawable/ic_widgets"
-    android:contentDescription="@string/accessibility_action_open_communal_hub" />
+  -->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+    <item android:color="?androidprv:attr/materialColorOnPrimaryContainer" />
+</selector>

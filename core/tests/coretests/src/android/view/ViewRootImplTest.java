@@ -16,13 +16,6 @@
 
 package android.view;
 
-import static android.view.accessibility.Flags.FLAG_FORCE_INVERT_COLOR;
-import static android.view.flags.Flags.FLAG_ADD_SCHANDLE_TO_VRI_SURFACE;
-import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
-import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY;
-import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY;
-import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
-import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
@@ -44,6 +37,13 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.accessibility.Flags.FLAG_FORCE_INVERT_COLOR;
+import static android.view.flags.Flags.FLAG_ADD_SCHANDLE_TO_VRI_SURFACE;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
+import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
@@ -53,6 +53,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -63,9 +64,11 @@ import android.app.Instrumentation;
 import android.app.UiModeManager;
 import android.content.Context;
 import android.graphics.ForceDarkType;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
 import android.os.SystemProperties;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
@@ -1538,6 +1541,37 @@ public class ViewRootImplTest {
         Log.d(TAG, "mViewRootImpl.mSurface=" + mViewRootImpl.mSurface);
         assertTrue("Could not create ASurfaceControl from VRI surface",
                 nativeCreateASurfaceControlFromSurface(mViewRootImpl.mSurface));
+    }
+
+    @EnableFlags(Flags.FLAG_INSETS_CONTROL_SEQ)
+    @Test
+    public void testHandleInsetsControlChanged() {
+        mView = new View(sContext);
+        attachViewToWindow(mView);
+
+        mViewRootImpl = mView.getViewRootImpl();
+        final InsetsController controller = mViewRootImpl.getInsetsController();
+
+        final InsetsState state0 = new InsetsState();
+        final InsetsState state1 = new InsetsState();
+        state0.setDisplayFrame(new Rect(0, 0, 500, 1000));
+        state0.setSeq(10000);
+        state1.setDisplayFrame(new Rect(0, 0, 1500, 2000));
+        state1.setSeq(10001);
+        final InsetsSourceControl.Array array = new InsetsSourceControl.Array();
+
+        sInstrumentation.runOnMainSync(() -> {
+            mViewRootImpl.handleInsetsControlChanged(state0, array);
+            assertEquals(state0, controller.getLastDispatchedState());
+
+            mViewRootImpl.handleInsetsControlChanged(state1, array);
+            assertEquals(state1, controller.getLastDispatchedState());
+
+            // Skip the stale value.
+            mViewRootImpl.handleInsetsControlChanged(state0, array);
+            assertEquals(state1, controller.getLastDispatchedState());
+            assertNotEquals(state0, controller.getLastDispatchedState());
+        });
     }
 
     private boolean setForceDarkSysProp(boolean isForceDarkEnabled) {

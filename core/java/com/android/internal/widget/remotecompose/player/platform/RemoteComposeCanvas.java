@@ -42,6 +42,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     boolean mInActionDown = false;
     boolean mDebug = false;
     Point mActionDownPoint = new Point(0, 0);
+    AndroidRemoteContext mARContext = new AndroidRemoteContext();
 
     public RemoteComposeCanvas(Context context) {
         super(context);
@@ -88,8 +89,6 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         invalidate();
     }
 
-    AndroidRemoteContext mARContext = new AndroidRemoteContext();
-
     @Override
     public void onViewAttachedToWindow(View view) {
         if (mDocument == null) {
@@ -118,6 +117,20 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     @Override
     public void onViewDetachedFromWindow(View view) {
         removeAllViews();
+    }
+
+    public String[] getNamedColors() {
+        return mDocument.getNamedColors();
+    }
+
+    /**
+     * set the color associated with this name.
+     *
+     * @param colorName Name of color typically "android.xxx"
+     * @param colorValue "the argb value"
+     */
+    public void setColor(String colorName, int colorValue) {
+        mARContext.setNamedColorOverride(colorName, colorValue);
     }
 
     public interface ClickCallbacks {

@@ -101,6 +101,7 @@ import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.IWallpaperService;
@@ -2209,8 +2210,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     public ParcelFileDescriptor getWallpaperWithFeature(String callingPkg, String callingFeatureId,
             IWallpaperManagerCallback cb, final int which, Bundle outParams, int wallpaperUserId,
             boolean getCropped) {
-        final boolean hasPrivilege = hasPermission(READ_WALLPAPER_INTERNAL);
-        if (!hasPrivilege) checkPermission(MANAGE_EXTERNAL_STORAGE);
+        final boolean hasPrivilege = hasPermission(READ_WALLPAPER_INTERNAL)
+                || hasPermission(MANAGE_EXTERNAL_STORAGE);
+        if (!hasPrivilege) {
+            mContext.getSystemService(StorageManager.class).checkPermissionReadImages(true,
+                    Binder.getCallingPid(), Binder.getCallingUid(), callingPkg, callingFeatureId);
+        }
 
         wallpaperUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), wallpaperUserId, false, true, "getWallpaper", null);

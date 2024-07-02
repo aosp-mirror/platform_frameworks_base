@@ -38,6 +38,7 @@ import com.android.systemui.ambient.touch.dagger.BouncerSwipeModule;
 import com.android.systemui.ambient.touch.scrim.ScrimController;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -103,6 +104,8 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
 
     private final UiEventLogger mUiEventLogger;
 
+    private final ActivityStarter mActivityStarter;
+
     private final ScrimManager.Callback mScrimManagerCallback = new ScrimManager.Callback() {
         @Override
         public void onScrimControllerChanged(ScrimController controller) {
@@ -149,11 +152,16 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
                         return true;
                     }
 
-                    // If scrolling up and keyguard is not locked, dismiss the dream since there's
-                    // no bouncer to show.
+                    // If scrolling up and keyguard is not locked, dismiss both keyguard and the
+                    // dream since there's no bouncer to show.
                     if (e1.getY() > e2.getY()
                             && !mLockPatternUtils.isSecure(mUserTracker.getUserId())) {
-                        mCentralSurfaces.get().awakenDreams();
+                        mActivityStarter.executeRunnableDismissingKeyguard(
+                                () -> mCentralSurfaces.get().awakenDreams(),
+                                /* cancelAction= */ null,
+                                /* dismissShade= */ true,
+                                /* afterKeyguardGone= */ true,
+                                /* deferred= */ false);
                         return true;
                     }
 
@@ -162,7 +170,6 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
                     // bouncer. As that view's expansion shrinks, the bouncer appears. The bouncer
                     // is fully hidden at full expansion (1) and fully visible when fully collapsed
                     // (0).
-                    final float dragDownAmount = e2.getY() - e1.getY();
                     final float screenTravelPercentage = Math.abs(e1.getY() - e2.getY())
                             / mTouchSession.getBounds().height();
                     setPanelExpansion(1 - screenTravelPercentage);
@@ -216,7 +223,8 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
             FlingAnimationUtils flingAnimationUtilsClosing,
             @Named(BouncerSwipeModule.SWIPE_TO_BOUNCER_START_REGION) float swipeRegionPercentage,
             @Named(BouncerSwipeModule.MIN_BOUNCER_ZONE_SCREEN_PERCENTAGE) float minRegionPercentage,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            ActivityStarter activityStarter) {
         mCentralSurfaces = centralSurfaces;
         mScrimManager = scrimManager;
         mNotificationShadeWindowController = notificationShadeWindowController;
@@ -229,6 +237,7 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
         mValueAnimatorCreator = valueAnimatorCreator;
         mVelocityTrackerFactory = velocityTrackerFactory;
         mUiEventLogger = uiEventLogger;
+        mActivityStarter = activityStarter;
     }
 
     @Override

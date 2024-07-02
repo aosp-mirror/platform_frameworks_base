@@ -212,6 +212,17 @@ class HealthServiceWrapperAidl extends HealthServiceWrapper {
         }
     }
 
+    @Override
+    public BatteryHealthData getBatteryHealthData() throws RemoteException {
+        IHealth service = mLastService.get();
+        if (service == null) return null;
+        try {
+            return service.getBatteryHealthData();
+        } catch (UnsupportedOperationException | ServiceSpecificException ex) {
+            return null;
+        }
+    }
+
     public void setChargingPolicy(int policy) throws RemoteException {
         IHealth service = mLastService.get();
         if (service == null) return;
