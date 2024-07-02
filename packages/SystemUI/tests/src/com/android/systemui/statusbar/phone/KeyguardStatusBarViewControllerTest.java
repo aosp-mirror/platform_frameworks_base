@@ -52,28 +52,17 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.CarrierTextController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
-import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeViewStateProvider;
-import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository;
-import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.phone.ui.TintedIconManager;
@@ -82,13 +71,10 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
-import com.android.systemui.statusbar.ui.viewmodel.KeyguardStatusBarViewModel;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
-
-import kotlinx.coroutines.test.TestScope;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -150,11 +136,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private KeyguardStatusBarViewController mController;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private final FakeExecutor mBackgroundExecutor = new FakeExecutor(new FakeSystemClock());
-    private final TestScope mTestScope = TestScopeProvider.getTestScope();
-    private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
-    private KeyguardInteractor mKeyguardInteractor;
-    private KeyguardStatusBarViewModel mViewModel;
 
     @Before
     public void setup() throws Exception {
@@ -163,28 +145,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mIconManagerFactory.create(any(), any())).thenReturn(mIconManager);
-        KeyguardTransitionInteractor keyguardTransitionInteractor =
-                mKosmos.getKeyguardTransitionInteractor();
-        mKeyguardInteractor = new KeyguardInteractor(
-                mKeyguardRepository,
-                mCommandQueue,
-                PowerInteractorFactory.create().getPowerInteractor(),
-                new FakeKeyguardBouncerRepository(),
-                new ConfigurationInteractor(new FakeConfigurationRepository()),
-                new FakeShadeRepository(),
-                keyguardTransitionInteractor,
-                () -> mKosmos.getSceneInteractor(),
-                () -> mKosmos.getFromGoneTransitionInteractor(),
-                () -> mKosmos.getFromLockscreenTransitionInteractor(),
-                () -> mKosmos.getSharedNotificationContainerInteractor(),
-                mTestScope);
-        mViewModel =
-                new KeyguardStatusBarViewModel(
-                        mTestScope.getBackgroundScope(),
-                        mKosmos.getHeadsUpNotificationInteractor(),
-                        mKeyguardInteractor,
-                        new KeyguardStatusBarInteractor(new FakeKeyguardStatusBarRepository()),
-                        mBatteryController);
 
         allowTestableLooperAsMainThread();
         TestableLooper.get(this).runWithLooper(() -> {
@@ -212,7 +172,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mKeyguardUpdateMonitor,
-                mViewModel,
+                mKosmos.getKeyguardStatusBarViewModel(),
                 mBiometricUnlockController,
                 mStatusBarStateController,
                 mStatusBarContentInsetsProvider,
