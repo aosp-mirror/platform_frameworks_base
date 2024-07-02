@@ -618,12 +618,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
     /**
      * Processes message transactions, starting and completing them as needed.
+     * <p>
      * This function is called when adding a message transaction or when a timer
      * expires for an existing message transaction's retry or timeout. The
      * internal processing loop will iterate at most twice as if one iteration
      * completes a transaction, the next iteration can only start new transactions.
      * If the first iteration does not complete any transaction, the loop will
      * only iterate once.
+     * <p>
      */
     private synchronized void processMessageTransactions() {
         if (!Flags.reliableMessageRetrySupportService()) {

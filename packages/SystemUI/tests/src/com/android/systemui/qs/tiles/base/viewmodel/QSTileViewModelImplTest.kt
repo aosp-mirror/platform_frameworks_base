@@ -97,6 +97,7 @@ class QSTileViewModelImplTest : SysuiTestCase() {
                 qsTileLogger,
                 FakeSystemClock(),
                 testCoroutineDispatcher,
+                testCoroutineDispatcher,
                 testScope.backgroundScope,
             )
     }
