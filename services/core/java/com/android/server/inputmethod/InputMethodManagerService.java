@@ -3038,7 +3038,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 // getCurrentInputMethodSubtype.
                 subtypeId = NOT_A_SUBTYPE_ID;
                 // TODO(b/347083680): The method below has questionable behaviors.
-                newSubtype = getCurrentInputMethodSubtypeLocked();
+                newSubtype = getCurrentInputMethodSubtypeLocked(userId);
                 if (newSubtype != null) {
                     for (int i = 0; i < subtypeCount; ++i) {
                         if (Objects.equals(newSubtype, info.getSubtypeAt(i))) {
@@ -5486,7 +5486,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 newSubtypeHashcode = INVALID_SUBTYPE_HASHCODE;
                 // If the subtype is not specified, choose the most applicable one
                 // TODO(b/347083680): The method below has questionable behaviors.
-                newSubtype = getCurrentInputMethodSubtypeLocked();
+                newSubtype = getCurrentInputMethodSubtypeLocked(userId);
             }
         }
         settings.putSelectedSubtype(newSubtypeHashcode);
@@ -5543,7 +5543,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         synchronized (ImfLock.class) {
             if (mCurrentUserId == userId) {
                 // TODO(b/347083680): The method below has questionable behaviors.
-                return getCurrentInputMethodSubtypeLocked();
+                return getCurrentInputMethodSubtypeLocked(userId);
             }
 
             return InputMethodSettingsRepository.get(userId)
@@ -5563,15 +5563,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      *
      * <p>Also this method has had questionable behaviors:</p>
      * <ul>
-     *     <li>Calling this method can update {@link #mCurrentSubtype}.</li>
-     *     <li>This method may return {@link #mCurrentSubtype} as-is, even if it does not belong
-     *         to the current IME.</li>
+     *     <li>Calling this method can update {@link InputMethodBindingController#mCurrentSubtype}.
+     *     </li>
+     *     <li>This method may return {@link InputMethodBindingController#mCurrentSubtype} as-is,
+     *     even if it does not belong to the current IME.</li>
      * </ul>
      * <p>TODO(b/347083680): Address above issues.</p>
      */
     @GuardedBy("ImfLock.class")
-    InputMethodSubtype getCurrentInputMethodSubtypeLocked() {
-        final int userId = mCurrentUserId;
+    InputMethodSubtype getCurrentInputMethodSubtypeLocked(@UserIdInt int userId) {
         final var selectedMethodId = getInputMethodBindingController(userId).getSelectedMethodId();
         if (selectedMethodId == null) {
             return null;

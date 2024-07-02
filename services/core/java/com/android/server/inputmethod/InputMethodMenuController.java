@@ -85,7 +85,7 @@ final class InputMethodMenuController {
 
         if (preferredInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
             final InputMethodSubtype currentSubtype =
-                    mService.getCurrentInputMethodSubtypeLocked();
+                    mService.getCurrentInputMethodSubtypeLocked(userId);
             if (currentSubtype != null) {
                 final String curMethodId = bindingController.getSelectedMethodId();
                 final InputMethodInfo currentImi =
