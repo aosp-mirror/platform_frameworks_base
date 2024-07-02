@@ -1916,6 +1916,26 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun toggleBounds_togglesToCalculatedBoundsForNonResizable() {
+    val bounds = Rect(0, 0, 200, 100)
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds).apply {
+      topActivityInfo = ActivityInfo().apply {
+        screenOrientation = SCREEN_ORIENTATION_LANDSCAPE
+        configuration.windowConfiguration.appBounds = bounds
+      }
+      isResizeable = false
+    }
+
+    // Bounds should be 1000 x 500, vertically centered in the 1000 x 1000 stable bounds
+    val expectedBounds = Rect(STABLE_BOUNDS.left, 250, STABLE_BOUNDS.right, 750)
+
+    controller.toggleDesktopTaskSize(task)
+    // Assert bounds set to stable bounds
+    val wct = getLatestToggleResizeDesktopTaskWct()
+    assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
+  }
+
+  @Test
   fun toggleBounds_lastBoundsBeforeMaximizeSaved() {
     val bounds = Rect(0, 0, 100, 100)
     val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds)
@@ -1932,6 +1952,46 @@ class DesktopTasksControllerTest : ShellTestCase() {
     // Maximize
     controller.toggleDesktopTaskSize(task)
     task.configuration.windowConfiguration.bounds.set(STABLE_BOUNDS)
+
+    // Restore
+    controller.toggleDesktopTaskSize(task)
+
+    // Assert bounds set to last bounds before maximize
+    val wct = getLatestToggleResizeDesktopTaskWct()
+    assertThat(findBoundsChange(wct, task)).isEqualTo(boundsBeforeMaximize)
+  }
+
+  @Test
+  fun toggleBounds_togglesFromStableBoundsToLastBoundsBeforeMaximize_nonResizeableEqualWidth() {
+    val boundsBeforeMaximize = Rect(0, 0, 100, 100)
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, boundsBeforeMaximize).apply {
+      isResizeable = false
+    }
+
+    // Maximize
+    controller.toggleDesktopTaskSize(task)
+    task.configuration.windowConfiguration.bounds.set(STABLE_BOUNDS.left,
+      boundsBeforeMaximize.top, STABLE_BOUNDS.right, boundsBeforeMaximize.bottom)
+
+    // Restore
+    controller.toggleDesktopTaskSize(task)
+
+    // Assert bounds set to last bounds before maximize
+    val wct = getLatestToggleResizeDesktopTaskWct()
+    assertThat(findBoundsChange(wct, task)).isEqualTo(boundsBeforeMaximize)
+  }
+
+  @Test
+  fun toggleBounds_togglesFromStableBoundsToLastBoundsBeforeMaximize_nonResizeableEqualHeight() {
+    val boundsBeforeMaximize = Rect(0, 0, 100, 100)
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, boundsBeforeMaximize).apply {
+      isResizeable = false
+    }
+
+    // Maximize
+    controller.toggleDesktopTaskSize(task)
+    task.configuration.windowConfiguration.bounds.set(boundsBeforeMaximize.left,
+      STABLE_BOUNDS.top, boundsBeforeMaximize.right, STABLE_BOUNDS.bottom)
 
     // Restore
     controller.toggleDesktopTaskSize(task)
