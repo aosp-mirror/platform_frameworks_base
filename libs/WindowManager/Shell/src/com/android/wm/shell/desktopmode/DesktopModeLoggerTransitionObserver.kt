@@ -35,7 +35,7 @@ import androidx.core.util.plus
 import androidx.core.util.putAll
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.InstanceIdSequence
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate

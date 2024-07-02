@@ -66,7 +66,7 @@ import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 

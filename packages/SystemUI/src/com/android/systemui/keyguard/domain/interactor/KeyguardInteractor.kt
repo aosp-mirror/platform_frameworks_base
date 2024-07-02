@@ -249,7 +249,7 @@ constructor(
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
 
     /** Keyguard can be clipped at the top as the shade is dragged */
-    val topClippingBounds: Flow<Int?> =
+    val topClippingBounds: Flow<Int?> by lazy {
         combineTransform(
                 keyguardTransitionInteractor
                     .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
@@ -263,6 +263,7 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+    }
 
     /** Last point that [KeyguardRootView] view was tapped */
     val lastRootViewTapPosition: Flow<Point?> = repository.lastRootViewTapPosition.asStateFlow()
