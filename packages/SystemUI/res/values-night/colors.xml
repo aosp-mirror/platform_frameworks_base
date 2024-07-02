@@ -104,10 +104,6 @@
 
     <color name="people_tile_background">@color/material_dynamic_secondary20</color>
 
-    <!-- Internet Dialog -->
-    <color name="connected_network_primary_color">@color/material_dynamic_primary80</color>
-    <color name="connected_network_secondary_color">@color/material_dynamic_secondary80</color>
-
     <!-- Keyboard shortcut helper dialog -->
     <color name="ksh_key_item_color">@*android:color/system_on_surface_variant_dark</color>
 </resources>

@@ -60,18 +60,6 @@
         <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
-    <style name="TextAppearance.InternetDialog.Active">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/material_dynamic_primary80</item>
-        <item name="android:textDirection">locale</item>
-    </style>
-
-    <style name="TextAppearance.InternetDialog.Secondary.Active">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/material_dynamic_secondary80</item>
-    </style>
-
     <style name="ShortcutHelperTheme" parent="@style/ShortcutHelperThemeCommon">
         <item name="android:windowLightNavigationBar">false</item>
     </style>

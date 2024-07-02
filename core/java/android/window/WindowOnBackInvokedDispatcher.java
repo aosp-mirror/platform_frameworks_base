@@ -489,7 +489,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                     return;
                 }
                 OnBackAnimationCallback animationCallback = getBackAnimationCallback();
-                if (animationCallback != null) {
+                if (animationCallback != null
+                        && !(callback instanceof ImeBackAnimationController)) {
                     mProgressAnimator.onBackInvoked(callback::onBackInvoked);
                 } else {
                     mProgressAnimator.reset();

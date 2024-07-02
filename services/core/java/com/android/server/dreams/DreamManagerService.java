@@ -1079,7 +1079,39 @@ public final class DreamManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public void finishSelfOneway(IBinder token, boolean immediate) {
+            // Requires no permission, called by Dream from an arbitrary process.
+            if (token == null) {
+                throw new IllegalArgumentException("token must not be null");
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                finishSelfInternal(token, immediate);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
         public void startDozing(
+                IBinder token, int screenState, @Display.StateReason int reason,
+                int screenBrightness) {
+            // Requires no permission, called by Dream from an arbitrary process.
+            if (token == null) {
+                throw new IllegalArgumentException("token must not be null");
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                startDozingInternal(token, screenState, reason, screenBrightness);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void startDozingOneway(
                 IBinder token, int screenState, @Display.StateReason int reason,
                 int screenBrightness) {
             // Requires no permission, called by Dream from an arbitrary process.
