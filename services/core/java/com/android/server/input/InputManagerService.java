@@ -53,6 +53,7 @@ import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.input.InputSettings;
+import android.hardware.input.KeyGlyphMap;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.KeyboardLayoutSelectionResult;
 import android.hardware.input.TouchCalibration;
@@ -311,6 +312,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages Keyboard modifier keys remapping
     private final KeyRemapper mKeyRemapper;
 
+    // Manages Keyboard glyphs for specific keyboards
+    private final KeyboardGlyphManager mKeyboardGlyphManager;
+
     // Manages loading PointerIcons
     private final PointerIconCache mPointerIconCache;
 
@@ -460,6 +464,7 @@ public class InputManagerService extends IInputManager.Stub
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
                 mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
+        mKeyboardGlyphManager = new KeyboardGlyphManager(mContext, injector.getLooper());
         mPointerIconCache = new PointerIconCache(mContext, mNative);
 
         mUseDevInputEventForAudioJack =
@@ -576,6 +581,7 @@ public class InputManagerService extends IInputManager.Stub
         mKeyboardLedController.systemRunning();
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
+        mKeyboardGlyphManager.systemRunning();
     }
 
     private void reloadDeviceAliases() {
@@ -1206,6 +1212,11 @@ public class InputManagerService extends IInputManager.Stub
             @Nullable InputMethodSubtype imeSubtype) {
         return mKeyboardLayoutManager.getKeyboardLayoutListForInputDevice(identifier, userId,
                 imeInfo, imeSubtype);
+    }
+
+    @Override // Binder call
+    public KeyGlyphMap getKeyGlyphMap(int deviceId) {
+        return mKeyboardGlyphManager.getKeyGlyphMap(deviceId);
     }
 
     public void setFocusedApplication(int displayId, InputApplicationHandle application) {
@@ -2077,6 +2088,7 @@ public class InputManagerService extends IInputManager.Stub
         mBatteryController.dump(ipw);
         mKeyboardBacklightController.dump(ipw);
         mKeyboardLedController.dump(ipw);
+        mKeyboardGlyphManager.dump(ipw);
     }
 
     private void dumpAssociations(IndentingPrintWriter pw) {

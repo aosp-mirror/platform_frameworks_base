@@ -558,7 +558,12 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 Log.w(TAG, "onTouch down received without a preceding up");
             }
             mActivePointerId = MotionEvent.INVALID_POINTER_ID;
-            mOnFingerDown = false;
+
+            // It's possible on some devices to get duplicate touches from both doze and the
+            // normal touch listener. Don't reset the down in this case to avoid duplicate downs
+            if (!mIsAodInterruptActive) {
+                mOnFingerDown = false;
+            }
         } else if (!DeviceEntryUdfpsRefactor.isEnabled()) {
             if ((mLockscreenShadeTransitionController.getQSDragProgress() != 0f
                     && !mAlternateBouncerInteractor.isVisibleState())

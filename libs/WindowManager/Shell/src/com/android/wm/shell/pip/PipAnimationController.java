@@ -17,6 +17,7 @@
 package com.android.wm.shell.pip;
 
 import static android.util.RotationUtils.rotateBounds;
+import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
@@ -625,6 +626,14 @@ public class PipAnimationController {
                 }
             } else {
                 adjustedSourceRectHint.set(sourceRectHint);
+                if (isInPipDirection(direction)
+                        && rotationDelta == ROTATION_0
+                        && taskInfo.displayCutoutInsets != null) {
+                    // TODO: this is to special case the issues on Foldable device
+                    // with display cutout. This aligns with what's in SwipePipToHomeAnimator.
+                    adjustedSourceRectHint.offset(taskInfo.displayCutoutInsets.left,
+                            taskInfo.displayCutoutInsets.top);
+                }
             }
             final Rect sourceHintRectInsets = new Rect();
             if (!adjustedSourceRectHint.isEmpty()) {

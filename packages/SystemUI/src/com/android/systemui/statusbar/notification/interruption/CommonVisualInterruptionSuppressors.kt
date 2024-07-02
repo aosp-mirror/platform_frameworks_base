@@ -32,6 +32,7 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.database.ContentObserver
 import android.hardware.display.AmbientDisplayConfiguration
+import android.os.Bundle
 import android.os.Handler
 import android.os.PowerManager
 import android.os.SystemProperties
@@ -368,6 +369,11 @@ class AvalancheSuppressor(
             PendingIntent.FLAG_IMMUTABLE
         )
 
+        // Replace "System UI" app name with "Android System"
+        val bundle = Bundle()
+        bundle.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
+                context.getString(com.android.internal.R.string.android_system_label))
+
         val builder =
             Notification.Builder(context, NotificationChannels.ALERTS)
                 .setTicker(titleStr)
@@ -375,9 +381,11 @@ class AvalancheSuppressor(
                 .setContentText(textStr)
                 .setSmallIcon(com.android.systemui.res.R.drawable.ic_settings)
                 .setCategory(Notification.CATEGORY_SYSTEM)
+                .setTimeoutAfter(/* one day in ms */ 24 * 60 * 60 * 1000L)
                 .setAutoCancel(true)
                 .addAction(android.R.drawable.button_onoff_indicator_off, actionStr, pendingIntent)
                 .setContentIntent(pendingIntent)
+                .addExtras(bundle)
 
         notificationManager.notify(SystemMessage.NOTE_ADAPTIVE_NOTIFICATIONS, builder.build())
         hasSeenEdu = true

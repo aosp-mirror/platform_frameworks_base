@@ -352,6 +352,7 @@ public class PipController implements ConfigurationChangeListener,
         mPipBoundsAlgorithm.dump(pw, innerPrefix);
         mPipBoundsState.dump(pw, innerPrefix);
         mPipDisplayLayoutState.dump(pw, innerPrefix);
+        mPipTransitionState.dump(pw, innerPrefix);
     }
 
     /**

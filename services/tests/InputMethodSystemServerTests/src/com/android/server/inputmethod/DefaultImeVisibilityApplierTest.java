@@ -37,6 +37,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import static java.util.Objects.requireNonNull;
 
@@ -134,8 +135,10 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
 
     @Test
     public void testApplyImeVisibility_hideImeExplicit() throws Exception {
-        mInputMethodManagerService.mImeWindowVis = IME_ACTIVE;
         synchronized (ImfLock.class) {
+            final var bindingController =
+                    mInputMethodManagerService.getInputMethodBindingController(mUserId);
+            when(bindingController.getImeWindowVis()).thenReturn(IME_ACTIVE);
             mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
                     STATE_HIDE_IME_EXPLICIT, eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
@@ -144,8 +147,10 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
 
     @Test
     public void testApplyImeVisibility_hideNotAlways() throws Exception {
-        mInputMethodManagerService.mImeWindowVis = IME_ACTIVE;
         synchronized (ImfLock.class) {
+            final var bindingController =
+                    mInputMethodManagerService.getInputMethodBindingController(mUserId);
+            when(bindingController.getImeWindowVis()).thenReturn(IME_ACTIVE);
             mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
                     STATE_HIDE_IME_NOT_ALWAYS, eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }

@@ -27,6 +27,8 @@ import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.util.Log;
 
+import androidx.annotation.DrawableRes;
+
 import com.android.settingslib.R;
 
 import java.time.Duration;
@@ -184,18 +186,13 @@ public class ZenModesBackend {
      * Creates a new custom mode with the provided {@code name}. The mode will be "manual" (i.e.
      * not have a schedule), this can be later updated by the user in the mode settings page.
      *
+     * @param name mode name
+     * @param iconResId resource id of the chosen icon, {code 0} if none.
      * @return the created mode. Only {@code null} if creation failed due to an internal error
      */
     @Nullable
-    public ZenMode addCustomMode(String name) {
-        AutomaticZenRule rule = new AutomaticZenRule.Builder(name,
-                ZenModeConfig.toCustomManualConditionId())
-                .setPackage(ZenModeConfig.getCustomManualConditionProvider().getPackageName())
-                .setType(AutomaticZenRule.TYPE_OTHER)
-                .setOwner(ZenModeConfig.getCustomManualConditionProvider())
-                .setManualInvocationAllowed(true)
-                .build();
-
+    public ZenMode addCustomManualMode(String name, @DrawableRes int iconResId) {
+        AutomaticZenRule rule = ZenMode.newCustomManual(name, iconResId).getRule();
         String ruleId = mNotificationManager.addAutomaticZenRule(rule);
         return getMode(ruleId);
     }

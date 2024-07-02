@@ -3499,6 +3499,13 @@ public class NotificationStackScrollLayout
         setIsBeingDragged(true);
     }
 
+    // Only when scene container is enabled, mark that we are being dragged so that we start
+    // dispatching the rest of the gesture to scene container.
+    void startDraggingOnHun() {
+        SceneContainerFlag.isUnexpectedlyInLegacyMode();
+        setIsBeingDragged(true);
+    }
+
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
         if (!isScrollingEnabled()

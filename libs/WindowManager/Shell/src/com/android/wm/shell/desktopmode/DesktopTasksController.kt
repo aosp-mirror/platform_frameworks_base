@@ -36,6 +36,7 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.os.IBinder
 import android.os.SystemProperties
+import android.util.Size
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
@@ -416,7 +417,7 @@ class DesktopTasksController(
         )
         val wct = WindowContainerTransaction()
         exitSplitIfApplicable(wct, taskInfo)
-        moveHomeTaskToFront(wct)
+        moveHomeTask(wct, true /* toTop */)
         val taskToMinimize =
             bringDesktopAppsToFrontBeforeShowingNewTask(taskInfo.displayId, wct, taskInfo.taskId)
         addMoveToDesktopChanges(wct, taskInfo)
@@ -649,13 +650,21 @@ class DesktopTasksController(
     fun toggleDesktopTaskSize(taskInfo: RunningTaskInfo) {
         val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
 
-        val stableBounds = Rect()
-        displayLayout.getStableBounds(stableBounds)
+        val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+        val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         val destinationBounds = Rect()
-        if (taskInfo.configuration.windowConfiguration.bounds == stableBounds) {
-            // The desktop task is currently occupying the whole stable bounds. If the bounds
-            // before the task was toggled to stable bounds were saved, toggle the task to those
-            // bounds. Otherwise, toggle to the default bounds.
+
+        val isMaximized = if (taskInfo.isResizeable) {
+            currentTaskBounds == stableBounds
+        } else {
+            currentTaskBounds.width() == stableBounds.width()
+                    || currentTaskBounds.height() == stableBounds.height()
+        }
+
+        if (isMaximized) {
+            // The desktop task is at the maximized width and/or height of the stable bounds.
+            // If the task's pre-maximize stable bounds were saved, toggle the task to those bounds.
+            // Otherwise, toggle to the default bounds.
             val taskBoundsBeforeMaximize =
                 desktopModeTaskRepository.removeBoundsBeforeMaximize(taskInfo.taskId)
             if (taskBoundsBeforeMaximize != null) {
@@ -670,9 +679,20 @@ class DesktopTasksController(
         } else {
             // Save current bounds so that task can be restored back to original bounds if necessary
             // and toggle to the stable bounds.
-            val taskBounds = taskInfo.configuration.windowConfiguration.bounds
-            desktopModeTaskRepository.saveBoundsBeforeMaximize(taskInfo.taskId, taskBounds)
-            destinationBounds.set(stableBounds)
+            desktopModeTaskRepository.saveBoundsBeforeMaximize(taskInfo.taskId, currentTaskBounds)
+
+            if (taskInfo.isResizeable) {
+                // if resizable then expand to entire stable bounds (full display minus insets)
+                destinationBounds.set(stableBounds)
+            } else {
+                // if non-resizable then calculate max bounds according to aspect ratio
+                val activityAspectRatio = calculateAspectRatio(taskInfo)
+                val newSize = maximumSizeMaintainingAspectRatio(taskInfo,
+                    Size(stableBounds.width(), stableBounds.height()), activityAspectRatio)
+                val newBounds = centerInArea(
+                    newSize, stableBounds, stableBounds.left, stableBounds.top)
+                destinationBounds.set(newBounds)
+            }
         }
 
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
@@ -775,7 +795,7 @@ class DesktopTasksController(
             addWallpaperActivity(wct)
         } else {
             // Move home to front
-            moveHomeTaskToFront(wct)
+            moveHomeTask(wct, true /* toTop */)
         }
 
         val nonMinimizedTasksOrderedFrontToBack =
@@ -801,11 +821,11 @@ class DesktopTasksController(
         return taskToMinimize
     }
 
-    private fun moveHomeTaskToFront(wct: WindowContainerTransaction) {
+    private fun moveHomeTask(wct: WindowContainerTransaction, toTop: Boolean) {
         shellTaskOrganizer
             .getRunningTasks(context.displayId)
             .firstOrNull { task -> task.activityType == ACTIVITY_TYPE_HOME }
-            ?.let { homeTask -> wct.reorder(homeTask.getToken(), true /* onTop */) }
+            ?.let { homeTask -> wct.reorder(homeTask.getToken(), toTop /* onTop */) }
     }
 
     private fun addWallpaperActivity(wct: WindowContainerTransaction) {
@@ -1020,6 +1040,9 @@ class DesktopTasksController(
             )
             return WindowContainerTransaction().also { wct ->
                 addMoveToDesktopChanges(wct, task)
+                // In some launches home task is moved behind new task being launched. Make sure
+                // that's not the case for launches in desktop.
+                moveHomeTask(wct, false /* toTop */)
                 // Desktop Mode is already showing and we're launching a new Task - we might need to
                 // minimize another Task.
                 val taskToMinimize = addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task)

@@ -1097,9 +1097,10 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun isFinishedInState() =
         testScope.runTest {
-            val results by collectValues(underTest.isFinishedInState(GONE))
+            val results by collectValues(underTest.isFinishedIn(Scenes.Gone, GONE))
 
             sendSteps(
                 TransitionStep(AOD, DOZING, 0f, STARTED),
@@ -1181,6 +1182,89 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 )
 
             sendSteps(TransitionStep(DOZING, GONE, 1f, FINISHED))
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                        true,
+                        false,
+                        true,
+                    )
+                )
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun isFinishedIn() =
+        testScope.runTest {
+            val results by collectValues(underTest.isFinishedIn(Scenes.Gone, GONE))
+
+            sendSteps(
+                TransitionStep(AOD, DOZING, 0f, STARTED),
+                TransitionStep(AOD, DOZING, 0.5f, RUNNING),
+                TransitionStep(AOD, DOZING, 1f, FINISHED),
+            )
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false, // Finished in DOZING, not GONE.
+                    )
+                )
+
+            kosmos.setSceneTransition(Transition(from = Scenes.Lockscreen, to = Scenes.Gone))
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                    )
+                )
+
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                        true,
+                    )
+                )
+
+            kosmos.setSceneTransition(Transition(from = Scenes.Gone, to = Scenes.Lockscreen))
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                        true,
+                    )
+                )
+
+            kosmos.setSceneTransition(Idle(Scenes.Lockscreen))
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                        true,
+                        false,
+                    )
+                )
+
+            kosmos.setSceneTransition(Transition(from = Scenes.Lockscreen, to = Scenes.Gone))
+
+            assertThat(results)
+                .isEqualTo(
+                    listOf(
+                        false,
+                        true,
+                        false,
+                    )
+                )
+
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
 
             assertThat(results)
                 .isEqualTo(

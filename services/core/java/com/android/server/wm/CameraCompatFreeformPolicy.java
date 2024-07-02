@@ -110,12 +110,14 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         if (!isTreatmentEnabledForActivity(cameraActivity)) {
             return false;
         }
-        final int existingCameraCompatMode =
-                cameraActivity.mLetterboxUiController.getFreeformCameraCompatMode();
+        final int existingCameraCompatMode = cameraActivity.mAppCompatController
+                .getAppCompatCameraOverrides()
+                        .getFreeformCameraCompatMode();
         final int newCameraCompatMode = getCameraCompatMode(cameraActivity);
         if (newCameraCompatMode != existingCameraCompatMode) {
             mIsCameraCompatTreatmentPending = true;
-            cameraActivity.mLetterboxUiController.setFreeformCameraCompatMode(newCameraCompatMode);
+            cameraActivity.mAppCompatController.getAppCompatCameraOverrides()
+                    .setFreeformCameraCompatMode(newCameraCompatMode);
             forceUpdateActivityAndTask(cameraActivity);
             return true;
         } else {
@@ -134,8 +136,8 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
                     mDisplayContent.mDisplayId, cameraId);
             return false;
         }
-        cameraActivity.mLetterboxUiController.setFreeformCameraCompatMode(
-                CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE);
+        cameraActivity.mAppCompatController.getAppCompatCameraOverrides()
+                .setFreeformCameraCompatMode(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE);
         forceUpdateActivityAndTask(cameraActivity);
         mIsCameraCompatTreatmentPending = false;
         return true;
@@ -191,6 +193,6 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
                 || mCameraStateMonitor.isCameraWithIdRunningForActivity(topActivity, cameraId)) {
             return false;
         }
-        return topActivity.mLetterboxUiController.isRefreshRequested();
+        return topActivity.mAppCompatController.getAppCompatCameraOverrides().isRefreshRequested();
     }
 }

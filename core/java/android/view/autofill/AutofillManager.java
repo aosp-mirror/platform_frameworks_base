@@ -4351,6 +4351,13 @@ public final class AutofillManager {
                         addToSet(mInvisibleDialogTrackedIds, id);
                     }
                 }
+            } else {
+                if (sDebug) {
+                    // isClientVisibleForAutofillLocked() is checking whether
+                    // activity has stopped under the hood
+                    Log.d(TAG, "notifyViewVisibilityChangedLocked(): ignoring "
+                            + "view visibility change since activity has stopped");
+                }
             }
 
             if (mIsTrackedSaveView && mVisibleTrackedIds.isEmpty()) {
