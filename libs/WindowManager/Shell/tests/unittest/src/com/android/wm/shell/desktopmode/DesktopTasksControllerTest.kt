@@ -1087,13 +1087,17 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun handleRequest_fullscreenTask_freeformVisible_returnSwitchToFreeformWCT() {
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
+    val homeTask = setUpHomeTask()
     val freeformTask = setUpFreeformTask()
     markTaskVisible(freeformTask)
     val fullscreenTask = createFullscreenTask()
 
-    val result = controller.handleRequest(Binder(), createTransition(fullscreenTask))
-    assertThat(result?.changes?.get(fullscreenTask.token.asBinder())?.windowingMode)
+    val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+    assertThat(wct?.changes?.get(fullscreenTask.token.asBinder())?.windowingMode)
         .isEqualTo(WINDOWING_MODE_FREEFORM)
+
+    assertThat(wct!!.hierarchyOps.size).isEqualTo(2)
+    wct.assertReorderAt(1, homeTask, toTop = false)
   }
 
   @Test
