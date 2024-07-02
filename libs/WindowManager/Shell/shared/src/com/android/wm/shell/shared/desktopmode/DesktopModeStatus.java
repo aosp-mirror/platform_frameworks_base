@@ -70,6 +70,10 @@ public class DesktopModeStatus {
     private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
             "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
 
+    private static final boolean USE_APP_TO_WEB_BUILD_TIME_GENERIC_LINKS =
+            SystemProperties.getBoolean(
+                    "persist.wm.debug.use_app_to_web_build_time_generic_links", true);
+
     /** Whether the desktop density override is enabled. */
     public static final boolean DESKTOP_DENSITY_OVERRIDE_ENABLED =
             SystemProperties.getBoolean("persist.wm.debug.desktop_mode_density_enabled", false);
@@ -173,6 +177,13 @@ public class DesktopModeStatus {
      */
     public static boolean useDesktopOverrideDensity() {
         return isDesktopDensityOverrideEnabled() && isValidDesktopDensityOverrideSet();
+    }
+
+    /**
+     * Returns {@code true} if the app-to-web feature is using the build-time generic links list.
+     */
+    public static boolean useAppToWebBuildTimeGenericLinks() {
+        return USE_APP_TO_WEB_BUILD_TIME_GENERIC_LINKS;
     }
 
     /**
