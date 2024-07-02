@@ -5541,25 +5541,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
         synchronized (ImfLock.class) {
-            if (mCurrentUserId == userId) {
-                // TODO(b/347083680): The method below has questionable behaviors.
-                return getCurrentInputMethodSubtypeLocked(userId);
-            }
-
-            return InputMethodSettingsRepository.get(userId)
-                    .getCurrentInputMethodSubtypeForNonCurrentUsers();
+            // TODO(b/347083680): The method below has questionable behaviors.
+            return getCurrentInputMethodSubtypeLocked(userId);
         }
     }
 
     /**
      * Returns the current {@link InputMethodSubtype} for the current user.
-     *
-     * <p>CAVEATS: You must also update
-     * {@link InputMethodSettings#getCurrentInputMethodSubtypeForNonCurrentUsers()}
-     * when you update the algorithm of this method.</p>
-     *
-     * <p>TODO: Address code duplication between this and
-     * {@link InputMethodSettings#getCurrentInputMethodSubtypeForNonCurrentUsers()}.</p>
      *
      * <p>Also this method has had questionable behaviors:</p>
      * <ul>
