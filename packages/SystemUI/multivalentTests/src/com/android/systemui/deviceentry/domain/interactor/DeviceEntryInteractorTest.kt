@@ -617,6 +617,33 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
                 .isEqualTo(DeviceEntryRestrictionReason.DeviceNotUnlockedSinceMainlineUpdate)
         }
 
+    @Test
+    fun reportUserPresent_whenDeviceEntered() =
+        testScope.runTest {
+            val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
+            assertThat(isDeviceEntered).isFalse()
+            assertThat(kosmos.fakeDeviceEntryRepository.userPresentCount).isEqualTo(0)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+            switchToScene(Scenes.Gone)
+            assertThat(isDeviceEntered).isTrue()
+            assertThat(kosmos.fakeDeviceEntryRepository.userPresentCount).isEqualTo(1)
+
+            switchToScene(Scenes.Lockscreen)
+            assertThat(isDeviceEntered).isFalse()
+            assertThat(kosmos.fakeDeviceEntryRepository.userPresentCount).isEqualTo(1)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            switchToScene(Scenes.Gone)
+            assertThat(isDeviceEntered).isTrue()
+            assertThat(kosmos.fakeDeviceEntryRepository.userPresentCount).isEqualTo(2)
+        }
+
     private fun TestScope.verifyRestrictionReasonsForAuthFlags(
         vararg authFlagToDeviceEntryRestriction: Pair<Int, DeviceEntryRestrictionReason?>
     ) {
