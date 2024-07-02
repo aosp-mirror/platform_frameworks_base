@@ -461,6 +461,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DISPATCH_PREFERRED_MIXER_ATTRIBUTES = 52;
     private static final int MSG_CONFIGURATION_CHANGED = 54;
     private static final int MSG_BROADCAST_MASTER_MUTE = 55;
+    private static final int MSG_UPDATE_CONTEXTUAL_VOLUMES = 56;
 
     /**
      * Messages handled by the {@link SoundDoseHelper}, do not exceed
@@ -707,9 +708,13 @@ public class AudioService extends IAudioService.Stub
     // Streams currently muted by ringer mode and dnd
     protected static volatile int sRingerAndZenModeMutedStreams;
 
-    /** Streams that can be muted. Do not resolve to aliases when checking.
+    /** Streams that can be muted by system. Do not resolve to aliases when checking.
      * @see System#MUTE_STREAMS_AFFECTED */
     private int mMuteAffectedStreams;
+
+    /** Streams that can be muted by user. Do not resolve to aliases when checking.
+     * @see System#MUTE_STREAMS_AFFECTED */
+    private int mUserMutableStreams;
 
     @NonNull
     private SoundEffectsHelper mSfxHelper;
@@ -2345,6 +2350,7 @@ public class AudioService extends IAudioService.Stub
                 mMuteAffectedStreams &= ~(1 << vss.mStreamType);
             }
         }
+        updateUserMutableStreams();
     }
 
     private void createStreamStates() {
@@ -2414,6 +2420,8 @@ public class AudioService extends IAudioService.Stub
         }
         pw.print("\n- mute affected streams = 0x");
         pw.println(Integer.toHexString(mMuteAffectedStreams));
+        pw.print("\n- user mutable streams = 0x");
+        pw.println(Integer.toHexString(mUserMutableStreams));
     }
 
     private void updateStreamVolumeAlias(boolean updateVolumes, String caller) {
@@ -2908,6 +2916,7 @@ public class AudioService extends IAudioService.Stub
         mMuteAffectedStreams = mSettings.getSystemIntForUser(cr,
                 System.MUTE_STREAMS_AFFECTED, AudioSystem.DEFAULT_MUTE_STREAMS_AFFECTED,
                 UserHandle.USER_CURRENT);
+        updateUserMutableStreams();
 
         updateMasterMono(cr);
 
@@ -2925,6 +2934,12 @@ public class AudioService extends IAudioService.Stub
 
         // Load settings for the volume controller
         mVolumeController.loadSettings(cr);
+    }
+
+    private void updateUserMutableStreams() {
+        mUserMutableStreams = mMuteAffectedStreams;
+        mUserMutableStreams &= ~(1 << AudioSystem.STREAM_VOICE_CALL);
+        mUserMutableStreams &= ~(1 << AudioSystem.STREAM_BLUETOOTH_SCO);
     }
 
     @GuardedBy("mSettingsLock")
@@ -4466,7 +4481,7 @@ public class AudioService extends IAudioService.Stub
             }
         }
         if (mVoicePlaybackActive.getAndSet(voiceActive) != voiceActive) {
-            updateHearingAidVolumeOnVoiceActivityUpdate();
+            postUpdateContextualVolumes();
         }
         if (mMediaPlaybackActive.getAndSet(mediaActive) != mediaActive && mediaActive) {
             mSoundDoseHelper.scheduleMusicActiveCheck();
@@ -4604,13 +4619,29 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private void updateHearingAidVolumeOnVoiceActivityUpdate() {
-        final int streamType = getBluetoothContextualVolumeStream();
-        final int index = getStreamVolume(streamType);
-        sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_VOICE_ACTIVITY_HEARING_AID,
-                mVoicePlaybackActive.get(), streamType, index));
-        mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
 
+    // delay between audio playback configuration update and checking
+    // actual stream activity to take async playback stop into account
+    private static final int UPDATE_CONTEXTUAL_VOLUME_DELAY_MS = 500;
+
+    /*package*/ void postUpdateContextualVolumes() {
+        sendMsg(mAudioHandler, MSG_UPDATE_CONTEXTUAL_VOLUMES, SENDMSG_REPLACE,
+                /*arg1*/ 0, /*arg2*/ 0, TAG, UPDATE_CONTEXTUAL_VOLUME_DELAY_MS);
+    }
+
+    private void onUpdateContextualVolumes() {
+        final int streamType = getBluetoothContextualVolumeStream();
+        final int device = getDeviceForStream(streamType);
+        final int index = getStreamVolume(streamType, device);
+
+        if (AudioSystem.isLeAudioDeviceType(device)) {
+            mDeviceBroker.postSetLeAudioVolumeIndex(index * 10,
+                    mStreamStates[streamType].getMaxIndex(), streamType);
+        } else if (device == AudioSystem.DEVICE_OUT_HEARING_AID) {
+            mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
+        }
+        sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_VOICE_ACTIVITY_CONTEXTUAL_VOLUME,
+                mVoicePlaybackActive.get(), streamType, index, device));
     }
 
     /**
@@ -7123,6 +7154,11 @@ public class AudioService extends IAudioService.Stub
     @Override
     public boolean isStreamAffectedByMute(int streamType) {
         return (mMuteAffectedStreams & (1 << streamType)) != 0;
+    }
+
+    @Override
+    public boolean isStreamMutableByUi(int streamType) {
+        return (mUserMutableStreams & (1 << streamType)) != 0;
     }
 
     private void ensureValidDirection(int direction) {
@@ -9810,6 +9846,10 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_CONFIGURATION_CHANGED:
                     onConfigurationChanged();
+                    break;
+
+                case MSG_UPDATE_CONTEXTUAL_VOLUMES:
+                    onUpdateContextualVolumes();
                     break;
 
                 case MusicFxHelper.MSG_EFFECT_CLIENT_GONE:

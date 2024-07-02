@@ -39,7 +39,9 @@ import com.android.internal.protolog.common.LogLevel;
  * Methods in this class are stubs, that are replaced by optimised versions by the ProtoLogTool
  * during build.
  */
+// LINT.IfChange
 public class ProtoLog {
+// LINT.ThenChange(frameworks/base/tools/protologtool/src/com/android/protolog/tool/ProtoLogTool.kt)
 
     // Needs to be set directly otherwise the protologtool tries to transform the method call
     public static boolean REQUIRE_PROTOLOGTOOL = true;

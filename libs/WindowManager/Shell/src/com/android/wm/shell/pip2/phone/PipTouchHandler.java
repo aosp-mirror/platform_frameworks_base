@@ -713,15 +713,13 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         }
     }
 
-    private void animateToMaximizedState(Runnable callback) {
-        Rect maxMovementBounds = new Rect();
+    private void animateToMaximizedState() {
         Rect maxBounds = new Rect(0, 0, mPipBoundsState.getMaxSize().x,
                 mPipBoundsState.getMaxSize().y);
-        mPipBoundsAlgorithm.getMovementBounds(maxBounds, mInsetBounds, maxMovementBounds,
-                mIsImeShowing ? mImeHeight : 0);
+
         mSavedSnapFraction = mMotionHelper.animateToExpandedState(maxBounds,
-                mPipBoundsState.getMovementBounds(), maxMovementBounds,
-                callback);
+                getMovementBounds(mPipBoundsState.getBounds()),
+                getMovementBounds(maxBounds), null /* callback */);
     }
 
     private void animateToNormalSize(Runnable callback) {
@@ -729,22 +727,20 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
 
         final Size minMenuSize = mMenuController.getEstimatedMinMenuSize();
-        final Rect normalBounds = mPipBoundsState.getNormalBounds();
-        final Rect destBounds = mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds,
-                minMenuSize);
-        Rect restoredMovementBounds = new Rect();
-        mPipBoundsAlgorithm.getMovementBounds(destBounds,
-                mInsetBounds, restoredMovementBounds, mIsImeShowing ? mImeHeight : 0);
-        mSavedSnapFraction = mMotionHelper.animateToExpandedState(destBounds,
-                mPipBoundsState.getMovementBounds(), restoredMovementBounds, callback);
+        final Size defaultSize = mSizeSpecSource.getDefaultSize(mPipBoundsState.getAspectRatio());
+        final Rect normalBounds = new Rect(0, 0, defaultSize.getWidth(), defaultSize.getHeight());
+        final Rect adjustedNormalBounds = mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(
+                normalBounds, minMenuSize);
+
+        mSavedSnapFraction = mMotionHelper.animateToExpandedState(adjustedNormalBounds,
+                getMovementBounds(mPipBoundsState.getBounds()),
+                getMovementBounds(adjustedNormalBounds), callback /* callback */);
     }
 
     private void animateToUnexpandedState(Rect restoreBounds) {
-        Rect restoredMovementBounds = new Rect();
-        mPipBoundsAlgorithm.getMovementBounds(restoreBounds,
-                mInsetBounds, restoredMovementBounds, mIsImeShowing ? mImeHeight : 0);
         mMotionHelper.animateToUnexpandedState(restoreBounds, mSavedSnapFraction,
-                restoredMovementBounds, mPipBoundsState.getMovementBounds(), false /* immediate */);
+                getMovementBounds(restoreBounds),
+                getMovementBounds(mPipBoundsState.getBounds()), false /* immediate */);
         mSavedSnapFraction = -1f;
     }
 
@@ -919,10 +915,6 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                     && mMenuState != MENU_STATE_FULL) {
                 // If using pinch to zoom, double-tap functions as resizing between max/min size
                 if (mPipResizeGestureHandler.isUsingPinchToZoom()) {
-                    final boolean toExpand = mPipBoundsState.getBounds().width()
-                            < mPipBoundsState.getMaxSize().x
-                            && mPipBoundsState.getBounds().height()
-                            < mPipBoundsState.getMaxSize().y;
                     if (mMenuController.isMenuVisible()) {
                         mMenuController.hideMenu(ANIM_TYPE_NONE, false /* resize */);
                     }
@@ -934,7 +926,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                     // actually toggle to the size chosen
                     if (nextSize == PipDoubleTapHelper.SIZE_SPEC_MAX) {
                         mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
-                        animateToMaximizedState(null);
+                        animateToMaximizedState();
                     } else if (nextSize == PipDoubleTapHelper.SIZE_SPEC_DEFAULT) {
                         mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
                         animateToNormalSize(null);
@@ -1045,7 +1037,9 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
 
     private Rect getMovementBounds(Rect curBounds) {
         Rect movementBounds = new Rect();
-        mPipBoundsAlgorithm.getMovementBounds(curBounds, mInsetBounds,
+        Rect insetBounds = new Rect();
+        mPipBoundsAlgorithm.getInsetBounds(insetBounds);
+        mPipBoundsAlgorithm.getMovementBounds(curBounds, insetBounds,
                 movementBounds, mIsImeShowing ? mImeHeight : 0);
         return movementBounds;
     }
@@ -1091,6 +1085,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             case PipTransitionState.ENTERED_PIP:
                 onActivityPinned();
                 mTouchState.setAllowInputEvents(true);
+                mTouchState.reset();
                 break;
             case PipTransitionState.EXITED_PIP:
                 mTouchState.setAllowInputEvents(false);
@@ -1101,6 +1096,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                 break;
             case PipTransitionState.CHANGED_PIP_BOUNDS:
                 mTouchState.setAllowInputEvents(true);
+                mTouchState.reset();
                 break;
         }
     }

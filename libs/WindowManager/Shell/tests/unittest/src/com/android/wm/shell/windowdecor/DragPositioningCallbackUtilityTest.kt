@@ -27,6 +27,9 @@ import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.window.WindowContainerToken
+import com.android.dx.mockito.inline.extended.ExtendedMockito
+import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
+import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.common.DisplayController
@@ -37,6 +40,7 @@ import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertTrue
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -45,6 +49,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.quality.Strictness
 
 /**
  * Tests for [DragPositioningCallbackUtility].
@@ -82,9 +87,13 @@ class DragPositioningCallbackUtilityTest {
     @Rule
     val setFlagsRule = SetFlagsRule()
 
+    private lateinit var mockitoSession: StaticMockitoSession
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        mockitoSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
+                .spyStatic(DesktopModeStatus::class.java).startMocking()
 
         whenever(taskToken.asBinder()).thenReturn(taskBinder)
         whenever(mockDisplayController.getDisplayLayout(DISPLAY_ID)).thenReturn(mockDisplayLayout)
@@ -103,6 +112,11 @@ class DragPositioningCallbackUtilityTest {
         whenever(mockResources.getDimensionPixelSize(R.dimen.desktop_mode_minimum_window_height))
                 .thenReturn(DESKTOP_MODE_MIN_HEIGHT)
         whenever(mockDisplay.displayId).thenAnswer { DISPLAY_ID }
+    }
+
+    @After
+    fun tearDown() {
+        mockitoSession.finishMocking()
     }
 
     @Test
@@ -252,7 +266,7 @@ class DragPositioningCallbackUtilityTest {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS)
     fun taskMinWidthHeightUndefined_changeBoundsInDesktopModeLessThanMin_shouldNotChangeBounds() {
-        whenever(DesktopModeStatus.canEnterDesktopMode(mockContext)).thenReturn(true)
+        doReturn(true).`when`{ DesktopModeStatus.canEnterDesktopMode(mockContext) }
         initializeTaskInfo(taskMinWidth = -1, taskMinHeight = -1)
         val startingPoint =
             PointF(STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.bottom.toFloat())
@@ -275,7 +289,7 @@ class DragPositioningCallbackUtilityTest {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS)
     fun taskMinWidthHeightUndefined_changeBoundsInDesktopModeAllowedSize_shouldChangeBounds() {
-        whenever(DesktopModeStatus.canEnterDesktopMode(mockContext)).thenReturn(true)
+        doReturn(true).`when`{ DesktopModeStatus.canEnterDesktopMode(mockContext) }
         initializeTaskInfo(taskMinWidth = -1, taskMinHeight = -1)
         val startingPoint =
             PointF(STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.bottom.toFloat())
@@ -361,7 +375,7 @@ class DragPositioningCallbackUtilityTest {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS)
     fun testChangeBoundsInDesktopMode_windowSizeExceedsStableBounds_shouldBeLimitedToDisplaySize() {
-        whenever(DesktopModeStatus.canEnterDesktopMode(mockContext)).thenReturn(true)
+        doReturn(true).`when`{ DesktopModeStatus.canEnterDesktopMode(mockContext) }
         val startingPoint =
             PointF(OFF_CENTER_STARTING_BOUNDS.right.toFloat(),
                 OFF_CENTER_STARTING_BOUNDS.bottom.toFloat())
