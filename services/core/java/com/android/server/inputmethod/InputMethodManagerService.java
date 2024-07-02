@@ -1856,15 +1856,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    /**
-     * {@code true} when a {@link ClientState} has attached from starting the
-     * input connection.
-     */
-    @GuardedBy("ImfLock.class")
-    boolean hasAttachedClient() {
-        return getUserData(mCurrentUserId).mCurClient != null;
-    }
-
     @VisibleForTesting
     void setAttachedClientForTesting(@NonNull ClientState cs) {
         synchronized (ImfLock.class) {

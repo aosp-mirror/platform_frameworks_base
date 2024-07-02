@@ -172,6 +172,7 @@ final class DefaultImeVisibilityApplier {
             @ImeVisibilityStateComputer.VisibilityState int state,
             @SoftInputShowHideReason int reason, @UserIdInt int userId) {
         final var bindingController = mService.getInputMethodBindingController(userId);
+        final var userData = mService.getUserData(userId);
         final int displayIdToShowIme = bindingController.getDisplayIdToShowIme();
         switch (state) {
             case STATE_SHOW_IME:
@@ -184,7 +185,7 @@ final class DefaultImeVisibilityApplier {
                 break;
             case STATE_HIDE_IME:
                 if (!Flags.refactorInsetsController()) {
-                    if (mService.hasAttachedClient()) {
+                    if (userData.mCurClient != null) {
                         ImeTracker.forLogging().onProgress(statsToken,
                                 ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
                         // IMMS only knows of focused window, not the actual IME target.
