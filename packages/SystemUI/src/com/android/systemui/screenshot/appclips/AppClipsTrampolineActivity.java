@@ -26,6 +26,7 @@ import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -82,6 +83,7 @@ public class AppClipsTrampolineActivity extends Activity {
     private static final String TAG = AppClipsTrampolineActivity.class.getSimpleName();
     static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
     static final String EXTRA_SCREENSHOT_URI = TAG + "SCREENSHOT_URI";
+    static final String EXTRA_CLIP_DATA = TAG + "CLIP_DATA";
     static final String ACTION_FINISH_FROM_TRAMPOLINE = TAG + "FINISH_FROM_TRAMPOLINE";
     static final String EXTRA_RESULT_RECEIVER = TAG + "RESULT_RECEIVER";
     static final String EXTRA_CALLING_PACKAGE_NAME = TAG + "CALLING_PACKAGE_NAME";
@@ -263,6 +265,11 @@ public class AppClipsTrampolineActivity extends Activity {
             if (statusCode == CAPTURE_CONTENT_FOR_NOTE_SUCCESS) {
                 Uri uri = resultData.getParcelable(EXTRA_SCREENSHOT_URI, Uri.class);
                 convertedData.setData(uri);
+            }
+
+            if (resultData.containsKey(EXTRA_CLIP_DATA)) {
+                ClipData backlinksData = resultData.getParcelable(EXTRA_CLIP_DATA, ClipData.class);
+                convertedData.setClipData(backlinksData);
             }
 
             // Broadcast no longer required, setting it to null.

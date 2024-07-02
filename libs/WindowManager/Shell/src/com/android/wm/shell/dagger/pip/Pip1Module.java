@@ -212,12 +212,13 @@ public abstract class Pip1Module {
     @WMSingleton
     @Provides
     static PipMotionHelper providePipMotionHelper(Context context,
+            @ShellMainThread ShellExecutor mainExecutor,
             PipBoundsState pipBoundsState, PipTaskOrganizer pipTaskOrganizer,
             PhonePipMenuController menuController, PipSnapAlgorithm pipSnapAlgorithm,
             PipTransitionController pipTransitionController,
             FloatingContentCoordinator floatingContentCoordinator,
             Optional<PipPerfHintController> pipPerfHintControllerOptional) {
-        return new PipMotionHelper(context, pipBoundsState, pipTaskOrganizer,
+        return new PipMotionHelper(context, mainExecutor, pipBoundsState, pipTaskOrganizer,
                 menuController, pipSnapAlgorithm, pipTransitionController,
                 floatingContentCoordinator, pipPerfHintControllerOptional);
     }

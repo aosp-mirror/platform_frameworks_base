@@ -62,6 +62,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -177,7 +178,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private boolean mBound;
     private boolean mIsEnabled;
 
-    private boolean mIsNonPrimaryUser;
+    private boolean mIsSystemOrVisibleBgUser;
     private int mCurrentBoundedUserId = -1;
     private boolean mInputFocusTransferStarted;
     private float mInputFocusTransferStartY;
@@ -629,6 +630,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             SysUiState sysUiState,
             Provider<SceneInteractor> sceneInteractor,
             UserTracker userTracker,
+            UserManager userManager,
             WakefulnessLifecycle wakefulnessLifecycle,
             UiEventLogger uiEventLogger,
             DisplayTracker displayTracker,
@@ -639,10 +641,18 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
             BroadcastDispatcher broadcastDispatcher
     ) {
-        // b/241601880: This component shouldn't be running for a non-primary user
-        mIsNonPrimaryUser = !Process.myUserHandle().equals(UserHandle.SYSTEM);
-        if (mIsNonPrimaryUser) {
-            Log.wtf(TAG_OPS, "Unexpected initialization for non-primary user", new Throwable());
+        // b/241601880: This component should only be running for primary users or
+        // secondaryUsers when visibleBackgroundUsers are supported.
+        boolean isSystemUser = Process.myUserHandle().equals(UserHandle.SYSTEM);
+        boolean isVisibleBackgroundUser =
+                userManager.isVisibleBackgroundUsersSupported() && !userManager.isUserForeground();
+        if (!isSystemUser && isVisibleBackgroundUser) {
+            Log.d(TAG_OPS, "Initialization for visibleBackgroundUser");
+        }
+        mIsSystemOrVisibleBgUser = isSystemUser || isVisibleBackgroundUser;
+        if (!mIsSystemOrVisibleBgUser) {
+            Log.wtf(TAG_OPS, "Unexpected initialization for non-system foreground user",
+                    new Throwable());
         }
 
         mContext = context;
@@ -833,11 +843,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     private void internalConnectToCurrentUser(String reason) {
-        if (mIsNonPrimaryUser) {
+        if (!mIsSystemOrVisibleBgUser) {
             // This should not happen, but if any per-user SysUI component has a dependency on OPS,
             // then this could get triggered
-            Log.w(TAG_OPS, "Skipping connection to overview service due to non-primary user "
-                    + "caller");
+            Log.w(TAG_OPS,
+                    "Skipping connection to overview service due to non-system foreground user "
+                            + "caller");
             return;
         }
         disconnectFromLauncherService(reason);

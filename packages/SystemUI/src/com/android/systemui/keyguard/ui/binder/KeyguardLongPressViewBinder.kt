@@ -22,7 +22,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launch
 import com.android.systemui.common.ui.view.LongPressHandlingView
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 
@@ -39,7 +39,7 @@ object KeyguardLongPressViewBinder {
     @JvmStatic
     fun bind(
         view: LongPressHandlingView,
-        viewModel: KeyguardLongPressViewModel,
+        viewModel: KeyguardTouchHandlingViewModel,
         onSingleTap: () -> Unit,
         falsingManager: FalsingManager,
     ) {

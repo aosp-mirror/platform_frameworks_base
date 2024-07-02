@@ -71,9 +71,12 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
             }
 
             try {
-                CameraMetadataNative defaultRequest = cameraService.createDefaultRequest(mCameraId,
-                        templateType, mContext.getDeviceId(),
-                        mCameraManager.getDevicePolicyFromContext(mContext));
+                CameraMetadataNative defaultRequest =
+                        cameraService.createDefaultRequest(
+                                mCameraId,
+                                templateType,
+                                mCameraManager.getClientAttribution(),
+                                mCameraManager.getDevicePolicyFromContext(mContext));
                 CameraDeviceImpl.disableZslIfNeeded(defaultRequest, mTargetSdkVersion,
                         templateType);
 
@@ -104,9 +107,11 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
             }
 
             try {
-                return cameraService.isSessionConfigurationWithParametersSupported(mCameraId,
-                        mTargetSdkVersion, config,
-                        mContext.getDeviceId(),
+                return cameraService.isSessionConfigurationWithParametersSupported(
+                        mCameraId,
+                        mTargetSdkVersion,
+                        config,
+                        mCameraManager.getClientAttribution(),
                         mCameraManager.getDevicePolicyFromContext(mContext));
             } catch (ServiceSpecificException e) {
                 throw ExceptionUtils.throwAsPublicException(e);
@@ -133,12 +138,14 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
             }
 
             try {
-                CameraMetadataNative metadata = cameraService.getSessionCharacteristics(
-                        mCameraId, mTargetSdkVersion,
-                        CameraManager.getRotationOverride(mContext),
-                        sessionConfig,
-                        mContext.getDeviceId(),
-                        mCameraManager.getDevicePolicyFromContext(mContext));
+                CameraMetadataNative metadata =
+                        cameraService.getSessionCharacteristics(
+                                mCameraId,
+                                mTargetSdkVersion,
+                                CameraManager.getRotationOverride(mContext),
+                                sessionConfig,
+                                mCameraManager.getClientAttribution(),
+                                mCameraManager.getDevicePolicyFromContext(mContext));
 
                 return mCameraManager.prepareCameraCharacteristics(mCameraId, metadata,
                         cameraService);

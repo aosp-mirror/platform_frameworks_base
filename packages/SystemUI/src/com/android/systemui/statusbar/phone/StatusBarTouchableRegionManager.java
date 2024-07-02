@@ -29,6 +29,7 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.WindowInsets;
 
+import androidx.annotation.VisibleForTesting;
 import com.android.compose.animation.scene.ObservableTransitionState;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dumpable;
@@ -69,6 +70,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
 
     private boolean mIsStatusBarExpanded = false;
     private boolean mIsIdleOnGone = true;
+    private boolean mIsRemoteUserInteractionOngoing = false;
     private boolean mShouldAdjustInsets = false;
     private View mNotificationShadeWindowView;
     private View mNotificationPanelView;
@@ -133,6 +135,9 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             javaAdapter.alwaysCollectFlow(
                     sceneInteractor.get().getTransitionState(),
                     this::onSceneChanged);
+            javaAdapter.alwaysCollectFlow(
+                    sceneInteractor.get().isRemoteUserInteractionOngoing(),
+                    this::onRemoteUserInteractionOngoingChanged);
         } else {
             javaAdapter.alwaysCollectFlow(
                     shadeInteractor.isAnyExpanded(),
@@ -175,6 +180,13 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
                 // make sure our state is sensible
                 mForceCollapsedUntilLayout = false;
             }
+            updateTouchableRegion();
+        }
+    }
+
+    private void onRemoteUserInteractionOngoingChanged(Boolean ongoing) {
+        if (ongoing != mIsRemoteUserInteractionOngoing) {
+            mIsRemoteUserInteractionOngoing = ongoing;
             updateTouchableRegion();
         }
     }
@@ -276,13 +288,15 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
      * Helper to let us know when calculating the region is not needed because we know the entire
      * screen needs to be touchable.
      */
-    private boolean shouldMakeEntireScreenTouchable() {
+    @VisibleForTesting
+    boolean shouldMakeEntireScreenTouchable() {
         // The touchable region is always the full area when expanded, whether we're showing the
         // shade or the bouncer. It's also fully touchable when the screen off animation is playing
         // since we don't want stray touches to go through the light reveal scrim to whatever is
         // underneath.
         return mIsStatusBarExpanded
-                || (SceneContainerFlag.isEnabled() && !mIsIdleOnGone)
+                || (SceneContainerFlag.isEnabled()
+                && (!mIsIdleOnGone || mIsRemoteUserInteractionOngoing))
                 || mPrimaryBouncerInteractor.isShowing().getValue()
                 || mAlternateBouncerInteractor.isVisibleState()
                 || mUnlockedScreenOffAnimationController.isAnimationPlaying();

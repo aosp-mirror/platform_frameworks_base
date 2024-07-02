@@ -19,6 +19,7 @@ package com.android.systemui.keyboard.shortcut.shared.model
 enum class ShortcutCategoryType {
     SYSTEM,
     MULTI_TASKING,
+    IME
 }
 
 data class ShortcutCategory(

@@ -26,7 +26,7 @@ import android.annotation.Nullable;
 import android.content.ActivityInfoProto;
 import android.view.Surface;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 /**
  * Defines the behavior of reversion from device rotation overrides.

@@ -67,6 +67,7 @@ import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTasksController
+import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.sysui.KeyguardChangeListener
@@ -75,6 +76,7 @@ import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener
+import com.android.wm.shell.windowdecor.common.OnTaskActionClickListener
 import java.util.Optional
 import java.util.function.Supplier
 import org.junit.Assert.assertEquals
@@ -82,6 +84,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
@@ -516,6 +519,99 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         } finally {
             mockitoSession.finishMocking()
         }
+    }
+
+    @Test
+    fun testOnDecorMaximizedOrRestored_togglesTaskSize() {
+        val decor = setUpMockDecorationForTask(createTask(windowingMode = WINDOWING_MODE_FREEFORM))
+        onTaskOpening(decor.mTaskInfo)
+        val maxOrRestoreListener = ArgumentCaptor.forClass(OnTaskActionClickListener::class.java)
+            .let { captor ->
+                verify(decor).setOnMaximizeOrRestoreClickListener(captor.capture())
+                return@let captor.value
+            }
+
+        maxOrRestoreListener.onClick(decor.mTaskInfo.taskId, "test")
+
+        verify(mockDesktopTasksController).toggleDesktopTaskSize(decor.mTaskInfo)
+    }
+
+    @Test
+    fun testOnDecorMaximizedOrRestored_closesMenus() {
+        val decor = setUpMockDecorationForTask(createTask(windowingMode = WINDOWING_MODE_FREEFORM))
+        onTaskOpening(decor.mTaskInfo)
+        val maxOrRestoreListener = ArgumentCaptor.forClass(OnTaskActionClickListener::class.java)
+            .let { captor ->
+                verify(decor).setOnMaximizeOrRestoreClickListener(captor.capture())
+                return@let captor.value
+            }
+
+        maxOrRestoreListener.onClick(decor.mTaskInfo.taskId, "test")
+
+        verify(decor).closeHandleMenu()
+        verify(decor).closeMaximizeMenu()
+    }
+
+    @Test
+    fun testOnDecorSnappedLeft_snapResizes() {
+        val decor = setUpMockDecorationForTask(createTask(windowingMode = WINDOWING_MODE_FREEFORM))
+        onTaskOpening(decor.mTaskInfo)
+        val snapLeftListener = ArgumentCaptor.forClass(OnTaskActionClickListener::class.java)
+            .let { captor ->
+                verify(decor).setOnLeftSnapClickListener(captor.capture())
+                return@let captor.value
+            }
+
+        snapLeftListener.onClick(decor.mTaskInfo.taskId, "test")
+
+        verify(mockDesktopTasksController).snapToHalfScreen(decor.mTaskInfo, SnapPosition.LEFT)
+    }
+
+    @Test
+    fun testOnDecorSnappedLeft_closeMenus() {
+        val decor = setUpMockDecorationForTask(createTask(windowingMode = WINDOWING_MODE_FREEFORM))
+        onTaskOpening(decor.mTaskInfo)
+        val snapLeftListener = ArgumentCaptor.forClass(OnTaskActionClickListener::class.java)
+            .let { captor ->
+                verify(decor).setOnLeftSnapClickListener(captor.capture())
+                return@let captor.value
+            }
+
+        snapLeftListener.onClick(decor.mTaskInfo.taskId, "test")
+
+        verify(decor).closeHandleMenu()
+        verify(decor).closeMaximizeMenu()
+    }
+
+    @Test
+    fun testOnDecorSnappedRight_snapResizes() {
+        val decor = setUpMockDecorationForTask(createTask(windowingMode = WINDOWING_MODE_FREEFORM))
+        onTaskOpening(decor.mTaskInfo)
+        val snapLeftListener = ArgumentCaptor.forClass(OnTaskActionClickListener::class.java)
+            .let { captor ->
+                verify(decor).setOnRightSnapClickListener(captor.capture())
+                return@let captor.value
+            }
+
+        snapLeftListener.onClick(decor.mTaskInfo.taskId, "test")
+
+        verify(mockDesktopTasksController).snapToHalfScreen(decor.mTaskInfo, SnapPosition.RIGHT)
+    }
+
+    @Test
+    fun testOnDecorSnappedRight_closeMenus() {
+        val decor = setUpMockDecorationForTask(createTask(windowingMode = WINDOWING_MODE_FREEFORM))
+        onTaskOpening(decor.mTaskInfo)
+        val snapLeftListener = ArgumentCaptor.forClass(OnTaskActionClickListener::class.java)
+            .let { captor ->
+                verify(decor).setOnRightSnapClickListener(captor.capture())
+                return@let captor.value
+            }
+
+        snapLeftListener.onClick(decor.mTaskInfo.taskId, "test")
+
+        verify(decor).closeHandleMenu()
+        verify(decor).closeMaximizeMenu()
     }
 
     private fun onTaskOpening(task: RunningTaskInfo, leash: SurfaceControl = SurfaceControl()) {

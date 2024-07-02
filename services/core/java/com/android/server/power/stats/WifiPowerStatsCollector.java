@@ -43,6 +43,12 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
 
     private static final long ENERGY_UNSPECIFIED = -1;
 
+    interface Observer {
+        void onWifiPowerStatsRetrieved(WifiActivityEnergyInfo info,
+                List<BatteryStatsImpl.NetworkStatsDelta> delta, long elapsedRealtimeMs,
+                long uptimeMs);
+    }
+
     interface WifiStatsRetriever {
         interface Callback {
             void onWifiScanTime(int uid, long scanTimeMs, long batchScanTimeMs);
@@ -66,6 +72,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
     }
 
     private final Injector mInjector;
+    private final Observer mObserver;
 
     private WifiPowerStatsLayout mLayout;
     private boolean mIsInitialized;
@@ -93,12 +100,13 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
     private final SparseArray<WifiScanTimes> mLastScanTimes = new SparseArray<>();
     private long mLastWifiActiveDuration;
 
-    WifiPowerStatsCollector(Injector injector) {
+    WifiPowerStatsCollector(Injector injector, Observer observer) {
         super(injector.getHandler(), injector.getPowerStatsCollectionThrottlePeriod(
                         BatteryConsumer.powerComponentIdToString(
                                 BatteryConsumer.POWER_COMPONENT_WIFI)),
                 injector.getUidResolver(), injector.getClock());
         mInjector = injector;
+        mObserver = observer;
     }
 
     @Override
@@ -160,22 +168,27 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
+        WifiActivityEnergyInfo activityInfo = null;
         if (mPowerReportingSupported) {
-            collectWifiActivityInfo();
+            activityInfo = collectWifiActivityInfo();
         } else {
             collectWifiActivityStats();
         }
-        collectNetworkStats();
+        List<BatteryStatsImpl.NetworkStatsDelta> networkStatsDeltas = collectNetworkStats();
         collectWifiScanTime();
 
         if (mEnergyConsumerIds.length != 0) {
             collectEnergyConsumers();
         }
 
+        if (mObserver != null) {
+            mObserver.onWifiPowerStatsRetrieved(activityInfo, networkStatsDeltas,
+                    mClock.elapsedRealtime(), mClock.uptimeMillis());
+        }
         return mPowerStats;
     }
 
-    private void collectWifiActivityInfo() {
+    private WifiActivityEnergyInfo collectWifiActivityInfo() {
         CompletableFuture<WifiActivityEnergyInfo> immediateFuture = new CompletableFuture<>();
         mWifiManager.getWifiActivityEnergyInfoAsync(Runnable::run,
                 immediateFuture::complete);
@@ -190,7 +203,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
         }
 
         if (activityInfo == null) {
-            return;
+            return null;
         }
 
         long rxDuration = activityInfo.getControllerRxDurationMillis()
@@ -210,6 +223,9 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
         mPowerStats.durationMs = rxDuration + txDuration + scanDuration + idleDuration;
 
         mLastWifiActivityInfo = activityInfo;
+
+        return new WifiActivityEnergyInfo(activityInfo.getTimeSinceBootMillis(),
+                activityInfo.getStackState(), txDuration, rxDuration, scanDuration, idleDuration);
     }
 
     private void collectWifiActivityStats() {
@@ -219,12 +235,12 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
         mPowerStats.durationMs = duration;
     }
 
-    private void collectNetworkStats() {
+    private List<BatteryStatsImpl.NetworkStatsDelta> collectNetworkStats() {
         mPowerStats.uidStats.clear();
 
         NetworkStats networkStats = mNetworkStatsSupplier.get();
         if (networkStats == null) {
-            return;
+            return null;
         }
 
         List<BatteryStatsImpl.NetworkStatsDelta> delta =
@@ -256,6 +272,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
                 mLayout.setUidTxPackets(stats, mLayout.getUidTxPackets(stats) + txPackets);
             }
         }
+        return delta;
     }
 
     private void collectWifiScanTime() {

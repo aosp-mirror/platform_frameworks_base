@@ -31,6 +31,8 @@ class FakeCollapsedStatusBarViewModel : CollapsedStatusBarViewModel {
     override val ongoingActivityChip: MutableStateFlow<OngoingActivityChipModel> =
         MutableStateFlow(OngoingActivityChipModel.Hidden)
 
+    override val isHomeStatusBarAllowedByScene = MutableStateFlow(false)
+
     override fun areNotificationsLightsOut(displayId: Int): Flow<Boolean> = areNotificationLightsOut
 
     fun setNotificationLightsOut(lightsOut: Boolean) {

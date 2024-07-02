@@ -31,6 +31,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
@@ -105,6 +106,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private boolean mIsExpanded;
     private int mStatusBarState;
     private AnimationStateHandler mAnimationStateHandler;
+
+    private Handler mBgHandler;
     private int mHeadsUpInset;
 
     // Used for determining the region for touch interaction
@@ -149,7 +152,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             UiEventLogger uiEventLogger,
             JavaAdapter javaAdapter,
             ShadeInteractor shadeInteractor,
-            AvalancheController avalancheController) {
+            AvalancheController avalancheController,
+            @Background Handler bgHandler) {
         super(context, logger, handler, globalSettings, systemClock, executor,
                 accessibilityManagerWrapper, uiEventLogger, avalancheController);
         Resources resources = mContext.getResources();
@@ -159,7 +163,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         mGroupMembershipManager = groupMembershipManager;
         mVisualStabilityProvider = visualStabilityProvider;
         mAvalancheController = avalancheController;
-
+        mBgHandler = bgHandler;
         updateResources();
         configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
             @Override
@@ -401,7 +405,11 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             // Waiting HUNs in AvalancheController are still promoted to the HUN section and thus
             // seen in open shade; clear them so we don't show them again when the shade closes and
             // reordering is allowed again.
-            mAvalancheController.logDroppedHuns(mAvalancheController.getWaitingKeys().size());
+            int waitingKeysSize = mAvalancheController.getWaitingKeys().size();
+            mBgHandler.post(() -> {
+                // Do this in the background to avoid missing frames when closing the shade
+                mAvalancheController.logDroppedHuns(waitingKeysSize);
+            });
             mAvalancheController.clearNext();
 
             // In open shade the first HUN is pinned, and visual stability logic prevents us from

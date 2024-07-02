@@ -30,7 +30,7 @@ val Kosmos.lockscreenContentViewModel by
             clockInteractor = keyguardClockInteractor,
             interactor = keyguardBlueprintInteractor,
             authController = authController,
-            longPress = keyguardLongPressViewModel,
+            touchHandling = keyguardTouchHandlingViewModel,
             shadeInteractor = shadeInteractor,
             applicationScope = applicationCoroutineScope,
             unfoldTransitionInteractor = unfoldTransitionInteractor,

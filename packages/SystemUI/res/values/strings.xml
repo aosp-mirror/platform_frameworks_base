@@ -1193,6 +1193,8 @@
     <string name="popup_on_dismiss_cta_tile_text">Long press to customize widgets</string>
     <!-- Text for the button to configure widgets after long press. [CHAR LIMIT=50] -->
     <string name="button_to_configure_widgets_text">Customize widgets</string>
+    <!-- Text for unlock reason on the bouncer before customizing widgets. [CHAR LIMIT=NONE] -->
+    <string name="unlock_reason_to_customize_widgets">Unlock to customize widgets</string>
     <!-- Description for the App icon of disabled widget. [CHAR LIMIT=NONE] -->
     <string name="icon_description_for_disabled_widget">App icon for disabled widget</string>
     <!-- Description for the App icon of a package that is currently being installed. [CHAR LIMIT=NONE] -->
@@ -1393,7 +1395,7 @@
     <!-- Text which is shown in the expanded notification shade when there are currently no notifications visible that the user hasn't already seen. [CHAR LIMIT=30] -->
     <string name="no_unseen_notif_text">No new notifications</string>
 
-    <!-- Title of heads up notification for adaptive notifications user education. [CHAR LIMIT=30] -->
+    <!-- Title of heads up notification for adaptive notifications user education. [CHAR LIMIT=50] -->
     <string name="adaptive_notification_edu_hun_title">Adaptive notifications is on</string>
 
     <!-- Text of heads up notification for adaptive notifications user education. [CHAR LIMIT=100] -->

@@ -72,7 +72,6 @@ import android.view.Surface.OutOfResourcesException;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.VirtualRefBasePtr;
 import com.android.window.flags.Flags;
 
 import dalvik.system.CloseGuard;
@@ -273,10 +272,12 @@ public final class SurfaceControl implements Parcelable {
             String windowName, int displayId);
     private static native void nativeSetFrameTimelineVsync(long transactionObj,
             long frameTimelineVsyncId);
-    private static native void nativeAddJankDataListener(long nativeListener,
-            long nativeSurfaceControl);
-    private static native void nativeRemoveJankDataListener(long nativeListener);
-    private static native long nativeCreateJankDataListenerWrapper(OnJankDataListener listener);
+    private static native long nativeCreateJankDataListenerWrapper(
+            long surfaceControl, OnJankDataListener listener);
+    private static native long nativeGetJankDataListenerWrapperFinalizer();
+    private static native void nativeAddJankDataListener(long nativeListener);
+    private static native void nativeFlushJankData(long nativeListener);
+    private static native void nativeRemoveJankDataListener(long nativeListener, long afterVsync);
     private static native int nativeGetGPUContextPriority();
     private static native void nativeSetTransformHint(long nativeObject,
             @SurfaceControl.BufferTransform int transformHint);
@@ -461,17 +462,63 @@ public final class SurfaceControl implements Parcelable {
      * @see #addJankDataListener
      * @hide
      */
-    public static abstract class OnJankDataListener {
-        private final VirtualRefBasePtr mNativePtr;
-
-        public OnJankDataListener() {
-            mNativePtr = new VirtualRefBasePtr(nativeCreateJankDataListenerWrapper(this));
-        }
-
+    public interface OnJankDataListener {
         /**
          * Called when new jank classifications are available.
          */
-        public abstract void onJankDataAvailable(JankData[] jankStats);
+        void onJankDataAvailable(JankData[] jankData);
+
+    }
+
+    /**
+     * Handle to a registered {@link OnJankDatalistener}.
+     * @hide
+     */
+    public static class OnJankDataListenerRegistration {
+        private final long mNativeObject;
+
+        private static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                       OnJankDataListenerRegistration.class.getClassLoader(),
+                       nativeGetJankDataListenerWrapperFinalizer());
+
+        private final Runnable mFreeNativeResources;
+        private boolean mRemoved = false;
+
+        OnJankDataListenerRegistration(SurfaceControl surface, OnJankDataListener listener) {
+            mNativeObject = nativeCreateJankDataListenerWrapper(surface.mNativeObject, listener);
+            mFreeNativeResources = (mNativeObject == 0) ? () -> {} :
+                    sRegistry.registerNativeAllocation(this, mNativeObject);
+        }
+
+        /**
+         * Request a flush of any pending jank classification data. May cause the registered
+         * listener to be invoked inband.
+         */
+        public void flush() {
+            nativeFlushJankData(mNativeObject);
+        }
+
+        /**
+         * Request the removal of the registered listener after the VSync with the provided ID. Use
+         * a value <= 0 for afterVsync to remove the listener immediately. The given listener will
+         * not be removed before the given VSync, but may still reveive data for frames past the
+         * provided VSync.
+         */
+        public void removeAfter(long afterVsync) {
+            mRemoved = true;
+            nativeRemoveJankDataListener(mNativeObject, afterVsync);
+        }
+
+        /**
+         * Free the native resources associated with the listener registration.
+         */
+        public void release() {
+            if (!mRemoved) {
+                removeAfter(0);
+            }
+            mFreeNativeResources.run();
+        }
     }
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
@@ -2632,19 +2679,11 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * Adds a callback to be informed about SF's jank classification for a specific surface.
+     * Adds a callback to be informed about SF's jank classification for this surface.
      * @hide
      */
-    public static void addJankDataListener(OnJankDataListener listener, SurfaceControl surface) {
-        nativeAddJankDataListener(listener.mNativePtr.get(), surface.mNativeObject);
-    }
-
-    /**
-     * Removes a jank callback previously added with {@link #addJankDataListener}
-     * @hide
-     */
-    public static void removeJankDataListener(OnJankDataListener listener) {
-        nativeRemoveJankDataListener(listener.mNativePtr.get());
+    public OnJankDataListenerRegistration addJankDataListener(OnJankDataListener listener) {
+        return new OnJankDataListenerRegistration(this, listener);
     }
 
     /**

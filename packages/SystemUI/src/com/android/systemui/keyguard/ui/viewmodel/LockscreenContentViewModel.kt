@@ -44,7 +44,7 @@ constructor(
     clockInteractor: KeyguardClockInteractor,
     private val interactor: KeyguardBlueprintInteractor,
     private val authController: AuthController,
-    val longPress: KeyguardLongPressViewModel,
+    val touchHandling: KeyguardTouchHandlingViewModel,
     val shadeInteractor: ShadeInteractor,
     @Application private val applicationScope: CoroutineScope,
     unfoldTransitionInteractor: UnfoldTransitionInteractor,

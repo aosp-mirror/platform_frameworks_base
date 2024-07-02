@@ -31,6 +31,7 @@ import android.app.Notification.GROUP_ALERT_CHILDREN
 import android.app.Notification.GROUP_ALERT_SUMMARY
 import android.app.Notification.VISIBILITY_PRIVATE
 import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_LOW
@@ -133,7 +134,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     protected val bubbles: Bubbles = mock()
     lateinit var systemSettings: SystemSettings
     protected val packageManager: PackageManager = mock()
-
+    protected val notificationManager: NotificationManager = mock()
     protected abstract val provider: VisualInterruptionDecisionProvider
 
     private val neverSuppresses = object : NotificationInterruptSuppressor {}

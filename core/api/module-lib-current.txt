@@ -318,6 +318,14 @@ package android.net.netstats {
 
 }
 
+package android.net.wifi {
+
+  public final class WifiMigration {
+    method @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration") public static void migrateLegacyKeystoreToWifiBlobstore();
+  }
+
+}
+
 package android.nfc {
 
   public class NfcServiceManager {

@@ -79,6 +79,7 @@ final class InputMethodMenuController {
         if (DEBUG) Slog.v(TAG, "Show switching menu. showAuxSubtypes=" + showAuxSubtypes);
 
         final int userId = mService.getCurrentImeUserIdLocked();
+        final var bindingController = mService.getInputMethodBindingController(userId);
 
         hideInputMethodMenuLocked();
 
@@ -86,9 +87,9 @@ final class InputMethodMenuController {
             final InputMethodSubtype currentSubtype =
                     mService.getCurrentInputMethodSubtypeLocked();
             if (currentSubtype != null) {
-                final String curMethodId = mService.getSelectedMethodIdLocked();
+                final String curMethodId = bindingController.getSelectedMethodId();
                 final InputMethodInfo currentImi =
-                        mService.queryInputMethodForCurrentUserLocked(curMethodId);
+                        InputMethodSettingsRepository.get(userId).getMethodMap().get(curMethodId);
                 preferredInputMethodSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(
                         currentImi, currentSubtype.hashCode());
             }
@@ -179,7 +180,7 @@ final class InputMethodMenuController {
                     if (subtypeId < 0 || subtypeId >= im.getSubtypeCount()) {
                         subtypeId = NOT_A_SUBTYPE_ID;
                     }
-                    mService.setInputMethodLocked(im.getId(), subtypeId);
+                    mService.setInputMethodLocked(im.getId(), subtypeId, userId);
                 }
                 hideInputMethodMenuLocked();
             }

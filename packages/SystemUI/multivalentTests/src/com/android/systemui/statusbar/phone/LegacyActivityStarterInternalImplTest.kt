@@ -154,6 +154,25 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun startPendingIntentDismissingKeyguard_withCustomMessage_dismissWithAction() {
+        val pendingIntent = mock(PendingIntent::class.java)
+        `when`(pendingIntent.isActivity).thenReturn(true)
+        `when`(keyguardStateController.isShowing).thenReturn(true)
+        `when`(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+        val customMessage = "Custom unlock reason"
+
+        underTest.startPendingIntentDismissingKeyguard(
+            intent = pendingIntent,
+            dismissShade = true,
+            customMessage = customMessage
+        )
+        mainExecutor.runAllReady()
+
+        verify(statusBarKeyguardViewManager)
+            .dismissWithAction(any(), eq(null), anyBoolean(), eq(customMessage))
+    }
+
+    @Test
     fun startPendingIntentMaybeDismissingKeyguard_keyguardShowing_showOverLs_launchAnimator() {
         val pendingIntent = mock(PendingIntent::class.java)
         val parent = FrameLayout(context)
@@ -466,6 +485,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
         animationController: ActivityTransitionAnimator.Controller?,
         fillInIntent: Intent? = null,
         extraOptions: Bundle? = null,
+        customMessage: String? = null,
     ) {
         underTest.startPendingIntentDismissingKeyguard(
             intent = intent,
@@ -475,6 +495,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
             showOverLockscreen = true,
             fillInIntent = fillInIntent,
             extraOptions = extraOptions,
+            customMessage = customMessage,
         )
     }
 

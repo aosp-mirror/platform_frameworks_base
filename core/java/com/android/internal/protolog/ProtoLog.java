@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.internal.protolog.common;
+package com.android.internal.protolog;
+
+import com.android.internal.protolog.common.IProtoLog;
+import com.android.internal.protolog.common.IProtoLogGroup;
+import com.android.internal.protolog.common.LogLevel;
 
 /**
  * ProtoLog API - exposes static logging methods. Usage of this API is similar
@@ -35,7 +39,9 @@ package com.android.internal.protolog.common;
  * Methods in this class are stubs, that are replaced by optimised versions by the ProtoLogTool
  * during build.
  */
+// LINT.IfChange
 public class ProtoLog {
+// LINT.ThenChange(frameworks/base/tools/protologtool/src/com/android/protolog/tool/ProtoLogTool.kt)
 
     // Needs to be set directly otherwise the protologtool tries to transform the method call
     public static boolean REQUIRE_PROTOLOGTOOL = true;

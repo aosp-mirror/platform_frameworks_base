@@ -40,7 +40,7 @@ import android.window.ITrustedPresentationListener;
 import android.window.TrustedPresentationThresholds;
 import android.window.WindowInfosListener;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.wm.utils.RegionUtils;
 
 import java.io.PrintWriter;

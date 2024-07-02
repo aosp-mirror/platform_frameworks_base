@@ -70,10 +70,10 @@ constructor(
             ) { shadeExpansion, shadeMode, qsExpansion, transitionState, quickSettingsScene ->
                 when (transitionState) {
                     is ObservableTransitionState.Idle -> {
-                        if (transitionState.currentScene == Scenes.Lockscreen) {
-                            1f
-                        } else {
-                            shadeExpansion
+                        when (transitionState.currentScene) {
+                            Scenes.Lockscreen,
+                            Scenes.QuickSettings -> 1f
+                            else -> shadeExpansion
                         }
                     }
                     is ObservableTransitionState.Transition -> {
@@ -162,9 +162,13 @@ constructor(
         stackAppearanceInteractor::setCurrentGestureOverscroll
 
     /** Whether the notification stack is scrollable or not. */
-    val isScrollable: Flow<Boolean> = sceneInteractor.currentScene.map {
-        sceneInteractor.isSceneInFamily(it, SceneFamilies.NotifShade) || it == Scenes.Lockscreen
-    }.dumpWhileCollecting("isScrollable")
+    val isScrollable: Flow<Boolean> =
+        sceneInteractor.currentScene
+            .map {
+                sceneInteractor.isSceneInFamily(it, SceneFamilies.NotifShade) ||
+                    it == Scenes.Lockscreen
+            }
+            .dumpWhileCollecting("isScrollable")
 
     /** Whether the notification stack is displayed in doze mode. */
     val isDozing: Flow<Boolean> by lazy {

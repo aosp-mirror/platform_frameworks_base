@@ -21,6 +21,7 @@ import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -233,6 +234,8 @@ fun SceneScope.NotificationScrollingStack(
     // The height of the scrim visible on screen when it is in its resting (collapsed) state.
     val minVisibleScrimHeight: () -> Float = { screenHeight - maxScrimTop() }
 
+    val isClickable by viewModel.isClickable.collectAsStateWithLifecycle()
+
     // we are not scrolled to the top unless the scrim is at its maximum offset.
     LaunchedEffect(viewModel, scrimOffset) {
         snapshotFlow { scrimOffset.value >= 0f }
@@ -327,6 +330,9 @@ fun SceneScope.NotificationScrollingStack(
                             bottom = boundsInWindow.bottom,
                         )
                     )
+                }
+                .thenIf(isClickable) {
+                    Modifier.clickable(onClick = { viewModel.onEmptySpaceClicked() })
                 }
     ) {
         // Creates a cutout in the background scrim in the shape of the notifications scrim.

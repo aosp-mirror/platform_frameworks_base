@@ -126,6 +126,7 @@ constructor(
         animationController: ActivityTransitionAnimator.Controller?,
         fillInIntent: Intent?,
         extraOptions: Bundle?,
+        customMessage: String?,
     ) {
         activityStarterInternal.startPendingIntentDismissingKeyguard(
             intent = intent,
@@ -135,6 +136,7 @@ constructor(
             dismissShade = dismissShade,
             fillInIntent = fillInIntent,
             extraOptions = extraOptions,
+            customMessage = customMessage,
         )
     }
 
@@ -319,11 +321,13 @@ constructor(
         intent: Intent,
         onlyProvisioned: Boolean,
         dismissShade: Boolean,
+        customMessage: String?,
     ) {
         activityStarterInternal.startActivityDismissingKeyguard(
             intent = intent,
             onlyProvisioned = onlyProvisioned,
             dismissShade = dismissShade,
+            customMessage = customMessage,
         )
     }
 

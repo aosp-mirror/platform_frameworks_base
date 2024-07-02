@@ -191,7 +191,8 @@ public class MobileRadioPowerStatsProcessorTest {
         aggregatedStats.setUidState(APP_UID, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND, 0);
         aggregatedStats.setUidState(APP_UID2, STATE_PROCESS_STATE, PROCESS_STATE_CACHED, 0);
 
-        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector);
+        MobileRadioPowerStatsCollector collector =
+                new MobileRadioPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
 
         // Initial empty ModemActivityInfo.
@@ -430,7 +431,8 @@ public class MobileRadioPowerStatsProcessorTest {
         aggregatedStats.setUidState(APP_UID, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND, 0);
         aggregatedStats.setUidState(APP_UID2, STATE_PROCESS_STATE, PROCESS_STATE_CACHED, 0);
 
-        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector);
+        MobileRadioPowerStatsCollector collector =
+                new MobileRadioPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
 
         // Initial empty ModemActivityInfo.

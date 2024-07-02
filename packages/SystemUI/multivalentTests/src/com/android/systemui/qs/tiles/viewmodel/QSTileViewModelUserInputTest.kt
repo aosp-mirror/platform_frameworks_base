@@ -256,6 +256,7 @@ class QSTileViewModelUserInputTest : SysuiTestCase() {
             qsTileLogger,
             FakeSystemClock(),
             testCoroutineDispatcher,
+            testCoroutineDispatcher,
             scope.backgroundScope,
         )
 }

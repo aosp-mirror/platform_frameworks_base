@@ -68,4 +68,27 @@ class BrightnessMirrorInflaterTest : SysuiTestCase() {
 
         Assert.setTestThread(null)
     }
+
+    @Test
+    fun inflate_frameHasPadding() {
+        Assert.setTestThread(Thread.currentThread())
+
+        val (frame, _) =
+            BrightnessMirrorInflater.inflate(
+                themedContext,
+                kosmos.brightnessSliderControllerFactory,
+            )
+
+        assertThat(frame.visibility).isEqualTo(View.VISIBLE)
+
+        val padding =
+            context.resources.getDimensionPixelSize(R.dimen.rounded_slider_background_padding)
+
+        assertThat(frame.paddingLeft).isEqualTo(padding)
+        assertThat(frame.paddingTop).isEqualTo(padding)
+        assertThat(frame.paddingRight).isEqualTo(padding)
+        assertThat(frame.paddingBottom).isEqualTo(padding)
+
+        Assert.setTestThread(null)
+    }
 }

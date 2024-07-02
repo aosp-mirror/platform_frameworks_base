@@ -78,9 +78,9 @@ public class BrightnessSynchronizer {
     // Feature flag that will eventually be removed
     private final boolean mIntRangeUserPerceptionEnabled;
 
-    public BrightnessSynchronizer(Context context, boolean intRangeUserPerceptionEnabled) {
-        this(context, Looper.getMainLooper(), SystemClock::uptimeMillis,
-                intRangeUserPerceptionEnabled);
+    public BrightnessSynchronizer(Context context, Looper looper,
+            boolean intRangeUserPerceptionEnabled) {
+        this(context, looper, SystemClock::uptimeMillis, intRangeUserPerceptionEnabled);
     }
 
     @VisibleForTesting

@@ -59,6 +59,7 @@ import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -473,7 +474,9 @@ public class BubblesTest extends SysuiTestCase {
                         mock(AvalancheProvider.class),
                         mock(SystemSettings.class),
                         mock(PackageManager.class),
-                        Optional.of(mock(Bubbles.class))
+                        Optional.of(mock(Bubbles.class)),
+                        mContext,
+                        mock(NotificationManager.class)
                         );
         interruptionDecisionProvider.start();
 

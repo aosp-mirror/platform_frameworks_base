@@ -392,26 +392,17 @@ constructor(
                     allowedForWorkProfile ->
                     filterWidgetsAllowedByDevicePolicy(widgets, allowedForWorkProfile)
                 },
-            communalSettingsInteractor.communalWidgetCategories,
             updateOnWorkProfileBroadcastReceived,
-        ) { widgets, allowedCategories, _ ->
+        ) { widgets, _ ->
             widgets.map { widget ->
                 when (widget) {
                     is CommunalWidgetContentModel.Available -> {
-                        if (widget.providerInfo.widgetCategory and allowedCategories != 0) {
-                            // At least one category this widget specified is allowed, so show it
-                            WidgetContent.Widget(
-                                appWidgetId = widget.appWidgetId,
-                                providerInfo = widget.providerInfo,
-                                appWidgetHost = appWidgetHost,
-                                inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
-                            )
-                        } else {
-                            WidgetContent.DisabledWidget(
-                                appWidgetId = widget.appWidgetId,
-                                providerInfo = widget.providerInfo,
-                            )
-                        }
+                        WidgetContent.Widget(
+                            appWidgetId = widget.appWidgetId,
+                            providerInfo = widget.providerInfo,
+                            appWidgetHost = appWidgetHost,
+                            inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
+                        )
                     }
                     is CommunalWidgetContentModel.Pending -> {
                         WidgetContent.PendingWidget(

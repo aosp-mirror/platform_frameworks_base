@@ -51,7 +51,6 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.notification.NotificationUtils.interpolate
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
-import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -251,13 +250,17 @@ constructor(
 
     /** Keyguard can be clipped at the top as the shade is dragged */
     val topClippingBounds: Flow<Int?> by lazy {
-        repository.topClippingBounds
-            .sampleFilter(
+        combineTransform(
                 keyguardTransitionInteractor
                     .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
-                    .onStart { emit(0f) }
-            ) { goneValue ->
-                goneValue != 1f
+                    .map { it == 1f }
+                    .onStart { emit(false) }
+                    .distinctUntilChanged(),
+                repository.topClippingBounds
+            ) { isGone, topClippingBounds ->
+                if (!isGone) {
+                    emit(topClippingBounds)
+                }
             }
             .distinctUntilChanged()
     }

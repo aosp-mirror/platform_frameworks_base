@@ -92,8 +92,6 @@ public class GenericWindowPolicyControllerTest {
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
-    private GenericWindowPolicyController.PipBlockedCallback mPipBlockedCallback;
-    @Mock
     private VirtualDeviceManager.ActivityListener mActivityListener;
     @Mock
     private GenericWindowPolicyController.IntentListenerCallback mIntentListenerCallback;
@@ -140,7 +138,6 @@ public class GenericWindowPolicyControllerTest {
         gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
 
         assertThat(gwpc.isEnteringPipAllowed(TEST_UID)).isFalse();
-        verify(mPipBlockedCallback, timeout(TIMEOUT_MILLIS)).onEnteringPipBlocked(TEST_UID);
     }
 
     @Test
@@ -151,7 +148,6 @@ public class GenericWindowPolicyControllerTest {
                 Arrays.asList(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
                         WindowConfiguration.WINDOWING_MODE_PINNED)));
         assertThat(gwpc.isEnteringPipAllowed(TEST_UID)).isTrue();
-        verify(mPipBlockedCallback, after(TIMEOUT_MILLIS).never()).onEnteringPipBlocked(TEST_UID);
     }
 
     @Test
@@ -746,7 +742,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
-                /* pipBlockedCallback= */ mPipBlockedCallback,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ mSecureWindowCallback,
                 /* intentListenerCallback= */ mIntentListenerCallback,
@@ -767,7 +762,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
-                /* pipBlockedCallback= */ mPipBlockedCallback,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ mSecureWindowCallback,
                 /* intentListenerCallback= */ mIntentListenerCallback,
@@ -789,7 +783,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
-                /* pipBlockedCallback= */ mPipBlockedCallback,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
                 /* intentListenerCallback= */ mIntentListenerCallback,
@@ -811,7 +804,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
-                /* pipBlockedCallback= */ mPipBlockedCallback,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
                 /* intentListenerCallback= */ mIntentListenerCallback,
@@ -833,7 +825,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
-                /* pipBlockedCallback= */ mPipBlockedCallback,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
                 /* intentListenerCallback= */ mIntentListenerCallback,
@@ -855,7 +846,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
-                /* pipBlockedCallback= */ mPipBlockedCallback,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
                 /* intentListenerCallback= */ mIntentListenerCallback,
@@ -877,7 +867,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationExemptions= */ Collections.singleton(blockedComponent),
                 /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
-                /* pipBlockedCallback= */ mPipBlockedCallback,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
                 /* intentListenerCallback= */ mIntentListenerCallback,
@@ -899,7 +888,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationExemptions= */ Collections.singleton(allowedComponent),
                 /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
-                /* pipBlockedCallback= */ mPipBlockedCallback,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
                 /* intentListenerCallback= */ mIntentListenerCallback,
@@ -922,7 +910,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* permissionDialogComponent= */ permissionComponent,
                 /* activityListener= */ mActivityListener,
-                /* pipBlockedCallback= */ mPipBlockedCallback,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
                 /* intentListenerCallback= */ mIntentListenerCallback,

@@ -232,6 +232,7 @@ constructor(
         skipLockscreenChecks: Boolean,
         fillInIntent: Intent?,
         extraOptions: Bundle?,
+        customMessage: String?,
     ) {
         val animationController =
             if (associatedView is ExpandableNotificationRow) {
@@ -340,6 +341,7 @@ constructor(
                     afterKeyguardGone = willLaunchResolverActivity,
                     dismissShade = collapse,
                     willAnimateOnKeyguard = animate,
+                    customMessage = customMessage,
                 )
             }
         } else {
