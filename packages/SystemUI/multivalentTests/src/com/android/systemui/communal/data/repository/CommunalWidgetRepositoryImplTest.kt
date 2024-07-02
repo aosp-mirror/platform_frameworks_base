@@ -24,6 +24,7 @@ import android.content.ComponentName
 import android.content.applicationContext
 import android.graphics.Bitmap
 import android.os.UserHandle
+import android.os.userManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -47,9 +48,6 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -59,11 +57,15 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -85,6 +87,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val packageChangeRepository = kosmos.fakePackageChangeRepository
+    private val userManager = kosmos.userManager
+
+    private val mainUser = UserHandle(0)
 
     private val fakeAllowlist =
         listOf(
@@ -109,6 +114,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
         whenever(communalWidgetDao.getWidgets()).thenReturn(fakeWidgets)
         whenever(communalWidgetHost.appWidgetProviders).thenReturn(fakeProviders)
+        whenever(userManager.getUserSerialNumber(mainUser.identifier))
+            .thenReturn(testUserSerialNumber(mainUser))
 
         underTest =
             CommunalWidgetRepositoryImpl(
@@ -121,6 +128,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                 backupManager,
                 backupUtils,
                 packageChangeRepository,
+                userManager,
             )
     }
 
@@ -128,7 +136,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     fun communalWidgets_queryWidgetsFromDb() =
         testScope.runTest {
             val communalItemRankEntry = CommunalItemRank(uid = 1L, rank = 1)
-            val communalWidgetItemEntry = CommunalWidgetItem(uid = 1L, 1, "pk_name/cls_name", 1L)
+            val communalWidgetItemEntry = CommunalWidgetItem(uid = 1L, 1, "pk_name/cls_name", 1L, 0)
             fakeWidgets.value = mapOf(communalItemRankEntry to communalWidgetItemEntry)
             fakeProviders.value = mapOf(1 to providerInfoA)
 
@@ -154,13 +162,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L),
+                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0),
                     CommunalItemRank(uid = 3L, rank = 3) to
-                        CommunalWidgetItem(uid = 3L, 3, "pk_3/cls_3", 3L),
+                        CommunalWidgetItem(uid = 3L, 3, "pk_3/cls_3", 3L, 0),
                     CommunalItemRank(uid = 4L, rank = 4) to
-                        CommunalWidgetItem(uid = 4L, 4, "pk_4/cls_4", 4L),
+                        CommunalWidgetItem(uid = 4L, 4, "pk_4/cls_4", 4L, 0),
                 )
             fakeProviders.value =
                 mapOf(
@@ -192,9 +200,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L),
+                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0),
                 )
             fakeProviders.value =
                 mapOf(
@@ -249,7 +257,6 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val priority = 1
-            val user = UserHandle(0)
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(
@@ -259,11 +266,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, user, priority, kosmos.widgetConfiguratorSuccess)
+            underTest.addWidget(provider, mainUser, priority, kosmos.widgetConfiguratorSuccess)
             runCurrent()
 
-            verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
-            verify(communalWidgetDao).addWidget(id, provider, priority)
+            verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
+            verify(communalWidgetDao)
+                .addWidget(id, provider, priority, testUserSerialNumber(mainUser))
 
             // Verify backup requested
             verify(backupManager).dataChanged()
@@ -275,7 +283,6 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val priority = 1
-            val user = UserHandle(0)
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(
@@ -285,11 +292,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, user, priority, kosmos.widgetConfiguratorFail)
+            underTest.addWidget(provider, mainUser, priority, kosmos.widgetConfiguratorFail)
             runCurrent()
 
-            verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
-            verify(communalWidgetDao, never()).addWidget(id, provider, priority)
+            verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
+            verify(communalWidgetDao, never())
+                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt())
             verify(appWidgetHost).deleteAppWidgetId(id)
 
             // Verify backup not requested
@@ -302,7 +310,6 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val priority = 1
-            val user = UserHandle(0)
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(
@@ -312,13 +319,14 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, user, priority) {
+            underTest.addWidget(provider, mainUser, priority) {
                 throw IllegalStateException("some error")
             }
             runCurrent()
 
-            verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
-            verify(communalWidgetDao, never()).addWidget(id, provider, priority)
+            verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
+            verify(communalWidgetDao, never())
+                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt())
             verify(appWidgetHost).deleteAppWidgetId(id)
 
             // Verify backup not requested
@@ -331,7 +339,6 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val priority = 1
-            val user = UserHandle(0)
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_CONFIGURATION_OPTIONAL)
             whenever(
@@ -341,11 +348,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, user, priority, kosmos.widgetConfiguratorFail)
+            underTest.addWidget(provider, mainUser, priority, kosmos.widgetConfiguratorFail)
             runCurrent()
 
-            verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
-            verify(communalWidgetDao).addWidget(id, provider, priority)
+            verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
+            verify(communalWidgetDao)
+                .addWidget(id, provider, priority, testUserSerialNumber(mainUser))
 
             // Verify backup requested
             verify(backupManager).dataChanged()
@@ -538,9 +546,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L),
+                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0),
                 )
 
             // Widget 1 is installed
@@ -554,7 +562,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         sessionId = 1,
                         packageName = "pk_2",
                         icon = fakeIcon,
-                        user = UserHandle.CURRENT,
+                        user = mainUser,
                     )
                 )
             )
@@ -572,7 +580,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         priority = 2,
                         packageName = "pk_2",
                         icon = fakeIcon,
-                        user = UserHandle.CURRENT,
+                        user = mainUser,
                     ),
                 )
         }
@@ -583,7 +591,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
                 )
 
             // Widget 1 is pending install
@@ -594,7 +602,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         sessionId = 1,
                         packageName = "pk_1",
                         icon = fakeIcon,
-                        user = UserHandle.CURRENT,
+                        user = mainUser,
                     )
                 )
             )
@@ -607,7 +615,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         priority = 1,
                         packageName = "pk_1",
                         icon = fakeIcon,
-                        user = UserHandle.CURRENT,
+                        user = mainUser,
                     ),
                 )
 
@@ -633,6 +641,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         whenever(appWidgetHost.appWidgetIds).thenReturn(ids.toIntArray())
     }
 
+    // Commonly the user id and user serial number are the same, but for testing purposes use a
+    // simple algorithm to map a user id to a different user serial number to make sure the correct
+    // value is used.
+    private fun testUserSerialNumber(user: UserHandle): Int {
+        return user.identifier + 100
+    }
+
     private companion object {
         val PROVIDER_INFO_REQUIRES_CONFIGURATION =
             AppWidgetProviderInfo().apply { configure = ComponentName("test.pkg", "test.cmp") }
@@ -650,11 +665,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                                 widgetId = 1
                                 componentName = "pk_name/fake_widget_1"
                                 rank = 1
+                                userSerialNumber = 0
                             },
                             CommunalHubState.CommunalWidgetItem().apply {
                                 widgetId = 2
                                 componentName = "pk_name/fake_widget_2"
                                 rank = 2
+                                userSerialNumber = 0
                             },
                         )
                         .toTypedArray()

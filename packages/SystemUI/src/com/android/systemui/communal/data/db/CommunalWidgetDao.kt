@@ -17,6 +17,7 @@
 package com.android.systemui.communal.data.db
 
 import android.content.ComponentName
+import android.os.UserManager
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
@@ -53,23 +54,34 @@ constructor(
     private val communalWidgetDaoProvider: Provider<CommunalWidgetDao>,
     @Named(DEFAULT_WIDGETS) private val defaultWidgets: Array<String>,
     @CommunalLog logBuffer: LogBuffer,
+    private val userManager: UserManager,
 ) : RoomDatabase.Callback() {
     companion object {
         private const val TAG = "DefaultWidgetPopulation"
     }
+
     private val logger = Logger(logBuffer, TAG)
 
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
-        applicationScope.launch {
-            addDefaultWidgets()
-            logger.i("Default widgets were populated in the database.")
-        }
+        applicationScope.launch { addDefaultWidgets() }
     }
 
     // Read default widgets from config.xml and populate the database.
     private suspend fun addDefaultWidgets() =
         withContext(bgDispatcher) {
+            // Default widgets should be associated with the main user.
+            val userSerialNumber =
+                userManager.mainUser?.let { mainUser ->
+                    userManager.getUserSerialNumber(mainUser.identifier)
+                }
+            if (userSerialNumber == null) {
+                logger.w(
+                    "Skipped populating default widgets because device does not have a main user"
+                )
+                return@withContext
+            }
+
             defaultWidgets.forEachIndexed { index, name ->
                 val provider = ComponentName.unflattenFromString(name)
                 provider?.let {
@@ -80,11 +92,14 @@ constructor(
                             .addWidget(
                                 widgetId = id,
                                 provider = provider,
-                                priority = defaultWidgets.size - index
+                                priority = defaultWidgets.size - index,
+                                userSerialNumber = userSerialNumber,
                             )
                     }
                 }
             }
+
+            logger.i("Populated default widgets in the database.")
         }
 }
 
@@ -106,10 +121,16 @@ interface CommunalWidgetDao {
     fun deleteItemRankById(itemId: Long)
 
     @Query(
-        "INSERT INTO communal_widget_table(widget_id, component_name, item_id) " +
-            "VALUES(:widgetId, :componentName, :itemId)"
+        "INSERT INTO communal_widget_table" +
+            "(widget_id, component_name, item_id, user_serial_number) " +
+            "VALUES(:widgetId, :componentName, :itemId, :userSerialNumber)"
     )
-    fun insertWidget(widgetId: Int, componentName: String, itemId: Long): Long
+    fun insertWidget(
+        widgetId: Int,
+        componentName: String,
+        itemId: Long,
+        userSerialNumber: Int,
+    ): Long
 
     @Query("INSERT INTO communal_item_rank_table(rank) VALUES(:rank)")
     fun insertItemRank(rank: Int): Long
@@ -132,28 +153,41 @@ interface CommunalWidgetDao {
     }
 
     @Transaction
-    fun addWidget(widgetId: Int, provider: ComponentName, priority: Int): Long {
+    fun addWidget(
+        widgetId: Int,
+        provider: ComponentName,
+        priority: Int,
+        userSerialNumber: Int,
+    ): Long {
         return addWidget(
             widgetId = widgetId,
             componentName = provider.flattenToString(),
             priority = priority,
+            userSerialNumber = userSerialNumber,
         )
     }
 
     @Transaction
-    fun addWidget(widgetId: Int, componentName: String, priority: Int): Long {
+    fun addWidget(
+        widgetId: Int,
+        componentName: String,
+        priority: Int,
+        userSerialNumber: Int,
+    ): Long {
         return insertWidget(
             widgetId = widgetId,
             componentName = componentName,
             itemId = insertItemRank(priority),
+            userSerialNumber = userSerialNumber,
         )
     }
 
     @Transaction
     fun deleteWidgetById(widgetId: Int): Boolean {
         val widget =
-            getWidgetByIdNow(widgetId) ?: // no entry to delete from db
-            return false
+            getWidgetByIdNow(widgetId)
+                ?: // no entry to delete from db
+                return false
 
         deleteItemRankById(widget.itemId)
         deleteWidgets(widget)
@@ -166,6 +200,8 @@ interface CommunalWidgetDao {
         clearCommunalWidgetsTable()
         clearCommunalItemRankTable()
 
-        state.widgets.forEach { addWidget(it.widgetId, it.componentName, it.rank) }
+        state.widgets.forEach {
+            addWidget(it.widgetId, it.componentName, it.rank, it.userSerialNumber)
+        }
     }
 }

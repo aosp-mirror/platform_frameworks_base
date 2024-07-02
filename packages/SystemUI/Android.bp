@@ -668,6 +668,7 @@ android_library {
     ],
     asset_dirs: [
         "tests/goldens",
+        "schemas",
     ],
     static_libs: [
         "SystemUI-res",
@@ -707,6 +708,7 @@ android_library {
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
         "androidx.room_room-runtime",
+        "androidx.room_room-testing",
         "androidx.room_room-ktx",
         "device_state_flags_lib",
         "kotlinx-coroutines-android",

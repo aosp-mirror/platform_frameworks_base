@@ -20,6 +20,7 @@ import android.app.backup.BackupManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
+import android.os.UserManager
 import com.android.systemui.common.data.repository.PackageChangeRepository
 import com.android.systemui.common.shared.model.PackageInstallSession
 import com.android.systemui.communal.data.backup.CommunalBackupUtils
@@ -98,6 +99,7 @@ constructor(
     private val backupManager: BackupManager,
     private val backupUtils: CommunalBackupUtils,
     packageChangeRepository: PackageChangeRepository,
+    private val userManager: UserManager,
 ) : CommunalWidgetRepository {
     companion object {
         const val TAG = "CommunalWidgetRepository"
@@ -185,6 +187,7 @@ constructor(
                     widgetId = id,
                     provider = provider,
                     priority = priority,
+                    userSerialNumber = userManager.getUserSerialNumber(user.identifier),
                 )
                 backupManager.dataChanged()
             } else {
@@ -255,6 +258,7 @@ constructor(
                         widgetId = newWidgetId
                         componentName = restoredWidget.componentName
                         rank = restoredWidget.rank
+                        userSerialNumber = restoredWidget.userSerialNumber
                     }
                 }
             val newState = CommunalHubState().apply { widgets = newWidgets.toTypedArray() }
