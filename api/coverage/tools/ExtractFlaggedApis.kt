@@ -75,10 +75,10 @@ fun addFlaggedApi(builder: FlagApiMap.Builder, api: JavaMethod.Builder, flag: St
 fun getClassFlag(classItem: ClassItem): String? {
     var classFlag = getFlagAnnotation(classItem)
     var cur = classItem
-    // If a class is not an inner class, use its @FlaggedApi annotation value.
+    // If a class is not a nested class, use its @FlaggedApi annotation value.
     // Otherwise, use the flag value of the closest outer class that is annotated by @FlaggedApi.
-    while (cur.isInnerClass() && classFlag == null) {
-        cur = cur.parent() as ClassItem
+    while (classFlag == null) {
+        cur = cur.containingClass() ?: break
         classFlag = getFlagAnnotation(cur)
     }
     return classFlag
