@@ -38,6 +38,7 @@ import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepositor
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalPrefsInteractor
@@ -76,6 +77,8 @@ import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.spy
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -94,6 +97,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
     private lateinit var mediaRepository: FakeCommunalMediaRepository
     private lateinit var communalSceneInteractor: CommunalSceneInteractor
+    private lateinit var communalInteractor: CommunalInteractor
 
     private val testableResources = context.orCreateTestableResources
 
@@ -108,6 +112,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         smartspaceRepository = kosmos.fakeSmartspaceRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
         communalSceneInteractor = kosmos.communalSceneInteractor
+        communalInteractor = spy(kosmos.communalInteractor)
         kosmos.fakeUserRepository.setUserInfos(listOf(MAIN_USER_INFO))
         kosmos.fakeUserTracker.set(
             userInfos = listOf(MAIN_USER_INFO),
@@ -119,7 +124,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         underTest =
             CommunalEditModeViewModel(
                 communalSceneInteractor,
-                kosmos.communalInteractor,
+                communalInteractor,
                 kosmos.communalSettingsInteractor,
                 kosmos.keyguardTransitionInteractor,
                 mediaHost,
@@ -341,6 +346,16 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             underTest.onDisclaimerDismissed()
             assertThat(showDisclaimer).isFalse()
         }
+
+    @Test
+    fun scrollPosition_persistedOnEditCleanup() {
+        val index = 2
+        val offset = 30
+        underTest.onScrollPositionUpdated(index, offset)
+        underTest.cleanupEditModeState()
+
+        verify(communalInteractor).setScrollPosition(eq(index), eq(offset))
+    }
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)

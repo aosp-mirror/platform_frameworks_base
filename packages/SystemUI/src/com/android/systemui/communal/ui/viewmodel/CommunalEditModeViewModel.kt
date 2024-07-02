@@ -216,6 +216,9 @@ constructor(
     /** Called when exiting the edit mode, before transitioning back to the communal scene. */
     fun cleanupEditModeState() {
         communalSceneInteractor.setEditModeState(null)
+
+        // Set the scroll position of the glanceable hub to match where we are now.
+        persistScrollPosition()
     }
 
     companion object {

@@ -556,4 +556,29 @@ constructor(
             )
         }
     }
+
+    /**
+     * {@link #setScrollPosition} persists the current communal grid scroll position (to volatile
+     * memory) so that the next presentation of the grid (either as glanceable hub or edit mode) can
+     * restore position.
+     */
+    fun setScrollPosition(firstVisibleItemIndex: Int, firstVisibleItemOffset: Int) {
+        _firstVisibleItemIndex = firstVisibleItemIndex
+        _firstVisibleItemOffset = firstVisibleItemOffset
+    }
+
+    fun resetScrollPosition() {
+        _firstVisibleItemIndex = 0
+        _firstVisibleItemOffset = 0
+    }
+
+    val firstVisibleItemIndex: Int
+        get() = _firstVisibleItemIndex
+
+    private var _firstVisibleItemIndex: Int = 0
+
+    val firstVisibleItemOffset: Int
+        get() = _firstVisibleItemOffset
+
+    private var _firstVisibleItemOffset: Int = 0
 }
