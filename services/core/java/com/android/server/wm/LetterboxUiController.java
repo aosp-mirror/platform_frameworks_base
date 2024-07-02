@@ -472,49 +472,9 @@ final class LetterboxUiController {
         return !isHorizontalThinLetterboxed();
     }
 
-    /**
-     * Whether we should apply the user aspect ratio override to the min aspect ratio for the
-     * current app.
-     */
-    boolean shouldApplyUserMinAspectRatioOverride() {
-        return mActivityRecord.mAppCompatController.getAppCompatAspectRatioOverrides()
-                .shouldApplyUserMinAspectRatioOverride();
-    }
-
-    boolean shouldApplyUserFullscreenOverride() {
-        return mActivityRecord.mAppCompatController.getAppCompatAspectRatioOverrides()
-                .shouldApplyUserFullscreenOverride();
-    }
-
-    boolean isUserFullscreenOverrideEnabled() {
-        return mActivityRecord.mAppCompatController.getAppCompatAspectRatioOverrides()
-                .isUserFullscreenOverrideEnabled();
-    }
-
-    boolean isSystemOverrideToFullscreenEnabled() {
-        return mActivityRecord.mAppCompatController.getAppCompatAspectRatioOverrides()
-                .isSystemOverrideToFullscreenEnabled();
-    }
-
-    boolean hasFullscreenOverride() {
-        // `mUserAspectRatio` is always initialized first in `shouldApplyUserFullscreenOverride()`.
-        return shouldApplyUserFullscreenOverride() || isSystemOverrideToFullscreenEnabled();
-    }
-
-    float getUserMinAspectRatio() {
-        return mActivityRecord.mAppCompatController.getAppCompatAspectRatioOverrides()
-                .getUserMinAspectRatio();
-    }
-
     boolean shouldOverrideMinAspectRatio() {
         return mActivityRecord.mAppCompatController.getAppCompatAspectRatioOverrides()
                 .shouldOverrideMinAspectRatio();
-    }
-
-    @VisibleForTesting
-    int getUserMinAspectRatioOverrideCode() {
-        return mActivityRecord.mAppCompatController.getAppCompatAspectRatioOverrides()
-                .getUserMinAspectRatioOverrideCode();
     }
 
     @LetterboxConfiguration.LetterboxVerticalReachabilityPosition
@@ -937,7 +897,7 @@ final class LetterboxUiController {
 
         pw.println(prefix + "  letterboxReason=" + getLetterboxReasonString(mainWin));
         pw.println(prefix + "  activityAspectRatio="
-                + mActivityRecord.computeAspectRatio(mActivityRecord.getBounds()));
+                + AppCompatUtils.computeAspectRatio(mActivityRecord.getBounds()));
 
         boolean shouldShowLetterboxUi = shouldShowLetterboxUi(mainWin);
         pw.println(prefix + "shouldShowLetterboxUi=" + shouldShowLetterboxUi);
