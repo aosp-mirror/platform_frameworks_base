@@ -82,7 +82,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_flagOverridable_unsetOverride_featureFlagOn_returnsTrue() {
+  fun isEnabled_overrideUnset_featureFlagOn_returnsTrue() {
     setOverride(OVERRIDE_UNSET.setting)
 
     // For overridableFlag, for unset overrides, follow flag
@@ -92,7 +92,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
   @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_flagOverridable_unsetOverride_featureFlagOff_returnsFalse() {
+  fun isEnabled_overrideUnset_featureFlagOff_returnsFalse() {
     setOverride(OVERRIDE_UNSET.setting)
 
     // For overridableFlag, for unset overrides, follow flag
@@ -101,7 +101,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_flagOverridable_noOverride_featureFlagOn_returnsTrue() {
+  fun isEnabled_noOverride_featureFlagOn_returnsTrue() {
     setOverride(null)
 
     // For overridableFlag, in absence of overrides, follow flag
@@ -111,7 +111,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
   @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_flagOverridable_noOverride_featureFlagOff_returnsFalse() {
+  fun isEnabled_noOverride_featureFlagOff_returnsFalse() {
     setOverride(null)
 
     // For overridableFlag, in absence of overrides, follow flag
@@ -120,7 +120,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_flagOverridable_unrecognizableOverride_featureFlagOn_returnsTrue() {
+  fun isEnabled_unrecognizableOverride_featureFlagOn_returnsTrue() {
     setOverride(-2)
 
     // For overridableFlag, for recognizable overrides, follow flag
@@ -130,7 +130,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
   @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_flagOverridable_unrecognizableOverride_featureFlagOff_returnsFalse() {
+  fun isEnabled_unrecognizableOverride_featureFlagOff_returnsFalse() {
     setOverride(-2)
 
     // For overridableFlag, for recognizable overrides, follow flag
@@ -139,7 +139,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_flagOverridable_overrideOff_featureFlagOn_returnsFalse() {
+  fun isEnabled_overrideOff_featureFlagOn_returnsFalse() {
     setOverride(OVERRIDE_OFF.setting)
 
     // For overridableFlag, follow override if they exist
@@ -149,7 +149,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
   @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_flagOverridable_overrideOn_featureFlagOff_returnsTrue() {
+  fun isEnabled_overrideOn_featureFlagOff_returnsTrue() {
     setOverride(OVERRIDE_ON.setting)
 
     // For overridableFlag, follow override if they exist
@@ -158,7 +158,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_flagOverridable_overrideOffThenOn_featureFlagOn_returnsFalseAndFalse() {
+  fun isEnabled_overrideOffThenOn_featureFlagOn_returnsFalseAndFalse() {
     setOverride(OVERRIDE_OFF.setting)
 
     // For overridableFlag, follow override if they exist
@@ -173,7 +173,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
   @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_flagOverridable_overrideOnThenOff_featureFlagOff_returnsTrueAndTrue() {
+  fun isEnabled_overrideOnThenOff_featureFlagOff_returnsTrueAndTrue() {
     setOverride(OVERRIDE_ON.setting)
 
     // For overridableFlag, follow override if they exist
@@ -187,7 +187,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_flagOverridable_noOverride_featureFlagOnThenOff_returnsTrueAndFalse() {
+  fun isEnabled_noOverride_featureFlagOnThenOff_returnsTrueAndFalse() {
     setOverride(null)
     // For overridableFlag, in absence of overrides, follow flag
     assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
@@ -206,6 +206,108 @@ class DesktopModeFlagsTest : ShellTestCase() {
     }
   }
 
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
+  @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  fun isEnabled_noSystemProperty_overrideOn_featureFlagOff_returnsTrueAndStoresPropertyOn() {
+    System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY)
+    setOverride(OVERRIDE_ON.setting)
+
+    assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
+    // Store System Property if not present
+    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
+        .isEqualTo(OVERRIDE_ON.setting.toString())
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  fun isEnabled_noSystemProperty_overrideUnset_featureFlagOn_returnsTrueAndStoresPropertyUnset() {
+    System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY)
+    setOverride(OVERRIDE_UNSET.setting)
+
+    assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
+    // Store System Property if not present
+    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
+        .isEqualTo(OVERRIDE_UNSET.setting.toString())
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
+  @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  fun isEnabled_noSystemProperty_overrideUnset_featureFlagOff_returnsFalseAndStoresPropertyUnset() {
+    System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY)
+    setOverride(OVERRIDE_UNSET.setting)
+
+    assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse()
+    // Store System Property if not present
+    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
+        .isEqualTo(OVERRIDE_UNSET.setting.toString())
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  @Suppress("ktlint:standard:max-line-length")
+  fun isEnabled_systemPropertyNotInteger_overrideOff_featureFlagOn_returnsFalseAndStoresPropertyOff() {
+    System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, "abc")
+    setOverride(OVERRIDE_OFF.setting)
+
+    assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse()
+    // Store System Property if currently invalid
+    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
+        .isEqualTo(OVERRIDE_OFF.setting.toString())
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  @Suppress("ktlint:standard:max-line-length")
+  fun isEnabled_systemPropertyInvalidInteger_overrideOff_featureFlagOn_returnsFalseAndStoresPropertyOff() {
+    System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, "-2")
+    setOverride(OVERRIDE_OFF.setting)
+
+    assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse()
+    // Store System Property if currently invalid
+    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
+        .isEqualTo(OVERRIDE_OFF.setting.toString())
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  fun isEnabled_systemPropertyOff_overrideOn_featureFlagOn_returnsFalseAndDoesNotUpdateProperty() {
+    System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, OVERRIDE_OFF.setting.toString())
+    setOverride(OVERRIDE_ON.setting)
+
+    // Have a consistent override until reboot
+    assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse()
+    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
+        .isEqualTo(OVERRIDE_OFF.setting.toString())
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
+  @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  fun isEnabled_systemPropertyOn_overrideOff_featureFlagOff_returnsTrueAndDoesNotUpdateProperty() {
+    System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, OVERRIDE_ON.setting.toString())
+    setOverride(OVERRIDE_OFF.setting)
+
+    // Have a consistent override until reboot
+    assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
+    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
+        .isEqualTo(OVERRIDE_ON.setting.toString())
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  @Suppress("ktlint:standard:max-line-length")
+  fun isEnabled_systemPropertyUnset_overrideOff_featureFlagOn_returnsTrueAndDoesNotUpdateProperty() {
+    System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, OVERRIDE_UNSET.setting.toString())
+    setOverride(OVERRIDE_OFF.setting)
+
+    // Have a consistent override until reboot
+    assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
+    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
+        .isEqualTo(OVERRIDE_UNSET.setting.toString())
+  }
+
   private fun setOverride(setting: Int?) {
     val contentResolver = mContext.contentResolver
     val key = Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES
@@ -217,9 +319,16 @@ class DesktopModeFlagsTest : ShellTestCase() {
   }
 
   private fun resetCache() {
-    val cacheToggleOverride =
+    val cachedToggleOverride =
         DESKTOP_WINDOWING_MODE::class.java.getDeclaredField("cachedToggleOverride")
-    cacheToggleOverride.isAccessible = true
-    cacheToggleOverride.set(DESKTOP_WINDOWING_MODE, null)
+    cachedToggleOverride.isAccessible = true
+    cachedToggleOverride.set(DESKTOP_WINDOWING_MODE, null)
+
+    // Clear override cache stored in System property
+    System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY)
+  }
+
+  private companion object {
+    const val SYSTEM_PROPERTY_OVERRIDE_KEY = "sys.wmshell.desktopmode.dev_toggle_override"
   }
 }
