@@ -48,6 +48,8 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun setup() {
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
+        // TODO: b/349075982 - Remove once launcher rotation and checks are stable.
+        tapl.setExpectedRotationCheckEnabled(false)
 
         SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp, rotation)
     }

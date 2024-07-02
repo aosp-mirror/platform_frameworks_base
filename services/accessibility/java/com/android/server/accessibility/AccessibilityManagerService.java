@@ -47,6 +47,7 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.USER_SHORTCUT_TYPES;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
@@ -3086,6 +3087,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         scheduleUpdateClientsIfNeededLocked(userState, forceUpdate);
         updateAccessibilityShortcutTargetsLocked(userState, HARDWARE);
         updateAccessibilityShortcutTargetsLocked(userState, SOFTWARE);
+        updateAccessibilityShortcutTargetsLocked(userState, GESTURE);
         updateAccessibilityShortcutTargetsLocked(userState, QUICK_SETTINGS);
         // Update the capabilities before the mode because we will check the current mode is
         // invalid or not..
@@ -3207,6 +3209,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         somethingChanged |= readAccessibilityShortcutTargetsLocked(userState, HARDWARE);
         somethingChanged |= readAccessibilityShortcutTargetsLocked(userState, QUICK_SETTINGS);
         somethingChanged |= readAccessibilityShortcutTargetsLocked(userState, SOFTWARE);
+        somethingChanged |= readAccessibilityShortcutTargetsLocked(userState, GESTURE);
         somethingChanged |= readAccessibilityButtonTargetComponentLocked(userState);
         somethingChanged |= readUserRecommendedUiTimeoutSettingsLocked(userState);
         somethingChanged |= readMagnificationModeForDefaultDisplayLocked(userState);
@@ -3750,23 +3753,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
 
-        final List<Pair<Integer, String>> shortcutTypeAndShortcutSetting = new ArrayList<>(3);
-        shortcutTypeAndShortcutSetting.add(
-                new Pair<>(HARDWARE,
-                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE));
-        shortcutTypeAndShortcutSetting.add(
-                new Pair<>(SOFTWARE,
-                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS));
+        final List<Integer> shortcutTypes = new ArrayList<>(4);
+        shortcutTypes.add(HARDWARE);
+        shortcutTypes.add(SOFTWARE);
         if (android.view.accessibility.Flags.a11yQsShortcut()) {
-            shortcutTypeAndShortcutSetting.add(
-                    new Pair<>(QUICK_SETTINGS,
-                            Settings.Secure.ACCESSIBILITY_QS_TARGETS));
+            shortcutTypes.add(QUICK_SETTINGS);
+        }
+        if (android.provider.Flags.a11yStandaloneGestureEnabled()) {
+            shortcutTypes.add(GESTURE);
         }
 
         final ComponentName serviceName = service.getComponentName();
-        for (Pair<Integer, String> shortcutTypePair : shortcutTypeAndShortcutSetting) {
-            int shortcutType = shortcutTypePair.first;
-            String shortcutSettingName = shortcutTypePair.second;
+        for (Integer shortcutType: shortcutTypes) {
+            String shortcutSettingName = ShortcutUtils.convertToKey(shortcutType);
             if (userState.removeShortcutTargetLocked(shortcutType, serviceName)) {
                 final Set<String> currentTargets = userState.getShortcutTargetsLocked(shortcutType);
                 persistColonDelimitedSetToSettingLocked(
@@ -4068,6 +4067,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             boolean enable, @UserShortcutType int shortcutTypes,
             @NonNull List<String> shortcutTargets, @UserIdInt int userId) {
         enableShortcutsForTargets_enforcePermission();
+        if ((shortcutTypes & GESTURE) == GESTURE
+                && !android.provider.Flags.a11yStandaloneGestureEnabled()) {
+            throw new IllegalArgumentException(
+                    "GESTURE type shortcuts are disabled by feature flag");
+        }
         for (int shortcutType : USER_SHORTCUT_TYPES) {
             if ((shortcutTypes & shortcutType) == shortcutType) {
                 enableShortcutForTargets(enable, shortcutType, shortcutTargets, userId);
@@ -5451,6 +5455,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mAccessibilityButtonTargetsUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
 
+        private final Uri mAccessibilityGestureTargetsUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS);
+
         private final Uri mUserNonInteractiveUiTimeoutUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS);
 
@@ -5503,6 +5510,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mAccessibilityButtonComponentIdUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mAccessibilityButtonTargetsUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mAccessibilityGestureTargetsUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mUserNonInteractiveUiTimeoutUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
@@ -5573,6 +5582,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 } else if (mAccessibilityButtonTargetsUri.equals(uri)) {
                     if (readAccessibilityShortcutTargetsLocked(userState, SOFTWARE)) {
+                        onUserStateChangedLocked(userState);
+                    }
+                } else if (mAccessibilityGestureTargetsUri.equals(uri)) {
+                    if (readAccessibilityShortcutTargetsLocked(userState, GESTURE)) {
                         onUserStateChangedLocked(userState);
                     }
                 } else if (mUserNonInteractiveUiTimeoutUri.equals(uri)

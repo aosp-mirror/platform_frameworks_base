@@ -166,6 +166,8 @@ public final class ShortcutUtils {
         switch (type) {
             case UserShortcutType.SOFTWARE:
                 return Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS;
+            case UserShortcutType.GESTURE:
+                return Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS;
             case UserShortcutType.HARDWARE:
                 return Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
             case UserShortcutType.TRIPLETAP:
@@ -190,6 +192,7 @@ public final class ShortcutUtils {
     public static int convertToType(String key) {
         return switch (key) {
             case Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS -> UserShortcutType.SOFTWARE;
+            case Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS -> UserShortcutType.GESTURE;
             case Settings.Secure.ACCESSIBILITY_QS_TARGETS -> UserShortcutType.QUICK_SETTINGS;
             case Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE -> UserShortcutType.HARDWARE;
             case Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED ->

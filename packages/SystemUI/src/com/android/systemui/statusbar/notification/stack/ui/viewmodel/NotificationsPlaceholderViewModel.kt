@@ -23,6 +23,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
@@ -43,6 +44,7 @@ constructor(
     private val interactor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
     private val shadeSceneViewModel: ShadeSceneViewModel,
+    private val headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     featureFlags: FeatureFlagsClassic,
 ) : FlowDumperImpl(dumpManager) {
     /** DEBUG: whether the placeholder should be made slightly visible for positional debugging. */
@@ -74,6 +76,10 @@ constructor(
     /** Whether or not the notification scrim should be clickable. */
     val isClickable: StateFlow<Boolean> = shadeSceneViewModel.isClickable
 
+    /** True when a HUN is pinned or animating away. */
+    val isHeadsUpOrAnimatingAway: Flow<Boolean> =
+        headsUpNotificationInteractor.isHeadsUpOrAnimatingAway
+
     /** Corner rounding of the stack */
     val shadeScrimRounding: Flow<ShadeScrimRounding> =
         interactor.shadeScrimRounding.dumpWhileCollecting("shadeScrimRounding")
@@ -102,6 +108,11 @@ constructor(
     /** Sets whether the notification stack is scrolled to the top. */
     fun setScrolledToTop(scrolledToTop: Boolean) {
         interactor.setScrolledToTop(scrolledToTop)
+    }
+
+    /** Snooze the currently pinned HUN. */
+    fun snoozeHun() {
+        headsUpNotificationInteractor.snooze()
     }
 }
 

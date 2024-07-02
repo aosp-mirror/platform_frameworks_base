@@ -136,6 +136,7 @@ public class SettingsToPropertiesMapper {
     static final String[] sDeviceConfigAconfigScopes = new String[] {
         "accessibility",
         "android_core_networking",
+        "android_sdk",
         "android_stylus",
         "aoc",
         "app_widgets",

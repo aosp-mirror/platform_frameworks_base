@@ -21,12 +21,16 @@ import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.app.AutomaticZenRule;
 import android.net.Uri;
+import android.os.Parcel;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
+
+import com.android.internal.R;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -159,6 +163,30 @@ public class ZenModeTest {
                 INTERRUPTION_FILTER_PRIORITY);
         assertThat(zenMode.getPolicy()).isEqualTo(ZEN_POLICY);
         assertThat(zenMode.getRule().getZenPolicy()).isEqualTo(ZEN_POLICY);
+    }
+
+    @Test
+    public void writeToParcel_equals() {
+        assertUnparceledIsEqualToOriginal("example",
+                new ZenMode("id", ZEN_RULE, zenConfigRuleFor(ZEN_RULE, false)));
+
+        assertUnparceledIsEqualToOriginal("dnd", ZenMode.manualDndMode(ZEN_RULE, true));
+
+        assertUnparceledIsEqualToOriginal("custom_manual",
+                ZenMode.newCustomManual("New mode", R.drawable.ic_zen_mode_type_immersive));
+    }
+
+    private static void assertUnparceledIsEqualToOriginal(String type, ZenMode original) {
+        Parcel parcel = Parcel.obtain();
+        try {
+            original.writeToParcel(parcel, 0);
+            parcel.setDataPosition(0);
+            ZenMode unparceled = ZenMode.CREATOR.createFromParcel(parcel);
+
+            assertWithMessage("Comparing " + type).that(unparceled).isEqualTo(original);
+        } finally {
+            parcel.recycle();
+        }
     }
 
     private static ZenModeConfig.ZenRule zenConfigRuleFor(AutomaticZenRule azr, boolean isActive) {

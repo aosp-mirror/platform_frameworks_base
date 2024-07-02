@@ -16,6 +16,9 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
+import android.content.pm.PackageManager;
+
+import com.android.server.wm.utils.OptPropFactory;
 
 /**
  * Allows the interaction with all the app compat policies and configurations
@@ -28,19 +31,26 @@ class AppCompatController {
     private final AppCompatOrientationPolicy mOrientationPolicy;
     @NonNull
     private final AppCompatOverrides mAppCompatOverrides;
+    @NonNull
+    private final AppCompatCameraPolicy mAppCompatCameraPolicy;
 
     AppCompatController(@NonNull WindowManagerService wmService,
                         @NonNull ActivityRecord activityRecord) {
+        final PackageManager packageManager = wmService.mContext.getPackageManager();
+        final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
+                activityRecord.packageName);
         mTransparentPolicy = new TransparentPolicy(activityRecord,
                 wmService.mLetterboxConfiguration);
-        mAppCompatOverrides = new AppCompatOverrides(wmService, activityRecord,
-                wmService.mLetterboxConfiguration);
+        mAppCompatOverrides = new AppCompatOverrides(activityRecord,
+                wmService.mLetterboxConfiguration, optPropBuilder);
         // TODO(b/341903757) Remove BooleanSuppliers after fixing dependency with aspectRatio.
         final LetterboxUiController tmpController = activityRecord.mLetterboxUiController;
         mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord,
                 mAppCompatOverrides, tmpController::shouldApplyUserFullscreenOverride,
                 tmpController::shouldApplyUserMinAspectRatioOverride,
                 tmpController::isSystemOverrideToFullscreenEnabled);
+        mAppCompatCameraPolicy = new AppCompatCameraPolicy(activityRecord,
+                mAppCompatOverrides.getAppCompatCameraOverrides());
     }
 
     @NonNull
@@ -54,7 +64,22 @@ class AppCompatController {
     }
 
     @NonNull
+    AppCompatCameraPolicy getAppCompatCameraPolicy() {
+        return mAppCompatCameraPolicy;
+    }
+
+    @NonNull
     AppCompatOverrides getAppCompatOverrides() {
         return mAppCompatOverrides;
+    }
+
+    @NonNull
+    AppCompatOrientationOverrides getAppCompatOrientationOverrides() {
+        return mAppCompatOverrides.getAppCompatOrientationOverrides();
+    }
+
+    @NonNull
+    AppCompatCameraOverrides getAppCompatCameraOverrides() {
+        return mAppCompatOverrides.getAppCompatCameraOverrides();
     }
 }

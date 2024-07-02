@@ -287,7 +287,7 @@ constructor(
     /** Are we on the dream without the shade/qs? */
     private val isDreamingWithoutShade: Flow<Boolean> =
         combine(
-                keyguardTransitionInteractor.isFinishedInState(DREAMING),
+                keyguardTransitionInteractor.isFinishedIn(DREAMING),
                 isAnyExpanded,
             ) { isDreaming, isAnyExpanded ->
                 isDreaming && !isAnyExpanded

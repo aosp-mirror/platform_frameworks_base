@@ -49,7 +49,6 @@ import com.android.compatibility.common.util.SystemUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -96,7 +95,6 @@ public final class ConcurrentMultiUserTest {
         }
     }
 
-    @Ignore("b/345557347")
     @Test
     public void driverShowImeNotAffectPassenger() {
         assertDriverImeHidden();
