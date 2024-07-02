@@ -288,11 +288,13 @@ constructor(
     private fun startSettingsActivity(intent: Intent, view: View) {
         if (job?.isActive == true) {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            activityStarter.postStartActivityDismissingKeyguard(
-                intent,
-                0,
-                dialogTransitionAnimator.createActivityTransitionController(view)
-            )
+            val controller = dialogTransitionAnimator.createActivityTransitionController(view)
+            // The controller will be null when the screen is locked and going to show the
+            // primary bouncer. In this case we dismiss the dialog manually.
+            if (controller == null) {
+                cancelJob()
+            }
+            activityStarter.postStartActivityDismissingKeyguard(intent, 0, controller)
         }
     }
 

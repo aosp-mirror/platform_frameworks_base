@@ -44,7 +44,7 @@ constructor(
     private val quickAffordanceInteractor: KeyguardQuickAffordanceInteractor,
     private val bottomAreaInteractor: KeyguardBottomAreaInteractor,
     private val burnInHelperWrapper: BurnInHelperWrapper,
-    private val longPressViewModel: KeyguardLongPressViewModel,
+    private val keyguardTouchHandlingViewModel: KeyguardTouchHandlingViewModel,
     val settingsMenuViewModel: KeyguardSettingsMenuViewModel,
 ) {
     data class PreviewMode(
@@ -162,7 +162,7 @@ constructor(
      * the lock screen settings menu item pop-up.
      */
     fun onTouchedOutsideLockScreenSettingsMenu() {
-        longPressViewModel.onTouchedOutside()
+        keyguardTouchHandlingViewModel.onTouchedOutside()
     }
 
     private fun button(

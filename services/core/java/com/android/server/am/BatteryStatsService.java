@@ -848,6 +848,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     private void syncStats(String reason, int flags) {
+        mStats.collectPowerStatsSamples();
         awaitUninterruptibly(mWorker.scheduleSync(reason, flags));
     }
 

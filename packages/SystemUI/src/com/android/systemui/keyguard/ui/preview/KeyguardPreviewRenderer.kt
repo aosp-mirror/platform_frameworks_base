@@ -197,8 +197,7 @@ constructor(
                 initiallySelectedSlotId =
                     bundle.getString(
                         KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
-                    )
-                        ?: KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
+                    ) ?: KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
                 shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
             )
         } else {
@@ -230,8 +229,7 @@ constructor(
             val previewContext =
                 display?.let {
                     ContextThemeWrapper(context.createDisplayContext(it), context.getTheme())
-                }
-                    ?: context
+                } ?: context
 
             val rootView = FrameLayout(previewContext)
 
@@ -318,8 +316,8 @@ constructor(
      */
     private fun setUpSmartspace(previewContext: Context, parentView: ViewGroup) {
         if (
-            !lockscreenSmartspaceController.isEnabled() ||
-                !lockscreenSmartspaceController.isDateWeatherDecoupled()
+            !lockscreenSmartspaceController.isEnabled ||
+                !lockscreenSmartspaceController.isDateWeatherDecoupled
         ) {
             return
         }
@@ -654,6 +652,7 @@ constructor(
             clockController.clock = clock
         }
     }
+
     private fun onClockChanged() {
         if (MigrateClocksToBlueprint.isEnabled) {
             return

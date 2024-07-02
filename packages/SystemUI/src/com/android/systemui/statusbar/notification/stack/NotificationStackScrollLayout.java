@@ -1500,6 +1500,7 @@ public class NotificationStackScrollLayout
      * needed.
      */
     void setOnStackYChanged(Consumer<Boolean> onStackYChanged) {
+        SceneContainerFlag.assertInLegacyMode();
         mOnStackYChanged = onStackYChanged;
     }
 
@@ -2270,6 +2271,7 @@ public class NotificationStackScrollLayout
 
     public void setOverscrollTopChangedListener(
             OnOverscrollTopChangedListener overscrollTopChangedListener) {
+        SceneContainerFlag.assertInLegacyMode();
         mOverscrollTopChangedListener = overscrollTopChangedListener;
     }
 
@@ -5705,6 +5707,7 @@ public class NotificationStackScrollLayout
      * Set a listener to when scrolling changes.
      */
     public void setOnScrollListener(Consumer<Integer> listener) {
+        SceneContainerFlag.assertInLegacyMode();
         mScrollListener = listener;
     }
 

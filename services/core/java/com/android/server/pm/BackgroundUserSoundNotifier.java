@@ -28,6 +28,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.UserInfo;
 import android.media.AudioFocusInfo;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
@@ -183,8 +184,8 @@ public class BackgroundUserSoundNotifier {
             foregroundContext) throws RemoteException {
         final int userId = UserHandle.getUserId(afi.getClientUid());
         final int usage = afi.getAttributes().getUsage();
-        String userName = mUserManager.getUserInfo(userId).name;
-        if (userId != foregroundContext.getUserId()) {
+        UserInfo userInfo = mUserManager.getUserInfo(userId);
+        if (userInfo != null && userId != foregroundContext.getUserId()) {
             //TODO: b/349138482 - Add handling of cases when usage == USAGE_NOTIFICATION_RINGTONE
             if (usage == USAGE_ALARM) {
                 Intent muteIntent = createIntent(ACTION_MUTE_SOUND, afi, foregroundContext, userId);
@@ -199,7 +200,7 @@ public class BackgroundUserSoundNotifier {
 
                 mUserWithNotification = foregroundContext.getUserId();
                 mNotificationManager.notifyAsUser(LOG_TAG, afi.getClientUid(),
-                        createNotification(userName, mutePI, switchPI, foregroundContext),
+                        createNotification(userInfo.name, mutePI, switchPI, foregroundContext),
                         foregroundContext.getUser());
             }
         }

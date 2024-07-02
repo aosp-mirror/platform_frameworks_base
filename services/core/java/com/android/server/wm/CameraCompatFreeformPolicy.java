@@ -32,7 +32,7 @@ import android.content.res.Configuration;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
 
 /**

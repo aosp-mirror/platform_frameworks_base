@@ -461,6 +461,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DISPATCH_PREFERRED_MIXER_ATTRIBUTES = 52;
     private static final int MSG_CONFIGURATION_CHANGED = 54;
     private static final int MSG_BROADCAST_MASTER_MUTE = 55;
+    private static final int MSG_UPDATE_CONTEXTUAL_VOLUMES = 56;
 
     /**
      * Messages handled by the {@link SoundDoseHelper}, do not exceed
@@ -4466,7 +4467,7 @@ public class AudioService extends IAudioService.Stub
             }
         }
         if (mVoicePlaybackActive.getAndSet(voiceActive) != voiceActive) {
-            updateHearingAidVolumeOnVoiceActivityUpdate();
+            postUpdateContextualVolumes();
         }
         if (mMediaPlaybackActive.getAndSet(mediaActive) != mediaActive && mediaActive) {
             mSoundDoseHelper.scheduleMusicActiveCheck();
@@ -4604,13 +4605,29 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private void updateHearingAidVolumeOnVoiceActivityUpdate() {
-        final int streamType = getBluetoothContextualVolumeStream();
-        final int index = getStreamVolume(streamType);
-        sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_VOICE_ACTIVITY_HEARING_AID,
-                mVoicePlaybackActive.get(), streamType, index));
-        mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
 
+    // delay between audio playback configuration update and checking
+    // actual stream activity to take async playback stop into account
+    private static final int UPDATE_CONTEXTUAL_VOLUME_DELAY_MS = 500;
+
+    /*package*/ void postUpdateContextualVolumes() {
+        sendMsg(mAudioHandler, MSG_UPDATE_CONTEXTUAL_VOLUMES, SENDMSG_REPLACE,
+                /*arg1*/ 0, /*arg2*/ 0, TAG, UPDATE_CONTEXTUAL_VOLUME_DELAY_MS);
+    }
+
+    private void onUpdateContextualVolumes() {
+        final int streamType = getBluetoothContextualVolumeStream();
+        final int device = getDeviceForStream(streamType);
+        final int index = getStreamVolume(streamType, device);
+
+        if (AudioSystem.isLeAudioDeviceType(device)) {
+            mDeviceBroker.postSetLeAudioVolumeIndex(index * 10,
+                    mStreamStates[streamType].getMaxIndex(), streamType);
+        } else if (device == AudioSystem.DEVICE_OUT_HEARING_AID) {
+            mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
+        }
+        sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_VOICE_ACTIVITY_CONTEXTUAL_VOLUME,
+                mVoicePlaybackActive.get(), streamType, index, device));
     }
 
     /**
@@ -9639,6 +9656,9 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_INIT_SPATIALIZER:
                     onInitSpatializer();
+                    // the device inventory can only be synchronized after the
+                    // spatializer has been initialized
+                    mDeviceBroker.postSynchronizeAdiDevicesInInventory(null);
                     mAudioEventWakeLock.release();
                     break;
 
@@ -9807,6 +9827,10 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_CONFIGURATION_CHANGED:
                     onConfigurationChanged();
+                    break;
+
+                case MSG_UPDATE_CONTEXTUAL_VOLUMES:
+                    onUpdateContextualVolumes();
                     break;
 
                 case MusicFxHelper.MSG_EFFECT_CLIENT_GONE:
@@ -11394,7 +11418,8 @@ public class AudioService extends IAudioService.Stub
 
         deviceState.setAudioDeviceCategory(btAudioDeviceCategory);
 
-        mDeviceBroker.addOrUpdateBtAudioDeviceCategoryInInventory(deviceState);
+        mDeviceBroker.addOrUpdateBtAudioDeviceCategoryInInventory(
+                deviceState, true /*syncInventory*/);
         mDeviceBroker.postPersistAudioDeviceSettings();
 
         mSpatializerHelper.refreshDevice(deviceState.getAudioDeviceAttributes(),
@@ -11963,8 +11988,9 @@ public class AudioService extends IAudioService.Stub
         var umi = LocalServices.getService(UserManagerInternal.class);
         var pmsi = LocalServices.getService(PermissionManagerServiceInternal.class);
         var provider = new AudioServerPermissionProvider(packageStates,
-                (Integer uid, String perm) -> (pmsi.checkUidPermission(uid, perm,
-                        Context.DEVICE_ID_DEFAULT) == PackageManager.PERMISSION_GRANTED),
+                (Integer uid, String perm) -> ActivityManager.checkComponentPermission(perm, uid,
+                        /* owningUid = */ -1, /* exported */true)
+                    == PackageManager.PERMISSION_GRANTED,
                 () -> umi.getUserIds()
                 );
         audioPolicy.registerOnStartTask(() -> {
@@ -12326,13 +12352,19 @@ public class AudioService extends IAudioService.Stub
         }
 
         @Override
-        public void addAssistantServiceUid(int uid) {
+        public void addAssistantServiceUid(int uid, int owningUid) {
+            if (audioserverPermissions()) {
+                mPermissionProvider.setIsolatedServiceUid(uid, owningUid);
+            }
             sendMsg(mAudioHandler, MSG_ADD_ASSISTANT_SERVICE_UID, SENDMSG_QUEUE,
                     uid, 0, null, 0);
         }
 
         @Override
         public void removeAssistantServiceUid(int uid) {
+            if (audioserverPermissions()) {
+                mPermissionProvider.clearIsolatedServiceUid(uid);
+            }
             sendMsg(mAudioHandler, MSG_REMOVE_ASSISTANT_SERVICE_UID, SENDMSG_QUEUE,
                     uid, 0, null, 0);
         }

@@ -15,6 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 
@@ -308,9 +309,10 @@ public class CoreDocument {
 
         /**
          * Returns true if x,y coordinate is within bounds
+         *
          * @param x x-coordinate
          * @param y y-coordinate
-         * @return x,y coordinate is within bounds
+         * @return x, y coordinate is within bounds
          */
         public boolean contains(float x, float y) {
             return x >= mLeft && x < mRight
@@ -483,6 +485,37 @@ public class CoreDocument {
         return builder.toString();
     }
 
+    /**
+     * Gets the names of all named colors.
+     *
+     * @return array of named colors or null
+     */
+    public String[] getNamedColors() {
+        int count = 0;
+        for (Operation op : mOperations) {
+            if (op instanceof NamedVariable) {
+                NamedVariable n = (NamedVariable) op;
+                if (n.mVarType == NamedVariable.COLOR_TYPE) {
+                    count++;
+                }
+            }
+        }
+        if (count == 0) {
+            return null;
+        }
+        String[] ret = new String[count];
+        int i = 0;
+        for (Operation op : mOperations) {
+            if (op instanceof NamedVariable) {
+                NamedVariable n = (NamedVariable) op;
+                if (n.mVarType == NamedVariable.COLOR_TYPE) {
+                    ret[i++] = n.mVarName;
+                }
+            }
+        }
+        return ret;
+    }
+
     //////////////////////////////////////////////////////////////////////////
     // Painting
     //////////////////////////////////////////////////////////////////////////
@@ -493,6 +526,7 @@ public class CoreDocument {
 
     /**
      * Returns > 0 if it needs to repaint
+     *
      * @return
      */
     public int needsRepaint() {
@@ -525,7 +559,6 @@ public class CoreDocument {
         context.loadFloat(RemoteContext.ID_WINDOW_WIDTH, getWidth());
         context.loadFloat(RemoteContext.ID_WINDOW_HEIGHT, getHeight());
         mRepaintNext = context.updateOps();
-
         for (Operation op : mOperations) {
             // operations will only be executed if no theme is set (ie UNSPECIFIED)
             // or the theme is equal as the one passed in argument to paint.

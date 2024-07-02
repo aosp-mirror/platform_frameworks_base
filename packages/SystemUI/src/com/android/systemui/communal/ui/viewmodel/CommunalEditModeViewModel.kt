@@ -25,6 +25,7 @@ import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Flags.enableWidgetPickerSizeFilter
+import com.android.systemui.communal.data.model.CommunalWidgetCategories
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalPrefsInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -183,7 +184,7 @@ constructor(
             }
             putExtra(
                 AppWidgetManager.EXTRA_CATEGORY_FILTER,
-                communalSettingsInteractor.communalWidgetCategories.value
+                CommunalWidgetCategories.defaultCategories
             )
             putExtra(EXTRA_UI_SURFACE_KEY, EXTRA_UI_SURFACE_VALUE)
             putParcelableArrayListExtra(EXTRA_ADDED_APP_WIDGETS_KEY, excludeList)

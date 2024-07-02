@@ -79,7 +79,6 @@ cc_library_shared {
         "libcamera_client",
         "libmtp",
         "libpiex",
-        "libprocessgroup",
         "libandroidfw",
         "libhidlallocatorutils",
         "libhidlbase",

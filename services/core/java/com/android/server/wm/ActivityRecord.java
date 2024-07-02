@@ -386,7 +386,7 @@ import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.AttributeCache;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -4578,9 +4578,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!delayed) {
             updateReportedVisibilityLocked();
         }
-
-        // Reset the last saved PiP snap fraction on removal.
-        mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
         mDisplayContent.onRunningActivityChanged();
         mRemovingFromDisplay = false;
     }
@@ -6744,8 +6741,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (task.mLastRecentsAnimationTransaction != null) {
             task.clearLastRecentsAnimationTransaction(true /* forceRemoveOverlay */);
         }
-        // Reset the last saved PiP snap fraction on app stop.
-        mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
         if (isClientVisible()) {
             // Though this is usually unlikely to happen, still make sure the client is invisible.
             setClientVisible(false);

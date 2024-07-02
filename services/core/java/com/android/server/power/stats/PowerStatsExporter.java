@@ -154,8 +154,11 @@ public class PowerStatsExporter {
                 batteryUsageStatsBuilder.getAggregateBatteryConsumerBuilder(
                         BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
         if (descriptor.powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
-            deviceScope.addConsumedPowerForCustomComponent(descriptor.powerComponentId,
-                    totalPower[0]);
+            if (batteryUsageStatsBuilder.isSupportedCustomPowerComponent(
+                    descriptor.powerComponentId)) {
+                deviceScope.addConsumedPowerForCustomComponent(descriptor.powerComponentId,
+                        totalPower[0]);
+            }
         } else {
             deviceScope.addConsumedPower(descriptor.powerComponentId,
                     totalPower[0], BatteryConsumer.POWER_MODEL_UNDEFINED);

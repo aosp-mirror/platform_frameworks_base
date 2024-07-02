@@ -28,7 +28,7 @@ import android.window.BackMotionEvent
 import android.window.BackNavigationInfo
 import com.android.internal.R
 import com.android.internal.policy.TransitionAnimation
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import com.android.wm.shell.shared.annotations.ShellMainThread

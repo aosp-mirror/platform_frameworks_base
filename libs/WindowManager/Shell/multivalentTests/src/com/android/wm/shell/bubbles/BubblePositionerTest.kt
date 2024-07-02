@@ -27,7 +27,7 @@ import android.view.WindowManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.BubblePositioner.MAX_HEIGHT
 import com.android.wm.shell.common.bubbles.BubbleBarLocation

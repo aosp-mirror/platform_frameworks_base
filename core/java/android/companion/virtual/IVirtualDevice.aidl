@@ -17,7 +17,9 @@
 package android.companion.virtual;
 
 import android.app.PendingIntent;
+import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
+import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.companion.virtual.sensor.VirtualSensor;
@@ -296,4 +298,15 @@ interface IVirtualDevice {
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     String getVirtualCameraId(in VirtualCameraConfig camera);
+
+    /**
+     * Setter for listeners that live in the client process, namely in
+     * {@link android.companion.virtual.VirtualDeviceInternal}.
+     *
+     * This is needed for virtual devices that are created by the system, as the VirtualDeviceImpl
+     * object is created before the returned VirtualDeviceInternal one.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void setListeners(in IVirtualDeviceActivityListener activityListener,
+            in IVirtualDeviceSoundEffectListener soundEffectListener);
 }

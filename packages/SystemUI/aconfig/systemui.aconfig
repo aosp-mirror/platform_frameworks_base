@@ -217,6 +217,17 @@ flag {
 }
 
 flag {
+    name: "notification_group_hun_removal_animation_fix"
+    namespace: "systemui"
+    description: "Fix the lack of hun removal animation for group notifications"
+        "(not GROUP_ALERT_SUMMARY)"
+    bug: "343475993"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "scene_container"
     namespace: "systemui"
     description: "Enables the scene container framework go/flexiglass."
@@ -1021,13 +1032,6 @@ flag {
 }
 
 flag {
-  name: "glanceable_hub_shortcut_button"
-  namespace: "systemui"
-  description: "Shows a button over the dream and lock screen to open the glanceable hub"
-  bug: "339667383"
-}
-
-flag {
   name: "glanceable_hub_gesture_handle"
   namespace: "systemui"
   description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
@@ -1114,6 +1118,16 @@ flag {
   namespace: "systemui"
   description: "Expands heads up notification when users clicks reply button and activate inline reply"
   bug: "346976443"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "translucent_occluding_activity_fix"
+  namespace: "systemui"
+  description: "Fixes occlusion animation for transluent activities"
+  bug: "303010980"
   metadata {
     purpose: PURPOSE_BUGFIX
   }

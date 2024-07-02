@@ -56,3 +56,11 @@ flag {
     description: "Improved metrics."
     bug: "339245692"
 }
+
+flag {
+    name: "bal_send_intent_with_options"
+    namespace: "responsible_apis"
+    description: "Add options parameter to IntentSender.sendIntent."
+    bug: "339720406"
+}
+

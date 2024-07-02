@@ -610,7 +610,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
     }
 
-    void notifyAccessibilityButtonClicked(int displayId) {
+    void notifyMagnificationShortcutTriggered(int displayId) {
         if (mMagnificationGestureHandler.size() != 0) {
             final MagnificationGestureHandler handler = mMagnificationGestureHandler.get(displayId);
             if (handler != null) {

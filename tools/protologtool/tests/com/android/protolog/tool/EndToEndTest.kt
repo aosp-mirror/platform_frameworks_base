@@ -35,7 +35,7 @@ class EndToEndTest {
         val output = run(
                 srcs = mapOf("frameworks/base/org/example/Example.java" to """
                     package org.example;
-                    import com.android.internal.protolog.common.ProtoLog;
+                    import com.android.internal.protolog.ProtoLog;
                     import static com.android.internal.protolog.ProtoLogGroup.GROUP;
 
                     class Example {
@@ -48,7 +48,7 @@ class EndToEndTest {
                 """.trimIndent()),
                 logGroup = LogGroup("GROUP", true, false, "TAG_GROUP"),
                 commandOptions = CommandOptions(arrayOf("transform-protolog-calls",
-                        "--protolog-class", "com.android.internal.protolog.common.ProtoLog",
+                        "--protolog-class", "com.android.internal.protolog.ProtoLog",
                         "--loggroups-class", "com.android.internal.protolog.ProtoLogGroup",
                         "--loggroups-jar", "not_required.jar",
                         "--viewer-config-file-path", "not_required.pb",
@@ -69,7 +69,7 @@ class EndToEndTest {
         val output = run(
                 srcs = mapOf("frameworks/base/org/example/Example.java" to """
                     package org.example;
-                    import com.android.internal.protolog.common.ProtoLog;
+                    import com.android.internal.protolog.ProtoLog;
                     import static com.android.internal.protolog.ProtoLogGroup.GROUP;
 
                     class Example {
@@ -82,7 +82,7 @@ class EndToEndTest {
                 """.trimIndent()),
                 logGroup = LogGroup("GROUP", true, false, "TAG_GROUP"),
                 commandOptions = CommandOptions(arrayOf("generate-viewer-config",
-                        "--protolog-class", "com.android.internal.protolog.common.ProtoLog",
+                        "--protolog-class", "com.android.internal.protolog.ProtoLog",
                         "--loggroups-class", "com.android.internal.protolog.ProtoLogGroup",
                         "--loggroups-jar", "not_required.jar",
                         "--viewer-config-type", "json",

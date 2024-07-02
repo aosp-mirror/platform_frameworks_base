@@ -2608,6 +2608,18 @@ package android.os {
 
 }
 
+package android.os.connectivity {
+
+  public final class CellularBatteryStats implements android.os.Parcelable {
+    ctor @FlaggedApi("com.android.server.power.optimization.streamlined_connectivity_battery_stats") public CellularBatteryStats(long, long, long, long, long, long, long, long, long, long, @NonNull long[], @NonNull long[], @NonNull long[], long);
+  }
+
+  public final class WifiBatteryStats implements android.os.Parcelable {
+    ctor @FlaggedApi("com.android.server.power.optimization.streamlined_connectivity_battery_stats") public WifiBatteryStats(long, long, long, long, long, long, long, long, long, long, long, long, long, @NonNull long[], @NonNull long[], @NonNull long[], long);
+  }
+
+}
+
 package android.os.health {
 
   public class HealthKeys {

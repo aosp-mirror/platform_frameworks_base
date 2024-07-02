@@ -181,6 +181,7 @@ import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CircleReveal;
 import com.android.systemui.statusbar.CommandQueue;
@@ -1328,7 +1329,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                                                 .putExtra(Intent.EXTRA_TEXT, message.toString()),
                                         "Share rejected touch report")
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                        true /* onlyProvisioned */, true /* dismissShade */);
+                        true /* onlyProvisioned */,
+                        true /* dismissShade */,
+                        null /* customMessage */);
             });
         }
 

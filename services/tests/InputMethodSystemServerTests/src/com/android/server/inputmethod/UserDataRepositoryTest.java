@@ -106,7 +106,7 @@ public final class UserDataRepositoryTest {
 
         // Assert UserDataRepository called the InputMethodBindingController creator function.
         verify(bindingControllerFactorySpy).apply(ANY_USER_ID);
-        assertThat(allUserData.get(0).mBindingController.mUserId).isEqualTo(ANY_USER_ID);
+        assertThat(allUserData.get(0).mBindingController.getUserId()).isEqualTo(ANY_USER_ID);
     }
 
     @Test
@@ -149,7 +149,7 @@ public final class UserDataRepositoryTest {
         assertThat(allUserData.get(0).mUserId).isEqualTo(ANY_USER_ID);
 
         // Assert UserDataRepository called the InputMethodBindingController creator function.
-        assertThat(allUserData.get(0).mBindingController.mUserId).isEqualTo(ANY_USER_ID);
+        assertThat(allUserData.get(0).mBindingController.getUserId()).isEqualTo(ANY_USER_ID);
     }
 
     private List<UserDataRepository.UserData> collectUserData(UserDataRepository repository) {

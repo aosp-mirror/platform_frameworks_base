@@ -69,8 +69,13 @@ public final class VirtualRotaryEncoderScrollEvent implements Parcelable {
     }
 
     /**
-     * Returns the scroll amount, normalized from -1.0 to 1.0, inclusive. Positive values
-     * indicate scrolling forward (e.g. down in a vertical list); negative values, backward.
+     * Returns the scroll amount, normalized from -1.0 to 1.0, inclusive.
+     * <p>
+     * Positive values indicate scrolling forward (e.g. down in a vertical list); negative values,
+     * backward.
+     * <p>
+     * Values of 1.0 or -1.0 represent the maximum supported scroll.
+     * </p>
      */
     public @FloatRange(from = -1.0f, to = 1.0f) float getScrollAmount() {
         return mScrollAmount;
@@ -91,7 +96,7 @@ public final class VirtualRotaryEncoderScrollEvent implements Parcelable {
      */
     public static final class Builder {
 
-        private float mScrollAmount;
+        @FloatRange(from = -1.0f, to = 1.0f) private float mScrollAmount = 0.0f;
         private long mEventTimeNanos = 0L;
 
         /**
@@ -102,9 +107,13 @@ public final class VirtualRotaryEncoderScrollEvent implements Parcelable {
         }
 
         /**
-         * Sets the scroll amount, normalized from -1.0 to 1.0, inclusive. Positive values
-         * indicate scrolling forward (e.g. down in a vertical list); negative values, backward.
-         *
+         * Sets the scroll amount, normalized from -1.0 to 1.0, inclusive.
+         * <p>
+         * Positive values indicate scrolling forward (e.g. down in a vertical list); negative
+         * values, backward.
+         * <p>
+         * Values of 1.0 or -1.0 represent the maximum supported scroll.
+         * </p>
          * @return this builder, to allow for chaining of calls
          */
         public @NonNull Builder setScrollAmount(

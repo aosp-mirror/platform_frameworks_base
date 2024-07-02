@@ -43,6 +43,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -54,6 +56,7 @@ import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.view.Display;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -99,11 +102,14 @@ public final class AppClipsActivityTest extends SysuiTestCase {
     private static final int BACKLINKS_TASK_ID = 42;
     private static final String BACKLINKS_TASK_APP_NAME = "Backlinks app";
     private static final String BACKLINKS_TASK_PACKAGE_NAME = "backlinksTaskPackageName";
+
     private static final RootTaskInfo TASK_THAT_SUPPORTS_BACKLINKS =
             createTaskInfoForBacklinksTask();
-
     private static final AssistContent ASSIST_CONTENT_FOR_BACKLINKS_TASK =
             createAssistContentForBacklinksTask();
+    private static final Drawable FAKE_DRAWABLE = new ShapeDrawable();
+
+    private ArgumentCaptor<Integer> mDisplayIdCaptor = ArgumentCaptor.forClass(Integer.class);
 
     @Mock
     private AppClipsCrossProcessHelper mAppClipsCrossProcessHelper;
@@ -171,6 +177,8 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         assertThat(((ImageView) mActivity.findViewById(R.id.preview)).getDrawable()).isNotNull();
         assertThat(mActivity.findViewById(R.id.backlinks_data).getVisibility())
                 .isEqualTo(View.GONE);
+        assertThat(mActivity.findViewById(R.id.backlinks_include_data).getVisibility())
+                .isEqualTo(View.GONE);
     }
 
     @Test
@@ -214,9 +222,44 @@ public final class AppClipsActivityTest extends SysuiTestCase {
     @Test
     @EnableFlags(Flags.FLAG_APP_CLIPS_BACKLINKS)
     public void appClipsLaunched_backlinks_displayed() throws RemoteException {
-        // Set up mocking to verify backlinks view is displayed on screen.
-        ArgumentCaptor<Integer> displayIdCaptor = ArgumentCaptor.forClass(Integer.class);
-        when(mAtmService.getAllRootTaskInfosOnDisplay(displayIdCaptor.capture()))
+        setUpMocksForBacklinks();
+
+        launchActivity();
+        waitForIdleSync();
+
+        assertThat(mDisplayIdCaptor.getValue()).isEqualTo(mActivity.getDisplayId());
+        TextView backlinksData = mActivity.findViewById(R.id.backlinks_data);
+        assertThat(backlinksData.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(backlinksData.getText().toString()).isEqualTo(BACKLINKS_TASK_APP_NAME);
+        assertThat(backlinksData.getCompoundDrawablesRelative()[0]).isEqualTo(FAKE_DRAWABLE);
+
+        CheckBox backlinksIncludeData = mActivity.findViewById(R.id.backlinks_include_data);
+        assertThat(backlinksIncludeData.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(backlinksIncludeData.getText().toString())
+                .isEqualTo(mActivity.getString(R.string.backlinks_include_link));
+        assertThat(backlinksIncludeData.isChecked()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_APP_CLIPS_BACKLINKS)
+    public void appClipsLaunched_backlinks_doNotIncludeLink() throws RemoteException {
+        setUpMocksForBacklinks();
+
+        launchActivity();
+        waitForIdleSync();
+        CheckBox backlinksIncludeData = mActivity.findViewById(R.id.backlinks_include_data);
+        runOnMainThread(() -> backlinksIncludeData.performClick());
+        waitForIdleSync();
+
+        assertThat(backlinksIncludeData.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(backlinksIncludeData.isChecked()).isFalse();
+
+        TextView backlinksData = mActivity.findViewById(R.id.backlinks_data);
+        assertThat(backlinksData.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    private void setUpMocksForBacklinks() throws RemoteException {
+        when(mAtmService.getAllRootTaskInfosOnDisplay(mDisplayIdCaptor.capture()))
                 .thenReturn(List.of(TASK_THAT_SUPPORTS_BACKLINKS));
         doAnswer(invocation -> {
             AssistContentRequester.Callback callback = invocation.getArgument(1);
@@ -226,15 +269,7 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         when(mPackageManager
                 .resolveActivity(any(Intent.class), anyInt()))
                 .thenReturn(createBacklinksTaskResolveInfo());
-
-        launchActivity();
-        waitForIdleSync();
-
-        assertThat(displayIdCaptor.getValue()).isEqualTo(mActivity.getDisplayId());
-        TextView backlinksData = mActivity.findViewById(R.id.backlinks_data);
-        assertThat(backlinksData.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(backlinksData.getText().toString()).isEqualTo(
-                mActivity.getString(R.string.backlinks_string, BACKLINKS_TASK_APP_NAME));
+        when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
     }
 
     private void launchActivity() {

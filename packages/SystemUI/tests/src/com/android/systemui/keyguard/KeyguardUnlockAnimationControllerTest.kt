@@ -7,6 +7,7 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.os.PowerManager
 import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
@@ -99,6 +100,13 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
             mock(ActivityManager.RunningTaskInfo::class.java), false)
     private lateinit var wallpaperTargets: Array<RemoteAnimationTarget>
 
+    private var surfaceControlLockWp = mock(SurfaceControl::class.java)
+    private var lockWallpaperTarget = RemoteAnimationTarget(
+            3 /* taskId */, 0, surfaceControlLockWp, false, Rect(), Rect(), 0, Point(), Rect(),
+            Rect(), mock(WindowConfiguration::class.java), false, surfaceControlLockWp,
+            Rect(), mock(ActivityManager.RunningTaskInfo::class.java), false)
+    private lateinit var lockWallpaperTargets: Array<RemoteAnimationTarget>
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -118,6 +126,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         // appear amount setter doesn't short circuit.
         remoteAnimationTargets = arrayOf(remoteTarget1)
         wallpaperTargets = arrayOf(wallpaperTarget)
+        lockWallpaperTargets = arrayOf(lockWallpaperTarget)
 
         // Set the surface applier to our mock so that we can verify the arguments passed to it.
         // This applier does not have any side effects within the unlock animation controller, so
@@ -143,6 +152,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
+            arrayOf(),
             arrayOf(),
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
@@ -177,6 +187,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
             wallpaperTargets,
+            arrayOf(),
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -199,6 +210,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
             wallpaperTargets,
+            arrayOf(),
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -219,6 +231,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
             wallpaperTargets,
+            arrayOf(),
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -242,6 +255,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
             wallpaperTargets,
+            arrayOf(),
             0 /* startTime */,
             true /* requestedShowSurfaceBehindKeyguard */
         )
@@ -265,6 +279,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
             wallpaperTargets,
+            arrayOf(),
             0 /* startTime */,
             true /* requestedShowSurfaceBehindKeyguard */
         )
@@ -286,6 +301,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
             wallpaperTargets,
+            arrayOf(),
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -301,6 +317,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
             wallpaperTargets,
+            arrayOf(),
             0 /* startTime */,
             true /* requestedShowSurfaceBehindKeyguard */
         )
@@ -317,11 +334,59 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
                 remoteAnimationTargets,
                 wallpaperTargets,
+                arrayOf(),
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
 
         assertTrue(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation())
+    }
+
+    /**
+     * The canned animation should launch a cross fade when there are different wallpapers on lock
+     * and home screen.
+     */
+    @Test
+    @EnableFlags(Flags.FLAG_FASTER_UNLOCK_TRANSITION)
+    fun manualUnlock_multipleWallpapers() {
+        var lastFadeInAlpha = -1f
+        var lastFadeOutAlpha = -1f
+
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+                arrayOf(remoteTarget1, remoteTarget2),
+                wallpaperTargets,
+                lockWallpaperTargets,
+                0 /* startTime */,
+                false /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        for (i in 0..10) {
+            clearInvocations(surfaceTransactionApplier)
+            val amount = i / 10f
+
+            keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(amount)
+
+            val captorSb = ArgThatCaptor<SyncRtSurfaceTransactionApplier.SurfaceParams>()
+            verify(surfaceTransactionApplier, times(2)).scheduleApply(
+                    captorSb.capture { sp ->
+                        sp.surface == surfaceControlWp || sp.surface == surfaceControlLockWp })
+
+            val fadeInAlpha = captorSb.getLastValue { it.surface == surfaceControlWp }.alpha
+            val fadeOutAlpha = captorSb.getLastValue { it.surface == surfaceControlLockWp }.alpha
+
+            if (amount == 0f) {
+                assertTrue (fadeInAlpha == 0f)
+                assertTrue (fadeOutAlpha == 1f)
+            } else if (amount == 1f) {
+                assertTrue (fadeInAlpha == 1f)
+                assertTrue (fadeOutAlpha == 0f)
+            } else {
+                assertTrue(fadeInAlpha >= lastFadeInAlpha)
+                assertTrue(fadeOutAlpha <= lastFadeOutAlpha)
+            }
+            lastFadeInAlpha = fadeInAlpha
+            lastFadeOutAlpha = fadeOutAlpha
+        }
     }
 
     /**
@@ -333,6 +398,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
                 arrayOf(remoteTarget1, remoteTarget2),
                 wallpaperTargets,
+                arrayOf(),
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -378,6 +444,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
                 remoteAnimationTargets,
                 wallpaperTargets,
+                arrayOf(),
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -387,7 +454,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         clearInvocations(surfaceTransactionApplier)
 
         keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(1f)
-        keyguardUnlockAnimationController.setWallpaperAppearAmount(1f)
+        keyguardUnlockAnimationController.setWallpaperAppearAmount(1f, wallpaperTargets)
 
         val captorSb = ArgThatCaptor<SyncRtSurfaceTransactionApplier.SurfaceParams>()
         verify(surfaceTransactionApplier, times(1)).scheduleApply(
@@ -414,6 +481,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
                 remoteAnimationTargets,
                 wallpaperTargets,
+                arrayOf(),
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -423,7 +491,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         clearInvocations(surfaceTransactionApplier)
 
         keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(1f)
-        keyguardUnlockAnimationController.setWallpaperAppearAmount(1f)
+        keyguardUnlockAnimationController.setWallpaperAppearAmount(1f, wallpaperTargets)
 
         val captorSb = ArgThatCaptor<SyncRtSurfaceTransactionApplier.SurfaceParams>()
         verify(surfaceTransactionApplier, times(1)).scheduleApply(
@@ -532,8 +600,8 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
             }
         }
 
-        fun getLastValue(): T {
-            return allArgs.last()
+        fun getLastValue(predicate: Predicate<T>? = null): T {
+            return if (predicate != null) allArgs.last(predicate::test) else allArgs.last()
         }
 
         fun getAllValues(): List<T> {

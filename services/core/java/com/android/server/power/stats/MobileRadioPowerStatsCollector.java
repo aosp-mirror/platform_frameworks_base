@@ -16,6 +16,7 @@
 
 package com.android.server.power.stats;
 
+import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.net.NetworkStats;
@@ -69,6 +70,13 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             AccessNetworkConstants.AccessNetworkType.NGRAN
     };
 
+    interface Observer {
+        void onMobileRadioPowerStatsRetrieved(
+                @Nullable ModemActivityInfo modemActivityDelta,
+                @Nullable List<BatteryStatsImpl.NetworkStatsDelta> networkStatsDeltas,
+                long elapsedRealtimeMs, long uptimeMs);
+    }
+
     interface Injector {
         Handler getHandler();
         Clock getClock();
@@ -84,6 +92,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     }
 
     private final Injector mInjector;
+    private final Observer mObserver;
 
     private MobileRadioPowerStatsLayout mLayout;
     private boolean mIsInitialized;
@@ -105,13 +114,14 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     private long mLastCallDuration;
     private long mLastScanDuration;
 
-    MobileRadioPowerStatsCollector(Injector injector) {
+    MobileRadioPowerStatsCollector(Injector injector, Observer observer) {
         super(injector.getHandler(), injector.getPowerStatsCollectionThrottlePeriod(
                         BatteryConsumer.powerComponentIdToString(
                                 BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)),
                 injector.getUidResolver(),
                 injector.getClock());
         mInjector = injector;
+        mObserver = observer;
     }
 
     @Override
@@ -198,10 +208,8 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         Arrays.fill(mPowerStats.stats, 0);
         mPowerStats.uidStats.clear();
 
-        collectModemActivityInfo();
-
-        collectNetworkStats();
-
+        ModemActivityInfo modemActivityDelta = collectModemActivityInfo();
+        List<BatteryStatsImpl.NetworkStatsDelta> networkStatsDeltas = collectNetworkStats();
         if (mEnergyConsumerIds.length != 0) {
             collectEnergyConsumers();
         }
@@ -210,12 +218,16 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             setTimestamp(mClock.elapsedRealtime());
         }
 
+        if (mObserver != null) {
+            mObserver.onMobileRadioPowerStatsRetrieved(modemActivityDelta,
+                    networkStatsDeltas, mClock.elapsedRealtime(), mClock.uptimeMillis());
+        }
         return mPowerStats;
     }
 
-    private void collectModemActivityInfo() {
+    private ModemActivityInfo collectModemActivityInfo() {
         if (mTelephonyManager == null) {
-            return;
+            return null;
         }
 
         CompletableFuture<ModemActivityInfo> immediateFuture = new CompletableFuture<>();
@@ -243,7 +255,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         }
 
         if (activityInfo == null) {
-            return;
+            return null;
         }
 
         ModemActivityInfo deltaInfo = mLastModemActivityInfo == null
@@ -293,12 +305,13 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
                 }
             }
         }
+        return deltaInfo;
     }
 
-    private void collectNetworkStats() {
+    private List<BatteryStatsImpl.NetworkStatsDelta> collectNetworkStats() {
         NetworkStats networkStats = mNetworkStatsSupplier.get();
         if (networkStats == null) {
-            return;
+            return null;
         }
 
         List<BatteryStatsImpl.NetworkStatsDelta> delta =
@@ -330,6 +343,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
                 mLayout.setUidTxPackets(stats, mLayout.getUidTxPackets(stats) + txPackets);
             }
         }
+        return delta;
     }
 
     private void collectEnergyConsumers() {

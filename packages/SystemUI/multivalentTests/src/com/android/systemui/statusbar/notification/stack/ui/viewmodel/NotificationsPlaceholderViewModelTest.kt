@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -31,9 +32,10 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@RunWithLooper
 class NotificationsPlaceholderViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
-    private val underTest = kosmos.notificationsPlaceholderViewModel
+    private val underTest by lazy { kosmos.notificationsPlaceholderViewModel }
 
     @Test
     fun onBoundsChanged() =

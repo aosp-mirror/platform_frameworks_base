@@ -598,10 +598,11 @@ public final class DisplayManagerService extends SystemService {
         FoldSettingProvider foldSettingProvider = new FoldSettingProvider(context,
                 new SettingsWrapper(),
                 new FoldLockSettingAvailabilityProvider(context.getResources()));
+        Looper displayThreadLooper = DisplayThread.get().getLooper();
         mInjector = injector;
         mContext = context;
         mFlags = injector.getFlags();
-        mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
+        mHandler = new DisplayManagerHandler(displayThreadLooper);
         mUiHandler = UiThread.getHandler();
         mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mPersistentDataStore);
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContext,
@@ -609,7 +610,7 @@ public final class DisplayManagerService extends SystemService {
                 mDisplayDeviceRepo, new LogicalDisplayListener(), mSyncRoot, mHandler, mFlags);
         mDisplayModeDirector = new DisplayModeDirector(
                 context, mHandler, mFlags, mDisplayDeviceConfigProvider);
-        mBrightnessSynchronizer = new BrightnessSynchronizer(mContext,
+        mBrightnessSynchronizer = new BrightnessSynchronizer(mContext, displayThreadLooper,
                 mFlags.isBrightnessIntRangeUserPerceptionEnabled());
         Resources resources = mContext.getResources();
         mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(

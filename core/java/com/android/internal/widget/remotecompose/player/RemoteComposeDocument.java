@@ -103,5 +103,15 @@ public class RemoteComposeDocument {
         return "Document{\n"
                 + mDocument + '}';
     }
+
+    /**
+     * Gets a array of Names of the named colors defined in the loaded doc.
+     *
+     * @return
+     */
+    public String[] getNamedColors() {
+        return mDocument.getNamedColors();
+    }
+
 }
 

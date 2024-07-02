@@ -183,8 +183,6 @@ public class InteractionJankMonitorTest {
         doNothing().when(viewRoot).removeSurfaceChangedCallback(any());
 
         SurfaceControlWrapper surfaceControl = mock(SurfaceControlWrapper.class);
-        doNothing().when(surfaceControl).addJankStatsListener(any(), any());
-        doNothing().when(surfaceControl).removeJankStatsListener(any());
 
         final ChoreographerWrapper choreographer = mock(ChoreographerWrapper.class);
         doReturn(SystemClock.elapsedRealtime()).when(choreographer).getVsyncId();

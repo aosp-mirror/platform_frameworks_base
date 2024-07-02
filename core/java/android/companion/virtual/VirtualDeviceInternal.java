@@ -128,6 +128,22 @@ public class VirtualDeviceInternal {
                         Binder.restoreCallingIdentity(token);
                     }
                 }
+
+                @Override
+                public void onActivityLaunchBlocked(int displayId, ComponentName componentName,
+                        @UserIdInt int userId) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (mActivityListenersLock) {
+                            for (int i = 0; i < mActivityListeners.size(); i++) {
+                                mActivityListeners.valueAt(i)
+                                        .onActivityLaunchBlocked(displayId, componentName, userId);
+                            }
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                }
             };
     private final IVirtualDeviceSoundEffectListener mSoundEffectListener =
             new IVirtualDeviceSoundEffectListener.Stub() {
@@ -162,6 +178,20 @@ public class VirtualDeviceInternal {
                 params,
                 mActivityListenerBinder,
                 mSoundEffectListener);
+    }
+
+    VirtualDeviceInternal(
+            IVirtualDeviceManager service,
+            Context context,
+            IVirtualDevice virtualDevice) {
+        mService = service;
+        mContext = context.getApplicationContext();
+        mVirtualDevice = virtualDevice;
+        try {
+            mVirtualDevice.setListeners(mActivityListenerBinder, mSoundEffectListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     int getDeviceId() {
@@ -510,6 +540,12 @@ public class VirtualDeviceInternal {
 
         public void onDisplayEmpty(int displayId) {
             mExecutor.execute(() -> mActivityListener.onDisplayEmpty(displayId));
+        }
+
+        public void onActivityLaunchBlocked(int displayId, ComponentName componentName,
+                @UserIdInt int userId) {
+            mExecutor.execute(() ->
+                    mActivityListener.onActivityLaunchBlocked(displayId, componentName, userId));
         }
     }
 

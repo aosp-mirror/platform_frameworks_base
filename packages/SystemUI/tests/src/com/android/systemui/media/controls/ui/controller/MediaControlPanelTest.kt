@@ -1799,6 +1799,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 any(),
                 eq(null),
                 eq(null),
+                eq(null),
             )
         verify(activityStarter, never()).postStartActivityDismissingKeyguard(eq(clickIntent), any())
     }

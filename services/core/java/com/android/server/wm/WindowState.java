@@ -250,7 +250,7 @@ import android.window.OnBackInvokedCallbackInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.protolog.common.LogLevel;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
@@ -3695,7 +3695,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void fillInsetsSourceControls(@NonNull InsetsSourceControl.Array outArray,
             boolean copyControls) {
-        final int lastSeq = mLastReportedInsetsState.getSeq();
+        final int lastSeq = mLastReportedActiveControls.getSeq();
         final InsetsSourceControl[] controls =
                 getDisplayContent().getInsetsStateController().getControlsForDispatch(this);
         outArray.set(controls, copyControls);

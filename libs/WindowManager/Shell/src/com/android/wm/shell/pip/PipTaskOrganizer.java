@@ -73,7 +73,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
@@ -423,7 +423,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             });
             mPipTransitionController.setPipOrganizer(this);
             displayController.addDisplayWindowListener(this);
-            pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
+            pipTransitionController.registerPipTransitionCallback(
+                    mPipTransitionCallback, mMainExecutor);
         }
     }
 

@@ -92,7 +92,7 @@ final class AppClipsViewModel extends ViewModel {
     private final MutableLiveData<Bitmap> mScreenshotLiveData;
     private final MutableLiveData<Uri> mResultLiveData;
     private final MutableLiveData<Integer> mErrorLiveData;
-    private final MutableLiveData<ClipData> mBacklinksLiveData;
+    private final MutableLiveData<InternalBacklinksData> mBacklinksLiveData;
 
     private AppClipsViewModel(AppClipsCrossProcessHelper appClipsCrossProcessHelper,
             ImageExporter imageExporter, IActivityTaskManager atmService,
@@ -144,10 +144,11 @@ final class AppClipsViewModel extends ViewModel {
      */
     void triggerBacklinks(Set<Integer> taskIdsToIgnore, int displayId) {
         mBgExecutor.execute(() -> {
-            ListenableFuture<ClipData> backlinksData = getBacklinksData(taskIdsToIgnore, displayId);
+            ListenableFuture<InternalBacklinksData> backlinksData = getBacklinksData(
+                    taskIdsToIgnore, displayId);
             Futures.addCallback(backlinksData, new FutureCallback<>() {
                 @Override
-                public void onSuccess(@Nullable ClipData result) {
+                public void onSuccess(@Nullable InternalBacklinksData result) {
                     if (result != null) {
                         mBacklinksLiveData.setValue(result);
                     }
@@ -180,8 +181,8 @@ final class AppClipsViewModel extends ViewModel {
         return mErrorLiveData;
     }
 
-    /** Returns a {@link LiveData} that holds the Backlinks data in {@link ClipData}. */
-    LiveData<ClipData> getBacklinksLiveData() {
+    /** Returns a {@link LiveData} that holds Backlinks data in {@link InternalBacklinksData}. */
+    LiveData<InternalBacklinksData> getBacklinksLiveData() {
         return mBacklinksLiveData;
     }
 
@@ -226,7 +227,7 @@ final class AppClipsViewModel extends ViewModel {
         return HardwareRenderer.createHardwareBitmap(output, bounds.width(), bounds.height());
     }
 
-    private ListenableFuture<ClipData> getBacklinksData(Set<Integer> taskIdsToIgnore,
+    private ListenableFuture<InternalBacklinksData> getBacklinksData(Set<Integer> taskIdsToIgnore,
             int displayId) {
         return getAllRootTaskInfosOnDisplay(displayId)
                 .stream()
@@ -264,8 +265,9 @@ final class AppClipsViewModel extends ViewModel {
                 != null;
     }
 
-    private ListenableFuture<ClipData> getBacklinksDataForTaskId(RootTaskInfo taskInfo) {
-        SettableFuture<ClipData> backlinksData = SettableFuture.create();
+    private ListenableFuture<InternalBacklinksData> getBacklinksDataForTaskId(
+            RootTaskInfo taskInfo) {
+        SettableFuture<InternalBacklinksData> backlinksData = SettableFuture.create();
         int taskId = taskInfo.taskId;
         mAssistContentRequester.requestAssistContent(taskId, assistContent ->
                 backlinksData.set(getBacklinksDataFromAssistContent(taskInfo, assistContent)));
@@ -273,7 +275,7 @@ final class AppClipsViewModel extends ViewModel {
     }
 
     /**
-     * A utility method to get {@link ClipData} to use for Backlinks functionality from
+     * A utility method to get {@link InternalBacklinksData} to use for Backlinks functionality from
      * {@link AssistContent} received from the app whose screenshot is taken.
      *
      * <p>There are multiple ways an app can provide deep-linkable data via {@link AssistContent}
@@ -289,14 +291,16 @@ final class AppClipsViewModel extends ViewModel {
      *
      * @param taskInfo {@link RootTaskInfo} of the task which provided the {@link AssistContent}.
      * @param content the {@link AssistContent} to map into Backlinks {@link ClipData}.
-     * @return {@link ClipData} that represents the Backlinks data.
+     * @return {@link InternalBacklinksData} that represents the Backlinks data along with app icon.
      */
-    private ClipData getBacklinksDataFromAssistContent(RootTaskInfo taskInfo,
+    private InternalBacklinksData getBacklinksDataFromAssistContent(RootTaskInfo taskInfo,
             @Nullable AssistContent content) {
         String appName = getAppNameOfTask(taskInfo);
         String packageName = taskInfo.topActivity.getPackageName();
-        ClipData fallback = ClipData.newIntent(appName,
+        Drawable appIcon = taskInfo.topActivityInfo.loadIcon(mPackageManager);
+        ClipData mainLauncherIntent = ClipData.newIntent(appName,
                 getMainLauncherIntentForPackage(packageName));
+        InternalBacklinksData fallback = new InternalBacklinksData(mainLauncherIntent, appIcon);
         if (content == null) {
             return fallback;
         }
@@ -306,7 +310,7 @@ final class AppClipsViewModel extends ViewModel {
             Uri uri = content.getWebUri();
             Intent backlinksIntent = new Intent(ACTION_VIEW).setData(uri);
             if (doesIntentResolveToSamePackage(backlinksIntent, packageName)) {
-                return ClipData.newRawUri(appName, uri);
+                return new InternalBacklinksData(ClipData.newRawUri(appName, uri), appIcon);
             }
         }
 
@@ -314,7 +318,8 @@ final class AppClipsViewModel extends ViewModel {
         if (content.isAppProvidedIntent()) {
             Intent backlinksIntent = content.getIntent();
             if (doesIntentResolveToSamePackage(backlinksIntent, packageName)) {
-                return ClipData.newIntent(appName, backlinksIntent);
+                return new InternalBacklinksData(ClipData.newIntent(appName, backlinksIntent),
+                        appIcon);
             }
         }
 

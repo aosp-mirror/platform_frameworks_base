@@ -72,6 +72,14 @@ public abstract class RemoteContext {
         return (System.nanoTime() - mStart) * 1E-9f;
     }
 
+    /**
+     * Set the value of a named Color.
+     * This overrides the color in the document
+     * @param colorName
+     * @param color
+     */
+    public abstract void setNamedColorOverride(String colorName, int color);
+
 
     /**
      * The context can be used in a few different mode, allowing operations to skip being executed:
@@ -262,16 +270,45 @@ public abstract class RemoteContext {
     public static final int ID_COMPONENT_WIDTH = 7;
     public static final int ID_COMPONENT_HEIGHT = 8;
     public static final int ID_CALENDAR_MONTH = 9;
+    public static final int ID_OFFSET_TO_UTC = 10;
+    public static final int ID_WEEK_DAY = 11;
+    public static final int ID_DAY_OF_MONTH = 12;
 
+    /**
+     * CONTINUOUS_SEC is seconds from midnight looping every hour 0-3600
+     */
     public static final float FLOAT_CONTINUOUS_SEC = Utils.asNan(ID_CONTINUOUS_SEC);
+    /**
+     * seconds run from Midnight=0 quantized to seconds hour 0..3599
+     */
     public static final float FLOAT_TIME_IN_SEC = Utils.asNan(ID_TIME_IN_SEC);
+    /**
+     * minutes run from Midnight=0 quantized to minutes 0..1439
+     */
     public static final float FLOAT_TIME_IN_MIN = Utils.asNan(ID_TIME_IN_MIN);
+    /**
+     * hours run from Midnight=0 quantized to Hours 0-23
+     */
     public static final float FLOAT_TIME_IN_HR = Utils.asNan(ID_TIME_IN_HR);
+    /**
+     * Moth of Year quantized to MONTHS 1-12. 1 = January
+     */
     public static final float FLOAT_CALENDAR_MONTH = Utils.asNan(ID_CALENDAR_MONTH);
+    /**
+     * DAY OF THE WEEK 1-7. 1 = Monday
+     */
+    public static final float FLOAT_WEEK_DAY = Utils.asNan(ID_WEEK_DAY);
+    /**
+     * DAY OF THE MONTH 1-31
+     */
+    public static final float FLOAT_DAY_OF_MONTH = Utils.asNan(ID_DAY_OF_MONTH);
+
     public static final float FLOAT_WINDOW_WIDTH = Utils.asNan(ID_WINDOW_WIDTH);
     public static final float FLOAT_WINDOW_HEIGHT = Utils.asNan(ID_WINDOW_HEIGHT);
     public static final float FLOAT_COMPONENT_WIDTH = Utils.asNan(ID_COMPONENT_WIDTH);
     public static final float FLOAT_COMPONENT_HEIGHT = Utils.asNan(ID_COMPONENT_HEIGHT);
+    // ID_OFFSET_TO_UTC is the offset from UTC in sec (typically / 3600f)
+    public static final float FLOAT_OFFSET_TO_UTC = Utils.asNan(ID_OFFSET_TO_UTC);
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling
     ///////////////////////////////////////////////////////////////////////////////////////////////

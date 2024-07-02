@@ -20,15 +20,16 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
@@ -41,8 +42,8 @@ constructor(
     dumpManager: DumpManager,
     private val interactor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
+    private val shadeSceneViewModel: ShadeSceneViewModel,
     featureFlags: FeatureFlagsClassic,
-    private val keyguardInteractor: KeyguardInteractor,
 ) : FlowDumperImpl(dumpManager) {
     /** DEBUG: whether the placeholder should be made slightly visible for positional debugging. */
     val isVisualDebuggingEnabled: Boolean = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES)
@@ -60,10 +61,18 @@ constructor(
         interactor.setConstrainedAvailableSpace(height)
     }
 
+    /** Notifies that empty space on the notification scrim has been clicked. */
+    fun onEmptySpaceClicked() {
+        shadeSceneViewModel.onContentClicked()
+    }
+
     /** Sets the content alpha for the current state of the brightness mirror */
     fun setAlphaForBrightnessMirror(alpha: Float) {
         interactor.setAlphaForBrightnessMirror(alpha)
     }
+
+    /** Whether or not the notification scrim should be clickable. */
+    val isClickable: StateFlow<Boolean> = shadeSceneViewModel.isClickable
 
     /** Corner rounding of the stack */
     val shadeScrimRounding: Flow<ShadeScrimRounding> =

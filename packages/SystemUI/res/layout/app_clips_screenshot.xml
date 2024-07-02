@@ -51,13 +51,30 @@
         app:layout_constraintStart_toEndOf="@id/save"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <CheckBox
+        android:id="@+id/backlinks_include_data"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:checked="true"
+        android:text="@string/backlinks_include_link"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/preview"
+        app:layout_constraintStart_toEndOf="@id/cancel"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/backlinks_data"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:background="@drawable/backlinks_rounded_rectangle"
+        android:drawablePadding="4dp"
+        android:gravity="center"
+        android:paddingHorizontal="8dp"
         android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@id/cancel"
+        app:layout_constraintBottom_toTopOf="@id/preview"
+        app:layout_constraintStart_toEndOf="@id/backlinks_include_data"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView

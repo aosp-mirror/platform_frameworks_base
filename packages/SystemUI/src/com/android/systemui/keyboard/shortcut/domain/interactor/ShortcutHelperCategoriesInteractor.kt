@@ -18,30 +18,56 @@ package com.android.systemui.keyboard.shortcut.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperCategoriesRepository
-import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
+import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 @SysUISingleton
 class ShortcutHelperCategoriesInteractor
 @Inject
 constructor(
-    stateRepository: ShortcutHelperStateRepository,
     categoriesRepository: ShortcutHelperCategoriesRepository,
 ) {
 
+    private val systemsShortcutCategory = categoriesRepository.systemShortcutsCategory
+    private val multitaskingShortcutsCategory = categoriesRepository.multitaskingShortcutsCategory
+    private val imeShortcutsCategory =
+        categoriesRepository.imeShortcutsCategory.map { groupSubCategoriesInCategory(it) }
+
     val shortcutCategories: Flow<List<ShortcutCategory>> =
-        stateRepository.state.map { state ->
-            when (state) {
-                is ShortcutHelperState.Active ->
-                    listOf(
-                        categoriesRepository.systemShortcutsCategory(),
-                        categoriesRepository.multitaskingShortcutsCategory()
-                    )
-                is ShortcutHelperState.Inactive -> emptyList()
-            }
+        combine(systemsShortcutCategory, multitaskingShortcutsCategory, imeShortcutsCategory) {
+            shortcutCategories ->
+            shortcutCategories.filterNotNull()
         }
+
+    private fun groupSubCategoriesInCategory(
+        shortcutCategory: ShortcutCategory?
+    ): ShortcutCategory? {
+        if (shortcutCategory == null) {
+            return null
+        }
+        val subCategoriesWithGroupedShortcuts =
+            shortcutCategory.subCategories.map {
+                ShortcutSubCategory(
+                    label = it.label,
+                    shortcuts = groupShortcutsInSubcategory(it.shortcuts)
+                )
+            }
+        return ShortcutCategory(
+            type = shortcutCategory.type,
+            subCategories = subCategoriesWithGroupedShortcuts
+        )
+    }
+
+    private fun groupShortcutsInSubcategory(shortcuts: List<Shortcut>) =
+        shortcuts
+            .groupBy { it.label }
+            .entries
+            .map { (commonLabel, groupedShortcuts) ->
+                Shortcut(label = commonLabel, commands = groupedShortcuts.flatMap { it.commands })
+            }
 }
