@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar;
+package com.android.systemui.navigationbar.views;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
@@ -28,7 +28,7 @@ import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
 import static com.android.systemui.assist.AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS;
-import static com.android.systemui.navigationbar.NavigationBar.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
+import static com.android.systemui.navigationbar.views.NavigationBar.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -86,10 +86,15 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
-import com.android.systemui.navigationbar.buttons.DeadZone;
-import com.android.systemui.navigationbar.buttons.KeyButtonView;
+import com.android.systemui.navigationbar.NavBarHelper;
+import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
+import com.android.systemui.navigationbar.views.buttons.ButtonDispatcher;
+import com.android.systemui.navigationbar.views.buttons.DeadZone;
+import com.android.systemui.navigationbar.views.buttons.KeyButtonView;
+import com.android.systemui.navigationbar.views.buttons.NavBarButtonClickLogger;
+import com.android.systemui.navigationbar.views.buttons.NavbarOrientationTrackingLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;

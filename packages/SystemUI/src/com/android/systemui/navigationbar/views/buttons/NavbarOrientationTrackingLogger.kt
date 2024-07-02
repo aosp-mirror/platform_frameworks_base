@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar
+package com.android.systemui.navigationbar.views.buttons
 
 import android.view.Surface
 import com.android.systemui.log.LogBuffer

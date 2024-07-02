@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar;
+package com.android.systemui.navigationbar.views;
 
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
@@ -25,7 +25,7 @@ import android.util.SparseArray;
 import android.view.View;
 
 import com.android.systemui.navigationbar.NavigationBarComponent.NavigationBarScope;
-import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
+import com.android.systemui.navigationbar.views.buttons.ButtonDispatcher;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.statusbar.phone.BarTransitions;

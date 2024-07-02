@@ -32,7 +32,7 @@ import android.view.animation.Interpolator;
 
 import com.android.app.animation.Interpolators;
 import com.android.settingslib.Utils;
-import com.android.systemui.navigationbar.buttons.ButtonInterface;
+import com.android.systemui.navigationbar.views.buttons.ButtonInterface;
 import com.android.systemui.res.R;
 
 public class NavigationHandle extends View implements ButtonInterface {

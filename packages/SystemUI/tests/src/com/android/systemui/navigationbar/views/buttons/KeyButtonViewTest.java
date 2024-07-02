@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar.buttons;
+package com.android.systemui.navigationbar.views.buttons;
 
 import static android.view.KeyEvent.ACTION_DOWN;
 import static android.view.KeyEvent.ACTION_UP;
@@ -26,12 +26,12 @@ import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.KeyEvent.KEYCODE_HOME;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 
-import static com.android.systemui.navigationbar.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_BACK_BUTTON_LONGPRESS;
-import static com.android.systemui.navigationbar.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_BACK_BUTTON_TAP;
-import static com.android.systemui.navigationbar.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_HOME_BUTTON_LONGPRESS;
-import static com.android.systemui.navigationbar.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_HOME_BUTTON_TAP;
-import static com.android.systemui.navigationbar.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_OVERVIEW_BUTTON_LONGPRESS;
-import static com.android.systemui.navigationbar.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_OVERVIEW_BUTTON_TAP;
+import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_BACK_BUTTON_LONGPRESS;
+import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_BACK_BUTTON_TAP;
+import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_HOME_BUTTON_LONGPRESS;
+import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_HOME_BUTTON_TAP;
+import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_OVERVIEW_BUTTON_LONGPRESS;
+import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_OVERVIEW_BUTTON_TAP;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;

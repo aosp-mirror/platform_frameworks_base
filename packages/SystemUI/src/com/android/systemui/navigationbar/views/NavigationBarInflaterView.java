@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar;
+package com.android.systemui.navigationbar.views;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
@@ -36,10 +36,11 @@ import android.widget.Space;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
-import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
-import com.android.systemui.navigationbar.buttons.KeyButtonView;
-import com.android.systemui.navigationbar.buttons.ReverseLinearLayout;
-import com.android.systemui.navigationbar.buttons.ReverseLinearLayout.ReverseRelativeLayout;
+import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.navigationbar.views.buttons.ButtonDispatcher;
+import com.android.systemui.navigationbar.views.buttons.KeyButtonView;
+import com.android.systemui.navigationbar.views.buttons.ReverseLinearLayout;
+import com.android.systemui.navigationbar.views.buttons.ReverseLinearLayout.ReverseRelativeLayout;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.system.QuickStepContract;
