@@ -74,7 +74,8 @@ constructor(
                             },
                             { "State: Projecting(type=$str1 hostPackage=$str2)" }
                         )
-                        ProjectionChipModel.Projecting(type, state)
+                        // TODO(b/351851835): Get the device name.
+                        ProjectionChipModel.Projecting(type, state, deviceName = null)
                     }
                 }
             }

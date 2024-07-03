@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 
+import android.content.applicationContext
 import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -27,6 +28,7 @@ val Kosmos.screenRecordChipViewModel: ScreenRecordChipViewModel by
     Kosmos.Fixture {
         ScreenRecordChipViewModel(
             scope = applicationCoroutineScope,
+            context = applicationContext,
             interactor = screenRecordChipInteractor,
             endMediaProjectionDialogHelper = endMediaProjectionDialogHelper,
             dialogTransitionAnimator = mockDialogTransitionAnimator,
