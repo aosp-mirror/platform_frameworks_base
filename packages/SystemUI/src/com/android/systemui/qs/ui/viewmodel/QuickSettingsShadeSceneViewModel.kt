@@ -20,42 +20,54 @@ import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
-import com.android.systemui.qs.ui.adapter.QSSceneAdapter
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeAlignment
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the Quick Settings Shade scene. */
 @SysUISingleton
 class QuickSettingsShadeSceneViewModel
 @Inject
 constructor(
-    shadeInteractor: ShadeInteractor,
+    private val shadeInteractor: ShadeInteractor,
     val overlayShadeViewModel: OverlayShadeViewModel,
-    val brightnessSliderViewModel: BrightnessSliderViewModel,
-    val tileGridViewModel: TileGridViewModel,
-    val editModeViewModel: EditModeViewModel,
-    val qsSceneAdapter: QSSceneAdapter,
+    val quickSettingsContainerViewModel: QuickSettingsContainerViewModel,
+    @Application applicationScope: CoroutineScope,
 ) {
+
+    val isEditing: StateFlow<Boolean> = quickSettingsContainerViewModel.editModeViewModel.isEditing
+
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        MutableStateFlow(
-                mapOf(
-                    if (shadeInteractor.shadeAlignment == ShadeAlignment.Top) {
-                        Swipe.Up
-                    } else {
-                        Swipe.Down
-                    } to SceneFamilies.Home,
-                    Back to SceneFamilies.Home,
-                )
+        isEditing
+            .map { editing -> destinations(editing) }
+            .stateIn(
+                applicationScope,
+                SharingStarted.WhileSubscribed(),
+                destinations(isEditing.value)
             )
-            .asStateFlow()
+
+    private fun destinations(editing: Boolean): Map<UserAction, UserActionResult> {
+        return buildMap {
+            put(
+                if (shadeInteractor.shadeAlignment == ShadeAlignment.Top) {
+                    Swipe.Up
+                } else {
+                    Swipe.Down
+                },
+                UserActionResult(SceneFamilies.Home)
+            )
+            if (!editing) {
+                put(Back, UserActionResult(SceneFamilies.Home))
+            }
+        }
+    }
 }

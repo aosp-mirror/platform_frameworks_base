@@ -93,7 +93,7 @@ constructor(
      */
     val canShowEditMode =
         allOf(
-                keyguardTransitionInteractor.isFinishedInState(KeyguardState.GONE),
+                keyguardTransitionInteractor.isFinishedIn(KeyguardState.GONE),
                 communalInteractor.editModeOpen
             )
             .filter { it }

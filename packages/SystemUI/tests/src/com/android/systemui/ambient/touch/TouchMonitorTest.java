@@ -46,6 +46,7 @@ import android.view.WindowMetrics;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleCoroutineScope;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
@@ -159,7 +160,9 @@ public class TouchMonitorTest extends SysuiTestCase {
             ArgumentCaptor<LifecycleObserver> observerCaptor =
                     ArgumentCaptor.forClass(LifecycleObserver.class);
             verify(mLifecycleRegistry, atLeast(1)).addObserver(observerCaptor.capture());
-            mLifecycleObservers.addAll(observerCaptor.getAllValues());
+            mLifecycleObservers.addAll(observerCaptor.getAllValues().stream().filter(
+                    lifecycleObserver -> !(lifecycleObserver instanceof LifecycleCoroutineScope))
+                    .toList());
 
             updateLifecycle(Lifecycle.State.RESUMED);
 

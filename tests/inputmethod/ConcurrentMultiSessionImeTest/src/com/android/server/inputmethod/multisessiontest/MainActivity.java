@@ -87,11 +87,13 @@ public final class MainActivity extends ConcurrentUserActivityBase {
             }
             if (!mImm.showSoftInput(mEditor, /* flags= */ 0)) {
                 Log.e(TAG, String.format("Failed to show my IME as user %d, "
-                                + "mEditor:focused=%b,hasWindowFocus=%b", getUserId(),
+                                + "mEditor:focused=%b,hasWindowFocus=%b",
+                        Process.myUserHandle().getIdentifier(),
                         mEditor.isFocused(), mEditor.hasWindowFocus()));
             }
         });
         PollingCheck.waitFor(WAIT_IME_TIMEOUT_MS, () -> isMyImeVisible(),
-                String.format("My IME (user %d) didn't show up", getUserId()));
+                String.format("My IME (user %d) didn't show up",
+                        Process.myUserHandle().getIdentifier()));
     }
 }
