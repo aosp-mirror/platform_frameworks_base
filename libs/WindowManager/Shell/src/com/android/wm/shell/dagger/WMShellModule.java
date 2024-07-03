@@ -245,7 +245,10 @@ public abstract class WMShellModule {
         return new CaptionWindowDecorViewModel(
                 context,
                 mainHandler,
+                mainExecutor,
                 mainChoreographer,
+                windowManager,
+                shellInit,
                 taskOrganizer,
                 displayController,
                 rootTaskDisplayAreaOrganizer,
