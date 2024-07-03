@@ -2336,10 +2336,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // Place the nav bar on top of anything else in the top activity.
             t.setLayer(navSurfaceControl, Integer.MAX_VALUE);
         }
-        final StatusBarManagerInternal bar = dc.getDisplayPolicy().getStatusBarManagerInternal();
-        if (bar != null) {
-            bar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, false);
-        }
+        sendLumaSamplingEnabledToStatusBarInternal(dc, false);
     }
 
     /** @see RecentsAnimationController#restoreNavigationBarFromApp */
@@ -2357,10 +2354,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         final DisplayContent dc =
                 mController.mAtm.mRootWindowContainer.getDisplayContent(recentsDisplayId);
-        final StatusBarManagerInternal bar = dc.getDisplayPolicy().getStatusBarManagerInternal();
-        if (bar != null) {
-            bar.setNavigationBarLumaSamplingEnabled(recentsDisplayId, true);
-        }
+        sendLumaSamplingEnabledToStatusBarInternal(dc, true);
         final WindowState navWindow = dc.getDisplayPolicy().getNavigationBar();
         if (navWindow == null) return;
         navWindow.setSurfaceTranslationY(0);
@@ -2392,6 +2386,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         // To apply transactions.
         dc.mWmService.scheduleAnimationLocked();
+    }
+
+    private void sendLumaSamplingEnabledToStatusBarInternal(@NonNull DisplayContent dc,
+            boolean enabled) {
+        final StatusBarManagerInternal bar = dc.getDisplayPolicy().getStatusBarManagerInternal();
+        if (bar != null) {
+            bar.setNavigationBarLumaSamplingEnabled(dc.getDisplayId(), enabled);
+        }
     }
 
     private void reportStartReasonsToLogger() {
