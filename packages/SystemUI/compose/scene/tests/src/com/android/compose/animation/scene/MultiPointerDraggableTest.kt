@@ -128,7 +128,7 @@ class MultiPointerDraggableTest {
         var started = false
         var dragged = false
         var stopped = false
-        var consumeBeforeMultiPointerDraggable = false
+        var consumedByDescendant = false
 
         var touchSlop = 0f
         rule.setContent {
@@ -138,6 +138,7 @@ class MultiPointerDraggableTest {
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         enabled = { true },
+                        // We want to start a drag gesture immediately
                         startDragImmediately = { true },
                         onDragStarted = { _, _, _ ->
                             started = true
@@ -157,7 +158,7 @@ class MultiPointerDraggableTest {
                             awaitPointerEventScope {
                                 while (isActive) {
                                     val change = awaitPointerEvent().changes.first()
-                                    if (consumeBeforeMultiPointerDraggable) {
+                                    if (consumedByDescendant) {
                                         change.consume()
                                     }
                                 }
@@ -168,18 +169,19 @@ class MultiPointerDraggableTest {
         }
 
         // The first part of the gesture is consumed by our descendant
-        consumeBeforeMultiPointerDraggable = true
+        consumedByDescendant = true
         rule.onRoot().performTouchInput {
             down(middle)
             moveBy(Offset(0f, touchSlop))
         }
 
-        started = false
-        dragged = false
-        stopped = false
+        // The events were consumed by our descendant, we should not start a drag gesture.
+        assertThat(started).isFalse()
+        assertThat(dragged).isFalse()
+        assertThat(stopped).isFalse()
 
         // The next events could be consumed by us
-        consumeBeforeMultiPointerDraggable = false
+        consumedByDescendant = false
         rule.onRoot().performTouchInput {
             // The pointer is moved to a new position without reporting it
             updatePointerBy(0, Offset(0f, touchSlop))
@@ -188,7 +190,7 @@ class MultiPointerDraggableTest {
             up()
         }
 
-        // This event should not be used to start a drag gesture
+        // The "up" event should not be used to start a drag gesture
         assertThat(started).isFalse()
         assertThat(dragged).isFalse()
         assertThat(stopped).isFalse()

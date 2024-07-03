@@ -29,7 +29,7 @@ import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
-import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
+import androidx.compose.ui.input.pointer.changedToDown
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
@@ -415,12 +415,10 @@ internal class MultiPointerDraggableNode(
         fun canBeConsumed(changes: List<PointerInputChange>): Boolean {
             // At least one pointer down AND
             return changes.fastAny { it.pressed } &&
-                // All pointers must be:
+                // All pointers must be either:
                 changes.fastAll {
-                    // A) recently pressed: even if the event has already been consumed, we can
-                    // still use the recently added finger event to determine whether to initiate
-                    // dragging the scene.
-                    it.changedToDownIgnoreConsumed() ||
+                    // A) unconsumed AND recently pressed
+                    it.changedToDown() ||
                         // B) unconsumed AND in a new position (on the current axis)
                         it.positionChange().toFloat() != 0f
                 }
