@@ -158,7 +158,7 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                 }
                 if (mp != null) {
                     if (DEBUG) {
-                        Log.d(mTag, "mPlayer.pause+release piid:" + player.getPlayerIId());
+                        Log.d(mTag, "mp.pause+release piid:" + mp.getPlayerIId());
                     }
                     mp.pause();
                     try {
