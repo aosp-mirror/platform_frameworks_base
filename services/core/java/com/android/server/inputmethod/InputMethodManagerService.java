@@ -2868,7 +2868,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         String enabledImeIdsStr = settings.getEnabledInputMethodsStr();
         for (var imi : settings.getMethodList()) {
             if (!imi.isSystem()) {
-                return;
+                continue;
             }
             enabledImeIdsStr = InputMethodUtils.concatEnabledImeIds(enabledImeIdsStr, imi.getId());
         }
@@ -2881,19 +2881,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (TextUtils.isEmpty(id)) {
             final InputMethodInfo imi = InputMethodInfoUtils.getMostApplicableDefaultIME(
                     settings.getEnabledInputMethodList());
-            if (imi == null) {
-                return;
+            if (imi != null) {
+                id = imi.getId();
+                settings.putSelectedInputMethod(id);
             }
-            id = imi.getId();
-            settings.putSelectedInputMethod(id);
         }
+        final var bindingController = getInputMethodBindingController(userId);
+        bindingController.setSelectedMethodId(id);
 
+        // Also re-initialize controllers.
         final var userData = getUserData(userId);
         userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
-
-        final var bindingController = getInputMethodBindingController(userId);
-        bindingController.setSelectedMethodId(id);
     }
 
     @GuardedBy("ImfLock.class")
