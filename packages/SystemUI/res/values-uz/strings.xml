@@ -103,6 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> skrinshot olinganini aniqladi."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> va boshqa ochiq ilovalar skrinshot olinganini aniqladi."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Qaydga qoʻshish"</string>
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Havolani kiritish"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Ekranni yozib olish"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran yozib olinmoqda"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekrandan yozib olish seansi uchun joriy bildirishnoma"</string>
@@ -132,6 +133,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; yozib olinishini toʻxtatasiz"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Ekran ulashilmoqda"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +141,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ulashuvini toʻxtatasiz"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"Ekran namoyish qilinmoqda"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Yuz orqali ochildi. Davom etish uchun bosing."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Yuz aniqlandi. Davom etish uchun bosing."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Yuz aniqlandi. Davom etish uchun ochish belgisini bosing."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Yuz bilan ochildi. Davom etish uchun bosing."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Tasdiqlandi"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Autentifikatsiyani bekor qilish"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Boshqa parametrlar"</string>
@@ -472,6 +476,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Koʻproq vidjetlar qoʻshish"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Vidjetlarni sozlash uchun bosib turing"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Vidjetlarni moslashtirish"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Faolsizlantirilgan vidjet uchun ilova belgisi"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Oʻrnatilayotgan vidjet uchun ilova belgisi"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Vidjetni tahrirlash"</string>
@@ -549,12 +555,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Boshlash"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Bildirishnomalar yo‘q"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Yangi bildirishoma yoʻq"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (5720882373252389461) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (4260536236101821273) -->
-    <skip />
-    <!-- no translation found for go_to_adaptive_notification_settings (2423690125178298479) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Adaptiv bildirishnomalar yoniq"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Qisqa vaqt oraligʻida koʻp bildirishnoma kelsa, qurilmadagi tovush balandligi hamda bildirgi oynalar soni ikki daqiqagacha kamaytiriladi."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Faolsizlantirish"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Eskilarini koʻrish uchun qulfni yeching"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Bu qurilmani ota-onangiz boshqaradi"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Bu qurilma tashkilotingizga tegishli va tarmoq trafigi tashkilotingiz tomonidan kuzatilishi mumkin"</string>
@@ -1352,7 +1355,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ishlatmoqda"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Yaqinda <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ishlatgan"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Tizim"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Tizim boshqaruvi tugmalari"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Tizim ilovalari"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multi-vazifalilik"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Oxirgi ilovalar"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Ekranni ikkiga ajratish"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Kiritish"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Ilova yorliqlari"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Qulayliklar"</string>
@@ -1369,14 +1376,10 @@
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
-    <!-- no translation found for touchpad_back_gesture_action_title (7199067250654332735) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_guidance (4222430588599527272) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_animation_content_description (2646107450922379918) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_screen_animation_content_description (4036267494237748710) -->
-    <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Orqaga qaytish"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Ortga qaytish uchun sensorli panelda uchta barmoqni chapga yoki oʻngga suring."</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Sensorli panelda uchta barmoq chapga va oʻngga harakatlanishi"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Qurilma ekranidagi ortga qaytish ishorasi animatsiyasi"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Klaviatura orqa yoritkichi"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Daraja: %1$d / %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Uy boshqaruvi"</string>

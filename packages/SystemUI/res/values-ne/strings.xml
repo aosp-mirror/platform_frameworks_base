@@ -103,6 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ले यो स्क्रिनसट भेट्टाएको छ।"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> र खुला रहेका अन्य एपहरूले यो स्क्रिनसट भेट्टाएका छन्।"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"नोटमा सेभ गर्नुहोस्"</string>
+    <string name="backlinks_include_link" msgid="4562093591148248158">"लिंक समावेश गर्नुहोस्"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"स्क्रिन रेकर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रिन रेकर्डिङको प्रक्रिया अघि बढाइँदै"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"कुनै स्क्रिन रेकर्ड गर्ने सत्रका लागि चलिरहेको सूचना"</string>
@@ -132,6 +133,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; का सामग्री रेकर्ड हुन छाड्ने छन्"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"स्क्रिन सेयर गरिँदै छ"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +141,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; का सामग्री सेयर हुन छाड्ने छन्"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"स्क्रिन कास्ट गरिँदै छ"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"अनुहार प्रयोग गरी अनलक गरियो। जारी राख्न थिच्नुहोस्।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"अनुहार पहिचान गरियो। जारी राख्न थिच्नुहोस्।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"अनुहार पहिचान गरियो। जारी राख्न अनलक आइकनमा थिच्नुहोस्।"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"अनुहार प्रयोग गरी अनलक गरिएको छ। जारी राख्न ट्याप गर्नुहोस्।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"प्रमाणीकरण गरियो"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"प्रमाणीकरण रद्द गर्नुहोस्"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"थप विकल्पहरू"</string>
@@ -472,6 +476,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"थप विजेटहरू हाल्नुहोस्"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"विजेटहरू कस्टमाइज गर्न केही बेरसम्म थिच्नुहोस्"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"विजेटहरू कस्टमाइज गर्नुहोस्"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"अफ गरिएको विजेटको एप जनाउने आइकन"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"इन्स्टल भइरहेको विजेटको एप आइकन"</string>
     <string name="edit_widget" msgid="9030848101135393954">"विजेट सम्पादन गर्नुहोस्"</string>
@@ -549,12 +555,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"अहिले न"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कुनै सूचनाहरू छैनन्"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"कुनै पनि नयाँ सूचना छैन"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (5720882373252389461) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (4260536236101821273) -->
-    <skip />
-    <!-- no translation found for go_to_adaptive_notification_settings (2423690125178298479) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"एड्याप्टिभ नोटिफिकेसन अन छ"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"तपाईंले छोटो समयमा धेरै नोटिफिकेसन प्राप्त गर्दा तपाईंको डिभाइसले अब दुई मिनेटसम्म भोल्युम र स्क्रिनमा देखिने पप-अपको सङ्ख्या घटाउँछ।"</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"अफ गर्नुहोस्"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"पुराना सूचनाहरू हेर्न अनलक गर्नुहोस्"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"यो डिभाइस तपाईंका अभिभावक व्यवस्थापन गर्नुहुन्छ"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"यो डिभाइस तपाईंको सङ्गठनको स्वामित्वमा छ र उक्त सङ्गठनले यसको नेटवर्क ट्राफिक अनुगमन गर्न सक्छ"</string>
@@ -1352,7 +1355,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ले प्रयोग गरिरहेको छ"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ले हालसालै प्रयोग गरेको"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"सिस्टम"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"सिस्टमसँग सम्बन्धित नियन्त्रणहरू"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"सिस्टम एपहरू"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"एकै पटक एकभन्दा बढी एप चलाउन मिल्ने सुविधा"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"हालसालै चलाइएका एपहरू"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"स्प्लिट स्क्रिन"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"इनपुट"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"एपका सर्टकटहरू"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"सर्वसुलभता"</string>
@@ -1369,14 +1376,10 @@
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
-    <!-- no translation found for touchpad_back_gesture_action_title (7199067250654332735) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_guidance (4222430588599527272) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_animation_content_description (2646107450922379918) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_screen_animation_content_description (4036267494237748710) -->
-    <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"पछाडि जानुहोस्"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"पछाडि जान तिन वटा औँलाले टचप्याडमा कतै छोएर बायाँ वा दायाँतिर स्वाइप गर्नुहोस्।"</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"तिन वटा औँला दायाँ र बायाँ सारेको देखाइएको टचप्याड"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"पछाडि जाने जेस्चरको एनिमेसन देखाइएको डिभाइसको स्क्रिन"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"किबोर्ड ब्याकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d मध्ये %1$d औँ स्तर"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कन्ट्रोलहरू"</string>
