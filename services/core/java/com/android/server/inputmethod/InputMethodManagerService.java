@@ -5539,7 +5539,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     private boolean switchToInputMethodLocked(String imeId, @UserIdInt int userId) {
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-        if (userId == mCurrentUserId) {
+        if (mExperimentalConcurrentMultiUserModeEnabled || userId == mCurrentUserId) {
             if (!settings.getMethodMap().containsKey(imeId)
                     || !settings.getEnabledInputMethodList()
                     .contains(settings.getMethodMap().get(imeId))) {
