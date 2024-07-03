@@ -1349,13 +1349,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     private boolean shouldShowBlockedActivityDialog(ComponentName blockedComponent,
             ComponentName blockedAppStreamingActivityComponent) {
-        if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
-            return true;
-        }
         if (Objects.equals(blockedComponent, blockedAppStreamingActivityComponent)) {
             // Do not show the dialog if it was blocked for some reason already to avoid
             // infinite blocking loop.
             return false;
+        }
+        if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+            return true;
         }
         // Do not show the dialog if disabled by policy.
         return getDevicePolicy(POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR) == DEVICE_POLICY_DEFAULT;
