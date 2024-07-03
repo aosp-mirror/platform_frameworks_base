@@ -264,7 +264,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   fun instantiate_flagOff_doNotAddInitCallback() {
-    whenever(DesktopModeStatus.isDesktopModeFlagEnabled()).thenReturn(false)
+    whenever(DesktopModeStatus.canEnterDesktopMode(context)).thenReturn(false)
     clearInvocations(shellInit)
 
     createController()
