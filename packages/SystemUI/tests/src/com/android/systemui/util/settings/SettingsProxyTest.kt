@@ -27,6 +27,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
@@ -41,12 +46,16 @@ import org.mockito.kotlin.eq
 @TestableLooper.RunWithLooper
 class SettingsProxyTest : SysuiTestCase() {
 
+    private val testDispatcher = StandardTestDispatcher()
+
     private lateinit var mSettings: SettingsProxy
     private lateinit var mContentObserver: ContentObserver
+    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
-        mSettings = FakeSettingsProxy()
+        testScope = TestScope(testDispatcher)
+        mSettings = FakeSettingsProxy(testDispatcher)
         mContentObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {}
     }
 
@@ -55,6 +64,23 @@ class SettingsProxyTest : SysuiTestCase() {
         mSettings.registerContentObserverSync(TEST_SETTING, mContentObserver)
         verify(mSettings.getContentResolver())
             .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
+    }
+
+    @Test
+    fun registerContentObserverSuspend_inputString_success() =
+        testScope.runTest {
+            mSettings.registerContentObserver(TEST_SETTING, mContentObserver)
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
+        }
+
+    @Test
+    fun registerContentObserverAsync_inputString_success() {
+        mSettings.registerContentObserverAsync(TEST_SETTING, mContentObserver)
+        testScope.launch {
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
+        }
     }
 
     @Test
@@ -69,10 +95,52 @@ class SettingsProxyTest : SysuiTestCase() {
     }
 
     @Test
+    fun registerContentObserverSuspend_inputString_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserver(
+                TEST_SETTING,
+                notifyForDescendants = true,
+                mContentObserver
+            )
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
+        }
+
+    @Test
+    fun registerContentObserverAsync_inputString_notifyForDescendants_true() {
+        mSettings.registerContentObserverAsync(
+            TEST_SETTING,
+            notifyForDescendants = true,
+            mContentObserver
+        )
+        testScope.launch {
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
+        }
+    }
+
+    @Test
     fun registerContentObserver_inputUri_success() {
         mSettings.registerContentObserverSync(TEST_SETTING_URI, mContentObserver)
         verify(mSettings.getContentResolver())
             .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
+    }
+
+    @Test
+    fun registerContentObserverSuspend_inputUri_success() =
+        testScope.runTest {
+            mSettings.registerContentObserver(TEST_SETTING_URI, mContentObserver)
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
+        }
+
+    @Test
+    fun registerContentObserverAsync_inputUri_success() {
+        mSettings.registerContentObserverAsync(TEST_SETTING_URI, mContentObserver)
+        testScope.launch {
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
+        }
     }
 
     @Test
@@ -87,9 +155,49 @@ class SettingsProxyTest : SysuiTestCase() {
     }
 
     @Test
-    fun unregisterContentObserver() {
+    fun registerContentObserverSuspend_inputUri_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserver(
+                TEST_SETTING_URI,
+                notifyForDescendants = true,
+                mContentObserver
+            )
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
+        }
+
+    @Test
+    fun registerContentObserverAsync_inputUri_notifyForDescendants_true() {
+        mSettings.registerContentObserverAsync(
+            TEST_SETTING_URI,
+            notifyForDescendants = true,
+            mContentObserver
+        )
+        testScope.launch {
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
+        }
+    }
+
+    @Test
+    fun unregisterContentObserverSync() {
         mSettings.unregisterContentObserverSync(mContentObserver)
         verify(mSettings.getContentResolver()).unregisterContentObserver(eq(mContentObserver))
+    }
+
+    @Test
+    fun unregisterContentObserverSuspend_inputString_success() =
+        testScope.runTest {
+            mSettings.unregisterContentObserver(mContentObserver)
+            verify(mSettings.getContentResolver()).unregisterContentObserver(eq(mContentObserver))
+        }
+
+    @Test
+    fun unregisterContentObserverAsync_inputString_success() {
+        mSettings.unregisterContentObserverAsync(mContentObserver)
+        testScope.launch {
+            verify(mSettings.getContentResolver()).unregisterContentObserver(eq(mContentObserver))
+        }
     }
 
     @Test
@@ -199,12 +307,15 @@ class SettingsProxyTest : SysuiTestCase() {
         assertThat(mSettings.getFloat(TEST_SETTING, 2.5F)).isEqualTo(2.5F)
     }
 
-    private class FakeSettingsProxy : SettingsProxy {
+    private class FakeSettingsProxy(val testDispatcher: CoroutineDispatcher) : SettingsProxy {
 
         private val mContentResolver = mock(ContentResolver::class.java)
         private val settingToValueMap: MutableMap<String, String> = mutableMapOf()
 
         override fun getContentResolver() = mContentResolver
+
+        override val backgroundDispatcher: CoroutineDispatcher
+            get() = testDispatcher
 
         override fun getUriFor(name: String) =
             Uri.parse(StringBuilder().append("content://settings/").append(name).toString())
