@@ -549,15 +549,20 @@ public final class DisplayManagerGlobal {
     }
 
     /**
-     * Request to power a display ON or OFF.
+     * Request to power a display OFF or reset it to a power state it supposed to have.
+     * @param displayId the id of the display
+     * @param state one of {@link android.view.Display#STATE_UNKNOWN} (to reset the state to
+     *  the one the display should have had now), {@link android.view.Display#STATE_OFF}.
+     * @return true if successful, false otherwise
      * @hide
      */
     @RequiresPermission("android.permission.MANAGE_DISPLAYS")
-    public boolean requestDisplayPower(int displayId, boolean on) {
+    public boolean requestDisplayPower(int displayId, int state) {
         try {
-            return mDm.requestDisplayPower(displayId, on);
+            return mDm.requestDisplayPower(displayId, state);
         } catch (RemoteException ex) {
-            Log.e(TAG, "Error trying to request display power " + on, ex);
+            Log.e(TAG, "Error trying to request display power:"
+                    + " state=" + state, ex);
             return false;
         }
     }

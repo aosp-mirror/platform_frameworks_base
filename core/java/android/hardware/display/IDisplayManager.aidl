@@ -236,9 +236,9 @@ interface IDisplayManager {
     @EnforcePermission("MANAGE_DISPLAYS")
     void disableConnectedDisplay(int displayId);
 
-    // Request to power display ON or OFF.
+    // Request to power display OFF or reset it to a power state it supposed to have.
     @EnforcePermission("MANAGE_DISPLAYS")
-    boolean requestDisplayPower(int displayId, boolean on);
+    boolean requestDisplayPower(int displayId, int state);
 
     // Restricts display modes to specified modeIds.
     @EnforcePermission("RESTRICT_DISPLAY_MODES")
