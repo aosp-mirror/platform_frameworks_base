@@ -1888,7 +1888,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         final boolean restarting = !initial;
         final Binder startInputToken = new Binder();
-        final StartInputInfo info = new StartInputInfo(mCurrentUserId,
+        final StartInputInfo info = new StartInputInfo(userId,
                 bindingController.getCurToken(), bindingController.getCurTokenDisplayId(),
                 bindingController.getCurId(), startInputReason,
                 restarting, UserHandle.getUserId(userData.mCurClient.mUid),
@@ -2576,7 +2576,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 } else if (packageName != null) {
                     if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
                     final PackageManager userAwarePackageManager =
-                            getPackageManagerForUser(mContext, mCurrentUserId);
+                            getPackageManagerForUser(mContext, userId);
                     ApplicationInfo applicationInfo = null;
                     try {
                         applicationInfo = userAwarePackageManager.getApplicationInfo(packageName,
@@ -4682,7 +4682,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return;
         } else {
             // Called with current IME's token.
-            final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+            final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
             if (settings.getMethodMap().get(id) != null
                     && settings.getEnabledInputMethodListWithFilter(
                             (info) -> info.getId().equals(id)).isEmpty()) {
