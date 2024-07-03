@@ -19,7 +19,7 @@
     android:viewportHeight="24"
     android:viewportWidth="24">
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="?attr/pointerIconVectorStroke"
         android:pathData="M19 9.667h-4.668V5a2 2 0 0 0-2-2h-.667a2 2 0 0 0-2 2v4.667H5a2 2 0 0 0-2 2v.667a2 2 0 0 0 2 2h4.665V19a2 2 0 0 0 2 2h.667a2 2 0 0 0 2-2v-4.666H19a2 2 0 0 0 2-2v-.667a2 2 0 0 0-2-2m1 2.667a1 1 0 0 1-1 1h-5.668V19a1 1 0 0 1-1 1h-.667a1 1 0 0 1-1-1v-5.666H5a1 1 0 0 1-1-1v-.667a1 1 0 0 1 1-1h5.665V5a1 1 0 0 1 1-1h.667a1 1 0 0 1 1 1v5.667H19a1 1 0 0 1 1 1z" />
     <path
         android:fillColor="?attr/pointerIconVectorFill"
