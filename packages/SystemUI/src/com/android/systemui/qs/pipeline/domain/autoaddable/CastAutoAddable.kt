@@ -41,12 +41,7 @@ constructor(
 
     override fun ProducerScope<AutoAddSignal>.getCallback(): CastController.Callback {
         return CastController.Callback {
-            val isCasting =
-                controller.castDevices.any {
-                    it.state == CastController.CastDevice.STATE_CONNECTED ||
-                        it.state == CastController.CastDevice.STATE_CONNECTING
-                }
-            if (isCasting) {
+            if (controller.castDevices.any { it.isCasting }) {
                 sendAdd()
             }
         }

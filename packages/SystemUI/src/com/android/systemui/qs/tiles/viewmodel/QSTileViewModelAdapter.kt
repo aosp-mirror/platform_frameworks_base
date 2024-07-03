@@ -38,6 +38,7 @@ import java.util.function.Supplier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectIndexed
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -168,6 +169,7 @@ constructor(
                 if (listeningClients.size == 1) {
                     stateJob =
                         qsTileViewModel.state
+                            .filterNotNull()
                             .map { mapState(context, it, qsTileViewModel.config) }
                             .onEach { legacyState ->
                                 synchronized(callbacks) {

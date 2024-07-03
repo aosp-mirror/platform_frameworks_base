@@ -18,7 +18,7 @@ package com.android.systemui.recordissue
 
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.tiles.RecordIssueTile
+import com.android.systemui.recordissue.RecordIssueModule.Companion.TILE_SPEC
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -35,11 +35,7 @@ constructor(
 ) {
 
     private val prefs =
-        userFileManager.getSharedPreferences(
-            RecordIssueTile.TILE_SPEC,
-            Context.MODE_PRIVATE,
-            userTracker.userId
-        )
+        userFileManager.getSharedPreferences(TILE_SPEC, Context.MODE_PRIVATE, userTracker.userId)
 
     var takeBugreport
         get() = prefs.getBoolean(KEY_TAKE_BUG_REPORT, false)

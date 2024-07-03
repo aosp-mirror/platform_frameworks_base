@@ -48,7 +48,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
@@ -894,8 +894,19 @@ public class Bubble implements BubbleViewProvider {
     }
 
     @Nullable
-    Intent getAppBubbleIntent() {
+    @VisibleForTesting
+    public Intent getAppBubbleIntent() {
         return mAppIntent;
+    }
+
+    /**
+     * Sets the intent for a bubble that is an app bubble (one for which {@link #mIsAppBubble} is
+     * true).
+     *
+     * @param appIntent The intent to set for the app bubble.
+     */
+    void setAppBubbleIntent(Intent appIntent) {
+        mAppIntent = appIntent;
     }
 
     /**

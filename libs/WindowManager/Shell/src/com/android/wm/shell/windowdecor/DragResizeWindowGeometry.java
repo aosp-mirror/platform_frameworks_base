@@ -142,38 +142,40 @@ final class DragResizeWindowGeometry {
      * Returns if this MotionEvent should be handled, based on its source and position.
      */
     boolean shouldHandleEvent(@NonNull MotionEvent e, @NonNull Point offset) {
-        return shouldHandleEvent(e, isTouchEvent(e), offset);
-    }
-
-    /**
-     * Returns if this MotionEvent should be handled, based on its source and position.
-     */
-    boolean shouldHandleEvent(@NonNull MotionEvent e, boolean isTouch, @NonNull Point offset) {
         final float x = e.getX(0) + offset.x;
         final float y = e.getY(0) + offset.y;
 
         if (enableWindowingEdgeDragResize()) {
             // First check if touch falls within a corner.
             // Large corner bounds are used for course input like touch, otherwise fine bounds.
-            boolean result = isTouch
+            boolean result = isEventFromTouchscreen(e)
                     ? isInCornerBounds(mLargeTaskCorners, x, y)
                     : isInCornerBounds(mFineTaskCorners, x, y);
-            // Check if touch falls within the edge resize handle, since edge resizing can apply
-            // for any input source.
-            if (!result) {
+            // Check if touch falls within the edge resize handle. Limit edge resizing to stylus and
+            // mouse input.
+            if (!result && isEdgeResizePermitted(e)) {
                 result = isInEdgeResizeBounds(x, y);
             }
             return result;
         } else {
             // Legacy uses only fine corners for touch, and edges only for non-touch input.
-            return isTouch
+            return isEventFromTouchscreen(e)
                     ? isInCornerBounds(mFineTaskCorners, x, y)
                     : isInEdgeResizeBounds(x, y);
         }
     }
 
-    private boolean isTouchEvent(@NonNull MotionEvent e) {
+    static boolean isEventFromTouchscreen(@NonNull MotionEvent e) {
         return (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
+    }
+
+    static boolean isEdgeResizePermitted(@NonNull MotionEvent e) {
+        if (enableWindowingEdgeDragResize()) {
+            return e.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
+                    || e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
+        } else {
+            return e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
+        }
     }
 
     private boolean isInCornerBounds(TaskCorners corners, float xf, float yf) {
@@ -187,24 +189,29 @@ final class DragResizeWindowGeometry {
     /**
      * Returns the control type for the drag-resize, based on the touch regions and this
      * MotionEvent's coordinates.
+     * @param isTouchscreen Controls the size of the corner resize regions; touchscreen events
+     *                      (finger & stylus) are eligible for a larger area than cursor events
+     * @param isEdgeResizePermitted Indicates if the event is eligible for falling into an edge
+     *                              resize region.
      */
     @DragPositioningCallback.CtrlType
-    int calculateCtrlType(boolean isTouch, float x, float y) {
+    int calculateCtrlType(boolean isTouchscreen, boolean isEdgeResizePermitted, float x, float y) {
         if (enableWindowingEdgeDragResize()) {
             // First check if touch falls within a corner.
             // Large corner bounds are used for course input like touch, otherwise fine bounds.
-            int ctrlType = isTouch
+            int ctrlType = isTouchscreen
                     ? mLargeTaskCorners.calculateCornersCtrlType(x, y)
                     : mFineTaskCorners.calculateCornersCtrlType(x, y);
+
             // Check if touch falls within the edge resize handle, since edge resizing can apply
             // for any input source.
-            if (ctrlType == CTRL_TYPE_UNDEFINED) {
+            if (ctrlType == CTRL_TYPE_UNDEFINED && isEdgeResizePermitted) {
                 ctrlType = calculateEdgeResizeCtrlType(x, y);
             }
             return ctrlType;
         } else {
             // Legacy uses only fine corners for touch, and edges only for non-touch input.
-            return isTouch
+            return isTouchscreen
                     ? mFineTaskCorners.calculateCornersCtrlType(x, y)
                     : calculateEdgeResizeCtrlType(x, y);
         }

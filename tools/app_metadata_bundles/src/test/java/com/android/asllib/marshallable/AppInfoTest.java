@@ -20,6 +20,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.android.asllib.testutils.TestUtils;
 import com.android.asllib.util.MalformedXmlException;
+import com.android.asllib.util.XmlUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,35 +35,15 @@ public class AppInfoTest {
     private static final String APP_INFO_HR_PATH = "com/android/asllib/appinfo/hr";
     private static final String APP_INFO_OD_PATH = "com/android/asllib/appinfo/od";
     public static final List<String> REQUIRED_FIELD_NAMES =
-            List.of(
-                    "title",
-                    "description",
-                    "containsAds",
-                    "obeyAps",
-                    "adsFingerprinting",
-                    "securityFingerprinting",
-                    "privacyPolicy",
-                    "securityEndpoints",
-                    "firstPartyEndpoints",
-                    "serviceProviderEndpoints",
-                    "category",
-                    "email");
+            List.of("apsCompliant", "privacyPolicy");
     public static final List<String> REQUIRED_FIELD_NAMES_OD =
-            List.of(
-                    "title",
-                    "description",
-                    "contains_ads",
-                    "obey_aps",
-                    "ads_fingerprinting",
-                    "security_fingerprinting",
-                    "privacy_policy",
-                    "security_endpoint",
-                    "first_party_endpoint",
-                    "service_provider_endpoint",
-                    "category",
-                    "email");
-    public static final List<String> OPTIONAL_FIELD_NAMES = List.of("website");
-    public static final List<String> OPTIONAL_FIELD_NAMES_OD = List.of("website");
+            List.of("aps_compliant", "privacy_policy");
+    public static final List<String> REQUIRED_CHILD_NAMES =
+            List.of("first-party-endpoints", "service-provider-endpoints");
+    public static final List<String> REQUIRED_CHILD_NAMES_OD =
+            List.of("first_party_endpoints", "service_provider_endpoints");
+    public static final List<String> OPTIONAL_FIELD_NAMES = List.of();
+    public static final List<String> OPTIONAL_FIELD_NAMES_OD = List.of();
 
     private static final String ALL_FIELDS_VALID_FILE_NAME = "all-fields-valid.xml";
 
@@ -100,6 +81,34 @@ public class AppInfoTest {
 
         for (String reqField : REQUIRED_FIELD_NAMES_OD) {
             System.out.println("testing missing required field od: " + reqField);
+            var appInfoEle =
+                    TestUtils.getElementsFromResource(
+                            Paths.get(APP_INFO_OD_PATH, ALL_FIELDS_VALID_FILE_NAME));
+            TestUtils.removeOdChildEleWithName(appInfoEle.get(0), reqField);
+            assertThrows(
+                    MalformedXmlException.class,
+                    () -> new AppInfoFactory().createFromOdElements(appInfoEle));
+        }
+    }
+
+    /** Tests missing required child fails. */
+    @Test
+    public void testMissingRequiredChild() throws Exception {
+        System.out.println("Starting testMissingRequiredFields");
+        for (String reqChildName : REQUIRED_CHILD_NAMES) {
+            System.out.println("testing missing required child hr: " + reqChildName);
+            var appInfoEle =
+                    TestUtils.getElementsFromResource(
+                            Paths.get(APP_INFO_HR_PATH, ALL_FIELDS_VALID_FILE_NAME));
+            var child = XmlUtils.getChildrenByTagName(appInfoEle.get(0), reqChildName).get(0);
+            appInfoEle.get(0).removeChild(child);
+            assertThrows(
+                    MalformedXmlException.class,
+                    () -> new AppInfoFactory().createFromHrElements(appInfoEle));
+        }
+
+        for (String reqField : REQUIRED_CHILD_NAMES_OD) {
+            System.out.println("testing missing required child od: " + reqField);
             var appInfoEle =
                     TestUtils.getElementsFromResource(
                             Paths.get(APP_INFO_OD_PATH, ALL_FIELDS_VALID_FILE_NAME));

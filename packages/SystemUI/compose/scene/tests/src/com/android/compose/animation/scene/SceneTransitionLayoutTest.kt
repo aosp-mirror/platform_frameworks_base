@@ -21,6 +21,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -330,6 +331,42 @@ class SceneTransitionLayoutTest {
             at(48) { rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(140.dp, 130.dp) }
             after { rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(120.dp, 140.dp) }
         }
+    }
+
+    @Test
+    fun layoutSizeDoesNotOverscrollWhenOverscrollIsSpecified() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions { overscroll(SceneB, Orientation.Horizontal) }
+                )
+            }
+
+        val layoutTag = "layout"
+        rule.setContent {
+            SceneTransitionLayout(state, Modifier.testTag(layoutTag)) {
+                scene(SceneA) { Box(Modifier.size(50.dp)) }
+                scene(SceneB) { Box(Modifier.size(70.dp)) }
+            }
+        }
+
+        // Overscroll on A at -100%: size should be interpolated given that there is no overscroll
+        // defined for scene A.
+        var progress by mutableStateOf(-1f)
+        rule.runOnIdle {
+            state.startTransition(transition(from = SceneA, to = SceneB, progress = { progress }))
+        }
+        rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(30.dp)
+
+        // Middle of the transition.
+        progress = 0.5f
+        rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(60.dp)
+
+        // Overscroll on B at 200%: size should not be interpolated given that there is an
+        // overscroll defined for scene B.
+        progress = 2f
+        rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(70.dp)
     }
 
     @Test

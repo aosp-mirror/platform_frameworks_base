@@ -41,6 +41,7 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.R;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -159,19 +160,30 @@ public final class AccessibilityTargetHelper {
 
         final List<AccessibilityTarget> targets = new ArrayList<>(installedServices.size());
         for (AccessibilityServiceInfo info : installedServices) {
-            final int targetSdk =
-                    info.getResolveInfo().serviceInfo.applicationInfo.targetSdkVersion;
-            final boolean hasRequestAccessibilityButtonFlag =
-                    (info.flags & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
-            if ((targetSdk <= Build.VERSION_CODES.Q) && !hasRequestAccessibilityButtonFlag
-                    && (shortcutType == SOFTWARE)) {
-                continue;
+            if (isValidServiceTarget(info, shortcutType)) {
+                targets.add(createAccessibilityServiceTarget(context, shortcutType, info));
             }
-
-            targets.add(createAccessibilityServiceTarget(context, shortcutType, info));
         }
 
         return targets;
+    }
+
+    /**
+     * Check for maintaining compatibility on prior versions.
+     * Determines if a given service should be accumulated in a list of installed services.
+     * @param info service info to check.
+     * @param shortcutType type of shortcut to accumulate a list for.
+     * @return {@code true} if the service should be added (always true past version Q),
+     * otherwise {@code false}.
+     */
+    @VisibleForTesting
+    public static boolean isValidServiceTarget(
+            AccessibilityServiceInfo info, @UserShortcutType int shortcutType) {
+        final boolean hasRequestAccessibilityButtonFlag =
+                (info.flags & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
+        return (info.getResolveInfo().serviceInfo.applicationInfo.targetSdkVersion
+                > Build.VERSION_CODES.Q) || hasRequestAccessibilityButtonFlag
+                || shortcutType != SOFTWARE;
     }
 
     private static List<AccessibilityTarget> getAccessibilityActivityTargets(Context context,

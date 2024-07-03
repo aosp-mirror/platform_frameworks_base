@@ -16,12 +16,9 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
-import com.android.settingslib.statusbar.notification.data.repository.FakeNotificationsSoundPolicyRepository
 import com.android.settingslib.statusbar.notification.domain.interactor.NotificationsSoundPolicyInteractor
 import com.android.systemui.kosmos.Kosmos
-
-var Kosmos.notificationsSoundPolicyRepository by
-    Kosmos.Fixture { FakeNotificationsSoundPolicyRepository() }
+import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 
 val Kosmos.notificationsSoundPolicyInteractor: NotificationsSoundPolicyInteractor by
-    Kosmos.Fixture { NotificationsSoundPolicyInteractor(notificationsSoundPolicyRepository) }
+    Kosmos.Fixture { NotificationsSoundPolicyInteractor(zenModeRepository) }

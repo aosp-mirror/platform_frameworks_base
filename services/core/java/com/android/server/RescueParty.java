@@ -58,7 +58,6 @@ import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -493,14 +492,6 @@ public class RescueParty {
 
     private static void executeRescueLevelInternalOld(Context context, int level, @Nullable
             String failedPackage) throws Exception {
-
-        // Note: DeviceConfig reset is disabled currently and would be enabled using the flag,
-        // after we have figured out a way to reset flags without interfering with trunk
-        // development. TODO: b/287618292 For enabling flag resets.
-        if (!Flags.allowRescuePartyFlagResets() && level <= LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS) {
-            return;
-        }
-
         CrashRecoveryStatsLog.write(CrashRecoveryStatsLog.RESCUE_PARTY_RESET_REPORTED,
                 level, levelToString(level));
         // Try our best to reset all settings possible, and once finished
@@ -508,43 +499,10 @@ public class RescueParty {
         Exception res = null;
         switch (level) {
             case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
-                try {
-                    resetAllSettingsIfNecessary(context, Settings.RESET_MODE_UNTRUSTED_DEFAULTS,
-                            level);
-                } catch (Exception e) {
-                    res = e;
-                }
-                try {
-                    resetDeviceConfig(context, /*isScoped=*/true, failedPackage);
-                } catch (Exception e) {
-                    res = e;
-                }
                 break;
             case LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
-                try {
-                    resetAllSettingsIfNecessary(context, Settings.RESET_MODE_UNTRUSTED_CHANGES,
-                            level);
-                } catch (Exception e) {
-                    res = e;
-                }
-                try {
-                    resetDeviceConfig(context, /*isScoped=*/true, failedPackage);
-                } catch (Exception e) {
-                    res = e;
-                }
                 break;
             case LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
-                try {
-                    resetAllSettingsIfNecessary(context, Settings.RESET_MODE_TRUSTED_DEFAULTS,
-                            level);
-                } catch (Exception e) {
-                    res = e;
-                }
-                try {
-                    resetDeviceConfig(context, /*isScoped=*/false, failedPackage);
-                } catch (Exception e) {
-                    res = e;
-                }
                 break;
             case LEVEL_WARM_REBOOT:
                 executeWarmReboot(context, level, failedPackage);
@@ -572,16 +530,8 @@ public class RescueParty {
                 level, levelToString(level));
         switch (level) {
             case RESCUE_LEVEL_SCOPED_DEVICE_CONFIG_RESET:
-                // Enable deviceConfig reset behind flag
-                if (Flags.allowRescuePartyFlagResets()) {
-                    resetDeviceConfig(context, /*isScoped=*/true, failedPackage);
-                }
                 break;
             case RESCUE_LEVEL_ALL_DEVICE_CONFIG_RESET:
-                // Enable deviceConfig reset behind flag
-                if (Flags.allowRescuePartyFlagResets()) {
-                    resetDeviceConfig(context, /*isScoped=*/false, failedPackage);
-                }
                 break;
             case RESCUE_LEVEL_WARM_REBOOT:
                 executeWarmReboot(context, level, failedPackage);
@@ -673,7 +623,7 @@ public class RescueParty {
                 case RESCUE_LEVEL_SCOPED_DEVICE_CONFIG_RESET:
                     return PackageHealthObserverImpact.USER_IMPACT_LEVEL_10;
                 case RESCUE_LEVEL_ALL_DEVICE_CONFIG_RESET:
-                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_20;
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_40;
                 case RESCUE_LEVEL_WARM_REBOOT:
                     return PackageHealthObserverImpact.USER_IMPACT_LEVEL_50;
                 case RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
@@ -729,61 +679,6 @@ public class RescueParty {
         }
         if (res != null) {
             throw res;
-        }
-    }
-
-    private static void resetDeviceConfig(Context context, boolean isScoped,
-            @Nullable String failedPackage) throws Exception {
-        final ContentResolver resolver = context.getContentResolver();
-        try {
-            if (!isScoped || failedPackage == null) {
-                resetAllAffectedNamespaces(context);
-            } else {
-                performScopedReset(context, failedPackage);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to reset config settings", e);
-        }
-    }
-
-    private static void resetAllAffectedNamespaces(Context context) {
-        RescuePartyObserver rescuePartyObserver = RescuePartyObserver.getInstance(context);
-        Set<String> allAffectedNamespaces = rescuePartyObserver.getAllAffectedNamespaceSet();
-
-        Slog.w(TAG,
-                "Performing reset for all affected namespaces: "
-                        + Arrays.toString(allAffectedNamespaces.toArray()));
-        Iterator<String> it = allAffectedNamespaces.iterator();
-        while (it.hasNext()) {
-            String namespace = it.next();
-            // Don't let RescueParty reset the namespace for RescueParty switches.
-            if (NAMESPACE_CONFIGURATION.equals(namespace)) {
-                continue;
-            }
-            DeviceConfig.resetToDefaults(DEVICE_CONFIG_RESET_MODE, namespace);
-        }
-    }
-
-    private static void performScopedReset(Context context, @NonNull String failedPackage) {
-        RescuePartyObserver rescuePartyObserver = RescuePartyObserver.getInstance(context);
-        Set<String> affectedNamespaces = rescuePartyObserver.getAffectedNamespaceSet(
-                failedPackage);
-        // If we can't find namespaces affected for current package,
-        // skip this round of reset.
-        if (affectedNamespaces != null) {
-            Slog.w(TAG,
-                    "Performing scoped reset for package: " + failedPackage
-                            + ", affected namespaces: "
-                            + Arrays.toString(affectedNamespaces.toArray()));
-            Iterator<String> it = affectedNamespaces.iterator();
-            while (it.hasNext()) {
-                String namespace = it.next();
-                // Don't let RescueParty reset the namespace for RescueParty switches.
-                if (NAMESPACE_CONFIGURATION.equals(namespace)) {
-                    continue;
-                }
-                DeviceConfig.resetToDefaults(DEVICE_CONFIG_RESET_MODE, namespace);
-            }
         }
     }
 

@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"డీబగ్ యాప్‌ల కోసం GPU డీబగ్ లేయర్‌లను లోడ్ చేయడాన్ని అనుమతించండి"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"వివరణాత్మక వెండార్‌ లాగింగ్‌ను ఎనేబుల్ చేయండి"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"బగ్ రిపోర్ట్‌లలో అదనపు పరికర-నిర్దిష్ట వెండార్ లాగ్‌లను చేర్చండి, అవి ప్రైవేట్ సమాచారాన్ని కలిగి ఉండవచ్చు, మరింత బ్యాటరీని, మరియు/లేదా మరింత స్టోరేజ్‌ను ఉపయోగించవచ్చు."</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"విండో యానిమేషన్ స్కేల్"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ట్రాన్సిషన్ యానిమేషన్ స్కేల్"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"యానిమేటర్ వ్యవధి స్కేల్"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"అలారాలు &amp; రిమైండర్‌లు"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"అలారాలను సెట్ చేయడానికి, టైమ్-సెన్సిటివ్ చర్యలను షెడ్యూల్ చేయడానికి ఈ యాప్‌ను అనుమతించండి. ఇది యాప్‌ను బ్యాక్‌గ్రౌండ్‌లో రన్ అవడానికి అనుమతిస్తుంది, ఇది ఎక్కువ బ్యాటరీని ఉపయోగించవచ్చు.\n\nఈ అనుమతిని ఆఫ్ చేస్తే, ఈ యాప్ ద్వారా షెడ్యూల్ చేసినటువంటి ఇప్పటికే ఉన్న అలారాలు, టైమ్-ఆధారిత ఈవెంట్‌లు పనిచేయవు."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"షెడ్యూల్, అలారం, రిమైండర్, గడియారం"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"అంతరాయం కలిగించవద్దు"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ఆన్ చేయండి"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"అంతరాయం కలిగించవద్దును ఆన్ చేయండి"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ఎప్పటికీ వ‌ద్దు"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"వ్యవధి"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ప్రతిసారి అడగాలి"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"మీరు ఆఫ్‌ చేసే వరకు"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(పేరు లేదు)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ఇప్పుడే"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ఈ ఫోన్"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ఈ టాబ్లెట్"</string>

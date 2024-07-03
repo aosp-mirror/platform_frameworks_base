@@ -32,6 +32,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
@@ -828,6 +829,36 @@ public class WindowDecorationTests extends ShellTestCase {
                 eq(mMockTaskSurface), anyInt(), anyInt());
     }
 
+    @Test
+    public void updateViewHost_applyTransactionOnDrawIsTrue_surfaceControlIsUpdated() {
+        final TestWindowDecoration windowDecor = createWindowDecoration(
+                new TestRunningTaskInfoBuilder().build());
+        mRelayoutParams.mApplyStartTransactionOnDraw = true;
+
+        windowDecor.updateViewHost(mRelayoutParams, mMockSurfaceControlStartT, mRelayoutResult);
+
+        verify(mMockRootSurfaceControl).applyTransactionOnDraw(mMockSurfaceControlStartT);
+    }
+
+    @Test
+    public void updateViewHost_nullDrawTransaction_applyTransactionOnDrawIsTrue_throwsException() {
+        final TestWindowDecoration windowDecor = createWindowDecoration(
+                new TestRunningTaskInfoBuilder().build());
+        mRelayoutParams.mApplyStartTransactionOnDraw = true;
+
+        assertThrows(IllegalArgumentException.class,
+                () -> windowDecor.updateViewHost(
+                        mRelayoutParams, null /* onDrawTransaction */, mRelayoutResult));
+    }
+
+    @Test
+    public void updateViewHost_nullDrawTransaction_applyTransactionOnDrawIsFalse_doesNotThrow() {
+        final TestWindowDecoration windowDecor = createWindowDecoration(
+                new TestRunningTaskInfoBuilder().build());
+        mRelayoutParams.mApplyStartTransactionOnDraw = false;
+
+        windowDecor.updateViewHost(mRelayoutParams, null /* onDrawTransaction */, mRelayoutResult);
+    }
 
     private TestWindowDecoration createWindowDecoration(ActivityManager.RunningTaskInfo taskInfo) {
         return new TestWindowDecoration(mContext, mMockDisplayController, mMockShellTaskOrganizer,

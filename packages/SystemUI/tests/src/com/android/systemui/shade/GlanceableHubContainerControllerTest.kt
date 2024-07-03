@@ -18,8 +18,6 @@ package com.android.systemui.shade
 
 import android.graphics.Rect
 import android.os.PowerManager
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
@@ -29,10 +27,8 @@ import android.widget.FrameLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
-import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags
-import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler
 import com.android.systemui.ambient.touch.TouchMonitor
@@ -56,10 +52,8 @@ import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.stack.notificationStackScrollLayoutController
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -70,8 +64,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.Mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
@@ -181,133 +173,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
                 // Second call throws.
                 assertThrows(RuntimeException::class.java) { underTest.initView(context) }
-            }
-        }
-
-    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
-    @Test
-    fun onTouchEvent_communalClosed_doesNotIntercept() =
-        with(kosmos) {
-            testScope.runTest {
-                // Communal is closed.
-                goToScene(CommunalScenes.Blank)
-
-                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
-            }
-        }
-
-    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
-    @Test
-    fun onTouchEvent_openGesture_interceptsTouches() =
-        with(kosmos) {
-            testScope.runTest {
-                // Communal is closed.
-                goToScene(CommunalScenes.Blank)
-
-                // Initial touch down is intercepted, and so are touches outside of the region,
-                // until an
-                // up event is received.
-                assertThat(underTest.onTouchEvent(DOWN_IN_RIGHT_SWIPE_REGION_EVENT)).isTrue()
-                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isTrue()
-                assertThat(underTest.onTouchEvent(UP_EVENT)).isTrue()
-                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isFalse()
-            }
-        }
-
-    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
-    @Test
-    fun onTouchEvent_communalTransitioning_interceptsTouches() =
-        with(kosmos) {
-            testScope.runTest {
-                // Communal is opening.
-                communalRepository.setTransitionState(
-                    flowOf(
-                        ObservableTransitionState.Transition(
-                            fromScene = CommunalScenes.Blank,
-                            toScene = CommunalScenes.Communal,
-                            currentScene = flowOf(CommunalScenes.Blank),
-                            progress = flowOf(0.5f),
-                            isInitiatedByUserInput = true,
-                            isUserInputOngoing = flowOf(true)
-                        )
-                    )
-                )
-                testableLooper.processAllMessages()
-
-                // Touch events are intercepted.
-                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
-                // User activity sent to PowerManager.
-                verify(powerManager).userActivity(any(), any(), any())
-            }
-        }
-
-    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
-    @Test
-    fun onTouchEvent_communalOpen_interceptsTouches() =
-        with(kosmos) {
-            testScope.runTest {
-                // Communal is open.
-                goToScene(CommunalScenes.Communal)
-
-                // Touch events are intercepted.
-                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
-                // User activity sent to PowerManager.
-                verify(powerManager).userActivity(any(), any(), any())
-            }
-        }
-
-    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
-    @Test
-    fun onTouchEvent_communalAndBouncerShowing_doesNotIntercept() =
-        with(kosmos) {
-            testScope.runTest {
-                // Communal is open.
-                goToScene(CommunalScenes.Communal)
-
-                // Bouncer is visible.
-                fakeKeyguardBouncerRepository.setPrimaryShow(true)
-                testableLooper.processAllMessages()
-
-                // Touch events are not intercepted.
-                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
-                // User activity is not sent to PowerManager.
-                verify(powerManager, times(0)).userActivity(any(), any(), any())
-            }
-        }
-
-    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
-    @Test
-    fun onTouchEvent_communalAndShadeShowing_doesNotIntercept() =
-        with(kosmos) {
-            testScope.runTest {
-                // Communal is open.
-                goToScene(CommunalScenes.Communal)
-
-                // Shade shows up.
-                shadeTestUtil.setQsExpansion(1.0f)
-                testableLooper.processAllMessages()
-
-                // Touch events are not intercepted.
-                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
-            }
-        }
-
-    @DisableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
-    @Test
-    fun onTouchEvent_containerViewDisposed_doesNotIntercept() =
-        with(kosmos) {
-            testScope.runTest {
-                // Communal is open.
-                goToScene(CommunalScenes.Communal)
-
-                // Touch events are intercepted.
-                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
-
-                // Container view disposed.
-                underTest.disposeView()
-
-                // Touch events are not intercepted.
-                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
             }
         }
 
@@ -517,7 +382,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(FLAG_GLANCEABLE_HUB_FULLSCREEN_SWIPE)
     fun fullScreenSwipeGesture_doNotProcessTouchesInNotificationStack() =
         with(kosmos) {
             testScope.runTest {
@@ -572,9 +436,5 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 CONTAINER_HEIGHT.toFloat() / 2,
                 0
             )
-        private val DOWN_IN_RIGHT_SWIPE_REGION_EVENT =
-            MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, CONTAINER_WIDTH.toFloat(), 0f, 0)
-        private val MOVE_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
-        private val UP_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
     }
 }

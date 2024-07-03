@@ -15,9 +15,14 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.paint;
 
+/**
+ * Interface to a paint object
+ * For more details see Android Paint
+ */
 public interface PaintChanges {
 
-
+    // MASK to be set/cleared
+    int CLEAR_TEXT_SIZE = 1 << (PaintBundle.TEXT_SIZE - 1);
     int CLEAR_TEXT_STYLE = 1 << (PaintBundle.TYPEFACE - 1);
     int CLEAR_COLOR = 1 << (PaintBundle.COLOR - 1);
     int CLEAR_STROKE_WIDTH = 1 << (PaintBundle.STROKE_WIDTH - 1);
@@ -32,21 +37,101 @@ public interface PaintChanges {
     int CLEAR_COLOR_FILTER = 1 << (PaintBundle.COLOR_FILTER - 1);
     int VALID_BITS = 0x1FFF; // only the first 13 bit are valid now
 
-
+    /**
+     * Set the size of text
+     * @param size
+     */
     void setTextSize(float size);
+
+    /**
+     * Set the width of lines
+     * @param width
+     */
     void setStrokeWidth(float width);
+
+    /**
+     * Set the color to use
+     * @param color
+     */
     void setColor(int color);
+
+    /**
+     * Set the Stroke Cap
+     * @param cap
+     */
     void setStrokeCap(int cap);
+
+    /**
+     * Set the Stroke style FILL and/or STROKE
+     * @param style
+     */
     void setStyle(int style);
-    void setShader(int shader, String shaderString);
+
+    /**
+     * Set the id of the shader to use
+     * @param shader
+     */
+    void setShader(int shader);
+
+    /**
+     * Set the way image is interpolated
+     * @param quality
+     */
     void setImageFilterQuality(int quality);
+
+    /**
+     * Set the alpha to draw under
+     * @param a
+     */
     void setAlpha(float a);
+
+    /**
+     * Set the Stroke Miter
+     * @param miter
+     */
     void setStrokeMiter(float miter);
+
+    /**
+     * Set the Stroke Join
+     * @param join
+     */
     void setStrokeJoin(int join);
+
+    /**
+     * Should bitmaps be interpolated
+     * @param filter
+     */
     void setFilterBitmap(boolean filter);
+
+    /**
+     * Set the blend mode can be porterduff + others
+     * @param mode
+     */
     void setBlendMode(int mode);
+
+    /**
+     * Set the AntiAlias. Typically true
+     * Set to off when you need pixilated look (e.g. QR codes)
+     * @param aa
+     */
     void setAntiAlias(boolean aa);
+
+    /**
+     * Clear some sub set of the settings
+     * @param mask
+     */
     void clear(long mask);
+
+    /**
+     * Set a linear gradient fill
+     * @param colorsArray
+     * @param stopsArray
+     * @param startX
+     * @param startY
+     * @param endX
+     * @param endY
+     * @param tileMode
+     */
     void setLinearGradient(
             int[] colorsArray,
             float[] stopsArray,
@@ -57,6 +142,15 @@ public interface PaintChanges {
             int tileMode
     );
 
+    /**
+     * Set a radial gradient fill
+     * @param colorsArray
+     * @param stopsArray
+     * @param centerX
+     * @param centerY
+     * @param radius
+     * @param tileMode
+     */
     void setRadialGradient(
             int[] colorsArray,
             float[] stopsArray,
@@ -66,6 +160,13 @@ public interface PaintChanges {
             int tileMode
     );
 
+    /**
+     * Set a sweep gradient fill
+     * @param colorsArray
+     * @param stopsArray
+     * @param centerX
+     * @param centerY
+     */
     void setSweepGradient(
             int[] colorsArray,
             float[] stopsArray,
@@ -73,9 +174,19 @@ public interface PaintChanges {
             float centerY
     );
 
-
+    /**
+     * Set Color filter mod
+     * @param color
+     * @param mode
+     */
     void setColorFilter(int color, int mode);
 
+    /**
+     * Set TypeFace 0,1,2
+     * TODO above should point to a string to be decoded
+     * @param fontType
+     * @param weight
+     * @param italic
+     */
     void setTypeFace(int fontType, int weight, boolean italic);
 }
-

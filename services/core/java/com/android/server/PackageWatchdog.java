@@ -663,6 +663,7 @@ public class PackageWatchdog {
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_10,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_20,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_30,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_40,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_50,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_70,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_71,
@@ -678,6 +679,7 @@ public class PackageWatchdog {
         /* Actions having medium user impact, user of a device will likely notice. */
         int USER_IMPACT_LEVEL_20 = 20;
         int USER_IMPACT_LEVEL_30 = 30;
+        int USER_IMPACT_LEVEL_40 = 40;
         int USER_IMPACT_LEVEL_50 = 50;
         int USER_IMPACT_LEVEL_70 = 70;
         /* Action has high user impact, a last resort, user of a device will be very frustrated. */

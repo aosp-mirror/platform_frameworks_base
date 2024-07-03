@@ -199,8 +199,16 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     void relayout(RelayoutParams params, SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT, WindowContainerTransaction wct, T rootView,
             RelayoutResult<T> outResult) {
-        outResult.reset();
+        updateViewsAndSurfaces(params, startT, finishT, wct, rootView, outResult);
+        if (outResult.mRootView != null) {
+            updateViewHost(params, startT, outResult);
+        }
+    }
 
+    protected void updateViewsAndSurfaces(RelayoutParams params,
+            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
+            WindowContainerTransaction wct, T rootView, RelayoutResult<T> outResult) {
+        outResult.reset();
         if (params.mRunningTaskInfo != null) {
             mTaskInfo = params.mRunningTaskInfo;
         }
@@ -236,7 +244,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         updateCaptionContainerSurface(startT, outResult);
         updateCaptionInsets(params, wct, outResult, taskBounds);
         updateTaskSurface(params, startT, finishT, outResult);
-        updateViewHost(params, startT, outResult);
     }
 
     private void inflateIfNeeded(RelayoutParams params, WindowContainerTransaction wct,
@@ -410,8 +417,17 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
     }
 
-    private void updateViewHost(RelayoutParams params, SurfaceControl.Transaction onDrawTransaction,
-            RelayoutResult<T> outResult) {
+    /**
+     * Updates a {@link SurfaceControlViewHost} to connect the window decoration surfaces with our
+     * View hierarchy.
+     *
+     * @param params parameters to use from the last relayout
+     * @param onDrawTransaction a transaction to apply in sync with #onDraw
+     * @param outResult results to use from the last relayout
+     *
+     */
+    protected void updateViewHost(RelayoutParams params,
+            SurfaceControl.Transaction onDrawTransaction, RelayoutResult<T> outResult) {
         Trace.beginSection("CaptionViewHostLayout");
         if (mCaptionWindowManager == null) {
             // Put caption under a container surface because ViewRootImpl sets the destination frame
@@ -433,6 +449,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
                     mCaptionWindowManager);
             if (params.mApplyStartTransactionOnDraw) {
+                if (onDrawTransaction == null) {
+                    throw new IllegalArgumentException("Trying to sync a null Transaction");
+                }
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
             }
             mViewHost.setView(outResult.mRootView, lp);
@@ -440,6 +459,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         } else {
             Trace.beginSection("CaptionViewHostLayout-relayout");
             if (params.mApplyStartTransactionOnDraw) {
+                if (onDrawTransaction == null) {
+                    throw new IllegalArgumentException("Trying to sync a null Transaction");
+                }
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
             }
             mViewHost.relayout(lp);

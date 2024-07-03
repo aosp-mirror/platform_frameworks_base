@@ -39,6 +39,7 @@ import android.media.AudioSystem;
 import android.media.ISoundDose;
 import android.media.ISoundDoseCallback;
 import android.media.SoundDoseRecord;
+import android.media.VolumeInfo;
 import android.os.Binder;
 import android.os.Message;
 import android.os.RemoteException;
@@ -642,9 +643,9 @@ public class SoundDoseHelper {
             if (index > safeIndex) {
                 streamState.setIndex(safeIndex, deviceType, caller,
                         true /*hasModifyAudioSettings*/);
-                mAudioHandler.sendMessageAtTime(
+                mAudioHandler.sendMessage(
                         mAudioHandler.obtainMessage(MSG_SET_DEVICE_VOLUME, deviceType,
-                                /*arg2=*/0, streamState), /*delay=*/0);
+                                /*arg2=*/0, streamState));
             }
         }
     }
@@ -685,8 +686,11 @@ public class SoundDoseHelper {
     /*package*/ void disableSafeMediaVolume(String callingPackage) {
         synchronized (mSafeMediaVolumeStateLock) {
             final long identity = Binder.clearCallingIdentity();
-            setSafeMediaVolumeEnabled(false, callingPackage);
-            Binder.restoreCallingIdentity(identity);
+            try {
+                setSafeMediaVolumeEnabled(false, callingPackage);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
 
             if (mPendingVolumeCommand != null) {
                 mAudioService.onSetStreamVolume(mPendingVolumeCommand.mStreamType,
@@ -700,6 +704,7 @@ public class SoundDoseHelper {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkRequiresPermission")
     /*package*/ void scheduleMusicActiveCheck() {
         synchronized (mSafeMediaVolumeStateLock) {
             cancelMusicActiveCheck();
@@ -895,6 +900,8 @@ public class SoundDoseHelper {
 
         try {
             if (!isAbsoluteVolume) {
+                mLogger.enqueue(
+                        SoundDoseEvent.getAbsVolumeAttenuationEvent(/*attenuation=*/0.f, device));
                 // remove any possible previous attenuation
                 soundDose.updateAttenuation(/* attenuationDB= */0.f, device);
 
@@ -903,10 +910,11 @@ public class SoundDoseHelper {
 
             if (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC
                     && safeDevicesContains(device)) {
-                soundDose.updateAttenuation(
-                        -AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
-                                (newIndex + 5) / 10,
-                                device), device);
+                float attenuationDb = -AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
+                        (newIndex + 5) / 10, device);
+                mLogger.enqueue(
+                        SoundDoseEvent.getAbsVolumeAttenuationEvent(attenuationDb, device));
+                soundDose.updateAttenuation(attenuationDb, device);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Could not apply the attenuation for MEL calculation with volume index "
@@ -1031,10 +1039,9 @@ public class SoundDoseHelper {
             mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
         }
 
-        mAudioHandler.sendMessageAtTime(
+        mAudioHandler.sendMessage(
                 mAudioHandler.obtainMessage(MSG_PERSIST_SAFE_VOLUME_STATE,
-                        persistedState, /*arg2=*/0,
-                        /*obj=*/null), /*delay=*/0);
+                        persistedState, /*arg2=*/0, /*obj=*/null));
     }
 
     private void updateCsdEnabled(String caller) {
@@ -1195,8 +1202,8 @@ public class SoundDoseHelper {
 
         sanitizeDoseRecords_l();
 
-        mAudioHandler.sendMessageAtTime(mAudioHandler.obtainMessage(MSG_PERSIST_CSD_VALUES,
-                /* arg1= */0, /* arg2= */0, /* obj= */null), /* delay= */0);
+        mAudioHandler.sendMessage(mAudioHandler.obtainMessage(MSG_PERSIST_CSD_VALUES,
+                /* arg1= */0, /* arg2= */0, /* obj= */null));
 
         mLogger.enqueue(SoundDoseEvent.getDoseUpdateEvent(currentCsd, totalDuration));
     }
@@ -1312,23 +1319,32 @@ public class SoundDoseHelper {
     }
 
     /** Called when handling MSG_LOWER_VOLUME_TO_RS1 */
+    @SuppressWarnings("AndroidFrameworkRequiresPermission")
     private void onLowerVolumeToRs1() {
-        mLogger.enqueue(SoundDoseEvent.getLowerVolumeToRs1Event());
         final ArrayList<AudioDeviceAttributes> devices = mAudioService.getDevicesForAttributesInt(
-                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build(), true);
-        final int nativeDeviceType;
-        final AudioDeviceAttributes ada;
-        if (!devices.isEmpty()) {
-            ada = devices.get(0);
-            nativeDeviceType = ada.getInternalType();
-        } else {
-            nativeDeviceType = AudioSystem.DEVICE_OUT_USB_HEADSET;
-            ada = new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_USB_HEADSET, "");
+                new AudioAttributes.Builder().setUsage(
+                        AudioAttributes.USAGE_MEDIA).build(), /*forVolume=*/true);
+        if (devices.isEmpty()) {
+            Log.e(TAG, "Cannot lower the volume to RS1, no devices registered for USAGE_MEDIA");
+            return;
         }
-        final int index = safeMediaVolumeIndex(nativeDeviceType);
-        mAudioService.setStreamVolumeWithAttributionInt(STREAM_MUSIC, index / 10, /*flags*/ 0, ada,
-                mContext.getOpPackageName(), /*attributionTag=*/null,
-                true /*canChangeMuteAndUpdateController*/);
+        final AudioDeviceAttributes ada = devices.get(0);
+        final int nativeDeviceType = ada.getInternalType();
+        final int index = safeMediaVolumeIndex(nativeDeviceType) / 10;
+        final VolumeInfo curVolume = mAudioService.getDeviceVolume(
+                new VolumeInfo.Builder(STREAM_MUSIC).build(), ada,
+                /*callingPackage=*/"sounddosehelper");
+
+        if (index < curVolume.getVolumeIndex()) {
+            mLogger.enqueue(SoundDoseEvent.getLowerVolumeToRs1Event());
+            mAudioService.setStreamVolumeWithAttributionInt(STREAM_MUSIC, index, /*flags*/ 0, ada,
+                    mContext.getOpPackageName(), /*attributionTag=*/null,
+                    /*canChangeMuteAndUpdateController=*/true);
+        } else {
+            Log.i(TAG, "The current volume " + curVolume.getVolumeIndex()
+                    + " for device type " + nativeDeviceType
+                    + " is already smaller or equal to the safe index volume " + index);
+        }
     }
 
     // StreamVolumeCommand contains the information needed to defer the process of
@@ -1348,9 +1364,9 @@ public class SoundDoseHelper {
 
         @Override
         public String toString() {
-            return new StringBuilder().append("{streamType=").append(mStreamType).append(",index=")
-                    .append(mIndex).append(",flags=").append(mFlags).append(",device=")
-                    .append(mDevice).append('}').toString();
+            return "{streamType=" + mStreamType
+                    + ",index=" + mIndex + ",flags=" + mFlags
+                    + ",device=" + mDevice + "}";
         }
     }
 }

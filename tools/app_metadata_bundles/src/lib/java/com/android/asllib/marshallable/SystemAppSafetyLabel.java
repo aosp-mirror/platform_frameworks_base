@@ -26,15 +26,10 @@ import java.util.List;
 /** Safety Label representation containing zero or more {@link DataCategory} for data shared */
 public class SystemAppSafetyLabel implements AslMarshallable {
 
-    private final String mUrl;
+    private final Boolean mDeclaration;
 
-    public SystemAppSafetyLabel(String url) {
-        this.mUrl = url;
-    }
-
-    /** Returns the system app safety label URL. */
-    public String getUrl() {
-        return mUrl;
+    public SystemAppSafetyLabel(Boolean d) {
+        this.mDeclaration = d;
     }
 
     /** Creates an on-device DOM element from the {@link SystemAppSafetyLabel}. */
@@ -43,7 +38,7 @@ public class SystemAppSafetyLabel implements AslMarshallable {
         Element systemAppSafetyLabelEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_SYSTEM_APP_SAFETY_LABEL);
         systemAppSafetyLabelEle.appendChild(
-                XmlUtils.createOdStringEle(doc, XmlUtils.OD_NAME_URL, mUrl));
+                XmlUtils.createOdBooleanEle(doc, XmlUtils.OD_NAME_DECLARATION, mDeclaration));
         return XmlUtils.listOf(systemAppSafetyLabelEle);
     }
 
@@ -52,7 +47,8 @@ public class SystemAppSafetyLabel implements AslMarshallable {
     public List<Element> toHrDomElements(Document doc) {
         Element systemAppSafetyLabelEle =
                 doc.createElement(XmlUtils.HR_TAG_SYSTEM_APP_SAFETY_LABEL);
-        systemAppSafetyLabelEle.setAttribute(XmlUtils.HR_ATTR_URL, mUrl);
+        XmlUtils.maybeSetHrBoolAttr(
+                systemAppSafetyLabelEle, XmlUtils.HR_ATTR_DECLARATION, mDeclaration);
         return XmlUtils.listOf(systemAppSafetyLabelEle);
     }
 }

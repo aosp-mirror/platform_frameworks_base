@@ -18,6 +18,7 @@ package com.android.server.contentcapture;
 
 import static android.Manifest.permission.MANAGE_CONTENT_CAPTURE;
 import static android.content.Context.CONTENT_CAPTURE_MANAGER_SERVICE;
+import static android.service.contentcapture.ContentCaptureService.ASSIST_CONTENT_ACTIVITY_START_KEY;
 import static android.service.contentcapture.ContentCaptureService.setClientState;
 import static android.view.contentcapture.ContentCaptureHelper.toList;
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS;
@@ -28,6 +29,7 @@ import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PR
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD;
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_REQUIRED_GROUPS_CONFIG;
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER;
+import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_ENABLE_ACTIVITY_START_ASSIST_CONTENT;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_FALSE;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_OK;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_SECURITY_EXCEPTION;
@@ -44,6 +46,7 @@ import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVIC
 import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_WRITE_FINISHED;
 import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__REJECT_DATA_SHARE_REQUEST;
 import static com.android.internal.util.SyncResultReceiver.bundleFor;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -52,10 +55,12 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.ActivityId;
+import android.app.assist.AssistContent;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -183,6 +188,9 @@ public class ContentCaptureManagerService extends
     @GuardedBy("mLock")
     @Nullable
     private boolean mDisabledByDeviceConfig;
+
+    @GuardedBy("mLock")
+    private boolean activityStartAssistDataEnabled;
 
     // Device-config settings that are cached and passed back to apps
     @GuardedBy("mLock")
@@ -451,6 +459,8 @@ public class ContentCaptureManagerService extends
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_AUTO_DISCONNECT_TIMEOUT:
                     setFineTuneParamsFromDeviceConfig();
                     return;
+                case DEVICE_CONFIG_ENABLE_ACTIVITY_START_ASSIST_CONTENT:
+                    setActivityStartAssistDataEnabled();
                 default:
                     Slog.i(TAG, "Ignoring change on " + key);
             }
@@ -639,6 +649,15 @@ public class ContentCaptureManagerService extends
         final String enabled = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                 ContentCaptureManager.DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED);
         setDisabledByDeviceConfig(enabled);
+        setActivityStartAssistDataEnabled();
+    }
+
+    private void setActivityStartAssistDataEnabled() {
+        synchronized (mLock) {
+            this.activityStartAssistDataEnabled = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                    DEVICE_CONFIG_ENABLE_ACTIVITY_START_ASSIST_CONTENT, false);
+        }
     }
 
     private void setDisabledByDeviceConfig(@Nullable String explicitlyEnabled) {
@@ -908,6 +927,9 @@ public class ContentCaptureManagerService extends
         pw.print(prefix2);
         pw.print("contentProtectionAutoDisconnectTimeoutMs: ");
         pw.println(mDevCfgContentProtectionAutoDisconnectTimeoutMs);
+        pw.print(prefix2);
+        pw.print("activityStartAssistDataEnabled: ");
+        pw.println(activityStartAssistDataEnabled);
         pw.print(prefix);
         pw.println("Global Options:");
         mGlobalContentCaptureOptions.dump(prefix2, pw);
@@ -1321,6 +1343,33 @@ public class ContentCaptureManagerService extends
                 final ContentCapturePerUserService service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     return service.isContentCaptureServiceForUserLocked(uid);
+                }
+            }
+            return false;
+        }
+
+        @Override
+        @SuppressWarnings("GuardedBy")
+        public boolean sendActivityStartAssistData(@UserIdInt int userId,
+                @NonNull IBinder activityToken,
+                @NonNull Intent intentData) {
+            synchronized (mLock) {
+                if (!activityStartAssistDataEnabled) {
+                    return false;
+                }
+                Intent intent = new Intent(intentData);
+                intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
+                Bundle assistContentExtras = new Bundle();
+                assistContentExtras.putBoolean(ASSIST_CONTENT_ACTIVITY_START_KEY, true);
+                AssistContent assistContent = new AssistContent(assistContentExtras);
+                assistContent.setDefaultIntent(intent);
+
+                final Bundle activityAssistData = new Bundle();
+                activityAssistData.putParcelable(ASSIST_KEY_CONTENT, assistContent);
+                final ContentCapturePerUserService service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    return service.sendActivityAssistDataLocked(activityToken, activityAssistData);
                 }
             }
             return false;

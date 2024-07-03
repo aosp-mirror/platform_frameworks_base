@@ -23,10 +23,7 @@ import static com.android.systemui.Flags.validateKeyboardShortcutHelperIconUri;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.AppGlobals;
-import android.app.SynchronousUserSwitchObserver;
-import android.app.UserSwitchObserver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -150,13 +147,6 @@ public final class KeyboardShortcutListSearch {
     @VisibleForTesting BottomSheetDialog mKeyboardShortcutsBottomSheetDialog;
     private KeyCharacterMap mKeyCharacterMap;
     private KeyCharacterMap mBackupKeyCharacterMap;
-
-    private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
-            @Override
-            public void onUserSwitching(int newUserId) throws RemoteException {
-                dismiss();
-            }
-    };
 
     @VisibleForTesting
     KeyboardShortcutListSearch(Context context, WindowManager windowManager) {
@@ -474,14 +464,6 @@ public final class KeyboardShortcutListSearch {
             mBackgroundHandler = new Handler(mHandlerThread.getLooper());
         }
 
-        if (validateKeyboardShortcutHelperIconUri()) {
-            try {
-                ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);
-            } catch (RemoteException e) {
-                Log.e(TAG, "could not register user switch observer", e);
-            }
-        }
-
         retrieveKeyCharacterMap(deviceId);
         mAppShortcutsReceived = false;
         mImeShortcutsReceived = false;
@@ -563,13 +545,6 @@ public final class KeyboardShortcutListSearch {
             mKeyboardShortcutsBottomSheetDialog = null;
         }
         mHandlerThread.quit();
-        if (validateKeyboardShortcutHelperIconUri()) {
-            try {
-                ActivityManager.getService().unregisterUserSwitchObserver(mUserSwitchObserver);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Could not unregister user switch observer", e);
-            }
-        }
     }
 
     private KeyboardShortcutMultiMappingGroup getMultiMappingSystemShortcuts(Context context) {

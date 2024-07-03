@@ -381,18 +381,17 @@ private class AnimatedStateImpl<T, Delta>(
                 // relayout/redraw for nothing.
                 fromValue
             } else {
-                // In the case of bouncing, if the value remains constant during the overscroll, we
-                // should use the value of the scene we are bouncing around.
-                if (!canOverflow && transition is TransitionState.HasOverscrollProperties) {
-                    val bouncingScene = transition.bouncingScene
-                    if (bouncingScene != null) {
-                        return sharedValue[bouncingScene]
-                    }
-                }
-
+                val overscrollSpec = transition.currentOverscrollSpec
                 val progress =
-                    if (canOverflow) transition.progress
-                    else transition.progress.fastCoerceIn(0f, 1f)
+                    when {
+                        overscrollSpec == null -> {
+                            if (canOverflow) transition.progress
+                            else transition.progress.fastCoerceIn(0f, 1f)
+                        }
+                        overscrollSpec.scene == transition.toScene -> 1f
+                        else -> 0f
+                    }
+
                 sharedValue.type.lerp(fromValue, toValue, progress)
             }
         } else fromValue ?: toValue

@@ -39,7 +39,7 @@ import com.android.app.animation.Interpolators
 import com.android.internal.R
 import com.android.keyguard.KeyguardClockSwitchController
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.Flags.fastUnlockTransition
+import com.android.systemui.Flags.fasterUnlockTransition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
@@ -105,6 +105,13 @@ const val LEGACY_UNLOCK_ANIMATION_DURATION_MS = 200L
 const val UNLOCK_ANIMATION_DURATION_MS = 167L
 
 /**
+ * If there are two different wallpapers on home and lock screen, duration and delay of the lock
+ * wallpaper fade out.
+ */
+const val LOCK_WALLPAPER_FADE_OUT_DURATION = 140L
+const val LOCK_WALLPAPER_FADE_OUT_START_DELAY = 0L
+
+/**
  * How long the in-window launcher icon animation takes. This is used if the launcher is underneath
  * the lock screen and supports in-window animations.
  *
@@ -115,23 +122,24 @@ const val LAUNCHER_ICONS_ANIMATION_DURATION_MS = 633L
 
 /**
  * How long to wait for the shade to get out of the way before starting the canned unlock animation.
+ * If there are two different wallpapers on home and lock screen, this is also the duration and
+ * delay of the home wallpaper fade in.
  */
 const val LEGACY_CANNED_UNLOCK_START_DELAY = 100L
-const val CANNED_UNLOCK_START_DELAY = 67L
+const val CANNED_UNLOCK_START_DELAY = 25L
 
 /**
  * Duration for the alpha animation on the surface behind. This plays to fade in the surface during
  * a swipe to unlock (and to fade it back out if the swipe is cancelled).
  */
-const val LEGACY_SURFACE_BEHIND_SWIPE_FADE_DURATION_MS = 175L
-const val SURFACE_BEHIND_FADE_OUT_DURATION_MS = 83L
+const val SURFACE_BEHIND_SWIPE_FADE_DURATION_MS = 175L
 
 /**
  * Start delay for the surface behind animation, used so that the lockscreen can get out of the way
  * before the surface begins appearing.
  */
 const val LEGACY_UNLOCK_ANIMATION_SURFACE_BEHIND_START_DELAY_MS = 75L
-const val SURFACE_BEHIND_FADE_OUT_START_DELAY_MS = 0L
+const val UNLOCK_ANIMATION_SURFACE_BEHIND_START_DELAY_MS = 67L
 
 /**
  * Initiates, controls, and ends the keyguard unlock animation.
@@ -268,7 +276,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
     @VisibleForTesting
     var surfaceTransactionApplier: SyncRtSurfaceTransactionApplier? = null
     private var surfaceBehindRemoteAnimationTargets: Array<RemoteAnimationTarget>? = null
-    private var wallpaperTargets: Array<RemoteAnimationTarget>? = null
+    private var openingWallpaperTargets: Array<RemoteAnimationTarget>? = null
+    private var closingWallpaperTargets: Array<RemoteAnimationTarget>? = null
     private var surfaceBehindRemoteAnimationStartTime: Long = 0
 
     /**
@@ -285,6 +294,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
     var surfaceBehindAlphaAnimator = ValueAnimator.ofFloat(0f, 1f)
 
     var wallpaperCannedUnlockAnimator = ValueAnimator.ofFloat(0f, 1f)
+
+    var wallpaperFadeOutUnlockAnimator = ValueAnimator.ofFloat(1f, 0f)
 
     /**
      * Matrix applied to [surfaceBehindRemoteAnimationTarget], which is the surface of the
@@ -335,7 +346,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
     init {
         with(surfaceBehindAlphaAnimator) {
-            duration = surfaceBehindFadeOutDurationMs()
+            duration = SURFACE_BEHIND_SWIPE_FADE_DURATION_MS
             interpolator = Interpolators.LINEAR
             addUpdateListener { valueAnimator: ValueAnimator ->
                 surfaceBehindAlpha = valueAnimator.animatedValue as Float
@@ -351,7 +362,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
                     if (surfaceBehindAlpha == 0f) {
                         Log.d(TAG, "surfaceBehindAlphaAnimator#onAnimationEnd")
                         surfaceBehindRemoteAnimationTargets = null
-                        wallpaperTargets = null
+                        openingWallpaperTargets = null
+                        closingWallpaperTargets = null
                         keyguardViewMediator.get().finishSurfaceBehindRemoteAnimation(
                             false /* cancelled */)
                     } else {
@@ -363,12 +375,14 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         with(wallpaperCannedUnlockAnimator) {
-            duration = if (fastUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
+            duration = if (fasterUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
                     else LAUNCHER_ICONS_ANIMATION_DURATION_MS
-            interpolator = if (fastUnlockTransition()) Interpolators.LINEAR
+            interpolator = if (fasterUnlockTransition()) Interpolators.LINEAR
                     else Interpolators.ALPHA_OUT
+            if (fasterUnlockTransition()) startDelay = CANNED_UNLOCK_START_DELAY
             addUpdateListener { valueAnimator: ValueAnimator ->
-                setWallpaperAppearAmount(valueAnimator.animatedValue as Float)
+                setWallpaperAppearAmount(
+                        valueAnimator.animatedValue as Float, openingWallpaperTargets)
             }
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
@@ -377,6 +391,18 @@ class KeyguardUnlockAnimationController @Inject constructor(
                         false /* cancelled */)
                 }
             })
+        }
+
+        if (fasterUnlockTransition()) {
+            with(wallpaperFadeOutUnlockAnimator) {
+                duration = LOCK_WALLPAPER_FADE_OUT_DURATION
+                startDelay = LOCK_WALLPAPER_FADE_OUT_START_DELAY
+                interpolator = Interpolators.LINEAR
+                addUpdateListener { valueAnimator: ValueAnimator ->
+                    setWallpaperAppearAmount(
+                            valueAnimator.animatedValue as Float, closingWallpaperTargets)
+                }
+            }
         }
 
         with(surfaceBehindEntryAnimator) {
@@ -546,7 +572,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     fun notifyStartSurfaceBehindRemoteAnimation(
         targets: Array<RemoteAnimationTarget>,
-        wallpapers: Array<RemoteAnimationTarget>,
+        openingWallpapers: Array<RemoteAnimationTarget>,
+        closingWallpapers: Array<RemoteAnimationTarget>,
         startTime: Long,
         requestedShowSurfaceBehindKeyguard: Boolean
     ) {
@@ -556,7 +583,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         surfaceBehindRemoteAnimationTargets = targets
-        wallpaperTargets = wallpapers
+        openingWallpaperTargets = openingWallpapers
+        closingWallpaperTargets = closingWallpapers
         surfaceBehindRemoteAnimationStartTime = startTime
 
         // If we specifically requested that the surface behind be made visible (vs. it being made
@@ -613,7 +641,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         val isWakeAndUnlockNotFromDream = biometricUnlockControllerLazy.get().isWakeAndUnlock &&
             biometricUnlockControllerLazy.get().mode != MODE_WAKE_AND_UNLOCK_FROM_DREAM
 
-        val duration = if (fastUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
+        val duration = if (fasterUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
                 else LAUNCHER_ICONS_ANIMATION_DURATION_MS
         listeners.forEach {
             it.onUnlockAnimationStarted(
@@ -712,7 +740,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // As soon as the shade starts animating out of the way, start the canned unlock animation,
         // which will finish keyguard exit when it completes. The in-window animations in the
         // Launcher window will end on their own.
-        if (fastUnlockTransition()) hideKeyguardViewAfterRemoteAnimation()
         handler.postDelayed({
             if (keyguardViewMediator.get().isShowingAndNotOccluded &&
                 !keyguardStateController.isKeyguardGoingAway) {
@@ -721,9 +748,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 return@postDelayed
             }
 
-            if ((wallpaperTargets?.isNotEmpty() == true)) {
+            if ((openingWallpaperTargets?.isNotEmpty() == true)) {
                 fadeInWallpaper()
-                if (!fastUnlockTransition()) hideKeyguardViewAfterRemoteAnimation()
+                if (fasterUnlockTransition()) fadeOutWallpaper()
+                hideKeyguardViewAfterRemoteAnimation()
             } else {
                 keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                     false /* cancelled */)
@@ -856,7 +884,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
     /**
      * Scales in and translates up the surface behind the keyguard. This is used during unlock
      * animations and swipe gestures to animate the surface's entry (and exit, if the swipe is
-     * cancelled).
+     * cancelled). When called with [wallpapers]=true, if there are different home and lock screen
+     * wallpapers, this transitions between the two wallpapers
      */
     fun setSurfaceBehindAppearAmount(amount: Float, wallpapers: Boolean = true) {
         val animationAlpha = when {
@@ -924,13 +953,27 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         if (wallpapers) {
-            setWallpaperAppearAmount(amount)
+            if (!fasterUnlockTransition()) setWallpaperAppearAmount(amount, openingWallpaperTargets)
+            else {
+                // Use the amount to compute the fadeInAmount and fadeOutAmount of the home and lock
+                // screen wallpapers to manually imitate the canned unlock animation.
+                val total = (UNLOCK_ANIMATION_DURATION_MS + CANNED_UNLOCK_START_DELAY).toFloat()
+                val fadeInStart = CANNED_UNLOCK_START_DELAY / total
+                val fadeInAmount = maxOf(0f, (amount - fadeInStart) / (1f - fadeInStart))
+
+                val fadeOutStart = LOCK_WALLPAPER_FADE_OUT_START_DELAY / total
+                val fadeOutEnd = fadeOutStart + LOCK_WALLPAPER_FADE_OUT_DURATION / total
+                val fadeOutAmount = ((amount - fadeOutStart) / (fadeOutEnd - fadeOutStart))
+                        .coerceIn(0f, 1f)
+
+                setWallpaperAppearAmount(fadeInAmount, openingWallpaperTargets)
+                setWallpaperAppearAmount(1 - fadeOutAmount, closingWallpaperTargets)
+            }
         }
     }
 
-    fun setWallpaperAppearAmount(amount: Float) {
+    fun setWallpaperAppearAmount(amount: Float, wallpaperTargets: Array<RemoteAnimationTarget>?) {
         val animationAlpha = amount
-
         wallpaperTargets?.forEach { wallpaper ->
             // SyncRtSurfaceTransactionApplier cannot apply transaction when the target view is
             // unable to draw
@@ -992,7 +1035,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         // That target is no longer valid since the animation finished, null it out.
         surfaceBehindRemoteAnimationTargets = null
-        wallpaperTargets = null
+        openingWallpaperTargets = null
+        if (fasterUnlockTransition()) closingWallpaperTargets = null
 
         playingCannedUnlockAnimation = false
         dismissAmountThresholdsReached = false
@@ -1034,6 +1078,12 @@ class KeyguardUnlockAnimationController @Inject constructor(
         Log.d(TAG, "fadeInWallpaper")
         wallpaperCannedUnlockAnimator.cancel()
         wallpaperCannedUnlockAnimator.start()
+    }
+
+    private fun fadeOutWallpaper() {
+        Log.d(TAG, "fadeOutWallpaper")
+        wallpaperFadeOutUnlockAnimator.cancel()
+        wallpaperFadeOutUnlockAnimator.start()
     }
 
     private fun fadeOutSurfaceBehind() {
@@ -1149,7 +1199,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * TODO (b/298186160) replace references with the constant itself when flag is removed
      */
     private fun cannedUnlockStartDelayMs(): Long {
-        return if (fastUnlockTransition()) CANNED_UNLOCK_START_DELAY
+        return if (fasterUnlockTransition()) CANNED_UNLOCK_START_DELAY
                 else LEGACY_CANNED_UNLOCK_START_DELAY
     }
 
@@ -1158,7 +1208,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * TODO (b/298186160) replace references with the constant itself when flag is removed
      */
     private fun unlockAnimationDurationMs(): Long {
-        return if (fastUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
+        return if (fasterUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
                 else LEGACY_UNLOCK_ANIMATION_DURATION_MS
     }
 
@@ -1166,17 +1216,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * Temporary method for b/298186160
      * TODO (b/298186160) replace references with the constant itself when flag is removed
      */
-    private fun surfaceBehindFadeOutDurationMs(): Long {
-        return if (fastUnlockTransition()) SURFACE_BEHIND_FADE_OUT_DURATION_MS
-                else LEGACY_SURFACE_BEHIND_SWIPE_FADE_DURATION_MS
-    }
-
-    /**
-     * Temporary method for b/298186160
-     * TODO (b/298186160) replace references with the constant itself when flag is removed
-     */
     private fun surfaceBehindFadeOutStartDelayMs(): Long {
-        return if (fastUnlockTransition()) SURFACE_BEHIND_FADE_OUT_START_DELAY_MS
+        return if (fasterUnlockTransition()) UNLOCK_ANIMATION_SURFACE_BEHIND_START_DELAY_MS
                 else LEGACY_UNLOCK_ANIMATION_SURFACE_BEHIND_START_DELAY_MS
     }
 

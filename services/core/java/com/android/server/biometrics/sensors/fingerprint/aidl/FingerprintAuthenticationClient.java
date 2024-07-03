@@ -209,7 +209,7 @@ public class FingerprintAuthenticationClient
             Slog.d(TAG, "Lockout is implemented by the HAL");
             return;
         }
-        if (authenticated) {
+        if (authenticated && !isBiometricPrompt()) {
             getLockoutTracker().resetFailedAttemptsForUser(true /* clearAttemptCounter */,
                     getTargetUserId());
         } else {

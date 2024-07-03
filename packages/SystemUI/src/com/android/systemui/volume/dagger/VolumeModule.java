@@ -38,14 +38,13 @@ import com.android.systemui.volume.CsdWarningDialog;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogImpl;
-import com.android.systemui.volume.VolumeDialogModule;
 import com.android.systemui.volume.VolumePanelDialogReceiver;
 import com.android.systemui.volume.VolumeUI;
+import com.android.systemui.volume.domain.interactor.VolumeDialogInteractor;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.panel.dagger.VolumePanelComponent;
 import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory;
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
-import com.android.systemui.volume.ui.binder.VolumeDialogMenuIconBinder;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
 import dagger.Binds;
@@ -64,7 +63,6 @@ import dagger.multibindings.IntoSet;
                 CaptioningModule.class,
                 MediaDevicesModule.class,
                 SpatializerModule.class,
-                VolumeDialogModule.class,
         },
         subcomponents = {
                 VolumePanelComponent.class
@@ -117,8 +115,8 @@ public interface VolumeModule {
             DumpManager dumpManager,
             Lazy<SecureSettings> secureSettings,
             VibratorHelper vibratorHelper,
-            VolumeDialogMenuIconBinder volumeDialogMenuIconBinder,
-            SystemClock systemClock) {
+            SystemClock systemClock,
+            VolumeDialogInteractor interactor) {
         VolumeDialogImpl impl = new VolumeDialogImpl(
                 context,
                 volumeDialogController,
@@ -137,8 +135,8 @@ public interface VolumeModule {
                 dumpManager,
                 secureSettings,
                 vibratorHelper,
-                volumeDialogMenuIconBinder,
-                systemClock);
+                systemClock,
+                interactor);
         impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
         impl.setAutomute(true);
         impl.setSilentMode(false);

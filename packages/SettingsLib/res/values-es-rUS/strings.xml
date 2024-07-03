@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite cargar capas de depuración de GPU para apps de depuración"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Habilitar registro detallado"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluye otros registros de proveedor específicos del dispositivo en los informes de errores, que podrían contener información privada, consumir más batería o usar más espacio de almacenamiento."</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animación de ventana"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala de animación de transición"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de duración de animador"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmas y recordatorios"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permite que esta app establezca alarmas y programe acciones para horarios específicos. De esta manera, la app puede ejecutarse en segundo plano, lo que podría aumentar el consumo de batería.\n\nSi se desactiva este permiso, no funcionarán las alarmas ni los eventos basados en el tiempo existentes que programe esta app."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programar, alarma, recordatorio, reloj"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"No interrumpir"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activar"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activar No interrumpir"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nunca"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Duración"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Preguntar siempre"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Hasta que lo desactives"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(Sin nombre)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Recién"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Esta tablet"</string>

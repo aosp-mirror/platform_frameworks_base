@@ -102,6 +102,7 @@ class InstallingSession {
     @Nullable
     final DomainSet mPreVerifiedDomains;
     final boolean mHasAppMetadataFile;
+    @Nullable final String mDexoptCompilerFilter;
 
     // For move install
     InstallingSession(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
@@ -136,6 +137,7 @@ class InstallingSession {
         mApplicationEnabledSettingPersistent = false;
         mPreVerifiedDomains = null;
         mHasAppMetadataFile = false;
+        mDexoptCompilerFilter = null;
     }
 
     InstallingSession(int sessionId, File stagedDir, IPackageInstallObserver2 observer,
@@ -172,6 +174,7 @@ class InstallingSession {
         mApplicationEnabledSettingPersistent = sessionParams.applicationEnabledSettingPersistent;
         mPreVerifiedDomains = preVerifiedDomains;
         mHasAppMetadataFile = hasAppMetadatafile;
+        mDexoptCompilerFilter = sessionParams.dexoptCompilerFilter;
     }
 
     @Override

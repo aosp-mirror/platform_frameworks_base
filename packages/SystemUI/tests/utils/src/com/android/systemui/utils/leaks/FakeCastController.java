@@ -18,6 +18,7 @@ import android.testing.LeakCheck;
 
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.Callback;
+import com.android.systemui.statusbar.policy.CastDevice;
 
 import java.util.ArrayList;
 import java.util.List;

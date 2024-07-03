@@ -16,31 +16,35 @@
 
 package android.os.vibrator.persistence;
 
+import static android.os.vibrator.Flags.FLAG_VIBRATION_XML_APIS;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorInfo;
 
-import com.android.internal.annotations.VisibleForTesting;
-
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * The result of parsing a serialized vibration, which can be define by one or more
- * {@link VibrationEffect} and a resolution method.
+ * The result of parsing a serialized vibration.
+ *
+ * @see VibrationXmlParser
  *
  * @hide
  */
-@TestApi
-@SuppressLint("UnflaggedApi") // @TestApi without associated feature.
-public class ParsedVibration {
+@TestApi // This was used in CTS before the flag was introduced.
+@SystemApi
+@FlaggedApi(FLAG_VIBRATION_XML_APIS)
+public final class ParsedVibration {
     private final List<VibrationEffect> mEffects;
 
     /** @hide */
+    @TestApi
     public ParsedVibration(@NonNull List<VibrationEffect> effects) {
         mEffects = effects;
     }
@@ -49,31 +53,19 @@ public class ParsedVibration {
     public ParsedVibration(@NonNull VibrationEffect effect) {
         mEffects = List.of(effect);
     }
+
     /**
      * Returns the first parsed vibration supported by {@code vibrator}, or {@code null} if none of
      * the parsed vibrations are supported.
      *
      * @hide
      */
-    @TestApi
+    @TestApi // This was used in CTS before the flag was introduced.
+    @SystemApi
+    @FlaggedApi(FLAG_VIBRATION_XML_APIS)
     @Nullable
     public VibrationEffect resolve(@NonNull Vibrator vibrator) {
         return resolve(vibrator.getInfo());
-    }
-
-    /**
-     * Returns the parsed vibrations for testing purposes.
-     *
-     * <p>Real callers should not use this method. Instead, they should resolve to a
-     * {@link VibrationEffect} via {@link #resolve(Vibrator)}.
-     *
-     * @hide
-     */
-    @TestApi
-    @VisibleForTesting
-    @NonNull
-    public List<VibrationEffect> getVibrationEffects() {
-        return Collections.unmodifiableList(mEffects);
     }
 
     /**
@@ -82,7 +74,7 @@ public class ParsedVibration {
      * @hide
      */
     @Nullable
-    public final VibrationEffect resolve(@NonNull VibratorInfo info) {
+    public VibrationEffect resolve(@NonNull VibratorInfo info) {
         for (int i = 0; i < mEffects.size(); i++) {
             VibrationEffect effect = mEffects.get(i);
             if (info.areVibrationFeaturesSupported(effect)) {
@@ -90,5 +82,22 @@ public class ParsedVibration {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ParsedVibration)) {
+            return false;
+        }
+        ParsedVibration other = (ParsedVibration) o;
+        return mEffects.equals(other.mEffects);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(mEffects);
     }
 }

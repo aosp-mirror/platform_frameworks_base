@@ -16,6 +16,8 @@
 
 package com.android.mediaframeworktest.helpers;
 
+import android.content.AttributionSourceState;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
@@ -2226,5 +2228,25 @@ public class CameraTestUtils extends Assert {
             return bound;
         else
             return new Size(width, height);
+    }
+
+    /**
+     * Constructs an AttributionSourceState with only the uid, pid, and deviceId fields set
+     *
+     * <p>This method is a temporary stopgap in the transition to using AttributionSource. Currently
+     * AttributionSourceState is only used as a vehicle for passing deviceId, uid, and pid
+     * arguments.</p>
+     */
+    public static AttributionSourceState getClientAttribution(Context context) {
+        // TODO: Send the full contextAttribution over aidl, remove USE_CALLING_*
+        AttributionSourceState contextAttribution =
+                context.getAttributionSource().asState();
+        AttributionSourceState clientAttribution =
+                new AttributionSourceState();
+        clientAttribution.uid = -1; // USE_CALLING_UID
+        clientAttribution.pid = -1; // USE_CALLING_PID
+        clientAttribution.deviceId = contextAttribution.deviceId;
+        clientAttribution.next = new AttributionSourceState[0];
+        return clientAttribution;
     }
 }

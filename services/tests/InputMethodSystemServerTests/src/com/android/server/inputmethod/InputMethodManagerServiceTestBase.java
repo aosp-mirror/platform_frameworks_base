@@ -127,7 +127,7 @@ public class InputMethodManagerServiceTestBase {
     protected IInputMethodInvoker mMockInputMethodInvoker;
     protected InputMethodManagerService mInputMethodManagerService;
     protected ServiceThread mServiceThread;
-    protected ServiceThread mPackageMonitorThread;
+    protected ServiceThread mIoThread;
     protected boolean mIsLargeScreen;
     private InputManagerGlobal.TestSession mInputManagerGlobalSession;
 
@@ -189,6 +189,7 @@ public class InputMethodManagerServiceTestBase {
         // Injecting and mocked InputMethodBindingController and InputMethod.
         mMockInputMethodInvoker = IInputMethodInvoker.create(mMockInputMethod);
         mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mMockIInputManager);
+        when(mMockInputMethodBindingController.getUserId()).thenReturn(mCallingUserId);
         synchronized (ImfLock.class) {
             when(mMockInputMethodBindingController.getCurMethod())
                     .thenReturn(mMockInputMethodInvoker);
@@ -226,14 +227,14 @@ public class InputMethodManagerServiceTestBase {
                         "immstest1",
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
-        mPackageMonitorThread =
+        mIoThread =
                 new ServiceThread(
                         "immstest2",
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
         mInputMethodManagerService = new InputMethodManagerService(mContext,
                 InputMethodManagerService.shouldEnableExperimentalConcurrentMultiUserMode(mContext),
-                mServiceThread, mPackageMonitorThread,
+                mServiceThread, mIoThread,
                 unusedUserId -> mMockInputMethodBindingController);
         spyOn(mInputMethodManagerService);
 
@@ -267,8 +268,8 @@ public class InputMethodManagerServiceTestBase {
             mInputMethodManagerService.mInputMethodDeviceConfigs.destroy();
         }
 
-        if (mPackageMonitorThread != null) {
-            mPackageMonitorThread.quitSafely();
+        if (mIoThread != null) {
+            mIoThread.quitSafely();
         }
 
         if (mServiceThread != null) {

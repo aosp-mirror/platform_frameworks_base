@@ -17,7 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.hasParent
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 
 /** A [SemanticsMatcher] that matches [element], optionally restricted to scene [scene]. */
@@ -25,6 +25,6 @@ fun isElement(element: ElementKey, scene: SceneKey? = null): SemanticsMatcher {
     return if (scene == null) {
         hasTestTag(element.testTag)
     } else {
-        hasTestTag(element.testTag) and hasParent(hasTestTag(scene.testTag))
+        hasTestTag(element.testTag) and hasAnyAncestor(hasTestTag(scene.testTag))
     }
 }

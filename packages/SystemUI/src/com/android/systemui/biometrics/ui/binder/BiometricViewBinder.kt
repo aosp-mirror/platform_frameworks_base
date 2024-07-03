@@ -457,17 +457,10 @@ object BiometricViewBinder {
 
                 // Retry and confirmation when finger on sensor
                 launch {
-                    combine(
-                            viewModel.canTryAgainNow,
-                            viewModel.hasFingerOnSensor,
-                            viewModel.isPendingConfirmation,
-                            ::Triple
-                        )
-                        .collect { (canRetry, fingerAcquired, pendingConfirmation) ->
+                    combine(viewModel.canTryAgainNow, viewModel.hasFingerOnSensor, ::Pair)
+                        .collect { (canRetry, fingerAcquired) ->
                             if (canRetry && fingerAcquired) {
                                 legacyCallback.onButtonTryAgain()
-                            } else if (pendingConfirmation && fingerAcquired) {
-                                viewModel.confirmAuthenticated()
                             }
                         }
                 }
@@ -497,13 +490,21 @@ class Spaghetti(
     @Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
     interface Callback {
         fun onAuthenticated()
+
         fun onUserCanceled()
+
         fun onButtonNegative()
+
         fun onButtonTryAgain()
+
         fun onContentViewMoreOptionsButtonPressed()
+
         fun onError()
+
         fun onUseDeviceCredential()
+
         fun onStartDelayedFingerprintSensor()
+
         fun onAuthenticatedAndConfirmed()
     }
 
@@ -579,17 +580,22 @@ class Spaghetti(
         }
     }
 
-    private suspend fun getHelpForSuccessfulAuthentication(
+    private fun getHelpForSuccessfulAuthentication(
         authenticatedModality: BiometricModality,
-    ): Int? =
-        when {
-            // for coex, show a message when face succeeds after fingerprint has also started
-            modalities.hasFaceAndFingerprint &&
-                (viewModel.fingerprintStartMode.first() != FingerprintStartMode.Pending) &&
-                (authenticatedModality == BiometricModality.Face) ->
-                R.string.biometric_dialog_tap_confirm_with_face_alt_1
-            else -> null
+    ): Int? {
+        // for coex, show a message when face succeeds after fingerprint has also started
+        if (authenticatedModality != BiometricModality.Face) {
+            return null
         }
+
+        if (modalities.hasUdfps) {
+            return R.string.biometric_dialog_tap_confirm_with_face_alt_1
+        }
+        if (modalities.hasSfps) {
+            return R.string.biometric_dialog_tap_confirm_with_face_sfps
+        }
+        return null
+    }
 
     fun onAuthenticationFailed(
         @BiometricAuthenticator.Modality modality: Int,

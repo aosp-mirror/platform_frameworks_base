@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.util.MathUtils
+import com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
@@ -24,12 +25,17 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.shared.model.WakeSleepReason.FOLD
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.transform
 
 /**
  * Breaks down LOCKSCREEN->AOD transition into discrete steps for corresponding views to consume.
@@ -40,6 +46,7 @@ class LockscreenToAodTransitionViewModel
 @Inject
 constructor(
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+    private val powerInteractor: PowerInteractor,
     shadeDependentFlows: ShadeDependentFlows,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
@@ -47,6 +54,12 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromLockscreenTransitionInteractor.TO_AOD_DURATION,
+            edge = Edge.create(from = LOCKSCREEN, to = AOD),
+        )
+
+    private val transitionAnimationOnFold =
+        animationFlow.setup(
+            duration = FromLockscreenTransitionInteractor.TO_AOD_FOLD_DURATION,
             edge = Edge.create(from = LOCKSCREEN, to = AOD),
         )
 
@@ -71,11 +84,64 @@ constructor(
 
     fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
         var startAlpha = 1f
-        return transitionAnimation.sharedFlow(
-            duration = 500.milliseconds,
-            onStart = { startAlpha = viewState.alpha() },
-            onStep = { MathUtils.lerp(startAlpha, 1f, it) },
-        )
+        return transitionAnimation
+            .sharedFlow(
+                duration = 500.milliseconds,
+                onStart = { startAlpha = viewState.alpha() },
+                onStep = { MathUtils.lerp(startAlpha, 1f, it) },
+            )
+            .sample(powerInteractor.detailedWakefulness, ::Pair)
+            .transform { (alpha, wakefulness) ->
+                if (wakefulness.lastSleepReason != FOLD) {
+                    emit(alpha)
+                }
+            }
+    }
+
+    val lockscreenAlphaOnFold: Flow<Float> =
+        transitionAnimationOnFold
+            .sharedFlow(
+                startTime = 600.milliseconds,
+                duration = 500.milliseconds,
+                onStep = { it },
+            )
+            .sample(powerInteractor.detailedWakefulness, ::Pair)
+            .transform { (alpha, wakefulness) ->
+                if (wakefulness.lastSleepReason == FOLD) {
+                    emit(alpha)
+                }
+            }
+
+    val notificationAlphaOnFold: Flow<Float> =
+        transitionAnimationOnFold
+            .sharedFlow(
+                duration = 1100.milliseconds,
+                onStep = { 0f },
+                onFinish = { 1f },
+            )
+            .sample(powerInteractor.detailedWakefulness, ::Pair)
+            .transform { (alpha, wakefulness) ->
+                if (wakefulness.lastSleepReason == FOLD) {
+                    emit(alpha)
+                }
+            }
+
+    /** x-translation from the side of the screen for fold animation */
+    fun enterFromSideTranslationX(translatePx: Int): Flow<StateToValue> {
+        return transitionAnimationOnFold
+            .sharedFlowWithState(
+                startTime = 600.milliseconds,
+                duration = 500.milliseconds,
+                onStep = { translatePx + it * -translatePx },
+                onFinish = { 0f },
+                interpolator = EMPHASIZED_DECELERATE,
+            )
+            .sample(powerInteractor.detailedWakefulness, ::Pair)
+            .transform { (stateToValue, wakefulness) ->
+                if (wakefulness.lastSleepReason == FOLD) {
+                    emit(stateToValue)
+                }
+            }
     }
 
     override val deviceEntryParentViewAlpha: Flow<Float> =

@@ -18,6 +18,7 @@ package com.android.providers.settings;
 
 import static android.os.Process.FIRST_APPLICATION_UID;
 
+import android.aconfig.Aconfig.flag_permission;
 import android.aconfig.Aconfig.flag_state;
 import android.aconfig.Aconfig.parsed_flag;
 import android.aconfig.Aconfig.parsed_flags;
@@ -202,6 +203,12 @@ final class SettingsState {
 
     private static final String NULL_VALUE = "null";
 
+    // TOBO(b/312444587): remove after Test Mission 2.
+    // Bulk sync names
+    private static final String BULK_SYNC_MARKER = "aconfigd_marker/bulk_synced";
+    private static final String BULK_SYNC_TRIGGER_COUNTER =
+        "core_experiments_team_internal/BulkSyncTriggerCounterFlag__bulk_sync_trigger_counter";
+
     private static final ArraySet<String> sSystemPackages = new ArraySet<>();
 
     private final Object mWriteLock = new Object();
@@ -370,7 +377,6 @@ final class SettingsState {
         mAconfigDefaultFlags = new HashMap<>();
 
         ProtoOutputStream requests = null;
-        Map<String, AconfigdFlagInfo> aconfigFlagMap = new HashMap<>();
 
         synchronized (mLock) {
             readStateSyncLocked();
@@ -390,12 +396,12 @@ final class SettingsState {
 
             if (enableAconfigStorageDaemon()) {
                 if (isConfigSettingsKey(mKey)) {
-                    aconfigFlagMap = getAllAconfigFlagsFromSettings();
+                    getAllAconfigFlagsFromSettings(mAconfigDefaultFlags);
                 }
             }
 
             if (isConfigSettingsKey(mKey)) {
-                requests = handleBulkSyncToNewStorage(aconfigFlagMap);
+                requests = handleBulkSyncToNewStorage(mAconfigDefaultFlags);
             }
         }
 
@@ -409,12 +415,10 @@ final class SettingsState {
                     }
                 }
                 // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
-                if (mSettings.get("aconfigd_marker/bulk_synced").value.equals("true")
-                        && requests == null) {
+                if (requests == null) {
                     Map<String, AconfigdFlagInfo> aconfigdFlagMap =
                             AconfigdJavaUtils.listFlagsValueInNewStorage(localSocket);
                     compareFlagValueInNewStorage(
-                            aconfigFlagMap,
                             mAconfigDefaultFlags,
                             aconfigdFlagMap);
                 }
@@ -424,7 +428,6 @@ final class SettingsState {
 
     // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
     public int compareFlagValueInNewStorage(
-            Map<String, AconfigdFlagInfo> settingFlagMap,
             Map<String, AconfigdFlagInfo> defaultFlagMap,
             Map<String, AconfigdFlagInfo> aconfigdFlagMap) {
 
@@ -434,9 +437,6 @@ final class SettingsState {
         for (Map.Entry<String, AconfigdFlagInfo> entry : defaultFlagMap.entrySet()) {
             String key = entry.getKey();
             AconfigdFlagInfo flag = entry.getValue();
-            if (settingFlagMap.containsKey(key)) {
-                flag.merge(settingFlagMap.get(key));
-            }
 
             AconfigdFlagInfo aconfigdFlag = aconfigdFlagMap.get(key);
             if (aconfigdFlag == null) {
@@ -460,14 +460,31 @@ final class SettingsState {
             diffNum++;
         }
 
+        String compareMarkerName = "aconfigd_marker/compare_diff_num";
+        synchronized (mLock) {
+            Setting markerSetting = mSettings.get(compareMarkerName);
+            if (markerSetting == null) {
+                markerSetting =
+                        new Setting(
+                                compareMarkerName,
+                                String.valueOf(diffNum),
+                                false,
+                                "aconfig",
+                                "aconfig");
+                mSettings.put(compareMarkerName, markerSetting);
+            }
+            markerSetting.value = String.valueOf(diffNum);
+        }
+
         if (diffNum == 0) {
-            Slog.i(LOG_TAG, "Settings and new storage have same flags.");
+            Slog.w(LOG_TAG, "Settings and new storage have same flags.");
         }
         return diffNum;
     }
 
     @GuardedBy("mLock")
-    public Map<String, AconfigdFlagInfo> getAllAconfigFlagsFromSettings() {
+    public int getAllAconfigFlagsFromSettings(
+            @NonNull Map<String, AconfigdFlagInfo> flagInfoDefault) {
         Map<String, AconfigdFlagInfo> ret = new HashMap<>();
         int numSettings = mSettings.size();
         int num_requests = 0;
@@ -475,25 +492,24 @@ final class SettingsState {
             String name = mSettings.keyAt(i);
             Setting setting = mSettings.valueAt(i);
             AconfigdFlagInfo flag =
-                    getFlagOverrideToSync(name, setting.getValue());
+                    getFlagOverrideToSync(name, setting.getValue(), flagInfoDefault);
             if (flag == null) {
                 continue;
             }
-            String fullFlagName = flag.getFullFlagName();
-            AconfigdFlagInfo prev = ret.putIfAbsent(fullFlagName,flag);
-            if (prev != null) {
-                prev.merge(flag);
+            if (flag.getIsReadWrite()) {
+                ++num_requests;
             }
-            ++num_requests;
         }
         Slog.i(LOG_TAG, num_requests + " flag override requests created");
-        return ret;
+        return num_requests;
     }
 
     // TODO(b/341764371): migrate aconfig flag push to GMS core
     @VisibleForTesting
     @GuardedBy("mLock")
-    public AconfigdFlagInfo getFlagOverrideToSync(String name, String value) {
+    @Nullable
+    public AconfigdFlagInfo getFlagOverrideToSync(
+            String name, String value, @NonNull Map<String, AconfigdFlagInfo> flagInfoDefault) {
         int slashIdx = name.indexOf("/");
         if (slashIdx <= 0 || slashIdx >= name.length() - 1) {
             Slog.e(LOG_TAG, "invalid flag name " + name);
@@ -516,33 +532,23 @@ final class SettingsState {
             fullFlagName = fullFlagName.substring(colonIdx + 1);
             isLocal = true;
         }
-
-        String aconfigName = namespace + "/" + fullFlagName;
-        boolean isAconfig =
-                mNamespaceDefaults.containsKey(namespace)
-                        && mNamespaceDefaults.get(namespace).containsKey(aconfigName);
-        if (!isAconfig) {
-            return null;
-        }
-
         // get package name and flag name
         int dotIdx = fullFlagName.lastIndexOf(".");
         if (dotIdx == -1) {
             Slog.e(LOG_TAG, "invalid override flag name " + name);
             return null;
         }
-
-        AconfigdFlagInfo.Builder builder = AconfigdFlagInfo.newBuilder()
-                        .setPackageName(fullFlagName.substring(0, dotIdx))
-                        .setFlagName(fullFlagName.substring(dotIdx + 1))
-                        .setDefaultFlagValue(mNamespaceDefaults.get(namespace).get(aconfigName));
+        AconfigdFlagInfo flag = flagInfoDefault.get(fullFlagName);
+        if (flag == null || !namespace.equals(flag.getNamespace())) {
+            return null;
+        }
 
         if (isLocal) {
-            builder.setHasLocalOverride(isLocal).setBootFlagValue(value).setLocalFlagValue(value);
+            flag.setLocalFlagValue(value);
         } else {
-            builder.setHasServerOverride(true).setServerFlagValue(value).setBootFlagValue(value);
+            flag.setServerFlagValue(value);
         }
-        return builder.build();
+        return flag;
     }
 
 
@@ -552,15 +558,33 @@ final class SettingsState {
     public ProtoOutputStream handleBulkSyncToNewStorage(
             Map<String, AconfigdFlagInfo> aconfigFlagMap) {
         // get marker or add marker if it does not exist
-        final String bulkSyncMarkerName = new String("aconfigd_marker/bulk_synced");
-        Setting markerSetting = mSettings.get(bulkSyncMarkerName);
+        Setting markerSetting = mSettings.get(BULK_SYNC_MARKER);
+        int localCounter = 0;
         if (markerSetting == null) {
-            markerSetting = new Setting(bulkSyncMarkerName, "false", false, "aconfig", "aconfig");
-            mSettings.put(bulkSyncMarkerName, markerSetting);
+            markerSetting = new Setting(BULK_SYNC_MARKER, "0", false, "aconfig", "aconfig");
+            mSettings.put(BULK_SYNC_MARKER, markerSetting);
+        }
+        try {
+            localCounter = Integer.parseInt(markerSetting.value);
+        } catch(NumberFormatException e) {
+            // reset local counter
+            markerSetting.value = "0";
         }
 
         if (enableAconfigStorageDaemon()) {
-            if (markerSetting.value.equals("true")) {
+            Setting bulkSyncCounter = mSettings.get(BULK_SYNC_TRIGGER_COUNTER);
+            int serverCounter = 0;
+            if (bulkSyncCounter != null) {
+                try {
+                    serverCounter = Integer.parseInt(bulkSyncCounter.value);
+                } catch (NumberFormatException e) {
+                    // reset the local value of server counter
+                    bulkSyncCounter.value = "0";
+                }
+            }
+
+            boolean shouldSync = localCounter < serverCounter;
+            if (!shouldSync) {
                 // CASE 1, flag is on, bulk sync marker true, nothing to do
                 return null;
             } else {
@@ -574,33 +598,37 @@ final class SettingsState {
 
                 // loop over all settings and add flag override requests
                 for (AconfigdFlagInfo flag : aconfigFlagMap.values()) {
-                    String value =
-                            flag.getHasLocalOverride()
-                                    ? flag.getLocalFlagValue()
-                                    : flag.getServerFlagValue();
-                    AconfigdJavaUtils.writeFlagOverrideRequest(
-                            requests,
-                            flag.getPackageName(),
-                            flag.getFlagName(),
-                            value,
-                            flag.getHasLocalOverride());
+                    // don't sync read_only flags
+                    if (!flag.getIsReadWrite()) {
+                        continue;
+                    }
+
+                    if (flag.getHasServerOverride()) {
+                        AconfigdJavaUtils.writeFlagOverrideRequest(
+                                requests,
+                                flag.getPackageName(),
+                                flag.getFlagName(),
+                                flag.getServerFlagValue(),
+                                false);
+                    }
+
+                    if (flag.getHasLocalOverride()) {
+                        AconfigdJavaUtils.writeFlagOverrideRequest(
+                                requests,
+                                flag.getPackageName(),
+                                flag.getFlagName(),
+                                flag.getLocalFlagValue(),
+                                true);
+                    }
                 }
 
                 // mark sync has been done
-                markerSetting.value = "true";
+                markerSetting.value = String.valueOf(serverCounter);
                 scheduleWriteIfNeededLocked();
                 return requests;
             }
         } else {
-            if (markerSetting.value.equals("true")) {
-                // CASE 3, flag is off, bulk sync marker true, clear the marker
-                markerSetting.value = "false";
-                scheduleWriteIfNeededLocked();
-                return null;
-            } else {
-                // CASE 4, flag is off, bulk sync marker false, nothing to do
-                return null;
-            }
+            return null;
         }
     }
 
@@ -669,6 +697,7 @@ final class SettingsState {
                 String fullFlagName = flag.getPackage() + "." + flag.getName();
                 String flagName = flag.getNamespace() + "/" + fullFlagName;
                 String flagValue = flag.getState() == flag_state.ENABLED ? "true" : "false";
+                boolean isReadWrite = flag.getPermission() == flag_permission.READ_WRITE;
                 defaultMap.get(flag.getNamespace()).put(flagName, flagValue);
                 if (!flagInfoDefault.containsKey(fullFlagName)) {
                     flagInfoDefault.put(
@@ -677,6 +706,8 @@ final class SettingsState {
                                     .setPackageName(flag.getPackage())
                                     .setFlagName(flag.getName())
                                     .setDefaultFlagValue(flagValue)
+                                    .setIsReadWrite(isReadWrite)
+                                    .setNamespace(flag.getNamespace())
                                     .build());
                 }
             }

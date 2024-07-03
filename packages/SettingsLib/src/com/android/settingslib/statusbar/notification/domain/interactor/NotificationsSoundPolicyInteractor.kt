@@ -20,8 +20,7 @@ import android.app.NotificationManager
 import android.media.AudioManager
 import android.provider.Settings
 import android.service.notification.ZenModeConfig
-import com.android.settingslib.statusbar.notification.data.model.ZenMode
-import com.android.settingslib.statusbar.notification.data.repository.NotificationsSoundPolicyRepository
+import com.android.settingslib.statusbar.notification.data.repository.ZenModeRepository
 import com.android.settingslib.volume.shared.model.AudioStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,17 +29,15 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
 /** Determines notification sounds state and limitations. */
-class NotificationsSoundPolicyInteractor(
-    private val repository: NotificationsSoundPolicyRepository
-) {
+class NotificationsSoundPolicyInteractor(private val repository: ZenModeRepository) {
 
     /** @see NotificationManager.getNotificationPolicy */
-    val notificationPolicy: StateFlow<NotificationManager.Policy?>
-        get() = repository.notificationPolicy
+    private val notificationPolicy: StateFlow<NotificationManager.Policy?>
+        get() = repository.consolidatedNotificationPolicy
 
     /** @see NotificationManager.getZenMode */
-    val zenMode: StateFlow<ZenMode?>
-        get() = repository.zenMode
+    val zenMode: StateFlow<Int?>
+        get() = repository.globalZenMode
 
     /** Checks if [notificationPolicy] allows alarms. */
     val areAlarmsAllowed: Flow<Boolean?> = notificationPolicy.map { it?.allowAlarms() }
@@ -67,7 +64,7 @@ class NotificationsSoundPolicyInteractor(
             isRingerAllowed.filterNotNull(),
             isSystemAllowed.filterNotNull(),
         ) { zenMode, areAlarmsAllowed, isMediaAllowed, isRingerAllowed, isSystemAllowed ->
-            when (zenMode.zenMode) {
+            when (zenMode) {
                 // Everything is muted
                 Settings.Global.ZEN_MODE_NO_INTERRUPTIONS -> return@combine true
                 Settings.Global.ZEN_MODE_ALARMS ->

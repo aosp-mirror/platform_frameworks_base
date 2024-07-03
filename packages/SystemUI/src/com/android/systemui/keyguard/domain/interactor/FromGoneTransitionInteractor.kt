@@ -99,19 +99,21 @@ constructor(
                     }
             }
 
-            scope.launch {
-                keyguardRepository.isKeyguardEnabled
-                    .filterRelevantKeyguardStateAnd { enabled -> enabled }
-                    .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
-                    .filter { reshow -> reshow }
-                    .collect {
-                        startTransitionTo(
-                            KeyguardState.LOCKSCREEN,
-                            ownerReason =
-                                "Keyguard was re-enabled, and we weren't GONE when it " +
-                                    "was originally disabled"
-                        )
-                    }
+            if (!SceneContainerFlag.isEnabled) {
+                scope.launch {
+                    keyguardRepository.isKeyguardEnabled
+                        .filterRelevantKeyguardStateAnd { enabled -> enabled }
+                        .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
+                        .filter { reshow -> reshow }
+                        .collect {
+                            startTransitionTo(
+                                KeyguardState.LOCKSCREEN,
+                                ownerReason =
+                                    "Keyguard was re-enabled, and we weren't GONE when it " +
+                                        "was originally disabled"
+                            )
+                        }
+                }
             }
         } else {
             scope.launch("$TAG#listenForGoneToLockscreenOrHub") {

@@ -638,9 +638,9 @@ public class QSPanel extends LinearLayout implements Tunable {
         return mListening;
     }
 
-    protected void setPageMargin(int pageMargin) {
+    protected void setPageMargin(int pageMarginStart, int pageMarginEnd) {
         if (mTileLayout instanceof PagedTileLayout) {
-            ((PagedTileLayout) mTileLayout).setPageMargin(pageMargin);
+            ((PagedTileLayout) mTileLayout).setPageMargin(pageMarginStart, pageMarginEnd);
         }
     }
 

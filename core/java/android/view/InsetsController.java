@@ -29,6 +29,7 @@ import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+import static com.android.window.flags.Flags.insetsControlSeq;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -817,7 +818,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     Collections.unmodifiableList(runningAnimations));
             if (DEBUG) {
                 for (WindowInsetsAnimation anim : runningAnimations) {
-                    Log.d(TAG, String.format("Running animation type: %d, progress: %f",
+                    Log.d(TAG, String.format("Running animation on insets type: %d, progress: %f",
                             anim.getTypeMask(), anim.getInterpolatedFraction()));
                 }
             }
@@ -890,7 +891,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         @InsetsType int visibleTypes = 0;
         @InsetsType int[] cancelledUserAnimationTypes = {0};
         for (int i = 0, size = newState.sourceSize(); i < size; i++) {
-            final InsetsSource source = newState.sourceAt(i);
+            final InsetsSource source = insetsControlSeq()
+                    ? new InsetsSource(newState.sourceAt(i))
+                    : newState.sourceAt(i);
             @InsetsType int type = source.getType();
             @AnimationType int animationType = getAnimationType(type);
             final InsetsSourceConsumer consumer = mSourceConsumers.get(source.getId());

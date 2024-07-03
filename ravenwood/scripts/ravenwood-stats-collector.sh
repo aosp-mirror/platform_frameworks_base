@@ -22,10 +22,12 @@ out_dir=/tmp/ravenwood
 stats=$out_dir/ravenwood-stats-all.csv
 apis=$out_dir/ravenwood-apis-all.csv
 keep_all_dir=$out_dir/ravenwood-keep-all/
+dump_dir=$out_dir/ravenwood-dump/
 
 rm -fr $out_dir
 mkdir -p $out_dir
 mkdir -p $keep_all_dir
+mkdir -p $dump_dir
 
 # Where the input files are.
 path=$ANDROID_BUILD_TOP/out/host/linux-x86/testcases/ravenwood-stats-checker/x86_64/
@@ -86,3 +88,7 @@ collect_apis $apis
 cp *keep_all.txt $keep_all_dir
 echo "Keep all files created at:"
 find $keep_all_dir -type f
+
+cp *dump.txt $dump_dir
+echo "Dump files created at:"
+find $dump_dir -type f

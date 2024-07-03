@@ -23,6 +23,7 @@ import android.view.ViewConfiguration;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Gefingerpoken;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -122,9 +123,14 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                                                 + mPickedChild.getTranslationY());
                     mPanel.setHeadsUpDraggingStartingHeight(startHeight);
                     mPanel.startExpand(x, y, true /* startTracking */, startHeight);
-                    // This call needs to be after the expansion start otherwise we will get a
-                    // flicker of one frame as it's not expanded yet.
-                    mHeadsUpManager.unpinAll(true);
+
+                    // TODO(b/340514839): Figure out where to move this side effect in flexiglass
+                    if (!SceneContainerFlag.isEnabled()) {
+                        // This call needs to be after the expansion start otherwise we will get a
+                        // flicker of one frame as it's not expanded yet.
+                        mHeadsUpManager.unpinAll(true);
+                    }
+
                     clearNotificationEffects();
                     endMotion();
                     return true;

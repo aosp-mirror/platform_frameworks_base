@@ -19,22 +19,20 @@ package com.android.systemui.touchpad.tutorial.ui.view
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle.State.STARTED
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.compose.theme.PlatformTheme
-import com.android.systemui.touchpad.tutorial.ui.BackGestureTutorialViewModel
 import com.android.systemui.touchpad.tutorial.ui.GestureViewModelFactory
 import com.android.systemui.touchpad.tutorial.ui.HomeGestureTutorialViewModel
 import com.android.systemui.touchpad.tutorial.ui.Screen.BACK_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.Screen.HOME_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.Screen.TUTORIAL_SELECTION
 import com.android.systemui.touchpad.tutorial.ui.TouchpadTutorialViewModel
-import com.android.systemui.touchpad.tutorial.ui.TutorialSelectionViewModel
-import com.android.systemui.touchpad.tutorial.ui.TutorialSelectionViewModelFactory
 import javax.inject.Inject
 
 class TouchpadTutorialActivity
@@ -43,31 +41,43 @@ constructor(
     private val viewModelFactory: TouchpadTutorialViewModel.Factory,
 ) : ComponentActivity() {
 
+    private val vm by viewModels<TouchpadTutorialViewModel>(factoryProducer = { viewModelFactory })
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { PlatformTheme { TouchpadTutorialScreen(viewModelFactory) } }
+        enableEdgeToEdge()
+        setContent { PlatformTheme { TouchpadTutorialScreen(vm) { finish() } } }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        vm.onOpened()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        vm.onClosed()
     }
 }
 
 @Composable
-fun TouchpadTutorialScreen(viewModelFactory: ViewModelProvider.Factory) {
-    val vm = viewModel<TouchpadTutorialViewModel>(factory = viewModelFactory)
+fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> Unit) {
     val activeScreen by vm.screen.collectAsStateWithLifecycle(STARTED)
     when (activeScreen) {
-        TUTORIAL_SELECTION -> TutorialSelectionScreen()
-        BACK_GESTURE -> BackGestureTutorialScreen()
+        TUTORIAL_SELECTION ->
+            TutorialSelectionScreen(
+                onBackTutorialClicked = { vm.goTo(BACK_GESTURE) },
+                onHomeTutorialClicked = { vm.goTo(HOME_GESTURE) },
+                onActionKeyTutorialClicked = {},
+                onDoneButtonClicked = closeTutorial
+            )
+        BACK_GESTURE ->
+            BackGestureTutorialScreen(
+                onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
+                onBack = { vm.goTo(TUTORIAL_SELECTION) }
+            )
         HOME_GESTURE -> HomeGestureTutorialScreen()
     }
-}
-
-@Composable
-fun TutorialSelectionScreen() {
-    val vm = viewModel<TutorialSelectionViewModel>(factory = TutorialSelectionViewModelFactory())
-}
-
-@Composable
-fun BackGestureTutorialScreen() {
-    val vm = viewModel<BackGestureTutorialViewModel>(factory = GestureViewModelFactory())
 }
 
 @Composable

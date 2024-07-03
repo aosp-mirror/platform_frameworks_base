@@ -25,8 +25,11 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class XmlUtils {
+    public static final String DATA_TYPE_SEPARATOR = "_data_type_";
+
     public static final String HR_TAG_APP_METADATA_BUNDLES = "app-metadata-bundles";
     public static final String HR_TAG_SYSTEM_APP_SAFETY_LABEL = "system-app-safety-label";
     public static final String HR_TAG_SAFETY_LABELS = "safety-labels";
@@ -38,7 +41,9 @@ public class XmlUtils {
     public static final String HR_TAG_THIRD_PARTY_VERIFICATION = "third-party-verification";
     public static final String HR_TAG_DATA_ACCESSED = "data-accessed";
     public static final String HR_TAG_DATA_COLLECTED = "data-collected";
+    public static final String HR_TAG_DATA_COLLECTED_EPHEMERAL = "data-collected-ephemeral";
     public static final String HR_TAG_DATA_SHARED = "data-shared";
+    public static final String HR_TAG_ITEM = "item";
     public static final String HR_ATTR_NAME = "name";
     public static final String HR_ATTR_EMAIL = "email";
     public static final String HR_ATTR_ADDRESS = "address";
@@ -52,20 +57,22 @@ public class XmlUtils {
     public static final String HR_ATTR_IS_SHARING_OPTIONAL = "isSharingOptional";
     public static final String HR_ATTR_IS_DATA_DELETABLE = "isDataDeletable";
     public static final String HR_ATTR_IS_DATA_ENCRYPTED = "isDataEncrypted";
-    public static final String HR_ATTR_EPHEMERAL = "ephemeral";
+    // public static final String HR_ATTR_EPHEMERAL = "ephemeral";
     public static final String HR_ATTR_PURPOSES = "purposes";
     public static final String HR_ATTR_VERSION = "version";
     public static final String HR_ATTR_URL = "url";
+    public static final String HR_ATTR_DECLARATION = "declaration";
     public static final String HR_ATTR_TITLE = "title";
     public static final String HR_ATTR_DESCRIPTION = "description";
     public static final String HR_ATTR_CONTAINS_ADS = "containsAds";
     public static final String HR_ATTR_OBEY_APS = "obeyAps";
+    public static final String HR_ATTR_APS_COMPLIANT = "apsCompliant";
     public static final String HR_ATTR_ADS_FINGERPRINTING = "adsFingerprinting";
     public static final String HR_ATTR_SECURITY_FINGERPRINTING = "securityFingerprinting";
     public static final String HR_ATTR_PRIVACY_POLICY = "privacyPolicy";
     public static final String HR_ATTR_SECURITY_ENDPOINTS = "securityEndpoints";
-    public static final String HR_ATTR_FIRST_PARTY_ENDPOINTS = "firstPartyEndpoints";
-    public static final String HR_ATTR_SERVICE_PROVIDER_ENDPOINTS = "serviceProviderEndpoints";
+    public static final String HR_TAG_FIRST_PARTY_ENDPOINTS = "first-party-endpoints";
+    public static final String HR_TAG_SERVICE_PROVIDER_ENDPOINTS = "service-provider-endpoints";
     public static final String HR_ATTR_CATEGORY = "category";
 
     public static final String OD_TAG_BUNDLE = "bundle";
@@ -94,15 +101,17 @@ public class XmlUtils {
     public static final String OD_NAME_DESCRIPTION = "description";
     public static final String OD_NAME_CONTAINS_ADS = "contains_ads";
     public static final String OD_NAME_OBEY_APS = "obey_aps";
+    public static final String OD_NAME_APS_COMPLIANT = "aps_compliant";
     public static final String OD_NAME_ADS_FINGERPRINTING = "ads_fingerprinting";
     public static final String OD_NAME_SECURITY_FINGERPRINTING = "security_fingerprinting";
     public static final String OD_NAME_PRIVACY_POLICY = "privacy_policy";
-    public static final String OD_NAME_SECURITY_ENDPOINT = "security_endpoint";
-    public static final String OD_NAME_FIRST_PARTY_ENDPOINT = "first_party_endpoint";
-    public static final String OD_NAME_SERVICE_PROVIDER_ENDPOINT = "service_provider_endpoint";
+    public static final String OD_NAME_SECURITY_ENDPOINT = "security_endpoints";
+    public static final String OD_NAME_FIRST_PARTY_ENDPOINTS = "first_party_endpoints";
+    public static final String OD_NAME_SERVICE_PROVIDER_ENDPOINTS = "service_provider_endpoints";
     public static final String OD_NAME_CATEGORY = "category";
     public static final String OD_NAME_VERSION = "version";
     public static final String OD_NAME_URL = "url";
+    public static final String OD_NAME_DECLARATION = "declaration";
     public static final String OD_NAME_SYSTEM_APP_SAFETY_LABEL = "system_app_safety_label";
     public static final String OD_NAME_SECURITY_LABELS = "security_labels";
     public static final String OD_NAME_THIRD_PARTY_VERIFICATION = "third_party_verification";
@@ -123,7 +132,9 @@ public class XmlUtils {
     /** Gets the top-level children with the tag name.. */
     public static List<Element> getChildrenByTagName(Node parentEle, String tagName) {
         var elements = XmlUtils.asElementList(parentEle.getChildNodes());
-        return elements.stream().filter(e -> e.getTagName().equals(tagName)).toList();
+        return elements.stream()
+                .filter(e -> e.getTagName().equals(tagName))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -232,7 +243,18 @@ public class XmlUtils {
         return ele;
     }
 
-    /** Create OD style array DOM Element, which can represent any time but is stored as Strings. */
+    /** Create HR style array DOM Element. */
+    public static Element createHrArray(Document doc, String arrayTagName, List<String> arrayVals) {
+        Element arrEle = doc.createElement(arrayTagName);
+        for (String s : arrayVals) {
+            Element itemEle = doc.createElement(XmlUtils.HR_TAG_ITEM);
+            itemEle.setTextContent(s);
+            arrEle.appendChild(itemEle);
+        }
+        return arrEle;
+    }
+
+    /** Create OD style array DOM Element, which can represent any type but is stored as Strings. */
     public static Element createOdArray(
             Document doc, String arrayTag, String arrayName, List<String> arrayVals) {
         Element arrEle = doc.createElement(arrayTag);
@@ -267,7 +289,8 @@ public class XmlUtils {
     /** Gets a pipeline-split attribute. */
     public static List<String> getPipelineSplitAttr(Element ele, String attrName, boolean required)
             throws MalformedXmlException {
-        List<String> list = Arrays.stream(ele.getAttribute(attrName).split("\\|")).toList();
+        List<String> list =
+                Arrays.stream(ele.getAttribute(attrName).split("\\|")).collect(Collectors.toList());
         if ((list.isEmpty() || list.get(0).isEmpty()) && required) {
             throw new MalformedXmlException(
                     String.format(
@@ -296,15 +319,16 @@ public class XmlUtils {
         List<Element> boolEles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_BOOLEAN).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (boolEles.size() > 1) {
             throw new MalformedXmlException(
-                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+                    String.format(
+                            "Found more than one boolean %s in %s.", nameName, ele.getTagName()));
         }
         if (boolEles.isEmpty()) {
             if (required) {
                 throw new MalformedXmlException(
-                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+                        String.format("Found no boolean %s in %s.", nameName, ele.getTagName()));
             }
             return null;
         }
@@ -326,15 +350,16 @@ public class XmlUtils {
         List<Element> longEles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_LONG).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (longEles.size() > 1) {
             throw new MalformedXmlException(
-                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+                    String.format(
+                            "Found more than one long %s in %s.", nameName, ele.getTagName()));
         }
         if (longEles.isEmpty()) {
             if (required) {
                 throw new MalformedXmlException(
-                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+                        String.format("Found no long %s in %s.", nameName, ele.getTagName()));
             }
             return null;
         }
@@ -356,15 +381,16 @@ public class XmlUtils {
         List<Element> eles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_STRING).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (eles.size() > 1) {
             throw new MalformedXmlException(
-                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+                    String.format(
+                            "Found more than one string %s in %s.", nameName, ele.getTagName()));
         }
         if (eles.isEmpty()) {
             if (required) {
                 throw new MalformedXmlException(
-                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+                        String.format("Found no string %s in %s.", nameName, ele.getTagName()));
             }
             return null;
         }
@@ -383,15 +409,16 @@ public class XmlUtils {
         List<Element> eles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_PBUNDLE_AS_MAP).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (eles.size() > 1) {
             throw new MalformedXmlException(
-                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+                    String.format(
+                            "Found more than one pbundle %s in %s.", nameName, ele.getTagName()));
         }
         if (eles.isEmpty()) {
             if (required) {
                 throw new MalformedXmlException(
-                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+                        String.format("Found no pbundle %s in %s.", nameName, ele.getTagName()));
             }
             return null;
         }
@@ -426,7 +453,7 @@ public class XmlUtils {
         List<Element> intArrayEles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_INT_ARRAY).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (intArrayEles.size() > 1) {
             throw new MalformedXmlException(
                     String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
@@ -447,21 +474,50 @@ public class XmlUtils {
         return ints;
     }
 
+    /** Gets human-readable style String array. */
+    public static List<String> getHrItemsAsStrings(
+            Element parent, String elementName, boolean required) throws MalformedXmlException {
+
+        List<Element> arrayEles = XmlUtils.getChildrenByTagName(parent, elementName);
+        if (arrayEles.size() > 1) {
+            throw new MalformedXmlException(
+                    String.format(
+                            "Found more than one %s in %s.", elementName, parent.getTagName()));
+        }
+        if (arrayEles.isEmpty()) {
+            if (required) {
+                throw new MalformedXmlException(
+                        String.format("Found no %s in %s.", elementName, parent.getTagName()));
+            }
+            return null;
+        }
+        Element arrayEle = arrayEles.get(0);
+        List<Element> itemEles = XmlUtils.getChildrenByTagName(arrayEle, XmlUtils.HR_TAG_ITEM);
+        List<String> strs = new ArrayList<String>();
+        for (Element itemEle : itemEles) {
+            strs.add(itemEle.getTextContent());
+        }
+        return strs;
+    }
+
     /** Gets on-device style String array. */
     public static List<String> getOdStringArray(Element ele, String nameName, boolean required)
             throws MalformedXmlException {
         List<Element> arrayEles =
                 XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_STRING_ARRAY).stream()
                         .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
-                        .toList();
+                        .collect(Collectors.toList());
         if (arrayEles.size() > 1) {
             throw new MalformedXmlException(
-                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+                    String.format(
+                            "Found more than one string array %s in %s.",
+                            nameName, ele.getTagName()));
         }
         if (arrayEles.isEmpty()) {
             if (required) {
                 throw new MalformedXmlException(
-                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+                        String.format(
+                                "Found no string array %s in %s.", nameName, ele.getTagName()));
             }
             return null;
         }

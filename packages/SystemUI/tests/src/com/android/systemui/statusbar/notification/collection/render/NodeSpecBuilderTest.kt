@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.render
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.logcatLogBuffer
@@ -37,10 +38,12 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class NodeSpecBuilderTest : SysuiTestCase() {
 
     private val mediaContainerController: MediaContainerController = mock()

@@ -105,7 +105,17 @@ constructor(
                         is ObservableTransitionState.Transition ->
                             when {
                                 transitionState.fromScene == Scenes.Lockscreen &&
-                                    transitionState.toScene == Scenes.Gone -> flowOf(true)
+                                    transitionState.toScene == Scenes.Gone ->
+                                    sceneInteractor
+                                        .get()
+                                        .isTransitionUserInputOngoing
+                                        .flatMapLatestConflated { isUserInputOngoing ->
+                                            if (isUserInputOngoing) {
+                                                isDeviceEntered
+                                            } else {
+                                                flowOf(true)
+                                            }
+                                        }
                                 transitionState.fromScene == Scenes.Bouncer &&
                                     transitionState.toScene == Scenes.Gone ->
                                     transitionState.progress.map { progress ->
@@ -229,11 +239,14 @@ constructor(
     val aodVisibility: Flow<Boolean> =
         combine(
                 keyguardInteractor.isDozing,
+                keyguardInteractor.isAodAvailable,
                 keyguardInteractor.biometricUnlockState,
-            ) { isDozing, biometricUnlockState ->
+            ) { isDozing, isAodAvailable, biometricUnlockState ->
                 // AOD is visible if we're dozing, unless we are wake and unlocking (where we go
                 // directly from AOD to unlocked while dozing).
-                isDozing && !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
+                isDozing &&
+                    isAodAvailable &&
+                    !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
             }
             .distinctUntilChanged()
 

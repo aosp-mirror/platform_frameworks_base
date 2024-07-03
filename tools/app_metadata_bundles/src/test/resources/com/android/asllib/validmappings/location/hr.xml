@@ -1,5 +1,5 @@
 <app-metadata-bundles version="123">
-    <safety-labels version="12345">
+    <safety-labels>
         <data-labels>
             <data-shared dataCategory="location"
                 dataType="precise_location"

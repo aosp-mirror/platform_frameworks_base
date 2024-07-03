@@ -84,6 +84,10 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"泡泡"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"已關閉泡泡。"</string>
+    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
+    <skip />
+    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
+    <skip />
     <string name="restart_button_description" msgid="4564728020654658478">"輕觸此按鈕重新啟動這個應用程式，即可獲得更良好的觀看體驗"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"前往「設定」變更這個應用程式的顯示比例"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"變更顯示比例"</string>

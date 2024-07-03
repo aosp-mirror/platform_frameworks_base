@@ -31,6 +31,7 @@ import com.android.systemui.qs.tiles.LocationTile
 import com.android.systemui.qs.tiles.MicrophoneToggleTile
 import com.android.systemui.qs.tiles.UiModeNightTile
 import com.android.systemui.qs.tiles.WorkModeTile
+import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.impl.alarm.domain.AlarmTileMapper
 import com.android.systemui.qs.tiles.impl.alarm.domain.interactor.AlarmTileDataInteractor
@@ -79,6 +80,41 @@ interface PolicyModule {
     @IntoMap
     @StringKey(WorkModeTile.TILE_SPEC)
     fun bindWorkModeTile(workModeTile: WorkModeTile): QSTileImpl<*>
+
+    @Binds
+    @IntoMap
+    @StringKey(FLASHLIGHT_TILE_SPEC)
+    fun provideAirplaneModeAvailabilityInteractor(
+            impl: FlashlightTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(LOCATION_TILE_SPEC)
+    fun provideLocationAvailabilityInteractor(
+            impl: LocationTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(ALARM_TILE_SPEC)
+    fun provideAlarmAvailabilityInteractor(
+            impl: AlarmTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(UIMODENIGHT_TILE_SPEC)
+    fun provideUiModeNightAvailabilityInteractor(
+            impl: UiModeNightTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(WORK_MODE_TILE_SPEC)
+    fun provideWorkModeAvailabilityInteractor(
+            impl: WorkModeTileDataInteractor
+    ): QSTileAvailabilityInteractor
 
     companion object {
         const val FLASHLIGHT_TILE_SPEC = "flashlight"
@@ -287,6 +323,15 @@ interface PolicyModule {
                 mapper.create(SensorPrivacyTileResources.CameraPrivacyTileResources),
             )
 
+        @Provides
+        @IntoMap
+        @StringKey(CAMERA_TOGGLE_TILE_SPEC)
+        fun provideCameraToggleAvailabilityInteractor(
+                factory: SensorPrivacyToggleTileDataInteractor.Factory
+        ): QSTileAvailabilityInteractor {
+            return factory.create(CAMERA)
+        }
+
         /** Inject microphone toggle config */
         @Provides
         @IntoMap
@@ -319,6 +364,16 @@ interface PolicyModule {
                 stateInteractor.create(MICROPHONE),
                 mapper.create(SensorPrivacyTileResources.MicrophonePrivacyTileResources),
             )
+
+        @Provides
+        @IntoMap
+        @StringKey(MIC_TOGGLE_TILE_SPEC)
+        fun provideMicToggleModeAvailabilityInteractor(
+                factory: SensorPrivacyToggleTileDataInteractor.Factory
+        ): QSTileAvailabilityInteractor {
+            return factory.create(MICROPHONE)
+        }
+
 
         /** Inject microphone toggle config */
         @Provides

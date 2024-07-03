@@ -53,17 +53,6 @@ flag {
 }
 
 flag {
-  name: "remove_prepare_surface_in_placement"
-  namespace: "windowing_frontend"
-  description: "Reduce unnecessary invocation to improve performance"
-  bug: "330721336"
-  is_fixed_read_only: true
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "close_to_square_config_includes_status_bar"
   namespace: "windowing_frontend"
   description: "On close to square display, when necessary, configuration includes status bar"
@@ -146,6 +135,13 @@ flag {
 }
 
 flag {
+  name: "process_priority_policy_for_multi_window_mode"
+  namespace: "windowing_frontend"
+  description: "Use higher priority for top-like processes"
+  bug: "200769420"
+}
+
+flag {
   name: "insets_decoupled_configuration"
   namespace: "windowing_frontend"
   description: "Configuration decoupled from insets"
@@ -193,3 +189,14 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "ensure_wallpaper_in_transitions"
+  namespace: "windowing_frontend"
+  description: "Ensure that wallpaper window tokens are always present/available for collection in transitions"
+  bug: "347593088"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+

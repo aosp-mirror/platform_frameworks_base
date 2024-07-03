@@ -1,2 +1,9 @@
+# Android platform SQLite owners are responsible for:
+# 1. Periodically updating libsqlite from upstream sqlite.org.
+# 2. Escalating libsqlite bug reports to upstream sqlite.org.
+# 3. Addressing bugs, performance regressions, and feature requests
+#    in Android SDK SQLite wrappers (android.database.sqlite.*).
+# 4. Reviewing proposed changes to said Android SDK SQLite wrappers.
+
 shayba@google.com
 shombert@google.com

@@ -31,6 +31,7 @@ import android.content.ContentResolver;
 import android.os.Handler;
 import android.provider.Settings;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -44,10 +45,12 @@ import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class BatteryMeterViewControllerTest extends SysuiTestCase {
     @Mock
     private BatteryMeterView mBatteryMeterView;

@@ -229,6 +229,10 @@ public class SensorController {
                 Slog.e(TAG, "No sensor callback configured for sensor handle " + handle);
                 return BAD_VALUE;
             }
+            if (mVdmInternal == null) {
+                Slog.e(TAG, "Virtual Device Manager is not enabled.");
+                return BAD_VALUE;
+            }
             VirtualSensor sensor = mVdmInternal.getVirtualSensor(mVirtualDeviceId, handle);
             if (sensor == null) {
                 Slog.e(TAG, "No sensor found for deviceId=" + mVirtualDeviceId
@@ -283,6 +287,10 @@ public class SensorController {
                 @SensorDirectChannel.RateLevel int rateLevel) {
             if (mCallback == null) {
                 Slog.e(TAG, "No runtime sensor callback configured.");
+                return BAD_VALUE;
+            }
+            if (mVdmInternal == null) {
+                Slog.e(TAG, "Virtual Device Manager is not enabled.");
                 return BAD_VALUE;
             }
             VirtualSensor sensor = mVdmInternal.getVirtualSensor(mVirtualDeviceId, sensorHandle);

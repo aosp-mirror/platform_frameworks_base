@@ -32,6 +32,11 @@ import com.android.systemui.shade.ui.composable.ShadeHeader
 import kotlin.time.Duration.Companion.milliseconds
 
 fun TransitionBuilder.toNotificationsShadeTransition(
+    /**
+     * The edge where the shade will animate from. This is statically determined (i.e. doesn't
+     * change during runtime).
+     */
+    edge: Edge = Edge.Top,
     durationScale: Double = 1.0,
 ) {
     spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
@@ -50,7 +55,7 @@ fun TransitionBuilder.toNotificationsShadeTransition(
             }
         }
 
-    translate(OverlayShade.Elements.Panel, Edge.Top)
+    translate(OverlayShade.Elements.Panel, edge)
 
     fractionRange(end = .5f) { fade(OverlayShade.Elements.Scrim) }
 

@@ -30,6 +30,7 @@ import com.android.systemui.qs.tiles.HotspotTile
 import com.android.systemui.qs.tiles.InternetTile
 import com.android.systemui.qs.tiles.InternetTileNewImpl
 import com.android.systemui.qs.tiles.NfcTile
+import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.impl.airplane.domain.AirplaneModeMapper
 import com.android.systemui.qs.tiles.impl.airplane.domain.interactor.AirplaneModeTileDataInteractor
@@ -89,6 +90,27 @@ interface ConnectivityModule {
 
     /** Inject NfcTile into tileMap in QSModule */
     @Binds @IntoMap @StringKey(NfcTile.TILE_SPEC) fun bindNfcTile(nfcTile: NfcTile): QSTileImpl<*>
+
+    @Binds
+    @IntoMap
+    @StringKey(AIRPLANE_MODE_TILE_SPEC)
+    fun provideAirplaneModeAvailabilityInteractor(
+            impl: AirplaneModeTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(DATA_SAVER_TILE_SPEC)
+    fun provideDataSaverAvailabilityInteractor(
+            impl: DataSaverTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(INTERNET_TILE_SPEC)
+    fun provideInternetAvailabilityInteractor(
+            impl: InternetTileDataInteractor
+    ): QSTileAvailabilityInteractor
 
     companion object {
 

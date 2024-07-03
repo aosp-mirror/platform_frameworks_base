@@ -32,8 +32,11 @@ import com.android.internal.util.DataClass;
  * registered to monitor that type of event on the targeted display.
  *
  * @hide
+ * @deprecated See {@link android.hardware.input.InputManager#monitorGestureInput(String, int)}
+ *             for more details.
  */
 @DataClass(genToString = true)
+@Deprecated
 public final class InputMonitor implements Parcelable {
     private static final String TAG = "InputMonitor";
 

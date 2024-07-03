@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"디버그 앱에 GPU 디버그 레이어 로드 허용"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"상세 공급업체 로깅 사용 설정"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"버그 신고에 추가적인 기기별 공급업체 로그를 포함합니다. 여기에는 개인정보가 포함될 수 있으며, 배터리 또는 저장공간 사용량이 늘어날 수 있습니다."</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"창 애니메이션 배율"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"전환 애니메이션 배율"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator 길이 배율"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"알람 및 리마인더"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"이 앱이 알람을 설정하고 시간 기반 작업을 예약할 수 있도록 허용합니다. 이렇게 하면 백그라운드에서 앱 실행이 허용되어 배터리 사용량이 증가할 수 있습니다.\n\n이 권한을 사용 중지하면 이 앱에서 예약한 기존의 알람 및 시간 기반 일정이 작동하지 않습니다."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"일정 예약, 알람, 리마인더, 시계"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"방해 금지 모드"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"사용 설정"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"방해 금지 모드 사용 설정"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"사용 안함"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"지속 시간"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"항상 확인"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"사용 중지할 때까지"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(이름 없음)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"조금 전"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"이 휴대전화"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"이 태블릿"</string>

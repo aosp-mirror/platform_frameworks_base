@@ -63,24 +63,24 @@ constructor(
     private fun setupAccessibilityDelegate() {
         accessibilityDelegate =
             object : AccessibilityDelegate() {
-                private val accessibilityAuthenticateHint =
+                private val accessibilityBouncerHint =
                     AccessibilityNodeInfo.AccessibilityAction(
                         AccessibilityNodeInfoCompat.ACTION_CLICK,
-                        resources.getString(R.string.accessibility_authenticate_hint)
+                        resources.getString(R.string.accessibility_bouncer)
                     )
                 private val accessibilityEnterHint =
                     AccessibilityNodeInfo.AccessibilityAction(
                         AccessibilityNodeInfoCompat.ACTION_CLICK,
                         resources.getString(R.string.accessibility_enter_hint)
                     )
+
                 override fun onInitializeAccessibilityNodeInfo(
                     v: View,
                     info: AccessibilityNodeInfo
                 ) {
                     super.onInitializeAccessibilityNodeInfo(v, info)
                     when (accessibilityHintType) {
-                        AccessibilityHintType.AUTHENTICATE ->
-                            info.addAction(accessibilityAuthenticateHint)
+                        AccessibilityHintType.BOUNCER -> info.addAction(accessibilityBouncerHint)
                         AccessibilityHintType.ENTER -> info.addAction(accessibilityEnterHint)
                         AccessibilityHintType.NONE -> return
                     }
@@ -204,12 +204,12 @@ constructor(
             /* reversible */ false,
         )
 
-        // LockscreenFingerprint <=> LockscreenLocked
+        // LockscreenFingerprint => LockscreenLocked
         animatedIconDrawable.addTransition(
             R.id.locked_fp,
             R.id.locked,
             context.getDrawable(R.drawable.fp_to_locked) as AnimatedVectorDrawable,
-            /* reversible */ true,
+            /* reversible */ false,
         )
 
         // LockscreenUnlocked <=> AodLocked
@@ -274,7 +274,7 @@ constructor(
 
     enum class AccessibilityHintType {
         NONE,
-        AUTHENTICATE,
+        BOUNCER,
         ENTER,
     }
 }

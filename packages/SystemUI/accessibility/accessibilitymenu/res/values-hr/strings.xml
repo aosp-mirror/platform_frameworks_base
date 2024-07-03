@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"Idi na prethodni zaslon"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Idi na sljedeći zaslon"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Izbornik pristupačnosti veliki je zaslonski izbornik koji vam omogućuje upravljanje uređajem. Putem njega možete zaključati uređaj, upravljati glasnoćom i svjetlinom, izrađivati snimke zaslona i drugo."</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"Upravljanje uređajem pomoću velikog izbornika"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Upravljajte uređajem pomoću velikog izbornika"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Postavke izbornika pristupačnosti"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Veliki gumbi"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Povećanje veličine gumba izbornika Pristupačnosti"</string>

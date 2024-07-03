@@ -86,7 +86,6 @@ import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.InputConfig;
 import android.os.RemoteException;
@@ -114,7 +113,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.testutils.StubTransaction;
 import com.android.server.wm.SensitiveContentPackages.PackageInfo;
-import com.android.window.flags.Flags;
 
 import org.junit.After;
 import org.junit.Test;
@@ -1369,67 +1367,7 @@ public class WindowStateTests extends WindowTestsBase {
 
     @SetupWindows(addWindows = {W_INPUT_METHOD})
     @Test
-    public void testImeTargetChangeListener_OnImeTargetOverlayVisibilityChanged_legacy() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_WINDOW_SESSION_RELAYOUT_INFO);
-
-        final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
-        mWm.mImeTargetChangeListener = listener;
-
-        // Scenario 1: test addWindow/relayoutWindow to add Ime layering overlay window as visible.
-        final WindowToken windowToken = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
-                mDisplayContent);
-        final IWindow client = new TestIWindow();
-        final Session session = getTestSession();
-        final ClientWindowFrames outFrames = new ClientWindowFrames();
-        final MergedConfiguration outConfig = new MergedConfiguration();
-        final SurfaceControl outSurfaceControl = new SurfaceControl();
-        final InsetsState outInsetsState = new InsetsState();
-        final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
-        final Bundle outBundle = new Bundle();
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                TYPE_APPLICATION_OVERLAY);
-        params.setTitle("imeLayeringTargetOverlay");
-        params.token = windowToken.token;
-        params.flags = FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM;
-
-        mWm.addWindow(session, client, params, View.VISIBLE, DEFAULT_DISPLAY,
-                0 /* userUd */, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
-                new InsetsSourceControl.Array(), new Rect(), new float[1]);
-        mWm.relayoutWindow(session, client, params, 100, 200, View.VISIBLE, 0, 0, 0,
-                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
-        waitHandlerIdle(mWm.mH);
-
-        final WindowState imeLayeringTargetOverlay = mDisplayContent.getWindow(
-                w -> w.mClient.asBinder() == client.asBinder());
-        assertThat(imeLayeringTargetOverlay.isVisible()).isTrue();
-        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
-        assertThat(listener.mIsRemoved).isFalse();
-        assertThat(listener.mIsVisibleForImeTargetOverlay).isTrue();
-
-        // Scenario 2: test relayoutWindow to let the Ime layering target overlay window invisible.
-        mWm.relayoutWindow(session, client, params, 100, 200, View.GONE, 0, 0, 0,
-                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
-        waitHandlerIdle(mWm.mH);
-
-        assertThat(imeLayeringTargetOverlay.isVisible()).isFalse();
-        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
-        assertThat(listener.mIsRemoved).isFalse();
-        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
-
-        // Scenario 3: test removeWindow to remove the Ime layering target overlay window.
-        mWm.removeClientToken(session, client.asBinder());
-        waitHandlerIdle(mWm.mH);
-
-        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
-        assertThat(listener.mIsRemoved).isTrue();
-        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
-    }
-
-    @SetupWindows(addWindows = {W_INPUT_METHOD})
-    @Test
     public void testImeTargetChangeListener_OnImeTargetOverlayVisibilityChanged() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_WINDOW_SESSION_RELAYOUT_INFO);
-
         final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
         mWm.mImeTargetChangeListener = listener;
 

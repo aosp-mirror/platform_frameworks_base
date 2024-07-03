@@ -740,6 +740,12 @@ public abstract class DisplayManagerInternal {
          */
         void onBlockingScreenOn(Runnable unblocker);
 
+        /**
+         * Called while display is turning to screen state other than state ON to notify that any
+         * pending work from the previous blockScreenOn call should have been cancelled.
+         */
+        void cancelBlockScreenOn();
+
         /** Whether auto brightness update in doze is allowed */
         boolean allowAutoBrightnessInDoze();
     }
@@ -772,6 +778,12 @@ public abstract class DisplayManagerInternal {
          *                  {@link DisplayManager} that it can continue turning screen on.
          */
         boolean blockScreenOn(Runnable unblocker);
+
+        /**
+         * Called while display is turning to screen state other than state ON to notify that any
+         * pending work from the previous blockScreenOn call should have been cancelled.
+         */
+        void cancelBlockScreenOn();
 
         /**
          * Get the brightness levels used to determine automatic brightness based on lux levels.

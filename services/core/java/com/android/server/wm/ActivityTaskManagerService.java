@@ -260,7 +260,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.policy.KeyguardDismissCallback;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -1318,12 +1318,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             String resultWho, int requestCode, int flagsMask, int flagsValues, Bundle bOptions) {
         enforceNotIsolatedCaller("startActivityIntentSender");
         if (fillInIntent != null) {
-            // Refuse possible leaked file descriptors
-            if (fillInIntent.hasFileDescriptors()) {
-                throw new IllegalArgumentException("File descriptors passed in Intent");
-            }
-            // Remove existing mismatch flag so it can be properly updated later
-            fillInIntent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
+            fillInIntent.prepareToEnterSystemServer();
         }
 
         if (!(target instanceof PendingIntentRecord)) {
@@ -1349,10 +1344,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public boolean startNextMatchingActivity(IBinder callingActivity, Intent intent,
             Bundle bOptions) {
-        // Refuse possible leaked file descriptors
-        if (intent != null && intent.hasFileDescriptors()) {
-            throw new IllegalArgumentException("File descriptors passed in Intent");
+        if (intent != null) {
+            intent.prepareToEnterSystemServer();
         }
+
         SafeActivityOptions options = SafeActivityOptions.fromBundle(bOptions);
 
         synchronized (mGlobalLock) {
@@ -1367,8 +1362,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return false;
             }
             intent = new Intent(intent);
-            // Remove existing mismatch flag so it can be properly updated later
-            intent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
             // The caller is not allowed to change the data.
             intent.setDataAndType(r.intent.getData(), r.intent.getType());
             // And we are resetting to find the next component...
@@ -6199,11 +6192,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLockWithoutBoost) {
                 final WindowProcessController proc = mProcessNames.remove(name, uid);
                 if (proc != null && !mStartingProcessActivities.isEmpty()) {
-                    for (int i = mStartingProcessActivities.size() - 1; i >= 0; i--) {
-                        final ActivityRecord r = mStartingProcessActivities.get(i);
+                    // Use a copy in case finishIfPossible changes the list indirectly.
+                    final ArrayList<ActivityRecord> activities =
+                            new ArrayList<>(mStartingProcessActivities);
+                    for (int i = activities.size() - 1; i >= 0; i--) {
+                        final ActivityRecord r = activities.get(i);
                         if (uid == r.info.applicationInfo.uid && name.equals(r.processName)) {
                             Slog.w(TAG, proc + " is removed with pending start " + r);
-                            mStartingProcessActivities.remove(i);
+                            mStartingProcessActivities.remove(r);
                             // If visible, finish it to avoid getting stuck on screen.
                             if (r.isVisibleRequested()) {
                                 r.finishIfPossible("starting-proc-removed", false /* oomAdj */);

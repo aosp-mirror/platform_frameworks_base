@@ -18,8 +18,8 @@ package com.android.server.notification;
 
 import static android.app.NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
-import static android.service.notification.NotificationServiceProto.CHANNEL_POLICY_PRIORITY;
 import static android.service.notification.NotificationServiceProto.CHANNEL_POLICY_NONE;
+import static android.service.notification.NotificationServiceProto.CHANNEL_POLICY_PRIORITY;
 import static android.service.notification.NotificationServiceProto.RULE_TYPE_AUTOMATIC;
 import static android.service.notification.NotificationServiceProto.RULE_TYPE_MANUAL;
 import static android.service.notification.NotificationServiceProto.RULE_TYPE_UNKNOWN;
@@ -352,8 +352,10 @@ class ZenModeEventLogger {
             ZenModeDiff.RuleDiff manualDiff = diff.getManualRuleDiff();
             if (manualDiff != null && manualDiff.hasDiff()) {
                 // a diff in the manual rule doesn't *necessarily* mean that it's responsible for
-                // the change -- only if it's been added or removed.
-                if (manualDiff.wasAdded() || manualDiff.wasRemoved()) {
+                // the change -- only if it's been added or removed or updated.
+                if (manualDiff.wasAdded() || manualDiff.wasRemoved()
+                        || (Flags.modesUi()
+                        && (manualDiff.becameActive() || manualDiff.becameInactive()))) {
                     return RULE_TYPE_MANUAL;
                 }
             }
@@ -391,10 +393,8 @@ class ZenModeEventLogger {
             if (config == null) {
                 return rules;
             }
-
-            if (config.manualRule != null) {
-                // If the manual rule is non-null, then it's active. We make a copy and set the rule
-                // type so that the correct value gets logged.
+            if (config.isManualActive()) {
+                // We make a copy and set the rule type so that the correct value gets logged.
                 ZenRule rule = config.manualRule.copy();
                 rule.type = ACTIVE_RULE_TYPE_MANUAL;
                 rules.add(rule);
@@ -592,10 +592,10 @@ class ZenModeEventLogger {
                 // This applies to both call and message senders, but not conversation senders,
                 // where they use the same enum values.
                 proto.write(DNDPolicyProto.ALLOW_CALLS_FROM,
-                        ZenAdapters.notificationPolicySendersToZenPolicyPeopleType(
+                        ZenAdapters.prioritySendersToPeopleType(
                                 mNewPolicy.allowCallsFrom()));
                 proto.write(DNDPolicyProto.ALLOW_MESSAGES_FROM,
-                        ZenAdapters.notificationPolicySendersToZenPolicyPeopleType(
+                        ZenAdapters.prioritySendersToPeopleType(
                                 mNewPolicy.allowMessagesFrom()));
                 proto.write(DNDPolicyProto.ALLOW_CONVERSATIONS_FROM,
                         mNewPolicy.allowConversationsFrom());

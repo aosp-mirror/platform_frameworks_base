@@ -73,7 +73,7 @@ stack traces when specific surface transaction calls are made, which is possible
 following system properties for example:
 ```shell
 # Enabling
-adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha  # matches the name of the SurfaceControlTransaction method
+adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha,setPosition  # matches the name of the SurfaceControlTransaction methods
 adb shell setprop persist.wm.debug.sc.tx.log_match_name com.android.systemui # matches the name of the surface
 adb reboot
 adb logcat -s "SurfaceControlRegistry"
@@ -86,6 +86,16 @@ adb reboot
 
 It is not necessary to set both `log_match_call` and `log_match_name`, but note logs can be quite
 noisy if unfiltered.
+
+It can sometimes be useful to trace specific logs and when they are applied (sometimes we build
+transactions that can be applied later).  You can do this by adding the "merge" and "apply" calls to
+the set of requested calls:
+```shell
+# Enabling
+adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha,merge,apply  # apply will dump logs of each setAlpha or merge call on that tx
+adb reboot
+adb logcat -s "SurfaceControlRegistry"
+```
 
 ## Tracing activity starts in the app process
 

@@ -486,7 +486,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     boolean mBootMessageNeedsHiding;
     volatile boolean mBootAnimationDismissable;
-    private KeyguardServiceDelegate mKeyguardDelegate;
+    @VisibleForTesting KeyguardServiceDelegate mKeyguardDelegate;
     private boolean mKeyguardBound;
     final DrawnListener mKeyguardDrawnCallback = new DrawnListener() {
         @Override
@@ -2090,8 +2090,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     "Home - Long Press");
             switch (mLongPressOnHomeBehavior) {
                 case LONG_PRESS_HOME_ALL_APPS:
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
-                    launchAllAppsAction();
+                    if (mHasFeatureLeanback) {
+                        launchAllAppsAction();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
+                    } else {
+                        launchAllAppsViaA11y();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ACCESSIBILITY_ALL_APPS);
+                    }
                     break;
                 case LONG_PRESS_HOME_ASSIST:
                     logKeyboardSystemsEvent(event, KeyboardLogEvent.LAUNCH_ASSISTANT);
@@ -2882,6 +2887,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         ContentResolver resolver = mContext.getContentResolver();
         boolean updateRotation = false;
+        boolean updateKidsModeSettings = false;
+        final boolean kidsModeEnabled;
         synchronized (mLock) {
             mEndcallBehavior = Settings.System.getIntForUser(resolver,
                     Settings.System.END_BUTTON_BEHAVIOR,
@@ -2995,20 +3002,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Secure.STYLUS_BUTTONS_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
             mInputManagerInternal.setStylusButtonMotionEventsEnabled(mStylusButtonsEnabled);
 
-            final boolean kidsModeEnabled = Settings.Secure.getIntForUser(resolver,
+            kidsModeEnabled = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.NAV_BAR_KIDS_MODE, 0, UserHandle.USER_CURRENT) == 1;
             if (mKidsModeEnabled != kidsModeEnabled) {
                 mKidsModeEnabled = kidsModeEnabled;
-                updateKidsModeSettings();
+                updateKidsModeSettings = true;
             }
+        }
+        if (updateKidsModeSettings) {
+            updateKidsModeSettings(kidsModeEnabled);
         }
         if (updateRotation) {
             updateRotation(true);
         }
     }
 
-    private void updateKidsModeSettings() {
-        if (mKidsModeEnabled) {
+    private void updateKidsModeSettings(boolean kidsModeEnabled) {
+        if (kidsModeEnabled) {
             // Needed since many Kids apps aren't optimised to support both orientations and it
             // will be hard for kids to understand the app compat mode.
             // TODO(229961548): Remove ignoreOrientationRequest exception for Kids Mode once
@@ -3678,12 +3688,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_ALL_APPS:
-                if (!down) {
-                    mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
-                    Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
-                    msg.setAsynchronous(true);
-                    msg.sendToTarget();
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
+                if (firstDown) {
+                    if (mHasFeatureLeanback) {
+                        mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
+                        Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
+                        msg.setAsynchronous(true);
+                        msg.sendToTarget();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
+                    } else {
+                        launchAllAppsViaA11y();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ACCESSIBILITY_ALL_APPS);
+                    }
                 }
                 return true;
             case KeyEvent.KEYCODE_NOTIFICATION:
@@ -6511,6 +6526,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void setSwitchingUser(boolean switching) {
         mKeyguardDelegate.setSwitchingUser(switching);
+        if (switching) {
+            dismissKeyboardShortcutsMenu();
+        }
     }
 
     @Override

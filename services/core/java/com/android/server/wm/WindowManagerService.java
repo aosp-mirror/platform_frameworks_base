@@ -335,7 +335,7 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.protolog.LegacyProtoLogImpl;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -2027,7 +2027,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // Otherwise, look at the package
             final ApplicationInfo appInfo = mPmInternal.getApplicationInfo(
                     packageName, 0 /* flags */, SYSTEM_UID, UserHandle.getUserId(callingUid));
-            if (appInfo == null || appInfo.uid != callingUid) {
+            if (appInfo == null
+                    || !mPmInternal.isSameApp(
+                            packageName, callingUid, UserHandle.getUserId(callingUid))) {
                 throw new SecurityException("Package " + packageName + " not in UID "
                         + callingUid);
             }
@@ -2290,32 +2292,7 @@ public class WindowManagerService extends IWindowManager.Stub
             outInsetsState = null;
             outActiveControls = null;
         }
-        return relayoutWindowInner(session, client, attrs, requestedWidth, requestedHeight,
-                viewVisibility, flags, seq, lastSyncSeqId, outFrames, outMergedConfiguration,
-                outSurfaceControl, outInsetsState, outActiveControls, null /* outBundle */,
-                outRelayoutResult);
-    }
 
-    /** @deprecated */
-    @Deprecated
-    public int relayoutWindow(Session session, IWindow client, LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
-            int lastSyncSeqId, ClientWindowFrames outFrames,
-            MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
-            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
-            Bundle outBundle) {
-        return relayoutWindowInner(session, client, attrs, requestedWidth, requestedHeight,
-                viewVisibility, flags, seq, lastSyncSeqId, outFrames, outMergedConfiguration,
-                outSurfaceControl, outInsetsState, outActiveControls, outBundle,
-                null /* outRelayoutResult */);
-    }
-
-    private int relayoutWindowInner(Session session, IWindow client, LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
-            int lastSyncSeqId, ClientWindowFrames outFrames,
-            MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
-            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
-            Bundle outBundle, WindowRelayoutResult outRelayoutResult) {
         if (outActiveControls != null) {
             outActiveControls.set(null, false /* copyControls */);
         }
@@ -2647,14 +2624,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (outFrames != null && outMergedConfiguration != null) {
-                final boolean shouldReportActivityWindowInfo;
-                if (Flags.windowSessionRelayoutInfo()) {
-                    shouldReportActivityWindowInfo = outRelayoutResult != null
+                final boolean shouldReportActivityWindowInfo = outRelayoutResult != null
                             && win.mLastReportedActivityWindowInfo != null;
-                } else {
-                    shouldReportActivityWindowInfo = outBundle != null
-                            && win.mLastReportedActivityWindowInfo != null;
-                }
                 final ActivityWindowInfo outActivityWindowInfo = shouldReportActivityWindowInfo
                         ? new ActivityWindowInfo()
                         : null;
@@ -2663,13 +2634,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         outActivityWindowInfo, false /* useLatestConfig */, shouldRelayout);
 
                 if (shouldReportActivityWindowInfo) {
-                    if (Flags.windowSessionRelayoutInfo()) {
-                        outRelayoutResult.activityWindowInfo = outActivityWindowInfo;
-                    } else {
-                        outBundle.putParcelable(
-                                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
-                                outActivityWindowInfo);
-                    }
+                    outRelayoutResult.activityWindowInfo = outActivityWindowInfo;
                 }
 
                 // Set resize-handled here because the values are sent back to the client.
@@ -2700,28 +2665,16 @@ public class WindowManagerService extends IWindowManager.Stub
                         win.isVisible() /* visible */, false /* removed */);
             }
 
-            if (Flags.windowSessionRelayoutInfo()) {
-                if (outRelayoutResult != null) {
-                    if (win.syncNextBuffer() && viewVisibility == View.VISIBLE
-                            && win.mSyncSeqId > lastSyncSeqId) {
-                        outRelayoutResult.syncSeqId = win.shouldSyncWithBuffers()
-                                ? win.mSyncSeqId
-                                : -1;
-                        win.markRedrawForSyncReported();
-                    } else {
-                        outRelayoutResult.syncSeqId = -1;
-                    }
-                }
-            } else if (outBundle != null) {
-                final int maybeSyncSeqId;
+            if (outRelayoutResult != null) {
                 if (win.syncNextBuffer() && viewVisibility == View.VISIBLE
                         && win.mSyncSeqId > lastSyncSeqId) {
-                    maybeSyncSeqId = win.shouldSyncWithBuffers() ? win.mSyncSeqId : -1;
+                    outRelayoutResult.syncSeqId = win.shouldSyncWithBuffers()
+                            ? win.mSyncSeqId
+                            : -1;
                     win.markRedrawForSyncReported();
                 } else {
-                    maybeSyncSeqId = -1;
+                    outRelayoutResult.syncSeqId = -1;
                 }
-                outBundle.putInt(IWindowSession.KEY_RELAYOUT_BUNDLE_SEQID, maybeSyncSeqId);
             }
 
             if (configChanged) {
@@ -3790,6 +3743,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         null /* trigger */, null /* remote */, null /* disp */);
             }
             mCurrentUserId = newUserId;
+            mDisplayWindowSettingsProvider.setOverrideSettingsForUser(newUserId);
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettings(mRoot);
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
 
@@ -3843,7 +3798,7 @@ public class WindowManagerService extends IWindowManager.Stub
             hideBootMessagesLocked();
             // If the screen still doesn't come up after 30 seconds, give
             // up and turn it on.
-            mH.sendEmptyMessageDelayed(H.BOOT_TIMEOUT, 30 * 1000);
+            mH.sendEmptyMessageDelayed(H.BOOT_TIMEOUT, 30 * 1000 * Build.HW_TIMEOUT_MULTIPLIER);
         }
 
         mPolicy.systemBooted();
@@ -5526,6 +5481,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // DisplayWindowSettings are applied. In addition, wide-color/hdr/isTouchDevice also
             // affect the Configuration.
             mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);
+            // Per-user display settings may leave outdated settings after user switches, especially
+            // during reboots starting with the default user without setCurrentUser called.
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettings(mRoot);
         }
     }
 

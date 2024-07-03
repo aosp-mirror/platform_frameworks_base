@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.testutils
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -75,7 +76,7 @@ fun ComposeContentTestRule.setContentForSizeAssertions(
     setContent {
         SettingsTheme {
             Surface {
-                Box {
+                Box(Modifier.safeDrawingPadding()) {
                     Box(
                         Modifier
                             .sizeIn(maxWidth = parentMaxWidth, maxHeight = parentMaxHeight)

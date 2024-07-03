@@ -2797,6 +2797,8 @@ public class PackageInstaller {
         public int developmentInstallFlags = 0;
         /** {@hide} */
         public int unarchiveId = -1;
+        /** {@hide} */
+        public @Nullable String dexoptCompilerFilter = null;
 
         private final ArrayMap<String, Integer> mPermissionStates;
 
@@ -2850,6 +2852,7 @@ public class PackageInstaller {
             applicationEnabledSettingPersistent = source.readBoolean();
             developmentInstallFlags = source.readInt();
             unarchiveId = source.readInt();
+            dexoptCompilerFilter = source.readString();
         }
 
         /** {@hide} */
@@ -2885,6 +2888,7 @@ public class PackageInstaller {
             ret.applicationEnabledSettingPersistent = applicationEnabledSettingPersistent;
             ret.developmentInstallFlags = developmentInstallFlags;
             ret.unarchiveId = unarchiveId;
+            ret.dexoptCompilerFilter = dexoptCompilerFilter;
             return ret;
         }
 
@@ -3564,6 +3568,11 @@ public class PackageInstaller {
         }
 
         /** @hide */
+        public void setDexoptCompilerFilter(@Nullable String dexoptCompilerFilter) {
+            this.dexoptCompilerFilter = dexoptCompilerFilter;
+        }
+
+        /** @hide */
         @NonNull
         public ArrayMap<String, Integer> getPermissionStates() {
             return mPermissionStates;
@@ -3622,6 +3631,7 @@ public class PackageInstaller {
                     applicationEnabledSettingPersistent);
             pw.printHexPair("developmentInstallFlags", developmentInstallFlags);
             pw.printPair("unarchiveId", unarchiveId);
+            pw.printPair("dexoptCompilerFilter", dexoptCompilerFilter);
             pw.println();
         }
 
@@ -3667,6 +3677,7 @@ public class PackageInstaller {
             dest.writeBoolean(applicationEnabledSettingPersistent);
             dest.writeInt(developmentInstallFlags);
             dest.writeInt(unarchiveId);
+            dest.writeString(dexoptCompilerFilter);
         }
 
         public static final Parcelable.Creator<SessionParams>

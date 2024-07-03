@@ -111,6 +111,7 @@ cc_library_shared_for_libandroid_runtime {
         "libminikin",
         "libz",
         "server_configurable_flags",
+        "libaconfig_storage_read_api_cc",
         "android.database.sqlite-aconfig-cc",
         "android.media.audiopolicy-aconfig-cc",
     ],
@@ -127,6 +128,7 @@ cc_library_shared_for_libandroid_runtime {
     ],
 
     defaults: [
+        "aconfig_lib_cc_shared_link.defaults",
         "latest_android_media_audio_common_types_cpp_target_shared",
     ],
 
@@ -194,6 +196,7 @@ cc_library_shared_for_libandroid_runtime {
                 "android_os_PerformanceHintManager.cpp",
                 "android_os_SELinux.cpp",
                 "android_os_ServiceManager.cpp",
+                "android_os_ServiceManagerNative.cpp",
                 "android_os_SharedMemory.cpp",
                 "android_os_storage_StorageManager.cpp",
                 "android_os_UEventObserver.cpp",
@@ -365,6 +368,7 @@ cc_library_shared_for_libandroid_runtime {
                 "libdl_android",
                 "libtimeinstate",
                 "server_configurable_flags",
+                "libaconfig_storage_read_api_cc",
                 "libimage_io",
                 "libultrahdr",
                 "libperfetto_c",

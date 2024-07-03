@@ -31,7 +31,7 @@ public class SystemAppSafetyLabelTest {
             "com/android/asllib/systemappsafetylabel/od";
 
     private static final String VALID_FILE_NAME = "valid.xml";
-    private static final String MISSING_URL_FILE_NAME = "missing-url.xml";
+    private static final String MISSING_BOOL_FILE_NAME = "missing-bool.xml";
 
     /** Logic for setting up tests (empty if not yet needed). */
     public static void main(String[] params) throws Exception {}
@@ -49,12 +49,12 @@ public class SystemAppSafetyLabelTest {
         testOdToHrSystemAppSafetyLabel(VALID_FILE_NAME);
     }
 
-    /** Tests missing url. */
+    /** Tests missing bool. */
     @Test
-    public void testMissingUrl() throws Exception {
-        System.out.println("starting testMissingUrl.");
-        hrToOdExpectException(MISSING_URL_FILE_NAME);
-        odToHrExpectException(MISSING_URL_FILE_NAME);
+    public void testMissingBool() throws Exception {
+        System.out.println("starting testMissingBool.");
+        hrToOdExpectException(MISSING_BOOL_FILE_NAME);
+        odToHrExpectException(MISSING_BOOL_FILE_NAME);
     }
 
     private void hrToOdExpectException(String fileName) {

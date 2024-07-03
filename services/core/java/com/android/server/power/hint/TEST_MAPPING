@@ -10,16 +10,18 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
-    },
+    }
+  ],
+  "postsubmit": [
     {
       "name": "CtsStatsdAtomHostTestCases",
       "options": [
         {"exclude-annotation": "androidx.test.filters.FlakyTest"},
         {"exclude-annotation": "org.junit.Ignore"},
-        {"include-filter": "android.cts.statsdatom.powermanager"}
+        {"include-filter": "android.cts.statsdatom.performancehintmanager"}
       ],
       "file_patterns": [
-        "(/|^)ThermalManagerService.java"
+        "(/|^)HintManagerService.java"
       ]
     }
   ]

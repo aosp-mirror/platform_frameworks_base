@@ -106,6 +106,10 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setDisplayEnabled(true);
             case "disable-display":
                 return setDisplayEnabled(false);
+            case "power-reset":
+                return requestDisplayPower(Display.STATE_UNKNOWN);
+            case "power-off":
+                return requestDisplayPower(Display.STATE_OFF);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -179,6 +183,10 @@ class DisplayManagerShellCommand extends ShellCommand {
             pw.println("  disable-display DISPLAY_ID");
             pw.println("    Disable the DISPLAY_ID. Only possible if this is a connected display.");
         }
+        pw.println("  power-reset DISPLAY_ID");
+        pw.println("    Turn the DISPLAY_ID power to a state the display supposed to have.");
+        pw.println("  power-off DISPLAY_ID");
+        pw.println("    Turn the display DISPLAY_ID power off.");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
@@ -590,6 +598,23 @@ class DisplayManagerShellCommand extends ShellCommand {
             return 1;
         }
         mService.enableConnectedDisplay(displayId, enable);
+        return 0;
+    }
+
+    private int requestDisplayPower(int state) {
+        final String displayIdText = getNextArg();
+        if (displayIdText == null) {
+            getErrPrintWriter().println("Error: no displayId specified");
+            return 1;
+        }
+        final int displayId;
+        try {
+            displayId = Integer.parseInt(displayIdText);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: invalid displayId: '" + displayIdText + "'");
+            return 1;
+        }
+        mService.requestDisplayPower(displayId, state);
         return 0;
     }
 }

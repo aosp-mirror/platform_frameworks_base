@@ -292,7 +292,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -410,7 +410,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -527,7 +527,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -646,7 +646,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -764,7 +764,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -890,7 +890,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -1007,7 +1007,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -1123,7 +1123,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -1240,7 +1240,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -1373,7 +1373,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -1491,7 +1491,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -1607,7 +1607,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -1725,7 +1725,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -1842,7 +1842,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -1959,7 +1959,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -2076,7 +2076,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -2193,7 +2193,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -2310,7 +2310,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -2432,7 +2432,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -2547,7 +2547,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -2800,7 +2800,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -2917,7 +2917,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -3033,7 +3033,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -3150,7 +3150,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -3269,7 +3269,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -3387,7 +3387,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -3511,7 +3511,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -3631,7 +3631,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -3750,7 +3750,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -3870,7 +3870,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -3971,7 +3971,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -4072,7 +4072,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -4192,7 +4192,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -4313,7 +4313,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -4432,7 +4432,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -4550,7 +4550,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -4667,7 +4667,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -4784,7 +4784,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -4899,7 +4899,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -5022,7 +5022,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -5126,7 +5126,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -5222,7 +5222,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -5339,7 +5339,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -5440,7 +5440,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -5581,7 +5581,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -5700,7 +5700,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -5845,7 +5845,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -5920,7 +5920,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -5999,7 +5999,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>
@@ -6074,7 +6074,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_light</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_light</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_light</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_light</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_light</item>
         <item name="customColorBrandA">@color/system_brand_a_light</item>
         <item name="customColorBrandB">@color/system_brand_b_light</item>
         <item name="customColorBrandC">@color/system_brand_c_light</item>
@@ -6160,7 +6160,7 @@ easier.
         <item name="customColorThemeApp">@color/system_theme_app_dark</item>
         <item name="customColorOnThemeApp">@color/system_on_theme_app_dark</item>
         <item name="customColorThemeAppRing">@color/system_theme_app_ring_dark</item>
-        <item name="customColorOnThemeAppRing">@color/system_on_theme_app_ring_dark</item>
+        <item name="customColorThemeNotif">@color/system_theme_notif_dark</item>
         <item name="customColorBrandA">@color/system_brand_a_dark</item>
         <item name="customColorBrandB">@color/system_brand_b_dark</item>
         <item name="customColorBrandC">@color/system_brand_c_dark</item>

@@ -24,6 +24,9 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 
 import java.util.List;
 
+/**
+ * Draw text along a path.
+ */
 public class DrawTextOnPath extends PaintOperation {
     public static final Companion COMPANION = new Companion();
     int mPathId;
@@ -45,7 +48,8 @@ public class DrawTextOnPath extends PaintOperation {
 
     @Override
     public String toString() {
-        return "DrawTextOnPath " + " " + mPathId + ";";
+        return "DrawTextOnPath [" + mTextId + "] [" + mPathId + "] "
+                + mHOffset + ", " + mVOffset;
     }
 
     public static class Companion implements CompanionOperation {

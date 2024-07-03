@@ -30,8 +30,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.TileRow
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.res.R
@@ -42,13 +42,14 @@ class StretchedGridLayout
 @Inject
 constructor(
     private val iconTilesViewModel: IconTilesViewModel,
-    private val gridSizeViewModel: InfiniteGridSizeViewModel,
+    private val gridSizeViewModel: FixedColumnsSizeViewModel,
 ) : GridLayout {
 
     @Composable
     override fun TileGrid(
         tiles: List<TileViewModel>,
         modifier: Modifier,
+        editModeStart: () -> Unit,
     ) {
         DisposableEffect(tiles) {
             val token = Any()

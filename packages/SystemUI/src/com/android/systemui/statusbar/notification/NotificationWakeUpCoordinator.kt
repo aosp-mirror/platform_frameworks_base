@@ -58,7 +58,7 @@ class NotificationWakeUpCoordinator
 constructor(
     @Application applicationScope: CoroutineScope,
     dumpManager: DumpManager,
-    private val mHeadsUpManager: HeadsUpManager,
+    private val headsUpManager: HeadsUpManager,
     private val statusBarStateController: StatusBarStateController,
     private val bypassController: KeyguardBypassController,
     private val dozeParameters: DozeParameters,
@@ -71,8 +71,8 @@ constructor(
     StatusBarStateController.StateListener,
     ShadeExpansionListener,
     Dumpable {
-    private lateinit var mStackScrollerController: NotificationStackScrollLayoutController
-    private var mVisibilityInterpolator = Interpolators.FAST_OUT_SLOW_IN_REVERSE
+    private lateinit var stackScrollerController: NotificationStackScrollLayoutController
+    private var visibilityInterpolator = Interpolators.FAST_OUT_SLOW_IN_REVERSE
 
     private var inputLinearDozeAmount: Float = 0.0f
     private var inputEasedDozeAmount: Float = 0.0f
@@ -85,13 +85,13 @@ constructor(
     private var outputEasedDozeAmount: Float = 0.0f
     @VisibleForTesting val dozeAmountInterpolator: Interpolator = Interpolators.FAST_OUT_SLOW_IN
 
-    private var mNotificationVisibleAmount = 0.0f
-    private var mNotificationsVisible = false
-    private var mNotificationsVisibleForExpansion = false
-    private var mVisibilityAnimator: ObjectAnimator? = null
-    private var mVisibilityAmount = 0.0f
-    private var mLinearVisibilityAmount = 0.0f
-    private val mEntrySetToClearWhenFinished = mutableSetOf<NotificationEntry>()
+    private var notificationVisibleAmount = 0.0f
+    private var notificationsVisible = false
+    private var notificationsVisibleForExpansion = false
+    private var visibilityAnimator: ObjectAnimator? = null
+    private var visibilityAmount = 0.0f
+    private var linearVisibilityAmount = 0.0f
+    private val entrySetToClearWhenFinished = mutableSetOf<NotificationEntry>()
     private var pulseExpanding: Boolean = false
     private val wakeUpListeners = arrayListOf<WakeUpListener>()
     private var state: Int = StatusBarState.KEYGUARD
@@ -104,14 +104,14 @@ constructor(
             willWakeUp = false
             if (value) {
                 if (
-                    mNotificationsVisible &&
-                        !mNotificationsVisibleForExpansion &&
+                    notificationsVisible &&
+                        !notificationsVisibleForExpansion &&
                         !bypassController.bypassEnabled
                 ) {
                     // We're waking up while pulsing, let's make sure the animation looks nice
-                    mStackScrollerController.wakeUpFromPulse()
+                    stackScrollerController.wakeUpFromPulse()
                 }
-                if (bypassController.bypassEnabled && !mNotificationsVisible) {
+                if (bypassController.bypassEnabled && !notificationsVisible) {
                     // Let's make sure our huns become visible once we are waking up in case
                     // they were blocked by the proximity sensor
                     updateNotificationVisibility(
@@ -186,13 +186,13 @@ constructor(
 
     init {
         dumpManager.registerDumpable(this)
-        mHeadsUpManager.addListener(this)
+        headsUpManager.addListener(this)
         statusBarStateController.addCallback(this)
         bypassController.registerOnBypassStateChangedListener(bypassStateChangedListener)
         addListener(
             object : WakeUpListener {
                 override fun onFullyHiddenChanged(isFullyHidden: Boolean) {
-                    if (isFullyHidden && mNotificationsVisibleForExpansion) {
+                    if (isFullyHidden && notificationsVisibleForExpansion) {
                         // When the notification becomes fully invisible, let's make sure our
                         // expansion
                         // flag also changes. This can happen if the bouncer shows when dragging
@@ -217,7 +217,7 @@ constructor(
     }
 
     fun setStackScroller(stackScrollerController: NotificationStackScrollLayoutController) {
-        mStackScrollerController = stackScrollerController
+        this.stackScrollerController = stackScrollerController
         pulseExpanding = stackScrollerController.isPulseExpanding
         stackScrollerController.setOnPulseHeightChangedListener {
             val nowExpanding = isPulseExpanding()
@@ -237,7 +237,7 @@ constructor(
         }
     }
 
-    fun isPulseExpanding(): Boolean = mStackScrollerController.isPulseExpanding
+    fun isPulseExpanding(): Boolean = stackScrollerController.isPulseExpanding
 
     /**
      * @param visible should notifications be visible
@@ -249,13 +249,13 @@ constructor(
         animate: Boolean,
         increaseSpeed: Boolean
     ) {
-        mNotificationsVisibleForExpansion = visible
+        notificationsVisibleForExpansion = visible
         updateNotificationVisibility(animate, increaseSpeed)
-        if (!visible && mNotificationsVisible) {
+        if (!visible && notificationsVisible) {
             // If we stopped expanding and we're still visible because we had a pulse that hasn't
             // times out, let's release them all to make sure were not stuck in a state where
             // notifications are visible
-            mHeadsUpManager.releaseAllImmediately()
+            headsUpManager.releaseAllImmediately()
         }
     }
 
@@ -269,12 +269,12 @@ constructor(
 
     private fun updateNotificationVisibility(animate: Boolean, increaseSpeed: Boolean) {
         // TODO: handle Lockscreen wakeup for bypass when we're not pulsing anymore
-        var visible = mNotificationsVisibleForExpansion || mHeadsUpManager.hasNotifications()
+        var visible = notificationsVisibleForExpansion || headsUpManager.hasNotifications()
         visible = visible && canShowPulsingHuns
 
         if (
             !visible &&
-                mNotificationsVisible &&
+                notificationsVisible &&
                 (wakingUp || willWakeUp) &&
                 outputLinearDozeAmount != 0.0f
         ) {
@@ -290,11 +290,11 @@ constructor(
         animate: Boolean,
         increaseSpeed: Boolean
     ) {
-        if (mNotificationsVisible == visible) {
+        if (notificationsVisible == visible) {
             return
         }
-        mNotificationsVisible = visible
-        mVisibilityAnimator?.cancel()
+        notificationsVisible = visible
+        visibilityAnimator?.cancel()
         if (animate) {
             notifyAnimationStart(visible)
             startVisibilityAnimation(increaseSpeed)
@@ -371,7 +371,7 @@ constructor(
             state = statusBarStateController.state,
             changed = changed
         )
-        mStackScrollerController.setDozeAmount(outputEasedDozeAmount)
+        stackScrollerController.setDozeAmount(outputEasedDozeAmount)
         updateHideAmount()
         if (changed && outputLinearDozeAmount == 0.0f) {
             setNotificationsVisible(visible = false, animate = false, increaseSpeed = false)
@@ -475,7 +475,7 @@ constructor(
             this.collapsedEnoughToHide = collapsedEnough
             if (couldShowPulsingHuns && !canShowPulsingHuns) {
                 updateNotificationVisibility(animate = true, increaseSpeed = true)
-                mHeadsUpManager.releaseAllImmediately()
+                headsUpManager.releaseAllImmediately()
             }
         }
     }
@@ -562,12 +562,12 @@ constructor(
     }
 
     private fun startVisibilityAnimation(increaseSpeed: Boolean) {
-        if (mNotificationVisibleAmount == 0f || mNotificationVisibleAmount == 1f) {
-            mVisibilityInterpolator =
-                if (mNotificationsVisible) Interpolators.TOUCH_RESPONSE
+        if (notificationVisibleAmount == 0f || notificationVisibleAmount == 1f) {
+            visibilityInterpolator =
+                if (notificationsVisible) Interpolators.TOUCH_RESPONSE
                 else Interpolators.FAST_OUT_SLOW_IN_REVERSE
         }
-        val target = if (mNotificationsVisible) 1.0f else 0.0f
+        val target = if (notificationsVisible) 1.0f else 0.0f
         val visibilityAnimator = ObjectAnimator.ofFloat(this, notificationVisibility, target)
         visibilityAnimator.interpolator = InterpolatorsAndroidX.LINEAR
         var duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP.toLong()
@@ -576,34 +576,34 @@ constructor(
         }
         visibilityAnimator.duration = duration
         visibilityAnimator.start()
-        mVisibilityAnimator = visibilityAnimator
+        this.visibilityAnimator = visibilityAnimator
     }
 
     private fun setVisibilityAmount(visibilityAmount: Float) {
         logger.logSetVisibilityAmount(visibilityAmount)
-        mLinearVisibilityAmount = visibilityAmount
-        mVisibilityAmount = mVisibilityInterpolator.getInterpolation(visibilityAmount)
+        linearVisibilityAmount = visibilityAmount
+        this.visibilityAmount = visibilityInterpolator.getInterpolation(visibilityAmount)
         handleAnimationFinished()
         updateHideAmount()
     }
 
     private fun handleAnimationFinished() {
-        if (outputLinearDozeAmount == 0.0f || mLinearVisibilityAmount == 0.0f) {
-            mEntrySetToClearWhenFinished.forEach { it.setHeadsUpAnimatingAway(false) }
-            mEntrySetToClearWhenFinished.clear()
+        if (outputLinearDozeAmount == 0.0f || linearVisibilityAmount == 0.0f) {
+            entrySetToClearWhenFinished.forEach { it.setHeadsUpAnimatingAway(false) }
+            entrySetToClearWhenFinished.clear()
         }
     }
 
     private fun updateHideAmount() {
-        val linearAmount = min(1.0f - mLinearVisibilityAmount, outputLinearDozeAmount)
-        val amount = min(1.0f - mVisibilityAmount, outputEasedDozeAmount)
+        val linearAmount = min(1.0f - linearVisibilityAmount, outputLinearDozeAmount)
+        val amount = min(1.0f - visibilityAmount, outputEasedDozeAmount)
         logger.logSetHideAmount(linearAmount)
-        mStackScrollerController.setHideAmount(linearAmount, amount)
+        stackScrollerController.setHideAmount(linearAmount, amount)
         notificationsFullyHidden = linearAmount == 1.0f
     }
 
     private fun notifyAnimationStart(awake: Boolean) {
-        mStackScrollerController.notifyHideAnimationStart(!awake)
+        stackScrollerController.notifyHideAnimationStart(!awake)
     }
 
     override fun onDozingChanged(isDozing: Boolean) {
@@ -615,7 +615,7 @@ constructor(
     override fun onHeadsUpStateChanged(entry: NotificationEntry, isHeadsUp: Boolean) {
         var animate = shouldAnimateVisibility()
         if (!isHeadsUp) {
-            if (outputLinearDozeAmount != 0.0f && mLinearVisibilityAmount != 0.0f) {
+            if (outputLinearDozeAmount != 0.0f && linearVisibilityAmount != 0.0f) {
                 if (entry.isRowDismissed) {
                     // if we animate, we see the shelf briefly visible. Instead we fully animate
                     // the notification and its background out
@@ -623,11 +623,11 @@ constructor(
                 } else if (!wakingUp && !willWakeUp) {
                     // TODO: look that this is done properly and not by anyone else
                     entry.setHeadsUpAnimatingAway(true)
-                    mEntrySetToClearWhenFinished.add(entry)
+                    entrySetToClearWhenFinished.add(entry)
                 }
             }
-        } else if (mEntrySetToClearWhenFinished.contains(entry)) {
-            mEntrySetToClearWhenFinished.remove(entry)
+        } else if (entrySetToClearWhenFinished.contains(entry)) {
+            entrySetToClearWhenFinished.remove(entry)
             entry.setHeadsUpAnimatingAway(false)
         }
         updateNotificationVisibility(animate, increaseSpeed = false)
@@ -644,11 +644,11 @@ constructor(
         pw.println("hardDozeAmountOverrideSource: $hardDozeAmountOverrideSource")
         pw.println("outputLinearDozeAmount: $outputLinearDozeAmount")
         pw.println("outputEasedDozeAmount: $outputEasedDozeAmount")
-        pw.println("mNotificationVisibleAmount: $mNotificationVisibleAmount")
-        pw.println("mNotificationsVisible: $mNotificationsVisible")
-        pw.println("mNotificationsVisibleForExpansion: $mNotificationsVisibleForExpansion")
-        pw.println("mVisibilityAmount: $mVisibilityAmount")
-        pw.println("mLinearVisibilityAmount: $mLinearVisibilityAmount")
+        pw.println("notificationVisibleAmount: $notificationVisibleAmount")
+        pw.println("notificationsVisible: $notificationsVisible")
+        pw.println("notificationsVisibleForExpansion: $notificationsVisibleForExpansion")
+        pw.println("visibilityAmount: $visibilityAmount")
+        pw.println("linearVisibilityAmount: $linearVisibilityAmount")
         pw.println("pulseExpanding: $pulseExpanding")
         pw.println("state: ${StatusBarState.toString(state)}")
         pw.println("fullyAwake: $fullyAwake")
@@ -698,7 +698,7 @@ constructor(
                 }
 
                 override fun get(coordinator: NotificationWakeUpCoordinator): Float {
-                    return coordinator.mLinearVisibilityAmount
+                    return coordinator.linearVisibilityAmount
                 }
             }
 

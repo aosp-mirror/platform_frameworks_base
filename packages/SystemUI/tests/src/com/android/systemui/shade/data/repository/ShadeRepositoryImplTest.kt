@@ -40,7 +40,7 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        underTest = ShadeRepositoryImpl()
+        underTest = ShadeRepositoryImpl(getContext())
     }
 
     @Test

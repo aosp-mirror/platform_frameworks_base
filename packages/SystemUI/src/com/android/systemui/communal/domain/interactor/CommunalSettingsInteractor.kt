@@ -19,7 +19,6 @@ package com.android.systemui.communal.domain.interactor
 import android.content.pm.UserInfo
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.communal.data.model.CommunalEnabledState
-import com.android.systemui.communal.data.model.CommunalWidgetCategories
 import com.android.systemui.communal.data.repository.CommunalSettingsRepository
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
@@ -69,18 +68,6 @@ constructor(
             .map { model -> model.enabled }
             // Start this eagerly since the value is accessed synchronously in many places.
             .stateIn(scope = bgScope, started = SharingStarted.Eagerly, initialValue = false)
-
-    /** What widget categories to show on the hub. */
-    val communalWidgetCategories: StateFlow<Int> =
-        userInteractor.selectedUserInfo
-            .flatMapLatest { user -> repository.getWidgetCategories(user) }
-            .map { categories -> categories.categories }
-            .stateIn(
-                scope = bgScope,
-                // Start this eagerly since the value can be accessed synchronously.
-                started = SharingStarted.Eagerly,
-                initialValue = CommunalWidgetCategories.defaultCategories
-            )
 
     /** The type of background to use for the hub. Used to experiment with different backgrounds */
     val communalBackground: Flow<CommunalBackgroundType> =

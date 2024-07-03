@@ -35,7 +35,17 @@ enum class BluetoothTileDialogUiEvent(val metricId: Int) : UiEventLogger.UiEvent
     CONNECTED_OTHER_DEVICE_DISCONNECT(1508),
     @UiEvent(doc = "The auto on toggle is clicked") BLUETOOTH_AUTO_ON_TOGGLE_CLICKED(1617),
     @UiEvent(doc = "The audio sharing button is clicked")
-    BLUETOOTH_AUDIO_SHARING_BUTTON_CLICKED(1700);
+    BLUETOOTH_AUDIO_SHARING_BUTTON_CLICKED(1700),
+    @UiEvent(doc = "Currently broadcasting and a LE audio supported device is clicked")
+    LAUNCH_SETTINGS_IN_SHARING_LE_DEVICE_CLICKED(1717),
+    @UiEvent(doc = "Currently broadcasting and a non-LE audio supported device is clicked")
+    LAUNCH_SETTINGS_IN_SHARING_NON_LE_DEVICE_CLICKED(1718),
+    @UiEvent(
+        doc = "Not broadcasting, having one connected, another saved LE audio device is clicked"
+    )
+    LAUNCH_SETTINGS_NOT_SHARING_SAVED_LE_DEVICE_CLICKED(1719),
+    @UiEvent(doc = "Not broadcasting, one of the two connected LE audio devices is clicked")
+    LAUNCH_SETTINGS_NOT_SHARING_CONNECTED_LE_DEVICE_CLICKED(1720);
 
     override fun getId() = metricId
 }

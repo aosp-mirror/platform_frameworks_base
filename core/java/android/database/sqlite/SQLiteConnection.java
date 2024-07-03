@@ -239,8 +239,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                     NoPreloadHolder.DEBUG_SQL_STATEMENTS, NoPreloadHolder.DEBUG_SQL_TIME,
                     mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
         } catch (SQLiteCantOpenDatabaseException e) {
-            final StringBuilder message = new StringBuilder("Cannot open database '")
-                    .append(file).append('\'')
+            final StringBuilder message = new StringBuilder(e.getMessage())
+                    .append(" '").append(file).append("'")
                     .append(" with flags 0x")
                     .append(Integer.toHexString(mConfiguration.openFlags));
 
@@ -265,12 +265,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                     message.append(": File ").append(path).append(" is not readable");
                 } else if (Files.isDirectory(path)) {
                     message.append(": Path ").append(path).append(" is a directory");
-                } else {
-                    message.append(": Unable to deduct failure reason");
                 }
             } catch (Throwable th) {
-                message.append(": Unable to deduct failure reason"
-                        + " because filesystem couldn't be examined: ").append(th.getMessage());
+                // Ignore any exceptions generated whilst attempting to create extended diagnostic
+                // messages.
             }
             throw new SQLiteCantOpenDatabaseException(message.toString(), e);
         } finally {

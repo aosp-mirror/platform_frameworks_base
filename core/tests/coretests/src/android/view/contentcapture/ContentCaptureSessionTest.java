@@ -198,7 +198,7 @@ public class ContentCaptureSessionTest {
         }
 
         @Override
-        MainContentCaptureSession getMainCaptureSession() {
+        ContentCaptureSession getMainCaptureSession() {
             throw new UnsupportedOperationException("should not have been called");
         }
 

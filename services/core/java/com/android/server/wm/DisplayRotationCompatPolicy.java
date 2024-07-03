@@ -42,7 +42,7 @@ import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.UiThread;
 
 /**
@@ -80,8 +80,11 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
         mDisplayContent = displayContent;
         mWmService = displayContent.mWmService;
         mCameraStateMonitor = cameraStateMonitor;
-        mCameraStateMonitor.addCameraStateListener(this);
         mActivityRefresher = activityRefresher;
+    }
+
+    void start() {
+        mCameraStateMonitor.addCameraStateListener(this);
         mActivityRefresher.addEvaluator(this);
     }
 
@@ -225,9 +228,11 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                 != lastReportedConfig.windowConfiguration.getDisplayRotation());
         return isTreatmentEnabledForDisplay()
                 && isTreatmentEnabledForActivity(activity)
-                && activity.mLetterboxUiController.shouldRefreshActivityForCameraCompat()
+                && activity.mAppCompatController.getAppCompatCameraOverrides()
+                    .shouldRefreshActivityForCameraCompat()
                 && (displayRotationChanged
-                || activity.mLetterboxUiController.isCameraCompatSplitScreenAspectRatioAllowed());
+                || activity.mAppCompatController.getAppCompatCameraOverrides()
+                        .isCameraCompatSplitScreenAspectRatioAllowed());
     }
 
     /**
@@ -251,7 +256,8 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
         return isTreatmentEnabledForDisplay()
                 && isCameraActive(activity, /* mustBeFullscreen */ true)
-                && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
+                && activity.mAppCompatController.getAppCompatCameraOverrides()
+                    .shouldForceRotateForCameraCompat();
     }
 
     /**
@@ -283,7 +289,8 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                 // handle dynamic changes so we shouldn't force rotate them.
                 && activity.getOverrideOrientation() != SCREEN_ORIENTATION_NOSENSOR
                 && activity.getOverrideOrientation() != SCREEN_ORIENTATION_LOCKED
-                && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
+                && activity.mAppCompatController.getAppCompatCameraOverrides()
+                    .shouldForceRotateForCameraCompat();
     }
 
     @Override
@@ -292,7 +299,8 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
         // Checking whether an activity in fullscreen rather than the task as this camera
         // compat treatment doesn't cover activity embedding.
         if (cameraActivity.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-            cameraActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
+            cameraActivity.mAppCompatController
+                    .getAppCompatCameraPolicy().recomputeConfigurationForCameraCompatIfNeeded();
             mDisplayContent.updateOrientation();
             return true;
         }
@@ -359,13 +367,14 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                 || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
             return true;
         }
-        topActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
+        topActivity.mAppCompatController
+                .getAppCompatCameraPolicy().recomputeConfigurationForCameraCompatIfNeeded();
         mDisplayContent.updateOrientation();
         return true;
     }
 
     // TODO(b/336474959): Do we need cameraId here?
-    private boolean isActivityForCameraIdRefreshing(String cameraId) {
+    private boolean isActivityForCameraIdRefreshing(@NonNull String cameraId) {
         final ActivityRecord topActivity = mDisplayContent.topRunningActivity(
                 /* considerKeyguardState= */ true);
         if (!isTreatmentEnabledForActivity(topActivity)

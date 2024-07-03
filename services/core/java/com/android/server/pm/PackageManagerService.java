@@ -3999,7 +3999,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 final PackageMetrics.ComponentStateMetrics componentStateMetrics =
                         new PackageMetrics.ComponentStateMetrics(setting,
                                 UserHandle.getUid(userId, packageSetting.getAppId()),
-                                packageSetting.getEnabled(userId), callingUid);
+                                setting.isComponent() ? computer.getComponentEnabledSettingInternal(
+                                        setting.getComponentName(), callingUid, userId)
+                                        : packageSetting.getEnabled(userId), callingUid);
                 if (!setEnabledSettingInternalLocked(computer, packageSetting, setting, userId,
                         callingPackage)) {
                     continue;

@@ -200,7 +200,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                 throw new IllegalStateException(
                         "Exclusively one of logo resource or logo bitmap can be set");
             }
-            mPromptInfo.setLogo(logoRes, convertDrawableToBitmap(mContext.getDrawable(logoRes)));
+            if (logoRes != 0) {
+                mPromptInfo.setLogo(logoRes,
+                        convertDrawableToBitmap(mContext.getDrawable(logoRes)));
+            }
             return this;
         }
 
@@ -219,11 +222,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         @NonNull
         public BiometricPrompt.Builder setLogoBitmap(@NonNull Bitmap logoBitmap) {
-            if (mPromptInfo.getLogoRes() != -1) {
+            if (mPromptInfo.getLogoRes() != 0) {
                 throw new IllegalStateException(
                         "Exclusively one of logo resource or logo bitmap can be set");
             }
-            mPromptInfo.setLogo(-1, logoBitmap);
+            mPromptInfo.setLogo(0, logoBitmap);
             return this;
         }
 
@@ -791,10 +794,15 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         public void onDialogDismissed(int reason) {
             // Check the reason and invoke OnClickListener(s) if necessary
             if (reason == DISMISSED_REASON_NEGATIVE) {
-                mNegativeButtonInfo.executor.execute(() -> {
-                    mNegativeButtonInfo.listener.onClick(null, DialogInterface.BUTTON_NEGATIVE);
-                    mIsPromptShowing = false;
-                });
+                if (mNegativeButtonInfo != null) {
+                    mNegativeButtonInfo.executor.execute(() -> {
+                        mNegativeButtonInfo.listener.onClick(null, DialogInterface.BUTTON_NEGATIVE);
+                        mIsPromptShowing = false;
+                    });
+                } else {
+                    mAuthenticationCallback.onAuthenticationError(BIOMETRIC_ERROR_USER_CANCELED,
+                            null /* errString */);
+                }
             } else if (reason == DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS) {
                 if (mContentViewMoreOptionsButtonInfo != null) {
                     mContentViewMoreOptionsButtonInfo.executor.execute(() -> {
@@ -832,7 +840,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * Gets the drawable resource of the logo for the prompt, as set by
      * {@link Builder#setLogoRes(int)}. Currently for system applications use only.
      *
-     * @return The drawable resource of the logo, or -1 if the prompt has no logo resource set.
+     * @return The drawable resource of the logo, or 0 if the prompt has no logo resource set.
      */
     @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)

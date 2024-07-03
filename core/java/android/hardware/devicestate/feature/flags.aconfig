@@ -9,3 +9,12 @@ flag {
     bug: "293636629"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "device_state_property_migration"
+    is_exported: true
+    namespace: "windowing_sdk"
+    description: "Client migration to updated DeviceStateManager API's"
+    bug: "336640888"
+    is_fixed_read_only: true
+}

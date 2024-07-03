@@ -38,7 +38,7 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.bubbles.BubbleExpandedView;

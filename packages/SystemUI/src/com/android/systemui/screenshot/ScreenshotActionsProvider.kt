@@ -29,6 +29,7 @@ import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_EDIT_TAPPED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_SHARE_TAPPED
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonAppearance
+import com.android.systemui.screenshot.ui.viewmodel.PreviewAction
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -40,7 +41,9 @@ import java.util.UUID
  */
 interface ScreenshotActionsProvider {
     fun onScrollChipReady(onClick: Runnable)
+
     fun onScrollChipInvalidated()
+
     fun setCompletedScreenshot(result: ScreenshotSavedResult)
 
     /**
@@ -75,17 +78,19 @@ constructor(
     private var result: ScreenshotSavedResult? = null
 
     init {
-        actionsCallback.providePreviewAction {
-            debugLog(LogConfig.DEBUG_ACTIONS) { "Preview tapped" }
-            uiEventLogger.log(SCREENSHOT_PREVIEW_TAPPED, 0, request.packageNameString)
-            onDeferrableActionTapped { result ->
-                actionExecutor.startSharedTransition(
-                    createEdit(result.uri, context),
-                    result.user,
-                    true
-                )
+        actionsCallback.providePreviewAction(
+            PreviewAction(context.resources.getString(R.string.screenshot_edit_description)) {
+                debugLog(LogConfig.DEBUG_ACTIONS) { "Preview tapped" }
+                uiEventLogger.log(SCREENSHOT_PREVIEW_TAPPED, 0, request.packageNameString)
+                onDeferrableActionTapped { result ->
+                    actionExecutor.startSharedTransition(
+                        createEdit(result.uri, context),
+                        result.user,
+                        true
+                    )
+                }
             }
-        }
+        )
 
         actionsCallback.provideActionButton(
             ActionButtonAppearance(

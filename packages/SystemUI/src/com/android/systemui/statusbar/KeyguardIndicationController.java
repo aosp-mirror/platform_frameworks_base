@@ -386,6 +386,11 @@ public class KeyguardIndicationController {
         mStatusBarStateListener.onDozingChanged(mStatusBarStateController.isDozing());
     }
 
+    @Nullable
+    public ViewGroup getIndicationArea() {
+        return mIndicationArea;
+    }
+
     public void setIndicationArea(ViewGroup indicationArea) {
         mIndicationArea = indicationArea;
         mTopIndicationView = indicationArea.findViewById(R.id.keyguard_indication_text);
@@ -1271,7 +1276,7 @@ public class KeyguardIndicationController {
             mPowerPluggedInWired = status.isPluggedInWired() && isChargingOrFull;
             mPowerPluggedInWireless = status.isPluggedInWireless() && isChargingOrFull;
             mPowerPluggedInDock = status.isPluggedInDock() && isChargingOrFull;
-            mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
+            mPowerPluggedIn = isPowerPluggedIn(status, isChargingOrFull);
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mContext);
@@ -1557,6 +1562,11 @@ public class KeyguardIndicationController {
         return status.isBatteryDefender();
     }
 
+    /** Return true if the device has power plugged in. */
+    protected boolean isPowerPluggedIn(BatteryStatus status, boolean isChargingOrFull) {
+        return status.isPluggedIn() && isChargingOrFull;
+    }
+
     private boolean isCurrentUser(int userId) {
         return getCurrentUser() == userId;
     }
@@ -1630,6 +1640,7 @@ public class KeyguardIndicationController {
                         "skip showing FACE_ERROR_TIMEOUT due to co-ex logic");
             }
         } else if (deferredFaceMessage != null) {
+            mBouncerMessageInteractor.setFaceAcquisitionMessage(deferredFaceMessage.toString());
             // Face-only: The face timeout message is not very actionable, let's ask the
             // user to manually retry.
             showBiometricMessage(
@@ -1663,11 +1674,6 @@ public class KeyguardIndicationController {
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
-        @Override
-        public void onStateChanged(int newState) {
-            setVisible(newState == StatusBarState.KEYGUARD);
-        }
-
         @Override
         public void onDozingChanged(boolean dozing) {
             if (mDozing == dozing) {

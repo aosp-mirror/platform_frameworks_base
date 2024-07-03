@@ -69,6 +69,7 @@ val Kosmos.qsQRCodeScannerViewModel by
             qsTileLogger,
             systemClock,
             testDispatcher,
+            testDispatcher,
             testScope.backgroundScope,
         )
     }

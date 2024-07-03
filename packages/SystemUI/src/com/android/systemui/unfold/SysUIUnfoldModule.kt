@@ -21,6 +21,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.NotificationPanelUnfoldAnimationController
 import com.android.systemui.statusbar.phone.StatusBarMoveFromCenterAnimationController
+import com.android.systemui.unfold.dagger.NaturalRotation
 import com.android.systemui.unfold.dagger.UnfoldBg
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
@@ -108,6 +109,13 @@ abstract class SysUIUnfoldInternalModule {
     abstract fun bindsFoldLightRevealOverlayAnimation(
         anim: FoldLightRevealOverlayAnimation
     ): FullscreenLightRevealAnimation
+
+    @Binds
+    @NaturalRotation
+    @SysUIUnfoldScope
+    abstract fun bindNaturalRotationUnfoldProgressProvider(
+        provider: NaturalRotationUnfoldProgressProvider
+    ): UnfoldTransitionProgressProvider
 }
 
 @SysUIUnfoldScope

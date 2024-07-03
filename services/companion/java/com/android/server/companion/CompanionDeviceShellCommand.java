@@ -21,6 +21,7 @@ import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_S
 import android.companion.AssociationInfo;
 import android.companion.ContextSyncMessage;
 import android.companion.Flags;
+import android.companion.ObservingDevicePresenceRequest;
 import android.companion.Telecom;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.net.MacAddress;
@@ -189,6 +190,43 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     if (Flags.devicePresence()) {
                         int userId = getNextIntArgRequired();
                         mDevicePresenceProcessor.simulateDeviceEventOnUserUnlocked(userId);
+                    }
+                    break;
+                }
+
+                case "start-observing-device-presence-uuid": {
+                    if (Flags.devicePresence()) {
+                        int userId = getNextIntArgRequired();
+                        String packageName = getNextArgRequired();
+                        String uuid = getNextArgRequired();
+                        if ("null".equals(uuid)) {
+                            out.println("UUID can not be null.");
+                            break;
+                        }
+                        ParcelUuid parcelUuid = ParcelUuid.fromString(uuid);
+                        ObservingDevicePresenceRequest request = new ObservingDevicePresenceRequest
+                                .Builder().setUuid(parcelUuid).build();
+                        mDevicePresenceProcessor.startObservingDevicePresence(
+                                request, packageName, userId, /* enforcePermissions */ false);
+
+                    }
+                    break;
+                }
+
+                case "stop-observing-device-presence-uuid": {
+                    if (Flags.devicePresence()) {
+                        int userId = getNextIntArgRequired();
+                        String packageName = getNextArgRequired();
+                        String uuid = getNextArgRequired();
+                        if ("null".equals(uuid)) {
+                            out.println("UUID can not be null.");
+                            break;
+                        }
+                        ParcelUuid parcelUuid = ParcelUuid.fromString(uuid);
+                        ObservingDevicePresenceRequest request = new ObservingDevicePresenceRequest
+                                .Builder().setUuid(parcelUuid).build();
+                        mDevicePresenceProcessor.stopObservingDevicePresence(
+                                request, packageName, userId, /* enforcePermissions */ false);
                     }
                     break;
                 }
@@ -514,6 +552,14 @@ class CompanionDeviceShellCommand extends ShellCommand {
             pw.println("  Simulate device unlocked for given user. This will send corresponding");
             pw.println("  callback after simulate-device-event-device-locked");
             pw.println("  command has been called.");
+            pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  start-observing-device-presence-uuid USER_ID PACKAGE_NAME UUID");
+            pw.println("  Start observing device presence base on the UUID.");
+            pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  stop-observing-device-presence-uuid USER_ID PACKAGE_NAME UUID");
+            pw.println("  Stop observing device presence base on the UUID.");
             pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
         }
 

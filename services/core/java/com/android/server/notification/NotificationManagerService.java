@@ -23,6 +23,7 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREG
 import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.OP_RECEIVE_SENSITIVE_NOTIFICATIONS;
 import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.app.Flags.lifetimeExtensionRefactor;
 import static android.app.Flags.sortSectionByTime;
@@ -45,6 +46,10 @@ import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
+import static android.app.NotificationChannel.NEWS_ID;
+import static android.app.NotificationChannel.PROMOTIONS_ID;
+import static android.app.NotificationChannel.RECS_ID;
+import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED;
 import static android.app.NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED;
@@ -97,6 +102,11 @@ import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROU
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
+import static android.service.notification.Adjustment.KEY_TYPE;
+import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
+import static android.service.notification.Adjustment.TYPE_NEWS;
+import static android.service.notification.Adjustment.TYPE_PROMOTION;
+import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
 import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.Flags.redactSensitiveNotificationsFromUntrustedListeners;
 import static android.service.notification.Flags.redactSensitiveNotificationsBigTextStyle;
@@ -224,6 +234,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
@@ -284,6 +295,7 @@ import android.service.notification.NotificationRecordProto;
 import android.service.notification.NotificationServiceDumpProto;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeProto;
 import android.service.notification.ZenPolicy;
@@ -455,7 +467,8 @@ public class NotificationManagerService extends SystemService {
             Adjustment.KEY_IMPORTANCE_PROPOSAL,
             Adjustment.KEY_SENSITIVE_CONTENT,
             Adjustment.KEY_RANKING_SCORE,
-            Adjustment.KEY_NOT_CONVERSATION
+            Adjustment.KEY_NOT_CONVERSATION,
+            Adjustment.KEY_TYPE
     };
 
     static final String[] NON_BLOCKABLE_DEFAULT_ROLES = new String[] {
@@ -1020,7 +1033,7 @@ public class NotificationManagerService extends SystemService {
             summary.getSbn().getNotification().color = summaryAttr.iconColor;
             summary.getSbn().getNotification().visibility = summaryAttr.visibility;
             mHandler.post(new EnqueueNotificationRunnable(userId, summary, isAppForeground,
-                    mPostNotificationTrackerFactory.newTracker(null)));
+                    /* isAppProvided= */ false, mPostNotificationTrackerFactory.newTracker(null)));
         }
     }
 
@@ -1647,7 +1660,7 @@ public class NotificationManagerService extends SystemService {
                         // Force isAppForeground true here, because for sysui's purposes we
                         // want to adjust the flag behaviour.
                         mHandler.post(new EnqueueNotificationRunnable(r.getUser().getIdentifier(),
-                                r, true /* isAppForeground*/,
+                                r, /* isAppForeground= */ true , /* isAppProvided= */ false,
                                 mPostNotificationTrackerFactory.newTracker(null)));
                     }
                 }
@@ -1678,7 +1691,7 @@ public class NotificationManagerService extends SystemService {
                         // want to be able to adjust the flag behaviour.
                         mHandler.post(
                                 new EnqueueNotificationRunnable(r.getUser().getIdentifier(), r,
-                                        /* foreground= */ true,
+                                        /* foreground= */ true, /* isAppProvided= */ false,
                                         mPostNotificationTrackerFactory.newTracker(null)));
                     }
                 }
@@ -2703,7 +2716,7 @@ public class NotificationManagerService extends SystemService {
                 enqueueNotificationInternal(r.getSbn().getPackageName(), r.getSbn().getOpPkg(),
                         r.getSbn().getUid(), r.getSbn().getInitialPid(), r.getSbn().getTag(),
                         r.getSbn().getId(),  r.getSbn().getNotification(), userId, muteOnReturn,
-                        false /* byForegroundService */);
+                        /* byForegroundService= */ false, /* isAppProvided= */ false);
             } catch (Exception e) {
                 Slog.e(TAG, "Cannot un-snooze notification", e);
             }
@@ -2848,6 +2861,7 @@ public class NotificationManagerService extends SystemService {
                     final boolean isAppForeground =
                             mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
                     mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground,
+                            /* isAppProvided= */ false,
                             mPostNotificationTrackerFactory.newTracker(null)));
                 }
             }
@@ -3760,7 +3774,7 @@ public class NotificationManagerService extends SystemService {
                 Notification notification, int userId) throws RemoteException {
             enqueueNotificationInternal(pkg, opPkg, Binder.getCallingUid(),
                     Binder.getCallingPid(), tag, id, notification, userId,
-                    false /* byForegroundService */);
+                    /* byForegroundService= */ false, /* isAppProvided= */ true);
         }
 
         @Override
@@ -4531,6 +4545,34 @@ public class NotificationManagerService extends SystemService {
                 return ParceledListSlice.emptyList();
             }
             return mPreferencesHelper.getNotificationChannelsBypassingDnd(pkg, uid);
+        }
+
+        @Override
+        public List<String> getPackagesBypassingDnd(int userId,
+                                                    boolean includeConversationChannels) {
+            checkCallerIsSystem();
+
+            final ArraySet<String> packageNames = new ArraySet<>();
+
+            for (int user : mUm.getProfileIds(userId, false)) {
+                List<PackageInfo> pkgs = mPackageManagerClient.getInstalledPackagesAsUser(0, user);
+                for (PackageInfo pi : pkgs) {
+                    String pkg = pi.packageName;
+                    // If any NotificationChannel for this package is bypassing, the
+                    // package is considered bypassing.
+                    for (NotificationChannel channel : getNotificationChannelsBypassingDnd(pkg,
+                            pi.applicationInfo.uid).getList()) {
+                        // Skips non-demoted conversation channels.
+                        if (!includeConversationChannels
+                                && !TextUtils.isEmpty(channel.getConversationId())
+                                && !channel.isDemoted()) {
+                            continue;
+                        }
+                        packageNames.add(pkg);
+                    }
+                }
+            }
+            return new ArrayList<String>(packageNames);
         }
 
         @Override
@@ -5505,6 +5547,14 @@ public class NotificationManagerService extends SystemService {
 
             return mZenModeHelper.addAutomaticZenRule(rulePkg, automaticZenRule,
                     computeZenOrigin(fromUser), "addAutomaticZenRule", Binder.getCallingUid());
+        }
+
+        @Override
+        public void setManualZenRuleDeviceEffects(ZenDeviceEffects effects) throws RemoteException {
+            checkCallerIsSystem();
+
+            mZenModeHelper.setManualZenRuleDeviceEffects(effects, computeZenOrigin(true),
+                    "Update manual mode non-policy settings", Binder.getCallingUid());
         }
 
         @Override
@@ -6569,6 +6619,30 @@ public class NotificationManagerService extends SystemService {
             for (String removeKey : toRemove) {
                 adjustments.remove(removeKey);
             }
+            if (android.service.notification.Flags.notificationClassification()
+                    && adjustments.containsKey(KEY_TYPE)) {
+                NotificationChannel newChannel = null;
+                int type = adjustments.getInt(KEY_TYPE);
+                if (TYPE_NEWS == type) {
+                    newChannel = mPreferencesHelper.getNotificationChannel(
+                            r.getSbn().getPackageName(), r.getUid(), NEWS_ID, false);
+                } else if (TYPE_PROMOTION == type) {
+                    newChannel = mPreferencesHelper.getNotificationChannel(
+                            r.getSbn().getPackageName(), r.getUid(), PROMOTIONS_ID, false);
+                } else if (TYPE_SOCIAL_MEDIA == type) {
+                    newChannel = mPreferencesHelper.getNotificationChannel(
+                            r.getSbn().getPackageName(), r.getUid(), SOCIAL_MEDIA_ID, false);
+                } else if (TYPE_CONTENT_RECOMMENDATION == type) {
+                    newChannel = mPreferencesHelper.getNotificationChannel(
+                            r.getSbn().getPackageName(), r.getUid(), RECS_ID, false);
+                }
+                if (newChannel == null) {
+                    adjustments.remove(KEY_TYPE);
+                } else {
+                    // swap app provided type with the real thing
+                    adjustments.putParcelable(KEY_TYPE, newChannel);
+                }
+            }
             r.addAdjustment(adjustment);
             if (adjustment.getSignals().containsKey(Adjustment.KEY_SENSITIVE_CONTENT)) {
                 logSensitiveAdjustmentReceived(isPosted,
@@ -6986,7 +7060,7 @@ public class NotificationManagerService extends SystemService {
         public void enqueueNotification(String pkg, String opPkg, int callingUid, int callingPid,
                 String tag, int id, Notification notification, int userId) {
             enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
-                    userId, false /* byForegroundService */);
+                    userId, /* byForegroundService= */ false , /* isAppProvided= */ true);
         }
 
         @Override
@@ -6994,7 +7068,7 @@ public class NotificationManagerService extends SystemService {
                 String tag, int id, Notification notification, int userId,
                 boolean byForegroundService) {
             enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
-                    userId, byForegroundService);
+                    userId, byForegroundService, /* isAppProvided= */ true);
         }
 
         @Override
@@ -7206,7 +7280,8 @@ public class NotificationManagerService extends SystemService {
                 r.getSbn().getInitialPid(), r.getSbn().getTag(),
                 r.getSbn().getId(), r.getNotification(),
                 r.getSbn().getUserId(), /* postSilently= */ true,
-                /* byForegroundService= */ false);
+                /* byForegroundService= */ false,
+                /* isAppProvided= */ false);
     }
 
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted) {
@@ -7267,19 +7342,21 @@ public class NotificationManagerService extends SystemService {
 
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
-            int incomingUserId, boolean byForegroundService) {
+            int incomingUserId, boolean byForegroundService, boolean isAppProvided) {
         enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
-                incomingUserId, false /* postSilently */, byForegroundService);
+                incomingUserId, false /* postSilently */, byForegroundService, isAppProvided);
     }
 
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
-            int incomingUserId, boolean postSilently, boolean byForegroundService) {
+            int incomingUserId, boolean postSilently, boolean byForegroundService,
+            boolean isAppProvided) {
         PostNotificationTracker tracker = acquireWakeLockForPost(pkg, callingUid);
         boolean enqueued = false;
         try {
             enqueued = enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id,
-                    notification, incomingUserId, postSilently, tracker, byForegroundService);
+                    notification, incomingUserId, postSilently, tracker, byForegroundService,
+                    isAppProvided);
         } finally {
             if (!enqueued) {
                 tracker.cancel();
@@ -7305,7 +7382,7 @@ public class NotificationManagerService extends SystemService {
     private boolean enqueueNotificationInternal(final String pkg, final String opPkg,  //HUI
             final int callingUid, final int callingPid, final String tag, final int id,
             final Notification notification, int incomingUserId, boolean postSilently,
-            PostNotificationTracker tracker, boolean byForegroundService) {
+            PostNotificationTracker tracker, boolean byForegroundService, boolean isAppProvided) {
         if (DBG) {
             Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id
                     + " notification=" + notification);
@@ -7506,7 +7583,8 @@ public class NotificationManagerService extends SystemService {
         // Need escalated privileges to get package importance.
         final int packageImportance = getPackageImportanceWithIdentity(pkg);
         boolean isAppForeground = packageImportance == IMPORTANCE_FOREGROUND;
-        mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground, tracker));
+        mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground,
+                /* isAppProvided= */ isAppProvided, tracker));
         return true;
     }
 
@@ -7886,6 +7964,7 @@ public class NotificationManagerService extends SystemService {
                             mHandler.post(
                                     new EnqueueNotificationRunnable(
                                             r.getUser().getIdentifier(), r, isAppForeground,
+                                            /* isAppProvided= */ false,
                                             mPostNotificationTrackerFactory.newTracker(null)));
                         }
                     }
@@ -8456,13 +8535,15 @@ public class NotificationManagerService extends SystemService {
         private final NotificationRecord r;
         private final int userId;
         private final boolean isAppForeground;
+        private final boolean isAppProvided;
         private final PostNotificationTracker mTracker;
 
         EnqueueNotificationRunnable(int userId, NotificationRecord r, boolean foreground,
-                PostNotificationTracker tracker) {
+                boolean isAppProvided, PostNotificationTracker tracker) {
             this.userId = userId;
             this.r = r;
             this.isAppForeground = foreground;
+            this.isAppProvided = isAppProvided;
             this.mTracker = checkNotNull(tracker);
         }
 
@@ -8484,6 +8565,13 @@ public class NotificationManagerService extends SystemService {
          */
         private boolean enqueueNotification() {
             synchronized (mNotificationLock) {
+                if (android.app.Flags.secureAllowlistToken()) {
+                    // allowlistToken is populated by unparceling, so it will be absent if the
+                    // EnqueueNotificationRunnable is created directly by NMS (as we do for group
+                    // summaries) instead of via notify(). Fix that.
+                    r.getNotification().overrideAllowlistToken(ALLOWLIST_TOKEN);
+                }
+
                 final long snoozeAt =
                         mSnoozeHelper.getSnoozeTimeForUnpostedNotification(
                                 r.getUser().getIdentifier(),
@@ -8547,9 +8635,10 @@ public class NotificationManagerService extends SystemService {
                     if (old != null) {
                         enqueueStatus = EVENTLOG_ENQUEUE_STATUS_UPDATE;
                     }
+                    int appProvided = isAppProvided ? 1 : 0;
                     EventLogTags.writeNotificationEnqueue(callingUid, callingPid,
                             pkg, id, tag, userId, notification.toString(),
-                            enqueueStatus);
+                            enqueueStatus, appProvided);
                 }
 
                 // tell the assistant service about the notification
@@ -8709,7 +8798,7 @@ public class NotificationManagerService extends SystemService {
                                         // was not autogrouped onPost, to avoid an unnecessary sort.
                                         // We add the autogroup key to the notification without a
                                         // sort here, and it'll be sorted below with extractSignals.
-                                        addAutogroupKeyLocked(key, /*requestSort=*/false);
+                                        addAutogroupKeyLocked(key, /* requestSort= */false);
                                     }
                                 }
                             }
@@ -11334,7 +11423,7 @@ public class NotificationManagerService extends SystemService {
             record.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
 
             mHandler.post(new EnqueueNotificationRunnable(record.getUser().getIdentifier(),
-                    record, isAppForeground,
+                    record, isAppForeground, /* isAppProvided= */ false,
                     mPostNotificationTrackerFactory.newTracker(null)));
         }
     }
@@ -11933,7 +12022,10 @@ public class NotificationManagerService extends SystemService {
             long token = Binder.clearCallingIdentity();
             try {
                 if (mPackageManager.checkUidPermission(RECEIVE_SENSITIVE_NOTIFICATIONS, uid)
-                        == PERMISSION_GRANTED || mPackageManagerInternal.isPlatformSigned(pkg)) {
+                        == PERMISSION_GRANTED || mPackageManagerInternal.isPlatformSigned(pkg)
+                        || mAppOps
+                        .noteOpNoThrow(OP_RECEIVE_SENSITIVE_NOTIFICATIONS, uid, pkg, null, null)
+                        == MODE_ALLOWED) {
                     return true;
                 }
 

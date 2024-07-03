@@ -200,12 +200,14 @@ public class SplitControllerTest {
     public void testOnTaskFragmentVanished() {
         final TaskFragmentContainer tf = createTfContainer(mSplitController, mActivity);
         doReturn(tf.getTaskFragmentToken()).when(mInfo).getFragmentToken();
+        doReturn(createTestTaskContainer()).when(mSplitController).getTaskContainer(TASK_ID);
 
         // The TaskFragment has been removed in the server, we only need to cleanup the reference.
-        mSplitController.onTaskFragmentVanished(mTransaction, mInfo);
+        mSplitController.onTaskFragmentVanished(mTransaction, mInfo, TASK_ID);
 
         verify(mSplitPresenter, never()).deleteTaskFragment(any(), any());
         verify(mSplitController).removeContainer(tf);
+        verify(mSplitController).updateDivider(any(), any(), anyBoolean());
         verify(mTransaction, never()).finishActivity(any());
     }
 
@@ -1152,7 +1154,7 @@ public class SplitControllerTest {
                 .setTaskFragmentInfo(info));
         mSplitController.onTransactionReady(transaction);
 
-        verify(mSplitController).onTaskFragmentVanished(any(), eq(info));
+        verify(mSplitController).onTaskFragmentVanished(any(), eq(info), anyInt());
         verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any(),
                 anyInt(), anyBoolean());
     }

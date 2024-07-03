@@ -45,6 +45,7 @@ enum class DeviceType {
     TOUCHSCREEN,
     DPAD,
     STYLUS,
+    ROTARY_ENCODER,
 };
 
 static unique_fd invalidFd() {
@@ -113,6 +114,10 @@ static unique_fd openUinput(const char* readableName, jint vendorId, jint produc
             ioctl(fd, UI_SET_ABSBIT, ABS_TILT_Y);
             ioctl(fd, UI_SET_ABSBIT, ABS_PRESSURE);
             ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
+            break;
+        case DeviceType::ROTARY_ENCODER:
+            ioctl(fd, UI_SET_EVBIT, EV_REL);
+            ioctl(fd, UI_SET_RELBIT, REL_WHEEL);
             break;
         default:
             ALOGE("Invalid input device type %d", static_cast<int32_t>(deviceType));
@@ -312,6 +317,13 @@ static jlong nativeOpenUinputStylus(JNIEnv* env, jobject thiz, jstring name, jin
     return fd.ok() ? reinterpret_cast<jlong>(new VirtualStylus(std::move(fd))) : INVALID_PTR;
 }
 
+static jlong nativeOpenUinputRotaryEncoder(JNIEnv* env, jobject thiz, jstring name, jint vendorId,
+                                           jint productId, jstring phys, jint height, jint width) {
+    auto fd = openUinputJni(env, name, vendorId, productId, phys, DeviceType::ROTARY_ENCODER,
+                            /* screenHeight= */ 0, /* screenWidth= */ 0);
+    return fd.ok() ? reinterpret_cast<jlong>(new VirtualRotaryEncoder(std::move(fd))) : INVALID_PTR;
+}
+
 static void nativeCloseUinput(JNIEnv* env, jobject thiz, jlong ptr) {
     VirtualInputDevice* virtualInputDevice = reinterpret_cast<VirtualInputDevice*>(ptr);
     delete virtualInputDevice;
@@ -381,6 +393,13 @@ static bool nativeWriteStylusButtonEvent(JNIEnv* env, jobject thiz, jlong ptr, j
                                            std::chrono::nanoseconds(eventTimeNanos));
 }
 
+static bool nativeWriteRotaryEncoderScrollEvent(JNIEnv* env, jobject thiz, jlong ptr,
+                                                jfloat scrollAmount, jlong eventTimeNanos) {
+    VirtualRotaryEncoder* virtualRotaryEncoder = reinterpret_cast<VirtualRotaryEncoder*>(ptr);
+    return virtualRotaryEncoder->writeScrollEvent(scrollAmount,
+                                                  std::chrono::nanoseconds(eventTimeNanos));
+}
+
 static JNINativeMethod methods[] = {
         {"nativeOpenUinputDpad", "(Ljava/lang/String;IILjava/lang/String;)J",
          (void*)nativeOpenUinputDpad},
@@ -392,6 +411,8 @@ static JNINativeMethod methods[] = {
          (void*)nativeOpenUinputTouchscreen},
         {"nativeOpenUinputStylus", "(Ljava/lang/String;IILjava/lang/String;II)J",
          (void*)nativeOpenUinputStylus},
+        {"nativeOpenUinputRotaryEncoder", "(Ljava/lang/String;IILjava/lang/String;)J",
+         (void*)nativeOpenUinputRotaryEncoder},
         {"nativeCloseUinput", "(J)V", (void*)nativeCloseUinput},
         {"nativeWriteDpadKeyEvent", "(JIIJ)Z", (void*)nativeWriteDpadKeyEvent},
         {"nativeWriteKeyEvent", "(JIIJ)Z", (void*)nativeWriteKeyEvent},
@@ -401,6 +422,8 @@ static JNINativeMethod methods[] = {
         {"nativeWriteScrollEvent", "(JFFJ)Z", (void*)nativeWriteScrollEvent},
         {"nativeWriteStylusMotionEvent", "(JIIIIIIIJ)Z", (void*)nativeWriteStylusMotionEvent},
         {"nativeWriteStylusButtonEvent", "(JIIJ)Z", (void*)nativeWriteStylusButtonEvent},
+        {"nativeWriteRotaryEncoderScrollEvent", "(JFJ)Z",
+         (void*)nativeWriteRotaryEncoderScrollEvent},
 };
 
 int register_android_server_companion_virtual_InputController(JNIEnv* env) {

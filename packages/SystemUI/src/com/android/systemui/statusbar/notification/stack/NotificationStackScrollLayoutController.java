@@ -59,6 +59,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.view.OneShotPreDrawListener;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
@@ -68,7 +69,6 @@ import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -127,6 +127,7 @@ import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
+import com.android.systemui.statusbar.phone.HeadsUpNotificationViewControllerEmptyImpl;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -169,6 +170,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final HeadsUpManager mHeadsUpManager;
+    private HeadsUpTouchHelper mHeadsUpTouchHelper;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
     private final TunerService mTunerService;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -707,6 +709,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             NotificationVisibilityProvider visibilityProvider,
             NotificationWakeUpCoordinator wakeUpCoordinator,
             HeadsUpManager headsUpManager,
+            Provider<IStatusBarService> statusBarService,
             NotificationRoundnessManager notificationRoundnessManager,
             TunerService tunerService,
             DeviceProvisionedController deviceProvisionedController,
@@ -759,6 +762,14 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mVisibilityProvider = visibilityProvider;
         mWakeUpCoordinator = wakeUpCoordinator;
         mHeadsUpManager = headsUpManager;
+        if (SceneContainerFlag.isEnabled()) {
+            mHeadsUpTouchHelper = new HeadsUpTouchHelper(
+                    mHeadsUpManager,
+                    statusBarService.get(),
+                    getHeadsUpCallback(),
+                    new HeadsUpNotificationViewControllerEmptyImpl()
+            );
+        }
         mNotificationRoundnessManager = notificationRoundnessManager;
         mTunerService = tunerService;
         mDeviceProvisionedController = deviceProvisionedController;
@@ -1053,6 +1064,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public void setOverscrollTopChangedListener(
             OnOverscrollTopChangedListener listener) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setOverscrollTopChangedListener(listener);
     }
 
@@ -1178,6 +1190,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void goToFullShade(long delay) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.goToFullShade(delay);
     }
 
@@ -1248,6 +1261,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setOnStackYChanged(Consumer<Boolean> onStackYChanged) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setOnStackYChanged(onStackYChanged);
     }
 
@@ -1320,7 +1334,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         updateAlpha();
     }
 
-    void setMaxAlphaFromView(float alpha) {
+    /**
+     * Max alpha from the containing view. Used by brightness slider as an example.
+     */
+    public void setMaxAlphaFromView(float alpha) {
         mMaxAlphaFromView = alpha;
         updateAlpha();
     }
@@ -1747,6 +1764,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * Set a listener to when scrolling changes.
      */
     public void setOnScrollListener(Consumer<Integer> listener) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setOnScrollListener(listener);
     }
 
@@ -1994,6 +2012,13 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     && !mView.isExpandingNotification()) {
                 scrollWantsIt = mView.onInterceptTouchEventScroll(ev);
             }
+            boolean hunWantsIt = false;
+            if (shouldHeadsUpHandleTouch()) {
+                hunWantsIt = mHeadsUpTouchHelper.onInterceptTouchEvent(ev);
+                if (hunWantsIt) {
+                    mView.startDraggingOnHun();
+                }
+            }
             boolean swipeWantsIt = false;
             if (mLongPressedView == null && !mView.isBeingDragged()
                     && !mView.isExpandingNotification()
@@ -2023,7 +2048,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     && ev.getActionMasked() != MotionEvent.ACTION_DOWN) {
                 mJankMonitor.begin(mView, CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
             }
-            return swipeWantsIt || scrollWantsIt || expandWantsIt || longPressWantsIt;
+            return swipeWantsIt || scrollWantsIt || expandWantsIt || longPressWantsIt || hunWantsIt;
         }
 
         @Override
@@ -2075,6 +2100,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     && !expandingNotification && !mView.getDisallowScrollingInThisMotion()) {
                 scrollerWantsIt = mView.onScrollTouch(ev);
             }
+            boolean hunWantsIt = false;
+            if (shouldHeadsUpHandleTouch()) {
+                hunWantsIt = mHeadsUpTouchHelper.onTouchEvent(ev);
+            }
 
             // Check if we need to clear any snooze leavebehinds
             if (guts != null && !NotificationSwipeHelper.isTouchInView(ev, guts)
@@ -2095,7 +2124,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 mView.setCheckForLeaveBehind(true);
             }
             traceJankOnTouchEvent(ev.getActionMasked(), scrollerWantsIt);
-            return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || longPressWantsIt;
+            return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || longPressWantsIt
+                    || hunWantsIt;
         }
 
         private void traceJankOnTouchEvent(int action, boolean scrollerWantsIt) {
@@ -2121,6 +2151,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     }
                     break;
             }
+        }
+
+        private boolean shouldHeadsUpHandleTouch() {
+            return SceneContainerFlag.isEnabled() && mLongPressedView == null
+                    && !mSwipeHelper.isSwiping();
         }
     }
 

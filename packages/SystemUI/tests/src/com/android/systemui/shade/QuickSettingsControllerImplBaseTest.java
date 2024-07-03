@@ -218,6 +218,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mKeyguardRepository,
                 keyguardTransitionInteractor,
                 powerInteractor,
+                mShadeRepository,
                 new FakeUserSetupRepository(),
                 mUserSwitcherInteractor,
                 new ShadeInteractorLegacyImpl(

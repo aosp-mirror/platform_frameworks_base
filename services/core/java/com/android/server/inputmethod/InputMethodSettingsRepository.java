@@ -78,7 +78,7 @@ final class InputMethodSettingsRepository {
                                     userId,
                                     AdditionalSubtypeMapRepository.get(userId),
                                     DirectBootAwareness.AUTO);
-                    sPerUserMap.put(userId, settings);
+                    put(userId, settings);
                 }
             }
         });

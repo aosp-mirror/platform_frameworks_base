@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot.policy
 
 import android.content.ComponentName
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
@@ -50,7 +51,9 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class WorkProfilePolicyTest {
     @JvmField @Rule val setFlagsRule = SetFlagsRule()
 

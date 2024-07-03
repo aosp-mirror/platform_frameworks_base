@@ -550,8 +550,21 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
         try {
             process = Runtime.getRuntime().exec(command);
-        } catch (IOException exc) {
-            throw new RuntimeException("Error running shell command '" + command + "'", exc);
+        } catch (IOException ex) {
+            // Make sure the passed FDs are closed.
+            IoUtils.closeQuietly(sink);
+            IoUtils.closeQuietly(source);
+            IoUtils.closeQuietly(stderrSink);
+            // No to need to wrap in RuntimeException. Only to keep the old behavior.
+            // This is just logged and not propagated to the remote caller anyway.
+            throw new RuntimeException("Error running shell command '" + command + "'", ex);
+        } catch (IllegalArgumentException | NullPointerException | SecurityException ex) {
+            // Make sure the passed FDs are closed.
+            IoUtils.closeQuietly(sink);
+            IoUtils.closeQuietly(source);
+            IoUtils.closeQuietly(stderrSink);
+            // Rethrow the exception. This will be propagated to the remote caller.
+            throw ex;
         }
 
         // Read from process and write to pipe

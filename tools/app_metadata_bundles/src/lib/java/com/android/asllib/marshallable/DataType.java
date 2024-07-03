@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Data usage type representation. Types are specific to a {@link DataCategory} and contains
@@ -182,7 +183,7 @@ public class DataType implements AslMarshallable {
                             XmlUtils.OD_NAME_PURPOSES,
                             this.getPurposes().stream()
                                     .map(p -> String.valueOf(p.getValue()))
-                                    .toList()));
+                                    .collect(Collectors.toList())));
         }
 
         maybeAddBoolToOdElement(

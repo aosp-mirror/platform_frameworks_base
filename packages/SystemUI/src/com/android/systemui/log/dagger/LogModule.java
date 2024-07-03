@@ -364,6 +364,16 @@ public class LogModule {
         return factory.create("MediaCarouselCtlrLog", 20);
     }
 
+    /**
+     * Provides a buffer for media loading changes
+     */
+    @Provides
+    @SysUISingleton
+    @MediaLoadingLog
+    public static LogBuffer providesMediaLoadingLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaLoadingLog", 20);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
@@ -612,7 +622,8 @@ public class LogModule {
     @SysUISingleton
     @SceneFrameworkLog
     public static LogBuffer provideSceneFrameworkLogBuffer(LogBufferFactory factory) {
-        return factory.create("SceneFramework", 50);
+        return factory
+                .create("SceneFramework", 50, /* systrace */ true, /* alwaysLogToLogcat */  true);
     }
 
     /** Provides a {@link LogBuffer} for the bluetooth QS tile dialog. */
@@ -663,4 +674,11 @@ public class LogModule {
         return factory.create("DeviceEntryIconLog", 100);
     }
 
+    /** Provides a {@link LogBuffer} for use by the volume loggers. */
+    @Provides
+    @SysUISingleton
+    @VolumeLog
+    public static LogBuffer provideVolumeLogBuffer(LogBufferFactory factory) {
+        return factory.create("VolumeLog", 50);
+    }
 }

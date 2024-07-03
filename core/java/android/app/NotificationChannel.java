@@ -72,6 +72,35 @@ public final class NotificationChannel implements Parcelable {
     public static final String DEFAULT_CHANNEL_ID = "miscellaneous";
 
     /**
+     * A reserved id for a system channel reserved for promotional notifications.
+     *  @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final String PROMOTIONS_ID = "android.app.promotions";
+    /**
+     * A reserved id for a system channel reserved for non-conversation social media notifications.
+     *  @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final String SOCIAL_MEDIA_ID = "android.app.social";
+    /**
+     * A reserved id for a system channel reserved for news notifications.
+     *  @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final String NEWS_ID = "android.app.news";
+    /**
+     * A reserved id for a system channel reserved for content recommendation notifications.
+     *  @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final String RECS_ID = "android.app.recs";
+
+    /**
      * The formatter used by the system to create an id for notification
      * channels when it automatically creates conversation channels on behalf of an app. The format
      * string takes two arguments, in this order: the

@@ -29,8 +29,8 @@ import android.os.Parcel;
 
 /**
  * Callback that allows to {@link TransactionExecutor#cycleToPath} to {@link ON_PAUSE} or
- * {@link ON_STOP} in {@link TransactionExecutor#executeCallbacks} for activity "refresh" flow
- * that goes through "paused -> resumed" or "stopped -> resumed" cycle.
+ * {@link ON_STOP} in {@link TransactionExecutor#executeTransactionItems} for activity "refresh"
+ * flow that goes through "paused -> resumed" or "stopped -> resumed" cycle.
  *
  * <p>This is used in combination with {@link com.android.server.wm.DisplayRotationCompatPolicy}
  * for camera compatibility treatment that handles orientation mismatch between camera buffers and

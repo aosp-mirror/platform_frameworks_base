@@ -22,4 +22,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class FakeScreenRecordRepository : ScreenRecordRepository {
     override val screenRecordState: MutableStateFlow<ScreenRecordModel> =
         MutableStateFlow(ScreenRecordModel.DoingNothing)
+
+    var stopRecordingInvoked = false
+
+    override suspend fun stopRecording() {
+        stopRecordingInvoked = true
+    }
 }

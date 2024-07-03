@@ -54,4 +54,8 @@
     <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"థాయ్ (పత్తచోత్)"</string>
     <string name="keyboard_layout_serbian_latin" msgid="3128791759390046571">"సెర్బియన్ (లాటిన్)"</string>
     <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"మాంటెనెగ్రిన్ (లాటిన్)"</string>
+    <!-- no translation found for keyboard_layout_serbian_cyrillic (7013541044323542196) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_montenegrin_cyrillic (2391253952894077421) -->
+    <skip />
 </resources>

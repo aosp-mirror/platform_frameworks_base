@@ -16,8 +16,11 @@
 
 package com.android.systemui.keyboard.shortcut.ui.view
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.graphics.Insets
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.view.WindowInsets
 import androidx.activity.BackEventCompat
@@ -83,7 +86,15 @@ constructor(
         }
     }
 
-    private fun onKeyboardSettingsClicked() {}
+    private fun onKeyboardSettingsClicked() {
+        try {
+            startActivity(Intent(Settings.ACTION_HARD_KEYBOARD_SETTINGS))
+        } catch (e: ActivityNotFoundException) {
+            // From the Settings docs: In some cases, a matching Activity may not exist, so ensure
+            // you safeguard against this.
+            e.printStackTrace()
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -112,7 +123,7 @@ constructor(
             resources.getFloat(R.dimen.shortcut_helper_screen_width_fraction)
         // maxWidth needs to be set before the sheet is drawn, otherwise the call will have no
         // effect.
-        val screenWidth = resources.displayMetrics.widthPixels
+        val screenWidth = windowManager.maximumWindowMetrics.bounds.width()
         bottomSheetBehavior.maxWidth = (sheetScreenWidthFraction * screenWidth).toInt()
     }
 
@@ -121,7 +132,7 @@ constructor(
             val safeDrawingInsets = insets.safeDrawing
             // Make sure the bottom sheet is not covered by the status bar.
             bottomSheetBehavior.maxHeight =
-                resources.displayMetrics.heightPixels - safeDrawingInsets.top
+                windowManager.maximumWindowMetrics.bounds.height() - safeDrawingInsets.top
             // Make sure the contents inside of the bottom sheet are not hidden by system bars, or
             // cutouts.
             bottomSheet.updatePadding(

@@ -23,9 +23,11 @@
 #include <map>
 #include <set>
 #include <span>
+#include <utility>
 
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
+#include "androidfw/CombinedIterator.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/ResourceUtils.h"
 #include "androidfw/Util.h"
@@ -1622,6 +1624,12 @@ Theme::Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {
 
 Theme::~Theme() = default;
 
+static bool IsUndefined(const Res_value& value) {
+  // DATA_NULL_EMPTY (@empty) is a valid resource value and DATA_NULL_UNDEFINED represents
+  // an absence of a valid value.
+  return value.dataType == Res_value::TYPE_NULL && value.data != Res_value::DATA_NULL_EMPTY;
+}
+
 base::expected<std::monostate, NullOrIOError> Theme::ApplyStyle(uint32_t resid, bool force) {
   ATRACE_NAME("Theme::ApplyStyle");
 
@@ -1633,38 +1641,75 @@ base::expected<std::monostate, NullOrIOError> Theme::ApplyStyle(uint32_t resid, 
   // Merge the flags from this style.
   type_spec_flags_ |= (*bag)->type_spec_flags;
 
+  //
+  // This function is the most expensive part of applying an frro to the existing app resources,
+  // and needs to be as efficient as possible.
+  // The data structure we're working with is two parallel sorted arrays of keys (resource IDs)
+  // and entries (resource value + some attributes).
+  // The styles get applied in sequence, starting with an empty set of attributes. Each style
+  // contains its values for the theme attributes, and gets applied in either normal or forced way:
+  //  - normal way never overrides the existing attribute, so only unique style attributes are added
+  //  - forced way overrides anything for that attribute, and if it's undefined it removes the
+  //    previous value completely
+  //
+  // Style attributes come in a Bag data type - a sorted array of attributes with their values. This
+  // means we don't need to re-sort the attributes ever, and instead:
+  //  - for an already existing attribute just skip it or apply the forced value
+  //    - if the forced value is undefined, mark it undefined as well to get rid of it later
+  //  - for a new attribute append it to the array, forming a new sorted section of new attributes
+  //    past the end of the original ones (ignore undefined ones here)
+  //  - inplace merge two sorted sections to form a single sorted array again.
+  //  - run the last pass to remove all undefined elements
+  //
+  // Using this algorithm performs better than a repeated binary search + insert in the middle,
+  // as that keeps shifting the tail end of the arrays and wasting CPU cycles in memcpy().
+  //
+  const auto starting_size = keys_.size();
+  if (starting_size == 0) {
+    keys_.reserve((*bag)->entry_count);
+    entries_.reserve((*bag)->entry_count);
+  }
+  bool wrote_undefined = false;
   for (auto it = begin(*bag); it != end(*bag); ++it) {
     const uint32_t attr_res_id = it->key;
-
     // If the resource ID passed in is not a style, the key can be some other identifier that is not
     // a resource ID. We should fail fast instead of operating with strange resource IDs.
     if (!is_valid_resid(attr_res_id)) {
       return base::unexpected(std::nullopt);
     }
-
-    // DATA_NULL_EMPTY (@empty) is a valid resource value and DATA_NULL_UNDEFINED represents
-    // an absence of a valid value.
-    bool is_undefined = it->value.dataType == Res_value::TYPE_NULL &&
-        it->value.data != Res_value::DATA_NULL_EMPTY;
+    const bool is_undefined = IsUndefined(it->value);
     if (!force && is_undefined) {
       continue;
     }
-
-    const auto key_it = std::lower_bound(keys_.begin(), keys_.end(), attr_res_id);
-    const auto entry_it = entries_.begin() + (key_it - keys_.begin());
-    if (key_it != keys_.end() && *key_it == attr_res_id) {
-      if (is_undefined) {
-        // DATA_NULL_UNDEFINED clears the value of the attribute in the theme only when `force` is
-        // true.
-        keys_.erase(key_it);
-        entries_.erase(entry_it);
-      } else if (force) {
+    const auto key_it = std::lower_bound(keys_.begin(), keys_.begin() + starting_size, attr_res_id);
+    if (key_it != keys_.begin() + starting_size && *key_it == attr_res_id) {
+      const auto entry_it = entries_.begin() + (key_it - keys_.begin());
+      if (force || IsUndefined(entry_it->value)) {
         *entry_it = Entry{it->cookie, (*bag)->type_spec_flags, it->value};
+        wrote_undefined |= is_undefined;
       }
-    } else {
-      keys_.insert(key_it, attr_res_id);
-      entries_.insert(entry_it, Entry{it->cookie, (*bag)->type_spec_flags, it->value});
+    } else if (!is_undefined) {
+      keys_.emplace_back(attr_res_id);
+      entries_.emplace_back(it->cookie, (*bag)->type_spec_flags, it->value);
     }
+  }
+
+  if (starting_size && keys_.size() != starting_size) {
+    std::inplace_merge(
+        CombinedIterator(keys_.begin(), entries_.begin()),
+        CombinedIterator(keys_.begin() + starting_size, entries_.begin() + starting_size),
+        CombinedIterator(keys_.end(), entries_.end()));
+  }
+  if (wrote_undefined) {
+    auto new_end = std::remove_if(CombinedIterator(keys_.begin(), entries_.begin()),
+                                  CombinedIterator(keys_.end(), entries_.end()),
+                                  [](const auto& pair) { return IsUndefined(pair.second.value); });
+    keys_.erase(new_end.it1, keys_.end());
+    entries_.erase(new_end.it2, entries_.end());
+  }
+  if (android::base::kEnableDChecks && !std::is_sorted(keys_.begin(), keys_.end())) {
+    ALOGW("Bag %u was unsorted in the apk?", unsigned(resid));
+    return base::unexpected(std::nullopt);
   }
   return {};
 }
@@ -1691,6 +1736,9 @@ std::optional<AssetManager2::SelectedValue> Theme::GetAttribute(uint32_t resid) 
       return std::nullopt;
     }
     const auto entry_it = entries_.begin() + (key_it - keys_.begin());
+    if (IsUndefined(entry_it->value)) {
+      return std::nullopt;
+    }
     type_spec_flags |= entry_it->type_spec_flags;
     if (entry_it->value.dataType == Res_value::TYPE_ATTRIBUTE) {
       resid = entry_it->value.data;

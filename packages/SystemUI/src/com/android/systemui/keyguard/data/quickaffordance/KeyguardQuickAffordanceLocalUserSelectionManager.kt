@@ -20,7 +20,6 @@ package com.android.systemui.keyguard.data.quickaffordance
 import android.content.Context
 import android.content.IntentFilter
 import android.content.SharedPreferences
-import com.android.systemui.Flags
 import com.android.systemui.backup.BackupHelper
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -30,7 +29,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.util.settings.SystemSettings
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -52,7 +50,6 @@ constructor(
     @Application private val context: Context,
     private val userFileManager: UserFileManager,
     private val userTracker: UserTracker,
-    private val systemSettings: SystemSettings,
     broadcastDispatcher: BroadcastDispatcher,
 ) : KeyguardQuickAffordanceSelectionManager {
 
@@ -73,22 +70,6 @@ constructor(
     }
 
     private val defaults: Map<String, List<String>> by lazy {
-        // Quick hack to allow testing out a lock screen shortcut to open the glanceable hub. This
-        // flag will not be rolled out and is only used for local testing.
-        // TODO(b/339667383): delete or properly implement this once a product decision is made
-        if (Flags.glanceableHubShortcutButton()) {
-            if (systemSettings.getBool("open_hub_chip_replace_home_controls", false)) {
-                return@lazy mapOf(
-                    "bottom_start" to listOf("glanceable_hub"),
-                    "bottom_end" to listOf("create_note")
-                )
-            } else {
-                return@lazy mapOf(
-                    "bottom_start" to listOf("home"),
-                    "bottom_end" to listOf("glanceable_hub")
-                )
-            }
-        }
         context.resources
             .getStringArray(R.array.config_keyguardQuickAffordanceDefaults)
             .associate { item ->

@@ -41,7 +41,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.android.systemui.communal.domain.model.CommunalContentModel
-import com.android.systemui.communal.ui.compose.extensions.plus
+import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.util.WidgetPickerIntentUtils
 import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
 import kotlinx.coroutines.CoroutineScope
@@ -57,6 +57,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun rememberDragAndDropTargetState(
     gridState: LazyGridState,
+    contentOffset: Offset,
     contentListState: ContentListState,
     updateDragPositionForRemove: (offset: Offset) -> Boolean,
 ): DragAndDropTargetState {
@@ -70,6 +71,7 @@ internal fun rememberDragAndDropTargetState(
         remember(gridState, contentListState) {
             DragAndDropTargetState(
                 state = gridState,
+                contentOffset = contentOffset,
                 contentListState = contentListState,
                 scope = scope,
                 autoScrollSpeed = autoScrollSpeed,
@@ -145,6 +147,7 @@ internal fun Modifier.dragAndDropTarget(
  */
 internal class DragAndDropTargetState(
     private val state: LazyGridState,
+    private val contentOffset: Offset,
     private val contentListState: ContentListState,
     private val scope: CoroutineScope,
     private val autoScrollSpeed: MutableState<Float>,
@@ -214,8 +217,7 @@ internal class DragAndDropTargetState(
                 return@let true
             }
             return false
-        }
-            ?: false
+        } ?: false
     }
 
     fun onEnded() {
@@ -249,10 +251,9 @@ internal class DragAndDropTargetState(
     }
 
     private fun findTargetItem(dragEvent: DragEvent): LazyGridItemInfo? =
-        state.layoutInfo.visibleItemsInfo.firstOrNull { item ->
-            dragEvent.x.toInt() in item.offset.x..(item.offset + item.size).x &&
-                dragEvent.y.toInt() in item.offset.y..(item.offset + item.size).y
-        }
+        state.layoutInfo.visibleItemsInfo.firstItemAtOffset(
+            Offset(dragEvent.x, dragEvent.y) - contentOffset
+        )
 
     private fun movePlaceholderTo(index: Int) {
         val currentIndex = contentListState.list.indexOf(placeHolder)

@@ -17,8 +17,8 @@
 package com.android.systemui.shade
 
 import android.os.PowerManager
-import android.testing.AndroidTestingRunner
 import android.view.MotionEvent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
@@ -47,7 +47,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class LockscreenHostedDreamGestureListenerTest : SysuiTestCase() {
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var falsingCollector: FalsingCollector

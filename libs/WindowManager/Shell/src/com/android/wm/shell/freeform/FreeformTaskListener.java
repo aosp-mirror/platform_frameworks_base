@@ -25,7 +25,7 @@ import android.content.Context;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -150,6 +150,10 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                                 "Adding active freeform task: #%d", taskInfo.taskId);
                     }
+                } else if (repository.isClosingTask(taskInfo.taskId)
+                        && repository.removeClosingTask(taskInfo.taskId)) {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                            "Removing closing freeform task: #%d", taskInfo.taskId);
                 }
                 repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId,
                         taskInfo.isVisible);

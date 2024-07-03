@@ -25,12 +25,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.DreamManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.InputChannelCompat;
@@ -87,7 +90,7 @@ public class ShadeTouchHandlerTest extends SysuiTestCase {
         assertThat(captured).isTrue();
     }
 
-    // Verifies that a swipe in the upward direction is not catpured.
+    // Verifies that a swipe in the upward direction is not captured.
     @Test
     public void testSwipeUp_notCaptured() {
         final boolean captured = swipe(Direction.UP);
@@ -98,32 +101,56 @@ public class ShadeTouchHandlerTest extends SysuiTestCase {
 
     // Verifies that a swipe down forwards captured touches to central surfaces for handling.
     @Test
-    public void testSwipeDown_sentToCentralSurfaces() {
+    @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
+    public void testSwipeDown_communalEnabled_sentToCentralSurfaces() {
         swipe(Direction.DOWN);
 
-        // Both motion events are sent for the shade window to process.
+        // Both motion events are sent for central surfaces to process.
         verify(mCentralSurfaces, times(2)).handleExternalShadeWindowTouch(any());
     }
 
-    // Verifies that a swipe down forwards captured touches to central surfaces for handling.
+    // Verifies that a swipe down forwards captured touches to the shade view for handling.
+    @Test
+    @DisableFlags(Flags.FLAG_COMMUNAL_HUB)
+    public void testSwipeDown_communalDisabled_sentToShadeView() {
+        swipe(Direction.DOWN);
+
+        // Both motion events are sent for the shade view to process.
+        verify(mShadeViewController, times(2)).handleExternalTouch(any());
+    }
+
+    // Verifies that a swipe down while dreaming forwards captured touches to the shade view for
+    // handling.
     @Test
     public void testSwipeDown_dreaming_sentToShadeView() {
         when(mDreamManager.isDreaming()).thenReturn(true);
 
         swipe(Direction.DOWN);
 
-        // Both motion events are sent for the shade window to process.
+        // Both motion events are sent for the shade view to process.
         verify(mShadeViewController, times(2)).handleExternalTouch(any());
     }
 
-    // Verifies that a swipe down is not forwarded to the shade window.
+    // Verifies that a swipe up is not forwarded to central surfaces.
     @Test
-    public void testSwipeUp_touchesNotSent() {
+    @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
+    public void testSwipeUp_communalEnabled_touchesNotSent() {
         swipe(Direction.UP);
 
-        // Motion events are not sent for the shade window to process as the swipe is going in the
+        // Motion events are not sent for central surfaces to process as the swipe is going in the
         // wrong direction.
         verify(mCentralSurfaces, never()).handleExternalShadeWindowTouch(any());
+    }
+
+    // Verifies that a swipe up is not forwarded to the shade view.
+    @Test
+    @DisableFlags(Flags.FLAG_COMMUNAL_HUB)
+    public void testSwipeUp_communalDisabled_touchesNotSent() {
+        swipe(Direction.UP);
+
+        // Motion events are not sent for the shade view to process as the swipe is going in the
+        // wrong direction.
+        verify(mShadeViewController, never()).handleExternalTouch(any());
     }
 
     /**

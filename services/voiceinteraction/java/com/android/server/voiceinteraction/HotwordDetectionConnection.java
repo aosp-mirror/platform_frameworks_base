@@ -1165,7 +1165,7 @@ final class HotwordDetectionConnection {
                 LocalServices.getService(PermissionManagerServiceInternal.class)
                         .setHotwordDetectionServiceProvider(() -> uid);
                 mIdentity = new HotwordDetectionServiceIdentity(uid, mVoiceInteractionServiceUid);
-                addServiceUidForAudioPolicy(uid);
+                addServiceUidForAudioPolicy(uid, mVoiceInteractionServiceUid);
             }
         }));
     }
@@ -1187,23 +1187,17 @@ final class HotwordDetectionConnection {
         });
     }
 
-    private void addServiceUidForAudioPolicy(int uid) {
-        mScheduledExecutorService.execute(() -> {
-            AudioManagerInternal audioManager =
-                    LocalServices.getService(AudioManagerInternal.class);
-            if (audioManager != null) {
-                audioManager.addAssistantServiceUid(uid);
-            }
-        });
+    private void addServiceUidForAudioPolicy(int isolatedUid, int owningUid) {
+        AudioManagerInternal audioManager = LocalServices.getService(AudioManagerInternal.class);
+        if (audioManager != null) {
+            audioManager.addAssistantServiceUid(isolatedUid, owningUid);
+        }
     }
 
     private void removeServiceUidForAudioPolicy(int uid) {
-        mScheduledExecutorService.execute(() -> {
-            AudioManagerInternal audioManager =
-                    LocalServices.getService(AudioManagerInternal.class);
-            if (audioManager != null) {
-                audioManager.removeAssistantServiceUid(uid);
-            }
-        });
+        AudioManagerInternal audioManager = LocalServices.getService(AudioManagerInternal.class);
+        if (audioManager != null) {
+            audioManager.removeAssistantServiceUid(uid);
+        }
     }
 }

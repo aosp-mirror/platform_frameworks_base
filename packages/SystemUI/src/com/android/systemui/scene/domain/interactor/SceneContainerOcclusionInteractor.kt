@@ -121,7 +121,7 @@ constructor(
     private val SceneKey.canBeOccluded: Boolean
         get() =
             when (this) {
-                Scenes.Bouncer -> true
+                Scenes.Bouncer -> false
                 Scenes.Communal -> true
                 Scenes.Gone -> true
                 Scenes.Lockscreen -> true

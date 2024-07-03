@@ -140,6 +140,14 @@ public class Utils {
     }
 
     /**
+     * @param authenticators composed of one or more values from {@link Authenticators}
+     * @return true if mandatory biometrics is requested
+     */
+    static boolean isMandatoryBiometricsRequested(@Authenticators.Types int authenticators) {
+        return (authenticators & Authenticators.MANDATORY_BIOMETRICS) != 0;
+    }
+
+    /**
      * @param promptInfo should be first processed by
      * {@link #combineAuthenticatorBundles(PromptInfo)}
      * @return true if device credential is allowed.
@@ -242,7 +250,8 @@ public class Utils {
         // Check if any of the non-biometric and non-credential bits are set. If so, this is
         // invalid.
         final int testBits = ~(Authenticators.DEVICE_CREDENTIAL
-                | Authenticators.BIOMETRIC_MIN_STRENGTH);
+                | Authenticators.BIOMETRIC_MIN_STRENGTH
+                | Authenticators.MANDATORY_BIOMETRICS);
         if ((authenticators & testBits) != 0) {
             Slog.e(BiometricService.TAG, "Non-biometric, non-credential bits found."
                     + " Authenticators: " + authenticators);
@@ -258,6 +267,8 @@ public class Utils {
         } else if (biometricBits == Authenticators.BIOMETRIC_STRONG) {
             return true;
         } else if (biometricBits == Authenticators.BIOMETRIC_WEAK) {
+            return true;
+        } else if (isMandatoryBiometricsRequested(authenticators)) {
             return true;
         }
 

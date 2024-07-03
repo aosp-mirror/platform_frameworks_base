@@ -93,7 +93,29 @@ class PointerIconLoadingTest {
             PointerIcon.getLoadedSystemIcon(
                 ContextThemeWrapper(context, theme),
                 PointerIcon.TYPE_ARROW,
-                /* useLargeIcons= */ false)
+                /* useLargeIcons= */ false,
+                /* pointerScale= */ 1f)
+
+        pointerIcon.getBitmap().assertAgainstGolden(
+            screenshotRule,
+            testName.methodName,
+            exactScreenshotMatcher
+        )
+    }
+
+    @Test
+    fun testPointerScale() {
+        assumeTrue(enableVectorCursors())
+        assumeTrue(enableVectorCursorA11ySettings())
+
+        val pointerScale = 2f
+
+        val pointerIcon =
+            PointerIcon.getLoadedSystemIcon(
+                context,
+                PointerIcon.TYPE_ARROW,
+                /* useLargeIcons= */ false,
+                pointerScale)
 
         pointerIcon.getBitmap().assertAgainstGolden(
             screenshotRule,

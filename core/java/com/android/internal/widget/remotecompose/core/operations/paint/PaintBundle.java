@@ -15,43 +15,60 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.paint;
 
+import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.operations.Utils;
 
 import java.util.Arrays;
 
+/**
+ * Paint Bundle represents a delta of changes to a paint object
+ */
 public class PaintBundle {
     int[] mArray = new int[200];
+    int[] mOutArray = null;
     int mPos = 0;
 
-    public void applyPaintChange(PaintChanges p) {
+    /**
+     * Apply changes to a PaintChanges interface
+     * @param paintContext
+     * @param p
+     */
+    public void applyPaintChange(PaintContext paintContext, PaintChanges p) {
         int i = 0;
         int mask = 0;
+        if (mOutArray == null) {
+            mOutArray = mArray;
+        }
         while (i < mPos) {
-            int cmd = mArray[i++];
+            int cmd = mOutArray[i++];
             mask = mask | (1 << (cmd - 1));
             switch (cmd & 0xFFFF) {
                 case TEXT_SIZE: {
-                    p.setTextSize(Float.intBitsToFloat(mArray[i++]));
+                    p.setTextSize(Float.intBitsToFloat(mOutArray[i++]));
                     break;
                 }
                 case TYPEFACE:
                     int style = (cmd >> 16);
                     int weight = style & 0x3ff;
                     boolean italic = (style >> 10) > 0;
-                    int font_type = mArray[i++];
+                    int font_type = mOutArray[i++];
 
                     p.setTypeFace(font_type, weight, italic);
                     break;
+                case COLOR_ID: // mOutArray should have already decoded it
                 case COLOR: {
-                    p.setColor(mArray[i++]);
+                    p.setColor(mOutArray[i++]);
                     break;
                 }
                 case STROKE_WIDTH: {
-                    p.setStrokeWidth(Float.intBitsToFloat(mArray[i++]));
+                    p.setStrokeWidth(Float.intBitsToFloat(mOutArray[i++]));
                     break;
                 }
                 case STROKE_MITER: {
-                    p.setStrokeMiter(Float.intBitsToFloat(mArray[i++]));
+                    p.setStrokeMiter(Float.intBitsToFloat(mOutArray[i++]));
                     break;
                 }
                 case STROKE_CAP: {
@@ -63,6 +80,7 @@ public class PaintBundle {
                     break;
                 }
                 case SHADER: {
+                    p.setShader(mOutArray[i++]);
                     break;
                 }
                 case STROKE_JOIN: {
@@ -81,17 +99,16 @@ public class PaintBundle {
                     p.setFilterBitmap(!((cmd >> 16) == 0));
                     break;
                 }
-
                 case GRADIENT: {
-                    i = callSetGradient(cmd, mArray, i, p);
+                    i = callSetGradient(cmd, mOutArray, i, p);
                     break;
                 }
                 case COLOR_FILTER: {
-                    p.setColorFilter(mArray[i++], cmd >> 16);
+                    p.setColorFilter(mOutArray[i++], cmd >> 16);
                     break;
                 }
                 case ALPHA: {
-                    p.setAlpha(Float.intBitsToFloat(mArray[i++]));
+                    p.setAlpha(Float.intBitsToFloat(mOutArray[i++]));
                     break;
                 }
             }
@@ -106,7 +123,6 @@ public class PaintBundle {
         switch (id) {
             case TEXT_SIZE:
                 return "TEXT_SIZE";
-
             case COLOR:
                 return "COLOR";
             case STROKE_WIDTH:
@@ -133,7 +149,6 @@ public class PaintBundle {
                 return "ALPHA";
             case COLOR_FILTER:
                 return "COLOR_FILTER";
-
         }
         return "????" + id + "????";
     }
@@ -154,6 +169,14 @@ public class PaintBundle {
         return str + "]";
     }
 
+    private static String asFloatStr(int value) {
+        float fValue = Float.intBitsToFloat(value);
+        if (Float.isNaN(fValue)) {
+            return "[" + Utils.idFromNan(fValue) + "]";
+        }
+        return Float.toString(fValue);
+    }
+
     @Override
     public String toString() {
         StringBuilder ret = new StringBuilder("\n");
@@ -164,7 +187,8 @@ public class PaintBundle {
             switch (type) {
 
                 case TEXT_SIZE: {
-                    ret.append("    TextSize(" + Float.intBitsToFloat(mArray[i++]));
+                    ret.append("    TextSize("
+                            + asFloatStr(mArray[i++]));
                 }
 
                 break;
@@ -181,14 +205,18 @@ public class PaintBundle {
                     ret.append("    Color(" + colorInt(mArray[i++]));
                 }
                 break;
+                case COLOR_ID: {
+                    ret.append("    ColorId([" + mArray[i++] + "]");
+                }
+                break;
                 case STROKE_WIDTH: {
                     ret.append("    StrokeWidth("
-                            + (Float.intBitsToFloat(mArray[i++])));
+                            + (asFloatStr(mArray[i++])));
                 }
                 break;
                 case STROKE_MITER: {
                     ret.append("    StrokeMiter("
-                            + (Float.intBitsToFloat(mArray[i++])));
+                            + (asFloatStr(mArray[i++])));
                 }
                 break;
                 case STROKE_CAP: {
@@ -207,11 +235,12 @@ public class PaintBundle {
                 }
                 break;
                 case SHADER: {
+                    ret.append("    Shader(" + mArray[i++]);
                 }
                 break;
                 case ALPHA: {
                     ret.append("    Alpha("
-                            + (Float.intBitsToFloat(mArray[i++])));
+                            + (asFloatStr(mArray[i++])));
                 }
                 break;
                 case IMAGE_FILTER_QUALITY: {
@@ -244,7 +273,6 @@ public class PaintBundle {
         return ret.toString();
     }
 
-
     int callPrintGradient(int cmd, int[] array, int i, StringBuilder p) {
         int ret = i;
         int type = (cmd >> 16);
@@ -258,26 +286,25 @@ public class PaintBundle {
                     colors = new int[len];
                     for (int j = 0; j < colors.length; j++) {
                         colors[j] = array[ret++];
-
                     }
                 }
                 len = array[ret++];
-                float[] stops = null;
+                String[] stops = null;
                 if (len > 0) {
-                    stops = new float[len];
+                    stops = new String[len];
                     for (int j = 0; j < stops.length; j++) {
-                        stops[j] = Float.intBitsToFloat(array[ret++]);
+                        stops[j] = asFloatStr(array[ret++]);
                     }
                 }
 
                 p.append("      colors = " + colorInt(colors) + ",\n");
                 p.append("      stops = " + Arrays.toString(stops) + ",\n");
                 p.append("      start = ");
-                p.append("[" + Float.intBitsToFloat(array[ret++]));
-                p.append(", " + Float.intBitsToFloat(array[ret++]) + "],\n");
+                p.append("[" + asFloatStr(array[ret++]));
+                p.append(", " + asFloatStr(array[ret++]) + "],\n");
                 p.append("      end = ");
-                p.append("[" + Float.intBitsToFloat(array[ret++]));
-                p.append(", " + Float.intBitsToFloat(array[ret++]) + "],\n");
+                p.append("[" + asFloatStr(array[ret++]));
+                p.append(", " + asFloatStr(array[ret++]) + "],\n");
                 int tileMode = array[ret++];
                 p.append("      tileMode = " + tileMode + "\n    ");
             }
@@ -295,21 +322,21 @@ public class PaintBundle {
                     }
                 }
                 len = array[ret++];
-                float[] stops = null;
+                String[] stops = null;
                 if (len > 0) {
-                    stops = new float[len];
+                    stops = new String[len];
                     for (int j = 0; j < stops.length; j++) {
-                        stops[j] = Float.intBitsToFloat(array[ret++]);
+                        stops[j] = asFloatStr(array[ret++]);
                     }
                 }
 
                 p.append("      colors = " + colorInt(colors) + ",\n");
                 p.append("      stops = " + Arrays.toString(stops) + ",\n");
                 p.append("      center = ");
-                p.append("[" + Float.intBitsToFloat(array[ret++]));
-                p.append(", " + Float.intBitsToFloat(array[ret++]) + "],\n");
+                p.append("[" + asFloatStr(array[ret++]));
+                p.append(", " + asFloatStr(array[ret++]) + "],\n");
                 p.append("      radius =");
-                p.append(" " + Float.intBitsToFloat(array[ret++]) + ",\n");
+                p.append(" " + asFloatStr(array[ret++]) + ",\n");
                 int tileMode = array[ret++];
                 p.append("      tileMode = " + tileMode + "\n    ");
             }
@@ -327,20 +354,19 @@ public class PaintBundle {
                     }
                 }
                 len = array[ret++];
-                float[] stops = null;
+                String[] stops = null;
                 if (len > 0) {
-                    stops = new float[len];
+                    stops = new String[len];
                     for (int j = 0; j < stops.length; j++) {
-                        stops[j] = Float.intBitsToFloat(array[ret++]);
+                        stops[j] = asFloatStr(array[ret++]);
                     }
                 }
-
                 p.append("      colors = " + colorInt(colors) + ",\n");
                 p.append("      stops = " + Arrays.toString(stops) + ",\n");
                 p.append("      center = ");
-                p.append("[" + Float.intBitsToFloat(array[ret++]));
-                p.append(", " + Float.intBitsToFloat(array[ret++]) + "],\n    ");
-
+                p.append("[" + asFloatStr(array[ret++]));
+                p.append(", "
+                        + asFloatStr(array[ret++]) + "],\n    ");
             }
             break;
             default: {
@@ -375,7 +401,6 @@ public class PaintBundle {
         if (colors == null) {
             return ret;
         }
-
 
         switch (gradientType) {
 
@@ -433,7 +458,7 @@ public class PaintBundle {
     public static final int COLOR = 4;  // int
     public static final int STROKE_WIDTH = 5; // float
     public static final int STROKE_MITER = 6;
-    public static final int STROKE_CAP = 7; // int
+    public static final int STROKE_CAP = 7; //  int
     public static final int STYLE = 8; // int
     public static final int SHADER = 9; // int
     public static final int IMAGE_FILTER_QUALITY = 10; // int
@@ -445,7 +470,7 @@ public class PaintBundle {
     public static final int TYPEFACE = 16;
     public static final int FILTER_BITMAP = 17;
     public static final int BLEND_MODE = 18;
-
+    public static final int COLOR_ID = 19;  // int
 
     public static final int BLEND_MODE_CLEAR = 0;
     public static final int BLEND_MODE_SRC = 1;
@@ -634,8 +659,8 @@ public class PaintBundle {
 
     /**
      * @param fontType 0 = default 1 = sans serif 2 = serif 3 = monospace
-     * @param weight    100-1000
-     * @param italic    tur
+     * @param weight   100-1000
+     * @param italic   tur
      */
     public void setTextStyle(int fontType, int weight, boolean italic) {
         int style = (weight & 0x3FF) | (italic ? 2048 : 0);  // pack the weight and italic
@@ -658,12 +683,28 @@ public class PaintBundle {
         mPos++;
     }
 
+    /**
+     * Set the Color based on Color
+     * @param color
+     */
     public void setColor(int color) {
         mArray[mPos] = COLOR;
         mPos++;
         mArray[mPos] = color;
         mPos++;
     }
+
+    /**
+     * Set the Color based on ID
+     * @param color
+     */
+    public void setColorId(int color) {
+        mArray[mPos] = COLOR_ID;
+        mPos++;
+        mArray[mPos] = color;
+        mPos++;
+    }
+
 
     /**
      * Set the paint's Cap.
@@ -676,16 +717,29 @@ public class PaintBundle {
         mPos++;
     }
 
+    /**
+     * Set the style STROKE and/or FILL
+     * @param style
+     */
     public void setStyle(int style) {
         mArray[mPos] = STYLE | (style << 16);
         mPos++;
     }
 
-    public void setShader(int shader, String shaderString) {
-        mArray[mPos] = SHADER | (shader << 16);
+    /**
+     * Set the shader id to use
+     * @param shaderId
+     */
+    public void setShader(int shaderId) {
+        mArray[mPos] = SHADER;
+        mPos++;
+        mArray[mPos] = shaderId;
         mPos++;
     }
 
+    /**
+     * Set the Alpha value
+     */
     public void setAlpha(float alpha) {
         mArray[mPos] = ALPHA;
         mPos++;
@@ -728,7 +782,6 @@ public class PaintBundle {
      * (generated by a drawing command) are composited with the
      * destination pixels
      * (content of the render target).
-     *
      *
      * @param blendmode The blend mode to be installed in the paint
      */
@@ -825,5 +878,216 @@ public class PaintBundle {
         return "null";
     }
 
-}
+    /**
+     * Check all the floats for Nan(id) floats and call listenTo
+     * @param context
+     * @param support
+     */
+    public void registerVars(RemoteContext context, VariableSupport support) {
+        int i = 0;
+        while (i < mPos) {
+            int cmd = mArray[i++];
+            int type = cmd & 0xFFFF;
+            switch (type) {
+                case STROKE_MITER:
+                case STROKE_WIDTH:
+                case ALPHA:
+                case TEXT_SIZE:
+                    float v = Float.intBitsToFloat(mArray[i++]);
+                    if (Float.isNaN(v)) {
+                        context.listensTo(Utils.idFromNan(v), support);
+                    }
+                    break;
+                case COLOR_ID:
+                    context.listensTo(mArray[i++], support);
+                    break;
+                case COLOR:
 
+                case TYPEFACE:
+                case SHADER:
+                case COLOR_FILTER:
+                    i++;
+                    break;
+                case STROKE_JOIN:
+                case FILTER_BITMAP:
+                case STROKE_CAP:
+                case STYLE:
+                case IMAGE_FILTER_QUALITY:
+                case BLEND_MODE:
+                case ANTI_ALIAS:
+                    break;
+
+                case GRADIENT: {
+                    // TODO gradients should be handled correctly
+                    i = callPrintGradient(cmd, mArray, i, new StringBuilder());
+                }
+            }
+        }
+    }
+
+    /**
+     * Update variables if any are float ids
+     * @param context
+     */
+    public void updateVariables(RemoteContext context) {
+        if (mOutArray == null) {
+            mOutArray = Arrays.copyOf(mArray, mArray.length);
+        } else {
+            System.arraycopy(mArray, 0, mOutArray, 0, mArray.length);
+        }
+        int i = 0;
+        while (i < mPos) {
+            int cmd = mArray[i++];
+            int type = cmd & 0xFFFF;
+            switch (type) {
+                case STROKE_MITER:
+                case STROKE_WIDTH:
+                case ALPHA:
+                case TEXT_SIZE:
+                    mOutArray[i] = fixFloatVar(mArray[i], context);
+                    i++;
+                    break;
+                case COLOR_ID:
+                    mOutArray[i] = fixColor(mArray[i], context);
+                    i++;
+                    break;
+                case COLOR:
+                case TYPEFACE:
+                case SHADER:
+                case COLOR_FILTER:
+                    i++;
+                    break;
+                case STROKE_JOIN:
+                case FILTER_BITMAP:
+                case STROKE_CAP:
+                case STYLE:
+                case IMAGE_FILTER_QUALITY:
+                case BLEND_MODE:
+                case ANTI_ALIAS:
+                    break;
+
+                case GRADIENT: {
+                    // TODO gradients should be handled correctly
+                    i = updateFloatsInGradient(cmd, mOutArray, mArray, i, context);
+                }
+            }
+        }
+    }
+
+    private int fixFloatVar(int val, RemoteContext context) {
+        float v = Float.intBitsToFloat(val);
+        if (Float.isNaN(v)) {
+            int id = Utils.idFromNan(v);
+            return Float.floatToRawIntBits(context.getFloat(id));
+        }
+        return val;
+    }
+
+    private int fixColor(int colorId, RemoteContext context) {
+        int n = context.getColor(colorId);
+        return n;
+    }
+
+    int updateFloatsInGradient(int cmd, int[] out, int[] array,
+                               int i,
+                               RemoteContext context) {
+        int ret = i;
+        int type = (cmd >> 16);
+        switch (type) {
+            case 0: {
+                int len = array[ret++];
+                if (len > 0) {
+                    for (int j = 0; j < len; j++) {
+                        ret++;
+                    }
+                }
+                len = array[ret++];
+
+                if (len > 0) {
+                    for (int j = 0; j < len; j++) {
+                        out[ret] = fixFloatVar(array[ret], context);
+                        ret++;
+                    }
+                }
+
+                out[ret] = fixFloatVar(array[ret], context);
+                ret++;
+                out[ret] = fixFloatVar(array[ret], context);
+                ret++;
+
+                //      end
+                out[ret] = fixFloatVar(array[ret], context);
+                ret++;
+                out[ret] = fixFloatVar(array[ret], context);
+                ret++;
+                ret++; // tileMode
+            }
+
+            break;
+            case 1: {
+                //   RadialGradient
+                int len = array[ret++];
+                if (len > 0) {
+                    for (int j = 0; j < len; j++) {
+                        ret++;
+                    }
+                }
+                len = array[ret++];
+                if (len > 0) {
+                    for (int j = 0; j < len; j++) {
+                        out[ret] = fixFloatVar(array[ret], context);
+                        ret++;
+                    }
+                }
+
+
+                //    center
+                out[ret] = fixFloatVar(array[ret], context);
+                ret++;
+                out[ret] = fixFloatVar(array[ret], context);
+                ret++;
+                //     radius
+                out[ret] = fixFloatVar(array[ret], context);
+                ret++;
+                ret++; // tileMode
+
+            }
+
+            break;
+            case 2: {
+                //   SweepGradient
+                int len = array[ret++];
+                int[] colors = null;
+                if (len > 0) {
+                    colors = new int[len];
+                    for (int j = 0; j < colors.length; j++) {
+                        colors[j] = array[ret++];
+
+                    }
+                }
+                len = array[ret++];
+                float[] stops = null;
+                if (len > 0) {
+                    stops = new float[len];
+                    for (int j = 0; j < stops.length; j++) {
+                        out[ret] = fixFloatVar(array[ret], context);
+                        ret++;
+                    }
+                }
+
+                //      center
+                out[ret] = fixFloatVar(array[ret], context);
+                ret++;
+                out[ret] = fixFloatVar(array[ret], context);
+                ret++;
+            }
+            break;
+            default: {
+                System.err.println("gradient type unknown");
+            }
+        }
+
+        return ret;
+    }
+
+}

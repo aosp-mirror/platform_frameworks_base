@@ -16,6 +16,7 @@
 
 package com.android.server.input;
 
+import static android.view.PointerIcon.DEFAULT_POINTER_SCALE;
 import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_FILL_BLACK;
 import static android.view.flags.Flags.enableVectorCursorA11ySettings;
 
@@ -101,7 +102,9 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.Secure.getUriFor(Settings.Secure.STYLUS_POINTER_ICON_ENABLED),
                         (reason) -> updateStylusPointerIconEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_FILL_STYLE),
-                        (reason) -> updatePointerFillStyleFromSettings()));
+                        (reason) -> updatePointerFillStyleFromSettings()),
+                Map.entry(Settings.System.getUriFor(Settings.System.POINTER_SCALE),
+                        (reason) -> updatePointerScaleFromSettings()));
     }
 
     /**
@@ -276,5 +279,15 @@ class InputSettingsObserver extends ContentObserver {
                 POINTER_ICON_VECTOR_STYLE_FILL_BLACK,
                 UserHandle.USER_CURRENT);
         mService.setPointerFillStyle(pointerFillStyle);
+    }
+
+    private void updatePointerScaleFromSettings() {
+        if (!enableVectorCursorA11ySettings()) {
+            return;
+        }
+        final float pointerScale = Settings.System.getFloatForUser(mContext.getContentResolver(),
+                Settings.System.POINTER_SCALE, DEFAULT_POINTER_SCALE,
+                UserHandle.USER_CURRENT);
+        mService.setPointerScale(pointerScale);
     }
 }

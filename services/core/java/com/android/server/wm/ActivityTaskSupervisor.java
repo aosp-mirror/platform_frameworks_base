@@ -148,7 +148,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
@@ -952,7 +952,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // Schedule transaction.
                 if (shouldDispatchLaunchActivityItemIndependently(r.info.packageName, r.getUid())) {
                     // LaunchActivityItem has @UnsupportedAppUsage usages.
-                    // Guard the bundleClientTransactionFlag feature with targetSDK on Android 15+.
+                    // Guard with targetSDK on Android 15+.
                     // To not bundle the transaction, dispatch the pending before schedule new
                     // transaction.
                     mService.getLifecycleManager().dispatchPendingTransaction(proc.getThread());

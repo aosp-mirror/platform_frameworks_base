@@ -126,6 +126,7 @@ message SystemSettingsProto {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
         optional SettingProto pointer_fill_style = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto pointer_scale = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Pointer pointer = 37;
     optional SettingProto pointer_speed = 18 [ (android.privacy).dest = DEST_AUTOMATIC ];

@@ -19,5 +19,23 @@
             <meta-data android:name="android.hardware.input.metadata.KEYBOARD_LAYOUTS"
                     android:resource="@xml/keyboard_layouts" />
         </receiver>
+
+        <receiver android:name=".KeyGlyphMapProvider"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.hardware.input.action.QUERY_KEYBOARD_GLYPH_MAPS" />
+            </intent-filter>
+            <meta-data android:name="android.hardware.input.metadata.KEYBOARD_GLYPH_MAPS"
+                       android:resource="@xml/keyboard_glyph_maps" />
+        </receiver>
+
+        <receiver android:name=".OverlayKeyGlyphMapProvider"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.hardware.input.action.QUERY_KEYBOARD_GLYPH_MAPS" />
+            </intent-filter>
+            <meta-data android:name="android.hardware.input.metadata.KEYBOARD_GLYPH_MAPS"
+                       android:resource="@xml/keyboard_glyph_maps_overlay" />
+        </receiver>
     </application>
 </manifest>

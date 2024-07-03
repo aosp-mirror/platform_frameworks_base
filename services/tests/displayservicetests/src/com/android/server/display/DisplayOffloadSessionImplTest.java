@@ -94,4 +94,11 @@ public class DisplayOffloadSessionImplTest {
 
         verify(mDisplayOffloader).onBlockingScreenOn(eq(unblocker));
     }
+
+    @Test
+    public void testUnblockScreenOn() {
+        mSession.cancelBlockScreenOn();
+
+        verify(mDisplayOffloader).cancelBlockScreenOn();
+    }
 }

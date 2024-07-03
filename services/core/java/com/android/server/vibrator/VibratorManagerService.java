@@ -193,6 +193,27 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
     };
 
+    @VisibleForTesting
+    final AppOpsManager.OnOpChangedInternalListener mAppOpsChangeListener =
+            new AppOpsManager.OnOpChangedInternalListener() {
+                @Override
+                public void onOpChanged(int op, String packageName) {
+                    if (op != AppOpsManager.OP_VIBRATE) {
+                        return;
+                    }
+                    synchronized (mLock) {
+                        if (shouldCancelAppOpModeChangedLocked(mNextVibration)) {
+                            clearNextVibrationLocked(
+                                    new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_APP_OPS));
+                        }
+                        if (shouldCancelAppOpModeChangedLocked(mCurrentVibration)) {
+                            mCurrentVibration.notifyCancelled(new Vibration.EndInfo(
+                                    Vibration.Status.CANCELLED_BY_APP_OPS), /* immediate= */ false);
+                        }
+                    }
+                }
+            };
+
     static native long nativeInit(OnSyncedVibrationCompleteListener listener);
 
     static native long nativeGetFinalizer();
@@ -238,6 +259,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mBatteryStatsService = injector.getBatteryStatsService();
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
+        if (Flags.cancelByAppops()) {
+            mAppOps.startWatchingMode(AppOpsManager.OP_VIBRATE, null, mAppOpsChangeListener);
+        }
 
         PowerManager pm = context.getSystemService(PowerManager.class);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
@@ -1390,6 +1414,15 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     @GuardedBy("mLock")
+    private boolean shouldCancelAppOpModeChangedLocked(@Nullable VibrationStepConductor conductor) {
+        if (conductor == null) {
+            return false;
+        }
+        return checkAppOpModeLocked(conductor.getVibration().callerInfo)
+                != AppOpsManager.MODE_ALLOWED;
+    }
+
+    @GuardedBy("mLock")
     private void onAllVibratorsLocked(Consumer<VibratorController> consumer) {
         for (int i = 0; i < mVibrators.size(); i++) {
             consumer.accept(mVibrators.valueAt(i));
@@ -2461,9 +2494,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             try {
                 ParsedVibration parsedVibration =
                         VibrationXmlParser.parseDocument(new StringReader(xml));
-                if (parsedVibration == null) {
-                    throw new IllegalArgumentException("Error parsing vibration XML " + xml);
-                }
                 VibratorInfo combinedVibratorInfo = getCombinedVibratorInfo();
                 if (combinedVibratorInfo == null) {
                     throw new IllegalStateException(

@@ -17,6 +17,7 @@
 package com.android.settingslib.volume.shared.model
 
 import android.media.AudioManager
+import android.media.AudioSystem
 
 /** Type-safe wrapper for [AudioManager] audio stream. */
 @JvmInline
@@ -24,6 +25,8 @@ value class AudioStream(val value: Int) {
     init {
         require(value in supportedStreamTypes) { "Unsupported stream=$value" }
     }
+
+    override fun toString(): String = AudioSystem.streamToString(value)
 
     companion object {
         val supportedStreamTypes =

@@ -280,6 +280,9 @@
     <!-- to adjust volume in volume panel -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
+    <!-- to get bluetooth audio device category -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED" />
+
     <!-- to access ResolverRankerServices -->
     <uses-permission android:name="android.permission.BIND_RESOLVER_RANKER_SERVICE" />
 
@@ -387,7 +390,7 @@
         android:killAfterRestore="false"
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
-        android:icon="@drawable/android14_patch_adaptive"
+        android:icon="@drawable/android15_patch_adaptive"
         android:process="com.android.systemui"
         android:supportsRtl="true"
         android:theme="@style/Theme.SystemUI"
@@ -650,6 +653,7 @@
         <!-- started from MediaProjectionManager -->
         <activity
             android:name=".mediaprojection.permission.MediaProjectionPermissionActivity"
+            android:showForAllUsers="true"
             android:exported="true"
             android:theme="@style/Theme.SystemUI.MediaProjectionAlertDialog"
             android:finishOnCloseSystemDialogs="true"
@@ -660,6 +664,7 @@
         <activity
             android:name=".mediaprojection.appselector.MediaProjectionAppSelectorActivity"
             android:theme="@style/Theme.SystemUI.MediaProjectionAppSelector"
+            android:showForAllUsers="true"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:documentLaunchMode="never"
@@ -1107,8 +1112,8 @@
 
         <activity android:name="com.android.systemui.keyboard.shortcut.ui.view.ShortcutHelperActivity"
             android:exported="false"
+            android:showForAllUsers="true"
             android:theme="@style/ShortcutHelperTheme"
-            android:excludeFromRecents="true"
-            android:finishOnCloseSystemDialogs="true" />
+            android:excludeFromRecents="true" />
     </application>
 </manifest>

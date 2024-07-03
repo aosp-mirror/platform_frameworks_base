@@ -193,6 +193,9 @@ public final class PointerIcon implements Parcelable {
     /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_END =
             POINTER_ICON_VECTOR_STYLE_FILL_BLUE;
 
+    /** @hide */ public static final float DEFAULT_POINTER_SCALE = 1f;
+    /** @hide */ public static final float LARGE_POINTER_SCALE = 2.5f;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mType;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -253,7 +256,7 @@ public final class PointerIcon implements Parcelable {
      * @hide
      */
     public static @NonNull PointerIcon getLoadedSystemIcon(@NonNull Context context, int type,
-            boolean useLargeIcons) {
+            boolean useLargeIcons, float pointerScale) {
         if (type == TYPE_NOT_SPECIFIED) {
             throw new IllegalStateException("Cannot load icon for type TYPE_NOT_SPECIFIED");
         }
@@ -268,13 +271,18 @@ public final class PointerIcon implements Parcelable {
         }
 
         final int defStyle;
-        // TODO(b/305193969): Use scaled vectors when large icons are requested.
-        if (useLargeIcons) {
-            defStyle = com.android.internal.R.style.LargePointer;
-        } else if (android.view.flags.Flags.enableVectorCursors()) {
+        if (android.view.flags.Flags.enableVectorCursorA11ySettings()) {
             defStyle = com.android.internal.R.style.VectorPointer;
         } else {
-            defStyle = com.android.internal.R.style.Pointer;
+            // TODO(b/346358375): Remove useLargeIcons and the legacy pointer styles when
+            //  enableVectorCursorA11ySetting is rolled out.
+            if (useLargeIcons) {
+                defStyle = com.android.internal.R.style.LargePointer;
+            } else if (android.view.flags.Flags.enableVectorCursors()) {
+                defStyle = com.android.internal.R.style.VectorPointer;
+            } else {
+                defStyle = com.android.internal.R.style.Pointer;
+            }
         }
         TypedArray a = context.obtainStyledAttributes(null,
                 com.android.internal.R.styleable.Pointer,
@@ -286,11 +294,11 @@ public final class PointerIcon implements Parcelable {
             Log.w(TAG, "Missing theme resources for pointer icon type " + type);
             return type == TYPE_DEFAULT
                     ? getSystemIcon(TYPE_NULL)
-                    : getLoadedSystemIcon(context, TYPE_DEFAULT, useLargeIcons);
+                    : getLoadedSystemIcon(context, TYPE_DEFAULT, useLargeIcons, pointerScale);
         }
 
         final PointerIcon icon = new PointerIcon(type);
-        icon.loadResource(context.getResources(), resourceId, context.getTheme());
+        icon.loadResource(context.getResources(), resourceId, context.getTheme(), pointerScale);
         return icon;
     }
 
@@ -353,7 +361,7 @@ public final class PointerIcon implements Parcelable {
         }
 
         PointerIcon icon = new PointerIcon(TYPE_CUSTOM);
-        icon.loadResource(resources, resourceId, null);
+        icon.loadResource(resources, resourceId, null, DEFAULT_POINTER_SCALE);
         return icon;
     }
 
@@ -460,12 +468,13 @@ public final class PointerIcon implements Parcelable {
     }
 
     private BitmapDrawable getBitmapDrawableFromVectorDrawable(Resources resources,
-            VectorDrawable vectorDrawable) {
+            VectorDrawable vectorDrawable, float pointerScale) {
         // Ensure we pass the display metrics into the Bitmap constructor so that it is initialized
         // with the correct density.
         Bitmap bitmap = Bitmap.createBitmap(resources.getDisplayMetrics(),
-                vectorDrawable.getIntrinsicWidth(),
-                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888, true /* hasAlpha */);
+                (int) (vectorDrawable.getIntrinsicWidth() * pointerScale),
+                (int) (vectorDrawable.getIntrinsicHeight() * pointerScale),
+                Bitmap.Config.ARGB_8888, true /* hasAlpha */);
         Canvas canvas = new Canvas(bitmap);
         vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         vectorDrawable.draw(canvas);
@@ -473,7 +482,7 @@ public final class PointerIcon implements Parcelable {
     }
 
     private void loadResource(@NonNull Resources resources, @XmlRes int resourceId,
-            @Nullable Resources.Theme theme) {
+            @Nullable Resources.Theme theme, float pointerScale) {
         final XmlResourceParser parser = resources.getXml(resourceId);
         final int bitmapRes;
         final float hotSpotX;
@@ -484,8 +493,10 @@ public final class PointerIcon implements Parcelable {
             final TypedArray a = resources.obtainAttributes(
                     parser, com.android.internal.R.styleable.PointerIcon);
             bitmapRes = a.getResourceId(com.android.internal.R.styleable.PointerIcon_bitmap, 0);
-            hotSpotX = a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotX, 0);
-            hotSpotY = a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotY, 0);
+            hotSpotX = a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotX, 0)
+                    * pointerScale;
+            hotSpotY = a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotY, 0)
+                    * pointerScale;
             a.recycle();
         } catch (Exception ex) {
             throw new IllegalArgumentException("Exception parsing pointer icon resource.", ex);
@@ -534,7 +545,7 @@ public final class PointerIcon implements Parcelable {
                     }
                     if (isVectorAnimation) {
                         drawableFrame = getBitmapDrawableFromVectorDrawable(resources,
-                                (VectorDrawable) drawableFrame);
+                                (VectorDrawable) drawableFrame, pointerScale);
                     }
                     mBitmapFrames[i - 1] = getBitmapFromDrawable((BitmapDrawable) drawableFrame);
                 }
@@ -542,7 +553,8 @@ public final class PointerIcon implements Parcelable {
         }
         if (drawable instanceof VectorDrawable) {
             mDrawNativeDropShadow = true;
-            drawable = getBitmapDrawableFromVectorDrawable(resources, (VectorDrawable) drawable);
+            drawable = getBitmapDrawableFromVectorDrawable(resources, (VectorDrawable) drawable,
+                    pointerScale);
         }
         if (!(drawable instanceof BitmapDrawable)) {
             throw new IllegalArgumentException("<pointer-icon> bitmap attribute must "

@@ -71,14 +71,18 @@ object MediaRecommendationsViewBinder {
     fun bindRecsCard(
         viewHolder: RecommendationViewHolder,
         viewModel: MediaRecsCardViewModel,
-        mediaViewController: MediaViewController,
+        viewController: MediaViewController,
         falsingManager: FalsingManager,
     ) {
+        // Set up media control location and its listener.
+        viewModel.onLocationChanged(viewController.currentEndLocation)
+        viewController.locationChangeListener = viewModel.onLocationChanged
+
         // Bind main card.
         viewHolder.cardTitle.setTextColor(viewModel.cardTitleColor)
         viewHolder.recommendations.backgroundTintList = ColorStateList.valueOf(viewModel.cardColor)
         viewHolder.recommendations.contentDescription =
-            viewModel.contentDescription.invoke(mediaViewController.isGutsVisible)
+            viewModel.contentDescription.invoke(viewController.isGutsVisible)
 
         viewHolder.recommendations.setOnClickListener {
             if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return@setOnClickListener
@@ -88,21 +92,21 @@ object MediaRecommendationsViewBinder {
         viewHolder.recommendations.setOnLongClickListener {
             if (falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY))
                 return@setOnLongClickListener true
-            if (!mediaViewController.isGutsVisible) {
-                openGuts(viewHolder, viewModel, mediaViewController)
+            if (!viewController.isGutsVisible) {
+                openGuts(viewHolder, viewModel, viewController)
             } else {
-                closeGuts(viewHolder, viewModel, mediaViewController)
+                closeGuts(viewHolder, viewModel, viewController)
             }
             return@setOnLongClickListener true
         }
 
         // Bind all recommendations.
         bindRecommendationsList(viewHolder, viewModel.mediaRecs, falsingManager)
-        updateRecommendationsVisibility(mediaViewController, viewHolder.recommendations)
+        updateRecommendationsVisibility(viewController, viewHolder.recommendations)
 
         // Set visibility of recommendations.
-        val expandedSet: ConstraintSet = mediaViewController.expandedLayout
-        val collapsedSet: ConstraintSet = mediaViewController.collapsedLayout
+        val expandedSet: ConstraintSet = viewController.expandedLayout
+        val collapsedSet: ConstraintSet = viewController.collapsedLayout
         viewHolder.mediaTitles.forEach {
             setVisibleAndAlpha(expandedSet, it.id, viewModel.areTitlesVisible)
             setVisibleAndAlpha(collapsedSet, it.id, viewModel.areTitlesVisible)
@@ -112,15 +116,15 @@ object MediaRecommendationsViewBinder {
             setVisibleAndAlpha(collapsedSet, it.id, viewModel.areSubtitlesVisible)
         }
 
-        bindRecommendationsGuts(viewHolder, viewModel, mediaViewController, falsingManager)
+        bindRecommendationsGuts(viewHolder, viewModel, viewController, falsingManager)
 
-        mediaViewController.refreshState()
+        viewController.refreshState()
     }
 
     private fun bindRecommendationsGuts(
         viewHolder: RecommendationViewHolder,
         viewModel: MediaRecsCardViewModel,
-        mediaViewController: MediaViewController,
+        viewController: MediaViewController,
         falsingManager: FalsingManager,
     ) {
         val gutsViewHolder = viewHolder.gutsViewHolder
@@ -131,14 +135,14 @@ object MediaRecommendationsViewBinder {
         gutsViewHolder.dismiss.isEnabled = true
         gutsViewHolder.dismiss.setOnClickListener {
             if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return@setOnClickListener
-            closeGuts(viewHolder, viewModel, mediaViewController)
-            gutsViewModel.onDismissClicked.invoke()
+            closeGuts(viewHolder, viewModel, viewController)
+            gutsViewModel.onDismissClicked()
         }
 
         gutsViewHolder.cancelText.background = gutsViewModel.cancelTextBackground
         gutsViewHolder.cancel.setOnClickListener {
             if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                closeGuts(viewHolder, viewModel, mediaViewController)
+                closeGuts(viewHolder, viewModel, viewController)
             }
         }
 
@@ -173,7 +177,7 @@ object MediaRecommendationsViewBinder {
             val mediaCoverContainer = viewHolder.mediaCoverContainers[index]
             mediaCoverContainer.setOnClickListener {
                 if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return@setOnClickListener
-                mediaRecViewModel.onClicked.invoke(Expandable.fromView(it), index)
+                mediaRecViewModel.onClicked(Expandable.fromView(it), index)
             }
             mediaCoverContainer.setOnLongClickListener {
                 if (falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY))
