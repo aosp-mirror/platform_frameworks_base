@@ -21,29 +21,32 @@ import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager
 import android.window.TransitionInfo
+import android.window.WindowContainerTransaction
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags.enableDesktopWindowingWallpaperActivity
+import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 
 /**
- * A [Transitions.TransitionObserver] that observes shell transitions and updates
- * the [DesktopModeTaskRepository] state TODO: b/332682201
- * This observes transitions related to desktop mode
- * and other transitions that originate both within and outside shell.
+ * A [Transitions.TransitionObserver] that observes shell transitions and updates the
+ * [DesktopModeTaskRepository] state TODO: b/332682201 This observes transitions related to desktop
+ * mode and other transitions that originate both within and outside shell.
  */
 class DesktopTasksTransitionObserver(
     context: Context,
     private val desktopModeTaskRepository: DesktopModeTaskRepository,
     private val transitions: Transitions,
+    private val shellTaskOrganizer: ShellTaskOrganizer,
     shellInit: ShellInit
 ) : Transitions.TransitionObserver {
 
     init {
-        if (Transitions.ENABLE_SHELL_TRANSITIONS &&
-            DesktopModeStatus.canEnterDesktopMode(context)) {
+        if (
+            Transitions.ENABLE_SHELL_TRANSITIONS && DesktopModeStatus.canEnterDesktopMode(context)
+        ) {
             shellInit.addInitCallback(::onInit, this)
         }
     }
@@ -83,8 +86,16 @@ class DesktopTasksTransitionObserver(
             change.taskInfo?.let { taskInfo ->
                 if (DesktopWallpaperActivity.isWallpaperTask(taskInfo)) {
                     when (change.mode) {
-                        WindowManager.TRANSIT_OPEN ->
+                        WindowManager.TRANSIT_OPEN -> {
                             desktopModeTaskRepository.wallpaperActivityToken = taskInfo.token
+                            // After the task for the wallpaper is created, set it non-trimmable.
+                            // This is important to prevent recents from trimming and removing the
+                            // task.
+                            shellTaskOrganizer.applyTransaction(
+                                WindowContainerTransaction()
+                                    .setTaskTrimmableFromRecents(taskInfo.token, false)
+                            )
+                        }
                         WindowManager.TRANSIT_CLOSE ->
                             desktopModeTaskRepository.wallpaperActivityToken = null
                         else -> {}
