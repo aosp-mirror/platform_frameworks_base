@@ -362,15 +362,17 @@ internal class MultiPointerDraggableNode(
         pass: () -> PointerEventPass,
     ): PointerEvent {
         fun canBeConsumed(changes: List<PointerInputChange>): Boolean {
-            // All pointers must be:
-            return changes.fastAll {
-                // A) recently pressed: even if the event has already been consumed, we can still
-                // use the recently added finger event to determine whether to initiate dragging the
-                // scene.
-                it.changedToDownIgnoreConsumed() ||
-                    // B) unconsumed AND in a new position (on the current axis)
-                    it.positionChange().toFloat() != 0f
-            }
+            // At least one pointer down AND
+            return changes.fastAny { it.pressed } &&
+                // All pointers must be:
+                changes.fastAll {
+                    // A) recently pressed: even if the event has already been consumed, we can
+                    // still use the recently added finger event to determine whether to initiate
+                    // dragging the scene.
+                    it.changedToDownIgnoreConsumed() ||
+                        // B) unconsumed AND in a new position (on the current axis)
+                        it.positionChange().toFloat() != 0f
+                }
         }
 
         var event: PointerEvent
