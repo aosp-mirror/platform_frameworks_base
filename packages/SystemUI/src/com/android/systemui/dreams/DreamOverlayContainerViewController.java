@@ -21,8 +21,6 @@ import static android.service.dreams.Flags.dreamHandlesBeingObscured;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamAlphaScaledExpansion;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamYPositionScaledExpansion;
-import static com.android.systemui.Flags.communalHub;
-import static com.android.systemui.Flags.glanceableHubGestureHandle;
 import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM;
 import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
@@ -191,7 +189,6 @@ public class DreamOverlayContainerViewController extends
             DreamOverlayContainerView containerView,
             ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
-            @Named(DreamOverlayModule.HUB_GESTURE_INDICATOR_VIEW) View hubGestureIndicatorView,
             AmbientStatusBarViewController statusBarViewController,
             LowLightTransitionCoordinator lowLightTransitionCoordinator,
             TouchInsetManager.TouchInsetSession touchInsetSession,
@@ -229,12 +226,6 @@ public class DreamOverlayContainerViewController extends
         mComplicationHostViewController = complicationHostViewController;
         mDreamOverlayMaxTranslationY = resources.getDimensionPixelSize(
                 R.dimen.dream_overlay_y_offset);
-
-        if (communalHub() && glanceableHubGestureHandle()) {
-            // TODO(b/339667383): remove this temporary swipe gesture handle
-            hubGestureIndicatorView.setVisibility(View.VISIBLE);
-        }
-
         final View view = mComplicationHostViewController.getView();
 
         mDreamOverlayContentView.addView(view,

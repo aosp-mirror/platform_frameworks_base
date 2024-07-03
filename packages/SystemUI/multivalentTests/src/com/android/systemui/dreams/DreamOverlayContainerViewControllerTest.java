@@ -32,11 +32,9 @@ import android.app.DreamManager;
 import android.content.res.Resources;
 import android.graphics.Region;
 import android.os.Handler;
-import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.AttachedSurfaceControl;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
@@ -46,7 +44,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
-import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController;
 import com.android.systemui.ambient.touch.scrim.BouncerlessScrimController;
@@ -101,9 +98,6 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     ViewGroup mDreamOverlayContentView;
 
     @Mock
-    View mHubGestureIndicatorView;
-
-    @Mock
     Handler mHandler;
 
     @Mock
@@ -156,7 +150,6 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mDreamOverlayContainerView,
                 mComplicationHostViewController,
                 mDreamOverlayContentView,
-                mHubGestureIndicatorView,
                 mAmbientStatusBarViewController,
                 mLowLightTransitionCoordinator,
                 mTouchInsetSession,
@@ -175,18 +168,6 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mShadeInteractor,
                 mCommunalInteractor,
                 mDreamManager);
-    }
-
-    @DisableFlags(Flags.FLAG_COMMUNAL_HUB)
-    @Test
-    public void testHubGestureIndicatorGoneWhenFlagOff() {
-        verify(mHubGestureIndicatorView, never()).setVisibility(View.VISIBLE);
-    }
-
-    @EnableFlags({Flags.FLAG_COMMUNAL_HUB, Flags.FLAG_GLANCEABLE_HUB_GESTURE_HANDLE})
-    @Test
-    public void testHubGestureIndicatorVisibleWhenFlagOn() {
-        verify(mHubGestureIndicatorView).setVisibility(View.VISIBLE);
     }
 
     @Test
