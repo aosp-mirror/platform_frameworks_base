@@ -2925,10 +2925,12 @@ public abstract class Context {
      */
     @SuppressWarnings("HiddenAbstractMethod")
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
-    public abstract void sendOrderedBroadcastAsUserMultiplePermissions(Intent intent,
+    public void sendOrderedBroadcastAsUserMultiplePermissions(Intent intent,
             UserHandle user, String[] receiverPermissions, int appOp, Bundle options,
             BroadcastReceiver resultReceiver, Handler scheduler, int initialCode,
-            String initialData, Bundle initialExtras);
+            String initialData, Bundle initialExtras) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Version of
