@@ -1410,9 +1410,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 (windowToken, imeVisible) -> {
                     if (Flags.refactorInsetsController()) {
                         if (imeVisible) {
-                            showSoftInputInternal(windowToken);
+                            showCurrentInputInternal(windowToken);
                         } else {
-                            hideSoftInputInternal(windowToken);
+                            hideCurrentInputInternal(windowToken);
                         }
                     }
                 });
@@ -1884,7 +1884,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (Flags.refactorInsetsController()) {
             if (isShowRequestedForCurrentWindow(userId) && userData.mImeBindingState != null
                     && userData.mImeBindingState.mFocusedWindow != null) {
-                showSoftInputInternal(userData.mImeBindingState.mFocusedWindow);
+                showCurrentInputInternal(userData.mImeBindingState.mFocusedWindow);
             }
         } else {
             if (isShowRequestedForCurrentWindow(userId)) {
@@ -3083,8 +3083,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    boolean showSoftInputInternal(IBinder windowToken) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInputInternal");
+    boolean showCurrentInputInternal(IBinder windowToken) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showCurrentInputInternal");
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#showSoftInput", mDumper);
         synchronized (ImfLock.class) {
@@ -3103,8 +3103,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    boolean hideSoftInputInternal(IBinder windowToken) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInputInternal");
+    boolean hideCurrentInputInternal(IBinder windowToken) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideCurrentInputInternal");
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#hideSoftInput", mDumper);
         synchronized (ImfLock.class) {
