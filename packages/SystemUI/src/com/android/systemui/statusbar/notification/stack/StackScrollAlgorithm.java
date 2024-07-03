@@ -487,11 +487,8 @@ public class StackScrollAlgorithm {
         // expanded. Consider updating these states in updateContentView instead so that we don't
         // have to recalculate in every frame.
         float currentY = -ambientState.getScrollY();
-        if (!ambientState.isOnKeyguard()
-                || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding())) {
-            // add top padding at the start as long as we're not on the lock screen
-            currentY += mNotificationScrimPadding;
-        }
+        // add top padding at the start as long as we're not on the lock screen
+        currentY += getScrimTopPaddingOrZero(ambientState);
         state.firstViewInShelf = null;
         for (int i = 0; i < state.visibleChildren.size(); i++) {
             final ExpandableView view = state.visibleChildren.get(i);
@@ -548,11 +545,9 @@ public class StackScrollAlgorithm {
      */
     protected void updatePositionsForState(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-        if (!ambientState.isOnKeyguard()
-                || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding())) {
-            algorithmState.mCurrentYPosition += mNotificationScrimPadding;
-            algorithmState.mCurrentExpandedYPosition += mNotificationScrimPadding;
-        }
+        float scrimTopPadding = getScrimTopPaddingOrZero(ambientState);
+        algorithmState.mCurrentYPosition += scrimTopPadding;
+        algorithmState.mCurrentExpandedYPosition += scrimTopPadding;
 
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
@@ -580,9 +575,7 @@ public class StackScrollAlgorithm {
                 && algorithmState.firstViewInShelf != null;
 
         final float shelfHeight = showingShelf ? ambientState.getShelf().getIntrinsicHeight() : 0f;
-        final float scrimPadding = ambientState.isOnKeyguard()
-                && (!ambientState.isBypassEnabled() || !ambientState.isPulseExpanding())
-                ? 0 : mNotificationScrimPadding;
+        final float scrimPadding = getScrimTopPaddingOrZero(ambientState);
 
         final float stackHeight = ambientState.getStackHeight() - shelfHeight - scrimPadding;
         final float stackEndHeight = ambientState.getStackEndHeight() - shelfHeight - scrimPadding;
@@ -592,6 +585,21 @@ public class StackScrollAlgorithm {
             return 0f;
         }
         return stackHeight / stackEndHeight;
+    }
+
+    /**
+     * Returns the top scrim padding, or zero if the SceneContainer flag is enabled.
+     */
+    private float getScrimTopPaddingOrZero(AmbientState ambientState) {
+        if (SceneContainerFlag.isEnabled()) {
+            // the scrim padding is set on the notification placeholder
+            return 0f;
+        }
+
+        boolean shouldUsePadding =
+                !ambientState.isOnKeyguard()
+                        || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding());
+        return shouldUsePadding ? mNotificationScrimPadding : 0f;
     }
 
     private boolean hasNonClearableNotifs(StackScrollAlgorithmState algorithmState) {
@@ -664,6 +672,7 @@ public class StackScrollAlgorithm {
         float viewEnd = stackTop + viewState.getYTranslation() + viewState.height;
         maybeUpdateHeadsUpIsVisible(viewState, ambientState.isShadeExpanded(),
                 view.mustStayOnScreen(),
+                // TODO(b/332574413) use the position from the HeadsUpNotificationPlaceholder
                 /* topVisible= */ viewState.getYTranslation() >= mNotificationScrimPadding,
                 viewEnd, /* hunMax */ ambientState.getMaxHeadsUpTranslation()
         );
@@ -891,6 +900,7 @@ public class StackScrollAlgorithm {
                     // Ensure that the heads up is always visible even when scrolled off.
                     // NSSL y starts at top of screen in non-split-shade, but below the qs offset
                     // in split shade, so we only need to inset by the scrim padding in split shade.
+                    // TODO(b/332574413) get the clamp inset from HeadsUpNotificationPlaceholder
                     final float clampInset = ambientState.getUseSplitShade()
                             ? mNotificationScrimPadding : mQuickQsOffsetHeight;
                     clampHunToTop(clampInset, ambientState.getStackTranslation(),
