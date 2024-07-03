@@ -419,7 +419,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mShadeAnimationInteractor = new ShadeAnimationInteractorLegacyImpl(
                 new ShadeAnimationRepository(), mShadeRepository);
         mPowerInteractor = keyguardInteractorDeps.getPowerInteractor();
-        when(mKeyguardTransitionInteractor.isInTransitionToStateWhere(any())).thenReturn(
+        when(mKeyguardTransitionInteractor.isInTransitionWhere(any(), any())).thenReturn(
                 MutableStateFlow(false));
         when(mKeyguardTransitionInteractor.isInTransition(any(), any()))
                 .thenReturn(emptyFlow());

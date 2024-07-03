@@ -16,20 +16,12 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 
-val Kosmos.keyguardTransitionBootInteractor: KeyguardTransitionBootInteractor by
+val Kosmos.internalKeyguardTransitionInteractor by
     Kosmos.Fixture {
-        KeyguardTransitionBootInteractor(
-            scope = applicationCoroutineScope,
-            deviceEntryInteractor = deviceEntryInteractor,
-            deviceProvisioningInteractor = deviceProvisioningInteractor,
-            keyguardTransitionInteractor = keyguardTransitionInteractor,
+        InternalKeyguardTransitionInteractor(
             repository = keyguardTransitionRepository,
-            internalTransitionInteractor = internalKeyguardTransitionInteractor,
         )
     }
