@@ -7180,8 +7180,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         @Override
         public void setImeInputTargetRequestedVisibility(boolean visible) {
             if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                // TODO(b/329229469) we won't have the statsToken in all cases, but should still log
                 try {
-                    // TODO stats token
                     mRemoteInsetsController.setImeInputTargetRequestedVisibility(visible);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to deliver setImeInputTargetRequestedVisibility", e);

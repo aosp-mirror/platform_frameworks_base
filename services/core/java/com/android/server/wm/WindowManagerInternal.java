@@ -365,8 +365,10 @@ public abstract class WindowManagerInternal {
          *
          * @param windowToken The window token
          * @param imeVisible {@code true} if the IME should be shown, {@code false} to hide
+         * @param statsToken the token tracking the current IME request.
          */
-        void onImeRequestedChanged(IBinder windowToken, boolean imeVisible);
+        void onImeRequestedChanged(IBinder windowToken, boolean imeVisible,
+                @Nullable ImeTracker.Token statsToken);
     }
 
     /**

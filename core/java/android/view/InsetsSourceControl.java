@@ -31,6 +31,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.proto.ProtoOutputStream;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.ImeTracker;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -56,6 +57,9 @@ public class InsetsSourceControl implements Parcelable {
     private boolean mSkipAnimationOnce;
     private int mParcelableFlags;
 
+    /** The token tracking the current IME request */
+    private @Nullable ImeTracker.Token mImeStatsToken;
+
     public InsetsSourceControl(int id, @InsetsType int type, @Nullable SurfaceControl leash,
             boolean initiallyVisible, Point surfacePosition, Insets insetsHint) {
         mId = id;
@@ -78,6 +82,7 @@ public class InsetsSourceControl implements Parcelable {
         mSurfacePosition = new Point(other.mSurfacePosition);
         mInsetsHint = other.mInsetsHint;
         mSkipAnimationOnce = other.getAndClearSkipAnimationOnce();
+        mImeStatsToken = other.getImeStatsToken();
     }
 
     public InsetsSourceControl(Parcel in) {
@@ -88,6 +93,7 @@ public class InsetsSourceControl implements Parcelable {
         mSurfacePosition = in.readTypedObject(Point.CREATOR);
         mInsetsHint = in.readTypedObject(Insets.CREATOR);
         mSkipAnimationOnce = in.readBoolean();
+        mImeStatsToken = in.readTypedObject(ImeTracker.Token.CREATOR);
     }
 
     public int getId() {
@@ -153,6 +159,15 @@ public class InsetsSourceControl implements Parcelable {
         return result;
     }
 
+    @Nullable
+    public ImeTracker.Token getImeStatsToken() {
+        return mImeStatsToken;
+    }
+
+    public void setImeStatsToken(@Nullable ImeTracker.Token imeStatsToken) {
+        mImeStatsToken = imeStatsToken;
+    }
+
     public void setParcelableFlags(int parcelableFlags) {
         mParcelableFlags = parcelableFlags;
     }
@@ -171,6 +186,7 @@ public class InsetsSourceControl implements Parcelable {
         dest.writeTypedObject(mSurfacePosition, mParcelableFlags);
         dest.writeTypedObject(mInsetsHint, mParcelableFlags);
         dest.writeBoolean(mSkipAnimationOnce);
+        dest.writeTypedObject(mImeStatsToken, mParcelableFlags);
     }
 
     public void release(Consumer<SurfaceControl> surfaceReleaseConsumer) {
@@ -196,13 +212,14 @@ public class InsetsSourceControl implements Parcelable {
                 && mInitiallyVisible == that.mInitiallyVisible
                 && mSurfacePosition.equals(that.mSurfacePosition)
                 && mInsetsHint.equals(that.mInsetsHint)
-                && mSkipAnimationOnce == that.mSkipAnimationOnce;
+                && mSkipAnimationOnce == that.mSkipAnimationOnce
+                && Objects.equals(mImeStatsToken, that.mImeStatsToken);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mId, mType, mLeash, mInitiallyVisible, mSurfacePosition, mInsetsHint,
-                mSkipAnimationOnce);
+                mSkipAnimationOnce, mImeStatsToken);
     }
 
     @Override
@@ -225,6 +242,7 @@ public class InsetsSourceControl implements Parcelable {
         pw.print(" mSurfacePosition="); pw.print(mSurfacePosition);
         pw.print(" mInsetsHint="); pw.print(mInsetsHint);
         pw.print(" mSkipAnimationOnce="); pw.print(mSkipAnimationOnce);
+        pw.print(" mImeStatsToken="); pw.print(mImeStatsToken);
         pw.println();
     }
 

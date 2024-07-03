@@ -30,6 +30,7 @@ import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.inputmethod.ImeTracker;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.Surface;
@@ -276,7 +277,8 @@ interface IWindowSession {
     /**
      * Updates the requested visible types of insets.
      */
-    oneway void updateRequestedVisibleTypes(IWindow window, int requestedVisibleTypes);
+    oneway void updateRequestedVisibleTypes(IWindow window, int requestedVisibleTypes,
+            in @nullable ImeTracker.Token imeStatsToken);
 
     /**
      * Called when the system gesture exclusion has changed.
@@ -369,4 +371,14 @@ interface IWindowSession {
      * @return {@code true} if the focus changes. Otherwise, {@code false}.
      */
     boolean moveFocusToAdjacentWindow(IWindow fromWindow, int direction);
+
+    /**
+     * Notifies the statsToken and IME visibility to the ImeInsetsSourceProvider.
+     *
+     * @param window The window that is used to get the ImeInsetsSourceProvider.
+     * @param visible {@code true} to make it visible, {@code false} to hide it.
+     * @param statsToken the token tracking the current IME request.
+     */
+    oneway void notifyImeWindowVisibilityChangedFromClient(IWindow window, boolean visible,
+            in ImeTracker.Token statsToken);
 }
