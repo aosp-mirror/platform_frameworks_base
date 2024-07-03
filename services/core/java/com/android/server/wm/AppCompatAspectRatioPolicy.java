@@ -30,6 +30,7 @@ import static com.android.server.wm.LetterboxConfiguration.DEFAULT_LETTERBOX_ASP
 import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -48,23 +49,17 @@ class AppCompatAspectRatioPolicy {
     @NonNull
     private final TransparentPolicy mTransparentPolicy;
     @NonNull
-    private final AppCompatOrientationPolicy mAppCompatOrientationPolicy;
-    @NonNull
     private final AppCompatOverrides mAppCompatOverrides;
     @NonNull
-    private final AspectRatioState mAspectRatioState;
-
-
+    private final AppCompatAspectRatioState mAppCompatAspectRatioState;
 
     AppCompatAspectRatioPolicy(@NonNull ActivityRecord activityRecord,
             @NonNull TransparentPolicy transparentPolicy,
-            @NonNull AppCompatOrientationPolicy orientationPolicy,
             @NonNull AppCompatOverrides appCompatOverrides) {
         mActivityRecord = activityRecord;
         mTransparentPolicy = transparentPolicy;
-        mAppCompatOrientationPolicy = orientationPolicy;
         mAppCompatOverrides = appCompatOverrides;
-        mAspectRatioState = new AspectRatioState();
+        mAppCompatAspectRatioState = new AppCompatAspectRatioState();
     }
 
     /**
@@ -72,41 +67,43 @@ class AppCompatAspectRatioPolicy {
      * resolved.
      */
     void reset() {
-        mAspectRatioState.mIsAspectRatioApplied = false;
+        mAppCompatAspectRatioState.reset();
     }
 
-    void applyAspectRatio(@NonNull Configuration newParentConfig, @NonNull Rect parentBounds,
-            @NonNull Rect resolvedBounds, @NonNull Rect containingBoundsWithInsets,
-            @NonNull Rect containingBounds) {
+    float getDesiredAspectRatio(@NonNull Configuration newParentConfig,
+            @NonNull Rect parentBounds) {
         final float letterboxAspectRatioOverride =
                 mAppCompatOverrides.getAppCompatAspectRatioOverrides()
                         .getFixedOrientationLetterboxAspectRatio(newParentConfig);
-
         // Aspect ratio as suggested by the system. Apps requested mix/max aspect ratio will
         // be respected in #applyAspectRatio.
-        final float desiredAspectRatio;
         if (isDefaultMultiWindowLetterboxAspectRatioDesired(newParentConfig)) {
-            desiredAspectRatio = DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW;
+            return DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW;
         } else if (letterboxAspectRatioOverride > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO) {
-            desiredAspectRatio = letterboxAspectRatioOverride;
-        } else {
-            desiredAspectRatio = AppCompatUtils.computeAspectRatio(parentBounds);
+            return letterboxAspectRatioOverride;
         }
-        mAspectRatioState.mIsAspectRatioApplied = applyAspectRatio(resolvedBounds,
+        return AppCompatUtils.computeAspectRatio(parentBounds);
+    }
+
+    void applyDesiredAspectRatio(@NonNull Configuration newParentConfig, @NonNull Rect parentBounds,
+            @NonNull Rect resolvedBounds, @NonNull Rect containingBoundsWithInsets,
+            @NonNull Rect containingBounds) {
+        final float desiredAspectRatio = getDesiredAspectRatio(newParentConfig, parentBounds);
+        mAppCompatAspectRatioState.mIsAspectRatioApplied = applyAspectRatio(resolvedBounds,
                 containingBoundsWithInsets, containingBounds, desiredAspectRatio);
     }
 
-    void applyAspectRatio(Rect outBounds, Rect containingAppBounds,
+    void applyAspectRatioForLetterbox(Rect outBounds, Rect containingAppBounds,
             Rect containingBounds) {
-        mAspectRatioState.mIsAspectRatioApplied = applyAspectRatio(outBounds, containingAppBounds,
-                containingBounds, 0 /* desiredAspectRatio */);
+        mAppCompatAspectRatioState.mIsAspectRatioApplied = applyAspectRatio(outBounds,
+                containingAppBounds, containingBounds, 0 /* desiredAspectRatio */);
     }
 
     /**
      * @return {@code true} when an app compat aspect ratio has been applied.
      */
     boolean isAspectRatioApplied() {
-        return mAspectRatioState.mIsAspectRatioApplied;
+        return mAppCompatAspectRatioState.mIsAspectRatioApplied;
     }
 
     /**
@@ -171,6 +168,35 @@ class AppCompatAspectRatioPolicy {
             return mTransparentPolicy.getInheritedMaxAspectRatio();
         }
         return mActivityRecord.info.getMaxAspectRatio();
+    }
+
+    @Nullable
+    Rect getLetterboxedContainerBounds() {
+        return mAppCompatAspectRatioState.getLetterboxedContainerBounds();
+    }
+
+    /**
+     * Whether this activity is letterboxed for fixed orientation. If letterboxed due to fixed
+     * orientation then aspect ratio restrictions are also already respected.
+     *
+     * <p>This happens when an activity has fixed orientation which doesn't match orientation of the
+     * parent because a display setting 'ignoreOrientationRequest' is set to true. See {@link
+     * WindowManagerService#getIgnoreOrientationRequest} for more context.
+     */
+    boolean isLetterboxedForFixedOrientationAndAspectRatio() {
+        return mAppCompatAspectRatioState.isLetterboxedForFixedOrientationAndAspectRatio();
+    }
+
+    boolean isLetterboxedForAspectRatioOnly() {
+        return mAppCompatAspectRatioState.isLetterboxedForAspectRatioOnly();
+    }
+
+    void setLetterboxBoundsForFixedOrientationAndAspectRatio(@NonNull Rect bounds) {
+        mAppCompatAspectRatioState.mLetterboxBoundsForFixedOrientationAndAspectRatio = bounds;
+    }
+
+    void setLetterboxBoundsForAspectRatio(@NonNull Rect bounds) {
+        mAppCompatAspectRatioState.mLetterboxBoundsForAspectRatio = bounds;
     }
 
     private boolean isParentFullscreenPortrait() {
@@ -308,9 +334,46 @@ class AppCompatAspectRatioPolicy {
                 && !dc.getIgnoreOrientationRequest();
     }
 
-    private static class AspectRatioState {
+    private static class AppCompatAspectRatioState {
         // Whether the aspect ratio restrictions applied to the activity bounds
         // in applyAspectRatio().
         private boolean mIsAspectRatioApplied = false;
+
+        // Bounds populated in resolveAspectRatioRestriction when this activity is letterboxed for
+        // aspect ratio. If not null, they are used as parent container in
+        // resolveSizeCompatModeConfiguration and in a constructor of CompatDisplayInsets.
+        @Nullable
+        private Rect mLetterboxBoundsForAspectRatio;
+        // Bounds populated in resolveFixedOrientationConfiguration when this activity is
+        // letterboxed for fixed orientation. If not null, they are used as parent container in
+        // resolveSizeCompatModeConfiguration and in a constructor of CompatDisplayInsets. If
+        // letterboxed due to fixed orientation then aspect ratio restrictions are also respected.
+        // This happens when an activity has fixed orientation which doesn't match orientation of
+        // the parent because a display is ignoring orientation request or fixed to user rotation.
+        // See WindowManagerService#getIgnoreOrientationRequest and
+        // WindowManagerService#getFixedToUserRotation for more context.
+        @Nullable
+        private Rect mLetterboxBoundsForFixedOrientationAndAspectRatio;
+
+        @Nullable
+        Rect getLetterboxedContainerBounds() {
+            return mLetterboxBoundsForFixedOrientationAndAspectRatio != null
+                    ? mLetterboxBoundsForFixedOrientationAndAspectRatio
+                    : mLetterboxBoundsForAspectRatio;
+        }
+
+        void reset() {
+            mIsAspectRatioApplied = false;
+            mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
+            mLetterboxBoundsForAspectRatio = null;
+        }
+
+        boolean isLetterboxedForFixedOrientationAndAspectRatio() {
+            return mLetterboxBoundsForFixedOrientationAndAspectRatio != null;
+        }
+
+        boolean isLetterboxedForAspectRatioOnly() {
+            return mLetterboxBoundsForAspectRatio != null;
+        }
     }
 }

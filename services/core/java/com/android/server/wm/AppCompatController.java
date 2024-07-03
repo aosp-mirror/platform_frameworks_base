@@ -49,7 +49,7 @@ class AppCompatController {
                 wmService.mLetterboxConfiguration, optPropBuilder);
         mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord, mAppCompatOverrides);
         mAppCompatAspectRatioPolicy = new AppCompatAspectRatioPolicy(activityRecord,
-                mTransparentPolicy, mOrientationPolicy, mAppCompatOverrides);
+                mTransparentPolicy, mAppCompatOverrides);
     }
 
     @NonNull
