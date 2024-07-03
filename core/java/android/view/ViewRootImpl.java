@@ -2476,8 +2476,10 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        if (!Display.isDozeState(mAttachInfo.mDisplayState)) {
-            // Only need to acquire wake lock for DOZE state.
+        if (mAttachInfo.mDisplayState != Display.STATE_DOZE) {
+            // In DOZE_SUSPEND, Android shouldn't control the display; therefore we only poke the
+            // draw wake lock when display state is DOZE. Noted that Display#isDozeState includes
+            // DOZE_SUSPEND as well, so, it's not feasible here.
             return;
         }
         if (mWindowAttributes.type != WindowManager.LayoutParams.TYPE_BASE_APPLICATION) {
