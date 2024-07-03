@@ -2482,10 +2482,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(activity.mChildren.contains(win4));
 
         // The starting window should be on-top of all other windows.
-        assertEquals(startingWin, activity.mChildren.peekLast());
+        assertEquals(startingWin, activity.getTopChild());
 
         // The base application window should be below all other windows.
-        assertEquals(baseWin, activity.mChildren.peekFirst());
+        assertEquals(baseWin, activity.getBottomChild());
         activity.removeImmediately();
     }
 
