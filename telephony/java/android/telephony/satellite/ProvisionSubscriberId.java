@@ -43,12 +43,17 @@ public final class ProvisionSubscriberId implements Parcelable {
     /** carrier id */
     private int mCarrierId;
 
+    /** apn */
+    private String mNiddApn;
+
     /**
      * @hide
      */
-    public ProvisionSubscriberId(@NonNull String subscriberId, @NonNull int carrierId) {
+    public ProvisionSubscriberId(@NonNull String subscriberId, @NonNull int carrierId,
+            @NonNull String niddApn) {
         this.mCarrierId = carrierId;
         this.mSubscriberId = subscriberId;
+        this.mNiddApn = niddApn;
     }
 
     private ProvisionSubscriberId(Parcel in) {
@@ -63,6 +68,7 @@ public final class ProvisionSubscriberId implements Parcelable {
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeString(mSubscriberId);
         out.writeInt(mCarrierId);
+        out.writeString(mNiddApn);
     }
 
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
@@ -89,7 +95,7 @@ public final class ProvisionSubscriberId implements Parcelable {
     }
 
     /**
-     * @return token.
+     * @return provision subscriberId.
      * @hide
      */
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
@@ -106,6 +112,15 @@ public final class ProvisionSubscriberId implements Parcelable {
         return mCarrierId;
     }
 
+    /**
+     * @return niddApn.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public String getNiddApn() {
+        return mNiddApn;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -117,12 +132,16 @@ public final class ProvisionSubscriberId implements Parcelable {
 
         sb.append("CarrierId:");
         sb.append(mCarrierId);
+        sb.append(",");
+
+        sb.append("NiddApn:");
+        sb.append(mNiddApn);
         return sb.toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mSubscriberId, mCarrierId);
+        return Objects.hash(mSubscriberId, mCarrierId, mNiddApn);
     }
 
     @Override
@@ -131,11 +150,12 @@ public final class ProvisionSubscriberId implements Parcelable {
         if (o == null || getClass() != o.getClass()) return false;
         ProvisionSubscriberId that = (ProvisionSubscriberId) o;
         return mSubscriberId.equals(that.mSubscriberId) && mCarrierId
-                == that.mCarrierId;
+                == that.mCarrierId && mNiddApn.equals(that.mNiddApn);
     }
 
     private void readFromParcel(Parcel in) {
         mSubscriberId = in.readString();
         mCarrierId = in.readInt();
+        mNiddApn = in.readString();
     }
 }
