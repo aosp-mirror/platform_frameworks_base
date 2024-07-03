@@ -386,7 +386,7 @@ import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.AttributeCache;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -6748,6 +6748,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();
+        // This is unlikely to happen because the sequence of lifecycle should invoke
+        // finishRelaunching before being stopped. Reset the potential unpaired count in case
+        // the binder transaction of relaunch is failed, so the transition won't be blocked.
+        if (mPendingRelaunchCount > 0) {
+            Slog.i(TAG, "Clear pending relaunch count on stopped " + this);
+            clearRelaunching();
+        }
 
         if (finishing) {
             abortAndClearOptionsAnimation();
@@ -8179,8 +8186,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void setRequestedOrientation(@ActivityInfo.ScreenOrientation int requestedOrientation) {
-        if (mAppCompatController.getAppCompatOverrides()
-                .getAppCompatOrientationOverrides()
+        if (mAppCompatController.getAppCompatOrientationOverrides()
                 .shouldIgnoreRequestedOrientation(requestedOrientation)) {
             return;
         }
@@ -8559,7 +8565,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int parentWindowingMode =
                 newParentConfiguration.windowConfiguration.getWindowingMode();
         final boolean isInCameraCompatFreeform = parentWindowingMode == WINDOWING_MODE_FREEFORM
-                && mLetterboxUiController.getFreeformCameraCompatMode()
+                && mAppCompatController.getAppCompatCameraOverrides().getFreeformCameraCompatMode()
                         != CAMERA_COMPAT_FREEFORM_NONE;
 
         // Bubble activities should always fill their parent and should not be letterboxed.
@@ -9887,7 +9893,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return mLetterboxUiController.getUserMinAspectRatio();
         }
         if (!mLetterboxUiController.shouldOverrideMinAspectRatio()
-                && !mLetterboxUiController.shouldOverrideMinAspectRatioForCamera()) {
+                && !mAppCompatController.getAppCompatCameraOverrides()
+                    .shouldOverrideMinAspectRatioForCamera()) {
             return info.getMinAspectRatio();
         }
         if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY)
@@ -10814,15 +10821,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(OVERRIDE_ORIENTATION, getOverrideOrientation());
         proto.write(SHOULD_SEND_COMPAT_FAKE_FOCUS, shouldSendCompatFakeFocus());
         proto.write(SHOULD_FORCE_ROTATE_FOR_CAMERA_COMPAT,
-                mLetterboxUiController.shouldForceRotateForCameraCompat());
+                mAppCompatController.getAppCompatCameraOverrides()
+                        .shouldForceRotateForCameraCompat());
         proto.write(SHOULD_REFRESH_ACTIVITY_FOR_CAMERA_COMPAT,
-                mLetterboxUiController.shouldRefreshActivityForCameraCompat());
+                mAppCompatController.getAppCompatCameraOverrides()
+                        .shouldRefreshActivityForCameraCompat());
         proto.write(SHOULD_REFRESH_ACTIVITY_VIA_PAUSE_FOR_CAMERA_COMPAT,
-                mLetterboxUiController.shouldRefreshActivityViaPauseForCameraCompat());
+                mAppCompatController.getAppCompatCameraOverrides()
+                        .shouldRefreshActivityViaPauseForCameraCompat());
         proto.write(SHOULD_OVERRIDE_MIN_ASPECT_RATIO,
                 mLetterboxUiController.shouldOverrideMinAspectRatio());
         proto.write(SHOULD_IGNORE_ORIENTATION_REQUEST_LOOP,
-                mAppCompatController.getAppCompatOverrides().getAppCompatOrientationOverrides()
+                mAppCompatController.getAppCompatOrientationOverrides()
                         .shouldIgnoreOrientationRequestLoop());
         proto.write(SHOULD_OVERRIDE_FORCE_RESIZE_APP,
                 mLetterboxUiController.shouldOverrideForceResizeApp());

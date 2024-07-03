@@ -5975,6 +5975,7 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     void removeUserInfo(@UserIdInt int userId) {
         synchronized (mUsersLock) {
+            UserManager.invalidateUserSerialNumberCache();
             mUsers.remove(userId);
         }
     }
@@ -6400,6 +6401,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         // Remove this user from the list
         synchronized (mUsersLock) {
+            UserManager.invalidateUserSerialNumberCache();
             mUsers.remove(userId);
             mIsUserManaged.delete(userId);
         }

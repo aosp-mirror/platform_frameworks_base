@@ -41,7 +41,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
@@ -127,8 +127,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     /**
      * Called when the Shell wants to start resizing Pip transition/animation.
+     *
+     * @param duration the suggested duration for resize animation.
      */
-    public void startResizeTransition(WindowContainerTransaction wct) {
+    public void startResizeTransition(WindowContainerTransaction wct, int duration) {
         // Default implementation does nothing.
     }
 

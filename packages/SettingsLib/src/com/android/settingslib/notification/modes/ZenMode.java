@@ -23,6 +23,7 @@ import static android.service.notification.SystemZenRules.getTriggerDescriptionF
 import static android.service.notification.ZenModeConfig.tryParseEventConditionId;
 import static android.service.notification.ZenModeConfig.tryParseScheduleConditionId;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import static java.util.Objects.requireNonNull;
@@ -33,12 +34,15 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.service.notification.SystemZenRules;
 import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 import android.util.Log;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -56,11 +60,12 @@ import java.util.Objects;
  * <p>It also adapts other rule features that we don't want to expose in the UI, such as
  * interruption filters other than {@code PRIORITY}, rules without specific icons, etc.
  */
-public class ZenMode {
+public class ZenMode implements Parcelable {
 
     private static final String TAG = "ZenMode";
 
     static final String MANUAL_DND_MODE_ID = "manual_dnd";
+    static final String TEMP_NEW_MODE_ID = "temp_new_mode";
 
     // Must match com.android.server.notification.ZenModeHelper#applyCustomPolicy.
     private static final ZenPolicy POLICY_INTERRUPTION_FILTER_ALARMS =
@@ -123,6 +128,25 @@ public class ZenMode {
     public static ZenMode manualDndMode(AutomaticZenRule manualRule, boolean isActive) {
         return new ZenMode(MANUAL_DND_MODE_ID, manualRule,
                 isActive ? Status.ENABLED_AND_ACTIVE : Status.ENABLED, true);
+    }
+
+    /**
+     * Returns a new {@link ZenMode} instance that can represent a custom_manual mode that is in the
+     * process of being created (and not yet saved).
+     *
+     * @param name mode name
+     * @param iconResId resource id of the chosen icon, {code 0} if none.
+     */
+    public static ZenMode newCustomManual(String name, @DrawableRes int iconResId) {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder(name,
+                ZenModeConfig.toCustomManualConditionId())
+                .setPackage(ZenModeConfig.getCustomManualConditionProvider().getPackageName())
+                .setType(AutomaticZenRule.TYPE_OTHER)
+                .setOwner(ZenModeConfig.getCustomManualConditionProvider())
+                .setIconResId(iconResId)
+                .setManualInvocationAllowed(true)
+                .build();
+        return new ZenMode(TEMP_NEW_MODE_ID, rule, Status.ENABLED, false);
     }
 
     private ZenMode(String id, @NonNull AutomaticZenRule rule, Status status, boolean isManualDnd) {
@@ -304,4 +328,34 @@ public class ZenMode {
     public String toString() {
         return mId + " (" + mStatus + ") -> " + mRule;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(mId);
+        dest.writeParcelable(mRule, 0);
+        dest.writeString(mStatus.name());
+        dest.writeBoolean(mIsManualDnd);
+    }
+
+    public static final Creator<ZenMode> CREATOR = new Creator<ZenMode>() {
+        @Override
+        public ZenMode createFromParcel(Parcel in) {
+            return new ZenMode(
+                    in.readString(),
+                    checkNotNull(in.readParcelable(AutomaticZenRule.class.getClassLoader(),
+                            AutomaticZenRule.class)),
+                    Status.valueOf(in.readString()),
+                    in.readBoolean());
+        }
+
+        @Override
+        public ZenMode[] newArray(int size) {
+            return new ZenMode[size];
+        }
+    };
 }

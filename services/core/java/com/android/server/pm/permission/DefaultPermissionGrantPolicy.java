@@ -807,7 +807,7 @@ final class DefaultPermissionGrantPolicy {
                     getDefaultSystemHandlerActivityPackage(pm,
                             SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId),
                     userId, MICROPHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
-                    NOTIFICATION_PERMISSIONS, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS);
+                    NOTIFICATION_PERMISSIONS);
         }
 
         // Voice recognition
@@ -875,6 +875,12 @@ final class DefaultPermissionGrantPolicy {
                     getDefaultSystemHandlerActivityPackage(pm, ACTION_TRACK, userId), userId,
                     SENSORS_PERMISSIONS);
             }
+
+            // Allow voice search on wear
+            grantPermissionsToSystemPackage(pm,
+                    getDefaultSystemHandlerActivityPackage(pm,
+                            SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId),
+                    userId, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS);
         }
 
         // Print Spooler

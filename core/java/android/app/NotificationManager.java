@@ -499,32 +499,31 @@ public class NotificationManager {
 
     /**
      * Activity Action: Launch an Automatic Zen Rule configuration screen
-     * <p>
-     * Input: Optionally, {@link #EXTRA_AUTOMATIC_RULE_ID}, if the configuration screen for an
+     *
+     * <p> Input: Optionally, {@link #EXTRA_AUTOMATIC_RULE_ID}, if the configuration screen for an
      * existing rule should be displayed. If the rule id is missing or null, apps should display
      * a configuration screen where users can create a new instance of the rule.
-     * <p>
-     * Output: Nothing
-     * <p>
-     *     You can have multiple activities handling this intent, if you support multiple
-     *     {@link AutomaticZenRule rules}. In order for the system to properly display all of your
-     *     rule types so that users can create new instances or configure existing ones, you need
-     *     to add some extra metadata ({@link #META_DATA_AUTOMATIC_RULE_TYPE})
-     *     to your activity tag in your manifest. If you'd like to limit the number of rules a user
-     *     can create from this flow, you can additionally optionally include
-     *     {@link #META_DATA_RULE_INSTANCE_LIMIT}.
      *
-     *     For example,
-     *     &lt;meta-data
-     *         android:name="android.app.zen.automatic.ruleType"
-     *         android:value="@string/my_condition_rule">
-     *     &lt;/meta-data>
-     *     &lt;meta-data
-     *         android:name="android.app.zen.automatic.ruleInstanceLimit"
-     *         android:value="1">
-     *     &lt;/meta-data>
-     * </p>
-     * </p>
+     * <p> Output: Nothing
+     *
+     * <p> You can have multiple activities handling this intent, if you support multiple
+     * {@link AutomaticZenRule rules}. In order for the system to properly display all of your
+     * rule types so that users can create new instances or configure existing ones, you need
+     * to add some extra metadata ({@link #META_DATA_AUTOMATIC_RULE_TYPE})
+     * to your activity tag in your manifest. If you'd like to limit the number of rules a user
+     * can create from this flow, you can additionally optionally include
+     * {@link #META_DATA_RULE_INSTANCE_LIMIT}. For example,
+     *
+     * <pre>
+     *     {@code
+     *     <meta-data
+     *         android:name="android.service.zen.automatic.ruleType"
+     *         android:value="@string/my_condition_rule" />
+     *     <meta-data
+     *         android:name="android.service.zen.automatic.ruleInstanceLimit"
+     *         android:value="1" />
+     *     }
+     * </pre>
      *
      * @see #addAutomaticZenRule(AutomaticZenRule)
      */

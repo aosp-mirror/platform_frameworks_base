@@ -40,6 +40,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,7 +60,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Provides a hassle-free way to implement new tiles according to current System UI architecture
@@ -81,6 +84,7 @@ class QSTileViewModelImpl<DATA_TYPE>(
     private val qsTileLogger: QSTileLogger,
     private val systemClock: SystemClock,
     private val backgroundDispatcher: CoroutineDispatcher,
+    uiBackgroundDispatcher: CoroutineDispatcher,
     private val tileScope: CoroutineScope,
 ) : QSTileViewModel, Dumpable {
 
@@ -93,18 +97,16 @@ class QSTileViewModelImpl<DATA_TYPE>(
 
     private val tileData: SharedFlow<DATA_TYPE> = createTileDataFlow()
 
-    override val state: SharedFlow<QSTileState> =
+    override val state: StateFlow<QSTileState?> =
         tileData
             .map { data ->
-                mapper().map(config, data).also { state ->
-                    qsTileLogger.logStateUpdate(spec, state, data)
-                }
+                withContext(uiBackgroundDispatcher) { mapper().map(config, data) }
+                    .also { state -> qsTileLogger.logStateUpdate(spec, state, data) }
             }
-            .flowOn(backgroundDispatcher)
-            .shareIn(
+            .stateIn(
                 tileScope,
                 SharingStarted.WhileSubscribed(),
-                replay = 1,
+                null,
             )
     override val isAvailable: StateFlow<Boolean> =
         users
@@ -147,26 +149,26 @@ class QSTileViewModelImpl<DATA_TYPE>(
 
     private fun createTileDataFlow(): SharedFlow<DATA_TYPE> =
         users
-            .flatMapLatest { user ->
-                val updateTriggers =
-                    merge(
-                            userInputFlow(user),
-                            forceUpdates
-                                .map { DataUpdateTrigger.ForceUpdate }
-                                .onEach { qsTileLogger.logForceUpdate(spec) },
-                        )
-                        .onStart {
-                            emit(DataUpdateTrigger.InitialRequest)
-                            qsTileLogger.logInitialRequest(spec)
-                        }
-                        .shareIn(tileScope, SharingStarted.WhileSubscribed())
-                tileDataInteractor()
-                    .tileData(user, updateTriggers)
-                    // combine makes sure updateTriggers is always listened even if
-                    // tileDataInteractor#tileData doesn't flatMapLatest on it
-                    .combine(updateTriggers) { data, _ -> data }
-                    .cancellable()
-                    .flowOn(backgroundDispatcher)
+            .transformLatest { user ->
+                coroutineScope {
+                    val updateTriggers: Flow<DataUpdateTrigger> =
+                        merge(
+                                userInputFlow(user),
+                                forceUpdates
+                                    .map { DataUpdateTrigger.ForceUpdate }
+                                    .onEach { qsTileLogger.logForceUpdate(spec) },
+                            )
+                            .onStart { qsTileLogger.logInitialRequest(spec) }
+                            .stateIn(this, SharingStarted.Eagerly, DataUpdateTrigger.InitialRequest)
+                    tileDataInteractor()
+                        .tileData(user, updateTriggers)
+                        // combine makes sure updateTriggers is always listened even if
+                        // tileDataInteractor#tileData doesn't transformLatest on it
+                        .combine(updateTriggers) { data, _ -> data }
+                        .cancellable()
+                        .flowOn(backgroundDispatcher)
+                        .collect { emit(it) }
+                }
             }
             .distinctUntilChanged()
             .shareIn(

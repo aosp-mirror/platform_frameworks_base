@@ -16,7 +16,7 @@
 ** limitations under the License.
 */
 -->
-<com.android.systemui.navigationbar.NavigationBarFrame
+<com.android.systemui.navigationbar.views.NavigationBarFrame
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navigation_bar_frame"
@@ -24,4 +24,4 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
 
-</com.android.systemui.navigationbar.NavigationBarFrame>
+</com.android.systemui.navigationbar.views.NavigationBarFrame>

@@ -266,7 +266,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testTreatmentDisabledPerApp_noForceRotationOrRefresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        doReturn(false).when(mActivity.mLetterboxUiController)
+        doReturn(false).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
                 .shouldForceRotateForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -468,8 +468,8 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
-        doReturn(false).when(
-                mActivity.mLetterboxUiController).shouldRefreshActivityForCameraCompat();
+        doReturn(false).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+                .shouldRefreshActivityForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
@@ -494,8 +494,9 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_displayRotationNotChanging_noRefresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        doReturn(false).when(mActivity.mLetterboxUiController)
-                .isCameraCompatSplitScreenAspectRatioAllowed();
+        doReturn(false).when(mActivity
+                        .mAppCompatController.getAppCompatCameraOverrides())
+                            .isCameraCompatSplitScreenAspectRatioAllowed();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ false);
@@ -507,7 +508,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_splitScreenAspectRatioAllowed_refresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        doReturn(true).when(mActivity.mLetterboxUiController)
+        doReturn(true).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
                 .isCameraCompatSplitScreenAspectRatioAllowed();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -533,7 +534,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabledForApp()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        doReturn(true).when(mActivity.mLetterboxUiController)
+        doReturn(true).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
                 .shouldRefreshActivityViaPauseForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -597,6 +598,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
         spyOn(mActivity.mAtmService.getLifecycleManager());
         spyOn(mActivity.mLetterboxUiController);
+        spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
 
         doReturn(mActivity).when(mDisplayContent).topRunningActivity(anyBoolean());
         doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
@@ -608,8 +610,8 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     private void assertActivityRefreshRequested(boolean refreshRequested,
                 boolean cycleThroughStop) throws Exception {
-        verify(mActivity.mLetterboxUiController, times(refreshRequested ? 1 : 0))
-                .setIsRefreshRequested(true);
+        verify(mActivity.mAppCompatController.getAppCompatCameraOverrides(),
+                times(refreshRequested ? 1 : 0)).setIsRefreshRequested(true);
 
         final RefreshCallbackItem refreshCallbackItem = RefreshCallbackItem.obtain(mActivity.token,
                 cycleThroughStop ? ON_STOP : ON_PAUSE);

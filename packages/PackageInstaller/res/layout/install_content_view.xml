@@ -34,7 +34,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
+        style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
         android:text="@string/message_staging" />
 
     <ProgressBar
@@ -57,7 +57,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
+        style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
         android:text="@string/installing" />
 
     <ProgressBar
@@ -74,7 +74,7 @@
       android:id="@+id/install_confirm_question"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      style="@android:style/TextAppearance.Material.Subhead"
+      style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
       android:text="@string/install_confirm_question"
       android:visibility="invisible"
       android:scrollbars="vertical" />
@@ -83,7 +83,7 @@
       android:id="@+id/install_confirm_question_update"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      style="@android:style/TextAppearance.Material.Subhead"
+      style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
       android:text="@string/install_confirm_question_update"
       android:visibility="invisible"
       android:scrollbars="vertical" />
@@ -92,7 +92,7 @@
       android:id="@+id/install_success"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      style="@android:style/TextAppearance.Material.Subhead"
+      style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
       android:text="@string/install_done"
       android:visibility="invisible" />
 
@@ -100,7 +100,7 @@
       android:id="@+id/install_failed"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      style="@android:style/TextAppearance.Material.Subhead"
+      style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
       android:text="@string/install_failed"
       android:visibility="invisible" />
 
@@ -108,7 +108,7 @@
       android:id="@+id/install_failed_blocked"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      style="@android:style/TextAppearance.Material.Subhead"
+      style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
       android:text="@string/install_failed_blocked"
       android:visibility="invisible" />
 
@@ -116,7 +116,7 @@
       android:id="@+id/install_failed_conflict"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      style="@android:style/TextAppearance.Material.Subhead"
+      style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
       android:text="@string/install_failed_conflict"
       android:visibility="invisible" />
 
@@ -124,7 +124,7 @@
       android:id="@+id/install_failed_incompatible"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      style="@android:style/TextAppearance.Material.Subhead"
+      style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
       android:text="@string/install_failed_incompatible"
       android:visibility="invisible" />
 
@@ -132,7 +132,7 @@
       android:id="@+id/install_failed_invalid_apk"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      style="@android:style/TextAppearance.Material.Subhead"
+      style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
       android:text="@string/install_failed_invalid_apk"
       android:visibility="invisible" />
 

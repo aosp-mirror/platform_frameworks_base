@@ -103,6 +103,8 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"இந்த ஸ்கிரீன்ஷாட்டை <xliff:g id="APPNAME">%1$s</xliff:g> கண்டறிந்துள்ளது."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"இந்த ஸ்கிரீன்ஷாட்டை <xliff:g id="APPNAME">%1$s</xliff:g> மற்றும் திறந்திருக்கும் பிற ஆப்ஸ் கண்டறிந்துள்ளன."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"குறிப்பில் சேர்"</string>
+    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
+    <skip />
     <string name="screenrecord_title" msgid="4257171601439507792">"ஸ்கிரீன் ரெக்கார்டர்"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ஸ்க்ரீன் ரெக்கார்டிங் செயலாக்கப்படுகிறது"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"திரை ரெக்கார்டிங் அமர்விற்கான தொடர் அறிவிப்பு"</string>
@@ -132,6 +134,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை ரெக்கார்டு செய்வதை நிறுத்துவீர்கள்"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"திரையைப் பகிர்கிறது"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +142,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸைப் பகிர்வதை நிறுத்துவீர்கள்"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"திரையை அலைபரப்புகிறது"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +196,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"முகம் மூலம் அன்லாக் செய்யப்பட்டது. தொடர அழுத்தவும்."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"முகம் அங்கீகரிக்கப்பட்டது. தொடர அழுத்தவும்."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"முகம் அங்கீகரிக்கப்பட்டது. தொடர அன்லாக் ஐகானை அழுத்தவும்."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"அங்கீகரிப்பை ரத்துசெய்"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"கூடுதல் விருப்பங்கள்"</string>
@@ -472,6 +478,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"கூடுதல் விட்ஜெட்களைச் சேருங்கள்"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"விட்ஜெட்களைப் பிரத்தியேகமாக்க நீண்ட நேரம் அழுத்துக"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"விட்ஜெட்களைப் பிரத்தியேகமாக்குங்கள்"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"முடக்கப்பட்ட விட்ஜெட்டுக்கான ஆப்ஸ் ஐகான்"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"நிறுவப்படும் விட்ஜெட்டுக்கான ஆப்ஸ் ஐகான்"</string>
     <string name="edit_widget" msgid="9030848101135393954">"விட்ஜெட்டைத் திருத்து"</string>
@@ -549,12 +557,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"இப்போது தொடங்கு"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"அறிவிப்புகள் இல்லை"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"புதிய அறிவிப்புகள் இல்லை"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (5720882373252389461) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (4260536236101821273) -->
-    <skip />
-    <!-- no translation found for go_to_adaptive_notification_settings (2423690125178298479) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"சூழல்சார் அறிவிப்புகள் இயக்கப்பட்டது"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"குறைந்த நேரத்தில் அதிக அறிவிப்பைப் பெறும்போது இரண்டு நிமிடங்கள் வரை உங்கள் சாதனம் ஒலியையும், திரையில் காட்டப்படும் பாப்-அப்களின் எண்ணிக்கையையும் குறைக்கிறது."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"முடக்கு"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"பழைய அறிவிப்பைப் பார்க்க அன்லாக் செய்க"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"இந்தச் சாதனம் உங்கள் பெற்றோரால் நிர்வகிக்கப்படுகிறது"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"இந்த சாதனம் உங்கள் நிறுவனத்துக்கு உரியது, நெட்வொர்க் ட்ராஃபிக்கையும் நிறுவனமே கண்காணிக்கக்கூடும்"</string>
@@ -1352,7 +1357,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ஆப்ஸால் பயன்படுத்தப்படுகிறது"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ஆப்ஸால் சமீபத்தில் பயன்படுத்தப்பட்டது"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"சிஸ்டம்"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"சிஸ்டம் கட்டுப்பாடுகள்"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"சிஸ்டம் ஆப்ஸ்"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"பல வேலைகளைச் செய்தல்"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"சமீபத்திய ஆப்ஸ்"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"திரைப் பிரிப்பு"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"உள்ளீடு"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ஆப்ஸ் ஷார்ட்கட்கள்"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"அணுகல்தன்மை"</string>
@@ -1369,14 +1378,10 @@
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
-    <!-- no translation found for touchpad_back_gesture_action_title (7199067250654332735) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_guidance (4222430588599527272) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_animation_content_description (2646107450922379918) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_screen_animation_content_description (4036267494237748710) -->
-    <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"பின்செல்"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"பின்செல்ல, உங்கள் டச்பேடில் எங்கு வேண்டுமானாலும் இடது அல்லது வலதுபுறமாக மூன்று விரல்களால் ஸ்வைப் செய்யவும்."</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"மூன்று விரல்கள் வலது மற்றும் இடதுபுறம் நகர்வதை டச்பேட் காட்டுகிறது"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"பின்செல்லும் சைகைக்கான அனிமேஷனை சாதனத்தின் திரை காட்டுகிறது"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"கீபோர்டு பேக்லைட்"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"நிலை, %2$d இல் %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ஹோம் கன்ட்ரோல்கள்"</string>

@@ -51,7 +51,7 @@ import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.protolog.LegacyProtoLogImpl;
 import com.android.internal.protolog.PerfettoProtoLogImpl;
 import com.android.internal.protolog.common.IProtoLog;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.IoThread;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 import com.android.server.wm.LetterboxConfiguration.LetterboxHorizontalReachabilityPosition;

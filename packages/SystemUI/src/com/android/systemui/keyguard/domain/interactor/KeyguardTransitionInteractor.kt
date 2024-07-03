@@ -530,17 +530,23 @@ constructor(
         return finishedKeyguardState.map { stateMatcher(it) }.distinctUntilChanged()
     }
 
-    /** Whether we've FINISHED a transition to a state that matches the given predicate. */
-    fun isFinishedInState(state: KeyguardState): Flow<Boolean> {
-        return finishedKeyguardState.map { it == state }.distinctUntilChanged()
+    fun isFinishedIn(scene: SceneKey, stateWithoutSceneContainer: KeyguardState): Flow<Boolean> {
+        return if (SceneContainerFlag.isEnabled) {
+            sceneInteractor
+                .get()
+                .transitionState
+                .map { it.isIdle(scene) || it.isTransitioning(from = scene) }
+                .distinctUntilChanged()
+        } else {
+            isFinishedIn(stateWithoutSceneContainer)
+        }
     }
 
-    /**
-     * Whether we've FINISHED a transition to a state that matches the given predicate. Consider
-     * using [isFinishedInStateWhere] whenever possible instead
-     */
-    fun isFinishedInStateWhereValue(stateMatcher: (KeyguardState) -> Boolean) =
-        stateMatcher(finishedKeyguardState.replayCache.last())
+    /** Whether we've FINISHED a transition to a state */
+    fun isFinishedIn(state: KeyguardState): Flow<Boolean> {
+        state.checkValidState()
+        return finishedKeyguardState.map { it == state }.distinctUntilChanged()
+    }
 
     fun getCurrentState(): KeyguardState {
         return currentKeyguardState.replayCache.last()

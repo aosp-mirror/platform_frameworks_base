@@ -29,6 +29,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.util.Preconditions;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -62,6 +63,8 @@ import java.util.List;
  * and throw an <code>IllegalStateException</code> otherwise.</p>
  */
 public class PipTransitionState {
+    private static final String TAG = PipTransitionState.class.getSimpleName();
+
     public static final int UNDEFINED = 0;
 
     // State for Launcher animating the swipe PiP to home animation.
@@ -190,8 +193,9 @@ public class PipTransitionState {
                     "No extra bundle for " + stateToString(state) + " state.");
         }
         if (mState != state) {
-            dispatchPipTransitionStateChanged(mState, state, extra);
+            final int prevState = mState;
             mState = state;
+            dispatchPipTransitionStateChanged(prevState, mState, extra);
         }
     }
 
@@ -318,5 +322,12 @@ public class PipTransitionState {
     public String toString() {
         return String.format("PipTransitionState(mState=%s, mInSwipePipToHomeTransition=%b)",
                 stateToString(mState), mInSwipePipToHomeTransition);
+    }
+
+    /** Dumps internal state. */
+    public void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + TAG);
+        pw.println(innerPrefix + "mState=" + stateToString(mState));
     }
 }

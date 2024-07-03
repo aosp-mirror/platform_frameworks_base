@@ -15,7 +15,9 @@
  */
 package com.android.systemui.keyguard.shared.model
 
+import android.util.Log
 import com.android.compose.animation.scene.SceneKey
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 
 /** List of all possible states to transition to/from */
@@ -87,6 +89,22 @@ enum class KeyguardState {
     /** An activity is displaying over the keyguard. */
     OCCLUDED;
 
+    fun checkValidState() {
+        val isStateValid: Boolean
+        val isEnabled: String
+        if (SceneContainerFlag.isEnabled) {
+            isStateValid = this === mapToSceneContainerState()
+            isEnabled = "enabled"
+        } else {
+            isStateValid = this !== UNDEFINED
+            isEnabled = "disabled"
+        }
+
+        if (!isStateValid) {
+            Log.e("KeyguardState", "$this is not a valid state when scene container is $isEnabled")
+        }
+    }
+
     fun mapToSceneContainerState(): KeyguardState {
         return when (this) {
             OFF,
@@ -128,17 +146,12 @@ enum class KeyguardState {
             return state != GONE
         }
 
-        /** Whether either of the bouncers are visible when we're FINISHED in the given state. */
-        @JvmStatic
-        fun isBouncerState(state: KeyguardState): Boolean {
-            return state == PRIMARY_BOUNCER || state == ALTERNATE_BOUNCER
-        }
-
         /**
          * Whether the device is awake ([PowerInteractor.isAwake]) when we're FINISHED in the given
          * keyguard state.
          */
         fun deviceIsAwakeInState(state: KeyguardState): Boolean {
+            state.checkValidState()
             return when (state) {
                 OFF -> false
                 DOZING -> false

@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
@@ -657,7 +656,6 @@ class KeyguardController {
             final boolean lastKeyguardGoingAway = mKeyguardGoingAway;
 
             final ActivityRecord lastDismissKeyguardActivity = mDismissingKeyguardActivity;
-            final ActivityRecord lastTurnScreenOnActivity = mTopTurnScreenOnActivity;
 
             mRequestDismissKeyguard = false;
             mOccluded = false;
@@ -666,7 +664,6 @@ class KeyguardController {
             mDismissingKeyguardActivity = null;
             mTopTurnScreenOnActivity = null;
 
-            boolean occludedByActivity = false;
             final Task task = getRootTaskForControllingOccluding(display);
             final ActivityRecord top = task != null ? task.getTopNonFinishingActivity() : null;
             if (top != null) {
@@ -712,7 +709,7 @@ class KeyguardController {
 
             if (mTopTurnScreenOnActivity != null
                     && !mService.mWindowManager.mPowerManager.isInteractive()
-                    && (mRequestDismissKeyguard || occludedByActivity)) {
+                    && (mRequestDismissKeyguard || mOccluded)) {
                 controller.mTaskSupervisor.wakeUp("handleTurnScreenOn");
                 mTopTurnScreenOnActivity.setCurrentLaunchCanTurnScreenOn(false);
             }

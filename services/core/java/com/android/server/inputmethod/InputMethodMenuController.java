@@ -85,7 +85,7 @@ final class InputMethodMenuController {
 
         if (preferredInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
             final InputMethodSubtype currentSubtype =
-                    mService.getCurrentInputMethodSubtypeLocked();
+                    bindingController.getCurrentInputMethodSubtype();
             if (currentSubtype != null) {
                 final String curMethodId = bindingController.getSelectedMethodId();
                 final InputMethodInfo currentImi =
@@ -201,7 +201,7 @@ final class InputMethodMenuController {
         attrs.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         attrs.setTitle("Select input method");
         w.setAttributes(attrs);
-        mService.updateSystemUiLocked();
+        mService.updateSystemUiLocked(userId);
         mService.sendOnNavButtonFlagsChangedLocked();
         mSwitchingDialog.show();
     }
@@ -239,7 +239,9 @@ final class InputMethodMenuController {
             mSwitchingDialog = null;
             mSwitchingDialogTitleView = null;
 
-            mService.updateSystemUiLocked();
+            // TODO(b/305849394): Make InputMethodMenuController multi-user aware
+            final int userId = mService.getCurrentImeUserIdLocked();
+            mService.updateSystemUiLocked(userId);
             mService.sendOnNavButtonFlagsChangedLocked();
             mDialogBuilder = null;
             mIms = null;

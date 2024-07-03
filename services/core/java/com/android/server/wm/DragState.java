@@ -64,7 +64,7 @@ import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.view.IDragAndDropPermissions;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;

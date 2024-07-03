@@ -49,6 +49,8 @@ import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.DisableSceneContainer;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -302,6 +304,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void disable_shadeOpenAndShouldHide_everythingHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -318,6 +321,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void disable_shadeOpenButNotShouldHide_everythingShown() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -335,6 +339,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     /** Regression test for b/279790651. */
     @Test
+    @DisableSceneContainer
     public void disable_shadeOpenAndShouldHide_thenShadeNotOpenAndDozingUpdate_everythingShown() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -376,6 +381,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void disable_isTransitioningToOccluded_everythingHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -390,6 +396,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void disable_wasTransitioningToOccluded_transitionFinished_everythingShown() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -674,6 +681,80 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @EnableSceneContainer
+    public void isHomeStatusBarAllowedByScene_false_everythingHidden() {
+        resumeAndGetFragment();
+
+        mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(false);
+
+        // THEN all views are hidden
+        assertEquals(View.GONE, getClockView().getVisibility());
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void isHomeStatusBarAllowedByScene_true_everythingShown() {
+        resumeAndGetFragment();
+
+        mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(true);
+
+        // THEN all views are shown
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+        assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void disable_isHomeStatusBarAllowedBySceneFalse_disableValuesIgnored() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        // WHEN the scene doesn't allow the status bar
+        mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(false);
+
+        // BUT the disable flags want to show the status bar
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN all views are hidden (the disable flags aren't respected)
+        assertEquals(View.GONE, getClockView().getVisibility());
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void disable_isHomeStatusBarAllowedBySceneTrue_disableValuesUsed() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        // WHEN the scene does allow the status bar
+        mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(true);
+
+        // AND the disable flags want to hide the clock
+        fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_CLOCK, 0, false);
+
+        // THEN all views are shown except the clock (the disable flags are used)
+        assertEquals(View.GONE, getClockView().getVisibility());
+        assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    @DisableSceneContainer
+    public void isHomeStatusBarAllowedByScene_sceneContainerDisabled_valueNotUsed() {
+        resumeAndGetFragment();
+
+        // Even if the scene says to hide the home status bar
+        mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(false);
+
+        // The value isn't used because the scene container flag is disabled, so all views are shown
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+        assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
     public void disable_isDozing_clockAndSystemInfoVisible() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         when(mStatusBarStateController.isDozing()).thenReturn(true);
@@ -758,6 +839,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void testStatusBarIcons_hiddenThroughoutCameraLaunch() {
         final CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -779,6 +861,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void testStatusBarIcons_hiddenThroughoutLockscreenToDreamTransition() {
         final CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 

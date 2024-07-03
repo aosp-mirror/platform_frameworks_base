@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Insets;
 import android.platform.test.annotations.Presubmit;
@@ -102,6 +103,8 @@ public class ImeBackAnimationControllerTest {
             mViewRoot.setOnContentApplyWindowInsetsListener(
                     mock(Window.OnContentApplyWindowInsetsListener.class));
             mBackAnimationController = new ImeBackAnimationController(mViewRoot, mInsetsController);
+            mViewRoot.mContext.getResources().getConfiguration().windowConfiguration
+                    .setWindowingMode(WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
 
             when(mWindowInsetsAnimationController.getHiddenStateInsets()).thenReturn(Insets.NONE);
             when(mWindowInsetsAnimationController.getShownStateInsets()).thenReturn(IME_INSETS);
@@ -156,8 +159,28 @@ public class ImeBackAnimationControllerTest {
         mBackAnimationController.onBackProgressed(new BackEvent(100f, 0f, 0.5f, EDGE_LEFT));
         // commit back gesture
         mBackAnimationController.onBackInvoked();
-        // verify that InsetsController#hide is called
-        verify(mInsetsController, times(1)).hide(ime());
+        // verify that InputMethodManager#notifyImeHidden is called (which is the case whenever
+        // getInputMethodManager is called from ImeBackAnimationController)
+        verify(mViewRootInsetsControllerHost, times(1)).getInputMethodManager();
+        // verify that ImeBackAnimationController does not take control over IME insets
+        verify(mInsetsController, never()).controlWindowInsetsAnimation(anyInt(), any(), any(),
+                anyBoolean(), anyLong(), any(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testMultiWindowModeNotPlayingAnim() {
+        // setup ViewRoot with WINDOWING_MODE_MULTI_WINDOW
+        mViewRoot.mContext.getResources().getConfiguration().windowConfiguration.setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+        // start back gesture
+        mBackAnimationController.onBackStarted(new BackEvent(0f, 0f, 0f, EDGE_LEFT));
+        // progress back gesture
+        mBackAnimationController.onBackProgressed(new BackEvent(100f, 0f, 0.5f, EDGE_LEFT));
+        // commit back gesture
+        mBackAnimationController.onBackInvoked();
+        // verify that InputMethodManager#notifyImeHidden is called (which is the case whenever
+        // getInputMethodManager is called from ImeBackAnimationController)
+        verify(mViewRootInsetsControllerHost, times(1)).getInputMethodManager();
         // verify that ImeBackAnimationController does not take control over IME insets
         verify(mInsetsController, never()).controlWindowInsetsAnimation(anyInt(), any(), any(),
                 anyBoolean(), anyLong(), any(), anyInt(), anyBoolean());
@@ -277,9 +300,9 @@ public class ImeBackAnimationControllerTest {
 
             // commit back gesture
             mBackAnimationController.onBackInvoked();
-
-            // verify that InsetsController#hide is called
-            verify(mInsetsController, times(1)).hide(ime());
+            // verify that InputMethodManager#notifyImeHidden is called (which is the case whenever
+            // getInputMethodManager is called from ImeBackAnimationController)
+            verify(mViewRootInsetsControllerHost, times(1)).getInputMethodManager();
         });
     }
 

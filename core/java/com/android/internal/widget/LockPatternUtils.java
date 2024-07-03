@@ -449,6 +449,21 @@ public class LockPatternUtils {
     }
 
     /**
+     * Save the current password data to the repair mode file.
+     *
+     * @return true if success or false otherwise.
+     */
+    public boolean writeRepairModeCredential(int userId) {
+        throwIfCalledOnMainThread();
+        try {
+            return getLockSettings().writeRepairModeCredential(userId);
+        } catch (RemoteException re) {
+            Log.e(TAG, "Failed to write repair mode credential", re);
+            return false;
+        }
+    }
+
+    /**
      * Check to see if a credential matches the saved one.
      * If credential matches, return an opaque attestation that the challenge was verified.
      *

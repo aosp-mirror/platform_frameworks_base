@@ -20,7 +20,8 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.policy.BatteryController
@@ -48,6 +49,7 @@ class KeyguardStatusBarViewModel
 constructor(
     @Application scope: CoroutineScope,
     headsUpNotificationInteractor: HeadsUpNotificationInteractor,
+    sceneInteractor: SceneInteractor,
     keyguardInteractor: KeyguardInteractor,
     keyguardStatusBarInteractor: KeyguardStatusBarInteractor,
     batteryController: BatteryController,
@@ -55,11 +57,11 @@ constructor(
     /** True if this view should be visible and false otherwise. */
     val isVisible: StateFlow<Boolean> =
         combine(
+                sceneInteractor.currentScene,
                 keyguardInteractor.isDozing,
-                keyguardInteractor.statusBarState,
                 headsUpNotificationInteractor.showHeadsUpStatusBar,
-            ) { isDozing, statusBarState, showHeadsUpStatusBar ->
-                !isDozing && statusBarState == StatusBarState.KEYGUARD && !showHeadsUpStatusBar
+            ) { currentScene, isDozing, showHeadsUpStatusBar ->
+                currentScene == Scenes.Lockscreen && !isDozing && !showHeadsUpStatusBar
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 

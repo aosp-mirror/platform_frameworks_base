@@ -41,7 +41,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.RemoteAnimationRunnerCompat;
 import com.android.systemui.display.data.repository.DisplayMetricsRepository;
-import com.android.systemui.navigationbar.NavigationBarView;
+import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.shared.statusbar.phone.BarTransitions;

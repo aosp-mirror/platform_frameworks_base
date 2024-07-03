@@ -280,6 +280,9 @@
     <!-- to adjust volume in volume panel -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
+    <!-- to get bluetooth audio device category -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED" />
+
     <!-- to access ResolverRankerServices -->
     <uses-permission android:name="android.permission.BIND_RESOLVER_RANKER_SERVICE" />
 
@@ -372,8 +375,6 @@
 
     <!-- Listen to (dis-)connection of external displays and enable / disable them. -->
     <uses-permission android:name="android.permission.MANAGE_DISPLAYS" />
-
-    <uses-permission android:name="android.permission.SET_BIOMETRIC_DIALOG_ADVANCED" />
 
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />

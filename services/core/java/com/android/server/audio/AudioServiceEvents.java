@@ -227,7 +227,7 @@ public class AudioServiceEvents {
         static final int VOL_SET_HEARING_AID_VOL = 3;
         static final int VOL_SET_AVRCP_VOL = 4;
         static final int VOL_ADJUST_VOL_UID = 5;
-        static final int VOL_VOICE_ACTIVITY_HEARING_AID = 6;
+        static final int VOL_VOICE_ACTIVITY_CONTEXTUAL_VOLUME = 6;
         static final int VOL_MODE_CHANGE_HEARING_AID = 7;
         static final int VOL_SET_GROUP_VOL = 8;
         static final int VOL_MUTE_STREAM_INT = 9;
@@ -299,14 +299,14 @@ public class AudioServiceEvents {
             logMetricEvent();
         }
 
-        /** used for VOL_VOICE_ACTIVITY_HEARING_AID */
-        VolumeEvent(int op, boolean voiceActive, int stream, int index) {
+        /** used for VOL_VOICE_ACTIVITY_CONTEXTUAL_VOLUME */
+        VolumeEvent(int op, boolean voiceActive, int stream, int index, int device) {
             mOp = op;
             mStream = stream;
             mVal1 = index;
             mVal2 = voiceActive ? 1 : 0;
             // unused
-            mVal3 = -1;
+            mVal3 = device;
             mCaller = null;
             mGroupName = null;
             logMetricEvent();
@@ -445,14 +445,16 @@ public class AudioServiceEvents {
                             .set(MediaMetrics.Property.INDEX, mVal1)
                             .record();
                     return;
-                case VOL_VOICE_ACTIVITY_HEARING_AID:
+                case VOL_VOICE_ACTIVITY_CONTEXTUAL_VOLUME:
                     new MediaMetrics.Item(mMetricsId)
-                            .set(MediaMetrics.Property.EVENT, "voiceActivityHearingAid")
+                            .set(MediaMetrics.Property.EVENT, "voiceActivityContextualVolume")
                             .set(MediaMetrics.Property.INDEX, mVal1)
                             .set(MediaMetrics.Property.STATE,
                                     mVal2 == 1 ? "active" : "inactive")
                             .set(MediaMetrics.Property.STREAM_TYPE,
                                     AudioSystem.streamToString(mStream))
+                            .set(MediaMetrics.Property.DEVICE,
+                                    AudioSystem.getOutputDeviceName(mVal3))
                             .record();
                     return;
                 case VOL_MODE_CHANGE_HEARING_AID:
@@ -538,11 +540,12 @@ public class AudioServiceEvents {
                             .append(" flags:0x").append(Integer.toHexString(mVal2))
                             .append(") from ").append(mCaller)
                             .toString();
-                case VOL_VOICE_ACTIVITY_HEARING_AID:
+                case VOL_VOICE_ACTIVITY_CONTEXTUAL_VOLUME:
                     return new StringBuilder("Voice activity change (")
                             .append(mVal2 == 1 ? "active" : "inactive")
-                            .append(") causes setting HEARING_AID volume to idx:").append(mVal1)
+                            .append(") causes setting volume to idx:").append(mVal1)
                             .append(" stream:").append(AudioSystem.streamToString(mStream))
+                            .append(" device:").append(AudioSystem.getOutputDeviceName(mVal3))
                             .toString();
                 case VOL_MODE_CHANGE_HEARING_AID:
                     return new StringBuilder("setMode(")

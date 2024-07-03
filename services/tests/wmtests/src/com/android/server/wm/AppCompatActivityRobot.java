@@ -149,6 +149,10 @@ class AppCompatActivityRobot {
                 .mLetterboxUiController).shouldApplyUserMinAspectRatioOverride();
     }
 
+    void setShouldCreateCompatDisplayInsets(boolean enabled) {
+        doReturn(enabled).when(mActivityStack.top()).shouldCreateCompatDisplayInsets();
+    }
+
     void setShouldApplyUserFullscreenOverride(boolean enabled) {
         doReturn(enabled).when(mActivityStack.top()
                 .mLetterboxUiController).shouldApplyUserFullscreenOverride();
