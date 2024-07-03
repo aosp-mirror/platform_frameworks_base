@@ -3254,7 +3254,20 @@ public final class TvInputManagerService extends SystemService {
         return filteredDisplayName;
     }
 
-    private static final class UserState {
+    private class TvInputManagerCallbackList extends RemoteCallbackList<ITvInputManagerCallback> {
+        @Override
+        public void onCallbackDied(ITvInputManagerCallback callback) {
+            synchronized (mLock) {
+                for (int i = 0; i < mUserStates.size(); i++) {
+                    int userId = mUserStates.keyAt(i);
+                    UserState userState = getOrCreateUserStateLocked(userId);
+                    userState.callbackPidUidMap.remove(callback);
+                }
+            }
+        }
+    }
+
+    private final class UserState {
         // A mapping from the TV input id to its TvInputState.
         private Map<String, TvInputState> inputMap = new HashMap<>();
 
@@ -3275,8 +3288,8 @@ public final class TvInputManagerService extends SystemService {
         private final Map<IBinder, SessionState> sessionStateMap = new HashMap<>();
 
         // A list of callbacks.
-        private final RemoteCallbackList<ITvInputManagerCallback> mCallbacks =
-                new RemoteCallbackList<>();
+        private final TvInputManagerCallbackList mCallbacks =
+                new TvInputManagerCallbackList();
 
         private final Map<ITvInputManagerCallback, Pair<Integer, Integer>> callbackPidUidMap =
                 new HashMap<>();
