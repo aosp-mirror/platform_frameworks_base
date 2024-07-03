@@ -270,6 +270,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         @Override
         public void showUdfpsOverlay(long requestId, int sensorId, int reason,
                 @NonNull IUdfpsOverlayControllerCallback callback) {
+            mUdfpsOverlayInteractor.setRequestId(requestId);
             mFgExecutor.execute(() -> UdfpsController.this.showUdfpsOverlay(
                     new UdfpsControllerOverlay(
                         mContext,
@@ -403,6 +404,15 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     new CancellationSignal(),
                     handler::post,
                     authenticationCallback);
+        }
+
+        /**
+         * Debug to run setIgnoreDisplayTouches
+         */
+        public void debugSetIgnoreDisplayTouches(boolean ignoreTouch) {
+            final long requestId = (mOverlay != null) ? mOverlay.getRequestId() : 0L;
+            UdfpsController.this.mFingerprintManager.setIgnoreDisplayTouches(
+                    requestId, mSensorProps.sensorId, ignoreTouch);
         }
     }
 
