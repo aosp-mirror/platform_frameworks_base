@@ -57,6 +57,7 @@ import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.LongArrayQueue;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
@@ -147,6 +148,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
     // Accessed on the handler thread only.
     private final SparseBooleanArray mAllocatedRollbackIds = new SparseBooleanArray();
 
+    // Sets to save user related contexts, sessions and receivers.
+    private final SparseArray<Context> mContexts = new SparseArray<>();
+    private final SparseArray<SessionCallback> mSessionCallbacks = new SparseArray<>();
+    private final SparseArray<BroadcastReceiver> mBroadcastReceivers = new SparseArray<>();
+
     // The list of all rollbacks, including available and committed rollbacks.
     // Accessed on the handler thread only.
     private final List<Rollback> mRollbacks = new ArrayList<>();
@@ -211,6 +217,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
 
         UserManager userManager = mContext.getSystemService(UserManager.class);
         for (UserHandle user : userManager.getUserHandles(true)) {
+            int identifier = user.getIdentifier();
+            if (identifier != UserHandle.USER_SYSTEM) {
+                // Ephemeral user will be removed later, no need to register user callbacks here.
+                boolean userEphemeral = userManager.isUserEphemeral(identifier);
+                if (userEphemeral) continue;
+            }
             registerUserCallbacks(user);
         }
 
@@ -280,6 +292,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         }, enableRollbackTimedOutFilter, null, getHandler());
 
         IntentFilter userAddedIntentFilter = new IntentFilter(Intent.ACTION_USER_ADDED);
+        userAddedIntentFilter.addAction(Intent.ACTION_USER_REMOVED);
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -291,6 +304,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                         return;
                     }
                     registerUserCallbacks(UserHandle.of(newUserId));
+                } else if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (userId == -1) {
+                        return;
+                    }
+                    unRegisterUserCallbacks(UserHandle.of(userId));
                 }
             }
         }, userAddedIntentFilter, null, getHandler());
@@ -332,14 +351,17 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             return;
         }
 
+        int identifier = user.getIdentifier();
+        SessionCallback sessionCallback = new SessionCallback();
+        mSessionCallbacks.append(identifier, sessionCallback);
         context.getPackageManager().getPackageInstaller()
-                .registerSessionCallback(new SessionCallback(), getHandler());
+                .registerSessionCallback(sessionCallback, getHandler());
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
         filter.addDataScheme("package");
-        context.registerReceiver(new BroadcastReceiver() {
+        BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 assertInWorkerThread();
@@ -358,7 +380,32 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                     onPackageFullyRemoved(packageName);
                 }
             }
-        }, filter, null, getHandler());
+        };
+        context.registerReceiver(receiver, filter, null, getHandler());
+        mBroadcastReceivers.append(identifier, receiver);
+        mContexts.append(identifier, context);
+    }
+
+    @AnyThread
+    private void unRegisterUserCallbacks(UserHandle user) {
+        int identifier = user.getIdentifier();
+        Context context = mContexts.get(identifier);
+
+        if (context == null) {
+            Slog.e(TAG, "Unable to unregister user callbacks for user " + user);
+            return;
+        }
+
+        SessionCallback sessionCallback = mSessionCallbacks.get(identifier);
+        context.getPackageManager().getPackageInstaller()
+                .unregisterSessionCallback(sessionCallback);
+
+        BroadcastReceiver broadcastReceiver = mBroadcastReceivers.get(identifier);
+        context.unregisterReceiver(broadcastReceiver);
+
+        mSessionCallbacks.remove(identifier);
+        mBroadcastReceivers.remove(identifier);
+        mContexts.remove(identifier);
     }
 
     @ExtThread
