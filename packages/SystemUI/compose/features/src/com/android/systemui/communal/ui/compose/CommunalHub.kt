@@ -113,6 +113,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.onClick
@@ -917,7 +918,7 @@ private fun CtaTileInViewModeContent(
             Icon(
                 imageVector = Icons.Outlined.Widgets,
                 contentDescription = stringResource(R.string.cta_label_to_open_widget_picker),
-                modifier = Modifier.size(Dimensions.IconSize),
+                modifier = Modifier.size(Dimensions.IconSize).clearAndSetSemantics {},
             )
             Spacer(modifier = Modifier.size(6.dp))
             Text(
