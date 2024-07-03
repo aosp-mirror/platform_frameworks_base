@@ -73,6 +73,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.Cuj;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
@@ -81,7 +82,6 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.common.InteractionJankMonitorUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
@@ -131,6 +131,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final SyncTransactionQueue mSyncQueue;
     private final DesktopTasksController mDesktopTasksController;
     private final InputManager mInputManager;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private boolean mTransitionDragActive;
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
@@ -186,7 +187,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            InteractionJankMonitor interactionJankMonitor
     ) {
         this(
                 context,
@@ -207,7 +209,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new InputMonitorFactory(),
                 SurfaceControl.Transaction::new,
                 rootTaskDisplayAreaOrganizer,
-                new SparseArray<>());
+                new SparseArray<>(),
+                interactionJankMonitor);
     }
 
     @VisibleForTesting
@@ -230,7 +233,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             InputMonitorFactory inputMonitorFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            SparseArray<DesktopModeWindowDecoration> windowDecorByTaskId) {
+            SparseArray<DesktopModeWindowDecoration> windowDecorByTaskId,
+            InteractionJankMonitor interactionJankMonitor) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -253,6 +257,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mWindowDecorByTaskId = windowDecorByTaskId;
         mSysUIPackageName = mContext.getResources().getString(
                 com.android.internal.R.string.config_systemUi);
+        mInteractionJankMonitor = interactionJankMonitor;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -388,8 +393,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) {
             return;
         }
-        InteractionJankMonitorUtils.beginTracing(
-                Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, mContext, decoration.mTaskSurface, tag);
+        mInteractionJankMonitor.begin(
+                decoration.mTaskSurface, mContext, Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, tag);
         mDesktopTasksController.toggleDesktopTaskSize(decoration.mTaskInfo);
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();
@@ -1077,7 +1082,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         } else {
             dragPositioningCallback =  new VeiledResizeTaskPositioner(
                     mTaskOrganizer, windowDecoration, mDisplayController,
-                    mDragStartListener, mTransitions);
+                    mDragStartListener, mTransitions, mInteractionJankMonitor);
             windowDecoration.setTaskDragResizer(
                     (VeiledResizeTaskPositioner) dragPositioningCallback);
         }

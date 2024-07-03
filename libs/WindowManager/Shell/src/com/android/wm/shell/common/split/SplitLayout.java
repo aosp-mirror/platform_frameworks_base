@@ -59,6 +59,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -67,7 +68,6 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.common.InteractionJankMonitorUtils;
 import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
@@ -131,6 +131,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     private final boolean mDimNonImeSide;
     private final boolean mAllowLeftRightSplitInPortrait;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private boolean mIsLeftRightSplit;
     private ValueAnimator mDividerFlingAnimator;
 
@@ -163,6 +164,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
         mRootBounds.set(configuration.windowConfiguration.getBounds());
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+        mInteractionJankMonitor = InteractionJankMonitor.getInstance();
         resetDividerPosition();
         updateInvisibleRect();
     }
@@ -569,12 +571,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     void onStartDragging() {
-        InteractionJankMonitorUtils.beginTracing(CUJ_SPLIT_SCREEN_RESIZE, mContext,
-                getDividerLeash(), null /* tag */);
+        mInteractionJankMonitor.begin(getDividerLeash(), mContext, CUJ_SPLIT_SCREEN_RESIZE);
     }
 
     void onDraggingCancelled() {
-        InteractionJankMonitorUtils.cancelTracing(CUJ_SPLIT_SCREEN_RESIZE);
+        mInteractionJankMonitor.cancel(CUJ_SPLIT_SCREEN_RESIZE);
     }
 
     void onDoubleTappedDivider() {
@@ -638,7 +639,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             if (flingFinishedCallback != null) {
                 flingFinishedCallback.run();
             }
-            InteractionJankMonitorUtils.endTracing(
+            mInteractionJankMonitor.end(
                     CUJ_SPLIT_SCREEN_RESIZE);
             return;
         }
@@ -661,7 +662,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 if (flingFinishedCallback != null) {
                     flingFinishedCallback.run();
                 }
-                InteractionJankMonitorUtils.endTracing(
+                mInteractionJankMonitor.end(
                         CUJ_SPLIT_SCREEN_RESIZE);
                 mDividerFlingAnimator = null;
             }
@@ -707,8 +708,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         set.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                InteractionJankMonitorUtils.beginTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER,
-                        mContext, getDividerLeash(), null /*tag*/);
+                mInteractionJankMonitor.begin(getDividerLeash(),
+                        mContext, CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
             }
 
             @Override
@@ -716,12 +717,12 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 mDividerPosition = dividerPos;
                 updateBounds(mDividerPosition);
                 finishCallback.accept(insets);
-                InteractionJankMonitorUtils.endTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
+                mInteractionJankMonitor.end(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                InteractionJankMonitorUtils.cancelTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
+                mInteractionJankMonitor.cancel(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
             }
         });
         set.start();
