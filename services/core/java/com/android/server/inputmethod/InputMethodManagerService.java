@@ -762,8 +762,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (!isChangingPackagesOfCurrentUserLocked()) {
                     return false;
                 }
-                final InputMethodSettings settings =
-                        InputMethodSettingsRepository.get(mCurrentUserId);
+                final int userId = getChangingUserId();
+                final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
                 String curInputMethodId = settings.getSelectedInputMethod();
                 final List<InputMethodInfo> methodList = settings.getMethodList();
                 final int numImes = methodList.size();
@@ -776,8 +776,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                     if (!doit) {
                                         return true;
                                     }
-                                    resetSelectedInputMethodAndSubtypeLocked("");
-                                    chooseNewDefaultIMELocked();
+                                    resetSelectedInputMethodAndSubtypeLocked("", userId);
+                                    chooseNewDefaultIMELocked(userId);
                                     return true;
                                 }
                             }
@@ -844,7 +844,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     if (change == PACKAGE_PERMANENT_CHANGE) {
                         Slog.i(TAG, "Input method uninstalled, disabling: " + imi.getComponent());
                         if (isCurrentUser) {
-                            setInputMethodEnabledLocked(imi.getId(), false);
+                            setInputMethodEnabledLocked(imi.getId(), false, userId);
                         } else {
                             settings.buildAndPutEnabledInputMethodsStrRemovingId(
                                     new StringBuilder(),
@@ -905,11 +905,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                             final var bindingController = getInputMethodBindingController(userId);
                             updateSystemUiLocked(0 /* vis */,
                                     bindingController.getBackDisposition(), userId);
-                            if (!chooseNewDefaultIMELocked()) {
+                            if (!chooseNewDefaultIMELocked(userId)) {
                                 changed = true;
                                 curIm = null;
                                 Slog.i(TAG, "Unsetting current input method");
-                                resetSelectedInputMethodAndSubtypeLocked("");
+                                resetSelectedInputMethodAndSubtypeLocked("", userId);
                             }
                         }
                     }
@@ -918,7 +918,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (curIm == null) {
                     // We currently don't have a default input method... is
                     // one now available?
-                    changed = chooseNewDefaultIMELocked();
+                    changed = chooseNewDefaultIMELocked(userId);
                 } else if (!changed && isPackageModified(curIm.getPackageName())) {
                     // Even if the current input method is still available, current subtype could
                     // be obsolete when the package is modified in practice.
@@ -2968,7 +2968,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // enabled.
         String id = settings.getSelectedInputMethod();
         // There is no input method selected, try to choose new applicable input method.
-        if (TextUtils.isEmpty(id) && chooseNewDefaultIMELocked()) {
+        if (TextUtils.isEmpty(id) && chooseNewDefaultIMELocked(userId)) {
             id = settings.getSelectedInputMethod();
         }
         if (!TextUtils.isEmpty(id)) {
@@ -5157,15 +5157,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private boolean chooseNewDefaultIMELocked() {
-        final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+    private boolean chooseNewDefaultIMELocked(@UserIdInt int userId) {
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         final InputMethodInfo imi = InputMethodInfoUtils.getMostApplicableDefaultIME(
                 settings.getEnabledInputMethodList());
         if (imi != null) {
             if (DEBUG) {
                 Slog.d(TAG, "New default IME was selected: " + imi.getId());
             }
-            resetSelectedInputMethodAndSubtypeLocked(imi.getId());
+            resetSelectedInputMethodAndSubtypeLocked(imi.getId(), userId);
             return true;
         }
 
@@ -5303,7 +5303,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     Slog.i(TAG, "All the enabled IMEs are gone. Reset default enabled IMEs.");
                 }
                 resetDefaultEnabledIme = true;
-                resetSelectedInputMethodAndSubtypeLocked("");
+                resetSelectedInputMethodAndSubtypeLocked("", userId);
             } else if (!enabledNonAuxImeFound) {
                 if (DEBUG) {
                     Slog.i(TAG, "All the enabled non-Aux IMEs are gone. Do partial reset.");
@@ -5322,7 +5322,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (DEBUG) {
                     Slog.d(TAG, "--- enable ime = " + imi);
                 }
-                setInputMethodEnabledLocked(imi.getId(), true);
+                setInputMethodEnabledLocked(imi.getId(), true, userId);
             }
         }
 
@@ -5330,16 +5330,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (!TextUtils.isEmpty(defaultImiId)) {
             if (!settings.getMethodMap().containsKey(defaultImiId)) {
                 Slog.w(TAG, "Default IME is uninstalled. Choose new default IME.");
-                if (chooseNewDefaultIMELocked()) {
+                if (chooseNewDefaultIMELocked(userId)) {
                     updateInputMethodsFromSettingsLocked(true, userId);
                 }
             } else {
                 // Double check that the default IME is certainly enabled.
-                setInputMethodEnabledLocked(defaultImiId, true);
+                setInputMethodEnabledLocked(defaultImiId, true, userId);
             }
         }
 
-        updateDefaultVoiceImeIfNeededLocked();
+        updateDefaultVoiceImeIfNeededLocked(userId);
 
         final var userData = getUserData(userId);
         userData.mSwitchingController.resetCircularListLocked(mContext, settings);
@@ -5365,8 +5365,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private void updateDefaultVoiceImeIfNeededLocked() {
-        final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+    private void updateDefaultVoiceImeIfNeededLocked(@UserIdInt int userId) {
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         final String systemSpeechRecognizer =
                 mContext.getString(com.android.internal.R.string.config_systemSpeechRecognizer);
         final String currentDefaultVoiceImeId = settings.getDefaultVoiceInputMethod();
@@ -5390,9 +5390,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return;
         }
         if (DEBUG) {
-            Slog.i(TAG, "Enabling the default Voice IME:" + newSystemVoiceIme);
+            Slog.i(TAG, "Enabling the default Voice IME:" + newSystemVoiceIme
+                    + " userId:" + userId);
         }
-        setInputMethodEnabledLocked(newSystemVoiceIme.getId(), true);
+        setInputMethodEnabledLocked(newSystemVoiceIme.getId(), true, userId);
         settings.putDefaultVoiceInputMethod(newSystemVoiceIme.getId());
     }
 
@@ -5404,11 +5405,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * @param id      ID of the IME is to be manipulated. It is OK to pass IME ID that is currently
      *                not recognized by the system
      * @param enabled {@code true} if {@code id} needs to be enabled
+     * @param userId  the user ID to be updated
      * @return {@code true} if the IME was previously enabled
      */
     @GuardedBy("ImfLock.class")
-    private boolean setInputMethodEnabledLocked(String id, boolean enabled) {
-        final int userId = mCurrentUserId;
+    private boolean setInputMethodEnabledLocked(String id, boolean enabled, @UserIdInt int userId) {
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         if (enabled) {
             final String enabledImeIdsStr = settings.getEnabledInputMethodsStr();
@@ -5432,9 +5433,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (bindingController.getDeviceIdToShowIme() == DEVICE_ID_DEFAULT) {
                     // Disabled input method is currently selected, switch to another one.
                     final String selId = settings.getSelectedInputMethod();
-                    if (id.equals(selId) && !chooseNewDefaultIMELocked()) {
+                    if (id.equals(selId) && !chooseNewDefaultIMELocked(userId)) {
                         Slog.i(TAG, "Can't find new IME, unsetting the current input method.");
-                        resetSelectedInputMethodAndSubtypeLocked("");
+                        resetSelectedInputMethodAndSubtypeLocked("", userId);
                     }
                 } else if (id.equals(settings.getSelectedDefaultDeviceInputMethod())) {
                     // Disabled default device IME while using a virtual device one, choose a
@@ -5493,9 +5494,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private void resetSelectedInputMethodAndSubtypeLocked(String newDefaultIme) {
-        // TODO(b/305849394): get userId from callers
-        final int userId = mCurrentUserId;
+    private void resetSelectedInputMethodAndSubtypeLocked(String newDefaultIme,
+            @UserIdInt int userId) {
         final var bindingController = getInputMethodBindingController(userId);
         bindingController.setDisplayIdToShowIme(INVALID_DISPLAY);
         bindingController.setDeviceIdToShowIme(DEVICE_ID_DEFAULT);
@@ -5705,7 +5705,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     return false; // IME is not found.
                 }
                 if (userId == mCurrentUserId) {
-                    setInputMethodEnabledLocked(imeId, enabled);
+                    setInputMethodEnabledLocked(imeId, enabled, userId);
                     return true;
                 }
                 if (enabled) {
@@ -6513,7 +6513,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (enabled && !settings.getMethodMap().containsKey(imeId)) {
                 failedToEnableUnknownIme = true;
             } else {
-                previouslyEnabled = setInputMethodEnabledLocked(imeId, enabled);
+                previouslyEnabled = setInputMethodEnabledLocked(imeId, enabled, userId);
             }
         } else {
             if (enabled) {
@@ -6650,14 +6650,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                 mContext, settings.getMethodList());
                         toDisable.removeAll(defaultEnabled);
                         for (InputMethodInfo info : toDisable) {
-                            setInputMethodEnabledLocked(info.getId(), false);
+                            setInputMethodEnabledLocked(info.getId(), false, userId);
                         }
                         for (InputMethodInfo info : defaultEnabled) {
-                            setInputMethodEnabledLocked(info.getId(), true);
+                            setInputMethodEnabledLocked(info.getId(), true, userId);
                         }
                         // Choose new default IME, reset to none if no IME available.
-                        if (!chooseNewDefaultIMELocked()) {
-                            resetSelectedInputMethodAndSubtypeLocked(null);
+                        if (!chooseNewDefaultIMELocked(userId)) {
+                            resetSelectedInputMethodAndSubtypeLocked(null, userId);
                         }
                         updateInputMethodsFromSettingsLocked(true /* enabledMayChange */, userId);
                         InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
