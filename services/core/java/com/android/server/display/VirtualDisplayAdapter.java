@@ -213,6 +213,10 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         }
     }
 
+    DisplayDevice getDisplayDevice(IBinder appToken) {
+        return mVirtualDisplayDevices.get(appToken);
+    }
+
     /**
      * Generates a virtual display's unique identifier.
      *

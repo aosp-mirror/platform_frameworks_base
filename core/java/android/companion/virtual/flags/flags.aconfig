@@ -89,3 +89,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "virtual_devices"
+    name: "virtual_display_rotation_api"
+    description: "API for on-demand rotation of virtual displays"
+    bug: "291748430"
+}

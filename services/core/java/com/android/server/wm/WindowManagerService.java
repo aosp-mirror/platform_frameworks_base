@@ -8362,6 +8362,26 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void setNonDefaultDisplayRotation(int displayId, @Surface.Rotation int rotation,
+                @NonNull String caller) {
+            if (displayId == Display.DEFAULT_DISPLAY || displayId == Display.INVALID_DISPLAY) {
+                Slog.w(TAG, "Cannot set rotation for display with id: " + displayId);
+                return;
+            }
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                if (displayContent == null) {
+                    Slog.w(TAG, "Cannot set rotation for display " + displayId
+                            + " due to missing DisplayContent");
+                    return;
+                }
+                displayContent.getDisplayRotation().setUserRotation(
+                        displayContent.getDisplayRotation().getUserRotationMode(), rotation,
+                        caller);
+            }
+        }
+
+        @Override
         public void setHomeSupportedOnDisplay(String displayUniqueId, int displayType,
                 boolean supported) {
             final long origId = Binder.clearCallingIdentity();
