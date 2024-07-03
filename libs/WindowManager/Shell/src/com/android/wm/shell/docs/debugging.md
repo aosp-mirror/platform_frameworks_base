@@ -68,7 +68,7 @@ adb shell dumpsys SurfaceFlinger
 ## Tracing global SurfaceControl transaction updates
 
 While Winscope traces are very useful, it sometimes doesn't give you enough information about which
-part of the code is initiating the transaction updates.  In such cases, it can be helpful to get
+part of the code is initiating the transaction updates. In such cases, it can be helpful to get
 stack traces when specific surface transaction calls are made, which is possible by enabling the
 following system properties for example:
 ```shell
@@ -81,8 +81,10 @@ adb logcat -s "SurfaceControlRegistry"
 # Disabling logging
 adb shell setprop persist.wm.debug.sc.tx.log_match_call \"\"
 adb shell setprop persist.wm.debug.sc.tx.log_match_name \"\"
-adb reboot
 ```
+
+A reboot is required to enable the logging. Once enabled, reboot is not needed to update the
+properties.
 
 It is not necessary to set both `log_match_call` and `log_match_name`, but note logs can be quite
 noisy if unfiltered.
