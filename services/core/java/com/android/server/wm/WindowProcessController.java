@@ -1581,6 +1581,25 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     @Override
+    public boolean onApplyAppSpecificConfig(Configuration inOutConfig) {
+        if (mConfigActivityRecord != null) {
+            // Let the activity decide whether to apply the size override.
+            return false;
+        }
+        final DisplayContent displayContent = mAtm.mWindowManager != null
+                ? mAtm.mWindowManager.getDefaultDisplayContentLocked()
+                : null;
+        return applySizeOverride(
+                displayContent,
+                mInfo,
+                null /* newParentConfiguration */,
+                inOutConfig,
+                false /* optOutEdgeToEdge */,
+                false /* hasFixedRotationTransform */,
+                false /* hasCompatDisplayInsets */);
+    }
+
+    @Override
     public void onConfigurationChanged(Configuration newGlobalConfig) {
         super.onConfigurationChanged(newGlobalConfig);
 
