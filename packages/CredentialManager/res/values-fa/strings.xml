@@ -85,7 +85,7 @@
     <string name="button_label_view_more" msgid="3429098227286495651">"مشاهده موارد بیشتر"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"برای <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"مدیران گذرواژه قفل‌شده"</string>
-    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"برای باز کردن قفل ضربه بزنید"</string>
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"برای باز کردن قفل تک‌ضرب بزنید"</string>
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"اطلاعات ورود به سیستم موجود نیست"</string>
     <string name="no_sign_in_info_in" msgid="2641118151920288356">"هیچ اطلاعات ورود به سیستمی در <xliff:g id="SOURCE">%1$s</xliff:g> وجود ندارد"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"مدیریت ورود به سیستم‌ها"</string>
