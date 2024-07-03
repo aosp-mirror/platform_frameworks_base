@@ -33,7 +33,7 @@ interface IBubbles {
 
     oneway void showBubble(in String key, in int topOnScreen) = 3;
 
-    oneway void dragBubbleToDismiss(in String key) = 4;
+    oneway void dragBubbleToDismiss(in String key, in long timestamp) = 4;
 
     oneway void removeAllBubbles() = 5;
 
