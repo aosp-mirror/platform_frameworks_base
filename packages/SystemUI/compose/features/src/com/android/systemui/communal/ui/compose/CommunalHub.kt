@@ -622,14 +622,18 @@ private fun Toolbar(
                 )
                 .onSizeChanged { setToolbarSize(it) },
     ) {
+        val addWidgetText = stringResource(R.string.hub_mode_add_widget_button_text)
         ToolbarButton(
             isPrimary = !removeEnabled,
-            modifier = Modifier.align(Alignment.CenterStart),
+            modifier =
+                Modifier.align(Alignment.CenterStart).semantics {
+                    contentDescription = addWidgetText
+                },
             onClick = onOpenWidgetPicker,
         ) {
-            Icon(Icons.Default.Add, stringResource(R.string.hub_mode_add_widget_button_text))
+            Icon(Icons.Default.Add, null)
             Text(
-                text = stringResource(R.string.hub_mode_add_widget_button_text),
+                text = addWidgetText,
             )
         }
 
