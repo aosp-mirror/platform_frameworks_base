@@ -357,8 +357,7 @@ class BackNavigationController {
                                 removedWindowContainer);
                 mBackAnimationInProgress = builder != null;
                 if (mBackAnimationInProgress) {
-                    if (removedWindowContainer.hasCommittedReparentToAnimationLeash()
-                            || removedWindowContainer.mTransitionController.inTransition()
+                    if (removedWindowContainer.mTransitionController.inTransition()
                             || mWindowManagerService.mSyncEngine.hasPendingSyncSets()) {
                         ProtoLog.w(WM_DEBUG_BACK_PREVIEW,
                                 "Pending back animation due to another animation is running");
