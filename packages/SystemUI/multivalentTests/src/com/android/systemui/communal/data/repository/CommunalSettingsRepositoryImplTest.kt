@@ -185,7 +185,7 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
     fun backgroundType_defaultValue() =
         testScope.runTest {
             val backgroundType by collectLastValue(underTest.getBackground(PRIMARY_USER))
-            assertThat(backgroundType).isEqualTo(CommunalBackgroundType.DEFAULT)
+            assertThat(backgroundType).isEqualTo(CommunalBackgroundType.ANIMATED)
         }
 
     @Test

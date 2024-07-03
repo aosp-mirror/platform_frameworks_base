@@ -160,7 +160,7 @@ fun CommunalContainer(
         viewModel.showGestureIndicator.collectAsStateWithLifecycle(initialValue = false)
     val backgroundType by
         viewModel.communalBackground.collectAsStateWithLifecycle(
-            initialValue = CommunalBackgroundType.DEFAULT
+            initialValue = CommunalBackgroundType.ANIMATED
         )
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
@@ -243,7 +243,7 @@ private fun SceneScope.CommunalScene(
 ) {
     Box(modifier = Modifier.element(Communal.Elements.Scrim).fillMaxSize()) {
         when (backgroundType) {
-            CommunalBackgroundType.DEFAULT -> DefaultBackground(colors = colors)
+            CommunalBackgroundType.STATIC -> DefaultBackground(colors = colors)
             CommunalBackgroundType.STATIC_GRADIENT -> StaticLinearGradient()
             CommunalBackgroundType.ANIMATED -> AnimatedLinearGradient()
             CommunalBackgroundType.NONE -> BackgroundTopScrim()

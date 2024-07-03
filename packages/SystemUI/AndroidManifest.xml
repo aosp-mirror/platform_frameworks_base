@@ -280,6 +280,9 @@
     <!-- to adjust volume in volume panel -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
+    <!-- to get bluetooth audio device category -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED" />
+
     <!-- to access ResolverRankerServices -->
     <uses-permission android:name="android.permission.BIND_RESOLVER_RANKER_SERVICE" />
 

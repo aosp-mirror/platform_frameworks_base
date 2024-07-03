@@ -108,7 +108,12 @@ internal constructor(
     private val draggingItemLayoutInfo: LazyGridItemInfo?
         get() = state.layoutInfo.visibleItemsInfo.firstOrNull { it.index == draggingItemIndex }
 
-    internal fun onDragStart(offset: Offset, contentOffset: Offset) {
+    /**
+     * Called when dragging is initiated.
+     *
+     * @return {@code True} if dragging a grid item, {@code False} otherwise.
+     */
+    internal fun onDragStart(offset: Offset, contentOffset: Offset): Boolean {
         state.layoutInfo.visibleItemsInfo
             .filter { item -> contentListState.isItemEditable(item.index) }
             // grid item offset is based off grid content container so we need to deduct
@@ -118,7 +123,10 @@ internal constructor(
                 dragStartPointerOffset = offset - this.offset.toOffset()
                 draggingItemIndex = index
                 draggingItemInitialOffset = this.offset.toOffset()
+                return true
             }
+
+        return false
     }
 
     internal fun onDragInterrupted() {
@@ -216,8 +224,9 @@ fun Modifier.dragContainer(
                     dragDropState.onDrag(offset = offset)
                 },
                 onDragStart = { offset ->
-                    dragDropState.onDragStart(offset, contentOffset)
-                    viewModel.onReorderWidgetStart()
+                    if (dragDropState.onDragStart(offset, contentOffset)) {
+                        viewModel.onReorderWidgetStart()
+                    }
                 },
                 onDragEnd = {
                     dragDropState.onDragInterrupted()

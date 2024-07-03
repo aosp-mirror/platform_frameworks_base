@@ -20,6 +20,7 @@ import android.hardware.display.DisplayManager
 import android.os.Looper
 import android.testing.TestableLooper
 import android.view.Display
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.Display.TYPE_EXTERNAL
 import android.view.Display.TYPE_INTERNAL
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -27,7 +28,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -45,6 +45,7 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.eq
 
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
@@ -63,8 +64,8 @@ class DisplayRepositoryTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        setDisplays(emptyList())
-        setAllDisplaysIncludingDisabled()
+        setDisplays(DEFAULT_DISPLAY)
+        setAllDisplaysIncludingDisabled(DEFAULT_DISPLAY)
         displayRepository =
             DisplayRepositoryImpl(
                 displayManager,
@@ -81,7 +82,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val value by latestDisplayFlowValue()
 
-            assertThat(value).isEmpty()
+            assertThat(value?.ids()).containsExactly(DEFAULT_DISPLAY)
 
             verify(displayManager).registerDisplayListener(any(), eq(testHandler), anyLong())
         }
@@ -91,7 +92,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val value by latestDisplayFlowValue()
 
-            assertThat(value).isEmpty()
+            assertThat(value?.ids()).containsExactly(DEFAULT_DISPLAY)
 
             verify(displayManager).registerDisplayListener(any(), eq(testHandler), anyLong())
         }
@@ -103,14 +104,14 @@ class DisplayRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val firstSubscriber by latestDisplayFlowValue()
 
-            assertThat(firstSubscriber).isEmpty()
+            assertThat(firstSubscriber).hasSize(1) // Default display only
             verify(displayManager, times(1))
                 .registerDisplayListener(displayListener.capture(), eq(testHandler), anyLong())
 
             val innerScope = TestScope()
             innerScope.runTest {
                 val secondSubscriber by latestDisplayFlowValue()
-                assertThat(secondSubscriber).isEmpty()
+                assertThat(secondSubscriber).hasSize(1)
 
                 // No new registration, just the precedent one.
                 verify(displayManager, times(1))
@@ -120,7 +121,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
             // Let's make sure it has *NOT* been unregistered, as there is still a subscriber.
             setDisplays(1)
             sendOnDisplayAdded(1)
-            assertThat(firstSubscriber?.ids()).containsExactly(1)
+            assertThat(firstSubscriber?.ids()).contains(1)
         }
 
         // All subscribers are done, unregister should have been called.
@@ -135,7 +136,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
             setDisplays(1)
             sendOnDisplayAdded(1)
 
-            assertThat(value?.ids()).containsExactly(1)
+            assertThat(value?.ids()).contains(1)
         }
 
     @Test
@@ -152,7 +153,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
             setDisplays(1, 2, 3)
             sendOnDisplayRemoved(4)
 
-            assertThat(value?.ids()).containsExactly(1, 2, 3)
+            assertThat(value?.ids()).containsExactly(DEFAULT_DISPLAY, 1, 2, 3)
         }
 
     @Test
@@ -168,7 +169,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
 
             displayListener.value.onDisplayChanged(4)
 
-            assertThat(value?.ids()).containsExactly(1, 2, 3, 4)
+            assertThat(value?.ids()).containsExactly(DEFAULT_DISPLAY, 1, 2, 3, 4)
         }
 
     @Test
@@ -435,37 +436,29 @@ class DisplayRepositoryTest : SysuiTestCase() {
             val defaultDisplayOff by latestDefaultDisplayOffFlowValue()
             setDisplays(
                 listOf(
-                    display(
-                        type = TYPE_INTERNAL,
-                        id = Display.DEFAULT_DISPLAY,
-                        state = Display.STATE_OFF
-                    )
+                    display(type = TYPE_INTERNAL, id = DEFAULT_DISPLAY, state = Display.STATE_OFF)
                 )
             )
-            displayListener.value.onDisplayChanged(Display.DEFAULT_DISPLAY)
+            displayListener.value.onDisplayChanged(DEFAULT_DISPLAY)
             assertThat(defaultDisplayOff).isTrue()
 
             setDisplays(
                 listOf(
-                    display(
-                        type = TYPE_INTERNAL,
-                        id = Display.DEFAULT_DISPLAY,
-                        state = Display.STATE_ON
-                    )
+                    display(type = TYPE_INTERNAL, id = DEFAULT_DISPLAY, state = Display.STATE_ON)
                 )
             )
-            displayListener.value.onDisplayChanged(Display.DEFAULT_DISPLAY)
+            displayListener.value.onDisplayChanged(DEFAULT_DISPLAY)
             assertThat(defaultDisplayOff).isFalse()
         }
 
     @Test
     fun displayFlow_startsWithDefaultDisplayBeforeAnyEvent() =
         testScope.runTest {
-            setDisplays(Display.DEFAULT_DISPLAY)
+            setDisplays(DEFAULT_DISPLAY)
 
             val value by latestDisplayFlowValue()
 
-            assertThat(value?.ids()).containsExactly(Display.DEFAULT_DISPLAY)
+            assertThat(value?.ids()).containsExactly(DEFAULT_DISPLAY)
         }
 
     private fun Iterable<Display>.ids(): List<Int> = map { it.displayId }
@@ -565,6 +558,8 @@ class DisplayRepositoryTest : SysuiTestCase() {
     }
 
     private fun setDisplays(vararg ids: Int) {
-        setDisplays(ids.map { display(type = TYPE_EXTERNAL, id = it) })
+        // DEFAULT_DISPLAY always there
+        val idsToSet = ids.toSet() + DEFAULT_DISPLAY
+        setDisplays(idsToSet.map { display(type = TYPE_EXTERNAL, id = it) })
     }
 }

@@ -74,7 +74,7 @@ interface PanelsModule {
 
     @Binds
     @PaginatedBaseLayoutType
-    fun bindPaginatedBaseGridLayout(impl: PartitionedGridLayout): PaginatableGridLayout
+    fun bindPaginatedBaseGridLayout(impl: InfiniteGridLayout): PaginatableGridLayout
 
     @Binds
     @PaginatedBaseLayoutType

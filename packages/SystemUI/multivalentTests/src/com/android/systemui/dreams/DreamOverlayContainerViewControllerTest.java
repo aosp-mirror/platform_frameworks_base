@@ -149,6 +149,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         when(mDreamOverlayContainerView.getRootSurfaceControl())
                 .thenReturn(mAttachedSurfaceControl);
         when(mKeyguardTransitionInteractor.isFinishedInStateWhere(any())).thenReturn(emptyFlow());
+        when(mKeyguardTransitionInteractor.isFinishedIn(any(), any())).thenReturn(emptyFlow());
+        when(mKeyguardTransitionInteractor.isFinishedIn(any())).thenReturn(emptyFlow());
         when(mShadeInteractor.isAnyExpanded()).thenReturn(MutableStateFlow(false));
         when(mCommunalInteractor.isCommunalShowing()).thenReturn(MutableStateFlow(false));
 

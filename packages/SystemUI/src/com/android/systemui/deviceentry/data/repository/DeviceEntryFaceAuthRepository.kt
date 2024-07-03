@@ -58,6 +58,7 @@ import com.android.systemui.log.SessionTracker
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
@@ -221,8 +222,7 @@ constructor(
                 trySendWithFailureLogging(it.bypassEnabled, TAG, "BypassStateChanged")
                 awaitClose { it.unregisterOnBypassStateChangedListener(callback) }
             }
-        }
-            ?: flowOf(false)
+        } ?: flowOf(false)
 
     override fun setLockedOut(isLockedOut: Boolean) {
         _isLockedOut.value = isLockedOut
@@ -322,7 +322,10 @@ constructor(
         merge(
                 powerInteractor.isAsleep,
                 combine(
-                    keyguardTransitionInteractor.isFinishedInState(KeyguardState.GONE),
+                    keyguardTransitionInteractor.isFinishedIn(
+                        scene = Scenes.Gone,
+                        stateWithoutSceneContainer = KeyguardState.GONE
+                    ),
                     keyguardInteractor.statusBarState,
                 ) { isFinishedInGoneState, statusBarState ->
                     // When the user is dragging the primary bouncer in (up) by manually scrolling
@@ -733,6 +736,7 @@ constructor(
         pw.println("  lockscreenBypassEnabled: ${keyguardBypassController?.bypassEnabled ?: false}")
     }
 }
+
 /** Combine two boolean flows by and-ing both of them */
 private fun and(flow: Flow<Boolean>, anotherFlow: Flow<Boolean>) =
     flow.combine(anotherFlow) { a, b -> a && b }

@@ -40,6 +40,7 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
@@ -144,7 +145,10 @@ constructor(
      */
     override val isCommunalContentFlowFrozen: Flow<Boolean> =
         allOf(
-                keyguardTransitionInteractor.isFinishedInState(KeyguardState.GLANCEABLE_HUB),
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Communal,
+                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB
+                ),
                 keyguardInteractor.isKeyguardOccluded,
                 not(keyguardInteractor.isAbleToDream)
             )
@@ -177,7 +181,10 @@ constructor(
     // opened.
     override val isFocusable: Flow<Boolean> =
         combine(
-                keyguardTransitionInteractor.isFinishedInState(KeyguardState.GLANCEABLE_HUB),
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Communal,
+                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB
+                ),
                 communalInteractor.isIdleOnCommunal,
                 shadeInteractor.isAnyFullyExpanded,
             ) { transitionedToGlanceableHub, isIdleOnCommunal, isAnyFullyExpanded ->
