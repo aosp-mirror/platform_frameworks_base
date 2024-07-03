@@ -516,14 +516,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private final WeakHashMap<IBinder, Boolean> mFocusedWindowPerceptible = new WeakHashMap<>();
 
     /**
-     * The displayId of current active input method.
-     */
-    @GuardedBy("ImfLock.class")
-    int getCurTokenDisplayIdLocked() {
-        return getInputMethodBindingController(mCurrentUserId).getCurTokenDisplayId();
-    }
-
-    /**
      * The display ID of the input method indicates the fallback display which returned by
      * {@link #computeImeDisplayIdForTarget}.
      */
@@ -2617,6 +2609,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     @InputMethodNavButtonFlags
     private int getInputMethodNavButtonFlagsLocked() {
+        // TODO(b/345519864): Make mImeDrawsImeNavBarRes multi-user aware.
+        final int userId = mCurrentUserId;
+        final var bindingController = getInputMethodBindingController(userId);
         if (mImeDrawsImeNavBarResLazyInitFuture != null) {
             // TODO(b/225366708): Avoid Future.get(), which is internally used here.
             ConcurrentUtils.waitForFutureNoInterrupt(mImeDrawsImeNavBarResLazyInitFuture,
@@ -2624,15 +2619,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         // Whether the current display has a navigation bar. When this is false (e.g. emulator),
         // the IME should not draw the IME navigation bar.
-        final int tokenDisplayId = getCurTokenDisplayIdLocked();
+        final int tokenDisplayId = bindingController.getCurTokenDisplayId();
         final boolean hasNavigationBar = mWindowManagerInternal
                 .hasNavigationBar(tokenDisplayId != INVALID_DISPLAY
                         ? tokenDisplayId : DEFAULT_DISPLAY);
         final boolean canImeDrawsImeNavBar =
                 mImeDrawsImeNavBarRes != null && mImeDrawsImeNavBarRes.get() && hasNavigationBar;
         final boolean shouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherLocked(
-                InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE,
-                mCurrentUserId);
+                InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE, userId);
         return (canImeDrawsImeNavBar ? InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR : 0)
                 | (shouldShowImeSwitcherWhenImeIsShown
                 ? InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN : 0);
