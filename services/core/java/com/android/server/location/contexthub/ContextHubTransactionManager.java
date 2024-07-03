@@ -474,9 +474,8 @@ import java.util.concurrent.atomic.AtomicInteger;
                 return;
             }
 
-            Integer transactionMessageSequenceNumber = transaction.getMessageSequenceNumber();
+            int transactionMessageSequenceNumber = transaction.getMessageSequenceNumber();
             if (transaction.getTransactionType() != ContextHubTransaction.TYPE_RELIABLE_MESSAGE
-                    || transactionMessageSequenceNumber == null
                     || transactionMessageSequenceNumber != messageSequenceNumber) {
                 Log.w(TAG, "Received unexpected message transaction response (expected message "
                         + "sequence number = "
