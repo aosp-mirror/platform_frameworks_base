@@ -447,14 +447,6 @@ public class RavenwoodBaseContext extends Context {
     }
 
     @Override
-    public void sendOrderedBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
-            String[] receiverPermissions, int appOp, Bundle options,
-            BroadcastReceiver resultReceiver, Handler scheduler, int initialCode,
-            String initialData, Bundle initialExtras) {
-        throw notSupported();
-    }
-
-    @Override
     public void sendStickyBroadcast(Intent intent) {
         throw notSupported();
     }
