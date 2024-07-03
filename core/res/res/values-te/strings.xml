@@ -265,6 +265,8 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"బగ్ రిపోర్ట్‌"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"సెషన్‌ను ముగించు"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"స్క్రీన్‌షాట్"</string>
+    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
+    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"బగ్ రిపోర్ట్‌"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ఇది ఈమెయిల్‌ మెసేజ్‌ రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ రిపోర్ట్‌ను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ప్రభావశీల రిపోర్ట్‌"</string>
@@ -1765,12 +1767,9 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
-    <skip />
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"తర్వాతిసారి మీరు యాక్సెసిబిలిటీ బటన్‌ను ట్యాప్ చేసినప్పుడు ఈ ఫీచర్ తెరుచుకుంటుంది"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"తర్వాతిసారి మీరు ఈ షార్ట్‌కట్‌ను ఉపయోగించినప్పుడు ఈ ఫీచర్ తెరుచుకుంటుంది. మీ స్క్రీన్ దిగువ నుండి 2 వేళ్లతో పైకి స్వైప్ చేసి, వెంటనే వదలండి."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"తర్వాతిసారి మీరు ఈ షార్ట్‌కట్‌ను ఉపయోగించినప్పుడు ఈ ఫీచర్ తెరుచుకుంటుంది. మీ స్క్రీన్ దిగువ నుండి 3 వేళ్లతో పైకి స్వైప్ చేసి, వెంటనే వదలండి."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"మ్యాగ్నిఫికేషన్"</string>
     <string name="user_switched" msgid="7249833311585228097">"ప్రస్తుత వినియోగదారు <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> యూజర్‌కు స్విచ్ అవుతోంది…"</string>
@@ -2434,12 +2433,21 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ఇది ఎలా పని చేస్తుంది"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"పెండింగ్‌లో ఉంది..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> సరిగ్గా పని చేయడం లేదు, తొలగించబడింది"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> బాగా పని చేయడం లేదు, తొలగించబడ్డాయి"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> సరిగ్గా పని చేయడం లేదు, తొలగించబడింది. వేలిముద్రతో మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి దాన్ని మళ్లీ సెటప్ చేయండి."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> బాగా పని చేయడం లేదు, తొలగించబడ్డాయి. మీ వేలిముద్రతో మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి వాటిని మళ్లీ సెటప్ చేయండి."</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
+    <skip />
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ఫేస్ అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"మీ ఫేస్ మోడల్ సరిగ్గా పని చేయడం లేదు, తొలగించబడింది. ఫేస్‌తో మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి దాన్ని మళ్లీ సెటప్ చేయండి."</string>
+    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
+    <skip />
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"సెటప్ చేయండి"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ఇప్పుడు కాదు"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> కోసం అలారం"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"యూజర్‌ను మార్చండి"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"మ్యూట్ చేయండి"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"సౌండ్‌ను మ్యూట్ చేయడానికి ట్యాప్ చేయండి"</string>
 </resources>

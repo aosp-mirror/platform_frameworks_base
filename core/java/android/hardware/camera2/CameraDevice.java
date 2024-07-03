@@ -1423,7 +1423,9 @@ public abstract class CameraDevice implements AutoCloseable {
      *         {@code false} otherwise.
      * @throws UnsupportedOperationException if the query operation is not supported by the camera
      *                                       device
-     * @throws IllegalArgumentException if the session configuration is invalid
+     * @throws IllegalArgumentException if the session configuration is invalid, including, if it
+     *                                  contains certain non-supported features queryable via
+     *                                  CameraCharacteristics.
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
@@ -1691,12 +1693,11 @@ public abstract class CameraDevice implements AutoCloseable {
          *
          * <p><b>IMPORTANT:</b></p>
          * <ul>
-         * <li>If feature support can be queried via
-         * {@link CameraCharacteristics#SCALER_MANDATORY_STREAM_COMBINATIONS} or
-         * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP}, applications should
-         * directly use that route rather than calling this function as: (1) using
-         * {@code CameraCharacteristics} is more efficient, and (2) calling this function with
-         * certain non-supported features will throw a {@link IllegalArgumentException}.</li>
+         * <li>If feature support can be queried via {@link CameraCharacteristics}, applications
+         * should directly use that route rather than calling this function as: (1) using
+         * {@code CameraCharacteristics} is more efficient, and (2) querying a feature explicitly
+         * deemed unsupported by CameraCharacteristics may throw a
+         * {@link IllegalArgumentException}.</li>
          *
          * <li>To minimize {@link SessionConfiguration} creation latency due to its dependency on
          * output surfaces, the application can call this method before acquiring valid
@@ -1724,7 +1725,8 @@ public abstract class CameraDevice implements AutoCloseable {
          *
          * @throws CameraAccessException if the camera device is no longer connected or has
          * encountered a fatal error
-         * @throws IllegalArgumentException if the session configuration is invalid
+         * @throws IllegalArgumentException if the session configuration is invalid, including,
+         * if it contains certain non-supported features queryable via CameraCharacteristics.
          *
          * @see CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION
          * @see SessionConfiguration

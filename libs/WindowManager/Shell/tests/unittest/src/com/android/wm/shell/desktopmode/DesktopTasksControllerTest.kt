@@ -264,7 +264,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   fun instantiate_flagOff_doNotAddInitCallback() {
-    whenever(DesktopModeStatus.isDesktopModeFlagEnabled()).thenReturn(false)
+    whenever(DesktopModeStatus.canEnterDesktopMode(context)).thenReturn(false)
     clearInvocations(shellInit)
 
     createController()
@@ -1093,10 +1093,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val fullscreenTask = createFullscreenTask()
 
     val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
-    assertThat(wct?.changes?.get(fullscreenTask.token.asBinder())?.windowingMode)
+
+    assertNotNull(wct, "should handle request")
+    assertThat(wct.changes[fullscreenTask.token.asBinder()]?.windowingMode)
         .isEqualTo(WINDOWING_MODE_FREEFORM)
 
-    assertThat(wct!!.hierarchyOps.size).isEqualTo(2)
+    assertThat(wct.hierarchyOps).hasSize(2)
     wct.assertReorderAt(1, homeTask, toTop = false)
   }
 

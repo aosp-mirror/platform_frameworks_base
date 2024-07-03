@@ -27,6 +27,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,17 +42,18 @@ import java.util.Objects;
 @SystemApi
 @FlaggedApi(FLAG_VIBRATION_XML_APIS)
 public final class ParsedVibration {
-    private final List<VibrationEffect> mEffects;
+    private final ArrayList<VibrationEffect> mEffects;
 
     /** @hide */
     @TestApi
     public ParsedVibration(@NonNull List<VibrationEffect> effects) {
-        mEffects = effects;
+        mEffects = new ArrayList<>(effects);
     }
 
     /** @hide */
     public ParsedVibration(@NonNull VibrationEffect effect) {
-        mEffects = List.of(effect);
+        mEffects = new ArrayList<>(1);
+        mEffects.add(effect);
     }
 
     /**
@@ -99,5 +101,12 @@ public final class ParsedVibration {
     @Override
     public int hashCode() {
         return Objects.hashCode(mEffects);
+    }
+
+    @Override
+    public String toString() {
+        return "ParsedVibration{"
+                + "effects=" + mEffects
+                + '}';
     }
 }

@@ -129,7 +129,7 @@ constructor(
                     }
                 }
             } else {
-                transitionInteractor.isInTransitionToAnyState.flatMapLatest { isInTransition ->
+                transitionInteractor.isInTransition.flatMapLatest { isInTransition ->
                     if (!isInTransition) {
                         defaultSurfaceBehindVisibility
                     } else {
@@ -206,11 +206,11 @@ constructor(
             transitionInteractor.currentKeyguardState
                 .sample(transitionInteractor.startedStepWithPrecedingStep, ::Pair)
                 .map { (currentState, startedWithPrev) ->
-                    val startedFromStep = startedWithPrev?.previousValue
-                    val startedStep = startedWithPrev?.newValue
+                    val startedFromStep = startedWithPrev.previousValue
+                    val startedStep = startedWithPrev.newValue
                     val returningToGoneAfterCancellation =
-                        startedStep?.to == KeyguardState.GONE &&
-                            startedFromStep?.transitionState == TransitionState.CANCELED &&
+                        startedStep.to == KeyguardState.GONE &&
+                            startedFromStep.transitionState == TransitionState.CANCELED &&
                             startedFromStep.from == KeyguardState.GONE
 
                     if (!returningToGoneAfterCancellation) {

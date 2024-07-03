@@ -16,11 +16,15 @@
 
 package com.android.systemui.util.settings;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
+
+import kotlinx.coroutines.CoroutineDispatcher;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,10 +34,16 @@ import java.util.Map;
 public class FakeGlobalSettings implements GlobalSettings {
     private final Map<String, String> mValues = new HashMap<>();
     private final Map<String, List<ContentObserver>> mContentObserversAllUsers = new HashMap<>();
+    private final CoroutineDispatcher mDispatcher;
 
     public static final Uri CONTENT_URI = Uri.parse("content://settings/fake_global");
 
     public FakeGlobalSettings() {
+        mDispatcher = StandardTestDispatcher(/* scheduler = */ null, /* name = */ null);
+    }
+
+    public FakeGlobalSettings(CoroutineDispatcher dispatcher) {
+        mDispatcher = dispatcher;
     }
 
     @Override
@@ -41,6 +51,11 @@ public class FakeGlobalSettings implements GlobalSettings {
         throw new UnsupportedOperationException(
                 "GlobalSettings.getContentResolver is not implemented, but you may find "
                         + "GlobalSettings.registerContentObserver helpful instead.");
+    }
+
+    @Override
+    public CoroutineDispatcher getBackgroundDispatcher() {
+        return mDispatcher;
     }
 
     @Override

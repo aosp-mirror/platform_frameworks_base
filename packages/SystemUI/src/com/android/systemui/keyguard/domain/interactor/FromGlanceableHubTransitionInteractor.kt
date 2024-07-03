@@ -50,6 +50,7 @@ constructor(
     private val glanceableHubTransitions: GlanceableHubTransitions,
     keyguardInteractor: KeyguardInteractor,
     override val transitionRepository: KeyguardTransitionRepository,
+    override val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,

@@ -28,6 +28,7 @@ import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
+import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAGS_IS_NON_APP_WINDOW;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
@@ -1231,7 +1232,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     public IBinder startTransition(@WindowManager.TransitionType int type,
             @NonNull WindowContainerTransaction wct, @Nullable TransitionHandler handler) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Directly starting a new transition "
-                + "type=%d wct=%s handler=%s", type, wct, handler);
+                + "type=%s wct=%s handler=%s", transitTypeToString(type), wct, handler);
         final ActiveTransition active =
                 new ActiveTransition(mOrganizer.startNewTransition(type, wct));
         active.mHandler = handler;

@@ -3364,6 +3364,10 @@ public class InputManagerService extends IInputManager.Stub
         mPointerIconCache.setPointerFillStyle(fillStyle);
     }
 
+    void setPointerStrokeStyle(@PointerIcon.PointerIconVectorStyleStroke int strokeStyle) {
+        mPointerIconCache.setPointerStrokeStyle(strokeStyle);
+    }
+
     void setPointerScale(float scale) {
         mPointerIconCache.setPointerScale(scale);
     }

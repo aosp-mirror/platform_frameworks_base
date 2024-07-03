@@ -68,6 +68,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -314,6 +315,40 @@ public class LockPatternUtilsTest {
         assertNotEquals(UserHandle.USER_ALL, LockPatternUtils.USER_REPAIR_MODE);
         assertNotEquals(UserHandle.USER_CURRENT, LockPatternUtils.USER_REPAIR_MODE);
         assertNotEquals(UserHandle.USER_CURRENT_OR_SELF, LockPatternUtils.USER_REPAIR_MODE);
+    }
+
+    @Test
+    public void testWriteRepairModeCredential_mainThread() {
+        createTestLockSettings();
+        var context = InstrumentationRegistry.getTargetContext();
+
+        var future = new CompletableFuture<Exception>();
+        context.getMainThreadHandler().post(() -> {
+            try {
+                mLockPatternUtils.writeRepairModeCredential(USER_ID);
+                future.complete(null);
+            } catch (Exception e) {
+                future.complete(e);
+            }
+        });
+
+        var e = future.join();
+        assertThat(e).isNotNull();
+        assertThat(e.getMessage()).contains("should not be called from the main thread");
+    }
+
+    @Test
+    public void testWriteRepairModeCredential() throws Exception {
+        var ils = createTestLockSettings();
+
+        when(ils.writeRepairModeCredential(USER_ID)).thenReturn(false);
+        assertThat(mLockPatternUtils.writeRepairModeCredential(USER_ID)).isFalse();
+
+        when(ils.writeRepairModeCredential(USER_ID)).thenReturn(true);
+        assertThat(mLockPatternUtils.writeRepairModeCredential(USER_ID)).isTrue();
+
+        when(ils.writeRepairModeCredential(USER_ID)).thenThrow(new RemoteException());
+        assertThat(mLockPatternUtils.writeRepairModeCredential(USER_ID)).isFalse();
     }
 
     private TestStrongAuthTracker createStrongAuthTracker() {

@@ -40,6 +40,7 @@ constructor(
     val deviceEntryInteractor: DeviceEntryInteractor,
     val deviceProvisioningInteractor: DeviceProvisioningInteractor,
     val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     val repository: KeyguardTransitionRepository,
 ) : CoreStartable {
 
@@ -64,7 +65,7 @@ constructor(
                 }
 
             if (
-                keyguardTransitionInteractor.currentTransitionInfoInternal.value.from !=
+                internalTransitionInteractor.currentTransitionInfoInternal.value.from !=
                     KeyguardState.OFF
             ) {
                 Log.e(

@@ -265,6 +265,8 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"အမှားရှာပြင် မှတ်တမ်း"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"စက်ရှင် ပြီးဆုံးပြီ"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
+    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
+    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"ချွတ်ယွင်းချက်အစီရင်ခံစာ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"သင့်ရဲ့ လက်ရှိ စက်အခြေအနေ အချက်အလက်များကို အီးမေးလ် အနေဖြင့် ပေးပို့ရန် စုဆောင်းပါမည်။ အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းမှ ပေးပို့ရန် အသင့်ဖြစ်သည်အထိ အချိန် အနည်းငယ်ကြာမြင့်မှာ ဖြစ်သဖြင့် သည်းခံပြီး စောင့်ပါရန်"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"လက်ငင်းတုံ့ပြန်နိုင်သည့် အစီရင်ခံချက်"</string>
@@ -1765,12 +1767,9 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
-    <skip />
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"နောက်တစ်ကြိမ်တွင် သုံးနိုင်မှုခလုတ်ကို တို့သည့်အခါ ဤဝန်ဆောင်မှု ပွင့်လာမည်"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"နောက်တစ်ကြိမ်တွင် ဤဖြတ်လမ်းကို သုံးသည့်အခါ ဤဝန်ဆောင်မှု ပွင့်လာမည်။ သင့်ဖန်သားပြင်အောက်ခြေမှ အပေါ်သို့ လက် ၂ ချောင်းဖြင့် ပွတ်ဆွဲ၍ အမြန်လွှတ်လိုက်ပါ။"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"နောက်တစ်ကြိမ်တွင် ဤဖြတ်လမ်းကို သုံးသည့်အခါ ဤဝန်ဆောင်မှု ပွင့်လာမည်။ သင့်ဖန်သားပြင်အောက်ခြေမှ အပေါ်သို့ လက် ၃ ချောင်းဖြင့် ပွတ်ဆွဲ၍ အမြန်လွှတ်လိုက်ပါ။"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ချဲ့ခြင်း"</string>
     <string name="user_switched" msgid="7249833311585228097">"လက်ရှိအသုံးပြုနေသူ <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>သို့ ပြောင်းနေသည်…"</string>
@@ -1986,14 +1985,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"လက်ရှိခေါ်ဆိုမှု"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"အဝင်ခေါ်ဆိုမှုကို စစ်ဆေးနေသည်"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"အမျိုးအစားမခွဲရသေးပါ"</string>
-    <!-- no translation found for promotional_notification_channel_label (7414844730492860233) -->
-    <skip />
-    <!-- no translation found for social_notification_channel_label (106520267132019945) -->
-    <skip />
-    <!-- no translation found for news_notification_channel_label (4299937455247883311) -->
-    <skip />
-    <!-- no translation found for recs_notification_channel_label (4945985121418684297) -->
-    <skip />
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"ပရိုမိုးရှင်းများ"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"လူမှုရေး"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"သတင်း"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"အကြံပြုချက်များ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ဤသတိပေးချက်များ၏ အရေးပါမှုကိုသတ်မှတ်ပြီးပါပြီ။"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ပါဝင်သည့်လူများကြောင့် အရေးပါပါသည်။"</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"စိတ်ကြိုက်အက်ပ် အကြောင်းကြားချက်"</string>
@@ -2210,10 +2205,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ဖန်သားပြင်အတွက် အများသုံးစွဲနိုင်မှုဖြတ်လမ်းလင့်ခ် ရွေးချယ်စနစ်"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"အများသုံးနိုင်မှု ဖြတ်လမ်းလင့်ခ်"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"အကြောင်းကြားစာအကွက်ကို ပယ်ရန်"</string>
-    <!-- no translation found for accessibility_system_action_menu_label (3385283204496447040) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_media_play_pause_label (1905647491347119748) -->
-    <skip />
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"မီနူး"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"မီဒီယာ ဖွင့်ရန်/ခဏရပ်ရန်"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad အပေါ်"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad အောက်"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ဘယ်"</string>
@@ -2433,19 +2426,28 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"သီးသန့်နေရာ"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"သတိထားရမည့် အကြောင်းကြားချက်ပါ အချက်အလက်ကို ဖျောက်ထားသည်"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"အက်ပ်အကြောင်းအရာသည် လုံခြုံရေးအတွက် မျက်နှာပြင် မျှဝေခြင်းမှ ဖျောက်ထားသည်"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"လုံခြုံရေးအတွက် အက်ပ်အကြောင်းအရာကို ဖန်သားပြင် မျှဝေခြင်းတွင် ဖျောက်ထားသည်"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ဂြိုဟ်တုနှင့် အလိုအလျောက် ချိတ်ဆက်ထားသည်"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက်မရှိဘဲ မက်ဆေ့ဂျ်များကို ပို့နိုင်၊ လက်ခံနိုင်သည်"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ဖွင့်ရန်"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"အလုပ်လုပ်ပုံ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ဆိုင်းငံ့ထားသည်…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"‘လက်ဗွေသုံး လော့ခ်ဖွင့်ခြင်း’ ကို စနစ်ထပ်မံထည့်သွင်းပါ"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> သိပ်အဆင်မပြေသဖြင့် ဖျက်ထားသည်"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> နှင့် <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> တို့ သိပ်အဆင်မပြေသဖြင့် ဖျက်ထားသည်"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> သိပ်အဆင်မပြေသဖြင့် ဖျက်ထားသည်။ သင့်ဖုန်းကို လက်ဗွေဖြင့်လော့ခ်ဖွင့်ရန် ၎င်းကို စနစ်ထပ်မံထည့်သွင်းပါ။"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> နှင့် <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> တို့ သိပ်အဆင်မပြေသဖြင့် ဖျက်ထားသည်။ သင့်ဖုန်းကို လက်ဗွေဖြင့်လော့ခ်ဖွင့်ရန် ၎င်းတို့ကို စနစ်ထပ်မံထည့်သွင်းပါ။"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
+    <skip />
     <string name="face_dangling_notification_title" msgid="947852541060975473">"‘မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း’ ကို စနစ်ထပ်မံထည့်သွင်းပါ"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"သင့်မျက်နှာနမူနာ သိပ်အဆင်မပြေသဖြင့် ဖျက်ထားသည်။ သင့်ဖုန်းကို မျက်နှာဖြင့်လော့ခ်ဖွင့်ရန် ၎င်းကို စနစ်ထပ်မံထည့်သွင်းပါ။"</string>
+    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
+    <skip />
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"စနစ်ထည့်သွင်းရန်"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ယခုမလုပ်ပါ"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> အတွက် နှိုးစက်"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"အသုံးပြုသူ ပြောင်းရန်"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"အသံပိတ်ရန်"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"အသံပိတ်ရန် တို့ပါ"</string>
 </resources>

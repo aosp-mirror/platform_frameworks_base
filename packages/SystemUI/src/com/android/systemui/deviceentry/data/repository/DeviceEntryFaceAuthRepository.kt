@@ -397,7 +397,7 @@ constructor(
             Pair(keyguardRepository.isKeyguardGoingAway.isFalse(), "keyguardNotGoingAway"),
             Pair(
                 keyguardTransitionInteractor
-                    .isInTransitionToStateWhere(KeyguardState::deviceIsAsleepInState)
+                    .isInTransitionWhere(toStatePredicate = KeyguardState::deviceIsAsleepInState)
                     .isFalse(),
                 "deviceNotTransitioningToAsleepState"
             ),

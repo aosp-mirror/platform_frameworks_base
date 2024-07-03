@@ -16,7 +16,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.wm.shell.multivalentscreenshot">
     <application android:debuggable="true" android:supportsRtl="true">
-        <uses-library android:name="android.test.runner" />
         <activity
             android:name="platform.test.screenshot.ScreenshotActivity"
             android:exported="true">

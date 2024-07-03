@@ -132,7 +132,7 @@ bool StringPool::StyleRef::operator==(const StyleRef& rhs) const {
 
   auto rhs_iter = rhs.entry_->spans.begin();
   for (const Span& span : entry_->spans) {
-    const Span& rhs_span = *rhs_iter;
+    const Span& rhs_span = *rhs_iter++;
     if (span.first_char != rhs_span.first_char || span.last_char != rhs_span.last_char ||
         span.name != rhs_span.name) {
       return false;

@@ -186,7 +186,6 @@ constructor(
         interactor.configurationBasedDimensions
             .map {
                 when {
-                    !it.useSplitShade -> 0
                     it.useLargeScreenHeader -> it.marginTopLargeScreen
                     else -> it.marginTop
                 }
@@ -372,7 +371,7 @@ constructor(
                 paddingTopDimen,
                 interactor.topPosition
                     .sampleCombine(
-                        keyguardTransitionInteractor.isInTransitionToAnyState,
+                        keyguardTransitionInteractor.isInTransition,
                         shadeInteractor.qsExpansion,
                     )
                     .onStart { emit(Triple(0f, false, 0f)) }

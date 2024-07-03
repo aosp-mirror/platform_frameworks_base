@@ -31,6 +31,7 @@ import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResiz
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration.WindowingMode;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -600,12 +601,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             if (mAppIconBitmap != null && mAppName != null) {
                 return;
             }
-            final ActivityInfo activityInfo = mTaskInfo.topActivityInfo;
-            if (activityInfo == null) {
-                Log.e(TAG, "Top activity info not found in task");
+            final ComponentName baseActivity = mTaskInfo.baseActivity;
+            if (baseActivity == null) {
+                Log.e(TAG, "Base activity component not found in task");
                 return;
             }
-            PackageManager pm = mContext.getApplicationContext().getPackageManager();
+            final PackageManager pm = mContext.getApplicationContext().getPackageManager();
+            final ActivityInfo activityInfo = pm.getActivityInfo(baseActivity, 0 /* flags */);
             final IconProvider provider = new IconProvider(mContext);
             final Drawable appIconDrawable = provider.getIcon(activityInfo);
             final BaseIconFactory headerIconFactory = createIconFactory(mContext,
@@ -619,6 +621,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
             final ApplicationInfo applicationInfo = activityInfo.applicationInfo;
             mAppName = pm.getApplicationLabel(applicationInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Base activity's component name cannot be found on the system");
         } finally {
             Trace.endSection();
         }

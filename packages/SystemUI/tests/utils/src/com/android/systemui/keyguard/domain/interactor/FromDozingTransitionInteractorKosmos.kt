@@ -30,6 +30,7 @@ var Kosmos.fromDozingTransitionInteractor by
         FromDozingTransitionInteractor(
             transitionRepository = keyguardTransitionRepository,
             transitionInteractor = keyguardTransitionInteractor,
+            internalTransitionInteractor = internalKeyguardTransitionInteractor,
             scope = applicationCoroutineScope,
             bgDispatcher = testDispatcher,
             mainDispatcher = testDispatcher,

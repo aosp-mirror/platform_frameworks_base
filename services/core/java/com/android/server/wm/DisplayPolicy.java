@@ -782,7 +782,6 @@ public class DisplayPolicy {
     }
 
     private void onDisplaySwitchFinished() {
-        mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
         mDisplayContent.mDisplayUpdater.onDisplaySwitching(false);
     }
 

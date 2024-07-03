@@ -617,7 +617,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             if (transition.isCollecting()) {
                 deferTransitionReady = true;
                 transition.deferTransitionReady();
-            } else if (Flags.alwaysDeferTransitionWhenApplyWct()) {
+            } else {
                 Slog.w(TAG, "Transition is not collecting when applyTransaction."
                         + " transition=" + transition + " state=" + transition.getState());
                 transition = null;

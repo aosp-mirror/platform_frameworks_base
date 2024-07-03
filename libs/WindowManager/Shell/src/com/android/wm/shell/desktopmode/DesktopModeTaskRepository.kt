@@ -250,6 +250,10 @@ class DesktopModeTaskRepository {
         return ArraySet(displayData[displayId]?.activeTasks)
     }
 
+    /** Returns the minimized tasks for the given [displayId]. */
+    fun getMinimizedTasks(displayId: Int): ArraySet<Int> =
+        ArraySet(displayData[displayId]?.minimizedTasks)
+
     /**
      * Returns whether Desktop Mode is currently showing any tasks, i.e. whether any Desktop Tasks
      * are visible.

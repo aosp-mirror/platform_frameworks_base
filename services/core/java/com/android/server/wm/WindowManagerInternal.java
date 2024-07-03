@@ -44,6 +44,7 @@ import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationTarget;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.WindowInfo;
@@ -815,6 +816,16 @@ public abstract class WindowManagerInternal {
      * @return The UI context of top focused display.
      */
     public abstract Context getTopFocusedDisplayUiContext();
+
+    /**
+     * Sets the rotation of a non-default display.
+     *
+     * @param displayId The id of the display
+     * @param rotation The new rotation value.
+     * @param caller The requester of the rotation change, used for bookkeeping.
+     */
+    public abstract void setNonDefaultDisplayRotation(int displayId, @Surface.Rotation int rotation,
+            @NonNull String caller);
 
     /**
      * Sets whether the relevant display content can host the relevant home activity and wallpaper.

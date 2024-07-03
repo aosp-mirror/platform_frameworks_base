@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
@@ -38,6 +39,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -45,13 +47,25 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
 
+    private val systemShortcutsSource = FakeKeyboardShortcutGroupsSource()
+    private val multitaskingShortcutsSource = FakeKeyboardShortcutGroupsSource()
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val kosmos = testKosmos().also { it.testDispatcher = UnconfinedTestDispatcher() }
+    private val kosmos =
+        testKosmos().also {
+            it.testDispatcher = UnconfinedTestDispatcher()
+            it.shortcutHelperSystemShortcutsSource = systemShortcutsSource
+            it.shortcutHelperMultiTaskingShortcutsSource = multitaskingShortcutsSource
+        }
     private val testScope = kosmos.testScope
     private val interactor = kosmos.shortcutHelperCategoriesInteractor
     private val helper = kosmos.shortcutHelperTestHelper
-    private val systemShortcutsSource = kosmos.shortcutHelperSystemShortcutsSource
-    private val multitaskingShortcutsSource = kosmos.shortcutHelperMultiTaskingShortcutsSource
+
+    @Before
+    fun setUp() {
+        // Setting these sources as empty temporarily. Will be populated in follow up CL.
+        systemShortcutsSource.setGroups(emptyList())
+        multitaskingShortcutsSource.setGroups(emptyList())
+    }
 
     @Test
     fun categories_emptyByDefault() =
@@ -69,13 +83,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
 
             helper.showFromActivity()
 
-            assertThat(categories)
-                .containsExactly(
-                    systemShortcutsSource.systemShortcutsCategory(),
-                    multitaskingShortcutsSource.multitaskingShortcutCategory(),
-                    imeShortcutCategory
-                )
-                .inOrder()
+            assertThat(categories).containsExactly(imeShortcutCategory).inOrder()
         }
 
     @Test
@@ -95,12 +103,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
 
             helper.showFromActivity()
 
-            assertThat(categories)
-                .containsExactly(
-                    systemShortcutsSource.systemShortcutsCategory(),
-                    multitaskingShortcutsSource.multitaskingShortcutCategory(),
-                    expectedGroupedShortcutCategories
-                )
+            assertThat(categories).containsExactly(expectedGroupedShortcutCategories)
         }
 
     private val switchToNextLanguageShortcut =
