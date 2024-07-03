@@ -2013,6 +2013,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 hunWantsIt = mHeadsUpTouchHelper.onInterceptTouchEvent(ev);
                 if (hunWantsIt) {
                     mView.startDraggingOnHun();
+                    mHeadsUpManager.unpinAll(true);
                 }
             }
             boolean swipeWantsIt = false;
