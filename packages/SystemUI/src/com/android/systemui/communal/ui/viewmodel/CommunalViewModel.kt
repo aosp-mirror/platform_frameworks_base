@@ -322,14 +322,6 @@ constructor(
         not(shadeInteractor.isAnyFullyExpanded)
             .stateIn(bgScope, SharingStarted.Eagerly, initialValue = false)
 
-    // TODO(b/339667383): remove this temporary swipe gesture handle
-    /**
-     * The dream overlay has its own gesture handle as the SysUI window is not visible above the
-     * dream. This flow will be false when dreaming so that we don't show a duplicate handle when
-     * opening the hub over the dream.
-     */
-    val showGestureIndicator: Flow<Boolean> = not(keyguardInteractor.isDreaming)
-
     /** The type of background to use for the hub. */
     val communalBackground: Flow<CommunalBackgroundType> =
         communalSettingsInteractor.communalBackground
