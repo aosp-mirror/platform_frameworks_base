@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
+import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
 import com.android.window.flags.Flags.FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.shared.DesktopModeStatus
@@ -32,6 +33,7 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.DESKTOP_WINDOWIN
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ToggleOverride.OVERRIDE_OFF
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ToggleOverride.OVERRIDE_ON
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ToggleOverride.OVERRIDE_UNSET
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.WALLPAPER_ACTIVITY
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -308,6 +310,138 @@ class DesktopModeFlagsTest : ShellTestCase() {
         .isEqualTo(OVERRIDE_UNSET.setting.toString())
   }
 
+  @Test
+  @EnableFlags(
+    FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
+    FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+    FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  fun isEnabled_dwFlagEnabled_overrideUnset_featureFlagOn_returnsTrue() {
+    setOverride(OVERRIDE_UNSET.setting)
+
+    // For unset overrides, follow flag
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue()
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  fun isEnabled_dwFlagEnabled_overrideUnset_featureFlagOff_returnsFalse() {
+    setOverride(OVERRIDE_UNSET.setting)
+
+    // For unset overrides, follow flag
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse()
+  }
+
+  @Test
+  @EnableFlags(
+    FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
+    FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+    FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  fun isEnabled_dwFlagEnabled_overrideOn_featureFlagOn_returnsTrue() {
+    setOverride(OVERRIDE_ON.setting)
+
+    // When toggle override matches its default state (dw flag), don't override flags
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue()
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  fun isEnabled_dwFlagEnabled_overrideOn_featureFlagOff_returnFalse() {
+    setOverride(OVERRIDE_ON.setting)
+
+    // When toggle override matches its default state (dw flag), don't override flags
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse()
+  }
+
+  @Test
+  @EnableFlags(
+    FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
+    FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+    FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  fun isEnabled_dwFlagEnabled_overrideOff_featureFlagOn_returnsFalse() {
+    setOverride(OVERRIDE_OFF.setting)
+
+    // Follow override if they exist, and is not equal to default toggle state (dw flag)
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse()
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  fun isEnabled_dwFlagEnabled_overrideOff_featureFlagOff_returnsFalse() {
+    setOverride(OVERRIDE_OFF.setting)
+
+    // Follow override if they exist, and is not equal to default toggle state (dw flag)
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse()
+  }
+
+  @Test
+  @EnableFlags(
+    FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  fun isEnabled_dwFlagDisabled_overrideUnset_featureFlagOn_returnsTrue() {
+    setOverride(OVERRIDE_UNSET.setting)
+
+    // For unset overrides, follow flag
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue()
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
+  @DisableFlags(
+    FLAG_ENABLE_DESKTOP_WINDOWING_MODE, FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  fun isEnabled_dwFlagDisabled_overrideUnset_featureFlagOff_returnsFalse() {
+    setOverride(OVERRIDE_UNSET.setting)
+
+    // For unset overrides, follow flag
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse()
+  }
+
+  @Test
+  @EnableFlags(
+    FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  fun isEnabled_dwFlagDisabled_overrideOn_featureFlagOn_returnsTrue() {
+    setOverride(OVERRIDE_ON.setting)
+
+    // Follow override if they exist, and is not equal to default toggle state (dw flag)
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue()
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
+  @DisableFlags(
+    FLAG_ENABLE_DESKTOP_WINDOWING_MODE, FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  fun isEnabled_dwFlagDisabled_overrideOn_featureFlagOff_returnTrue() {
+    setOverride(OVERRIDE_ON.setting)
+
+    // Follow override if they exist, and is not equal to default toggle state (dw flag)
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue()
+  }
+
+  @Test
+  @EnableFlags(
+    FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+  fun isEnabled_dwFlagDisabled_overrideOff_featureFlagOn_returnsTrue() {
+    setOverride(OVERRIDE_OFF.setting)
+
+    // When toggle override matches its default state (dw flag), don't override flags
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue()
+  }
+
+  @Test
+  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
+  @DisableFlags(
+    FLAG_ENABLE_DESKTOP_WINDOWING_MODE, FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  fun isEnabled_dwFlagDisabled_overrideOff_featureFlagOff_returnsFalse() {
+    setOverride(OVERRIDE_OFF.setting)
+
+    // When toggle override matches its default state (dw flag), don't override flags
+    assertThat(WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse()
+  }
+
   private fun setOverride(setting: Int?) {
     val contentResolver = mContext.contentResolver
     val key = Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES
@@ -319,10 +453,15 @@ class DesktopModeFlagsTest : ShellTestCase() {
   }
 
   private fun resetCache() {
-    val cachedToggleOverride =
+    val cachedToggleOverrideDesktopMode =
         DESKTOP_WINDOWING_MODE::class.java.getDeclaredField("cachedToggleOverride")
-    cachedToggleOverride.isAccessible = true
-    cachedToggleOverride.set(DESKTOP_WINDOWING_MODE, null)
+    cachedToggleOverrideDesktopMode.isAccessible = true
+    cachedToggleOverrideDesktopMode.set(DESKTOP_WINDOWING_MODE, null)
+
+    val cachedToggleOverrideWallpaperActivity =
+      WALLPAPER_ACTIVITY::class.java.getDeclaredField("cachedToggleOverride")
+    cachedToggleOverrideWallpaperActivity.isAccessible = true
+    cachedToggleOverrideWallpaperActivity.set(WALLPAPER_ACTIVITY, null)
 
     // Clear override cache stored in System property
     System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY)
