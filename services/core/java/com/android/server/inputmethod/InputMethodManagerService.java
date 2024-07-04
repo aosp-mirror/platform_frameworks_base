@@ -195,6 +195,7 @@ import java.lang.annotation.Target;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -570,8 +571,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private final ImeTrackerService mImeTrackerService;
 
     class SettingsObserver extends ContentObserver {
-        int mUserId;
-        boolean mRegistered = false;
 
         /**
          * <em>This constructor must be called within the lock.</em>
@@ -580,36 +579,29 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             super(handler);
         }
 
-        @GuardedBy("ImfLock.class")
-        public void registerContentObserverLocked(@UserIdInt int userId) {
-            if (mRegistered && mUserId == userId) {
-                return;
-            }
+        void registerContentObserverForAllUsers() {
             ContentResolver resolver = mContext.getContentResolver();
-            if (mRegistered) {
-                mContext.getContentResolver().unregisterContentObserver(this);
-                mRegistered = false;
-            }
-            if (mUserId != userId) {
-                mUserId = userId;
-            }
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.DEFAULT_INPUT_METHOD), false, this, userId);
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.ENABLED_INPUT_METHODS), false, this, userId);
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE), false, this, userId);
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD), false, this, userId);
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE), false, this, userId);
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    STYLUS_HANDWRITING_ENABLED), false, this);
-            mRegistered = true;
+            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
+                    Settings.Secure.DEFAULT_INPUT_METHOD), false, this, UserHandle.ALL);
+            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
+                    Settings.Secure.ENABLED_INPUT_METHODS), false, this, UserHandle.ALL);
+            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
+                    Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE), false, this, UserHandle.ALL);
+            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
+                    Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD), false, this, UserHandle.ALL);
+            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE), false, this, UserHandle.ALL);
+            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
+                    STYLUS_HANDWRITING_ENABLED), false, this, UserHandle.ALL);
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
+        public void onChange(boolean selfChange, @NonNull Collection<Uri> uris, int flags,
+                @UserIdInt int userId) {
+            uris.forEach(uri -> onChangeInternal(uri, userId));
+        }
+
+        private void onChangeInternal(@NonNull Uri uri, @UserIdInt int userId) {
             final Uri showImeUri = Settings.Secure.getUriFor(
                     Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD);
             final Uri accessibilityRequestingNoImeUri = Settings.Secure.getUriFor(
@@ -617,23 +609,27 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final Uri stylusHandwritingEnabledUri = Settings.Secure.getUriFor(
                     STYLUS_HANDWRITING_ENABLED);
             synchronized (ImfLock.class) {
+                if (!mConcurrentMultiUserModeEnabled && mCurrentUserId != userId) {
+                    return;
+                }
+
                 if (showImeUri.equals(uri)) {
                     mMenuController.updateKeyboardFromSettingsLocked();
                 } else if (accessibilityRequestingNoImeUri.equals(uri)) {
                     final int accessibilitySoftKeyboardSetting = Settings.Secure.getIntForUser(
                             mContext.getContentResolver(),
-                            Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, 0, mUserId);
+                            Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, 0, userId);
                     mVisibilityStateComputer.getImePolicy().setA11yRequestNoSoftKeyboard(
                             accessibilitySoftKeyboardSetting);
-                    final var userData = getUserData(mUserId);
+                    final var userData = getUserData(userId);
                     if (mVisibilityStateComputer.getImePolicy().isA11yRequestNoSoftKeyboard()) {
                         hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,
                                 0 /* flags */, SoftInputShowHideReason.HIDE_SETTINGS_ON_CHANGE,
-                                mUserId);
-                    } else if (isShowRequestedForCurrentWindow(mUserId)) {
+                                userId);
+                    } else if (isShowRequestedForCurrentWindow(userId)) {
                         showCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,
                                 InputMethodManager.SHOW_IMPLICIT,
-                                SoftInputShowHideReason.SHOW_SETTINGS_ON_CHANGE, mUserId);
+                                SoftInputShowHideReason.SHOW_SETTINGS_ON_CHANGE, userId);
                     }
                 } else if (stylusHandwritingEnabledUri.equals(uri)) {
                     InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
@@ -641,21 +637,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                             .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
                 } else {
                     boolean enabledChanged = false;
-                    String newEnabled = InputMethodSettingsRepository.get(mUserId)
+                    String newEnabled = InputMethodSettingsRepository.get(userId)
                             .getEnabledInputMethodsStr();
-                    final var userData = getUserData(mUserId);
+                    final var userData = getUserData(userId);
                     if (!userData.mLastEnabledInputMethodsStr.equals(newEnabled)) {
                         userData.mLastEnabledInputMethodsStr = newEnabled;
                         enabledChanged = true;
                     }
-                    updateInputMethodsFromSettingsLocked(enabledChanged, mUserId);
+                    updateInputMethodsFromSettingsLocked(enabledChanged, userId);
                 }
             }
-        }
-
-        @Override
-        public String toString() {
-            return "SettingsObserver{mUserId=" + mUserId + " mRegistered=" + mRegistered + "}";
         }
     }
 
@@ -1307,9 +1298,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // TODO(b/342027196): Double check if we need to always reset upon user switching.
         newUserData.mLastEnabledInputMethodsStr = "";
 
-        // ContentObserver should be registered again when the user is changed
-        mSettingsObserver.registerContentObserverLocked(newUserId);
-
         mCurrentUserId = newUserId;
         final String defaultImiId = SecureSettingsWrapper.getString(
                 Settings.Secure.DEFAULT_INPUT_METHOD, null, newUserId);
@@ -1401,7 +1389,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }, "Lazily initialize IMMS#mImeDrawsImeNavBarRes");
 
                 mMyPackageMonitor.register(mContext, UserHandle.ALL, mIoHandler);
-                mSettingsObserver.registerContentObserverLocked(currentUserId);
+                mSettingsObserver.registerContentObserverForAllUsers();
 
                 final IntentFilter broadcastFilterForAllUsers = new IntentFilter();
                 broadcastFilterForAllUsers.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -6122,7 +6110,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             p.println("  mConcurrentMultiUserModeEnabled=" + mConcurrentMultiUserModeEnabled);
             p.println("  ENABLE_HIDE_IME_CAPTION_BAR="
                     + InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR);
-            p.println("  mSettingsObserver=" + mSettingsObserver);
             p.println("  mStylusIds=" + (mStylusIds != null
                     ? Arrays.toString(mStylusIds.toArray()) : ""));
 
