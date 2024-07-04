@@ -47,6 +47,8 @@ import android.net.ConnectivityModuleConnector.ConnectivityModuleHealthListener;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.util.AtomicFile;
@@ -288,7 +290,8 @@ public class CrashRecoveryTest {
     }
 
     @Test
-    public void testBootLoopWithRescuePartyAndRollbackPackageHealthObserver() throws Exception {
+    @DisableFlags(Flags.FLAG_DEPRECATE_FLAGS_AND_SETTINGS_RESETS)
+    public void testBootLoopWithRescuePartyAndRollbackObserver() throws Exception {
         PackageWatchdog watchdog = createWatchdog();
         RescuePartyObserver rescuePartyObserver = setUpRescuePartyObserver(watchdog);
         RollbackPackageHealthObserver rollbackObserver =
@@ -348,6 +351,56 @@ public class CrashRecoveryTest {
 
         verify(rescuePartyObserver).executeBootLoopMitigation(6);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(7);
+        verify(rollbackObserver, never()).executeBootLoopMitigation(3);
+
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_DEESCALATION_WINDOW_MS + 1);
+        Mockito.reset(rescuePartyObserver);
+
+        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
+            watchdog.noteBoot();
+        }
+        verify(rescuePartyObserver).executeBootLoopMitigation(1);
+        verify(rescuePartyObserver, never()).executeBootLoopMitigation(2);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_DEPRECATE_FLAGS_AND_SETTINGS_RESETS)
+    public void testBootLoopWithRescuePartyAndRollbackObserverNoFlags() throws Exception {
+        PackageWatchdog watchdog = createWatchdog();
+        RescuePartyObserver rescuePartyObserver = setUpRescuePartyObserver(watchdog);
+        RollbackPackageHealthObserver rollbackObserver =
+                setUpRollbackPackageHealthObserver(watchdog);
+
+        verify(rescuePartyObserver, never()).executeBootLoopMitigation(1);
+        verify(rollbackObserver, never()).executeBootLoopMitigation(1);
+        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
+            watchdog.noteBoot();
+        }
+        verify(rescuePartyObserver).executeBootLoopMitigation(1);
+        verify(rescuePartyObserver, never()).executeBootLoopMitigation(2);
+        verify(rollbackObserver, never()).executeBootLoopMitigation(1);
+
+        watchdog.noteBoot();
+
+        verify(rescuePartyObserver, never()).executeBootLoopMitigation(2);
+        verify(rollbackObserver).executeBootLoopMitigation(1);
+        verify(rollbackObserver, never()).executeBootLoopMitigation(2);
+        // Update the list of available rollbacks after executing bootloop mitigation once
+        when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of(ROLLBACK_INFO_HIGH,
+                ROLLBACK_INFO_MANUAL));
+
+        watchdog.noteBoot();
+
+        verify(rescuePartyObserver, never()).executeBootLoopMitigation(2);
+        verify(rollbackObserver).executeBootLoopMitigation(2);
+        verify(rollbackObserver, never()).executeBootLoopMitigation(3);
+        // Update the list of available rollbacks after executing bootloop mitigation
+        when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of(ROLLBACK_INFO_MANUAL));
+
+        watchdog.noteBoot();
+
+        verify(rescuePartyObserver).executeBootLoopMitigation(2);
+        verify(rescuePartyObserver, never()).executeBootLoopMitigation(3);
         verify(rollbackObserver, never()).executeBootLoopMitigation(3);
 
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_DEESCALATION_WINDOW_MS + 1);
