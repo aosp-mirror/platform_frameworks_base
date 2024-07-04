@@ -542,6 +542,8 @@ public class AudioSystem
                 return "AUDIO_FORMAT_AAC_LATM_HE_V2"; // (AAC_LATM | AAC_SUB_HE_V2)
             case /* AUDIO_FORMAT_E_AC3_JOC         */ 0xA000001:
                 return "AUDIO_FORMAT_E_AC3_JOC";  // (E_AC3 | E_AC3_SUB_JOC)
+            case /* AUDIO_FORMAT_AC4_L4            */ 0x22000001:
+                return "AUDIO_FORMAT_AC4_L4";  // (AC4 | AC4_SUB_L4)
             case /* AUDIO_FORMAT_MAT_1_0           */ 0x24000001:
                 return "AUDIO_FORMAT_MAT_1_0"; // (MAT | MAT_SUB_1_0)
             case /* AUDIO_FORMAT_MAT_2_0           */ 0x24000002:
