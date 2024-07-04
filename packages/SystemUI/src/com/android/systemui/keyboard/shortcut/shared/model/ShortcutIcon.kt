@@ -16,21 +16,4 @@
 
 package com.android.systemui.keyboard.shortcut.shared.model
 
-data class Shortcut(
-    val label: String,
-    val commands: List<ShortcutCommand>,
-    val icon: ShortcutIcon? = null,
-)
-
-class ShortcutBuilder(private val label: String) {
-    val commands = mutableListOf<ShortcutCommand>()
-
-    fun command(builder: ShortcutCommandBuilder.() -> Unit) {
-        commands += ShortcutCommandBuilder().apply(builder).build()
-    }
-
-    fun build() = Shortcut(label, commands)
-}
-
-fun shortcut(label: String, block: ShortcutBuilder.() -> Unit): Shortcut =
-    ShortcutBuilder(label).apply(block).build()
+data class ShortcutIcon(val packageName: String, val resourceId: Int)

@@ -17,6 +17,7 @@
 package com.android.systemui.keyboard.shortcut.data.repository
 
 import android.content.Context
+import android.graphics.drawable.Icon
 import android.hardware.input.InputManager
 import android.util.Log
 import android.view.KeyCharacterMap
@@ -26,17 +27,20 @@ import android.view.KeyboardShortcutInfo
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
+import com.android.systemui.keyboard.shortcut.qualifiers.AppCategoriesShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.InputShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.MultitaskingShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.SystemShortcuts
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.APP_CATEGORIES
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.IME
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MULTI_TASKING
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.SYSTEM
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState.Active
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutIcon
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import javax.inject.Inject
@@ -52,6 +56,7 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @SystemShortcuts private val systemShortcutsSource: KeyboardShortcutGroupsSource,
     @MultitaskingShortcuts private val multitaskingShortcutsSource: KeyboardShortcutGroupsSource,
+    @AppCategoriesShortcuts private val appCategoriesShortcutsSource: KeyboardShortcutGroupsSource,
     @InputShortcuts private val inputShortcutsSource: KeyboardShortcutGroupsSource,
     private val inputManager: InputManager,
     stateRepository: ShortcutHelperStateRepository
@@ -72,7 +77,8 @@ constructor(
                 toShortcutCategory(
                     it.keyCharacterMap,
                     SYSTEM,
-                    systemShortcutsSource.shortcutGroups(it.id)
+                    systemShortcutsSource.shortcutGroups(it.id),
+                    keepIcons = true,
                 )
             } else {
                 null
@@ -85,7 +91,22 @@ constructor(
                 toShortcutCategory(
                     it.keyCharacterMap,
                     MULTI_TASKING,
-                    multitaskingShortcutsSource.shortcutGroups(it.id)
+                    multitaskingShortcutsSource.shortcutGroups(it.id),
+                    keepIcons = true,
+                )
+            } else {
+                null
+            }
+        }
+
+    val appCategoriesShortcutsCategory =
+        activeInputDevice.map {
+            if (it != null) {
+                toShortcutCategory(
+                    it.keyCharacterMap,
+                    APP_CATEGORIES,
+                    appCategoriesShortcutsSource.shortcutGroups(it.id),
+                    keepIcons = true,
                 )
             } else {
                 null
@@ -98,7 +119,8 @@ constructor(
                 toShortcutCategory(
                     it.keyCharacterMap,
                     IME,
-                    inputShortcutsSource.shortcutGroups(it.id)
+                    inputShortcutsSource.shortcutGroups(it.id),
+                    keepIcons = false,
                 )
             } else {
                 null
@@ -109,13 +131,14 @@ constructor(
         keyCharacterMap: KeyCharacterMap,
         type: ShortcutCategoryType,
         shortcutGroups: List<KeyboardShortcutGroup>,
+        keepIcons: Boolean,
     ): ShortcutCategory? {
         val subCategories =
             shortcutGroups
                 .map { shortcutGroup ->
                     ShortcutSubCategory(
                         shortcutGroup.label.toString(),
-                        toShortcuts(keyCharacterMap, shortcutGroup.items)
+                        toShortcuts(keyCharacterMap, shortcutGroup.items, keepIcons)
                     )
                 }
                 .filter { it.shortcuts.isNotEmpty() }
@@ -129,16 +152,37 @@ constructor(
 
     private fun toShortcuts(
         keyCharacterMap: KeyCharacterMap,
-        infoList: List<KeyboardShortcutInfo>
-    ) = infoList.mapNotNull { toShortcut(keyCharacterMap, it) }
+        infoList: List<KeyboardShortcutInfo>,
+        keepIcons: Boolean,
+    ) = infoList.mapNotNull { toShortcut(keyCharacterMap, it, keepIcons) }
 
     private fun toShortcut(
         keyCharacterMap: KeyCharacterMap,
-        shortcutInfo: KeyboardShortcutInfo
+        shortcutInfo: KeyboardShortcutInfo,
+        keepIcon: Boolean,
     ): Shortcut? {
-        val shortcutCommand = toShortcutCommand(keyCharacterMap, shortcutInfo)
-        return if (shortcutCommand == null) null
-        else Shortcut(label = shortcutInfo.label!!.toString(), commands = listOf(shortcutCommand))
+        val shortcutCommand = toShortcutCommand(keyCharacterMap, shortcutInfo) ?: return null
+        return Shortcut(
+            label = shortcutInfo.label!!.toString(),
+            icon = toShortcutIcon(keepIcon, shortcutInfo),
+            commands = listOf(shortcutCommand)
+        )
+    }
+
+    private fun toShortcutIcon(
+        keepIcon: Boolean,
+        shortcutInfo: KeyboardShortcutInfo
+    ): ShortcutIcon? {
+        if (!keepIcon) {
+            return null
+        }
+        val icon = shortcutInfo.icon ?: return null
+        // For now only keep icons of type resource, which is what the "default apps" shortcuts
+        // provide.
+        if (icon.type != Icon.TYPE_RESOURCE || icon.resPackage.isNullOrEmpty() || icon.resId <= 0) {
+            return null
+        }
+        return ShortcutIcon(packageName = icon.resPackage, resourceId = icon.resId)
     }
 
     private fun toShortcutCommand(

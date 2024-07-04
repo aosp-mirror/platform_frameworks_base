@@ -26,6 +26,7 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.IME
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MULTI_TASKING
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.SYSTEM
+import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.shortcutHelperMultiTaskingShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperSystemShortcutsSource
@@ -47,12 +48,14 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
 
     private val systemShortcutsSource = FakeKeyboardShortcutGroupsSource()
     private val multitaskingShortcutsSource = FakeKeyboardShortcutGroupsSource()
+    private val defaultAppsShortcutsSource = FakeKeyboardShortcutGroupsSource()
     @OptIn(ExperimentalCoroutinesApi::class)
     private val kosmos =
         testKosmos().also {
             it.testDispatcher = UnconfinedTestDispatcher()
             it.shortcutHelperSystemShortcutsSource = systemShortcutsSource
             it.shortcutHelperMultiTaskingShortcutsSource = multitaskingShortcutsSource
+            it.shortcutHelperAppCategoriesShortcutsSource = defaultAppsShortcutsSource
         }
 
     private val testScope = kosmos.testScope
