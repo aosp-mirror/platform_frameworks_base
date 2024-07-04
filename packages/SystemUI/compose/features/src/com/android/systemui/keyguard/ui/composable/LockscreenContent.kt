@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.composable
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +49,16 @@ class LockscreenContent(
     fun SceneScope.Content(
         modifier: Modifier = Modifier,
     ) {
+        val isContentVisible: Boolean by viewModel.isContentVisible.collectAsStateWithLifecycle()
+        if (!isContentVisible) {
+            // If the content isn't supposed to be visible, show a large empty box as it's needed
+            // for scene transition animations (can't just skip rendering everything or shared
+            // elements won't have correct final/initial bounds from animating in and out of the
+            // lockscreen scene).
+            Box(modifier)
+            return
+        }
+
         val coroutineScope = rememberCoroutineScope()
         val blueprintId by viewModel.blueprintId(coroutineScope).collectAsStateWithLifecycle()
         val view = LocalView.current
