@@ -534,6 +534,16 @@ flag {
 }
 
 flag {
+    name: "use_volume_controller"
+    namespace: "systemui"
+    description: "Adds Volume Controller signals to the AudioRepository to update volume"
+    bug: "349348461"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "screenshot_action_dismiss_system_windows"
     namespace: "systemui"
     description: "Dismiss existing system windows when starting action from screenshot UI"

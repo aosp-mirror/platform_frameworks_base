@@ -74,7 +74,7 @@ public class ResourcesManager {
     static final String TAG = "ResourcesManager";
     private static final boolean DEBUG = false;
 
-    private static ResourcesManager sResourcesManager;
+    private static volatile ResourcesManager sResourcesManager;
 
     /**
      * Internal lock object
@@ -359,17 +359,20 @@ public class ResourcesManager {
             sResourcesManager = resourcesManager;
             return oldResourceManager;
         }
-
     }
 
     @UnsupportedAppUsage
     public static ResourcesManager getInstance() {
-        synchronized (ResourcesManager.class) {
-            if (sResourcesManager == null) {
-                sResourcesManager = new ResourcesManager();
+        var rm = sResourcesManager;
+        if (rm == null) {
+            synchronized (ResourcesManager.class) {
+                rm = sResourcesManager;
+                if (rm == null) {
+                    sResourcesManager = rm = new ResourcesManager();
+                }
             }
-            return sResourcesManager;
         }
+        return rm;
     }
 
     /**

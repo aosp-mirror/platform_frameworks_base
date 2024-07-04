@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -168,9 +169,44 @@ class SceneTransitionLayoutTest {
 
         assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
 
-        rule.activity.onBackPressed()
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
         rule.waitForIdle()
         assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
+    }
+
+    @Test
+    fun testPredictiveBack() {
+        rule.setContent { TestContent() }
+
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+
+        // Start back.
+        val dispatcher = rule.activity.onBackPressedDispatcher
+        rule.runOnUiThread {
+            dispatcher.dispatchOnBackStarted(backEvent())
+            dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
+        }
+
+        val transition = assertThat(layoutState.transitionState).isTransition()
+        assertThat(transition).hasFromScene(SceneA)
+        assertThat(transition).hasToScene(SceneB)
+        assertThat(transition).hasProgress(0.4f)
+
+        // Cancel it.
+        rule.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
+        rule.waitForIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+        assertThat(layoutState.transitionState).isIdle()
+
+        // Start again and commit it.
+        rule.runOnUiThread {
+            dispatcher.dispatchOnBackStarted(backEvent())
+            dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
+            dispatcher.onBackPressed()
+        }
+        rule.waitForIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
+        assertThat(layoutState.transitionState).isIdle()
     }
 
     @Test
@@ -523,5 +559,14 @@ class SceneTransitionLayoutTest {
         assertThat(keyInA).isEqualTo(SceneA)
         assertThat(keyInB).isEqualTo(SceneB)
         assertThat(keyInC).isEqualTo(SceneC)
+    }
+
+    private fun backEvent(progress: Float = 0f): BackEventCompat {
+        return BackEventCompat(
+            touchX = 0f,
+            touchY = 0f,
+            progress = progress,
+            swipeEdge = BackEventCompat.EDGE_LEFT,
+        )
     }
 }

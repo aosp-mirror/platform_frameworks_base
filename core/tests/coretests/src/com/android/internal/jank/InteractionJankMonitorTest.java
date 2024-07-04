@@ -38,6 +38,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.provider.DeviceConfig;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewAttachTestActivity;
 
@@ -67,6 +68,7 @@ public class InteractionJankMonitorTest {
     private View mView;
     private Handler mHandler;
     private HandlerThread mWorker;
+    private SurfaceControl mSurfaceControl;
 
     @Rule
     public ActivityScenarioRule<ViewAttachTestActivity> mRule =
@@ -79,6 +81,9 @@ public class InteractionJankMonitorTest {
     public void setup() {
         mRule.getScenario().onActivity(activity -> mActivity = activity);
         mView = mActivity.getWindow().getDecorView();
+        mSurfaceControl = mView.getViewRootImpl().getSurfaceControl();
+        // Set mNativeObject to a non-zero value to make it a valid SurfaceControl.
+        mSurfaceControl.mNativeObject = 1;
         assertThat(mView.isAttachedToWindow()).isTrue();
 
         mHandler = spy(new Handler(mActivity.getMainLooper()));
@@ -88,7 +93,7 @@ public class InteractionJankMonitorTest {
     }
 
     @Test
-    public void testBeginEnd() {
+    public void testBeginEnd_inputView() {
         InteractionJankMonitor monitor = createMockedInteractionJankMonitor();
         FrameTracker tracker = createMockedFrameTracker();
         doReturn(tracker).when(monitor).createFrameTracker(any());
@@ -97,6 +102,22 @@ public class InteractionJankMonitorTest {
 
         // Simulate a trace session and see if begin / end are invoked.
         assertThat(monitor.begin(mView, Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
+        verify(tracker).begin();
+        assertThat(monitor.end(Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
+        verify(tracker).end(REASON_END_NORMAL);
+    }
+
+    @Test
+    public void testBeginEnd_inputSurfaceControl() {
+        InteractionJankMonitor monitor = createMockedInteractionJankMonitor();
+        FrameTracker tracker = createMockedFrameTracker();
+        doReturn(tracker).when(monitor).createFrameTracker(any());
+        doNothing().when(tracker).begin();
+        doReturn(true).when(tracker).end(anyInt());
+
+        // Simulate a trace session and see if begin / end are invoked.
+        assertThat(monitor.begin(mSurfaceControl, mActivity.getApplicationContext(),
+                Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
         verify(tracker).begin();
         assertThat(monitor.end(Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
         verify(tracker).end(REASON_END_NORMAL);

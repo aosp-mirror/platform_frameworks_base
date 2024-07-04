@@ -103,6 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Праграма \"<xliff:g id="APPNAME">%1$s</xliff:g>\" выявіла гэты здымак экрана."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> і іншыя адкрытыя праграмы выявілі гэты здымак экрана."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Дадаць у нататку"</string>
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Дадаць спасылку"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Запіс экрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Апрацоўваецца запіс экрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Бягучае апавяшчэнне для сеанса запісу экрана"</string>
@@ -132,6 +133,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Запіс з праграмы &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; будзе спынены"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Экран абагульваецца"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +141,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Абагульванне з праграмы &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; будзе спынена"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"Экран трансліруецца"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Разблакіравана распазнаваннем твару. Націсніце для працягу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Твар распазнаны. Націсніце для працягу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Твар распазнаны. Для працягу націсніце значок разблакіроўкі."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Твар распазнаны. Націсніце, каб працягнуць."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Распазнана"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Скасаваць аўтэнтыфікацыю"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Іншыя варыянты"</string>
@@ -472,6 +476,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Дадаць іншыя віджэты"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Доўга націскайце, каб наладзіць віджэты"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Наладзіць віджэты"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Значок праграмы для адключанага віджэта"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Значок праграмы для віджэта ў працэсе ўсталявання"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Змяніць віджэт"</string>
@@ -549,12 +555,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Пачаць зараз"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Апавяшчэнняў няма"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Няма новых апавяшчэнняў"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (5720882373252389461) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (4260536236101821273) -->
-    <skip />
-    <!-- no translation found for go_to_adaptive_notification_settings (2423690125178298479) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Адаптыўныя апавяшчэнні ўключаны"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Пры атрыманні шматлікіх апавяшчэнняў за кароткі час прылада памяншае гучнасць і колькасць усплывальных вокнаў на 2 хв."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Выключыць"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Разблакіруйце, каб убачыць усе апавяшчэнні"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Гэта прылада знаходзіцца пад кантролем бацькоў"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ваша арганізацыя валодае гэтай прыладай і можа кантраляваць сеткавы трафік"</string>
@@ -1352,7 +1355,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Зараз выкарыстоўваецца праграмай \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Нядаўна выкарыстоўваўся праграмай \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Сістэма"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Элементы кіравання сістэмай"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Сістэмныя праграмы"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Шматзадачнасць"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Нядаўнія праграмы"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Падзелены экран"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Увод"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Ярлыкі праграм"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Спецыяльныя магчымасці"</string>
@@ -1369,14 +1376,10 @@
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
-    <!-- no translation found for touchpad_back_gesture_action_title (7199067250654332735) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_guidance (4222430588599527272) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_animation_content_description (2646107450922379918) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_screen_animation_content_description (4036267494237748710) -->
-    <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Каб вярнуцца на папярэдні экран, правядзіце трыма пальцамі ўлева або ўправа ў любым месцы сэнсарнай панэлі."</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Паказваецца, як на сэнсарнай панэлі тры пальцы рухаюцца ўправа і ўлева"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"На экране прылады паказваецца анімацыя жэста \"Назад\""</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Падсветка клавіятуры"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Узровень %1$d з %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Кіраванне домам"</string>

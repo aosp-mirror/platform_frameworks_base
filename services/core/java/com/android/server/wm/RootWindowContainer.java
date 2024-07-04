@@ -2866,9 +2866,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         } else {
             throw new RuntimeException("Create the same sleep token twice: " + token);
         }
-        if (isSwappingDisplay) {
-            display.mWallpaperController.onDisplaySwitchStarted();
-        }
         return token;
     }
 

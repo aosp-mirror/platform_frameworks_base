@@ -32,6 +32,9 @@ import android.tools.flicker.config.ScenarioId
 import android.tools.flicker.config.desktopmode.Components
 import android.tools.flicker.extractors.ITransitionMatcher
 import android.tools.flicker.extractors.ShellTransitionScenarioExtractor
+import android.tools.flicker.extractors.TaggedCujTransitionMatcher
+import android.tools.flicker.extractors.TaggedScenarioExtractorBuilder
+import android.tools.traces.events.CujType
 import android.tools.traces.wm.Transition
 import android.tools.traces.wm.TransitionType
 
@@ -121,24 +124,17 @@ class DesktopModeFlickerScenarios {
             FlickerConfigEntry(
                 scenarioId = ScenarioId("CORNER_RESIZE"),
                 extractor =
-                ShellTransitionScenarioExtractor(
-                    transitionMatcher =
-                    object : ITransitionMatcher {
-                        override fun findAll(
-                            transitions: Collection<Transition>
-                        ): Collection<Transition> {
-                            return transitions.filter {
-                                it.type == TransitionType.CHANGE
-                            }
-                        }
-                    }
-                ),
+                    TaggedScenarioExtractorBuilder()
+                        .setTargetTag(CujType.CUJ_DESKTOP_MODE_RESIZE_WINDOW)
+                        .setTransitionMatcher(
+                            TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                        ).build(),
                 assertions =
-                        listOf(
-                            AppWindowIsVisibleAlways(Components.DESKTOP_MODE_APP),
-                            AppWindowOnTopAtEnd(Components.DESKTOP_MODE_APP),
-                            AppWindowRemainInsideDisplayBounds(Components.DESKTOP_MODE_APP),
-                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+                    listOf(
+                        AppWindowIsVisibleAlways(Components.DESKTOP_MODE_APP),
+                        AppWindowOnTopAtEnd(Components.DESKTOP_MODE_APP),
+                        AppWindowRemainInsideDisplayBounds(Components.DESKTOP_MODE_APP),
+                    ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
     }
 }

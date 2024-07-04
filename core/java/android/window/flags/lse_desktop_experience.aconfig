@@ -127,3 +127,10 @@ flag {
     description: "Whether to show developer option for enabling desktop windowing mode"
     bug: "348193756"
 }
+
+flag {
+    name: "enable_desktop_windowing_app_to_web"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable the app-to-web feature and show the open in browser button in the header menu"
+    bug: "349695493"
+}
