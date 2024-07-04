@@ -878,15 +878,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         final int childWindowingMode = c.getActivityWindowingMode();
         if (!ActivityTaskManagerService.isPip2ExperimentEnabled()
-                && tr.getWindowingMode() == WINDOWING_MODE_PINNED
-                && (childWindowingMode == WINDOWING_MODE_PINNED
-                || childWindowingMode == WINDOWING_MODE_UNDEFINED)) {
-            // If setActivityWindowingMode requested to match its pinned task's windowing mode,
-            // remove any inconsistency checking timeout callbacks for PiP.
-            Slog.d(TAG, "Task and activity windowing modes match, so remove any timeout "
-                    + "abort PiP callbacks scheduled if needed; task_win_mode="
-                    + tr.getWindowingMode() + ", activity_win_mode=" + childWindowingMode);
-            mService.mRootWindowContainer.removeAllMaybeAbortPipEnterRunnable();
+                && tr.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            if (childWindowingMode == WINDOWING_MODE_PINNED
+                    || childWindowingMode == WINDOWING_MODE_UNDEFINED) {
+                // If setActivityWindowingMode requested to match its pinned task's windowing mode,
+                // remove any inconsistency checking timeout callbacks for PiP.
+                Slog.d(TAG, "Task and activity windowing modes match, so remove any timeout "
+                        + "abort PiP callbacks scheduled if needed; task_win_mode="
+                        + tr.getWindowingMode() + ", activity_win_mode=" + childWindowingMode);
+                mService.mRootWindowContainer.removeAllMaybeAbortPipEnterRunnable();
+            } else if (shouldApplyLifecycleEffectOnPipChange()) {
+                // This is leaving PiP: task is pinned mode and activity changes to non-pip mode.
+                // Then the activity can be resumed because it becomes focusable.
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
         }
         if (childWindowingMode > -1) {
             tr.forAllActivities(a -> { a.setWindowingMode(childWindowingMode); });
@@ -911,6 +916,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (canEnterPip) {
                     canEnterPip = mService.mActivityClientController
                             .requestPictureInPictureMode(activity);
+                    if (canEnterPip && shouldApplyLifecycleEffectOnPipChange()) {
+                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                    }
                 }
                 if (!canEnterPip) {
                     // Restore the flag to its previous state when the activity cannot enter PIP.
@@ -920,6 +928,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         return effects;
+    }
+
+    // TODO(b/333452456): For testing on local easier. Remove after the use case is gone.
+    @VisibleForTesting
+    static boolean shouldApplyLifecycleEffectOnPipChange() {
+        return android.os.SystemProperties.getBoolean(
+                "persist.wm.debug.apply_lifecycle_on_pip_change", false)
+                || com.android.window.flags.Flags.applyLifecycleOnPipChange();
     }
 
     private int applyDisplayAreaChanges(DisplayArea displayArea,
