@@ -51,6 +51,7 @@ static void simplifyPaint(int color, Paint* paint) {
     paint->setStrokeWidth(kHighContrastTextBorderWidth + 0.04 * paint->getSkFont().getSize());
     paint->setStrokeJoin(SkPaint::kRound_Join);
     paint->setLooper(nullptr);
+    paint->setBlendMode(SkBlendMode::kSrcOver);
 }
 
 class DrawTextFunctor {
