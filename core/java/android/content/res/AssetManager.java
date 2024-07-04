@@ -17,7 +17,6 @@
 package android.content.res;
 
 import static android.content.res.Resources.ID_NULL;
-import static android.app.ResourcesManager.ApkKey;
 
 import android.annotation.AnyRes;
 import android.annotation.ArrayRes;
@@ -27,7 +26,6 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.TestApi;
-import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration.NativeConfig;
@@ -266,7 +264,7 @@ public final class AssetManager implements AutoCloseable {
             }
 
             sSystemApkAssetsSet = new ArraySet<>(apkAssets);
-            sSystemApkAssets = apkAssets.toArray(new ApkAssets[0]);
+            sSystemApkAssets = apkAssets.toArray(new ApkAssets[apkAssets.size()]);
             if (sSystem == null) {
                 sSystem = new AssetManager(true /*sentinel*/);
             }
@@ -450,7 +448,7 @@ public final class AssetManager implements AutoCloseable {
     @Deprecated
     @UnsupportedAppUsage
     public int addAssetPath(String path) {
-        return addAssetPathInternal(List.of(new ApkKey(path, false, false)), false);
+        return addAssetPathInternal(path, false /*overlay*/, false /*appAsLib*/);
     }
 
     /**
@@ -460,7 +458,7 @@ public final class AssetManager implements AutoCloseable {
     @Deprecated
     @UnsupportedAppUsage
     public int addAssetPathAsSharedLibrary(String path) {
-        return addAssetPathInternal(List.of(new ApkKey(path, true, false)), false);
+        return addAssetPathInternal(path, false /*overlay*/, true /*appAsLib*/);
     }
 
     /**
@@ -470,107 +468,47 @@ public final class AssetManager implements AutoCloseable {
     @Deprecated
     @UnsupportedAppUsage
     public int addOverlayPath(String path) {
-        return addAssetPathInternal(List.of(new ApkKey(path, false, true)), false);
+        return addAssetPathInternal(path, true /*overlay*/, false /*appAsLib*/);
     }
 
     /**
      * @hide
      */
-    public void addPresetApkKeys(@NonNull List<ApkKey> keys) {
-        addAssetPathInternal(keys, true);
+    public void addSharedLibraryPaths(@NonNull String[] paths) {
+        final int length = paths.length;
+        for (int i = 0; i < length; i++) {
+            addAssetPathInternal(paths[i], false, true);
+        }
     }
 
-    private int addAssetPathInternal(List<ApkKey> apkKeys, boolean presetAssets) {
-        Objects.requireNonNull(apkKeys, "apkKeys");
-        if (apkKeys.isEmpty()) {
-            return 0;
-        }
-
+    private int addAssetPathInternal(String path, boolean overlay, boolean appAsLib) {
+        Objects.requireNonNull(path, "path");
         synchronized (this) {
             ensureOpenLocked();
             final int count = mApkAssets.length;
 
-            // See if we already have some of the apkKeys loaded.
-            final int originalAssetsCount = mApkAssets.length;
-
-            // Getting an assets' path is a relatively expensive operation, cache them.
-            final ArrayMap<String, Integer> assetPaths = new ArrayMap<>(originalAssetsCount);
-            for (int i = 0; i < originalAssetsCount; i++) {
-                assetPaths.put(mApkAssets[i].getAssetPath(), i);
-            }
-
-            final var newKeys = new ArrayList<ApkKey>(apkKeys.size());
-            int lastFoundIndex = -1;
-            for (int i = 0, pathsSize = apkKeys.size(); i < pathsSize; i++) {
-                final var key = apkKeys.get(i);
-                final var index = assetPaths.get(key.path);
-                if (index == null) {
-                    newKeys.add(key);
-                } else {
-                    lastFoundIndex = index;
+            // See if we already have it loaded.
+            for (int i = 0; i < count; i++) {
+                if (mApkAssets[i].getAssetPath().equals(path)) {
+                    return i + 1;
                 }
             }
-            if (newKeys.isEmpty()) {
-                return lastFoundIndex + 1;
-            }
 
-            final var newAssets = loadAssets(newKeys);
-            if (newAssets.isEmpty()) {
-                return 0;
-            }
-            mApkAssets = makeNewAssetsArrayLocked(newAssets);
-            nativeSetApkAssets(mObject, mApkAssets, true, presetAssets);
-            invalidateCachesLocked(-1);
-            return originalAssetsCount + 1;
-        }
-    }
-
-    /**
-     * Insert the new assets preserving the correct order: all non-loader assets go before all
-     * of the loader assets.
-     */
-    @GuardedBy("this")
-    private @NonNull ApkAssets[] makeNewAssetsArrayLocked(
-            @NonNull ArrayList<ApkAssets> newNonLoaderAssets) {
-        final int originalAssetsCount = mApkAssets.length;
-        int firstLoaderIndex = originalAssetsCount;
-        for (int i = 0; i < originalAssetsCount; i++) {
-            if (mApkAssets[i].isForLoader()) {
-                firstLoaderIndex = i;
-                break;
-            }
-        }
-        final int newAssetsSize = newNonLoaderAssets.size();
-        final var newAssetsArray = new ApkAssets[originalAssetsCount + newAssetsSize];
-        if (firstLoaderIndex > 0) {
-            // This should always be true, but who knows...
-            System.arraycopy(mApkAssets, 0, newAssetsArray, 0, firstLoaderIndex);
-        }
-        for (int i = 0; i < newAssetsSize; i++) {
-            newAssetsArray[firstLoaderIndex + i] = newNonLoaderAssets.get(i);
-        }
-        if (originalAssetsCount > firstLoaderIndex) {
-            System.arraycopy(
-                    mApkAssets, firstLoaderIndex,
-                    newAssetsArray, firstLoaderIndex + newAssetsSize,
-                    originalAssetsCount - firstLoaderIndex);
-        }
-        return newAssetsArray;
-    }
-
-    private static @NonNull ArrayList<ApkAssets> loadAssets(@NonNull ArrayList<ApkKey> keys) {
-        final int pathsSize = keys.size();
-        final var loadedAssets = new ArrayList<ApkAssets>(pathsSize);
-        final var resourcesManager = ResourcesManager.getInstance();
-        for (int i = 0; i < pathsSize; i++) {
-            final var key = keys.get(i);
+            final ApkAssets assets;
             try {
-                // ResourcesManager has a cache of loaded assets, ensuring we don't open the same
-                // file repeatedly, which is useful for the common overlays and registered
-                // shared libraries.
-                loadedAssets.add(resourcesManager.loadApkAssets(key));
+                if (overlay) {
+                    // TODO(b/70343104): This hardcoded path will be removed once
+                    // addAssetPathInternal is deleted.
+                    final String idmapPath = "/data/resource-cache/"
+                            + path.substring(1).replace('/', '@')
+                            + "@idmap";
+                    assets = ApkAssets.loadOverlayFromPath(idmapPath, 0 /* flags */);
+                } else {
+                    assets = ApkAssets.loadFromPath(path,
+                            appAsLib ? ApkAssets.PROPERTY_DYNAMIC : 0);
+                }
             } catch (IOException e) {
-                Log.w(TAG, "Failed to load asset, key = " + key, e);
+                return 0;
             }
 
             mApkAssets = Arrays.copyOf(mApkAssets, count + 1);
