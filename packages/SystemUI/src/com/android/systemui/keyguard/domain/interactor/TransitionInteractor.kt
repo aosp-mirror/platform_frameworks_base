@@ -25,6 +25,7 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
@@ -81,6 +82,7 @@ sealed class TransitionInteractor(
         // a bugreport.
         ownerReason: String = "",
     ): UUID? {
+        toState.checkValidState()
         if (fromState != internalTransitionInteractor.currentTransitionInfoInternal.value.to) {
             Log.e(
                 name,
@@ -166,6 +168,8 @@ sealed class TransitionInteractor(
      */
     @Deprecated("Will be merged into maybeStartTransitionToOccludedOrInsecureCamera")
     suspend fun maybeHandleInsecurePowerGesture(): Boolean {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return true
         if (keyguardOcclusionInteractor.shouldTransitionFromPowerButtonGesture()) {
             if (keyguardInteractor.isKeyguardDismissible.value) {
                 startTransitionTo(

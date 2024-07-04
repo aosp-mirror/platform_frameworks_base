@@ -39,6 +39,7 @@ import android.os.SystemProperties
 import android.provider.Settings
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
 import android.provider.Settings.Global.HEADS_UP_OFF
+import android.service.notification.Flags
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage
@@ -219,6 +220,15 @@ class HunGroupAlertBehaviorSuppressor() :
     ) {
     override fun shouldSuppress(entry: NotificationEntry) =
         entry.sbn.let { it.isGroup && it.notification.suppressAlertingDueToGrouping() }
+}
+
+class HunSilentNotificationSuppressor() :
+    VisualInterruptionFilter(
+        types = setOf(PEEK, PULSE),
+        reason = "notification isSilent"
+    ) {
+    override fun shouldSuppress(entry: NotificationEntry) =
+        entry.sbn.let { Flags.notificationSilentFlag() && it.notification.isSilent }
 }
 
 class HunJustLaunchedFsiSuppressor() :

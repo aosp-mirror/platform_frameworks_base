@@ -91,8 +91,8 @@ constructor(
 
     private fun listenForDreamingToGlanceableHub() {
         if (!communalHub()) return
-        if (SceneContainerFlag.isEnabled)
-            return // TODO(b/336576536): Check if adaptation for scene framework is needed
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         scope.launch("$TAG#listenForDreamingToGlanceableHub", mainDispatcher) {
             glanceableHubTransitions.listenForGlanceableHubTransition(
                 transitionOwnerName = TAG,
@@ -103,6 +103,8 @@ constructor(
     }
 
     private fun listenForDreamingToPrimaryBouncer() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
                 .sample(startedKeyguardTransitionStep, ::Pair)
@@ -179,8 +181,8 @@ constructor(
     }
 
     private fun listenForDreamingToGoneWhenDismissable() {
-        if (SceneContainerFlag.isEnabled)
-            return // TODO(b/336576536): Check if adaptation for scene framework is needed
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.isAbleToDream
                 .sampleCombine(

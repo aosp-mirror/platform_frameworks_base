@@ -57,7 +57,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.anyString
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoSession
 import org.mockito.quality.Strictness
 
@@ -74,6 +76,9 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
     @Mock lateinit var packageManager: PackageManager
 
     private lateinit var mockitoSession: MockitoSession
+
+    private val spiedContext = spy(context)
+    private val spiedResources = spy(spiedContext.resources)
 
     @Before
     fun setUp() {
@@ -100,6 +105,8 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
                 )
             )
             .thenReturn(listOf("com.google.test.notes"))
+
+        `when`(spiedContext.resources).thenReturn(spiedResources)
     }
 
     @After
@@ -109,7 +116,7 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
 
     private fun createUnderTest(isEnabled: Boolean = true): KeyguardQuickAffordanceConfig =
         NoteTaskQuickAffordanceConfig(
-            context = context,
+            context = spiedContext,
             controller = controller,
             stylusManager = stylusManager,
             userManager = userManager,
@@ -132,126 +139,262 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
         )
 
     // region lockScreenState
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun lockScreenState_stylusUsed_userUnlocked_isSelected_shouldEmitVisible() = runTest {
-        val underTest = createUnderTest()
-        TestConfig().setStylusEverUsed(true).setUserUnlocked(true).setConfigSelections(underTest)
-
-        val actual by collectLastValue(underTest.lockScreenState)
-
-        assertThat(actual).isEqualTo(createLockScreenStateVisible())
-    }
-
-    @Test
-    fun lockScreenState_stylusUsed_userUnlocked_isSelected_noDefaultNotesAppSet_shouldEmitHidden() =
+    fun lockScreenState_stylusUnused_userLocked_customizationDisabled_notesLockScreenShortcutNotSelected_shouldEmitHidden() =
         runTest {
             val underTest = createUnderTest()
             TestConfig()
-                .setStylusEverUsed(true)
-                .setUserUnlocked(true)
-                .setConfigSelections(underTest)
-            whenever(
-                    roleManager.getRoleHoldersAsUser(
-                        eq(RoleManager.ROLE_NOTES),
-                        any(UserHandle::class.java)
-                    )
-                )
-                .thenReturn(emptyList())
+                .setStylusEverUsed(false)
+                .setUserUnlocked(false)
+                .setLockScreenCustomizationEnabled(false)
+                .setConfigSelections()
 
             val actual by collectLastValue(underTest.lockScreenState)
 
             assertThat(actual).isEqualTo(LockScreenState.Hidden)
         }
 
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun lockScreenState_stylusUnused_userUnlocked_isSelected_shouldEmitHidden() = runTest {
-        val underTest = createUnderTest()
-        TestConfig().setStylusEverUsed(false).setUserUnlocked(true).setConfigSelections(underTest)
+    fun lockScreenState_stylusUnused_userLocked_customizationDisabled_notesLockScreenShortcutSelected_shouldEmitHidden() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(false)
+                .setUserUnlocked(false)
+                .setLockScreenCustomizationEnabled(false)
+                .setConfigSelections(underTest)
 
-        val actual by collectLastValue(underTest.lockScreenState)
+            val actual by collectLastValue(underTest.lockScreenState)
 
-        assertThat(actual).isEqualTo(LockScreenState.Hidden)
-    }
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
 
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun lockScreenState_stylusUsed_userLocked_isSelected_shouldEmitHidden() = runTest {
-        val underTest = createUnderTest()
-        TestConfig().setStylusEverUsed(true).setUserUnlocked(false).setConfigSelections(underTest)
+    fun lockScreenState_stylusUnused_userLocked_customizationEnabled_notesLockScreenShortcutNotSelected_shouldEmitHidden() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(false)
+                .setUserUnlocked(false)
+                .setLockScreenCustomizationEnabled(true)
+                .setConfigSelections()
 
-        val actual by collectLastValue(underTest.lockScreenState)
+            val actual by collectLastValue(underTest.lockScreenState)
 
-        assertThat(actual).isEqualTo(LockScreenState.Hidden)
-    }
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
 
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun lockScreenState_stylusUsed_userUnlocked_noSelected_shouldEmitHidden() = runTest {
-        TestConfig().setStylusEverUsed(true).setUserUnlocked(true).setConfigSelections()
+    fun lockScreenState_stylusUnused_userLocked_customizationEnabled_notesLockScreenShortcutSelected_shouldEmitHidden() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(false)
+                .setUserUnlocked(false)
+                .setLockScreenCustomizationEnabled(true)
+                .setConfigSelections(underTest)
 
-        val underTest = createUnderTest()
-        val actual by collectLastValue(underTest.lockScreenState)
+            val actual by collectLastValue(underTest.lockScreenState)
 
-        assertThat(actual).isEqualTo(LockScreenState.Hidden)
-    }
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
 
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun lockScreenState_stylusUnused_userUnlocked_noSelected_shouldEmitHidden() = runTest {
-        TestConfig().setStylusEverUsed(false).setUserUnlocked(true).setConfigSelections()
+    fun lockScreenState_stylusUnused_userUnlocked_customizationDisabled_notesLockScreenShortcutNotSelected_shouldEmitHidden() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(false)
+                .setUserUnlocked(true)
+                .setLockScreenCustomizationEnabled(false)
+                .setConfigSelections()
 
-        val underTest = createUnderTest()
-        val actual by collectLastValue(underTest.lockScreenState)
+            val actual by collectLastValue(underTest.lockScreenState)
 
-        assertThat(actual).isEqualTo(LockScreenState.Hidden)
-    }
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
 
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun lockScreenState_stylusUsed_userLocked_noSelected_shouldEmitHidden() = runTest {
-        TestConfig().setStylusEverUsed(true).setUserUnlocked(false).setConfigSelections()
+    fun lockScreenState_stylusUnused_userUnlocked_customizationDisabled_notesLockScreenShortcutSelected_shouldEmitHidden() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(false)
+                .setUserUnlocked(true)
+                .setLockScreenCustomizationEnabled(false)
+                .setConfigSelections(underTest)
 
-        val underTest = createUnderTest()
-        val actual by collectLastValue(underTest.lockScreenState)
+            val actual by collectLastValue(underTest.lockScreenState)
 
-        assertThat(actual).isEqualTo(LockScreenState.Hidden)
-    }
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
 
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun lockScreenState_stylusUsed_userUnlocked_customSelections_shouldEmitHidden() = runTest {
-        TestConfig().setStylusEverUsed(true).setUserUnlocked(true).setConfigSelections(mock())
+    fun lockScreenState_stylusUnused_userUnlocked_customizationEnabled_notesLockScreenShortcutNotSelected_shouldEmitHidden() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(false)
+                .setUserUnlocked(true)
+                .setLockScreenCustomizationEnabled(true)
+                .setConfigSelections()
 
-        val underTest = createUnderTest()
-        val actual by collectLastValue(underTest.lockScreenState)
+            val actual by collectLastValue(underTest.lockScreenState)
 
-        assertThat(actual).isEqualTo(LockScreenState.Hidden)
-    }
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
 
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun lockScreenState_stylusUnused_userUnlocked_customSelections_shouldEmitHidden() = runTest {
-        TestConfig().setStylusEverUsed(false).setUserUnlocked(true).setConfigSelections(mock())
+    fun lockScreenState_stylusUnused_userUnlocked_customizationEnabled_notesLockScreenShortcutSelected_shouldEmitVisible() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(false)
+                .setUserUnlocked(true)
+                .setLockScreenCustomizationEnabled(true)
+                .setConfigSelections(underTest)
 
-        val underTest = createUnderTest()
-        val actual by collectLastValue(underTest.lockScreenState)
+            val actual by collectLastValue(underTest.lockScreenState)
 
-        assertThat(actual).isEqualTo(LockScreenState.Hidden)
-    }
+            assertThat(actual).isEqualTo(createLockScreenStateVisible())
+        }
 
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun lockScreenState_stylusUsed_userLocked_customSelections_shouldEmitHidden() = runTest {
-        TestConfig().setStylusEverUsed(true).setUserUnlocked(false).setConfigSelections(mock())
+    fun lockScreenState_stylusUsed_userLocked_customizationDisabled_notesLockScreenShortcutNotSelected_shouldEmitHidden() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(true)
+                .setUserUnlocked(false)
+                .setLockScreenCustomizationEnabled(false)
+                .setConfigSelections()
 
-        val underTest = createUnderTest()
-        val actual by collectLastValue(underTest.lockScreenState)
+            val actual by collectLastValue(underTest.lockScreenState)
 
-        assertThat(actual).isEqualTo(LockScreenState.Hidden)
-    }
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
 
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun lockScreenState_isNotEnabled_shouldEmitHidden() = runTest {
-        TestConfig().setStylusEverUsed(true).setUserUnlocked(true).setConfigSelections()
+    fun lockScreenState_stylusUsed_userLocked_customizationDisabled_notesLockScreenShortcutSelected_shouldEmitHidden() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(true)
+                .setUserUnlocked(false)
+                .setLockScreenCustomizationEnabled(false)
+                .setConfigSelections(underTest)
 
-        val underTest = createUnderTest(isEnabled = false)
-        val actual by collectLastValue(underTest.lockScreenState)
+            val actual by collectLastValue(underTest.lockScreenState)
 
-        assertThat(actual).isEqualTo(LockScreenState.Hidden)
-    }
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
+
+    @Suppress("ktlint:standard:max-line-length")
+    @Test
+    fun lockScreenState_stylusUsed_userLocked_customizationEnabled_notesLockScreenShortcutNotSelected_shouldEmitHidden() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(true)
+                .setUserUnlocked(false)
+                .setLockScreenCustomizationEnabled(true)
+                .setConfigSelections()
+
+            val actual by collectLastValue(underTest.lockScreenState)
+
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
+
+    @Suppress("ktlint:standard:max-line-length")
+    @Test
+    fun lockScreenState_stylusUsed_userLocked_customizationEnabled_notesLockScreenShortcutSelected_shouldEmitHidden() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(true)
+                .setUserUnlocked(false)
+                .setLockScreenCustomizationEnabled(true)
+                .setConfigSelections(underTest)
+
+            val actual by collectLastValue(underTest.lockScreenState)
+
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
+
+    @Suppress("ktlint:standard:max-line-length")
+    @Test
+    fun lockScreenState_stylusUsed_userUnlocked_customizationDisabled_notesLockScreenShortcutNotSelected_shouldEmitVisible() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(true)
+                .setUserUnlocked(true)
+                .setLockScreenCustomizationEnabled(false)
+                .setConfigSelections()
+
+            val actual by collectLastValue(underTest.lockScreenState)
+
+            assertThat(actual).isEqualTo(createLockScreenStateVisible())
+        }
+
+    @Suppress("ktlint:standard:max-line-length")
+    @Test
+    fun lockScreenState_stylusUsed_userUnlocked_customizationDisabled_notesLockScreenShortcutSelected_shouldEmitVisible() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(true)
+                .setUserUnlocked(true)
+                .setLockScreenCustomizationEnabled(false)
+                .setConfigSelections(underTest)
+
+            val actual by collectLastValue(underTest.lockScreenState)
+
+            assertThat(actual).isEqualTo(createLockScreenStateVisible())
+        }
+
+    @Suppress("ktlint:standard:max-line-length")
+    @Test
+    fun lockScreenState_stylusUsed_userUnlocked_customizationEnabled_notesLockScreenShortcutNotSelected_shouldEmitHidden() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(true)
+                .setUserUnlocked(true)
+                .setLockScreenCustomizationEnabled(true)
+                .setConfigSelections()
+
+            val actual by collectLastValue(underTest.lockScreenState)
+
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
+
+    @Suppress("ktlint:standard:max-line-length")
+    @Test
+    fun lockScreenState_stylusUsed_userUnlocked_customizationEnabled_notesLockScreenShortcutSelected_shouldEmitVisible() =
+        runTest {
+            val underTest = createUnderTest()
+            TestConfig()
+                .setStylusEverUsed(true)
+                .setUserUnlocked(true)
+                .setLockScreenCustomizationEnabled(true)
+                .setConfigSelections(underTest)
+
+            val actual by collectLastValue(underTest.lockScreenState)
+
+            assertThat(actual).isEqualTo(createLockScreenStateVisible())
+        }
+
     // endregion
 
     @Test
@@ -294,16 +437,22 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
             .isEqualTo(ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE)
         assertThat(disabled.actionIntent?.`package`).isEqualTo(context.packageName)
     }
+
     // endregion
 
     private inner class TestConfig {
 
         fun setStylusEverUsed(value: Boolean) = also {
-            whenever(InputSettings.isStylusEverUsed(mContext)).thenReturn(value)
+            whenever(InputSettings.isStylusEverUsed(spiedContext)).thenReturn(value)
         }
 
         fun setUserUnlocked(value: Boolean) = also {
             whenever(userManager.isUserUnlocked).thenReturn(value)
+        }
+
+        fun setLockScreenCustomizationEnabled(value: Boolean) = also {
+            `when`(spiedResources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled))
+                .thenReturn(value)
         }
 
         fun setConfigSelections(vararg values: KeyguardQuickAffordanceConfig) = also {

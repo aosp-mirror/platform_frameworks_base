@@ -29,18 +29,21 @@ import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
-import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
+import androidx.compose.ui.input.pointer.changedToDown
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
+import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.PointerInputModifierNode
+import androidx.compose.ui.node.TraversableNode
 import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.findNearestAncestor
 import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
@@ -48,11 +51,12 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFirstOrNull
-import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastSumBy
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.sign
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 /**
  * Make an element draggable in the given [orientation].
@@ -112,6 +116,18 @@ private data class MultiPointerDraggableElement(
     }
 }
 
+private val TRAVERSE_KEY = Any()
+
+/** Find the nearest [PointersInfoOwner] ancestor or throw. */
+internal fun DelegatableNode.requireAncestorPointersInfoOwner(): PointersInfoOwner {
+    val ancestorNode =
+        checkNotNull(findNearestAncestor(TRAVERSE_KEY)) {
+            "This should never happen! Couldn't find a MultiPointerDraggableNode. " +
+                "Are we inside an SceneTransitionLayout?"
+        }
+    return ancestorNode as PointersInfoOwner
+}
+
 internal class MultiPointerDraggableNode(
     orientation: Orientation,
     enabled: () -> Boolean,
@@ -120,14 +136,18 @@ internal class MultiPointerDraggableNode(
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
     var swipeDetector: SwipeDetector = DefaultSwipeDetector,
 ) :
-    PointerInputModifierNode,
     DelegatingNode(),
+    PointerInputModifierNode,
     CompositionLocalConsumerModifierNode,
+    TraversableNode,
+    PointersInfoOwner,
     ObserverModifierNode {
     private val pointerInputHandler: suspend PointerInputScope.() -> Unit = { pointerInput() }
     private val delegate = delegate(SuspendingPointerInputModifierNode(pointerInputHandler))
     private val velocityTracker = VelocityTracker()
     private var previousEnabled: Boolean = false
+
+    override val traverseKey: Any = TRAVERSE_KEY
 
     var enabled: () -> Boolean = enabled
         set(value) {
@@ -185,12 +205,42 @@ internal class MultiPointerDraggableNode(
         bounds: IntSize
     ) = delegate.onPointerEvent(pointerEvent, pass, bounds)
 
+    private var startedPosition: Offset? = null
+    private var pointersDown: Int = 0
+
+    override fun pointersInfo(): PointersInfo {
+        return PointersInfo(
+            startedPosition = startedPosition,
+            // Note: We could have 0 pointers during fling or for other reasons.
+            pointersDown = pointersDown.coerceAtLeast(1),
+        )
+    }
+
     private suspend fun PointerInputScope.pointerInput() {
         if (!enabled()) {
             return
         }
 
         coroutineScope {
+            launch {
+                // Intercepts pointer inputs and exposes [PointersInfo], via
+                // [requireAncestorPointersInfoOwner], to our descendants.
+                awaitPointerEventScope {
+                    while (isActive) {
+                        // During the Initial pass, we receive the event after our ancestors.
+                        val pointers = awaitPointerEvent(PointerEventPass.Initial).changes
+
+                        pointersDown = pointers.countDown()
+                        if (pointersDown == 0) {
+                            // There are no more pointers down
+                            startedPosition = null
+                        } else if (startedPosition == null) {
+                            startedPosition = pointers.first().position
+                        }
+                    }
+                }
+            }
+
             awaitPointerEventScope {
                 while (isActive) {
                     try {
@@ -314,15 +364,16 @@ internal class MultiPointerDraggableNode(
             }
 
         if (drag != null) {
-            // Count the number of pressed pointers.
-            val pressed = mutableSetOf<PointerId>()
-            currentEvent.changes.fastForEach { change ->
-                if (change.pressed) {
-                    pressed.add(change.id)
-                }
-            }
-
-            val controller = onDragStart(drag.position, overSlop, pressed.size)
+            val controller =
+                onDragStart(
+                    // The startedPosition is the starting position when a gesture begins (when the
+                    // first pointer touches the screen), not the point where we begin dragging.
+                    // For example, this could be different if one of our children intercepts the
+                    // gesture first and then we do.
+                    requireNotNull(startedPosition),
+                    overSlop,
+                    pointersDown,
+                )
 
             val successful: Boolean
             try {
@@ -364,12 +415,10 @@ internal class MultiPointerDraggableNode(
         fun canBeConsumed(changes: List<PointerInputChange>): Boolean {
             // At least one pointer down AND
             return changes.fastAny { it.pressed } &&
-                // All pointers must be:
+                // All pointers must be either:
                 changes.fastAll {
-                    // A) recently pressed: even if the event has already been consumed, we can
-                    // still use the recently added finger event to determine whether to initiate
-                    // dragging the scene.
-                    it.changedToDownIgnoreConsumed() ||
+                    // A) unconsumed AND recently pressed
+                    it.changedToDown() ||
                         // B) unconsumed AND in a new position (on the current axis)
                         it.positionChange().toFloat() != 0f
                 }
@@ -461,4 +510,15 @@ internal class MultiPointerDraggableNode(
             }
         }
     }
+
+    private fun List<PointerInputChange>.countDown() = fastSumBy { if (it.pressed) 1 else 0 }
 }
+
+internal fun interface PointersInfoOwner {
+    fun pointersInfo(): PointersInfo
+}
+
+internal data class PointersInfo(
+    val startedPosition: Offset?,
+    val pointersDown: Int,
+)

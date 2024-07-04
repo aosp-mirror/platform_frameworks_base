@@ -59,10 +59,13 @@ val Kosmos.shortcutHelperStateRepository by
 val Kosmos.shortcutHelperCategoriesRepository by
     Kosmos.Fixture {
         ShortcutHelperCategoriesRepository(
+            applicationContext,
+            testDispatcher,
             shortcutHelperSystemShortcutsSource,
             shortcutHelperMultiTaskingShortcutsSource,
             windowManager,
-            shortcutHelperStateRepository
+            fakeInputManager.inputManager,
+            shortcutHelperStateRepository,
         )
     }
 

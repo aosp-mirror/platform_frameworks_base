@@ -67,6 +67,11 @@ public interface NotificationInterruptStateProvider {
          */
         NO_FSI_SUPPRESSIVE_BUBBLE_METADATA(false),
         /**
+         * Notification should not FSI due to being explicitly silent.
+         * see {@link android.app.Notification#isSilent}
+         */
+        NO_FSI_SUPPRESSIVE_SILENT_NOTIFICATION(false),
+        /**
          * Device screen is off, so the FSI should launch.
          */
         FSI_DEVICE_NOT_INTERACTIVE(true),

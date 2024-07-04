@@ -23,7 +23,7 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
-import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.util.kotlin.SettingsSingleThreadBackground;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
@@ -37,7 +37,7 @@ class GlobalSettingsImpl implements GlobalSettings {
 
     @Inject
     GlobalSettingsImpl(ContentResolver contentResolver,
-            @Background CoroutineDispatcher bgDispatcher) {
+            @SettingsSingleThreadBackground CoroutineDispatcher bgDispatcher) {
         mContentResolver = contentResolver;
         mBgDispatcher = bgDispatcher;
     }

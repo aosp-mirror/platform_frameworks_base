@@ -38,7 +38,6 @@ import java.util.Objects;
  *
  * @hide
  */
-@TestApi // This was used in CTS before the flag was introduced.
 @SystemApi
 @FlaggedApi(FLAG_VIBRATION_XML_APIS)
 public final class ParsedVibration {
@@ -62,7 +61,6 @@ public final class ParsedVibration {
      *
      * @hide
      */
-    @TestApi // This was used in CTS before the flag was introduced.
     @SystemApi
     @FlaggedApi(FLAG_VIBRATION_XML_APIS)
     @Nullable

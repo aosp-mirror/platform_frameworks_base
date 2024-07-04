@@ -32,7 +32,7 @@ import static android.view.WindowInsets.Type.statusBars;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.compatui.AppCompatUtils.isSingleTopActivityTranslucent;
+import static com.android.wm.shell.compatui.AppCompatUtils.isTopActivityExemptFromDesktopWindowing;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
@@ -105,7 +105,6 @@ import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 
 import java.io.PrintWriter;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -1034,12 +1033,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && taskInfo.isFocused) {
             return false;
         }
-        // TODO(b/347289970): Consider replacing with API
         if (Flags.enableDesktopWindowingModalsPolicy()
-                && isSingleTopActivityTranslucent(taskInfo)) {
-            return false;
-        }
-        if (isSystemUIApplication(taskInfo)) {
+                && isTopActivityExemptFromDesktopWindowing(mContext, taskInfo)) {
             return false;
         }
         return DesktopModeStatus.canEnterDesktopMode(mContext)
@@ -1116,14 +1111,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private boolean isTaskInSplitScreen(int taskId) {
         return mSplitScreenController != null
                 && mSplitScreenController.isTaskInSplitScreen(taskId);
-    }
-
-    // TODO(b/347289970): Consider replacing with API
-    private boolean isSystemUIApplication(RunningTaskInfo taskInfo) {
-        if (taskInfo.baseActivity != null) {
-            return (Objects.equals(taskInfo.baseActivity.getPackageName(), mSysUIPackageName));
-        }
-        return false;
     }
 
     private void dump(PrintWriter pw, String prefix) {

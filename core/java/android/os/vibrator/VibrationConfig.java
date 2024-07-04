@@ -70,7 +70,7 @@ public class VibrationConfig {
 
     private final boolean mDefaultKeyboardVibrationEnabled;
 
-    private final boolean mHasFixedKeyboardAmplitude;
+    private final boolean mKeyboardVibrationSettingsSupported;
 
     /** @hide */
     public VibrationConfig(@Nullable Resources resources) {
@@ -89,8 +89,8 @@ public class VibrationConfig {
                 com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger, false);
         mDefaultKeyboardVibrationEnabled = loadBoolean(resources,
                 com.android.internal.R.bool.config_defaultKeyboardVibrationEnabled, true);
-        mHasFixedKeyboardAmplitude = loadFloat(resources,
-                com.android.internal.R.dimen.config_keyboardHapticFeedbackFixedAmplitude, -1) > 0;
+        mKeyboardVibrationSettingsSupported = loadBoolean(resources,
+                com.android.internal.R.bool.config_keyboardVibrationSettingsSupported, false);
 
         mDefaultAlarmVibrationIntensity = loadDefaultIntensity(resources,
                 com.android.internal.R.integer.config_defaultAlarmVibrationIntensity);
@@ -202,11 +202,11 @@ public class VibrationConfig {
     }
 
     /**
-     * Whether the device has a fixed amplitude for keyboard.
+     * Whether the device support keyboard vibration settings.
      * @hide
      */
-    public boolean hasFixedKeyboardAmplitude() {
-        return mHasFixedKeyboardAmplitude;
+    public boolean isKeyboardVibrationSettingsSupported() {
+        return mKeyboardVibrationSettingsSupported;
     }
 
     /** Get the default vibration intensity for given usage. */
@@ -249,6 +249,7 @@ public class VibrationConfig {
                 + ", mDefaultNotificationIntensity=" + mDefaultNotificationVibrationIntensity
                 + ", mDefaultRingIntensity=" + mDefaultRingVibrationIntensity
                 + ", mDefaultKeyboardVibrationEnabled=" + mDefaultKeyboardVibrationEnabled
+                + ", mKeyboardVibrationSettingsSupported=" + mKeyboardVibrationSettingsSupported
                 + "}";
     }
 
