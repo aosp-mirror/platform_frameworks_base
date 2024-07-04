@@ -550,7 +550,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Save allocating when calculating rects */
     private final Rect mTmpRect = new Rect();
-    private final Rect mTmpRect2 = new Rect();
     private final Region mTmpRegion = new Region();
 
     private final Configuration mTmpConfiguration = new Configuration();
