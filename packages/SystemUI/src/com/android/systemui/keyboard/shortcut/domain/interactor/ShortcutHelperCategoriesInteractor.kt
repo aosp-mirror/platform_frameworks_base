@@ -38,6 +38,7 @@ constructor(
             categoriesRepository.multitaskingShortcutsCategory,
             categoriesRepository.imeShortcutsCategory,
             categoriesRepository.appCategoriesShortcutsCategory,
+            categoriesRepository.currentAppShortcutsCategory
         ) { shortcutCategories ->
             shortcutCategories.filterNotNull().map { groupSubCategoriesInCategory(it) }
         }

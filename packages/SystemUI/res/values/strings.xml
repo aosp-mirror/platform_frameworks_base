@@ -3597,6 +3597,10 @@
          that shows the user which keyboard shortcuts they can use. The "App shortcuts" are
          for example "Open browser" or "Open calculator". [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_category_app_shortcuts">App shortcuts</string>
+    <!-- Default Title of the keyboard shortcut helper category for current app. The helper is a
+         component that shows the user which keyboard shortcuts they can use. The current app
+         shortcuts are shortcuts provided by the currently open app. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_current_app_shortcuts">Current App</string>
     <!-- Title of the keyboard shortcut helper category "Accessibility". The helper is a component
          that shows the user which keyboard shortcuts they can use. The "Accessibility" shortcuts
          are for example "Turn on talkback". [CHAR LIMIT=NONE] -->
