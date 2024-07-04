@@ -34,7 +34,7 @@ import javax.inject.Inject
 class MultitaskingShortcutsSource @Inject constructor(@Main private val resources: Resources) :
     KeyboardShortcutGroupsSource {
 
-    override fun shortcutGroups() =
+    override suspend fun shortcutGroups(deviceId: Int) =
         listOf(
             KeyboardShortcutGroup(
                 resources.getString(R.string.shortcutHelper_category_recent_apps),

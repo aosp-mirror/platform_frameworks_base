@@ -116,7 +116,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                     ShortcutCategory(
                         type = IME,
                         subCategories =
-                            TestShortcuts.subCategoriesWithGroupedDuplicatedShortcutLabels
+                            TestShortcuts.imeSubCategoriesWithGroupedDuplicatedShortcutLabels
                     ),
                 )
                 .inOrder()
@@ -180,7 +180,8 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                     TestShortcuts.multitaskingCategory,
                     ShortcutCategory(
                         type = IME,
-                        subCategories = TestShortcuts.subCategoriesWithUnsupportedModifiersRemoved
+                        subCategories =
+                            TestShortcuts.imeSubCategoriesWithUnsupportedModifiersRemoved
                     ),
                 )
                 .inOrder()
@@ -227,23 +228,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun categories_stateActive_imeShortcutsWitOnlyUnsupportedModifiers_discardsCategory() =
-        testScope.runTest {
-            helper.setImeShortcuts(TestShortcuts.groupsWithOnlyUnsupportedModifiers)
-            val categories by collectLastValue(interactor.shortcutCategories)
-
-            helper.showFromActivity()
-
-            assertThat(categories)
-                .containsExactly(
-                    TestShortcuts.systemCategory,
-                    TestShortcuts.multitaskingCategory,
-                )
-                .inOrder()
-        }
-
-    @Test
-    fun categories_stateActive_systemShortcutsWitOnlyUnsupportedModifiers_discardsCategory() =
+    fun categories_stateActive_systemShortcutsWithOnlyUnsupportedModifiers_discardsCategory() =
         testScope.runTest {
             systemShortcutsSource.setGroups(TestShortcuts.groupsWithOnlyUnsupportedModifiers)
             val categories by collectLastValue(interactor.shortcutCategories)
