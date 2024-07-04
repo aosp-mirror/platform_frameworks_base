@@ -266,6 +266,9 @@ class ActivityEmbeddingAnimationRunner {
             final Animation animation =
                     animationProvider.get(info, change, openingWholeScreenBounds);
             if (shouldUseJumpCutForAnimation(animation)) {
+                if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+                    return new ArrayList<>();
+                }
                 continue;
             }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
@@ -291,6 +294,9 @@ class ActivityEmbeddingAnimationRunner {
             final Animation animation =
                     animationProvider.get(info, change, closingWholeScreenBounds);
             if (shouldUseJumpCutForAnimation(animation)) {
+                if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+                    return new ArrayList<>();
+                }
                 continue;
             }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(

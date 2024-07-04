@@ -50,6 +50,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -393,19 +394,31 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         if (splitAttributes == null) {
             return TaskFragmentAnimationParams.DEFAULT;
         }
+        final TaskFragmentAnimationParams.Builder builder =
+                new TaskFragmentAnimationParams.Builder();
         final int animationBackgroundColor = getAnimationBackgroundColor(splitAttributes);
-        TaskFragmentAnimationParams.Builder builder = new TaskFragmentAnimationParams.Builder();
-        if (animationBackgroundColor != DEFAULT_ANIMATION_BACKGROUND_COLOR) {
-            builder.setAnimationBackgroundColor(animationBackgroundColor);
+        builder.setAnimationBackgroundColor(animationBackgroundColor);
+        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+            final int openAnimationResId =
+                    splitAttributes.getAnimationParams().getOpenAnimationResId();
+            builder.setOpenAnimationResId(openAnimationResId);
+            final int closeAnimationResId =
+                    splitAttributes.getAnimationParams().getCloseAnimationResId();
+            builder.setCloseAnimationResId(closeAnimationResId);
+            final int changeAnimationResId =
+                    splitAttributes.getAnimationParams().getChangeAnimationResId();
+            builder.setChangeAnimationResId(changeAnimationResId);
         }
-        // TODO(b/293658614): Allow setting custom open/close/changeAnimationResId.
         return builder.build();
     }
 
     @ColorInt
     private static int getAnimationBackgroundColor(@NonNull SplitAttributes splitAttributes) {
         int animationBackgroundColor = DEFAULT_ANIMATION_BACKGROUND_COLOR;
-        final AnimationBackground animationBackground = splitAttributes.getAnimationBackground();
+        AnimationBackground animationBackground = splitAttributes.getAnimationBackground();
+        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+            animationBackground = splitAttributes.getAnimationParams().getAnimationBackground();
+        }
         if (animationBackground instanceof AnimationBackground.ColorBackground colorBackground) {
             animationBackgroundColor = colorBackground.getColor();
         }
