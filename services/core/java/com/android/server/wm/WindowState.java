@@ -28,6 +28,7 @@ import static android.graphics.GraphicsProtos.dumpPointProto;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.util.SequenceUtils.getNextSeq;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
@@ -96,7 +97,6 @@ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
-import static android.util.SequenceUtils.getNextSeq;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
@@ -249,8 +249,8 @@ import android.window.OnBackInvokedCallbackInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
-import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
@@ -1976,8 +1976,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean isReadyForDisplay() {
         final boolean parentAndClientVisible = !isParentWindowHidden()
-                && mViewVisibility == View.VISIBLE && mToken.isVisible();
-        return mHasSurface && isVisibleByPolicy() && !mDestroying
+                && mViewVisibility == View.VISIBLE;
+        return mHasSurface && isVisibleByPolicy() && !mDestroying && mToken.isVisible()
                 && (parentAndClientVisible || isAnimating(TRANSITION | PARENTS));
     }
 
