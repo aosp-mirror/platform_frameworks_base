@@ -93,8 +93,8 @@ constructor(
     private val occlusionStateFromFinishedStep =
         combine(
                 keyguardTransitionInteractor.isFinishedIn(
-                    Scenes.Gone,
-                    stateWithoutSceneContainer = KeyguardState.GONE
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = KeyguardState.GONE,
                 ),
                 keyguardTransitionInteractor.isFinishedIn(KeyguardState.OCCLUDED),
                 keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop,

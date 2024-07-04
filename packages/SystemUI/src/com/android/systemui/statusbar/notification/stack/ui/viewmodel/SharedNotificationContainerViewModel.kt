@@ -141,6 +141,7 @@ constructor(
     private val communalSceneInteractor: CommunalSceneInteractor,
     unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) : FlowDumperImpl(dumpManager) {
+    // TODO(b/349784682): Transform deprecated states for Flexiglass
     private val statesForConstrainedNotifications: Set<KeyguardState> =
         setOf(AOD, LOCKSCREEN, DOZING, ALTERNATE_BOUNCER, PRIMARY_BOUNCER)
     private val statesForHiddenKeyguard: Set<KeyguardState> = setOf(GONE, OCCLUDED)

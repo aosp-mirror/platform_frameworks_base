@@ -43,6 +43,7 @@ import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import javax.inject.Inject
@@ -93,7 +94,10 @@ constructor(
      */
     val canShowEditMode =
         allOf(
-                keyguardTransitionInteractor.isFinishedIn(KeyguardState.GONE),
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = KeyguardState.GONE
+                ),
                 communalInteractor.editModeOpen
             )
             .filter { it }
