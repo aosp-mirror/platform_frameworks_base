@@ -92,7 +92,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.NativeLibraryHelper;
-import com.android.internal.telephony.TelephonyPermissions;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.HexDump;
@@ -357,7 +356,7 @@ public class PackageManagerServiceUtils {
      * If not, throws a {@link SecurityException}.
      */
     public static void enforceSystemOrPhoneCaller(String methodName, int callingUid) {
-        if (!TelephonyPermissions.isSystemOrPhone(callingUid)) {
+        if (callingUid != Process.PHONE_UID && callingUid != Process.SYSTEM_UID) {
             throw new SecurityException(
                     "Cannot call " + methodName + " from UID " + callingUid);
         }
