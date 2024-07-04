@@ -1137,3 +1137,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+   namespace: "systemui"
+   name: "fetch_bookmarks_xml_keyboard_shortcuts"
+   description: "Fetches application launch keyboard shortcuts from system server rather than building a hardcoded list."
+   bug: "312452252"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
