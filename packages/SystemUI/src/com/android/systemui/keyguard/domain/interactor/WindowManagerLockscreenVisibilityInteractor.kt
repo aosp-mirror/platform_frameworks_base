@@ -71,6 +71,7 @@ constructor(
     private val transitionSpecificSurfaceBehindVisibility: Flow<Boolean?> =
         transitionInteractor.startedKeyguardTransitionStep
             .flatMapLatest { startedStep ->
+                SceneContainerFlag.assertInLegacyMode()
                 when (startedStep.from) {
                     KeyguardState.LOCKSCREEN -> {
                         fromLockscreenInteractor.surfaceBehindVisibility

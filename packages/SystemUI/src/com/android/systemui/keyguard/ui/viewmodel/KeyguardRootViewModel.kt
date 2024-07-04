@@ -160,7 +160,7 @@ constructor(
                     edgeWithoutSceneContainer = Edge.create(from = LOCKSCREEN, to = GONE),
                 ),
                 keyguardTransitionInteractor.isInTransition(
-                    edge = Edge.create(from = PRIMARY_BOUNCER, to = Scenes.Lockscreen),
+                    edge = Edge.create(from = Scenes.Bouncer, to = LOCKSCREEN),
                     edgeWithoutSceneContainer =
                         Edge.create(from = PRIMARY_BOUNCER, to = LOCKSCREEN),
                 ),
