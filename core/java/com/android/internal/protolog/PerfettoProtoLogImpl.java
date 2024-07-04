@@ -170,7 +170,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     @VisibleForTesting
     @Override
     public void log(LogLevel level, IProtoLogGroup group, long messageHash, int paramsMask,
-            Object[] args) {
+            @Nullable Object[] args) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "log");
 
         try {
@@ -297,7 +297,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         os.end(outMessagesToken);
     }
 
-    private void logToLogcat(String tag, LogLevel level, long messageHash, Object[] args) {
+    private void logToLogcat(String tag, LogLevel level, long messageHash,
+            @Nullable Object[] args) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logToLogcat");
         try {
             doLogToLogcat(tag, level, messageHash, args);
@@ -306,7 +307,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         }
     }
 
-    private void doLogToLogcat(String tag, LogLevel level, long messageHash, Object[] args) {
+    private void doLogToLogcat(String tag, LogLevel level, long messageHash,
+            @Nullable Object[] args) {
         String message = null;
         String messageString = mViewerConfigReader.getViewerString(messageHash);
         if (messageString != null) {
@@ -322,8 +324,10 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         }
         if (message == null) {
             StringBuilder builder = new StringBuilder("UNKNOWN MESSAGE (" + messageHash + ")");
-            for (Object o : args) {
-                builder.append(" ").append(o);
+            if (args != null) {
+                for (Object o : args) {
+                    builder.append(" ").append(o);
+                }
             }
             message = builder.toString();
         }
