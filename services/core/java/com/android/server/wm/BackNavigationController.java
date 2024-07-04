@@ -1361,6 +1361,8 @@ class BackNavigationController {
                                     synchronized (openTask.mWmService.mGlobalLock) {
                                         if (mRequestedStartingSurfaceId != INVALID_TASK_ID) {
                                             mStartingSurface = sc;
+                                        } else {
+                                            sc.release();
                                         }
                                     }
                                 }
@@ -1599,12 +1601,20 @@ class BackNavigationController {
                     @NonNull ActivityRecord[] visibleOpenActivities) {
                 boolean needsLaunchBehind = true;
                 if (isSupportWindowlessSurface() && mShowWindowlessSurface && !mIsLaunchBehind) {
+                    boolean activitiesAreDrawn = false;
+                    for (int i = visibleOpenActivities.length - 1; i >= 0; --i) {
+                        // If the activity hasn't stopped, it's window should remain drawn.
+                        activitiesAreDrawn |= visibleOpenActivities[i].firstWindowDrawn;
+                    }
                     final WindowContainer mainOpen = openAnimationAdaptor.mAdaptors[0].mTarget;
                     final TaskSnapshot snapshot = getSnapshot(mainOpen, visibleOpenActivities);
-                    openAnimationAdaptor.createStartingSurface(snapshot);
-                    // set LaunchBehind if we are creating splash screen surface.
-                    needsLaunchBehind = snapshot == null
-                            && openAnimationAdaptor.mRequestedStartingSurfaceId != INVALID_TASK_ID;
+                    // Don't create starting surface if previous activities haven't stopped or
+                    // the snapshot does not exist.
+                    if (snapshot != null || !activitiesAreDrawn) {
+                        openAnimationAdaptor.createStartingSurface(snapshot);
+                    }
+                    // Only use LaunchBehind if snapshot does not exist.
+                    needsLaunchBehind = snapshot == null;
                 }
                 if (needsLaunchBehind) {
                     for (int i = visibleOpenActivities.length - 1; i >= 0; --i) {
