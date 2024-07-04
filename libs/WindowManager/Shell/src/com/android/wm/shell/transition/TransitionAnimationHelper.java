@@ -444,7 +444,7 @@ public class TransitionAnimationHelper {
      * Returns whether there is an opaque fullscreen Change positioned in front of the given Change
      * in the given TransitionInfo.
      */
-    private static boolean isCoveredByOpaqueFullscreenChange(
+    static boolean isCoveredByOpaqueFullscreenChange(
             TransitionInfo info, TransitionInfo.Change change) {
         // TransitionInfo#getChanges() are ordered from front to back
         for (TransitionInfo.Change coveringChange : info.getChanges()) {
