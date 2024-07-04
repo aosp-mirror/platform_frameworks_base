@@ -35,7 +35,8 @@ enum class DesktopModeFlags(
     private val shouldOverrideByDevOption: Boolean
 ) {
   // All desktop mode related flags will be added here
-  DESKTOP_WINDOWING_MODE(DesktopModeStatus::isDesktopModeFlagEnabled, true);
+  DESKTOP_WINDOWING_MODE(DesktopModeStatus::isDesktopModeFlagEnabled, true),
+  WALLPAPER_ACTIVITY(Flags::enableDesktopWindowingWallpaperActivity, true);
 
   // Local cache for toggle override, which is initialized once on its first access. It needs to be
   // refreshed only on reboots as overridden state takes effect on reboots.
@@ -52,10 +53,14 @@ enum class DesktopModeFlags(
           context.contentResolver == null) {
         flagFunction()
       } else {
+        val shouldToggleBeEnabledByDefault = DesktopModeStatus.shouldDevOptionBeEnabledByDefault()
         when (getToggleOverride(context)) {
           ToggleOverride.OVERRIDE_UNSET -> flagFunction()
-          ToggleOverride.OVERRIDE_OFF -> false
-          ToggleOverride.OVERRIDE_ON -> true
+          // When toggle override matches its default state, don't override flags. This helps users
+          // reset their feature overrides.
+          ToggleOverride.OVERRIDE_OFF ->
+              if (shouldToggleBeEnabledByDefault) false else flagFunction()
+          ToggleOverride.OVERRIDE_ON -> if (shouldToggleBeEnabledByDefault) flagFunction() else true
         }
       }
 
