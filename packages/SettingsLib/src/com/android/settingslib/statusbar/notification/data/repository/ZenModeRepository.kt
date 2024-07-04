@@ -73,12 +73,12 @@ class ZenModeRepositoryImpl(
 
                 awaitClose { context.unregisterReceiver(receiver) }
             }
-            .apply {
+            .let {
                 if (Flags.volumePanelBroadcastFix()) {
-                    flowOn(backgroundCoroutineContext)
-                    stateIn(scope, SharingStarted.WhileSubscribed(), null)
+                    it.flowOn(backgroundCoroutineContext)
+                        .stateIn(scope, SharingStarted.WhileSubscribed(), null)
                 } else {
-                    shareIn(
+                    it.shareIn(
                         started = SharingStarted.WhileSubscribed(),
                         scope = scope,
                     )
