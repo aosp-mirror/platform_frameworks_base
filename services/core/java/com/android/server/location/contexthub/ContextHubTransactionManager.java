@@ -494,7 +494,8 @@ import java.util.concurrent.atomic.AtomicInteger;
         ContextHubServiceTransaction transaction =
                 mReliableMessageTransactionMap.get(messageSequenceNumber);
         if (transaction == null) {
-            Log.w(TAG, "Could not find reliable message transaction with message sequence number"
+            Log.w(TAG, "Could not find reliable message transaction with "
+                    + "message sequence number = "
                     + messageSequenceNumber);
             return;
         }
