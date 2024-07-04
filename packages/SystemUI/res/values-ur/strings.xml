@@ -103,6 +103,8 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"‫<xliff:g id="APPNAME">%1$s</xliff:g> نے اس اسکرین شاٹ کا پتا لگایا۔"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"‫<xliff:g id="APPNAME">%1$s</xliff:g> اور دیگر کھلی ایپس نے اس اسکرین شاٹ کا پتا لگایا۔"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"نوٹ میں شامل کریں"</string>
+    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
+    <skip />
     <string name="screenrecord_title" msgid="4257171601439507792">"اسکرین ریکارڈر"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"سکرین ریکارڈنگ پروسیس ہورہی ہے"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اسکرین ریکارڈ سیشن کیلئے جاری اطلاع"</string>
@@ -132,6 +134,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"‏آپ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو ریکارڈ نہیں کر پائیں گے"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"اسکرین کا اشتراک ہو رہا ہے"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +142,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"‏آپ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کا اشتراک نہیں کر پائیں گے"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"اسکرین کاسٹ ہو رہی ہے"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +196,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"چہرے سے انلاک کیا گیا۔ جاری رکھنے کے لیے دبائیں۔"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"چہرے کی شناخت ہو گئی۔ جاری رکھنے کے لیے دبائیں۔"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"چہرے کی شناخت ہو گئی۔ جاری رکھنے کیلئے انلاک آئیکن دبائیں۔"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"تصدیق کردہ"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"تصدیق کو منسوخ کریں"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"مزید اختیارات"</string>
@@ -472,6 +478,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"مزید ویجٹس شامل کریں"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ویجٹس کو حسب ضرورت بنانے کے لیے لانگ پریس کریں"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ویجیٹس کو حسب ضرورت بنائیں"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"غیر فعال ویجیٹ کے لئے ایپ آئیکن"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"انسٹال ہونے والے ویجیٹ کا ایپ آئیکن"</string>
     <string name="edit_widget" msgid="9030848101135393954">"ویجیٹ میں ترمیم کریں"</string>
@@ -1353,7 +1361,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) کے زیر استعمال"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) کے ذریعے حال ہی میں استعمال کیا گیا"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"سسٹم"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"سسٹم کنٹرولز"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"سسٹم ایپس"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ملٹی ٹاسکنگ"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"حالیہ ایپس"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"اسپلٹ اسکرین"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ان پٹ"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ایپ شارٹ کٹس"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ایکسیسبیلٹی"</string>

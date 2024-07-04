@@ -53,6 +53,7 @@ constructor(
     private val repository: KeyguardOcclusionRepository,
     private val powerInteractor: PowerInteractor,
     private val transitionInteractor: KeyguardTransitionInteractor,
+    private val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     keyguardInteractor: KeyguardInteractor,
     deviceUnlockedInteractor: Lazy<DeviceUnlockedInteractor>,
 ) {
@@ -78,7 +79,7 @@ constructor(
         // *_BOUNCER -> LOCKSCREEN.
         return powerInteractor.detailedWakefulness.value.powerButtonLaunchGestureTriggered &&
             KeyguardState.deviceIsAsleepInState(
-                transitionInteractor.currentTransitionInfoInternal.value.to
+                internalTransitionInteractor.currentTransitionInfoInternal.value.to
             )
     }
 

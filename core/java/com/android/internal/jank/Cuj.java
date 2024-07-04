@@ -172,8 +172,12 @@ public class Cuj {
     /** Track window drag interaction in desktop mode. */
     public static final int CUJ_DESKTOP_MODE_DRAG_WINDOW = 110;
 
+    /** Track launching a dialog from a status bar chip. */
+    public static final int CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP = 111;
+
+
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_DRAG_WINDOW;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP;
 
     /** @hide */
     @IntDef({
@@ -275,7 +279,8 @@ public class Cuj {
             CUJ_DESKTOP_MODE_ENTER_MODE,
             CUJ_DESKTOP_MODE_EXIT_MODE,
             CUJ_DESKTOP_MODE_MINIMIZE_WINDOW,
-            CUJ_DESKTOP_MODE_DRAG_WINDOW
+            CUJ_DESKTOP_MODE_DRAG_WINDOW,
+            CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
@@ -388,6 +393,7 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_EXIT_MODE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_EXIT_MODE;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_MINIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_MINIMIZE_WINDOW;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_DRAG_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_DRAG_WINDOW;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP;
     }
 
     private Cuj() {
@@ -604,6 +610,8 @@ public class Cuj {
                 return "DESKTOP_MODE_MINIMIZE_WINDOW";
             case CUJ_DESKTOP_MODE_DRAG_WINDOW:
                 return "DESKTOP_MODE_DRAG_WINDOW";
+            case CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP:
+                return "STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP";
         }
         return "UNKNOWN";
     }

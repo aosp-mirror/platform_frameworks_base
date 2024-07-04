@@ -47,7 +47,7 @@ fun QuickQuickSettings(
     TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
         items(
             tiles.size,
-            key = { index -> sizedTiles[index].tile.spec },
+            key = { index -> sizedTiles[index].tile.spec.spec },
             span = { index -> GridItemSpan(sizedTiles[index].width) }
         ) { index ->
             Tile(

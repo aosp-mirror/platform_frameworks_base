@@ -597,6 +597,12 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @Constants.HandleMessageResult
     protected int handleReportPhysicalAddress(HdmiCecMessage message) {
         super.handleReportPhysicalAddress(message);
+        // Ignore <Report Physical Address> while DeviceDiscoveryAction is in progress to avoid
+        // starting a NewDeviceAction which might interfere in creating the list of known devices.
+        if (hasAction(DeviceDiscoveryAction.class)) {
+            return Constants.HANDLED;
+        }
+
         int path = HdmiUtils.twoBytesToInt(message.getParams());
         int address = message.getSource();
         int type = message.getParams()[2];

@@ -55,6 +55,7 @@ import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
@@ -134,6 +135,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockRootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock private lateinit var mockShellCommandHandler: ShellCommandHandler
     @Mock private lateinit var mockWindowManager: IWindowManager
+    @Mock private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
         SurfaceControl.Transaction()
@@ -167,7 +169,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockInputMonitorFactory,
                 transactionFactory,
                 mockRootTaskDisplayAreaOrganizer,
-            windowDecorByTaskIdSpy
+            windowDecorByTaskIdSpy, mockInteractionJankMonitor
         )
 
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)

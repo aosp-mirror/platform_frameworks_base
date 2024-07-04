@@ -1704,6 +1704,10 @@
   <java-symbol type="style" name="PointerIconVectorStyleFillPink" />
   <java-symbol type="style" name="PointerIconVectorStyleFillBlue" />
   <java-symbol type="attr" name="pointerIconVectorFill" />
+  <java-symbol type="style" name="PointerIconVectorStyleStrokeWhite" />
+  <java-symbol type="style" name="PointerIconVectorStyleStrokeBlack" />
+  <java-symbol type="style" name="PointerIconVectorStyleStrokeNone" />
+  <java-symbol type="attr" name="pointerIconVectorStroke" />
   <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Title" />
   <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Info" />
 

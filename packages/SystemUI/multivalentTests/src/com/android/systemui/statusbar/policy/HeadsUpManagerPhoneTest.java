@@ -104,8 +104,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                 UiEventLogger uiEventLogger,
                 JavaAdapter javaAdapter,
                 ShadeInteractor shadeInteractor,
-                AvalancheController avalancheController,
-                Handler bgHandler
+                AvalancheController avalancheController
         ) {
             super(
                     context,
@@ -123,8 +122,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                     uiEventLogger,
                     javaAdapter,
                     shadeInteractor,
-                    avalancheController,
-                    bgHandler
+                    avalancheController
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
@@ -147,8 +145,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                 mUiEventLogger,
                 mJavaAdapter,
                 mShadeInteractor,
-                mAvalancheController,
-                mBgHandler
+                mAvalancheController
         );
     }
 
@@ -173,7 +170,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
         mContext.getOrCreateTestableResources().addOverride(
                 R.integer.ambient_notification_extension_time, 500);
 
-        mAvalancheController = new AvalancheController(dumpManager, mUiEventLogger);
+        mAvalancheController = new AvalancheController(dumpManager, mUiEventLogger, mBgHandler);
     }
 
     @Test

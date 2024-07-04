@@ -93,16 +93,6 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "always_defer_transition_when_apply_wct"
-    description: "Report error when defer transition fails when it should not"
-    bug: "335562144"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    namespace: "windowing_sdk"
     name: "fix_pip_restore_to_overlay"
     description: "Restore exit-pip activity back to ActivityEmbedding overlay"
     bug: "297887697"

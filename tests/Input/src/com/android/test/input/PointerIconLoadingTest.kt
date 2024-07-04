@@ -88,6 +88,35 @@ class PointerIconLoadingTest {
         theme.applyStyle(
             PointerIcon.vectorFillStyleToResource(PointerIcon.POINTER_ICON_VECTOR_STYLE_FILL_GREEN),
             /* force= */ true)
+        theme.applyStyle(PointerIcon.vectorStrokeStyleToResource(
+            PointerIcon.POINTER_ICON_VECTOR_STYLE_STROKE_WHITE), /* force= */ true)
+
+        val pointerIcon =
+            PointerIcon.getLoadedSystemIcon(
+                ContextThemeWrapper(context, theme),
+                PointerIcon.TYPE_ARROW,
+                /* useLargeIcons= */ false,
+                /* pointerScale= */ 1f)
+
+        pointerIcon.getBitmap().assertAgainstGolden(
+            screenshotRule,
+            testName.methodName,
+            exactScreenshotMatcher
+        )
+    }
+
+    @Test
+    fun testPointerStrokeStyle() {
+        assumeTrue(enableVectorCursors())
+        assumeTrue(enableVectorCursorA11ySettings())
+
+        val theme: Resources.Theme = context.getResources().newTheme()
+        theme.setTo(context.getTheme())
+        theme.applyStyle(
+            PointerIcon.vectorFillStyleToResource(PointerIcon.POINTER_ICON_VECTOR_STYLE_FILL_BLACK),
+            /* force= */ true)
+        theme.applyStyle(PointerIcon.vectorStrokeStyleToResource(
+            PointerIcon.POINTER_ICON_VECTOR_STYLE_STROKE_BLACK), /* force= */ true)
 
         val pointerIcon =
             PointerIcon.getLoadedSystemIcon(

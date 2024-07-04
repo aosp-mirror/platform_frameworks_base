@@ -265,6 +265,8 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Ulat sa bug"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Tapusin ang session"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Screenshot"</string>
+    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
+    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Ulat ng bug"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Mangongolekta ito ng impormasyon tungkol sa kasalukuyang katayuan ng iyong device, na ipapadala bilang mensaheng e-mail. Gugugol ito ng kaunting oras mula sa pagsisimula ng ulat sa bug hanggang sa handa na itong maipadala; mangyaring magpasensya."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interactive na ulat"</string>
@@ -1765,11 +1767,11 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
     <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
     <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
     <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Pag-magnify"</string>
     <string name="user_switched" msgid="7249833311585228097">"Kasalukuyang user <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1986,14 +1988,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Kasalukuyang tawag"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Nagsi-screen ng papasok na tawag"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Di-nakategorya"</string>
-    <!-- no translation found for promotional_notification_channel_label (7414844730492860233) -->
-    <skip />
-    <!-- no translation found for social_notification_channel_label (106520267132019945) -->
-    <skip />
-    <!-- no translation found for news_notification_channel_label (4299937455247883311) -->
-    <skip />
-    <!-- no translation found for recs_notification_channel_label (4945985121418684297) -->
-    <skip />
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"Mga Promosyon"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"Social"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"Balita"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"Mga Rekomendasyon"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Ikaw ang magtatakda sa kahalagahan ng mga notification na ito."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Mahalaga ito dahil sa mga taong kasangkot."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Custom na notification ng app"</string>
@@ -2210,10 +2208,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Tagapili ng Shortcut ng Accessibility sa Screen"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Shortcut ng Accessibility"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"I-dismiss ang Notification Shade"</string>
-    <!-- no translation found for accessibility_system_action_menu_label (3385283204496447040) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_media_play_pause_label (1905647491347119748) -->
-    <skip />
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Menu"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"I-Play/I-Pause ang Media"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad Up"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad Down"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad Left"</string>
@@ -2440,12 +2436,21 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Paano ito gumagana"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Nakabinbin..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"I-set up ulit ang Pag-unlock Gamit ang Fingerprint"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Hindi gumagana nang maayos ang <xliff:g id="FINGERPRINT">%s</xliff:g> at na-delete ito"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Hindi gumagana nang maayos ang <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> at <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> at na-delete ang mga ito"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Hindi gumagana nang maayos ang <xliff:g id="FINGERPRINT">%s</xliff:g> at na-delete na ito. I-set up ulit ito para ma-unlock ang iyong telepono sa pamamagitan ng fingerprint."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Hindi gumagana nang maayos ang <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> at <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> at na-delete na ang mga ito. I-set up ulit ang mga ito para ma-unlock ang iyong telepono gamit ang fingerprint mo."</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
+    <skip />
     <string name="face_dangling_notification_title" msgid="947852541060975473">"I-set up ulit ang Pag-unlock Gamit ang Mukha"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Hindi gumagana nang maayos ang iyong face model at na-delete na ito. I-set up ulit ito para ma-unlock ang iyong telepono sa pamamagitan ng mukha."</string>
+    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
+    <skip />
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"I-set up"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Huwag muna"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm para kay <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Magpalit ng user"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"I-mute"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"I-tap para i-mute ang tunog"</string>
 </resources>

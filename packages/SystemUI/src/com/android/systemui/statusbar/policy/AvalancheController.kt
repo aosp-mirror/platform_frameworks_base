@@ -15,12 +15,14 @@
  */
 package com.android.systemui.statusbar.policy
 
+import android.os.Handler
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.policy.BaseHeadsUpManager.HeadsUpEntry
@@ -35,7 +37,10 @@ import javax.inject.Inject
 @SysUISingleton
 class AvalancheController
 @Inject
-constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) : Dumpable {
+constructor(dumpManager: DumpManager,
+            private val uiEventLogger: UiEventLogger,
+            @Background private val bgHandler: Handler
+) : Dumpable {
 
     private val tag = "AvalancheController"
     private val debug = Compile.IS_DEBUG && Log.isLoggable(tag, Log.DEBUG)
@@ -315,7 +320,7 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
 
         // Remove runnable labels for dropped huns
         val listToDrop = nextList.subList(1, nextList.size)
-        logDroppedHuns(listToDrop.size)
+        logDroppedHunsInBackground(listToDrop.size)
 
         if (debug) {
             // Clear runnable labels
@@ -332,10 +337,13 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
         showNow(headsUpEntryShowing!!, headsUpEntryShowingRunnableList)
     }
 
-    fun logDroppedHuns(numDropped: Int) {
-        for (n in 1..numDropped) {
-            uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_DROPPED)
-        }
+    fun logDroppedHunsInBackground(numDropped: Int) {
+        bgHandler.post(Runnable {
+            // Do this in the background to avoid missing frames when closing the shade
+            for (n in 1..numDropped) {
+                uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_DROPPED)
+            }
+        })
     }
 
     fun clearNext() {

@@ -188,7 +188,7 @@
   </string-array>
   <string-array name="tile_states_hearing_devices">
     <item msgid="1235334096484287173">"Non disponibile"</item>
-    <item msgid="3079622119444911877">"Off"</item>
-    <item msgid="3028994095749238254">"On"</item>
+    <item msgid="3079622119444911877">"Disattivi"</item>
+    <item msgid="3028994095749238254">"Attivi"</item>
   </string-array>
 </resources>

@@ -474,19 +474,10 @@ public class AudioDeviceBroker {
                 mBtHelper.stopBluetoothSco(eventSource);
             }
         }
-        // In BT classic for communication, the device changes from a2dp to sco device, but for
-        // LE Audio it stays the same and we must trigger the proper stream volume alignment, if
-        // LE Audio communication device is activated after the audio system has already switched to
-        // MODE_IN_CALL mode.
-        if (isBluetoothLeAudioRequested() && device != null) {
-            final int streamType = mAudioService.getBluetoothContextualVolumeStream();
-            final int leAudioVolIndex = getVssVolumeForDevice(streamType, device.getInternalType());
-            final int leAudioMaxVolIndex = getMaxVssVolumeForStream(streamType);
-            if (AudioService.DEBUG_COMM_RTE) {
-                Log.v(TAG, "setCommunicationRouteForClient restoring LE Audio device volume lvl.");
-            }
-            postSetLeAudioVolumeIndex(leAudioVolIndex, leAudioMaxVolIndex, streamType);
-        }
+        // In BT classic for communication, the device changes from a2dp to sco device,
+        // but for LE Audio or Hearing Aid it stays the same and we must trigger the proper
+        // stream volume alignment.
+        mAudioService.postUpdateContextualVolumes();
 
         updateCommunicationRoute(eventSource);
     }
