@@ -169,3 +169,10 @@ flag {
     description: "Whether to enable back navigation treatment in desktop windowing."
     bug: "350421096"
 }
+
+flag {
+    name: "enable_desktop_windowing_app_handle_education"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing app handle education"
+    bug: "348208342"
+}
