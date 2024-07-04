@@ -572,8 +572,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     class SettingsObserver extends ContentObserver {
         int mUserId;
         boolean mRegistered = false;
-        @NonNull
-        String mLastEnabled = "";
 
         /**
          * <em>This constructor must be called within the lock.</em>
@@ -593,7 +591,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 mRegistered = false;
             }
             if (mUserId != userId) {
-                mLastEnabled = "";
                 mUserId = userId;
             }
             resolver.registerContentObserver(Settings.Secure.getUriFor(
@@ -646,8 +643,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     boolean enabledChanged = false;
                     String newEnabled = InputMethodSettingsRepository.get(mUserId)
                             .getEnabledInputMethodsStr();
-                    if (!mLastEnabled.equals(newEnabled)) {
-                        mLastEnabled = newEnabled;
+                    final var userData = getUserData(mUserId);
+                    if (!userData.mLastEnabledInputMethodsStr.equals(newEnabled)) {
+                        userData.mLastEnabledInputMethodsStr = newEnabled;
                         enabledChanged = true;
                     }
                     updateInputMethodsFromSettingsLocked(enabledChanged, mUserId);
@@ -657,8 +655,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         @Override
         public String toString() {
-            return "SettingsObserver{mUserId=" + mUserId + " mRegistered=" + mRegistered
-                    + " mLastEnabled=" + mLastEnabled + "}";
+            return "SettingsObserver{mUserId=" + mUserId + " mRegistered=" + mRegistered + "}";
         }
     }
 
@@ -1305,11 +1302,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         maybeInitImeNavbarConfigLocked(newUserId);
 
+        final var newUserData = getUserData(newUserId);
+
+        // TODO(b/342027196): Double check if we need to always reset upon user switching.
+        newUserData.mLastEnabledInputMethodsStr = "";
+
         // ContentObserver should be registered again when the user is changed
         mSettingsObserver.registerContentObserverLocked(newUserId);
 
         mCurrentUserId = newUserId;
-        final var newUserData = getUserData(newUserId);
         final String defaultImiId = SecureSettingsWrapper.getString(
                 Settings.Secure.DEFAULT_INPUT_METHOD, null, newUserId);
 
@@ -4263,9 +4264,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
                 if (currentUser) {
                     // To avoid unnecessary "updateInputMethodsFromSettingsLocked" from happening.
-                    if (mSettingsObserver != null) {
-                        mSettingsObserver.mLastEnabled = settings.getEnabledInputMethodsStr();
-                    }
+                    final var userData = getUserData(userId);
+                    userData.mLastEnabledInputMethodsStr = settings.getEnabledInputMethodsStr();
                     updateInputMethodsFromSettingsLocked(false /* enabledChanged */, userId);
                 }
             }
@@ -6104,6 +6104,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         p.println("      inFullscreenMode=" + u.mInFullscreenMode);
                         p.println("      switchingController:");
                         u.mSwitchingController.dump(p, "        ");
+                        p.println("      mLastEnabledInputMethodsStr="
+                                + u.mLastEnabledInputMethodsStr);
                     };
             mUserDataRepository.forAllUserData(userDataDump);
 
