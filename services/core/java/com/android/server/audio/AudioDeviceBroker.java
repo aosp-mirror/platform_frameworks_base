@@ -1863,7 +1863,10 @@ public class AudioDeviceBroker {
                             synchronized (mBluetoothAudioStateLock) {
                                 reapplyAudioHalBluetoothState();
                             }
-                            mBtHelper.onAudioServerDiedRestoreA2dp();
+                            final int forceForMedia = getBluetoothA2dpEnabled()
+                                    ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP;
+                            setForceUse_Async(
+                                    AudioSystem.FOR_MEDIA, forceForMedia, "MSG_RESTORE_DEVICES");
                             updateCommunicationRoute("MSG_RESTORE_DEVICES");
                         }
                     }
