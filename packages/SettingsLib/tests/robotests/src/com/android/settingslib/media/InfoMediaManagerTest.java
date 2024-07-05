@@ -85,6 +85,15 @@ public class InfoMediaManagerTest {
     private static final String TEST_DUPLICATED_ID_1 = "test_duplicated_id_1";
     private static final String TEST_DUPLICATED_ID_2 = "test_duplicated_id_2";
     private static final String TEST_DUPLICATED_ID_3 = "test_duplicated_id_3";
+    private static final String TEST_BLUETOOTH_ROUTE_ID = "TEST_BT_ROUTE_ID";
+
+    private static final MediaRoute2Info TEST_BLUETOOTH_ROUTE =
+            new MediaRoute2Info.Builder(TEST_BLUETOOTH_ROUTE_ID, "BLUETOOTH_ROUTE")
+                    .setSystemRoute(true)
+                    .addFeature(MediaRoute2Info.FEATURE_LIVE_AUDIO)
+                    .setType(TYPE_BLUETOOTH_A2DP)
+                    .setAddress("00:00:00:00:00:00")
+                    .build();
 
     @Mock
     private MediaRouter2Manager mRouterManager;
@@ -843,6 +852,23 @@ public class InfoMediaManagerTest {
 
         mInfoMediaManager.mMediaDevices.clear();
         mInfoMediaManager.addMediaDevice(route2Info);
+
+        assertThat(mInfoMediaManager.mMediaDevices.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void addMediaDevice_withAddresslessBluetoothDevice_shouldIgnoreDeviceAndNotCrash() {
+        MediaRoute2Info bluetoothRoute =
+                new MediaRoute2Info.Builder(TEST_BLUETOOTH_ROUTE).setAddress(null).build();
+
+        final CachedBluetoothDeviceManager cachedBluetoothDeviceManager =
+                mock(CachedBluetoothDeviceManager.class);
+        when(mLocalBluetoothManager.getCachedDeviceManager())
+                .thenReturn(cachedBluetoothDeviceManager);
+        when(cachedBluetoothDeviceManager.findDevice(any(BluetoothDevice.class))).thenReturn(null);
+
+        mInfoMediaManager.mMediaDevices.clear();
+        mInfoMediaManager.addMediaDevice(bluetoothRoute);
 
         assertThat(mInfoMediaManager.mMediaDevices.size()).isEqualTo(0);
     }
