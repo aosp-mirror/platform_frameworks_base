@@ -18,6 +18,7 @@ package android.hardware.input
 
 import android.view.InputDevice
 import android.view.KeyCharacterMap
+import android.view.KeyCharacterMap.VIRTUAL_KEYBOARD
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import org.mockito.ArgumentMatchers.anyInt
@@ -25,7 +26,18 @@ import org.mockito.invocation.InvocationOnMock
 
 class FakeInputManager {
 
-    private val devices = mutableMapOf<Int, InputDevice>()
+    private val keyCharacterMap = KeyCharacterMap.load(VIRTUAL_KEYBOARD)
+
+    private val virtualKeyboard =
+        InputDevice.Builder()
+            .setId(VIRTUAL_KEYBOARD)
+            .setKeyboardType(InputDevice.KEYBOARD_TYPE_ALPHABETIC)
+            .setSources(InputDevice.SOURCE_KEYBOARD)
+            .setEnabled(true)
+            .setKeyCharacterMap(keyCharacterMap)
+            .build()
+
+    private val devices = mutableMapOf<Int, InputDevice>(VIRTUAL_KEYBOARD to virtualKeyboard)
 
     val inputManager =
         mock<InputManager> {
@@ -56,10 +68,6 @@ class FakeInputManager {
         addKeyboard(id, enabled)
     }
 
-    fun addVirtualKeyboard(enabled: Boolean = true) {
-        addKeyboard(id = KeyCharacterMap.VIRTUAL_KEYBOARD, enabled)
-    }
-
     private fun addKeyboard(id: Int, enabled: Boolean = true) {
         devices[id] =
             InputDevice.Builder()
@@ -67,6 +75,7 @@ class FakeInputManager {
                 .setKeyboardType(InputDevice.KEYBOARD_TYPE_ALPHABETIC)
                 .setSources(InputDevice.SOURCE_KEYBOARD)
                 .setEnabled(enabled)
+                .setKeyCharacterMap(keyCharacterMap)
                 .build()
     }
 

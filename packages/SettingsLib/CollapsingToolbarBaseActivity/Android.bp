@@ -22,7 +22,6 @@ android_library {
         "androidx.core_core",
         "com.google.android.material_material",
         "SettingsLibSettingsTransition",
-        "SettingsLibUtils",
         "SettingsLibSettingsTheme",
     ],
     sdk_version: "system_current",

@@ -604,6 +604,13 @@ public final class NotificationAttentionHelper {
             }
         }
 
+        // Suppressed because notification was explicitly flagged as silent
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            if (notification.isSilent()) {
+                return true;
+            }
+        }
+
         // Suppressed for being too recently noisy
         final String pkg = record.getSbn().getPackageName();
         if (mUsageStats.isAlertRateLimited(pkg)) {

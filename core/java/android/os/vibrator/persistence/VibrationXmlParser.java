@@ -121,7 +121,6 @@ import java.util.List;
  *
  * @hide
  */
-@TestApi // This was used in CTS before the flag was introduced.
 @SystemApi
 @FlaggedApi(FLAG_VIBRATION_XML_APIS)
 public final class VibrationXmlParser {
@@ -195,7 +194,6 @@ public final class VibrationXmlParser {
      *
      * @hide
      */
-    @TestApi // Replacing test APIs used in CTS before the flagged system APIs was introduced.
     @SystemApi
     @FlaggedApi(FLAG_VIBRATION_XML_APIS)
     @NonNull
@@ -217,7 +215,6 @@ public final class VibrationXmlParser {
      *
      * @hide
      */
-    @TestApi // Replacing test APIs used in CTS before the flagged system APIs was introduced.
     @SystemApi
     @FlaggedApi(FLAG_VIBRATION_XML_APIS)
     @NonNull

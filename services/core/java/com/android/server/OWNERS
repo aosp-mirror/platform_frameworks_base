@@ -48,3 +48,6 @@ per-file VcnManagementService.java = file:/services/core/java/com/android/server
 
 # SystemConfig
 per-file SystemConfig.java = file:/PACKAGE_MANAGER_OWNERS
+
+# CertBlocklister
+per-file Cert*.java = tweek@google.com, brambonne@google.com, prb@google.com, miguelaranda@google.com

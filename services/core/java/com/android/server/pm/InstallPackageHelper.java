@@ -4568,7 +4568,7 @@ final class InstallPackageHelper {
                             PackageManagerException.INTERNAL_ERROR_SYSTEM_OVERLAY_STATIC);
                 }
             } else {
-                if ((scanFlags & SCAN_AS_VENDOR) != 0) {
+                if ((scanFlags & (SCAN_AS_VENDOR | SCAN_AS_ODM)) != 0) {
                     if (pkg.getTargetSdkVersion() < ScanPackageUtils.getVendorPartitionVersion()) {
                         Slog.w(TAG, "System overlay " + pkg.getPackageName()
                                 + " targets an SDK below the required SDK level of vendor"

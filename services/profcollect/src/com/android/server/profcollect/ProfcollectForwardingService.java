@@ -398,14 +398,17 @@ public final class ProfcollectForwardingService extends SystemService {
                 if (randomNum >= traceFrequency) {
                     return;
                 }
-                // Wait for 1s before starting tracing.
+                // For a small percentage a traces, we collect the initialization behavior.
+                boolean traceInitialization = ThreadLocalRandom.current().nextInt(10) < 1;
+                int traceDelay = traceInitialization ? 0 : 1000;
+                String traceTag = traceInitialization ? "camera_init" : "camera";
                 BackgroundThread.get().getThreadHandler().postDelayed(() -> {
                     try {
-                        mIProfcollect.trace_once("camera");
+                        mIProfcollect.trace_once(traceTag);
                     } catch (RemoteException e) {
                         Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                     }
-                }, 1000);
+                }, traceDelay);
             }
         }, null);
     }

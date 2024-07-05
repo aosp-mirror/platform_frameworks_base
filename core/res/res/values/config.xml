@@ -4136,6 +4136,9 @@
     <!-- The default value for keyboard vibration toggle in settings. -->
     <bool name="config_defaultKeyboardVibrationEnabled">true</bool>
 
+    <!-- Indicating if keyboard vibration settings supported or not. -->
+    <bool name="config_keyboardVibrationSettingsSupported">false</bool>
+
     <!-- If the device should still vibrate even in low power mode, for certain priority vibrations
      (e.g. accessibility, alarms). This is mainly for Wear devices that don't have speakers. -->
     <bool name="config_allowPriorityVibrationsInLowPowerMode">false</bool>

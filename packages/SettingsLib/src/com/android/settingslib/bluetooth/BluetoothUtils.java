@@ -24,6 +24,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -808,7 +809,8 @@ public class BluetoothUtils {
      * <p>If CachedBluetoothDevice#getGroupId is invalid, fetch group id from
      * LeAudioProfile#getGroupId.
      */
-    public static int getGroupId(@NonNull CachedBluetoothDevice cachedDevice) {
+    public static int getGroupId(@Nullable CachedBluetoothDevice cachedDevice) {
+        if (cachedDevice == null) return BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
         int groupId = cachedDevice.getGroupId();
         String anonymizedAddress = cachedDevice.getDevice().getAnonymizedAddress();
         if (groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
@@ -823,5 +825,45 @@ public class BluetoothUtils {
         }
         Log.d(TAG, "getGroupId return invalid id for device: " + anonymizedAddress);
         return BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
+    }
+
+    /** Get primary device Uri in broadcast. */
+    @NonNull
+    public static String getPrimaryGroupIdUriForBroadcast() {
+        return "bluetooth_le_broadcast_fallback_active_group_id";
+    }
+
+    /** Get primary device group id in broadcast. */
+    @WorkerThread
+    public static int getPrimaryGroupIdForBroadcast(@NonNull Context context) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(),
+                getPrimaryGroupIdUriForBroadcast(),
+                BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
+    }
+
+    /** Get secondary {@link CachedBluetoothDevice} in broadcast. */
+    @Nullable
+    @WorkerThread
+    public static CachedBluetoothDevice getSecondaryDeviceForBroadcast(
+            @NonNull Context context, @Nullable LocalBluetoothManager localBtManager) {
+        if (localBtManager == null) return null;
+        int primaryGroupId = getPrimaryGroupIdForBroadcast(context);
+        if (primaryGroupId == BluetoothCsipSetCoordinator.GROUP_ID_INVALID) return null;
+        LocalBluetoothLeBroadcastAssistant assistant =
+                localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        CachedBluetoothDeviceManager deviceManager = localBtManager.getCachedDeviceManager();
+        List<BluetoothDevice> devices = assistant.getAllConnectedDevices();
+        for (BluetoothDevice device : devices) {
+            CachedBluetoothDevice cachedDevice = deviceManager.findDevice(device);
+            if (hasConnectedBroadcastSource(cachedDevice, localBtManager)) {
+                int groupId = getGroupId(cachedDevice);
+                if (groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID
+                        && groupId != primaryGroupId) {
+                    return cachedDevice;
+                }
+            }
+        }
+        return null;
     }
 }

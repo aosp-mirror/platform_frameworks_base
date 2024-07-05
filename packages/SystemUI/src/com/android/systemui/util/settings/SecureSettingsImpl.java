@@ -22,12 +22,12 @@ import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.UserTracker;
-
-import kotlinx.coroutines.CoroutineDispatcher;
+import com.android.systemui.util.kotlin.SettingsSingleThreadBackground;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.CoroutineDispatcher;
 
 class SecureSettingsImpl implements SecureSettings {
     private final ContentResolver mContentResolver;
@@ -36,7 +36,7 @@ class SecureSettingsImpl implements SecureSettings {
 
     @Inject
     SecureSettingsImpl(ContentResolver contentResolver, UserTracker userTracker,
-            @Background CoroutineDispatcher bgDispatcher) {
+            @SettingsSingleThreadBackground CoroutineDispatcher bgDispatcher) {
         mContentResolver = contentResolver;
         mUserTracker = userTracker;
         mBgDispatcher = bgDispatcher;

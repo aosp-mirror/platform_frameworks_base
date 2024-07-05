@@ -174,6 +174,13 @@ final class UserDataRepository {
                 mEnabledAccessibilitySessions = new SparseArray<>();
 
         /**
+         * A per-user cache of {@link InputMethodSettings#getEnabledInputMethodsStr()}.
+         */
+        @GuardedBy("ImfLock.class")
+        @NonNull
+        String mLastEnabledInputMethodsStr = "";
+
+        /**
          * Intended to be instantiated only from this file.
          */
         private UserData(@UserIdInt int userId,

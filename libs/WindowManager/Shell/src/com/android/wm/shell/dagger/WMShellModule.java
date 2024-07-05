@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.os.UserManager;
 import android.view.Choreographer;
 import android.view.IWindowManager;
-import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -404,8 +403,7 @@ public abstract class WMShellModule {
             Optional<RecentTasksController> recentTasksController,
             HomeTransitionObserver homeTransitionObserver) {
         return new RecentsTransitionHandler(shellInit, transitions,
-                recentTasksController.orElse(null), homeTransitionObserver,
-                SurfaceControl.Transaction::new);
+                recentTasksController.orElse(null), homeTransitionObserver);
     }
 
     //
