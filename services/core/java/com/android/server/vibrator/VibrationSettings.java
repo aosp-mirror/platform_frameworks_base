@@ -557,8 +557,8 @@ final class VibrationSettings {
             mVibrateInputDevices =
                     loadSystemSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0, userHandle) > 0;
             mVibrateOn = loadSystemSetting(Settings.System.VIBRATE_ON, 1, userHandle) > 0;
-            mKeyboardVibrationOn = loadSystemSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED,
-                    mVibrationConfig.isDefaultKeyboardVibrationEnabled() ? 1 : 0, userHandle) > 0;
+            mKeyboardVibrationOn = loadSystemSetting(
+                    Settings.System.KEYBOARD_VIBRATION_ENABLED, 1, userHandle) > 0;
 
             int alarmIntensity = toIntensity(
                     loadSystemSetting(Settings.System.ALARM_VIBRATION_INTENSITY, -1, userHandle),
@@ -645,12 +645,10 @@ final class VibrationSettings {
                         .append("), ");
             }
             vibrationIntensitiesString.append('}');
-            String keyboardVibrationOnString = mKeyboardVibrationOn
-                    + " (default: " + mVibrationConfig.isDefaultKeyboardVibrationEnabled() + ")";
             return "VibrationSettings{"
                     + "mVibratorConfig=" + mVibrationConfig
                     + ", mVibrateOn=" + mVibrateOn
-                    + ", mKeyboardVibrationOn=" + keyboardVibrationOnString
+                    + ", mKeyboardVibrationOn=" + mKeyboardVibrationOn
                     + ", mVibrateInputDevices=" + mVibrateInputDevices
                     + ", mBatterySaverMode=" + mBatterySaverMode
                     + ", mRingerMode=" + ringerModeToString(mRingerMode)
@@ -667,8 +665,7 @@ final class VibrationSettings {
             pw.println("VibrationSettings:");
             pw.increaseIndent();
             pw.println("vibrateOn = " + mVibrateOn);
-            pw.println("keyboardVibrationOn = " + mKeyboardVibrationOn
-                    + ", default: " + mVibrationConfig.isDefaultKeyboardVibrationEnabled());
+            pw.println("keyboardVibrationOn = " + mKeyboardVibrationOn);
             pw.println("vibrateInputDevices = " + mVibrateInputDevices);
             pw.println("batterySaverMode = " + mBatterySaverMode);
             pw.println("ringerMode = " + ringerModeToString(mRingerMode));
