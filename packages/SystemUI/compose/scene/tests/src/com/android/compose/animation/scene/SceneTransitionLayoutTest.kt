@@ -31,6 +31,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +60,7 @@ import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.test.subjects.DpOffsetSubject
 import com.android.compose.test.subjects.assertThat
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineScope
 import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
@@ -69,8 +72,13 @@ class SceneTransitionLayoutTest {
         private val LayoutSize = 300.dp
     }
 
-    private var currentScene by mutableStateOf(SceneA)
-    private lateinit var layoutState: SceneTransitionLayoutState
+    private lateinit var coroutineScope: CoroutineScope
+    private lateinit var layoutState: MutableSceneTransitionLayoutState
+    private var currentScene: SceneKey
+        get() = layoutState.transitionState.currentScene
+        set(value) {
+            rule.runOnUiThread { layoutState.setTargetScene(value, coroutineScope) }
+        }
 
     // We use createAndroidComposeRule() here and not createComposeRule() because we need an
     // activity for testBack().
@@ -79,13 +87,14 @@ class SceneTransitionLayoutTest {
     /** The content under test. */
     @Composable
     private fun TestContent(enableInterruptions: Boolean = true) {
-        layoutState =
-            updateSceneTransitionLayoutState(
-                currentScene,
-                { currentScene = it },
+        coroutineScope = rememberCoroutineScope()
+        layoutState = remember {
+            MutableSceneTransitionLayoutState(
+                SceneA,
                 EmptyTestTransitions,
                 enableInterruptions = enableInterruptions,
             )
+        }
 
         SceneTransitionLayout(
             state = layoutState,
@@ -218,23 +227,15 @@ class SceneTransitionLayoutTest {
         // We will advance the clock manually.
         rule.mainClock.autoAdvance = false
 
-        // Change the current scene. Until composition is triggered, this won't change the layout
-        // state.
+        // Change the current scene.
         currentScene = SceneB
-        assertThat(layoutState.transitionState).isIdle()
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
-
-        // On the next frame, we will recompose because currentScene changed, which will start the
-        // transition (i.e. it will change the transitionState to be a Transition) in a
-        // LaunchedEffect.
-        rule.mainClock.advanceTimeByFrame()
         val transition = assertThat(layoutState.transitionState).isTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasProgress(0f)
 
         // Then, on the next frame, the animator we started gets its initial value and clock
-        // starting time. We are now at progress = 0f.
+        // starting time. We are still at progress = 0f.
         rule.mainClock.advanceTimeByFrame()
         assertThat(transition).hasProgress(0f)
 
@@ -275,11 +276,8 @@ class SceneTransitionLayoutTest {
         // Pause animations to test the state mid-transition.
         rule.mainClock.autoAdvance = false
 
-        // Go to scene B and let the animation start. See [testLayoutState()] and
-        // [androidx.compose.ui.test.MainTestClock] to understand why we need to advance the clock
-        // by 2 frames to be at the start of the animation.
+        // Go to scene B and let the animation start.
         currentScene = SceneB
-        rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeByFrame()
 
         // Advance to the middle of the animation.
@@ -310,7 +308,6 @@ class SceneTransitionLayoutTest {
 
         // Animate to scene C, let the animation start then go to the middle of the transition.
         currentScene = SceneC
-        rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeBy(TestTransitionDuration / 2)
 
@@ -409,24 +406,24 @@ class SceneTransitionLayoutTest {
     fun multipleTransitionsWillComposeMultipleScenes() {
         val duration = 10 * 16L
 
-        var currentScene: SceneKey by mutableStateOf(SceneA)
-        lateinit var state: SceneTransitionLayoutState
-        rule.setContent {
-            state =
-                updateSceneTransitionLayoutState(
-                    currentScene = currentScene,
-                    onChangeScene = { currentScene = it },
-                    transitions =
-                        transitions {
-                            from(SceneA, to = SceneB) {
-                                spec = tween(duration.toInt(), easing = LinearEasing)
-                            }
-                            from(SceneB, to = SceneC) {
-                                spec = tween(duration.toInt(), easing = LinearEasing)
-                            }
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    SceneA,
+                    transitions {
+                        from(SceneA, to = SceneB) {
+                            spec = tween(duration.toInt(), easing = LinearEasing)
                         }
+                        from(SceneB, to = SceneC) {
+                            spec = tween(duration.toInt(), easing = LinearEasing)
+                        }
+                    }
                 )
+            }
 
+        lateinit var coroutineScope: CoroutineScope
+        rule.setContent {
+            coroutineScope = rememberCoroutineScope()
             SceneTransitionLayout(state) {
                 scene(SceneA) { Box(Modifier.testTag("aRoot").fillMaxSize()) }
                 scene(SceneB) { Box(Modifier.testTag("bRoot").fillMaxSize()) }
@@ -444,11 +441,10 @@ class SceneTransitionLayoutTest {
         rule.mainClock.autoAdvance = false
 
         // Start A => B and go to the middle of the transition.
-        currentScene = SceneB
+        rule.runOnUiThread { state.setTargetScene(SceneB, coroutineScope) }
 
-        // We need to tick 2 frames after changing [currentScene] before the animation actually
+        // We need to tick 1 frames after changing [currentScene] before the animation actually
         // starts.
-        rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeBy(duration / 2)
         rule.waitForIdle()
@@ -462,8 +458,7 @@ class SceneTransitionLayoutTest {
         rule.onNodeWithTag("cRoot").assertDoesNotExist()
 
         // Start B => C.
-        currentScene = SceneC
-        rule.mainClock.advanceTimeByFrame()
+        rule.runOnUiThread { state.setTargetScene(SceneC, coroutineScope) }
         rule.mainClock.advanceTimeByFrame()
         rule.waitForIdle()
 
@@ -517,12 +512,7 @@ class SceneTransitionLayoutTest {
             assertThrows(IllegalStateException::class.java) {
                 rule.setContent {
                     SceneTransitionLayout(
-                        state =
-                            updateSceneTransitionLayoutState(
-                                currentScene = currentScene,
-                                onChangeScene = { currentScene = it },
-                                transitions = EmptyTestTransitions
-                            ),
+                        state = remember { MutableSceneTransitionLayoutState(SceneA) },
                         modifier = Modifier.size(LayoutSize),
                     ) {
                         // from SceneA to SceneA

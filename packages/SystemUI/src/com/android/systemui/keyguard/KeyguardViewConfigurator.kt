@@ -21,6 +21,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintSet
@@ -29,9 +30,9 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
-import com.android.compose.animation.scene.transitions
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.KeyguardStatusViewController
@@ -112,7 +113,6 @@ constructor(
 
     private var rootViewHandle: DisposableHandle? = null
     private var indicationAreaHandle: DisposableHandle? = null
-    private val sceneKey = SceneKey("root-view-scene-key")
 
     var keyguardStatusViewController: KeyguardStatusViewController? = null
         get() {
@@ -229,12 +229,10 @@ constructor(
             setContent {
                 // STL is used solely to provide a SceneScope to enable us to invoke SceneScope
                 // composables.
-                SceneTransitionLayout(
-                    currentScene = sceneKey,
-                    onChangeScene = {},
-                    transitions = transitions {},
-                ) {
-                    scene(sceneKey) {
+                val currentScene = remember { SceneKey("root-view-scene-key") }
+                val state = remember { MutableSceneTransitionLayoutState(currentScene) }
+                SceneTransitionLayout(state) {
+                    scene(currentScene) {
                         with(
                             LockscreenContent(
                                 viewModel = viewModel,
