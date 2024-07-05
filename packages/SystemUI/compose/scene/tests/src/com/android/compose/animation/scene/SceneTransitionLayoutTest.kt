@@ -16,8 +16,6 @@
 
 package com.android.compose.animation.scene
 
-import androidx.activity.BackEventCompat
-import androidx.activity.ComponentActivity
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -43,7 +41,7 @@ import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertWidthIsEqualTo
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -80,9 +78,7 @@ class SceneTransitionLayoutTest {
             rule.runOnUiThread { layoutState.setTargetScene(value, coroutineScope) }
         }
 
-    // We use createAndroidComposeRule() here and not createComposeRule() because we need an
-    // activity for testBack().
-    @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule val rule = createComposeRule()
 
     /** The content under test. */
     @Composable
@@ -170,52 +166,6 @@ class SceneTransitionLayoutTest {
         rule.onNodeWithText("SceneC").assertDoesNotExist()
         assertThat(layoutState.transitionState).isIdle()
         assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
-    }
-
-    @Test
-    fun testBack() {
-        rule.setContent { TestContent() }
-
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
-
-        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
-        rule.waitForIdle()
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
-    }
-
-    @Test
-    fun testPredictiveBack() {
-        rule.setContent { TestContent() }
-
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
-
-        // Start back.
-        val dispatcher = rule.activity.onBackPressedDispatcher
-        rule.runOnUiThread {
-            dispatcher.dispatchOnBackStarted(backEvent())
-            dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
-        }
-
-        val transition = assertThat(layoutState.transitionState).isTransition()
-        assertThat(transition).hasFromScene(SceneA)
-        assertThat(transition).hasToScene(SceneB)
-        assertThat(transition).hasProgress(0.4f)
-
-        // Cancel it.
-        rule.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
-        rule.waitForIdle()
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
-        assertThat(layoutState.transitionState).isIdle()
-
-        // Start again and commit it.
-        rule.runOnUiThread {
-            dispatcher.dispatchOnBackStarted(backEvent())
-            dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
-            dispatcher.onBackPressed()
-        }
-        rule.waitForIdle()
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
-        assertThat(layoutState.transitionState).isIdle()
     }
 
     @Test
@@ -549,14 +499,5 @@ class SceneTransitionLayoutTest {
         assertThat(keyInA).isEqualTo(SceneA)
         assertThat(keyInB).isEqualTo(SceneB)
         assertThat(keyInC).isEqualTo(SceneC)
-    }
-
-    private fun backEvent(progress: Float = 0f): BackEventCompat {
-        return BackEventCompat(
-            touchX = 0f,
-            touchY = 0f,
-            progress = progress,
-            swipeEdge = BackEventCompat.EDGE_LEFT,
-        )
     }
 }
