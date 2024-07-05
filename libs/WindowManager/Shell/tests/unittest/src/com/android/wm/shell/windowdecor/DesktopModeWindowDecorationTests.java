@@ -82,7 +82,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.shared.DesktopModeStatus;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams;
 import com.android.wm.shell.windowdecor.common.OnTaskActionClickListener;
 

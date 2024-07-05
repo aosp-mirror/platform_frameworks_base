@@ -20,7 +20,6 @@ import android.content.Context
 import android.provider.Settings
 import android.util.Log
 import com.android.window.flags.Flags
-import com.android.wm.shell.shared.DesktopModeStatus
 
 /*
  * A shared class to check desktop mode flags state.
