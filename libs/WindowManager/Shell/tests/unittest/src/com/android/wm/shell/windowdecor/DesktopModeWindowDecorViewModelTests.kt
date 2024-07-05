@@ -360,7 +360,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 isTopActivityStyleFloating = true
                 numActivities = 1
             }
-            doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+            doReturn(true).`when` { DesktopModeStatus.canEnterDesktopMode(any()) }
             setUpMockDecorationsForTasks(task)
 
             onTaskOpening(task)
