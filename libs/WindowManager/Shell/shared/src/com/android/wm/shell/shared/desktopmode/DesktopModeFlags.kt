@@ -84,11 +84,12 @@ enum class DesktopModeFlags(
           // Read Setting Global if System Property is not present (just after reboot)
           // or not valid (user manually changed the value)
           val overrideFromSettingsGlobal =
-              Settings.Global.getInt(
+              convertToToggleOverrideWithFallback(
+                  Settings.Global.getInt(
                       context.contentResolver,
                       Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
-                      ToggleOverride.OVERRIDE_UNSET.setting)
-                  .convertToToggleOverrideWithFallback(ToggleOverride.OVERRIDE_UNSET)
+                      ToggleOverride.OVERRIDE_UNSET.setting),
+                  ToggleOverride.OVERRIDE_UNSET)
           // Initialize System Property
           System.setProperty(
               SYSTEM_PROPERTY_OVERRIDE_KEY, overrideFromSettingsGlobal.setting.toString())
@@ -97,7 +98,6 @@ enum class DesktopModeFlags(
         }
   }
 
-  // TODO(b/348193756): Share ToggleOverride enum with Settings 'DesktopModePreferenceController'
   /**
    * Override state of desktop mode developer option toggle.
    *
@@ -113,24 +113,12 @@ enum class DesktopModeFlags(
     OVERRIDE_ON(1)
   }
 
-  private val settingToToggleOverrideMap = ToggleOverride.entries.associateBy { it.setting }
-
   private fun String?.convertToToggleOverride(): ToggleOverride? {
     val intValue = this?.toIntOrNull() ?: return null
     return settingToToggleOverrideMap[intValue]
         ?: run {
           Log.w(TAG, "Unknown toggleOverride int $intValue")
           null
-        }
-  }
-
-  private fun Int.convertToToggleOverrideWithFallback(
-      fallbackOverride: ToggleOverride
-  ): ToggleOverride {
-    return settingToToggleOverrideMap[this]
-        ?: run {
-          Log.w(TAG, "Unknown toggleOverride int $this")
-          fallbackOverride
         }
   }
 
@@ -148,5 +136,19 @@ enum class DesktopModeFlags(
      * be refreshed only on reboots as overridden state takes effect on reboots.
      */
     private var cachedToggleOverride: ToggleOverride? = null
+
+    private val settingToToggleOverrideMap = ToggleOverride.entries.associateBy { it.setting }
+
+    @JvmStatic
+    fun convertToToggleOverrideWithFallback(
+        overrideInt: Int,
+        fallbackOverride: ToggleOverride
+    ): ToggleOverride {
+      return settingToToggleOverrideMap[overrideInt]
+          ?: run {
+            Log.w(TAG, "Unknown toggleOverride int $overrideInt")
+            fallbackOverride
+          }
+    }
   }
 }
