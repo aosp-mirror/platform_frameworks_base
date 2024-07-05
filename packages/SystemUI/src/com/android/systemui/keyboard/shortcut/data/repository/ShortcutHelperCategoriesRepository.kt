@@ -19,16 +19,14 @@ package com.android.systemui.keyboard.shortcut.data.repository
 import android.content.Context
 import android.hardware.input.InputManager
 import android.util.Log
-import android.view.InputDevice
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
-import android.view.WindowManager
-import android.view.WindowManager.KeyboardShortcutsReceiver
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
+import com.android.systemui.keyboard.shortcut.qualifiers.InputShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.MultitaskingShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.SystemShortcuts
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
@@ -44,7 +42,6 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
@@ -55,7 +52,7 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @SystemShortcuts private val systemShortcutsSource: KeyboardShortcutGroupsSource,
     @MultitaskingShortcuts private val multitaskingShortcutsSource: KeyboardShortcutGroupsSource,
-    private val windowManager: WindowManager,
+    @InputShortcuts private val inputShortcutsSource: KeyboardShortcutGroupsSource,
     private val inputManager: InputManager,
     stateRepository: ShortcutHelperStateRepository
 ) {
@@ -75,7 +72,7 @@ constructor(
                 toShortcutCategory(
                     it.keyCharacterMap,
                     SYSTEM,
-                    systemShortcutsSource.shortcutGroups()
+                    systemShortcutsSource.shortcutGroups(it.id)
                 )
             } else {
                 null
@@ -88,7 +85,7 @@ constructor(
                 toShortcutCategory(
                     it.keyCharacterMap,
                     MULTI_TASKING,
-                    multitaskingShortcutsSource.shortcutGroups()
+                    multitaskingShortcutsSource.shortcutGroups(it.id)
                 )
             } else {
                 null
@@ -96,22 +93,17 @@ constructor(
         }
 
     val imeShortcutsCategory =
-        activeInputDevice.map { if (it != null) retrieveImeShortcuts(it) else null }
-
-    private suspend fun retrieveImeShortcuts(
-        inputDevice: InputDevice,
-    ): ShortcutCategory? {
-        return suspendCancellableCoroutine { continuation ->
-            val shortcutsReceiver = KeyboardShortcutsReceiver { shortcutGroups ->
-                continuation.resumeWith(
-                    Result.success(
-                        toShortcutCategory(inputDevice.keyCharacterMap, IME, shortcutGroups)
-                    )
+        activeInputDevice.map {
+            if (it != null) {
+                toShortcutCategory(
+                    it.keyCharacterMap,
+                    IME,
+                    inputShortcutsSource.shortcutGroups(it.id)
                 )
+            } else {
+                null
             }
-            windowManager.requestImeKeyboardShortcuts(shortcutsReceiver, inputDevice.id)
         }
-    }
 
     private fun toShortcutCategory(
         keyCharacterMap: KeyCharacterMap,

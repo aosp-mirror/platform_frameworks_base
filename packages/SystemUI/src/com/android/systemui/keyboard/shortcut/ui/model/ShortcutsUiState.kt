@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyboard.shortcut.data.source
+package com.android.systemui.keyboard.shortcut.ui.model
 
-import android.view.KeyboardShortcutGroup
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 
-class FakeKeyboardShortcutGroupsSource : KeyboardShortcutGroupsSource {
+sealed interface ShortcutsUiState {
 
-    private var groups = listOf<KeyboardShortcutGroup>()
+    data class Active(
+        val shortcutCategories: List<ShortcutCategory>,
+        val defaultSelectedCategory: ShortcutCategoryType,
+    ) : ShortcutsUiState
 
-    override suspend fun shortcutGroups(deviceId: Int): List<KeyboardShortcutGroup> = groups
-
-    fun setGroups(groups: List<KeyboardShortcutGroup>) {
-        this.groups = groups
-    }
+    data object Inactive : ShortcutsUiState
 }

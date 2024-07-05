@@ -44,7 +44,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.VerticalSplit
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -73,6 +76,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -83,19 +87,42 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
+import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
+import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
 
 @Composable
 fun ShortcutHelper(
     onKeyboardSettingsClicked: () -> Unit,
     modifier: Modifier = Modifier,
-    categories: List<ShortcutHelperCategory> = ShortcutHelperTemporaryData.categories,
+    shortcutsUiState: ShortcutsUiState,
     useSinglePane: @Composable () -> Boolean = { shouldUseSinglePane() },
 ) {
-    if (useSinglePane()) {
-        ShortcutHelperSinglePane(modifier, categories, onKeyboardSettingsClicked)
-    } else {
-        ShortcutHelperTwoPane(modifier, categories, onKeyboardSettingsClicked)
+    when (shortcutsUiState) {
+        is ShortcutsUiState.Active -> {
+            if (useSinglePane()) {
+                ShortcutHelperSinglePane(
+                    modifier,
+                    shortcutsUiState.shortcutCategories,
+                    onKeyboardSettingsClicked
+                )
+            } else {
+                ShortcutHelperTwoPane(
+                    modifier,
+                    shortcutsUiState.shortcutCategories,
+                    shortcutsUiState.defaultSelectedCategory,
+                    onKeyboardSettingsClicked
+                )
+            }
+        }
+        is ShortcutsUiState.Inactive -> {
+            // No-op for now.
+        }
     }
 }
 
@@ -107,7 +134,7 @@ private fun shouldUseSinglePane() =
 @Composable
 private fun ShortcutHelperSinglePane(
     modifier: Modifier = Modifier,
-    categories: List<ShortcutHelperCategory>,
+    categories: List<ShortcutCategory>,
     onKeyboardSettingsClicked: () -> Unit,
 ) {
     Column(
@@ -129,9 +156,9 @@ private fun ShortcutHelperSinglePane(
 
 @Composable
 private fun CategoriesPanelSinglePane(
-    categories: List<ShortcutHelperCategory>,
+    categories: List<ShortcutCategory>,
 ) {
-    var expandedCategory by remember { mutableStateOf<ShortcutHelperCategory?>(null) }
+    var expandedCategory by remember { mutableStateOf<ShortcutCategory?>(null) }
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         categories.fastForEachIndexed { index, category ->
             val isExpanded = expandedCategory == category
@@ -162,7 +189,7 @@ private fun CategoriesPanelSinglePane(
 
 @Composable
 private fun CategoryItemSinglePane(
-    category: ShortcutHelperCategory,
+    category: ShortcutCategory,
     isExpanded: Boolean,
     onClick: () -> Unit,
     shape: Shape,
@@ -187,6 +214,22 @@ private fun CategoryItemSinglePane(
         }
     }
 }
+
+private val ShortcutCategory.icon: ImageVector
+    get() =
+        when (type) {
+            ShortcutCategoryType.SYSTEM -> Icons.Default.Tv
+            ShortcutCategoryType.MULTI_TASKING -> Icons.Default.VerticalSplit
+            ShortcutCategoryType.IME -> Icons.Default.Keyboard
+        }
+
+private val ShortcutCategory.labelResId: Int
+    get() =
+        when (type) {
+            ShortcutCategoryType.SYSTEM -> R.string.shortcut_helper_category_system
+            ShortcutCategoryType.MULTI_TASKING -> R.string.shortcut_helper_category_system
+            ShortcutCategoryType.IME -> R.string.shortcut_helper_category_input
+        }
 
 @Composable
 private fun RotatingExpandCollapseIcon(isExpanded: Boolean) {
@@ -219,7 +262,7 @@ private fun RotatingExpandCollapseIcon(isExpanded: Boolean) {
 }
 
 @Composable
-private fun ShortcutCategoryDetailsSinglePane(category: ShortcutHelperCategory) {
+private fun ShortcutCategoryDetailsSinglePane(category: ShortcutCategory) {
     Column(Modifier.padding(horizontal = 16.dp)) {
         category.subCategories.fastForEach { subCategory ->
             ShortcutSubCategorySinglePane(subCategory)
@@ -228,7 +271,7 @@ private fun ShortcutCategoryDetailsSinglePane(category: ShortcutHelperCategory) 
 }
 
 @Composable
-private fun ShortcutSubCategorySinglePane(subCategory: SubCategory) {
+private fun ShortcutSubCategorySinglePane(subCategory: ShortcutSubCategory) {
     // This @Composable is expected to be in a Column.
     SubCategoryTitle(subCategory.label)
     subCategory.shortcuts.fastForEachIndexed { index, shortcut ->
@@ -251,10 +294,12 @@ private fun ShortcutSinglePane(shortcut: Shortcut) {
 @Composable
 private fun ShortcutHelperTwoPane(
     modifier: Modifier = Modifier,
-    categories: List<ShortcutHelperCategory>,
+    categories: List<ShortcutCategory>,
+    defaultSelectedCategory: ShortcutCategoryType,
     onKeyboardSettingsClicked: () -> Unit,
 ) {
-    var selectedCategory by remember { mutableStateOf(categories.first()) }
+    var selectedCategoryType by remember { mutableStateOf(defaultSelectedCategory) }
+    val selectedCategory = categories.first { it.type == selectedCategoryType }
     Column(modifier = modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 26.dp)) {
         TitleBar()
         Spacer(modifier = Modifier.height(12.dp))
@@ -262,8 +307,8 @@ private fun ShortcutHelperTwoPane(
             StartSidePanel(
                 modifier = Modifier.fillMaxWidth(fraction = 0.32f),
                 categories = categories,
-                selectedCategory = selectedCategory,
-                onCategoryClicked = { selectedCategory = it },
+                selectedCategory = selectedCategoryType,
+                onCategoryClicked = { selectedCategoryType = it.type },
                 onKeyboardSettingsClicked = onKeyboardSettingsClicked,
             )
             Spacer(modifier = Modifier.width(24.dp))
@@ -273,7 +318,7 @@ private fun ShortcutHelperTwoPane(
 }
 
 @Composable
-private fun EndSidePanel(modifier: Modifier, category: ShortcutHelperCategory) {
+private fun EndSidePanel(modifier: Modifier, category: ShortcutCategory) {
     LazyColumn(modifier.nestedScroll(rememberNestedScrollInteropConnection())) {
         items(items = category.subCategories, key = { item -> item.label }) {
             SubCategoryContainerDualPane(it)
@@ -283,7 +328,7 @@ private fun EndSidePanel(modifier: Modifier, category: ShortcutHelperCategory) {
 }
 
 @Composable
-private fun SubCategoryContainerDualPane(subCategory: SubCategory) {
+private fun SubCategoryContainerDualPane(subCategory: ShortcutSubCategory) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
@@ -315,11 +360,12 @@ private fun SubCategoryTitle(title: String) {
 private fun ShortcutViewDualPane(shortcut: Shortcut) {
     Row(Modifier.padding(vertical = 16.dp)) {
         ShortcutDescriptionText(
-            modifier = Modifier.weight(0.25f).align(Alignment.CenterVertically),
+            modifier = Modifier.width(160.dp).align(Alignment.CenterVertically),
             shortcut = shortcut,
         )
+        Spacer(modifier = Modifier.width(16.dp))
         ShortcutKeyCombinations(
-            modifier = Modifier.weight(0.75f),
+            modifier = Modifier.weight(1f),
             shortcut = shortcut,
         )
     }
@@ -343,16 +389,17 @@ private fun ShortcutKeyCombinations(
 
 @Composable
 private fun ShortcutCommand(command: ShortcutCommand) {
-    // This @Composable is expected to be in a Row or FlowRow.
-    command.keys.forEachIndexed { keyIndex, key ->
-        if (keyIndex > 0) {
-            Spacer(Modifier.width(4.dp))
-        }
-        ShortcutKeyContainer {
-            if (key is ShortcutKey.Text) {
-                ShortcutTextKey(key)
-            } else if (key is ShortcutKey.Icon) {
-                ShortcutIconKey(key)
+    Row {
+        command.keys.forEachIndexed { keyIndex, key ->
+            if (keyIndex > 0) {
+                Spacer(Modifier.width(4.dp))
+            }
+            ShortcutKeyContainer {
+                if (key is ShortcutKey.Text) {
+                    ShortcutTextKey(key)
+                } else if (key is ShortcutKey.Icon) {
+                    ShortcutIconKey(key)
+                }
             }
         }
     }
@@ -384,7 +431,7 @@ private fun BoxScope.ShortcutTextKey(key: ShortcutKey.Text) {
 @Composable
 private fun BoxScope.ShortcutIconKey(key: ShortcutKey.Icon) {
     Icon(
-        imageVector = key.value,
+        painter = painterResource(key.drawableResId),
         contentDescription = null,
         modifier = Modifier.align(Alignment.Center).padding(6.dp)
     )
@@ -418,10 +465,10 @@ private fun ShortcutDescriptionText(
 @Composable
 private fun StartSidePanel(
     modifier: Modifier,
-    categories: List<ShortcutHelperCategory>,
+    categories: List<ShortcutCategory>,
     onKeyboardSettingsClicked: () -> Unit,
-    selectedCategory: ShortcutHelperCategory,
-    onCategoryClicked: (ShortcutHelperCategory) -> Unit,
+    selectedCategory: ShortcutCategoryType,
+    onCategoryClicked: (ShortcutCategory) -> Unit,
 ) {
     Column(modifier) {
         ShortcutsSearchBar()
@@ -434,16 +481,16 @@ private fun StartSidePanel(
 
 @Composable
 private fun CategoriesPanelTwoPane(
-    categories: List<ShortcutHelperCategory>,
-    selectedCategory: ShortcutHelperCategory,
-    onCategoryClicked: (ShortcutHelperCategory) -> Unit
+    categories: List<ShortcutCategory>,
+    selectedCategory: ShortcutCategoryType,
+    onCategoryClicked: (ShortcutCategory) -> Unit
 ) {
     Column {
         categories.fastForEach {
             CategoryItemTwoPane(
                 label = stringResource(it.labelResId),
                 icon = it.icon,
-                selected = selectedCategory == it,
+                selected = selectedCategory == it.type,
                 onClick = { onCategoryClicked(it) }
             )
         }

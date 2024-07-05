@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyboard.shortcut.data.source
+package com.android.systemui.keyboard.shortcut.qualifiers
 
-import android.view.KeyboardShortcutGroup
+import javax.inject.Qualifier
 
-class FakeKeyboardShortcutGroupsSource : KeyboardShortcutGroupsSource {
-
-    private var groups = listOf<KeyboardShortcutGroup>()
-
-    override suspend fun shortcutGroups(deviceId: Int): List<KeyboardShortcutGroup> = groups
-
-    fun setGroups(groups: List<KeyboardShortcutGroup>) {
-        this.groups = groups
-    }
-}
+@Qualifier annotation class InputShortcuts
