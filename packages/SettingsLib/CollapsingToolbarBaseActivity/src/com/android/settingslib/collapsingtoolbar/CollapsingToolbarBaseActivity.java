@@ -57,6 +57,7 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
         // for backward compatibility on R devices or wearable devices due to small device size.
         if (mCustomizeLayoutResId > 0 && (Build.VERSION.SDK_INT < Build.VERSION_CODES.S
