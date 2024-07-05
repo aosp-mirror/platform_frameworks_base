@@ -35,7 +35,7 @@ enum class DesktopModeFlags(
     private val shouldOverrideByDevOption: Boolean
 ) {
   // All desktop mode related flags will be added here
-  DESKTOP_WINDOWING_MODE(DesktopModeStatus::isDesktopModeFlagEnabled, true),
+  DESKTOP_WINDOWING_MODE(Flags::enableDesktopWindowingMode, true),
   WALLPAPER_ACTIVITY(Flags::enableDesktopWindowingWallpaperActivity, true);
 
   // Local cache for toggle override, which is initialized once on its first access. It needs to be
