@@ -317,6 +317,7 @@ class MenuAnimationController {
             constrainPositionAndUpdate(
                     new PointF(mMenuView.getTranslationX(), mMenuView.getTranslationY()),
                     /* writeToPosition = */ true);
+            mMenuView.onPositionChanged(true);
             moveToEdgeAndHide();
             return true;
         }
