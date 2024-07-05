@@ -700,19 +700,37 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun moveToDesktop_topActivityTranslucent_doesNothing() {
-    setFlagsRule.enableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  fun moveToDesktop_topActivityTranslucentWithStyleFloating_taskIsMovedToDesktop() {
     val task =
-        setUpFullscreenTask().apply {
-          isTopActivityTransparent = true
-          numActivities = 1
-        }
+      setUpFullscreenTask().apply {
+        isTopActivityTransparent = true
+        isTopActivityStyleFloating = true
+        numActivities = 1
+      }
+
+    controller.moveToDesktop(task, transitionSource = UNKNOWN)
+
+    val wct = getLatestEnterDesktopWct()
+    assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  fun moveToDesktop_topActivityTranslucentWithoutStyleFloating_doesNothing() {
+    val task =
+      setUpFullscreenTask().apply {
+        isTopActivityTransparent = true
+        isTopActivityStyleFloating = false
+        numActivities = 1
+      }
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
     verifyEnterDesktopWCTNotExecuted()
   }
 
   @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
   fun moveToDesktop_systemUIActivity_doesNothing() {
     val task = setUpFullscreenTask()
 
@@ -1374,20 +1392,40 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun handleRequest_shouldLaunchAsModal_returnSwitchToFullscreenWCT() {
-    setFlagsRule.enableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  fun handleRequest_topActivityTransparentWithStyleFloating_returnSwitchToFreeformWCT() {
+    val freeformTask = setUpFreeformTask()
+    markTaskVisible(freeformTask)
+
     val task =
-        setUpFreeformTask().apply {
-          isTopActivityTransparent = true
-          numActivities = 1
-        }
+      setUpFullscreenTask().apply {
+        isTopActivityTransparent = true
+        isTopActivityStyleFloating = true
+        numActivities = 1
+      }
 
     val result = controller.handleRequest(Binder(), createTransition(task))
     assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)
-        .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
   }
 
   @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  fun handleRequest_topActivityTransparentWithoutStyleFloating_returnSwitchToFullscreenWCT() {
+    val task =
+      setUpFreeformTask().apply {
+        isTopActivityTransparent = true
+        isTopActivityStyleFloating = false
+        numActivities = 1
+      }
+
+    val result = controller.handleRequest(Binder(), createTransition(task))
+    assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
   fun handleRequest_systemUIActivity_returnSwitchToFullscreenWCT() {
     val task = setUpFreeformTask()
 

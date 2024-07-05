@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -100,10 +101,14 @@ constructor(
                         biometricUnlockState,
                     ) ->
                     if (isWakeAndUnlock(biometricUnlockState.mode)) {
-                        startTransitionTo(
-                            KeyguardState.GONE,
-                            ownerReason = "biometric wake and unlock",
-                        )
+                        if (SceneContainerFlag.isEnabled) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                        } else {
+                            startTransitionTo(
+                                KeyguardState.GONE,
+                                ownerReason = "biometric wake and unlock",
+                            )
+                        }
                     }
                 }
         }
@@ -131,21 +136,35 @@ constructor(
                         isIdleOnCommunal,
                         canTransitionToGoneOnWake,
                         primaryBouncerShowing) ->
-                    startTransitionTo(
-                        if (!deviceEntryRepository.isLockscreenEnabled()) {
-                            KeyguardState.GONE
-                        } else if (canTransitionToGoneOnWake) {
-                            KeyguardState.GONE
-                        } else if (primaryBouncerShowing) {
-                            KeyguardState.PRIMARY_BOUNCER
-                        } else if (occluded) {
-                            KeyguardState.OCCLUDED
-                        } else if (isIdleOnCommunal) {
-                            KeyguardState.GLANCEABLE_HUB
+                    if (!deviceEntryRepository.isLockscreenEnabled()) {
+                        if (SceneContainerFlag.isEnabled) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
                         } else {
-                            KeyguardState.LOCKSCREEN
+                            startTransitionTo(KeyguardState.GONE)
                         }
-                    )
+                    } else if (canTransitionToGoneOnWake) {
+                        if (SceneContainerFlag.isEnabled) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                        } else {
+                            startTransitionTo(KeyguardState.GONE)
+                        }
+                    } else if (primaryBouncerShowing) {
+                        if (SceneContainerFlag.isEnabled) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                        } else {
+                            startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                        }
+                    } else if (occluded) {
+                        startTransitionTo(KeyguardState.OCCLUDED)
+                    } else if (isIdleOnCommunal) {
+                        if (SceneContainerFlag.isEnabled) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                        } else {
+                            startTransitionTo(KeyguardState.GLANCEABLE_HUB)
+                        }
+                    } else {
+                        startTransitionTo(KeyguardState.LOCKSCREEN)
+                    }
                 }
         }
     }
@@ -177,23 +196,55 @@ constructor(
                             // Handled by dismissFromDozing().
                             !isWakeAndUnlock(biometricUnlockState.mode)
                     ) {
-                        startTransitionTo(
-                            if (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen) {
-                                KeyguardState.GONE
-                            } else if (
-                                KeyguardWmStateRefactor.isEnabled &&
-                                    !deviceEntryRepository.isLockscreenEnabled()
-                            ) {
-                                KeyguardState.GONE
-                            } else if (primaryBouncerShowing) {
-                                KeyguardState.PRIMARY_BOUNCER
-                            } else if (isIdleOnCommunal) {
-                                KeyguardState.GLANCEABLE_HUB
+                        if (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen) {
+                            if (SceneContainerFlag.isEnabled) {
+                                // TODO(b/336576536): Check if adaptation for scene framework is
+                                // needed
                             } else {
-                                KeyguardState.LOCKSCREEN
-                            },
-                            ownerReason = "waking from dozing"
-                        )
+                                startTransitionTo(
+                                    KeyguardState.GONE,
+                                    ownerReason = "waking from dozing"
+                                )
+                            }
+                        } else if (
+                            KeyguardWmStateRefactor.isEnabled &&
+                                !deviceEntryRepository.isLockscreenEnabled()
+                        ) {
+                            if (SceneContainerFlag.isEnabled) {
+                                // TODO(b/336576536): Check if adaptation for scene framework is
+                                // needed
+                            } else {
+                                startTransitionTo(
+                                    KeyguardState.GONE,
+                                    ownerReason = "waking from dozing"
+                                )
+                            }
+                        } else if (primaryBouncerShowing) {
+                            if (SceneContainerFlag.isEnabled) {
+                                // TODO(b/336576536): Check if adaptation for scene framework is
+                                // needed
+                            } else {
+                                startTransitionTo(
+                                    KeyguardState.PRIMARY_BOUNCER,
+                                    ownerReason = "waking from dozing"
+                                )
+                            }
+                        } else if (isIdleOnCommunal) {
+                            if (SceneContainerFlag.isEnabled) {
+                                // TODO(b/336576536): Check if adaptation for scene framework is
+                                // needed
+                            } else {
+                                startTransitionTo(
+                                    KeyguardState.GLANCEABLE_HUB,
+                                    ownerReason = "waking from dozing"
+                                )
+                            }
+                        } else {
+                            startTransitionTo(
+                                KeyguardState.LOCKSCREEN,
+                                ownerReason = "waking from dozing"
+                            )
+                        }
                     }
                 }
         }

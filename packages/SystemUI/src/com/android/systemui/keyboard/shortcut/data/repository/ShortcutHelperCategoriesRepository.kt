@@ -16,12 +16,18 @@
 
 package com.android.systemui.keyboard.shortcut.data.repository
 
+import android.content.Context
+import android.hardware.input.InputManager
+import android.util.Log
+import android.view.InputDevice
+import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
 import android.view.WindowManager
 import android.view.WindowManager.KeyboardShortcutsReceiver
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.qualifiers.MultitaskingShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.SystemShortcuts
@@ -30,29 +36,46 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.IME
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MULTI_TASKING
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.SYSTEM
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState.Active
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 
 @SysUISingleton
 class ShortcutHelperCategoriesRepository
 @Inject
 constructor(
+    private val context: Context,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     @SystemShortcuts private val systemShortcutsSource: KeyboardShortcutGroupsSource,
     @MultitaskingShortcuts private val multitaskingShortcutsSource: KeyboardShortcutGroupsSource,
     private val windowManager: WindowManager,
-    shortcutHelperStateRepository: ShortcutHelperStateRepository
+    private val inputManager: InputManager,
+    stateRepository: ShortcutHelperStateRepository
 ) {
 
-    val systemShortcutsCategory =
-        shortcutHelperStateRepository.state.map {
+    private val activeInputDevice =
+        stateRepository.state.map {
             if (it is Active) {
+                withContext(backgroundDispatcher) { inputManager.getInputDevice(it.deviceId) }
+            } else {
+                null
+            }
+        }
+
+    val systemShortcutsCategory =
+        activeInputDevice.map {
+            if (it != null) {
                 toShortcutCategory(
-                    systemShortcutsSource.shortcutGroups(),
-                    ShortcutCategoryType.SYSTEM
+                    it.keyCharacterMap,
+                    SYSTEM,
+                    systemShortcutsSource.shortcutGroups()
                 )
             } else {
                 null
@@ -60,76 +83,128 @@ constructor(
         }
 
     val multitaskingShortcutsCategory =
-        shortcutHelperStateRepository.state.map {
-            if (it is Active) {
-                toShortcutCategory(multitaskingShortcutsSource.shortcutGroups(), MULTI_TASKING)
+        activeInputDevice.map {
+            if (it != null) {
+                toShortcutCategory(
+                    it.keyCharacterMap,
+                    MULTI_TASKING,
+                    multitaskingShortcutsSource.shortcutGroups()
+                )
             } else {
                 null
             }
         }
 
     val imeShortcutsCategory =
-        shortcutHelperStateRepository.state.map {
-            if (it is Active) retrieveImeShortcuts(it.deviceId) else null
-        }
+        activeInputDevice.map { if (it != null) retrieveImeShortcuts(it) else null }
 
-    private suspend fun retrieveImeShortcuts(deviceId: Int): ShortcutCategory? {
+    private suspend fun retrieveImeShortcuts(
+        inputDevice: InputDevice,
+    ): ShortcutCategory? {
         return suspendCancellableCoroutine { continuation ->
             val shortcutsReceiver = KeyboardShortcutsReceiver { shortcutGroups ->
-                continuation.resumeWith(Result.success(toShortcutCategory(shortcutGroups, IME)))
+                continuation.resumeWith(
+                    Result.success(
+                        toShortcutCategory(inputDevice.keyCharacterMap, IME, shortcutGroups)
+                    )
+                )
             }
-            windowManager.requestImeKeyboardShortcuts(shortcutsReceiver, deviceId)
+            windowManager.requestImeKeyboardShortcuts(shortcutsReceiver, inputDevice.id)
         }
     }
 
     private fun toShortcutCategory(
-        shortcutGroups: List<KeyboardShortcutGroup>,
+        keyCharacterMap: KeyCharacterMap,
         type: ShortcutCategoryType,
+        shortcutGroups: List<KeyboardShortcutGroup>,
     ): ShortcutCategory? {
         val subCategories =
             shortcutGroups
                 .map { shortcutGroup ->
                     ShortcutSubCategory(
-                        label = shortcutGroup.label.toString(),
-                        shortcuts = toShortcuts(shortcutGroup.items)
+                        shortcutGroup.label.toString(),
+                        toShortcuts(keyCharacterMap, shortcutGroup.items)
                     )
                 }
                 .filter { it.shortcuts.isNotEmpty() }
         return if (subCategories.isEmpty()) {
+            Log.wtf(TAG, "Empty sub categories after converting $shortcutGroups")
             null
         } else {
             ShortcutCategory(type, subCategories)
         }
     }
 
-    private fun toShortcuts(infoList: List<KeyboardShortcutInfo>) =
-        infoList.mapNotNull { toShortcut(it) }
+    private fun toShortcuts(
+        keyCharacterMap: KeyCharacterMap,
+        infoList: List<KeyboardShortcutInfo>
+    ) = infoList.mapNotNull { toShortcut(keyCharacterMap, it) }
 
-    private fun toShortcut(shortcutInfo: KeyboardShortcutInfo): Shortcut? {
-        val shortcutCommand = toShortcutCommand(shortcutInfo)
+    private fun toShortcut(
+        keyCharacterMap: KeyCharacterMap,
+        shortcutInfo: KeyboardShortcutInfo
+    ): Shortcut? {
+        val shortcutCommand = toShortcutCommand(keyCharacterMap, shortcutInfo)
         return if (shortcutCommand == null) null
         else Shortcut(label = shortcutInfo.label!!.toString(), commands = listOf(shortcutCommand))
     }
 
-    private fun toShortcutCommand(info: KeyboardShortcutInfo): ShortcutCommand? {
-        val keyCodes = mutableListOf<Int>()
+    private fun toShortcutCommand(
+        keyCharacterMap: KeyCharacterMap,
+        info: KeyboardShortcutInfo
+    ): ShortcutCommand? {
+        val keys = mutableListOf<ShortcutKey>()
         var remainingModifiers = info.modifiers
         SUPPORTED_MODIFIERS.forEach { supportedModifier ->
             if ((supportedModifier and remainingModifiers) != 0) {
-                keyCodes += supportedModifier
+                keys += toShortcutKey(keyCharacterMap, supportedModifier) ?: return null
                 // "Remove" the modifier from the remaining modifiers
                 remainingModifiers = remainingModifiers and supportedModifier.inv()
             }
         }
         if (remainingModifiers != 0) {
             // There is a remaining modifier we don't support
+            Log.wtf(TAG, "Unsupported modifiers remaining: $remainingModifiers")
             return null
         }
-        keyCodes += info.keycode
-        return ShortcutCommand(keyCodes)
+        if (info.keycode != 0) {
+            keys += toShortcutKey(keyCharacterMap, info.keycode, info.baseCharacter) ?: return null
+        }
+        if (keys.isEmpty()) {
+            Log.wtf(TAG, "No keys for $info")
+            return null
+        }
+        return ShortcutCommand(keys)
+    }
+
+    private fun toShortcutKey(
+        keyCharacterMap: KeyCharacterMap,
+        keyCode: Int,
+        baseCharacter: Char = Char.MIN_VALUE,
+    ): ShortcutKey? {
+        val iconResId = ShortcutHelperKeys.keyIcons[keyCode]
+        if (iconResId != null) {
+            return ShortcutKey.Icon(iconResId)
+        }
+        if (baseCharacter > Char.MIN_VALUE) {
+            return ShortcutKey.Text(baseCharacter.toString())
+        }
+        val specialKeyLabel = ShortcutHelperKeys.specialKeyLabels[keyCode]
+        if (specialKeyLabel != null) {
+            val label = specialKeyLabel(context)
+            return ShortcutKey.Text(label)
+        }
+        val displayLabelCharacter = keyCharacterMap.getDisplayLabel(keyCode)
+        if (displayLabelCharacter.code != 0) {
+            return ShortcutKey.Text(displayLabelCharacter.toString())
+        }
+        Log.wtf(TAG, "Couldn't find label or icon for key: $keyCode")
+        return null
     }
 
     companion object {
+        private const val TAG = "SHCategoriesRepo"
+
         private val SUPPORTED_MODIFIERS =
             listOf(
                 KeyEvent.META_META_ON,

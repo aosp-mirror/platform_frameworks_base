@@ -1942,7 +1942,7 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
-    public void testDozeManualBrightness() {
+    public void testDozeManualBrightness_DpcRefactorDisabled() {
         when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
         Settings.System.putInt(mContext.getContentResolver(),
@@ -1972,6 +1972,45 @@ public final class DisplayPowerControllerTest {
                 /* ignoreAnimationLimits= */ anyBoolean());
         assertEquals(brightness * DOZE_SCALE_FACTOR, mHolder.dpc.getDozeBrightnessForOffload(),
                 /* delta= */ 0);
+        // This brightness shouldn't be stored in the setting
+        verify(mHolder.brightnessSetting, never()).setBrightness(brightness * DOZE_SCALE_FACTOR);
+    }
+
+    @Test
+    public void testDozeManualBrightness_DpcRefactorEnabled() {
+        when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isRefactorDisplayPowerControllerEnabled()).thenReturn(true);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+        float brightness = 0.277f;
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
+        when(mHolder.hbmController.getCurrentBrightnessMax())
+                .thenReturn(PowerManager.BRIGHTNESS_MAX);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState, initialize
+
+        ArgumentCaptor<BrightnessSetting.BrightnessSettingListener> listenerCaptor =
+                ArgumentCaptor.forClass(BrightnessSetting.BrightnessSettingListener.class);
+        verify(mHolder.brightnessSetting).registerListener(listenerCaptor.capture());
+        BrightnessSetting.BrightnessSettingListener listener = listenerCaptor.getValue();
+        listener.onBrightnessChanged(brightness);
+        advanceTime(1); // Send messages, run updatePowerState
+
+        verify(mHolder.animator).animateTo(eq(brightness * DOZE_SCALE_FACTOR),
+                /* linearSecondTarget= */ anyFloat(), /* rate= */ anyFloat(),
+                /* ignoreAnimationLimits= */ anyBoolean());
+        assertEquals(brightness * DOZE_SCALE_FACTOR, mHolder.dpc.getDozeBrightnessForOffload(),
+                /* delta= */ 0);
+        // This brightness shouldn't be stored in the setting
+        verify(mHolder.brightnessSetting, never()).setBrightness(brightness * DOZE_SCALE_FACTOR);
     }
 
     @Test

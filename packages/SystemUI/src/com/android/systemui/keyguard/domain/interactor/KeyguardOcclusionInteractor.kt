@@ -24,6 +24,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
 import javax.inject.Inject
@@ -94,10 +95,15 @@ constructor(
                 // currently
                 // GONE, in which case we're going back to GONE and launching the insecure camera).
                 powerInteractor.detailedWakefulness
-                    .sample(transitionInteractor.currentKeyguardState, ::Pair)
-                    .map { (wakefulness, currentKeyguardState) ->
-                        wakefulness.powerButtonLaunchGestureTriggered &&
-                            currentKeyguardState != KeyguardState.GONE
+                    .sample(
+                        transitionInteractor.isFinishedIn(
+                            Scenes.Gone,
+                            stateWithoutSceneContainer = KeyguardState.GONE
+                        ),
+                        ::Pair
+                    )
+                    .map { (wakefulness, isOnGone) ->
+                        wakefulness.powerButtonLaunchGestureTriggered && !isOnGone
                     },
                 // Emit false once that activity goes away.
                 isShowWhenLockedActivityOnTop.filter { !it }.map { false }

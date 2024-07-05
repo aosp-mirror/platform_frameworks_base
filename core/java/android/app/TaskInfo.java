@@ -297,6 +297,12 @@ public class TaskInfo {
     public boolean isTopActivityTransparent;
 
     /**
+     * Whether the top activity has specified style floating.
+     * @hide
+     */
+    public boolean isTopActivityStyleFloating;
+
+    /**
      * Encapsulate specific App Compat information.
      * @hide
      */
@@ -429,6 +435,7 @@ public class TaskInfo {
                 && parentTaskId == that.parentTaskId
                 && Objects.equals(topActivity, that.topActivity)
                 && isTopActivityTransparent == that.isTopActivityTransparent
+                && isTopActivityStyleFloating == that.isTopActivityStyleFloating
                 && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo);
     }
 
@@ -498,6 +505,7 @@ public class TaskInfo {
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
         isTopActivityTransparent = source.readBoolean();
+        isTopActivityStyleFloating = source.readBoolean();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
     }
 
@@ -545,6 +553,7 @@ public class TaskInfo {
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
         dest.writeBoolean(isTopActivityTransparent);
+        dest.writeBoolean(isTopActivityStyleFloating);
         dest.writeTypedObject(appCompatTaskInfo, flags);
     }
 
@@ -582,6 +591,7 @@ public class TaskInfo {
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " isTopActivityTransparent=" + isTopActivityTransparent
+                + " isTopActivityStyleFloating=" + isTopActivityStyleFloating
                 + " appCompatTaskInfo=" + appCompatTaskInfo
                 + "}";
     }

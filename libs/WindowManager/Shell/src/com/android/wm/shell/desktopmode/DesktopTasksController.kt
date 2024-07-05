@@ -66,7 +66,7 @@ import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
-import com.android.wm.shell.compatui.isSingleTopActivityTranslucent
+import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
 import com.android.wm.shell.draganddrop.DragAndDropController
@@ -158,8 +158,6 @@ class DesktopTasksController(
                 visualIndicator = null
             }
         }
-    private val sysUIPackageName = context.resources.getString(
-        com.android.internal.R.string.config_systemUi)
 
     private val transitionAreaHeight
         get() =
@@ -217,11 +215,6 @@ class DesktopTasksController(
     @VisibleForTesting
     fun getVisualIndicator(): DesktopModeVisualIndicator? {
         return visualIndicator
-    }
-
-    // TODO(b/347289970): Consider replacing with API
-    private fun isSystemUIApplication(taskInfo: RunningTaskInfo): Boolean {
-        return taskInfo.baseActivity?.packageName == sysUIPackageName
     }
 
     fun setOnTaskResizeAnimationListener(listener: OnTaskResizeAnimationListener) {
@@ -351,19 +344,12 @@ class DesktopTasksController(
         wct: WindowContainerTransaction = WindowContainerTransaction(),
         transitionSource: DesktopModeTransitionSource,
     ) {
-        if (Flags.enableDesktopWindowingModalsPolicy() && isSingleTopActivityTranslucent(task)) {
+        if (Flags.enableDesktopWindowingModalsPolicy()
+            && isTopActivityExemptFromDesktopWindowing(context, task)) {
             KtProtoLog.w(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopTasksController: Cannot enter desktop, " +
-                    "translucent top activity found. This is likely a modal dialog."
-            )
-            return
-        }
-        if (isSystemUIApplication(task)) {
-            KtProtoLog.w(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: Cannot enter desktop, " +
-                        "systemUI top activity found."
+                        "ineligible top activity found."
             )
             return
         }
@@ -942,10 +928,8 @@ class DesktopTasksController(
                 when {
                     // Check if the closing task needs to be handled
                     TransitionUtil.isClosingType(request.type) -> handleTaskClosing(task)
-                    // Check if the task has a top transparent activity
-                    shouldLaunchAsModal(task) -> handleIncompatibleTaskLaunch(task)
-                    // Check if the task has a top systemUI activity
-                    isSystemUIApplication(task) -> handleIncompatibleTaskLaunch(task)
+                    // Check if the top task shouldn't be allowed to enter desktop mode
+                    isIncompatibleTask(task) -> handleIncompatibleTaskLaunch(task)
                     // Check if fullscreen task should be updated
                     task.isFullscreen -> handleFullscreenTaskLaunch(task, transition)
                     // Check if freeform task should be updated
@@ -979,9 +963,9 @@ class DesktopTasksController(
             .forEach { finishTransaction.setCornerRadius(it.leash, cornerRadius) }
     }
 
-    // TODO(b/347289970): Consider replacing with API
-    private fun shouldLaunchAsModal(task: TaskInfo) =
-        Flags.enableDesktopWindowingModalsPolicy() && isSingleTopActivityTranslucent(task)
+    private fun isIncompatibleTask(task: TaskInfo) =
+        Flags.enableDesktopWindowingModalsPolicy()
+                && isTopActivityExemptFromDesktopWindowing(context, task)
 
     private fun shouldHandleTaskClosing(request: TransitionRequestInfo): Boolean {
         return Flags.enableDesktopWindowingWallpaperActivity() &&

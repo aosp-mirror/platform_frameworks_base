@@ -114,3 +114,11 @@ flag {
     description: "Enables sysui animation for user aspect ratio button"
     bug: "300357441"
 }
+
+flag {
+  name: "app_compat_ui_framework"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the declarative compat UI framework is enabled"
+  bug: "270361630"
+  is_fixed_read_only: true
+}
