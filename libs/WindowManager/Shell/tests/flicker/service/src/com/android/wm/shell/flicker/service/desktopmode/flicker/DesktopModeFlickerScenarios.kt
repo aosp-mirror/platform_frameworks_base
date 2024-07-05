@@ -21,15 +21,17 @@ import android.tools.flicker.assertors.assertions.AppLayerIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAtStart
 import android.tools.flicker.assertors.assertions.AppWindowHasDesktopModeInitialBoundsAtTheEnd
+import android.tools.flicker.assertors.assertions.AppWindowIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppWindowOnTopAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowOnTopAtStart
 import android.tools.flicker.assertors.assertions.AppWindowRemainInsideDisplayBounds
-import android.tools.flicker.assertors.assertions.LauncherWindowMovesToTop
+import android.tools.flicker.assertors.assertions.LauncherWindowReplacesAppAsTopWindow
 import android.tools.flicker.config.AssertionTemplates
 import android.tools.flicker.config.FlickerConfigEntry
 import android.tools.flicker.config.ScenarioId
 import android.tools.flicker.config.desktopmode.Components
+import android.tools.flicker.config.desktopmode.Components.DESKTOP_WALLPAPER
 import android.tools.flicker.extractors.ITransitionMatcher
 import android.tools.flicker.extractors.ShellTransitionScenarioExtractor
 import android.tools.flicker.extractors.TaggedCujTransitionMatcher
@@ -68,6 +70,8 @@ class DesktopModeFlickerScenarios {
                             .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
+        // Use this scenario for closing an app in desktop windowing, except the last app. For the
+        // last app use CLOSE_LAST_APP scenario
         val CLOSE_APP =
             FlickerConfigEntry(
                 scenarioId = ScenarioId("CLOSE_APP"),
@@ -78,7 +82,13 @@ class DesktopModeFlickerScenarios {
                                 override fun findAll(
                                     transitions: Collection<Transition>
                                 ): Collection<Transition> {
-                                    return transitions.filter { it.type == TransitionType.CLOSE }
+                                    // In case there are multiple windows closing, filter out the
+                                    // last window closing. It should use the CLOSE_LAST_APP
+                                    // scenario below.
+                                    return transitions
+                                            .filter { it.type == TransitionType.CLOSE }
+                                            .sortedByDescending { it.id }
+                                            .drop(1)
                                 }
                             }
                     ),
@@ -103,19 +113,19 @@ class DesktopModeFlickerScenarios {
                                     transitions: Collection<Transition>
                                 ): Collection<Transition> {
                                     val lastTransition =
-                                        transitions.findLast { it.type == TransitionType.CLOSE }
-                                    return if (lastTransition != null) listOf(lastTransition)
-                                    else emptyList()
+                                        transitions
+                                                .filter { it.type == TransitionType.CLOSE }
+                                                .maxByOrNull { it.id }!!
+                                    return listOf(lastTransition)
                                 }
                             }
                     ),
                 assertions =
                     AssertionTemplates.COMMON_ASSERTIONS +
                         listOf(
-                                AppWindowOnTopAtStart(Components.DESKTOP_MODE_APP),
-                                AppLayerIsVisibleAtStart(Components.DESKTOP_MODE_APP),
-                                AppLayerIsInvisibleAtEnd(Components.DESKTOP_MODE_APP),
-                                LauncherWindowMovesToTop()
+                                AppWindowIsInvisibleAtEnd(Components.DESKTOP_MODE_APP),
+                                LauncherWindowReplacesAppAsTopWindow(Components.DESKTOP_MODE_APP),
+                                AppWindowIsInvisibleAtEnd(DESKTOP_WALLPAPER)
                             )
                             .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
@@ -128,13 +138,15 @@ class DesktopModeFlickerScenarios {
                         .setTargetTag(CujType.CUJ_DESKTOP_MODE_RESIZE_WINDOW)
                         .setTransitionMatcher(
                             TaggedCujTransitionMatcher(associatedTransitionRequired = false)
-                        ).build(),
+                        )
+                        .build(),
                 assertions =
                     listOf(
-                        AppWindowIsVisibleAlways(Components.DESKTOP_MODE_APP),
-                        AppWindowOnTopAtEnd(Components.DESKTOP_MODE_APP),
-                        AppWindowRemainInsideDisplayBounds(Components.DESKTOP_MODE_APP),
-                    ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+                            AppWindowIsVisibleAlways(Components.DESKTOP_MODE_APP),
+                            AppWindowOnTopAtEnd(Components.DESKTOP_MODE_APP),
+                            AppWindowRemainInsideDisplayBounds(Components.DESKTOP_MODE_APP),
+                        )
+                        .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
     }
 }
