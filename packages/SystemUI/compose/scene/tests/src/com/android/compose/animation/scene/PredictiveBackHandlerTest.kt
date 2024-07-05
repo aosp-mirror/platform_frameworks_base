@@ -20,12 +20,16 @@ import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
+import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.subjects.assertThat
+import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineScope
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -92,6 +96,56 @@ class PredictiveBackHandlerTest {
         rule.waitForIdle()
         assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
         assertThat(layoutState.transitionState).isIdle()
+    }
+
+    @Test
+    fun interruptedPredictiveBackDoesNotCallCanChangeScene() {
+        var canChangeSceneCalled = false
+        val layoutState =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    SceneA,
+                    canChangeScene = {
+                        canChangeSceneCalled = true
+                        true
+                    },
+                )
+            }
+
+        lateinit var coroutineScope: CoroutineScope
+        rule.setContent {
+            coroutineScope = rememberCoroutineScope()
+            SceneTransitionLayout(layoutState) {
+                scene(SceneA, mapOf(Back to SceneB)) { Box(Modifier.fillMaxSize()) }
+                scene(SceneB) { Box(Modifier.fillMaxSize()) }
+                scene(SceneC) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+
+        // Start back.
+        val dispatcher = rule.activity.onBackPressedDispatcher
+        rule.runOnUiThread { dispatcher.dispatchOnBackStarted(backEvent()) }
+
+        val predictiveTransition = assertThat(layoutState.transitionState).isTransition()
+        assertThat(predictiveTransition).hasFromScene(SceneA)
+        assertThat(predictiveTransition).hasToScene(SceneB)
+
+        // Start a new transition to C.
+        rule.runOnUiThread { layoutState.setTargetScene(SceneC, coroutineScope) }
+        val newTransition = assertThat(layoutState.transitionState).isTransition()
+        assertThat(newTransition).hasFromScene(SceneA)
+        assertThat(newTransition).hasToScene(SceneC)
+
+        // Commit the back gesture. It shouldn't call canChangeScene given that the back transition
+        // was interrupted.
+        rule.runOnUiThread { dispatcher.onBackPressed() }
+        rule.waitForIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneC)
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(predictiveTransition).hasCurrentScene(SceneA)
+        assertThat(canChangeSceneCalled).isFalse()
     }
 
     private fun backEvent(progress: Float = 0f): BackEventCompat {
