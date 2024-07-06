@@ -73,7 +73,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
@@ -496,7 +496,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "startSwipePipToHome: %s, state=%s", componentName, mPipTransitionState);
         mPipTransitionState.setInSwipePipToHomeTransition(true);
-        sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
+        if (!ENABLE_SHELL_TRANSITIONS) {
+            sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
+        }
         setBoundsStateForEntry(componentName, pictureInPictureParams, activityInfo);
         return mPipBoundsAlgorithm.getEntryDestinationBounds();
     }
@@ -633,6 +635,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (isLaunchIntoPipTask()) {
             exitLaunchIntoPipTask(wct);
+            return;
+        }
+
+        // bail early if leash is null
+        if (mLeash == null) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "exitPip: leash is null");
             return;
         }
 

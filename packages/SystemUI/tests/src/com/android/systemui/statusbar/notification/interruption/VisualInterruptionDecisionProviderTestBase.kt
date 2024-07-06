@@ -49,6 +49,7 @@ import android.graphics.drawable.Icon
 import android.hardware.display.FakeAmbientDisplayConfiguration
 import android.os.Looper
 import android.os.PowerManager
+import android.platform.test.annotations.EnableFlags
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
 import android.provider.Settings.Global.HEADS_UP_OFF
 import android.provider.Settings.Global.HEADS_UP_ON
@@ -526,6 +527,32 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             isGroupSummary = false
             groupAlertBehavior = GROUP_ALERT_SUMMARY
         }) {
+            assertShouldHeadsUp(it)
+            assertNoEventsLogged()
+        }
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
+    fun testShouldNotHeadsUp_silentNotification() {
+        withPeekAndPulseEntry({
+                                  isGrouped = false
+                                  isGroupSummary = false
+                                  isSilent = true
+                              }) {
+            assertShouldNotHeadsUp(it)
+            assertNoEventsLogged()
+        }
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
+    fun testShouldHeadsUp_silentNotificationFalse() {
+        withPeekAndPulseEntry({
+                                  isGrouped = false
+                                  isGroupSummary = false
+                                  isSilent = false
+                              }) {
             assertShouldHeadsUp(it)
             assertNoEventsLogged()
         }
@@ -1163,6 +1190,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var groupAlertBehavior: Int? = null
         var hasBubbleMetadata = false
         var hasFsi = false
+        var isSilent = false
 
         // Set on Notification:
         var isForegroundService = false
@@ -1232,6 +1260,8 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                         nb.setCategory(category)
                     }
                     groupAlertBehavior?.let { nb.setGroupAlertBehavior(it) }
+
+                    nb.setSilent(isSilent)
 
                     if (hasBubbleMetadata) {
                         nb.setBubbleMetadata(buildBubbleMetadata())

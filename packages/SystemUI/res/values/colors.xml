@@ -236,11 +236,8 @@
     <!-- Internet Dialog -->
     <!-- Material next state on color-->
     <color name="settingslib_state_on_color">@color/settingslib_state_on</color>
-    <!-- Material next track on color-->
-    <color name="settingslib_track_on_color">@color/settingslib_track_on</color>
     <!-- Material next track off color-->
     <color name="settingslib_track_off_color">@color/settingslib_track_off</color>
-    <color name="connected_network_primary_color">#191C18</color>
     <color name="connected_network_secondary_color">#41493D</color>
 
     <color name="dream_overlay_camera_mic_off_dot_color">#FCBE03</color>

@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.notification.interruption.FullScreenIntent
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_SUPPRESSED_ONLY_BY_DND
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_SUPPRESSIVE_BUBBLE_METADATA
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR
+import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_SUPPRESSIVE_SILENT_NOTIFICATION
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR
@@ -94,6 +95,7 @@ class FullScreenIntentDecisionProvider(
             uiEventId = FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA,
             eventLogData = EventLogData("274759612", "bubbleMetadata")
         ),
+        NO_FSI_SUPPRESSIVE_SILENT_NOTIFICATION(false, "suppressive setSilent notification"),
         NO_FSI_PACKAGE_SUSPENDED(false, "package suspended"),
         FSI_DEVICE_NOT_INTERACTIVE(true, "device is not interactive"),
         FSI_DEVICE_DREAMING(true, "device is dreaming"),
@@ -152,6 +154,12 @@ class FullScreenIntentDecisionProvider(
 
         if (sbn.isGroup && notification.suppressAlertingDueToGrouping()) {
             return NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR
+        }
+
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            if (sbn.notification.isSilent) {
+                return NO_FSI_SUPPRESSIVE_SILENT_NOTIFICATION
+            }
         }
 
         val bubbleMetadata = notification.bubbleMetadata

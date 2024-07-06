@@ -16,9 +16,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.service.dream.dreamManager
 import com.android.systemui.communal.domain.interactor.communalInteractor
-import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.deviceentry.data.repository.deviceEntryRepository
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
@@ -32,15 +30,14 @@ var Kosmos.fromDozingTransitionInteractor by
         FromDozingTransitionInteractor(
             transitionRepository = keyguardTransitionRepository,
             transitionInteractor = keyguardTransitionInteractor,
+            internalTransitionInteractor = internalKeyguardTransitionInteractor,
             scope = applicationCoroutineScope,
             bgDispatcher = testDispatcher,
             mainDispatcher = testDispatcher,
             keyguardInteractor = keyguardInteractor,
             communalInteractor = communalInteractor,
-            communalSceneInteractor = communalSceneInteractor,
             powerInteractor = powerInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
             deviceEntryRepository = deviceEntryRepository,
-            dreamManager = dreamManager
         )
     }

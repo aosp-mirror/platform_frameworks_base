@@ -24,6 +24,7 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.window.WindowContainerTransaction
+import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK
 import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
@@ -202,6 +203,46 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             StubTransaction() /* finishTransaction */)
 
         assertThat(desktopTaskRepo.isMinimizedTask(taskId = task.taskId)).isTrue()
+    }
+
+    @Test
+    fun removeLeftoverMinimizedTasks_activeNonMinimizedTasksStillAround_doesNothing() {
+        desktopTaskRepo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
+        desktopTaskRepo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+        desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+
+        val wct = WindowContainerTransaction()
+        desktopTasksLimiter.leftoverMinimizedTasksRemover.removeLeftoverMinimizedTasks(
+            DEFAULT_DISPLAY, wct)
+
+        assertThat(wct.isEmpty).isTrue()
+    }
+
+    @Test
+    fun removeLeftoverMinimizedTasks_noMinimizedTasks_doesNothing() {
+        val wct = WindowContainerTransaction()
+        desktopTasksLimiter.leftoverMinimizedTasksRemover.removeLeftoverMinimizedTasks(
+            DEFAULT_DISPLAY, wct)
+
+        assertThat(wct.isEmpty).isTrue()
+    }
+
+    @Test
+    fun removeLeftoverMinimizedTasks_onlyMinimizedTasksLeft_removesAllMinimizedTasks() {
+        val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task1.taskId)
+        desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
+
+        val wct = WindowContainerTransaction()
+        desktopTasksLimiter.leftoverMinimizedTasksRemover.removeLeftoverMinimizedTasks(
+            DEFAULT_DISPLAY, wct)
+
+        assertThat(wct.hierarchyOps).hasSize(2)
+        assertThat(wct.hierarchyOps[0].type).isEqualTo(HIERARCHY_OP_TYPE_REMOVE_TASK)
+        assertThat(wct.hierarchyOps[0].container).isEqualTo(task1.token.asBinder())
+        assertThat(wct.hierarchyOps[1].type).isEqualTo(HIERARCHY_OP_TYPE_REMOVE_TASK)
+        assertThat(wct.hierarchyOps[1].container).isEqualTo(task2.token.asBinder())
     }
 
     @Test

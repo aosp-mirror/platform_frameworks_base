@@ -65,17 +65,6 @@ class ShortcutHelperStateRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun state_activeThroughActivity_virtualKeyboardActive_emitsActiveWithVirtualDeviceId() =
-        testScope.runTest {
-            val state by collectLastValue(repo.state)
-
-            fakeInputManager.addVirtualKeyboard()
-            helper.showFromActivity()
-
-            assertThat(state).isEqualTo(ShortcutHelperState.Active(VIRTUAL_KEYBOARD))
-        }
-
-    @Test
     fun state_activeThroughActivity_physicalKeyboardActive_emitsActiveWithDeviceId() =
         testScope.runTest {
             val deviceId = 456

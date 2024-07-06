@@ -17,3 +17,13 @@
 package com.android.systemui.keyboard.shortcut.shared.model
 
 data class ShortcutSubCategory(val label: String, val shortcuts: List<Shortcut>)
+
+class ShortcutSubCategoryBuilder(val label: String) {
+    private val shortcuts = mutableListOf<Shortcut>()
+
+    fun shortcut(label: String, builder: ShortcutBuilder.() -> Unit) {
+        shortcuts += ShortcutBuilder(label).apply(builder).build()
+    }
+
+    fun build() = ShortcutSubCategory(label, shortcuts)
+}

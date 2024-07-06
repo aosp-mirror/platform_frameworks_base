@@ -32,12 +32,14 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.database.ContentObserver
 import android.hardware.display.AmbientDisplayConfiguration
+import android.os.Bundle
 import android.os.Handler
 import android.os.PowerManager
 import android.os.SystemProperties
 import android.provider.Settings
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
 import android.provider.Settings.Global.HEADS_UP_OFF
+import android.service.notification.Flags
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage
@@ -220,6 +222,15 @@ class HunGroupAlertBehaviorSuppressor() :
         entry.sbn.let { it.isGroup && it.notification.suppressAlertingDueToGrouping() }
 }
 
+class HunSilentNotificationSuppressor() :
+    VisualInterruptionFilter(
+        types = setOf(PEEK, PULSE),
+        reason = "notification isSilent"
+    ) {
+    override fun shouldSuppress(entry: NotificationEntry) =
+        entry.sbn.let { Flags.notificationSilentFlag() && it.notification.isSilent }
+}
+
 class HunJustLaunchedFsiSuppressor() :
     VisualInterruptionFilter(types = setOf(PEEK, PULSE), reason = "just launched FSI") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.hasJustLaunchedFullScreenIntent()
@@ -368,6 +379,11 @@ class AvalancheSuppressor(
             PendingIntent.FLAG_IMMUTABLE
         )
 
+        // Replace "System UI" app name with "Android System"
+        val bundle = Bundle()
+        bundle.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
+                context.getString(com.android.internal.R.string.android_system_label))
+
         val builder =
             Notification.Builder(context, NotificationChannels.ALERTS)
                 .setTicker(titleStr)
@@ -375,9 +391,11 @@ class AvalancheSuppressor(
                 .setContentText(textStr)
                 .setSmallIcon(com.android.systemui.res.R.drawable.ic_settings)
                 .setCategory(Notification.CATEGORY_SYSTEM)
+                .setTimeoutAfter(/* one day in ms */ 24 * 60 * 60 * 1000L)
                 .setAutoCancel(true)
                 .addAction(android.R.drawable.button_onoff_indicator_off, actionStr, pendingIntent)
                 .setContentIntent(pendingIntent)
+                .addExtras(bundle)
 
         notificationManager.notify(SystemMessage.NOTE_ADAPTIVE_NOTIFICATIONS, builder.build())
         hasSeenEdu = true

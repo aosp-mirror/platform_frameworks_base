@@ -49,6 +49,7 @@ constructor(
     val repository: KeyguardRepository,
     val biometricSettingsRepository: BiometricSettingsRepository,
     transitionInteractor: KeyguardTransitionInteractor,
+    internalTransitionInteractor: InternalKeyguardTransitionInteractor,
 ) {
 
     /**
@@ -74,7 +75,7 @@ constructor(
             // Whenever the keyguard is disabled...
             .filter { enabled -> !enabled }
             .sampleCombine(
-                transitionInteractor.currentTransitionInfoInternal,
+                internalTransitionInteractor.currentTransitionInfoInternal,
                 biometricSettingsRepository.isCurrentUserInLockdown
             )
             .map { (_, transitionInfo, inLockdown) ->
@@ -93,7 +94,7 @@ constructor(
                 .filter { enabled -> !enabled }
                 .sampleCombine(
                     biometricSettingsRepository.isCurrentUserInLockdown,
-                    transitionInteractor.currentTransitionInfoInternal,
+                    internalTransitionInteractor.currentTransitionInfoInternal,
                 )
                 .collect { (_, inLockdown, currentTransitionInfo) ->
                     if (currentTransitionInfo.to != KeyguardState.GONE && !inLockdown) {

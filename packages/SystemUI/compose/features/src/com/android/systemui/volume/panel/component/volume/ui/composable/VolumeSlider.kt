@@ -48,6 +48,7 @@ import com.android.compose.PlatformSlider
 import com.android.compose.PlatformSliderColors
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderState
 
 @Composable
@@ -62,7 +63,7 @@ fun VolumeSlider(
     val value by valueState(state)
     PlatformSlider(
         modifier =
-            modifier.clearAndSetSemantics {
+            modifier.sysuiResTag(state.label).clearAndSetSemantics {
                 if (state.isEnabled) {
                     contentDescription = state.label
                     state.a11yClickDescription?.let {

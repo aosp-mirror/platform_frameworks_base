@@ -57,6 +57,7 @@ class FromLockscreenTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
+    override val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
@@ -128,7 +129,7 @@ constructor(
             keyguardInteractor.isAbleToDream
                 .filterRelevantKeyguardState()
                 .sampleCombine(
-                    transitionInteractor.currentTransitionInfoInternal,
+                    internalTransitionInteractor.currentTransitionInfoInternal,
                     finishedKeyguardState,
                     keyguardInteractor.isActiveDreamLockscreenHosted,
                 )
@@ -185,7 +186,7 @@ constructor(
             shadeRepository.legacyShadeExpansion
                 .sampleCombine(
                     startedKeyguardTransitionStep,
-                    transitionInteractor.currentTransitionInfoInternal,
+                    internalTransitionInteractor.currentTransitionInfoInternal,
                     keyguardInteractor.statusBarState,
                     keyguardInteractor.isKeyguardDismissible,
                 )

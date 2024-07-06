@@ -19,6 +19,16 @@ flag {
 }
 
 flag {
+    name: "apply_lifecycle_on_pip_change"
+    namespace: "windowing_frontend"
+    description: "Make pip activity lifecyle change with windowing mode"
+    bug: "333452456"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "blast_sync_notification_shade_on_display_switch"
     namespace: "windowing_frontend"
     description: "Make the buffer content of notification shade synchronize with display switch"

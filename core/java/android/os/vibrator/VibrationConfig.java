@@ -68,9 +68,7 @@ public class VibrationConfig {
     @VibrationIntensity
     private final int mDefaultRingVibrationIntensity;
 
-    private final boolean mDefaultKeyboardVibrationEnabled;
-
-    private final boolean mHasFixedKeyboardAmplitude;
+    private final boolean mKeyboardVibrationSettingsSupported;
 
     /** @hide */
     public VibrationConfig(@Nullable Resources resources) {
@@ -87,10 +85,8 @@ public class VibrationConfig {
 
         mIgnoreVibrationsOnWirelessCharger = loadBoolean(resources,
                 com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger, false);
-        mDefaultKeyboardVibrationEnabled = loadBoolean(resources,
-                com.android.internal.R.bool.config_defaultKeyboardVibrationEnabled, true);
-        mHasFixedKeyboardAmplitude = loadFloat(resources,
-                com.android.internal.R.dimen.config_keyboardHapticFeedbackFixedAmplitude, -1) > 0;
+        mKeyboardVibrationSettingsSupported = loadBoolean(resources,
+                com.android.internal.R.bool.config_keyboardVibrationSettingsSupported, false);
 
         mDefaultAlarmVibrationIntensity = loadDefaultIntensity(resources,
                 com.android.internal.R.integer.config_defaultAlarmVibrationIntensity);
@@ -194,19 +190,11 @@ public class VibrationConfig {
     }
 
     /**
-     * Whether keyboard vibration settings is enabled by default.
+     * Whether the device support keyboard vibration settings.
      * @hide
      */
-    public boolean isDefaultKeyboardVibrationEnabled() {
-        return mDefaultKeyboardVibrationEnabled;
-    }
-
-    /**
-     * Whether the device has a fixed amplitude for keyboard.
-     * @hide
-     */
-    public boolean hasFixedKeyboardAmplitude() {
-        return mHasFixedKeyboardAmplitude;
+    public boolean isKeyboardVibrationSettingsSupported() {
+        return mKeyboardVibrationSettingsSupported;
     }
 
     /** Get the default vibration intensity for given usage. */
@@ -248,7 +236,7 @@ public class VibrationConfig {
                 + ", mDefaultMediaIntensity=" + mDefaultMediaVibrationIntensity
                 + ", mDefaultNotificationIntensity=" + mDefaultNotificationVibrationIntensity
                 + ", mDefaultRingIntensity=" + mDefaultRingVibrationIntensity
-                + ", mDefaultKeyboardVibrationEnabled=" + mDefaultKeyboardVibrationEnabled
+                + ", mKeyboardVibrationSettingsSupported=" + mKeyboardVibrationSettingsSupported
                 + "}";
     }
 

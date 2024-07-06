@@ -17,7 +17,11 @@
 package com.android.server.notification;
 
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
+import static android.app.NotificationChannel.NEWS_ID;
 import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
+import static android.app.NotificationChannel.PROMOTIONS_ID;
+import static android.app.NotificationChannel.RECS_ID;
+import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
@@ -1581,7 +1585,11 @@ public class PreferencesHelper implements RankingConfig {
                 boolean includeChannel = (includeDeleted || !nc.isDeleted())
                         && (activeChannelFilter == null
                                 || (includeBlocked && nc.getImportance() == IMPORTANCE_NONE)
-                                || activeChannelFilter.contains(nc.getId()));
+                                || activeChannelFilter.contains(nc.getId()))
+                        && !PROMOTIONS_ID.equals(nc.getId())
+                        && !NEWS_ID.equals(nc.getId())
+                        && !SOCIAL_MEDIA_ID.equals(nc.getId())
+                        && !RECS_ID.equals(nc.getId());
                 if (includeChannel) {
                     if (nc.getGroup() != null) {
                         if (r.groups.get(nc.getGroup()) != null) {

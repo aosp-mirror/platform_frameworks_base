@@ -115,11 +115,11 @@ constructor(
                 val intType =
                     secureSettings.getIntForUser(
                         GLANCEABLE_HUB_BACKGROUND_SETTING,
-                        CommunalBackgroundType.DEFAULT.value,
+                        CommunalBackgroundType.ANIMATED.value,
                         user.id
                     )
                 CommunalBackgroundType.entries.find { type -> type.value == intType }
-                    ?: CommunalBackgroundType.DEFAULT
+                    ?: CommunalBackgroundType.ANIMATED
             }
 
     private fun getEnabledByUser(user: UserInfo): Flow<Boolean> =

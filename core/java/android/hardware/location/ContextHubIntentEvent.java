@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
+import android.chre.flags.Flags;
 import android.content.Intent;
 
 import java.util.Objects;
@@ -273,6 +274,16 @@ public class ContextHubIntentEvent {
         }
 
         return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        if (!Flags.fixApiCheck()) {
+            return super.hashCode();
+        }
+
+        return Objects.hash(mEventType, mContextHubInfo, mNanoAppId,
+                mNanoAppMessage, mNanoAppAbortCode, mClientAuthorizationState);
     }
 
     private static void hasExtraOrThrow(Intent intent, String extra) {

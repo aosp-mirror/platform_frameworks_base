@@ -19,6 +19,7 @@ package android.hardware.input;
 import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
 import static com.android.input.flags.Flags.FLAG_DEVICE_ASSOCIATIONS;
 import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
+import static com.android.hardware.input.Flags.keyboardGlyphMap;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -156,6 +157,34 @@ public final class InputManager {
      */
     public static final String META_DATA_KEYBOARD_LAYOUTS =
             "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
+
+    /**
+     * Broadcast Action: Query available keyboard glyph maps.
+     * <p>
+     * The input manager service locates available keyboard glyph maps
+     * by querying broadcast receivers that are registered for this action.
+     * An application can offer additional keyboard glyph maps to the user
+     * by declaring a suitable broadcast receiver in its manifest.
+     * </p>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_QUERY_KEYBOARD_GLYPH_MAPS =
+            "android.hardware.input.action.QUERY_KEYBOARD_GLYPH_MAPS";
+
+    /**
+     * Metadata Key: Keyboard glyph map metadata associated with
+     * {@link #ACTION_QUERY_KEYBOARD_GLYPH_MAPS}.
+     * <p>
+     * Specifies the resource id of a XML resource that describes the keyboard
+     * glyph maps that are provided by the application.
+     * </p>
+     *
+     * @hide
+     */
+    public static final String META_DATA_KEYBOARD_GLYPH_MAPS =
+            "android.hardware.input.metadata.KEYBOARD_GLYPH_MAPS";
 
     /**
      * Prevent touches from being consumed by apps if these touches passed through a non-trusted
@@ -895,6 +924,23 @@ public final class InputManager {
         PhysicalKeyLayout keyLayout = new PhysicalKeyLayout(
                 mGlobal.getKeyCharacterMap(keyboardLayout), keyboardLayout);
         return new KeyboardLayoutPreviewDrawable(mContext, keyLayout, width, height);
+    }
+
+    /**
+     * Provides associated glyph map for the keyboard device (if available)
+     *
+     * @hide
+     */
+    @Nullable
+    public KeyGlyphMap getKeyGlyphMap(int deviceId) {
+        if (!keyboardGlyphMap()) {
+            return null;
+        }
+        try {
+            return mIm.getKeyGlyphMap(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     /**

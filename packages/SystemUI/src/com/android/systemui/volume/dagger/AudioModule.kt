@@ -20,7 +20,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.media.AudioManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.settingslib.statusbar.notification.domain.interactor.NotificationsSoundPolicyInteractor
+import com.android.settingslib.notification.domain.interactor.NotificationsSoundPolicyInteractor
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.data.repository.AudioRepositoryImpl
 import com.android.settingslib.volume.data.repository.AudioSharingRepository

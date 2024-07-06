@@ -22,14 +22,23 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
+import static android.app.WindowConfiguration.isFloating;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.app.WindowConfigurationProto.WINDOWING_MODE;
 import static android.content.ConfigurationProto.WINDOW_CONFIGURATION;
+import static android.content.pm.ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED;
+import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 
 import static com.android.server.wm.ConfigurationContainerProto.FULL_CONFIGURATION;
 import static com.android.server.wm.ConfigurationContainerProto.MERGED_OVERRIDE_CONFIGURATION;
@@ -38,11 +47,14 @@ import static com.android.server.wm.ConfigurationContainerProto.OVERRIDE_CONFIGU
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.app.WindowConfiguration;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.LocaleList;
+import android.util.DisplayMetrics;
 import android.util.proto.ProtoOutputStream;
+import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -524,22 +536,133 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /**
+     * @see ActivityRecord#applySizeOverrideIfNeeded
+     */
+    public static boolean applySizeOverride(DisplayContent displayContent, ApplicationInfo appInfo,
+            Configuration newParentConfiguration, Configuration inOutConfig,
+            boolean optOutEdgeToEdge, boolean hasFixedRotationTransform,
+            boolean hasCompatDisplayInsets) {
+        if (displayContent == null) {
+            return false;
+        }
+        final boolean useOverrideInsetsForConfig =
+                displayContent.mWmService.mFlags.mInsetsDecoupledConfiguration
+                        ? !appInfo.isChangeEnabled(INSETS_DECOUPLED_CONFIGURATION_ENFORCED)
+                                && !appInfo.isChangeEnabled(
+                                        OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION)
+                        : appInfo.isChangeEnabled(OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION);
+        if (newParentConfiguration == null) {
+            newParentConfiguration = displayContent.getConfiguration();
+        }
+        final int parentWindowingMode =
+                newParentConfiguration.windowConfiguration.getWindowingMode();
+        final boolean isFloating = isFloating(parentWindowingMode)
+                // Check the requested windowing mode of activity as well in case it is
+                // switching between PiP and fullscreen.
+                && (inOutConfig.windowConfiguration.getWindowingMode() == WINDOWING_MODE_UNDEFINED
+                        || isFloating(inOutConfig.windowConfiguration.getWindowingMode()));
+        final Rect parentBounds = newParentConfiguration.windowConfiguration.getBounds();
+        int rotation = newParentConfiguration.windowConfiguration.getRotation();
+        if (rotation == ROTATION_UNDEFINED && !hasFixedRotationTransform) {
+            rotation = displayContent.getRotation();
+        }
+        if (!optOutEdgeToEdge && (!useOverrideInsetsForConfig
+                || hasCompatDisplayInsets
+                || isFloating
+                || rotation == ROTATION_UNDEFINED)) {
+            // If the insets configuration decoupled logic is not enabled for the app, or the app
+            // already has a compat override, or the context doesn't contain enough info to
+            // calculate the override, skip the override.
+            return false;
+        }
+        // Make sure the orientation related fields will be updated by the override insets, because
+        // fixed rotation has assigned the fields from display's configuration.
+        if (hasFixedRotationTransform) {
+            inOutConfig.windowConfiguration.setAppBounds(null);
+            inOutConfig.screenWidthDp = Configuration.SCREEN_WIDTH_DP_UNDEFINED;
+            inOutConfig.screenHeightDp = Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+            inOutConfig.smallestScreenWidthDp = Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+            inOutConfig.orientation = ORIENTATION_UNDEFINED;
+        }
+
+        // Override starts here.
+        final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+        final int dw = rotated
+                ? displayContent.mBaseDisplayHeight
+                : displayContent.mBaseDisplayWidth;
+        final int dh = rotated
+                ? displayContent.mBaseDisplayWidth
+                : displayContent.mBaseDisplayHeight;
+        final Rect nonDecorFrame = displayContent.getDisplayPolicy()
+                .getDecorInsetsInfo(rotation, dw, dh).mOverrideNonDecorFrame;
+        // This should be the only place override the configuration for ActivityRecord. Override
+        // the value if not calculated yet.
+        Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+        if (outAppBounds == null || outAppBounds.isEmpty()) {
+            inOutConfig.windowConfiguration.setAppBounds(parentBounds);
+            outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+            outAppBounds.intersect(nonDecorFrame);
+        }
+        float density = inOutConfig.densityDpi;
+        if (density == Configuration.DENSITY_DPI_UNDEFINED) {
+            density = newParentConfiguration.densityDpi;
+        }
+        density *= DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
+            inOutConfig.screenWidthDp = (int) (outAppBounds.width() / density + 0.5f);
+        }
+        if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
+            inOutConfig.screenHeightDp = (int) (outAppBounds.height() / density + 0.5f);
+        }
+        if (inOutConfig.smallestScreenWidthDp == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
+                && parentWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+            // For the case of PIP transition and multi-window environment, the
+            // smallestScreenWidthDp is handled already. Override only if the app is in
+            // fullscreen.
+            final DisplayInfo info = new DisplayInfo(displayContent.getDisplayInfo());
+            displayContent.computeSizeRanges(info, rotated, dw, dh,
+                    displayContent.getDisplayMetrics().density,
+                    inOutConfig, true /* overrideConfig */);
+        }
+
+        // It's possible that screen size will be considered in different orientation with or
+        // without considering the system bar insets. Override orientation as well.
+        if (inOutConfig.orientation == ORIENTATION_UNDEFINED) {
+            inOutConfig.orientation =
+                    (inOutConfig.screenWidthDp <= inOutConfig.screenHeightDp)
+                            ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+        }
+        return true;
+    }
+
+    /**
+     * Gives the derived class a chance to apply the app-specific configuration.
+     *
+     * @param inOutConfig the configuration as the requested configuration.
+     * @return true if any of the given configuration has been updated.
+     */
+    public boolean onApplyAppSpecificConfig(Configuration inOutConfig) {
+        return false;
+    }
+
+    /**
      * Applies app-specific nightMode and {@link LocaleList} on requested configuration.
      * @return true if any of the requested configuration has been updated.
      */
     public boolean applyAppSpecificConfig(Integer nightMode, LocaleList locales,
             @Configuration.GrammaticalGender Integer gender) {
         mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
+        boolean changed = onApplyAppSpecificConfig(mRequestsTmpConfig);
         boolean newNightModeSet = (nightMode != null) && setOverrideNightMode(mRequestsTmpConfig,
                 nightMode);
         boolean newLocalesSet = (locales != null) && setOverrideLocales(mRequestsTmpConfig,
                 locales);
         boolean newGenderSet = setOverrideGender(mRequestsTmpConfig,
                 gender == null ? Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED : gender);
-        if (newNightModeSet || newLocalesSet || newGenderSet) {
+        if (changed || newNightModeSet || newLocalesSet || newGenderSet) {
             onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
         }
-        return newNightModeSet || newLocalesSet || newGenderSet;
+        return changed || newNightModeSet || newLocalesSet || newGenderSet;
     }
 
     /**
