@@ -1725,26 +1725,41 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(optionsCaptor.getValue().getOriginalOptions().getTransientLaunch());
     }
 
+    @SuppressWarnings("GuardedBy")
     @Test
     public void testResumeTopsWhenLeavingPinned() {
-        final ActivityRecord record = makePipableActivity();
-        final Task rootTask = record.getRootTask();
+        final ActivityRecord home = new ActivityBuilder(mAtm).setTask(
+                mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask()).build();
+        final Task homeTask = home.getTask();
+        final ActivityRecord pipActivity = makePipableActivity();
 
-        clearInvocations(mWm.mAtmService.mRootWindowContainer);
         final WindowContainerTransaction t = new WindowContainerTransaction();
-        WindowContainerToken wct = rootTask.mRemoteToken.toWindowContainerToken();
-        t.setWindowingMode(wct, WINDOWING_MODE_PINNED);
+        t.setWindowingMode(pipActivity.getTask().mRemoteToken.toWindowContainerToken(),
+                WINDOWING_MODE_PINNED);
+        clearInvocations(homeTask);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
-        verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivities();
+        if (WindowOrganizerController.shouldApplyLifecycleEffectOnPipChange()) {
+            verify(homeTask).resumeTopActivityUncheckedLocked(any(), any(), anyBoolean());
+        } else {
+            verify(homeTask, never()).resumeTopActivityUncheckedLocked(any(), any(), anyBoolean());
+        }
 
-        clearInvocations(mWm.mAtmService.mRootWindowContainer);
+        // Undo the effect of legacy logic in RootWindowContainer#moveActivityToPinnedRootTask.
+        if (pipActivity.mWaitForEnteringPinnedMode) {
+            pipActivity.mWaitForEnteringPinnedMode = false;
+            pipActivity.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        }
+        assertFalse(pipActivity.isFocusable());
+
         // The token for the PIP root task may have changed when the task entered PIP mode, so do
         // not reuse the one from above.
-        final WindowContainerToken newToken =
-                record.getRootTask().mRemoteToken.toWindowContainerToken();
+        final Task pipTask = pipActivity.getTask();
+        final WindowContainerToken newToken = pipTask.mRemoteToken.toWindowContainerToken();
         t.setWindowingMode(newToken, WINDOWING_MODE_FULLSCREEN);
+        clearInvocations(pipTask);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
-        verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivities();
+        assertTrue(pipActivity.isFocusable());
+        verify(pipTask).resumeTopActivityUncheckedLocked(any(), any(), anyBoolean());
     }
 
     @Test

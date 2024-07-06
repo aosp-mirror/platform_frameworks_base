@@ -24,6 +24,7 @@ import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperTestHelper
+import com.android.systemui.keyboard.shortcut.data.source.InputShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.MultitaskingShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.SystemShortcutsSource
@@ -56,6 +57,9 @@ val Kosmos.shortcutHelperStateRepository by
         )
     }
 
+val Kosmos.shortcutHelperInputShortcutsSource by
+    Kosmos.Fixture { InputShortcutsSource(mainResources, windowManager) }
+
 val Kosmos.shortcutHelperCategoriesRepository by
     Kosmos.Fixture {
         ShortcutHelperCategoriesRepository(
@@ -63,7 +67,7 @@ val Kosmos.shortcutHelperCategoriesRepository by
             testDispatcher,
             shortcutHelperSystemShortcutsSource,
             shortcutHelperMultiTaskingShortcutsSource,
-            windowManager,
+            shortcutHelperInputShortcutsSource,
             fakeInputManager.inputManager,
             shortcutHelperStateRepository,
         )
@@ -94,7 +98,13 @@ val Kosmos.shortcutHelperCategoriesInteractor by
     Kosmos.Fixture { ShortcutHelperCategoriesInteractor(shortcutHelperCategoriesRepository) }
 
 val Kosmos.shortcutHelperViewModel by
-    Kosmos.Fixture { ShortcutHelperViewModel(testDispatcher, shortcutHelperStateInteractor) }
+    Kosmos.Fixture {
+        ShortcutHelperViewModel(
+            testDispatcher,
+            shortcutHelperStateInteractor,
+            shortcutHelperCategoriesInteractor
+        )
+    }
 
 val Kosmos.fakeShortcutHelperStartActivity by Kosmos.Fixture { FakeShortcutHelperStartActivity() }
 

@@ -14,13 +14,13 @@
  *  limitations under the License.
  */
 
-package com.android.settingslib.statusbar.notification.domain.interactor
+package com.android.settingslib.notification.domain.interactor
 
 import android.app.NotificationManager
 import android.media.AudioManager
 import android.provider.Settings
 import android.service.notification.ZenModeConfig
-import com.android.settingslib.statusbar.notification.data.repository.ZenModeRepository
+import com.android.settingslib.notification.data.repository.ZenModeRepository
 import com.android.settingslib.volume.shared.model.AudioStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow

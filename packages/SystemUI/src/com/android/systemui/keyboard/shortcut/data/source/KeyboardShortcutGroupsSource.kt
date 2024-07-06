@@ -20,5 +20,5 @@ import android.view.KeyboardShortcutGroup
 
 interface KeyboardShortcutGroupsSource {
 
-    fun shortcutGroups(): List<KeyboardShortcutGroup>
+    suspend fun shortcutGroups(deviceId: Int): List<KeyboardShortcutGroup>
 }
