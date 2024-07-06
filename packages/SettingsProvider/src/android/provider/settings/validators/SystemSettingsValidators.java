@@ -30,6 +30,8 @@ import static android.view.PointerIcon.DEFAULT_POINTER_SCALE;
 import static android.view.PointerIcon.LARGE_POINTER_SCALE;
 import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_FILL_BEGIN;
 import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_FILL_END;
+import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_STROKE_BEGIN;
+import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_STROKE_END;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -213,6 +215,9 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.POINTER_FILL_STYLE,
                 new InclusiveIntegerRangeValidator(POINTER_ICON_VECTOR_STYLE_FILL_BEGIN,
                         POINTER_ICON_VECTOR_STYLE_FILL_END));
+        VALIDATORS.put(System.POINTER_STROKE_STYLE,
+                new InclusiveIntegerRangeValidator(POINTER_ICON_VECTOR_STYLE_STROKE_BEGIN,
+                        POINTER_ICON_VECTOR_STYLE_STROKE_END));
         VALIDATORS.put(System.POINTER_SCALE,
                 new InclusiveFloatRangeValidator(DEFAULT_POINTER_SCALE, LARGE_POINTER_SCALE));
         VALIDATORS.put(System.TOUCHPAD_POINTER_SPEED, new InclusiveIntegerRangeValidator(-7, 7));

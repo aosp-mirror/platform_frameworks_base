@@ -21,9 +21,9 @@ import android.content.Context;
 import android.service.notification.NotificationListenerService;
 
 import com.android.internal.jank.InteractionJankMonitor;
-import com.android.settingslib.statusbar.notification.data.repository.ZenModeRepository;
-import com.android.settingslib.statusbar.notification.data.repository.ZenModeRepositoryImpl;
-import com.android.settingslib.statusbar.notification.domain.interactor.NotificationsSoundPolicyInteractor;
+import com.android.settingslib.notification.data.repository.ZenModeRepository;
+import com.android.settingslib.notification.data.repository.ZenModeRepositoryImpl;
+import com.android.settingslib.notification.domain.interactor.NotificationsSoundPolicyInteractor;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Application;

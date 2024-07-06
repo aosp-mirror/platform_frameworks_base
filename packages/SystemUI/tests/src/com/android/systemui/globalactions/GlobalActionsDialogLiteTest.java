@@ -23,7 +23,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -34,20 +33,13 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.hardware.biometrics.BiometricManager;
-import android.hardware.biometrics.BiometricPrompt;
-import android.hardware.biometrics.Flags;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.UserManager;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.testing.TestableLooper;
@@ -96,7 +88,6 @@ import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -111,9 +102,6 @@ import java.util.concurrent.Executor;
 @RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class GlobalActionsDialogLiteTest extends SysuiTestCase {
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
     private GlobalActionsDialogLite mGlobalActionsDialogLite;
 
     @Mock private GlobalActions.GlobalActionsManager mWindowManagerFuncs;
@@ -153,7 +141,6 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
-    @Mock private BiometricManager mBiometricManager;
     @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
 
     private TestableLooper mTestableLooper;
@@ -170,13 +157,10 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         when(mUserContextProvider.getUserContext()).thenReturn(mContext);
         when(mResources.getConfiguration()).thenReturn(
                 getContext().getResources().getConfiguration());
-        when(mBiometricManager.canAuthenticate(anyInt())).thenReturn(
-                BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE);
 
         mGlobalSettings = new FakeGlobalSettings();
         mSecureSettings = new FakeSettings();
         mInteractor = mKosmos.getGlobalActionsInteractor();
-        mContext.addMockSystemService(Context.BIOMETRIC_SERVICE, mBiometricManager);
 
         mGlobalActionsDialogLite = new GlobalActionsDialogLite(mContext,
                 mWindowManagerFuncs,
@@ -564,35 +548,6 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 GlobalActionsDialogLite.RestartAction.class);
         assertThat(mGlobalActionsDialogLite.mOverflowItems).isEmpty();
         assertThat(mGlobalActionsDialogLite.mPowerItems).isEmpty();
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
-    public void requestBiometricAuth_whenShutDownShortPressAndMandatoryBiometricsActive() {
-        mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
-        ArgumentCaptor<BiometricPrompt.AuthenticationCallback>
-                authenticationCallbackArgumentCaptor = ArgumentCaptor.forClass(
-                        BiometricPrompt.AuthenticationCallback.class);
-
-        when(mBiometricManager.canAuthenticate(
-                BiometricManager.Authenticators.MANDATORY_BIOMETRICS)).thenReturn(
-                        BiometricManager.BIOMETRIC_SUCCESS);
-        doNothing().when(mGlobalActionsDialogLite).launchBiometricPromptForMandatoryBiometrics(
-                any());
-
-        GlobalActionsDialogLite.ShutDownAction shutDownAction =
-                mGlobalActionsDialogLite.new ShutDownAction();
-        shutDownAction.onPress();
-
-        verify(mGlobalActionsDialogLite).launchBiometricPromptForMandatoryBiometrics(
-                authenticationCallbackArgumentCaptor.capture());
-
-        BiometricPrompt.AuthenticationCallback authenticationCallback =
-                authenticationCallbackArgumentCaptor.getValue();
-        authenticationCallback.onAuthenticationSucceeded(null);
-
-        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_SHUTDOWN_PRESS);
-        verify(mWindowManagerFuncs).shutdown();
     }
 
     @Test

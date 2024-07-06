@@ -203,7 +203,9 @@ public class StatusBarStateControllerImpl implements
     @Override
     public void start() {
         mJavaAdapter.alwaysCollectFlow(
-                mKeyguardTransitionInteractorLazy.get().isFinishedInState(GONE),
+                mKeyguardTransitionInteractorLazy.get().isFinishedIn(
+                        /* scene */ Scenes.Gone,
+                        /* stateWithoutSceneContainer */ GONE),
                 (Boolean isFinishedInState) -> {
                     if (isFinishedInState) {
                         setLeaveOpenOnKeyguardHide(false);

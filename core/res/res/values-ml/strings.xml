@@ -265,6 +265,8 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"സെഷൻ അവസാനിപ്പിക്കുക"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"സ്‌ക്രീൻഷോട്ട്"</string>
+    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
+    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ഒരു ഇമെയിൽ സന്ദേശമായി അയയ്‌ക്കുന്നതിന്, ഇത് നിങ്ങളുടെ നിലവിലെ ഉപകരണ നിലയെക്കുറിച്ചുള്ള വിവരങ്ങൾ ശേഖരിക്കും. ബഗ് റിപ്പോർട്ട് ആരംഭിക്കുന്നതിൽ നിന്ന് ഇത് അയയ്‌ക്കാനായി തയ്യാറാകുന്നതുവരെ അൽപ്പസമയമെടുക്കും; ക്ഷമയോടെ കാത്തിരിക്കുക."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ഇന്റരാക്റ്റീവ് റിപ്പോർട്ട്"</string>
@@ -1765,11 +1767,11 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
     <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
     <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
     <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"മാഗ്നിഫിക്കേഷൻ"</string>
     <string name="user_switched" msgid="7249833311585228097">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="NAME">%1$s</xliff:g> ആണ്."</string>
@@ -2427,19 +2429,28 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"സ്വകാര്യ സ്പേസ്"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട അറിയിപ്പ് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ആപ്പ് ഉള്ളടക്കം, അതിന്റെ സുരക്ഷയ്ക്കായി സ്ക്രീൻ പങ്കിടലിൽ നിന്ന് മറച്ചിരിക്കുന്നു"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"സുരക്ഷയ്ക്കായി സ്ക്രീൻ പങ്കിടലിൽ നിന്ന് ആപ്പ് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"സാറ്റലൈറ്റിലേക്ക് സ്വയമേവ കണക്റ്റ് ചെയ്തു"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"മൊബൈലോ വൈഫൈ നെറ്റ്‌വർക്കോ ഇല്ലാതെ തന്നെ സന്ദേശങ്ങൾ അയയ്‌ക്കാനും സ്വീകരിക്കാനും നിങ്ങൾക്ക് കഴിയും"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages തുറക്കുക"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ഇത് പ്രവർത്തിക്കുന്നത് എങ്ങനെയാണ്"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"തീർപ്പാക്കിയിട്ടില്ല..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അത് ഇല്ലാതാക്കി"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> എന്നിവ ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അവ ഇല്ലാതാക്കി"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അത് ഇല്ലാതാക്കി. നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി വീണ്ടും സജ്ജീകരിക്കുക."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> എന്നിവ ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അവ ഇല്ലാതാക്കി. നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി അവ വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
+    <skip />
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ഫെയ്‌സ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"നിങ്ങളുടെ മുഖ മോഡൽ ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അത് ഇല്ലാതാക്കി. നിങ്ങളുടെ മുഖം ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
+    <skip />
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"സജ്ജീകരിക്കുക"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ഇപ്പോൾ വേണ്ട"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> എന്നയാൾക്കുള്ള അലാറം"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"ഉപയോക്താവിനെ മാറുക"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"മ്യൂട്ടുചെയ്യുക"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"ശബ്ദം മ്യൂട്ട് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക"</string>
 </resources>

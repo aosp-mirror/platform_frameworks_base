@@ -6367,6 +6367,33 @@ public class UserManager {
                 Settings.Global.DEVICE_DEMO_MODE, 0) > 0;
     }
 
+    private static final String CACHE_KEY_USER_SERIAL_NUMBER_PROPERTY =
+        PropertyInvalidatedCache.createPropertyName(
+            PropertyInvalidatedCache.MODULE_SYSTEM, "user_serial_number");
+
+    private final PropertyInvalidatedCache<Integer, Integer> mUserSerialNumberCache =
+            new PropertyInvalidatedCache<Integer, Integer>(
+                32, CACHE_KEY_USER_SERIAL_NUMBER_PROPERTY) {
+                @Override
+                public Integer recompute(Integer query) {
+                    try {
+                        return mService.getUserSerialNumber(query);
+                    } catch (RemoteException re) {
+                        throw re.rethrowFromSystemServer();
+                    }
+                }
+                @Override
+                public boolean bypass(Integer query) {
+                    return query <= 0;
+                }
+            };
+
+
+    /** @hide */
+    public static final void invalidateUserSerialNumberCache() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_USER_SERIAL_NUMBER_PROPERTY);
+    }
+
     /**
      * Returns a serial number on this device for a given userId. User handles can be recycled
      * when deleting and creating users, but serial numbers are not reused until the device is wiped.
@@ -6376,6 +6403,14 @@ public class UserManager {
      */
     @UnsupportedAppUsage
     public int getUserSerialNumber(@UserIdInt int userId) {
+        if (android.multiuser.Flags.cacheUserSerialNumber()) {
+            // System user serial number is always 0, and it always exists.
+            // There is no need to call binder for that.
+            if (userId == UserHandle.USER_SYSTEM) {
+               return UserHandle.USER_SERIAL_SYSTEM;
+            }
+            return mUserSerialNumberCache.query(userId);
+        }
         try {
             return mService.getUserSerialNumber(userId);
         } catch (RemoteException re) {

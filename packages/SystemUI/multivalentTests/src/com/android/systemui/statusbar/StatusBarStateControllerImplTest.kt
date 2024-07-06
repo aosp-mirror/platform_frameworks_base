@@ -38,8 +38,11 @@ import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.setTransition
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -392,11 +395,15 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
             )
             assertThat(underTest.leaveOpenOnKeyguardHide()).isEqualTo(true)
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GONE,
-                testScope = testScope,
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Gone),
+                stateTransition =
+                    TransitionStep(
+                        from = KeyguardState.LOCKSCREEN,
+                        to = KeyguardState.GONE,
+                    )
             )
+
             assertThat(underTest.leaveOpenOnKeyguardHide()).isEqualTo(false)
         }
 }

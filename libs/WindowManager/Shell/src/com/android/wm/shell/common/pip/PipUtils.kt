@@ -30,7 +30,7 @@ import android.util.Log
 import android.util.Pair
 import android.util.TypedValue
 import android.window.TaskSnapshot
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.Flags
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import kotlin.math.abs

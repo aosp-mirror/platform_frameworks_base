@@ -128,7 +128,7 @@
         errorLine1="        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());"
         errorLine2="                                                                ~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBar.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBar.java"
             line="807"
             column="65"/>
     </issue>
@@ -1646,7 +1646,7 @@
         errorLine1="        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);"
         errorLine2="                                               ~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonView.java"
             line="177"
             column="48"/>
     </issue>
@@ -2086,7 +2086,7 @@
         errorLine1="            WindowManager wm = getContext().getSystemService(WindowManager.class);"
         errorLine2="                                            ~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="729"
             column="45"/>
     </issue>
@@ -2097,7 +2097,7 @@
         errorLine1="        WindowManager wm = getContext().getSystemService(WindowManager.class);"
         errorLine2="                                        ~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="830"
             column="41"/>
     </issue>
@@ -4049,7 +4049,7 @@
         errorLine1="        pw.println(String.format(&quot;      mCurrentView: id=%s (%dx%d) %s %f&quot;,"
         errorLine2="                   ^">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="1128"
             column="20"/>
     </issue>
@@ -4060,7 +4060,7 @@
         errorLine1="        pw.println(String.format(&quot;      disabled=0x%08x vertical=%s darkIntensity=%.2f&quot;,"
         errorLine2="                   ^">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="1134"
             column="20"/>
     </issue>
@@ -4668,7 +4668,7 @@
         errorLine1="                    500).show();"
         errorLine2="                    ~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBar.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBar.java"
             line="1894"
             column="21"/>
     </issue>
@@ -8386,7 +8386,7 @@
         errorLine1="        mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);"
         errorLine2="                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBar.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBar.java"
             line="1500"
             column="60"/>
     </issue>
@@ -23055,7 +23055,7 @@
         errorLine1="            mBarTransitions.setBackgroundFrame(new Rect(0, frameHeight - height, w, h));"
         errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="1001"
             column="48"/>
     </issue>
@@ -25002,7 +25002,7 @@
         errorLine1="        mAudioManager.playSoundEffect(soundConstant, ActivityManager.getCurrentUser());"
         errorLine2="                                                                     ~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonView.java"
             line="373"
             column="70"/>
     </issue>
@@ -25222,7 +25222,7 @@
         errorLine1="        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);"
         errorLine2="                                                                         ~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonDrawable.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonDrawable.java"
             line="329"
             column="74"/>
     </issue>
@@ -25233,7 +25233,7 @@
         errorLine1="        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);"
         errorLine2="                                                                         ~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonDrawable.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonDrawable.java"
             line="357"
             column="74"/>
     </issue>
@@ -25827,7 +25827,7 @@
         errorLine1="        new AsyncTask&lt;Icon, Void, Drawable>() {"
         errorLine2="        ^">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonView.java"
             line="207"
             column="9"/>
     </issue>
@@ -29303,7 +29303,7 @@
         errorLine1="    public boolean onTouchEvent(MotionEvent ev) {"
         errorLine2="                   ~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonView.java"
             line="267"
             column="20"/>
     </issue>
@@ -29578,7 +29578,7 @@
         errorLine1="        mView.setOnTouchListener(this::onNavigationTouch);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBar.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBar.java"
             line="782"
             column="9"/>
     </issue>
@@ -29589,7 +29589,7 @@
         errorLine1="    public boolean onTouchEvent(MotionEvent event) {"
         errorLine2="                   ~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="383"
             column="20"/>
     </issue>
@@ -29600,7 +29600,7 @@
         errorLine1="    public boolean onTouchEvent(MotionEvent event) {"
         errorLine2="                   ~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/NearestTouchFrame.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/NearestTouchFrame.java"
             line="207"
             column="20"/>
     </issue>

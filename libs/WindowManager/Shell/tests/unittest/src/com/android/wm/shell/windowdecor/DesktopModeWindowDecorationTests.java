@@ -170,7 +170,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws PackageManager.NameNotFoundException {
         mMockitoSession = mockitoSession()
                 .strictness(Strictness.LENIENT)
                 .spyStatic(DesktopModeStatus.class)
@@ -186,6 +186,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         mTestableContext.ensureTestableResources();
         mContext.setMockPackageManager(mMockPackageManager);
         when(mMockPackageManager.getApplicationLabel(any())).thenReturn("applicationLabel");
+        final ActivityInfo activityInfo = new ActivityInfo();
+        activityInfo.applicationInfo = new ApplicationInfo();
+        when(mMockPackageManager.getActivityInfo(any(), anyInt())).thenReturn(activityInfo);
         final Display defaultDisplay = mock(Display.class);
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
@@ -608,8 +611,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 .setTaskDescriptionBuilder(taskDescriptionBuilder)
                 .setVisible(visible)
                 .build();
-        taskInfo.topActivityInfo = new ActivityInfo();
-        taskInfo.topActivityInfo.applicationInfo = new ApplicationInfo();
         taskInfo.realActivity = new ComponentName("com.android.wm.shell.windowdecor",
                 "DesktopModeWindowDecorationTests");
         taskInfo.baseActivity = new ComponentName("com.android.wm.shell.windowdecor",

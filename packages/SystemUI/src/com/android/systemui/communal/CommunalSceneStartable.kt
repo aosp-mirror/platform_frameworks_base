@@ -18,7 +18,6 @@ package com.android.systemui.communal
 
 import android.provider.Settings
 import com.android.compose.animation.scene.SceneKey
-import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.CoreStartable
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -92,8 +91,8 @@ constructor(
         keyguardTransitionInteractor.startedKeyguardTransitionStep
             .mapLatest(::determineSceneAfterTransition)
             .filterNotNull()
-            .onEach { (nextScene, nextTransition) ->
-                communalSceneInteractor.changeScene(nextScene, nextTransition)
+            .onEach { nextScene ->
+                communalSceneInteractor.changeScene(nextScene, CommunalTransitionKeys.SimpleFade)
             }
             .launchIn(applicationScope)
 
@@ -189,7 +188,7 @@ constructor(
 
     private suspend fun determineSceneAfterTransition(
         lastStartedTransition: TransitionStep,
-    ): Pair<SceneKey, TransitionKey>? {
+    ): SceneKey? {
         val to = lastStartedTransition.to
         val from = lastStartedTransition.from
         val docked = dockManager.isDocked
@@ -202,27 +201,22 @@ constructor(
                 // underneath the hub is shown. When launching activities over lockscreen, we only
                 // change scenes once the activity launch animation is finished, so avoid
                 // changing the scene here.
-                Pair(CommunalScenes.Blank, CommunalTransitionKeys.SimpleFade)
+                CommunalScenes.Blank
             }
             to == KeyguardState.GLANCEABLE_HUB && from == KeyguardState.OCCLUDED -> {
                 // When transitioning to the hub from an occluded state, fade out the hub without
                 // doing any translation.
-                Pair(CommunalScenes.Communal, CommunalTransitionKeys.SimpleFade)
+                CommunalScenes.Communal
             }
             // Transitioning to Blank scene when entering the edit mode will be handled separately
             // with custom animations.
             to == KeyguardState.GONE && !communalInteractor.editModeOpen.value ->
-                Pair(CommunalScenes.Blank, CommunalTransitionKeys.SimpleFade)
+                CommunalScenes.Blank
             !docked && !KeyguardState.deviceIsAwakeInState(to) -> {
                 // If the user taps the screen and wakes the device within this timeout, we don't
                 // want to dismiss the hub
                 delay(AWAKE_DEBOUNCE_DELAY)
-                Pair(CommunalScenes.Blank, CommunalTransitionKeys.SimpleFade)
-            }
-            from == KeyguardState.DOZING && to == KeyguardState.GLANCEABLE_HUB -> {
-                // Make sure the communal hub is showing (immediately, not fading in) when
-                // transitioning from dozing to hub.
-                Pair(CommunalScenes.Communal, CommunalTransitionKeys.Immediately)
+                CommunalScenes.Blank
             }
             else -> null
         }

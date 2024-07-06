@@ -261,6 +261,8 @@ public class LockPatternView extends View {
         public float lineEndY = Float.MIN_VALUE;
         @Nullable
         Animator activationAnimator;
+        @Nullable
+        Animator deactivationAnimator;
      }
 
     /**
@@ -667,7 +669,7 @@ public class LockPatternView extends View {
      */
     private void resetPattern() {
         if (mKeepDotActivated && !mPattern.isEmpty()) {
-            resetLastActivatedCellProgress();
+            resetPatternCellSize();
         }
         mPattern.clear();
         mPatternPath.reset();
@@ -676,14 +678,20 @@ public class LockPatternView extends View {
         invalidate();
     }
 
-    private void resetLastActivatedCellProgress() {
-        final ArrayList<Cell> pattern = mPattern;
-        final Cell lastCell = pattern.get(pattern.size() - 1);
-        final CellState cellState = mCellStates[lastCell.row][lastCell.column];
-        if (cellState.activationAnimator != null) {
-            cellState.activationAnimator.cancel();
+    private void resetPatternCellSize() {
+        for (int i = 0; i < mCellStates.length; i++) {
+            for (int j = 0; j < mCellStates[i].length; j++) {
+                CellState cellState = mCellStates[i][j];
+                if (cellState.activationAnimator != null) {
+                    cellState.activationAnimator.cancel();
+                }
+                if (cellState.deactivationAnimator != null) {
+                    cellState.deactivationAnimator.cancel();
+                }
+                cellState.activationAnimationProgress = 0f;
+                cellState.radius = mDotSize / 2f;
+            }
         }
-        cellState.activationAnimationProgress = 0f;
     }
 
     /**
@@ -819,12 +827,16 @@ public class LockPatternView extends View {
                     !mPatternDrawLookup[fillInGapCell.row][fillInGapCell.column]) {
                 addCellToPattern(fillInGapCell);
                 if (mKeepDotActivated) {
-                    startCellDeactivatedAnimation(fillInGapCell);
+                    if (mFadePattern) {
+                        startCellDeactivatedAnimation(fillInGapCell, /* fillInGap= */ true);
+                    } else {
+                        startCellActivatedAnimation(fillInGapCell);
+                    }
                 }
             }
 
             if (mKeepDotActivated && lastCell != null) {
-                startCellDeactivatedAnimation(lastCell);
+                startCellDeactivatedAnimation(lastCell, /* fillInGap= */ false);
             }
 
             addCellToPattern(cell);
@@ -872,17 +884,25 @@ public class LockPatternView extends View {
     }
 
     private void startCellActivatedAnimation(Cell cell) {
-        startCellActivationAnimation(cell, CELL_ACTIVATE);
+        startCellActivationAnimation(cell, CELL_ACTIVATE, /* fillInGap= */ false);
     }
 
-    private void startCellDeactivatedAnimation(Cell cell) {
-        startCellActivationAnimation(cell, CELL_DEACTIVATE);
+    private void startCellDeactivatedAnimation(Cell cell, boolean fillInGap) {
+        startCellActivationAnimation(cell, CELL_DEACTIVATE, /* fillInGap= */ fillInGap);
     }
 
-    private void startCellActivationAnimation(Cell cell, int activate) {
+    /**
+     * Start cell animation.
+     * @param cell The cell to be animated.
+     * @param activate Whether the cell is being activated or deactivated.
+     * @param fillInGap Whether the cell is a gap cell, i.e. filled in based on current pattern.
+     */
+    private void startCellActivationAnimation(Cell cell, int activate, boolean fillInGap) {
         final CellState cellState = mCellStates[cell.row][cell.column];
 
-        if (cellState.activationAnimator != null) {
+        // When mKeepDotActivated is true, don't cancel the previous animator since it would leave
+        // a dot in an in-between size if the next dot is reached before the animation is finished.
+        if (cellState.activationAnimator != null && !mKeepDotActivated) {
             cellState.activationAnimator.cancel();
         }
         AnimatorSet animatorSet = new AnimatorSet();
@@ -898,24 +918,37 @@ public class LockPatternView extends View {
                 .with(createLineEndAnimation(cellState, startX, startY,
                         getCenterXForColumn(cell.column), getCenterYForRow(cell.row)));
         if (mDotSize != mDotSizeActivated) {
-            animatorSetBuilder.with(createDotRadiusAnimation(cellState));
+            animatorSetBuilder.with(createDotRadiusAnimation(cellState, activate, fillInGap));
         }
         if (mDotColor != mDotActivatedColor) {
-            animatorSetBuilder.with(createDotActivationColorAnimation(cellState, activate));
+            animatorSetBuilder.with(
+                    createDotActivationColorAnimation(cellState, activate, fillInGap));
         }
 
-        animatorSet.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                cellState.activationAnimator = null;
-                invalidate();
-            }
-        });
-        cellState.activationAnimator = animatorSet;
+        if (activate == CELL_ACTIVATE) {
+            animatorSet.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    cellState.activationAnimator = null;
+                    invalidate();
+                }
+            });
+            cellState.activationAnimator = animatorSet;
+        } else {
+            animatorSet.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    cellState.deactivationAnimator = null;
+                    invalidate();
+                }
+            });
+            cellState.deactivationAnimator = animatorSet;
+        }
         animatorSet.start();
     }
 
-    private Animator createDotActivationColorAnimation(CellState cellState, int activate) {
+    private Animator createDotActivationColorAnimation(
+            CellState cellState, int activate, boolean fillInGap) {
         ValueAnimator.AnimatorUpdateListener updateListener =
                 valueAnimator -> {
                     cellState.activationAnimationProgress =
@@ -934,7 +967,7 @@ public class LockPatternView extends View {
         deactivateAnimator.setDuration(DOT_ACTIVATION_DURATION_MILLIS);
         AnimatorSet set = new AnimatorSet();
 
-        if (mKeepDotActivated) {
+        if (mKeepDotActivated && !fillInGap) {
             set.play(activate == CELL_ACTIVATE ? activateAnimator : deactivateAnimator);
         } else {
             // 'activate' ignored in this case, do full deactivate -> activate cycle
@@ -977,7 +1010,7 @@ public class LockPatternView extends View {
         return valueAnimator;
     }
 
-    private Animator createDotRadiusAnimation(CellState state) {
+    private Animator createDotRadiusAnimation(CellState state, int activate, boolean fillInGap) {
         float defaultRadius = mDotSize / 2f;
         float activatedRadius = mDotSizeActivated / 2f;
 
@@ -998,7 +1031,19 @@ public class LockPatternView extends View {
         deactivationAnimator.setDuration(DOT_RADIUS_DECREASE_DURATION_MILLIS);
 
         AnimatorSet set = new AnimatorSet();
-        set.playSequentially(activationAnimator, deactivationAnimator);
+        if (mKeepDotActivated) {
+            if (mFadePattern) {
+                if (fillInGap) {
+                    set.playSequentially(activationAnimator, deactivationAnimator);
+                } else {
+                    set.play(activate == CELL_ACTIVATE ? activationAnimator : deactivationAnimator);
+                }
+            } else if (activate == CELL_ACTIVATE) {
+                set.play(activationAnimator);
+            }
+        } else {
+            set.playSequentially(activationAnimator, deactivationAnimator);
+        }
         return set;
     }
 
@@ -1176,9 +1221,15 @@ public class LockPatternView extends View {
         // report pattern detected
         if (!mPattern.isEmpty()) {
             setPatternInProgress(false);
-            cancelLineAnimations();
             if (mKeepDotActivated) {
+                // When mKeepDotActivated is true, cancelling dot animations and resetting dot radii
+                // are handled in #resetPattern(), since we want to keep the dots activated until
+                // the pattern are reset.
                 deactivateLastCell();
+            } else {
+                // When mKeepDotActivated is false, cancelling animations and resetting dot radii
+                // are handled here.
+                cancelLineAnimations();
             }
             notifyPatternDetected();
             // Also clear pattern if fading is enabled
@@ -1198,7 +1249,7 @@ public class LockPatternView extends View {
 
     private void deactivateLastCell() {
         Cell lastCell = mPattern.get(mPattern.size() - 1);
-        startCellDeactivatedAnimation(lastCell);
+        startCellDeactivatedAnimation(lastCell, /* fillInGap= */ false);
     }
 
     private void cancelLineAnimations() {

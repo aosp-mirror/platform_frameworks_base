@@ -25,11 +25,11 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.LogLevel;
-import com.android.internal.protolog.common.ProtoLog;
 
 import org.junit.After;
 import org.junit.Ignore;
@@ -53,9 +53,6 @@ public class ProtoLogIntegrationTest {
         runWith(mockedProtoLog, this::testProtoLog);
         verify(mockedProtoLog).log(eq(LogLevel.ERROR), eq(ProtoLogGroup.TEST_GROUP),
                 anyInt(), eq(0b0010010111),
-                eq(com.android.internal.protolog.ProtoLogGroup.TEST_GROUP.isLogToLogcat()
-                        ? "Test completed successfully: %b %d %x %f %% %s"
-                        : null),
                 eq(new Object[]{true, 1L, 2L, 0.3, "ok"}));
     }
 

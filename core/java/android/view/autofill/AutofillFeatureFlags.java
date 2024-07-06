@@ -256,6 +256,21 @@ public class AutofillFeatureFlags {
             "ignore_relayout_auth_pending";
 
     /**
+     * Fixes to handle apps relaying out, and causing problems for autofill.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_ENABLE_RELAYOUT = "enable_relayout";
+
+    /**
+     * Enable relative location of views for fingerprinting for relayout.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_ENABLE_RELATIVE_LOCATION_FOR_RELAYOUT =
+            "enable_relative_location_for_relayout";
+
+    /**
      * Bugfix flag, Autofill should only fill in value from current session.
      *
      * See frameworks/base/services/autofill/bugfixes.aconfig#fill_fields_from_current_session_only
@@ -540,6 +555,22 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_IGNORE_RELAYOUT_WHEN_AUTH_PENDING,
+                false);
+    }
+
+    /** @hide */
+    public static boolean enableRelayoutFixes() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_ENABLE_RELAYOUT,
+                true);
+    }
+
+    /** @hide */
+    public static boolean enableRelativeLocationForRelayout() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_ENABLE_RELATIVE_LOCATION_FOR_RELAYOUT,
                 false);
     }
 

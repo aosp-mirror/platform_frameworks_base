@@ -267,6 +267,8 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Poročilo o napakah"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Končaj sejo"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Posnetek"</string>
+    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
+    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Poročilo o napakah"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"S tem bodo zbrani podatki o trenutnem stanju naprave, ki bodo poslani v e-poštnem sporočilu. Izvedba poročila o napakah in priprava trajata nekaj časa, zato bodite potrpežljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktivno poročilo"</string>
@@ -1767,11 +1769,11 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
     <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
     <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
     <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Povečava"</string>
     <string name="user_switched" msgid="7249833311585228097">"Trenutni uporabnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1988,14 +1990,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Aktivni klic"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Preverjanje dohodnega klica"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Nekategorizirano"</string>
-    <!-- no translation found for promotional_notification_channel_label (7414844730492860233) -->
-    <skip />
-    <!-- no translation found for social_notification_channel_label (106520267132019945) -->
-    <skip />
-    <!-- no translation found for news_notification_channel_label (4299937455247883311) -->
-    <skip />
-    <!-- no translation found for recs_notification_channel_label (4945985121418684297) -->
-    <skip />
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"Promocije"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"Družbeno"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"Novice"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"Priporočila"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Vi določite raven pomembnosti teh obvestil."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Pomembno zaradi udeleženih ljudi."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Obvestilo po meri iz aplikacije"</string>
@@ -2212,10 +2210,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Izbirnik zaslonske bližnjice za dostopnost"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Bližnjica za dostopnost"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Opusti zaslon z obvestili"</string>
-    <!-- no translation found for accessibility_system_action_menu_label (3385283204496447040) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_media_play_pause_label (1905647491347119748) -->
-    <skip />
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Meni"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Predvajaj/začasno zaustavi predstavnost"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Smerni gumb gor"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Smerni gumb dol"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Smerni gumb levo"</string>
@@ -2442,12 +2438,21 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Kako deluje"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"V teku …"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Vnovična nastavitev odklepanja s prstnim odtisom"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ni deloval pravilno in je bil izbrisan"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> in <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nista delovala pravilno in sta bila izbrisana"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ni deloval pravilno in je bil izbrisan. Znova ga nastavite, če želite telefon odklepati s prstnim odtisom."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> in <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nista delovala pravilno in sta bila izbrisana. Znova ju nastavite, če želite telefon odklepati s prstnim odtisom."</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
+    <skip />
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Vnovična nastavitev odklepanja z obrazom"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Model obraza ni deloval pravilno in je bil izbrisan. Znova ga nastavite, če želite telefon odklepati z obrazom."</string>
+    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
+    <skip />
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Nastavi"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ne zdaj"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm za uporabnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Preklop uporabnika"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Izklop zvoka"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Dotaknite se za izklop zvoka"</string>
 </resources>

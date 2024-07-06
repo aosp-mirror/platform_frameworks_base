@@ -26,6 +26,7 @@ import android.os.Parcelable;
 import android.util.proto.ProtoOutputStream;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @hide
@@ -368,6 +369,20 @@ public class ContextHubInfo implements Parcelable {
         }
 
         return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        if (!Flags.fixApiCheck()) {
+            return super.hashCode();
+        }
+
+        return Objects.hash(mId, mName, mVendor, mToolchain, mToolchainVersion,
+                getStaticSwVersion(), mChrePlatformId, mPeakMips,
+                mStoppedPowerDrawMw, mSleepPowerDrawMw, mPeakPowerDrawMw,
+                mMaxPacketLengthBytes, mSupportsReliableMessages,
+                Arrays.hashCode(mSupportedSensors),
+                Arrays.hashCode(mMemoryRegions));
     }
 
     private ContextHubInfo(Parcel in) {

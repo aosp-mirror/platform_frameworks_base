@@ -418,7 +418,7 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
     }
 
     protected int getRequestReason() {
-        if (isKeyguard() && !isBiometricPrompt()) {
+        if (isKeyguard()) {
             return BiometricRequestConstants.REASON_AUTH_KEYGUARD;
         } else if (isBiometricPrompt()) {
             // BP reason always takes precedent over settings, since callers from within

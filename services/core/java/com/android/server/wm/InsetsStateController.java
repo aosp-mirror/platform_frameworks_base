@@ -41,7 +41,7 @@ import android.view.InsetsState;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.io.PrintWriter;

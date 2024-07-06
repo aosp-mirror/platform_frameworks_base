@@ -20,6 +20,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logAccessibilityButtonLongPressStatus;
@@ -66,6 +67,9 @@ public class AccessibilityButtonChooserActivity extends Activity {
                 NAV_BAR_MODE_GESTURAL == getResources().getInteger(
                         com.android.internal.R.integer.config_navBarInteractionMode);
 
+        final int targetType = (isGestureNavigateEnabled
+                && android.provider.Flags.a11yStandaloneGestureEnabled()) ? GESTURE : SOFTWARE;
+
         if (isGestureNavigateEnabled) {
             final TextView promptPrologue = findViewById(R.id.accessibility_button_prompt_prologue);
             promptPrologue.setText(isTouchExploreOn
@@ -78,7 +82,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
                     : R.string.accessibility_gesture_instructional_text);
         }
 
-        mTargets.addAll(getTargets(this, SOFTWARE));
+        mTargets.addAll(getTargets(this, targetType));
 
         final GridView gridview = findViewById(R.id.accessibility_button_chooser_grid);
         gridview.setAdapter(new ButtonTargetAdapter(mTargets));

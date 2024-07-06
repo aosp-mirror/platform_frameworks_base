@@ -26,7 +26,7 @@ import android.testing.TestableContext;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import org.junit.After;
 import org.junit.Before;

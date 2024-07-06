@@ -17,12 +17,11 @@
 package com.android.systemui.qs.tiles.viewmodel
 
 import android.os.UserHandle
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 object StubQSTileViewModel : QSTileViewModel {
 
-    override val state: SharedFlow<QSTileState>
+    override val state: StateFlow<QSTileState?>
         get() = error("Don't call stubs")
 
     override val config: QSTileConfig

@@ -27,6 +27,7 @@ import android.os.DeadObjectException
 import android.os.Handler
 import android.os.PowerManager
 import android.os.RemoteException
+import android.os.Trace
 import android.util.Log
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
@@ -385,10 +386,15 @@ class KeyguardUnlockAnimationController @Inject constructor(
                         valueAnimator.animatedValue as Float, openingWallpaperTargets)
             }
             addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator) {
+                    super.onAnimationStart(animation)
+                    Trace.asyncTraceBegin(Trace.TRACE_TAG_APP, "WallpaperAlphaAnimation", 0)
+                }
                 override fun onAnimationEnd(animation: Animator) {
                     Log.d(TAG, "wallpaperCannedUnlockAnimator#onAnimationEnd")
                     keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                         false /* cancelled */)
+                    Trace.asyncTraceEnd(Trace.TRACE_TAG_APP, "WallpaperAlphaAnimation", 0)
                 }
             })
         }

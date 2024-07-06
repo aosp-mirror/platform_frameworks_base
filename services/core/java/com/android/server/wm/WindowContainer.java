@@ -111,7 +111,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.protolog.common.LogLevel;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
@@ -236,12 +236,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /** Total number of elements in this subtree, including our own hierarchy element. */
     private int mTreeWeight = 1;
-
-    /**
-     * Indicates whether we are animating and have committed the transaction to reparent our
-     * surface to the animation leash
-     */
-    private boolean mCommittedReparentToAnimationLeash;
 
     private int mSyncTransactionCommitCallbackDepth = 0;
 
@@ -2871,20 +2865,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void prepareSurfaces() {
-        // If a leash has been set when the transaction was committed, then the leash reparent has
-        // been committed.
-        mCommittedReparentToAnimationLeash = mSurfaceAnimator.hasLeash();
         for (int i = 0; i < mChildren.size(); i++) {
             mChildren.get(i).prepareSurfaces();
         }
-    }
-
-    /**
-     * @return true if the reparent to animation leash transaction has been committed, false
-     * otherwise.
-     */
-    boolean hasCommittedReparentToAnimationLeash() {
-        return mCommittedReparentToAnimationLeash;
     }
 
     /**
