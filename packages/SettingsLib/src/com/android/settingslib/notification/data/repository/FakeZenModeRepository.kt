@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.android.settingslib.statusbar.notification.data.repository
+package com.android.settingslib.notification.data.repository
 
 import android.app.NotificationManager
 import android.provider.Settings

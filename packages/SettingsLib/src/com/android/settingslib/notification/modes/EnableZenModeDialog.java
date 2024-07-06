@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.notification;
+package com.android.settingslib.notification.modes;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
@@ -96,7 +96,7 @@ public class EnableZenModeDialog {
     protected LinearLayout mZenRadioGroupContent;
 
     private RadioGroup mZenRadioGroup;
-    private int MAX_MANUAL_DND_OPTIONS = 3;
+    private static final int MAX_MANUAL_DND_OPTIONS = 3;
 
     @VisibleForTesting
     protected LayoutInflater mLayoutInflater;
@@ -119,9 +119,9 @@ public class EnableZenModeDialog {
     }
 
     public AlertDialog createDialog() {
-        mNotificationManager = (NotificationManager) mContext.
-                getSystemService(Context.NOTIFICATION_SERVICE);
-        mForeverId =  Condition.newId(mContext).appendPath("forever").build();
+        mNotificationManager = (NotificationManager) mContext
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+        mForeverId = Condition.newId(mContext).appendPath("forever").build();
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mUserId = mContext.getUserId();
         mAttached = false;
@@ -171,8 +171,8 @@ public class EnableZenModeDialog {
     }
 
     private void hideAllConditions() {
-        final int N = mZenRadioGroupContent.getChildCount();
-        for (int i = 0; i < N; i++) {
+        final int n = mZenRadioGroupContent.getChildCount();
+        for (int i = 0; i < n; i++) {
             mZenRadioGroupContent.getChildAt(i).setVisibility(View.GONE);
         }
 
@@ -221,8 +221,10 @@ public class EnableZenModeDialog {
         }
         tag.condition = condition;
         final Uri conditionId = getConditionId(tag.condition);
-        if (DEBUG) Log.d(TAG, "bind i=" + mZenRadioGroupContent.indexOfChild(row) + " first="
-                + first + " condition=" + conditionId);
+        if (DEBUG) {
+            Log.d(TAG, "bind i=" + mZenRadioGroupContent.indexOfChild(row) + " first="
+                    + first + " condition=" + conditionId);
+        }
         tag.rb.setEnabled(enabled);
         tag.rb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -447,14 +449,14 @@ public class EnableZenModeDialog {
     private void onClickTimeButton(View row, ConditionTag tag, boolean up, int rowId) {
         mMetricsLogger.logOnClickTimeButton(up);
         Condition newCondition = null;
-        final int N = MINUTE_BUCKETS.length;
+        final int n = MINUTE_BUCKETS.length;
         if (mBucketIndex == -1) {
             // not on a known index, search for the next or prev bucket by time
             final Uri conditionId = getConditionId(tag.condition);
             final long time = ZenModeConfig.tryParseCountdownConditionId(conditionId);
             final long now = System.currentTimeMillis();
-            for (int i = 0; i < N; i++) {
-                int j = up ? i : N - 1 - i;
+            for (int i = 0; i < n; i++) {
+                int j = up ? i : n - 1 - i;
                 final int bucketMinutes = MINUTE_BUCKETS[j];
                 final long bucketTime = now + bucketMinutes * MINUTES_MS;
                 if (up && bucketTime > time || !up && bucketTime < time) {
@@ -472,7 +474,7 @@ public class EnableZenModeDialog {
             }
         } else {
             // on a known index, simply increment or decrement
-            mBucketIndex = Math.max(0, Math.min(N - 1, mBucketIndex + (up ? 1 : -1)));
+            mBucketIndex = Math.max(0, Math.min(n - 1, mBucketIndex + (up ? 1 : -1)));
             newCondition = ZenModeConfig.toTimeCondition(mContext,
                     MINUTE_BUCKETS[mBucketIndex], ActivityManager.getCurrentUser());
         }

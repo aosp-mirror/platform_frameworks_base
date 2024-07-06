@@ -20,7 +20,7 @@ import android.app.NotificationManager.Policy
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.statusbar.notification.data.repository.updateNotificationPolicy
+import com.android.settingslib.notification.data.repository.updateNotificationPolicy
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope

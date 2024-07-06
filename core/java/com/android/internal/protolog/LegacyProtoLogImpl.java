@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -65,7 +66,7 @@ public class LegacyProtoLogImpl implements IProtoLog {
     private final String mLegacyViewerConfigFilename;
     private final TraceBuffer mBuffer;
     private final LegacyProtoLogViewerConfigReader mViewerConfig;
-    private final TreeMap<String, IProtoLogGroup> mLogGroups;
+    private final Map<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
     private final Runnable mCacheUpdater;
     private final int mPerChunkSize;
 
@@ -74,20 +75,19 @@ public class LegacyProtoLogImpl implements IProtoLog {
     private final Object mProtoLogEnabledLock = new Object();
 
     public LegacyProtoLogImpl(String outputFile, String viewerConfigFilename,
-            TreeMap<String, IProtoLogGroup> logGroups, Runnable cacheUpdater) {
+            Runnable cacheUpdater) {
         this(new File(outputFile), viewerConfigFilename, BUFFER_CAPACITY,
-                new LegacyProtoLogViewerConfigReader(), PER_CHUNK_SIZE, logGroups, cacheUpdater);
+                new LegacyProtoLogViewerConfigReader(), PER_CHUNK_SIZE, cacheUpdater);
     }
 
     public LegacyProtoLogImpl(File file, String viewerConfigFilename, int bufferCapacity,
             LegacyProtoLogViewerConfigReader viewerConfig, int perChunkSize,
-            TreeMap<String, IProtoLogGroup> logGroups, Runnable cacheUpdater) {
+            Runnable cacheUpdater) {
         mLogFile = file;
         mBuffer = new TraceBuffer(bufferCapacity);
         mLegacyViewerConfigFilename = viewerConfigFilename;
         mViewerConfig = viewerConfig;
         mPerChunkSize = perChunkSize;
-        mLogGroups = logGroups;
         mCacheUpdater = cacheUpdater;
     }
 
@@ -97,21 +97,25 @@ public class LegacyProtoLogImpl implements IProtoLog {
     @VisibleForTesting
     @Override
     public void log(LogLevel level, IProtoLogGroup group, long messageHash, int paramsMask,
-            @Nullable String messageString, Object[] args) {
+            Object[] args) {
         if (group.isLogToProto()) {
             logToProto(messageHash, paramsMask, args);
         }
         if (group.isLogToLogcat()) {
-            logToLogcat(group.getTag(), level, messageHash, messageString, args);
+            logToLogcat(group.getTag(), level, messageHash, args);
         }
     }
 
-    private void logToLogcat(String tag, LogLevel level, long messageHash,
-            @Nullable String messageString, Object[] args) {
+    @Override
+    public void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object... args) {
+        // This will be removed very soon so no point implementing it here.
+        throw new IllegalStateException(
+                "Not implemented. Only implemented for PerfettoProtoLogImpl.");
+    }
+
+    private void logToLogcat(String tag, LogLevel level, long messageHash, Object[] args) {
         String message = null;
-        if (messageString == null) {
-            messageString = mViewerConfig.getViewerString(messageHash);
-        }
+        final String messageString = mViewerConfig.getViewerString(messageHash);
         if (messageString != null) {
             if (args != null) {
                 try {
@@ -409,6 +413,13 @@ public class LegacyProtoLogImpl implements IProtoLog {
         // In legacy logging we just enable an entire group at a time without more granular control,
         // so we ignore the level argument to this function.
         return group.isLogToLogcat() || (group.isLogToProto() && isProtoEnabled());
+    }
+
+    @Override
+    public void registerGroups(IProtoLogGroup... protoLogGroups) {
+        for (IProtoLogGroup group : protoLogGroups) {
+            mLogGroups.put(group.name(), group);
+        }
     }
 }
 

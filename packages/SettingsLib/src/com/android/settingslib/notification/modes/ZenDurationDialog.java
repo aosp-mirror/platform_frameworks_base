@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.notification;
+package com.android.settingslib.notification.modes;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -46,22 +46,31 @@ import java.util.Arrays;
 
 public class ZenDurationDialog {
     private static final int[] MINUTE_BUCKETS = ZenModeConfig.MINUTE_BUCKETS;
-    @VisibleForTesting protected static final int MIN_BUCKET_MINUTES = MINUTE_BUCKETS[0];
-    @VisibleForTesting protected static final int MAX_BUCKET_MINUTES =
+    @VisibleForTesting
+    protected static final int MIN_BUCKET_MINUTES = MINUTE_BUCKETS[0];
+    @VisibleForTesting
+    protected static final int MAX_BUCKET_MINUTES =
             MINUTE_BUCKETS[MINUTE_BUCKETS.length - 1];
     private static final int DEFAULT_BUCKET_INDEX = Arrays.binarySearch(MINUTE_BUCKETS, 60);
-    @VisibleForTesting protected int mBucketIndex = -1;
+    @VisibleForTesting
+    protected int mBucketIndex = -1;
 
-    @VisibleForTesting protected static final int FOREVER_CONDITION_INDEX = 0;
-    @VisibleForTesting protected static final int COUNTDOWN_CONDITION_INDEX = 1;
-    @VisibleForTesting protected static final int ALWAYS_ASK_CONDITION_INDEX = 2;
+    @VisibleForTesting
+    protected static final int FOREVER_CONDITION_INDEX = 0;
+    @VisibleForTesting
+    protected static final int COUNTDOWN_CONDITION_INDEX = 1;
+    @VisibleForTesting
+    protected static final int ALWAYS_ASK_CONDITION_INDEX = 2;
 
-    @VisibleForTesting protected Context mContext;
-    @VisibleForTesting protected LinearLayout mZenRadioGroupContent;
+    @VisibleForTesting
+    protected Context mContext;
+    @VisibleForTesting
+    protected LinearLayout mZenRadioGroupContent;
     private RadioGroup mZenRadioGroup;
-    private int MAX_MANUAL_DND_OPTIONS = 3;
+    private static final int MAX_MANUAL_DND_OPTIONS = 3;
 
-    @VisibleForTesting protected LayoutInflater mLayoutInflater;
+    @VisibleForTesting
+    protected LayoutInflater mLayoutInflater;
 
     public ZenDurationDialog(Context context) {
         mContext = context;
@@ -104,22 +113,22 @@ public class ZenDurationDialog {
             case FOREVER_CONDITION_INDEX:
                 newZenDuration = Settings.Secure.ZEN_DURATION_FOREVER;
                 MetricsLogger.action(mContext,
-                        MetricsProto.MetricsEvent.
-                                NOTIFICATION_ZEN_MODE_DURATION_FOREVER);
+                        MetricsProto.MetricsEvent
+                                .NOTIFICATION_ZEN_MODE_DURATION_FOREVER);
                 break;
             case COUNTDOWN_CONDITION_INDEX:
                 ConditionTag tag = getConditionTagAt(checkedRadioButtonId);
                 newZenDuration = tag.countdownZenDuration;
                 MetricsLogger.action(mContext,
-                        MetricsProto.MetricsEvent.
-                                NOTIFICATION_ZEN_MODE_DURATION_TIME,
+                        MetricsProto.MetricsEvent
+                                .NOTIFICATION_ZEN_MODE_DURATION_TIME,
                         newZenDuration);
                 break;
             case ALWAYS_ASK_CONDITION_INDEX:
                 newZenDuration = Settings.Secure.ZEN_DURATION_PROMPT;
                 MetricsLogger.action(mContext,
-                        MetricsProto.MetricsEvent.
-                                NOTIFICATION_ZEN_MODE_DURATION_PROMPT);
+                        MetricsProto.MetricsEvent
+                                .NOTIFICATION_ZEN_MODE_DURATION_PROMPT);
                 break;
         }
 
@@ -299,12 +308,12 @@ public class ZenDurationDialog {
     @VisibleForTesting
     protected void onClickTimeButton(View row, ConditionTag tag, boolean up, int rowId) {
         int newDndTimeDuration = -1;
-        final int N = MINUTE_BUCKETS.length;
+        final int n = MINUTE_BUCKETS.length;
         if (mBucketIndex == -1) {
             // not on a known index, search for the next or prev bucket by time
             final long time = tag.countdownZenDuration;
-            for (int i = 0; i < N; i++) {
-                int j = up ? i : N - 1 - i;
+            for (int i = 0; i < n; i++) {
+                int j = up ? i : n - 1 - i;
                 final int bucketMinutes = MINUTE_BUCKETS[j];
                 if (up && bucketMinutes > time || !up && bucketMinutes < time) {
                     mBucketIndex = j;
@@ -318,7 +327,7 @@ public class ZenDurationDialog {
             }
         } else {
             // on a known index, simply increment or decrement
-            mBucketIndex = Math.max(0, Math.min(N - 1, mBucketIndex + (up ? 1 : -1)));
+            mBucketIndex = Math.max(0, Math.min(n - 1, mBucketIndex + (up ? 1 : -1)));
             newDndTimeDuration = MINUTE_BUCKETS[mBucketIndex];
         }
         tag.countdownZenDuration = newDndTimeDuration;

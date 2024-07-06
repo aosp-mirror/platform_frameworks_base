@@ -40,7 +40,7 @@ import javax.inject.Inject
 class SystemShortcutsSource @Inject constructor(@Main private val resources: Resources) :
     KeyboardShortcutGroupsSource {
 
-    override fun shortcutGroups() =
+    override suspend fun shortcutGroups(deviceId: Int) =
         listOf(
             KeyboardShortcutGroup(
                 resources.getString(R.string.shortcut_helper_category_system_controls),

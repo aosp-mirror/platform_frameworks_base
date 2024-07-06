@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.policy.domain.interactor
 
 import android.provider.Settings
-import com.android.settingslib.statusbar.notification.data.repository.ZenModeRepository
+import com.android.settingslib.notification.data.repository.ZenModeRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
