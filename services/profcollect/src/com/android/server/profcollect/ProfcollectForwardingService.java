@@ -287,7 +287,7 @@ public final class ProfcollectForwardingService extends SystemService {
         if (randomNum < traceFrequency) {
             BackgroundThread.get().getThreadHandler().post(() -> {
                 try {
-                    mIProfcollect.trace_once("applaunch");
+                    mIProfcollect.trace_system("applaunch");
                 } catch (RemoteException e) {
                     Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                 }
@@ -327,7 +327,7 @@ public final class ProfcollectForwardingService extends SystemService {
             // Dex2oat could take a while before it starts. Add a short delay before start tracing.
             BackgroundThread.get().getThreadHandler().postDelayed(() -> {
                 try {
-                    mIProfcollect.trace_once("dex2oat");
+                    mIProfcollect.trace_system("dex2oat");
                 } catch (RemoteException e) {
                     Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                 }
@@ -404,7 +404,7 @@ public final class ProfcollectForwardingService extends SystemService {
                 String traceTag = traceInitialization ? "camera_init" : "camera";
                 BackgroundThread.get().getThreadHandler().postDelayed(() -> {
                     try {
-                        mIProfcollect.trace_once(traceTag);
+                        mIProfcollect.trace_system(traceTag);
                     } catch (RemoteException e) {
                         Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                     }
