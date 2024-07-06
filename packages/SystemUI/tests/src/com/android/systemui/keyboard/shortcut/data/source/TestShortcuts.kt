@@ -154,6 +154,29 @@ object TestShortcuts {
             listOf(standardShortcutInfo3, shortcutInfoWithUnsupportedModifiers)
         )
 
+    private val switchToNextLanguageShortcut =
+        shortcut("Switch to next language") {
+            command {
+                key("Ctrl")
+                key("Space")
+            }
+        }
+
+    private val switchToPreviousLanguageShortcut =
+        shortcut("Switch to previous language") {
+            command {
+                key("Ctrl")
+                key("Shift")
+                key("Space")
+            }
+        }
+
+    private val subCategoryForInputLanguageSwitchShortcuts =
+        ShortcutSubCategory(
+            "Input",
+            listOf(switchToNextLanguageShortcut, switchToPreviousLanguageShortcut)
+        )
+
     private val subCategoryWithUnsupportedShortcutsRemoved =
         ShortcutSubCategory(
             groupWithSupportedAndUnsupportedModifierShortcut.label!!.toString(),
@@ -198,7 +221,13 @@ object TestShortcuts {
     val imeCategory =
         ShortcutCategory(
             type = ShortcutCategoryType.IME,
-            subCategories = listOf(standardSubCategory1, standardSubCategory2, standardSubCategory3)
+            subCategories =
+                listOf(
+                    subCategoryForInputLanguageSwitchShortcuts,
+                    standardSubCategory1,
+                    standardSubCategory2,
+                    standardSubCategory3
+                )
         )
 
     val systemGroups = listOf(standardGroup3, standardGroup2, standardGroup1)
@@ -221,6 +250,13 @@ object TestShortcuts {
     val subCategoriesWithGroupedDuplicatedShortcutLabels =
         listOf(subCategoryWithGroupedRepeatedShortcutLabels, subCategoryWithStandardShortcut)
 
+    val imeSubCategoriesWithGroupedDuplicatedShortcutLabels =
+        listOf(
+            subCategoryForInputLanguageSwitchShortcuts,
+            subCategoryWithGroupedRepeatedShortcutLabels,
+            subCategoryWithStandardShortcut
+        )
+
     val groupsWithUnsupportedModifier =
         listOf(
             groupWithStandardShortcutInfo,
@@ -230,6 +266,13 @@ object TestShortcuts {
 
     val subCategoriesWithUnsupportedModifiersRemoved =
         listOf(subCategoryWithStandardShortcut, subCategoryWithUnsupportedShortcutsRemoved)
+
+    val imeSubCategoriesWithUnsupportedModifiersRemoved =
+        listOf(
+            subCategoryForInputLanguageSwitchShortcuts,
+            subCategoryWithStandardShortcut,
+            subCategoryWithUnsupportedShortcutsRemoved
+        )
 
     val groupsWithOnlyUnsupportedModifiers = listOf(groupWithOnlyUnsupportedModifierShortcut)
 }
