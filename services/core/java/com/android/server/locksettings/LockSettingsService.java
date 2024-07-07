@@ -1773,6 +1773,20 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
+    @Override
+    public boolean writeRepairModeCredential(int userId) {
+        checkWritePermission();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSpManager) {
+                long protectorId = getCurrentLskfBasedProtectorId(userId);
+                return mSpManager.writeRepairModeCredentialLocked(protectorId, userId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     /**
      * @param savedCredential if the user is a profile with
      * {@link UserManager#isCredentialSharableWithParent()} with unified challenge and
