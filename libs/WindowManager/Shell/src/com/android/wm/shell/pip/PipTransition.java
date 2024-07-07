@@ -63,7 +63,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
@@ -1174,6 +1174,7 @@ public class PipTransition extends PipTransitionController {
         }
 
         final Rect sourceBounds = pipTaskInfo.configuration.windowConfiguration.getBounds();
+        sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
         final PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getAnimator(pipTaskInfo, leash, sourceBounds, sourceBounds,
                         destinationBounds, sourceHintRect, TRANSITION_DIRECTION_TO_PIP,

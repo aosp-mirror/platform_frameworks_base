@@ -6178,6 +6178,15 @@ public final class Settings {
         public static final String POINTER_FILL_STYLE = "pointer_fill_style";
 
         /**
+         * Pointer stroke style, specified by
+         * {@link android.view.PointerIcon.PointerIconVectorStyleStroke} constants.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String POINTER_STROKE_STYLE = "pointer_stroke_style";
+
+        /**
          * Whether lock-to-app will be triggered by long-press on recents.
          * @hide
          */
@@ -6380,6 +6389,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SIP_ASK_ME_EACH_TIME);
             PRIVATE_SETTINGS.add(POINTER_SPEED);
             PRIVATE_SETTINGS.add(POINTER_FILL_STYLE);
+            PRIVATE_SETTINGS.add(POINTER_STROKE_STYLE);
             PRIVATE_SETTINGS.add(POINTER_SCALE);
             PRIVATE_SETTINGS.add(LOCK_TO_APP_ENABLED);
             PRIVATE_SETTINGS.add(EGG_MODE);
@@ -13396,7 +13406,19 @@ public final class Settings {
                 = "enable_freeform_support";
 
         /**
-         * Whether to enable experimental desktop mode on secondary displays.
+         * Whether to override the availability of the desktop mode on the main display of the
+         * device. If on, users can make move an app to the desktop, allowing a freeform windowing
+         * experience.
+         * @hide
+         */
+        @Readable
+        public static final String DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES =
+                "override_desktop_mode_features";
+
+        /**
+         * Whether to enable the legacy freeform support on secondary displays. If enabled, the
+         * SECONDARY_HOME of the launcher is started on any secondary display, allowing for a
+         * desktop experience.
          * @hide
          */
         @Readable

@@ -42,9 +42,12 @@ class DesktopTasksLimiter (
         private val shellTaskOrganizer: ShellTaskOrganizer,
 ) {
     private val minimizeTransitionObserver = MinimizeTransitionObserver()
+    @VisibleForTesting
+    val leftoverMinimizedTasksRemover = LeftoverMinimizedTasksRemover()
 
     init {
         transitions.registerObserver(minimizeTransitionObserver)
+        taskRepository.addActiveTaskListener(leftoverMinimizedTasksRemover)
     }
 
     private data class TaskDetails (val displayId: Int, val taskId: Int)
@@ -110,6 +113,35 @@ class DesktopTasksLimiter (
                     ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "DesktopTasksLimiter: transition %s finished", transition)
             mPendingTransitionTokensAndTasks.remove(transition)
+        }
+    }
+
+    @VisibleForTesting
+    inner class LeftoverMinimizedTasksRemover : DesktopModeTaskRepository.ActiveTasksListener {
+        override fun onActiveTasksChanged(displayId: Int) {
+            val wct = WindowContainerTransaction()
+            removeLeftoverMinimizedTasks(displayId, wct)
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+
+        fun removeLeftoverMinimizedTasks(displayId: Int, wct: WindowContainerTransaction) {
+            if (taskRepository
+                .getActiveNonMinimizedTasksOrderedFrontToBack(displayId).isNotEmpty()) {
+                return
+            }
+            val remainingMinimizedTasks = taskRepository.getMinimizedTasks(displayId)
+            if (remainingMinimizedTasks.isEmpty()) {
+                return
+            }
+            KtProtoLog.v(
+                ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                "DesktopTasksLimiter: removing leftover minimized tasks: $remainingMinimizedTasks")
+            remainingMinimizedTasks.forEach { taskIdToRemove ->
+                val taskToRemove = shellTaskOrganizer.getRunningTaskInfo(taskIdToRemove)
+                if (taskToRemove != null) {
+                    wct.removeTask(taskToRemove.token)
+                }
+            }
         }
     }
 

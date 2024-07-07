@@ -56,6 +56,7 @@ class FromAlternateBouncerTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
+    override val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,

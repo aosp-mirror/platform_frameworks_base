@@ -30,6 +30,7 @@ import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.chips.ui.binder.ChipChronometerBinder
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
@@ -133,6 +134,14 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                                     )
                                 }
                             }
+                        }
+                    }
+                }
+
+                if (SceneContainerFlag.isEnabled) {
+                    launch {
+                        viewModel.isHomeStatusBarAllowedByScene.collect {
+                            listener.onIsHomeStatusBarAllowedBySceneChanged(it)
                         }
                     }
                 }
@@ -259,4 +268,10 @@ interface StatusBarVisibilityChangeListener {
 
     /** Called when the status of the ongoing activity chip (active or not active) has changed. */
     fun onOngoingActivityStatusChanged(hasOngoingActivity: Boolean)
+
+    /**
+     * Called when the scene state has changed such that the home status bar is newly allowed or no
+     * longer allowed. See [CollapsedStatusBarViewModel.isHomeStatusBarAllowedByScene].
+     */
+    fun onIsHomeStatusBarAllowedBySceneChanged(isHomeStatusBarAllowedByScene: Boolean)
 }

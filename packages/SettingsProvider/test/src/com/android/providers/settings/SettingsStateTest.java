@@ -151,12 +151,14 @@ public class SettingsStateTest {
                                                 .setFlagName("flag1")
                                                 .setDefaultFlagValue("false")
                                                 .setIsReadWrite(true)
+                                                .setNamespace("test_namespace")
                                                 .build();
         AconfigdFlagInfo flag2 = AconfigdFlagInfo.newBuilder()
                                                 .setPackageName("com.android.flags")
                                                 .setFlagName("flag2")
                                                 .setDefaultFlagValue("true")
                                                 .setIsReadWrite(false)
+                                                .setNamespace("test_namespace")
                                                 .build();
         Map<String, AconfigdFlagInfo> flagInfoDefault = new HashMap<>();
 
@@ -1018,12 +1020,17 @@ public class SettingsStateTest {
                         .setFlagName("flag1")
                         .setDefaultFlagValue("false")
                         .setIsReadWrite(true)
+                        .setNamespace("test_namespace")
                         .build();
 
         flagInfoDefault.put(flag1.getFullFlagName(), flag1);
 
-        // server override
+        // not the right namespace
+        assertNull(
+                settingsState.getFlagOverrideToSync(
+                        "some_namespace/com.android.flags.flag1", "true", flagInfoDefault));
 
+        // server override
         settingsState.getFlagOverrideToSync(
                 "test_namespace/com.android.flags.flag1", "true", flagInfoDefault);
         assertEquals("com.android.flags", flag1.getPackageName());
@@ -1079,21 +1086,45 @@ public class SettingsStateTest {
                         .setIsReadWrite(false)
                         .build());
 
+        String bulkSyncMarker = "aconfigd_marker/bulk_synced";
+        String bulkSyncCounter =
+                "core_experiments_team_internal/" +
+                "BulkSyncTriggerCounterFlag__bulk_sync_trigger_counter";
+
         synchronized (lock) {
-            settingsState.insertSettingLocked(
-                    "aconfigd_marker/bulk_synced", "false", null, false, "aconfig");
+            settingsState.insertSettingLocked(bulkSyncMarker, "0", null, false, "aconfig");
+            settingsState.insertSettingLocked(bulkSyncCounter, "1", null, false,
+                    "com.google.android.platform.core_experiments_team_internal");
 
             // first bulk sync
             ProtoOutputStream requests = settingsState.handleBulkSyncToNewStorage(flags);
             assertTrue(requests != null);
             String value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
-            assertEquals("true", value);
+            assertEquals("1", value);
 
             // send time should no longer bulk sync
             requests = settingsState.handleBulkSyncToNewStorage(flags);
-            assertTrue(requests == null);
+            assertNull(requests);
             value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
-            assertEquals("true", value);
+            assertEquals("1", value);
+
+            // won't sync if the marker is string
+            settingsState.insertSettingLocked(bulkSyncMarker, "true", null, false, "aconfig");
+            settingsState.insertSettingLocked(bulkSyncCounter, "0", null, false,
+                    "com.google.android.platform.core_experiments_team_internal");
+            requests = settingsState.handleBulkSyncToNewStorage(flags);
+            assertNull(requests);
+            value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
+            assertEquals("0", value);
+
+            // won't sync if the marker and counter value are the same
+            settingsState.insertSettingLocked(bulkSyncMarker, "1", null, false, "aconfig");
+            settingsState.insertSettingLocked(bulkSyncCounter, "1", null, false,
+                    "com.google.android.platform.core_experiments_team_internal");
+            requests = settingsState.handleBulkSyncToNewStorage(flags);
+            assertNull(requests);
+            value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
+            assertEquals("1", value);
         }
     }
 
@@ -1107,21 +1138,34 @@ public class SettingsStateTest {
                 SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
 
         Map<String, AconfigdFlagInfo> flags = new HashMap<>();
+        String bulkSyncMarker = "aconfigd_marker/bulk_synced";
+        String bulkSyncCounter =
+                "core_experiments_team_internal/" +
+                "BulkSyncTriggerCounterFlag__bulk_sync_trigger_counter";
         synchronized (lock) {
             settingsState.insertSettingLocked("aconfigd_marker/bulk_synced",
                     "true", null, false, "aconfig");
 
             // when aconfigd is off, should change the marker to false
             ProtoOutputStream requests = settingsState.handleBulkSyncToNewStorage(flags);
-            assertTrue(requests == null);
+            assertNull(requests);
             String value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
-            assertEquals("false", value);
+            assertEquals("0", value);
 
             // marker started with false value, after call, it should remain false
             requests = settingsState.handleBulkSyncToNewStorage(flags);
-            assertTrue(requests == null);
+            assertNull(requests);
             value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
-            assertEquals("false", value);
+            assertEquals("0", value);
+
+            // won't sync
+            settingsState.insertSettingLocked(bulkSyncMarker, "0", null, false, "aconfig");
+            settingsState.insertSettingLocked(bulkSyncCounter, "1", null, false,
+                    "com.google.android.platform.core_experiments_team_internal");
+            requests = settingsState.handleBulkSyncToNewStorage(flags);
+            assertNull(requests);
+            value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
+            assertEquals("0", value);
         }
     }
 
@@ -1164,6 +1208,7 @@ public class SettingsStateTest {
                         .setFlagName("flag1")
                         .setDefaultFlagValue("false")
                         .setIsReadWrite(true)
+                        .setNamespace("test_namespace")
                         .build();
         flagInfoDefault.put(flag1.getFullFlagName(), flag1);
 
@@ -1186,6 +1231,7 @@ public class SettingsStateTest {
                         .setFlagName("flag2")
                         .setDefaultFlagValue("false")
                         .setIsReadWrite(true)
+                        .setNamespace("test_namespace")
                         .build();
         flagInfoDefault.put(flag2.getFullFlagName(), flag2);
         synchronized (lock) {
@@ -1207,6 +1253,7 @@ public class SettingsStateTest {
                         .setFlagName("flag3")
                         .setDefaultFlagValue("false")
                         .setIsReadWrite(false)
+                        .setNamespace("test_namespace")
                         .build();
         flagInfoDefault.put(flag3.getFullFlagName(), flag3);
         synchronized (lock) {

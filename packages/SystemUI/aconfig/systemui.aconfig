@@ -146,6 +146,16 @@ flag {
 }
 
 flag {
+   name: "notification_transparent_header_fix"
+   namespace: "systemui"
+   description: "fix the transparent group header issue for async header inflation."
+   bug: "340161724"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "pss_app_selector_abrupt_exit_fix"
    namespace: "systemui"
    description: "Fixes the app selector abruptly disappearing without an animation, when the"
@@ -521,6 +531,16 @@ flag {
     namespace: "systemui"
     description: "Switches to the new volume panel (without Slices)."
     bug: "202262476"
+}
+
+flag {
+    name: "use_volume_controller"
+    namespace: "systemui"
+    description: "Adds Volume Controller signals to the AudioRepository to update volume"
+    bug: "349348461"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -1032,25 +1052,10 @@ flag {
 }
 
 flag {
-  name: "glanceable_hub_gesture_handle"
-  namespace: "systemui"
-  description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
-  bug: "339667383"
-}
-
-flag {
   name: "glanceable_hub_allow_keyguard_when_dreaming"
   namespace: "systemui"
   description: "Allows users to exit dream to keyguard with glanceable hub enabled"
   bug: "343505271"
-}
-
-
-flag {
-  name: "new_touchpad_gestures_tutorial"
-  namespace: "systemui"
-  description: "Enables new interactive tutorial for learning touchpad gestures"
-  bug: "309928033"
 }
 
 flag {
@@ -1121,4 +1126,24 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "translucent_occluding_activity_fix"
+  namespace: "systemui"
+  description: "Fixes occlusion animation for transluent activities"
+  bug: "303010980"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+   namespace: "systemui"
+   name: "fetch_bookmarks_xml_keyboard_shortcuts"
+   description: "Fetches application launch keyboard shortcuts from system server rather than building a hardcoded list."
+   bug: "312452252"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
 }

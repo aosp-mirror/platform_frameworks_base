@@ -103,6 +103,8 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> 检测到此屏幕截图。"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> 及其他打开的应用检测到此屏幕截图。"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"添加到备注中"</string>
+    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
+    <skip />
     <string name="screenrecord_title" msgid="4257171601439507792">"屏幕录制器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在处理屏幕录制视频"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持续显示屏幕录制会话通知"</string>
@@ -132,6 +134,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"将停止录制&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;的内容"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"正在共享屏幕"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +142,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"将停止分享&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;的内容"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"正在投放屏幕"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +196,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"已通过面孔识别解锁。点按即可继续。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"识别出面孔。点按即可继续。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"识别出面孔。按下解锁图标即可继续。"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"已经过身份验证"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"取消身份验证"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"更多选项"</string>
@@ -472,6 +478,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"添加更多微件"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"长按即可自定义微件"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"自定义微件"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"已停用微件的应用图标"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"代表正在安装的微件的应用图标"</string>
     <string name="edit_widget" msgid="9030848101135393954">"修改微件"</string>
@@ -549,12 +557,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即开始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"没有通知"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"没有新通知"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (5720882373252389461) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (4260536236101821273) -->
-    <skip />
-    <!-- no translation found for go_to_adaptive_notification_settings (2423690125178298479) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"自适应通知功能已开启"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"现在，当在短时间内收到许多通知时，您的设备会调低音量并减少屏幕上的弹出式窗口，最多持续两分钟。"</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"关闭"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"解锁即可查看旧通知"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"此设备由您的家长管理"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"贵单位拥有此设备，且可能会监控网络流量"</string>
@@ -1352,7 +1357,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”正在使用（<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>）"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”最近使用过（<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>）"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"系统"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"系统控件"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"系统应用"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"多任务处理"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"最近用过的应用"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"分屏"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"输入"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"应用快捷键"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"无障碍功能"</string>
@@ -1369,14 +1378,10 @@
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
-    <!-- no translation found for touchpad_back_gesture_action_title (7199067250654332735) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_guidance (4222430588599527272) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_animation_content_description (2646107450922379918) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_screen_animation_content_description (4036267494237748710) -->
-    <skip />
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"返回"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"如要返回，请使用三根手指在触控板上的任意位置左滑或右滑。"</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"触控板，其中显示了三根手指右移和左移"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"设备屏幕，其中显示了返回手势的动画"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"键盘背光"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"第 %1$d 级，共 %2$d 级"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"家居控制"</string>

@@ -36,7 +36,7 @@ import androidx.annotation.BinderThread;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.Preconditions;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -352,6 +352,7 @@ public class PipController implements ConfigurationChangeListener,
         mPipBoundsAlgorithm.dump(pw, innerPrefix);
         mPipBoundsState.dump(pw, innerPrefix);
         mPipDisplayLayoutState.dump(pw, innerPrefix);
+        mPipTransitionState.dump(pw, innerPrefix);
     }
 
     /**

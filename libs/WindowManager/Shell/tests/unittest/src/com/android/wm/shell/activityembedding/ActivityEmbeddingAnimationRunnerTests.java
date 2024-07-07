@@ -21,10 +21,12 @@ import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 
 import static com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationRunner.calculateParentBounds;
+import static com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationRunner.shouldUseJumpCutForAnimation;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_TASK_FRAGMENT_DRAG_RESIZE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -40,6 +42,8 @@ import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.window.TransitionInfo;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -279,6 +283,18 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
 
         assertEquals(testString + ": Parent bounds must be " + parentBounds, parentBounds,
                 actualParentBounds);
+    }
+
+    @Test
+    public void testShouldUseJumpCutForAnimation() {
+        final Animation noopAnimation = new AlphaAnimation(0f, 1f);
+        assertTrue("Animation without duration should use jump cut.",
+                shouldUseJumpCutForAnimation(noopAnimation));
+
+        final Animation alphaAnimation = new AlphaAnimation(0f, 1f);
+        alphaAnimation.setDuration(100);
+        assertFalse("Animation with duration should not use jump cut.",
+                shouldUseJumpCutForAnimation(alphaAnimation));
     }
 
     @NonNull

@@ -24,6 +24,7 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
@@ -61,6 +62,13 @@ class SceneInteractorTest : SysuiTestCase() {
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
 
     private val underTest = kosmos.sceneInteractor
+
+    init {
+        // Init lazy Fixtures. Accessing them once makes sure that the singletons are initialized
+        // and therefore starts to collect StateFlows eagerly (when there are any).
+        kosmos.deviceUnlockedInteractor
+        kosmos.keyguardEnabledInteractor
+    }
 
     @Test
     fun allSceneKeys() {

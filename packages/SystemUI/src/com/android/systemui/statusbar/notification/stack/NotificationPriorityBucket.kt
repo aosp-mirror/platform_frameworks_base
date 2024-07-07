@@ -20,6 +20,10 @@ import android.annotation.IntDef
             BUCKET_PRIORITY_PEOPLE,
             BUCKET_PEOPLE,
             BUCKET_ALERTING,
+            BUCKET_NEWS,
+            BUCKET_SOCIAL,
+            BUCKET_RECS,
+            BUCKET_PROMO,
             BUCKET_SILENT
         ]
 )
@@ -35,6 +39,10 @@ annotation class PriorityBucket {
                 BUCKET_PRIORITY_PEOPLE,
                 BUCKET_PEOPLE,
                 BUCKET_ALERTING,
+                BUCKET_NEWS,
+                BUCKET_SOCIAL,
+                BUCKET_RECS,
+                BUCKET_PROMO,
                 BUCKET_SILENT,
             )
     }
@@ -49,4 +57,9 @@ const val BUCKET_FOREGROUND_SERVICE = 3
 const val BUCKET_PRIORITY_PEOPLE = 7
 const val BUCKET_PEOPLE = 4
 const val BUCKET_ALERTING = 5
+const val BUCKET_NEWS = 10
+const val BUCKET_SOCIAL = 11
+const val BUCKET_RECS = 12
+const val BUCKET_PROMO = 13
 const val BUCKET_SILENT = 6
+

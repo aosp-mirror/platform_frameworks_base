@@ -52,7 +52,7 @@ import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;

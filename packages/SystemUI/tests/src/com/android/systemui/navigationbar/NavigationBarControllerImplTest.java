@@ -49,6 +49,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.views.NavigationBar;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shared.recents.utilities.Utilities;

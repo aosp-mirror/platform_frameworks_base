@@ -101,9 +101,16 @@ constructor(
 
     fun headsUpRow(key: HeadsUpRowKey): HeadsUpRowInteractor =
         HeadsUpRowInteractor(key as HeadsUpRowRepository)
+
     fun elementKeyFor(key: HeadsUpRowKey) = (key as HeadsUpRowRepository).elementKey
+
     fun setHeadsUpAnimatingAway(animatingAway: Boolean) {
         headsUpRepository.setHeadsUpAnimatingAway(animatingAway)
+    }
+
+    /** Snooze the currently pinned HUN. */
+    fun snooze() {
+        headsUpRepository.snooze()
     }
 }
 

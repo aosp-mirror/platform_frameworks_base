@@ -17,6 +17,7 @@
 package com.android.systemui.touchpad.tutorial.ui.view
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -25,10 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.compose.theme.PlatformTheme
-import com.android.systemui.touchpad.tutorial.ui.GestureViewModelFactory
-import com.android.systemui.touchpad.tutorial.ui.HomeGestureTutorialViewModel
 import com.android.systemui.touchpad.tutorial.ui.Screen.BACK_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.Screen.HOME_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.Screen.TUTORIAL_SELECTION
@@ -47,6 +45,8 @@ constructor(
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent { PlatformTheme { TouchpadTutorialScreen(vm) { finish() } } }
+        // required to handle 3+ fingers on touchpad
+        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
     }
 
     override fun onResume() {
@@ -74,13 +74,8 @@ fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> U
         BACK_GESTURE ->
             BackGestureTutorialScreen(
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
-                onBack = { vm.goTo(TUTORIAL_SELECTION) }
+                onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )
-        HOME_GESTURE -> HomeGestureTutorialScreen()
+        HOME_GESTURE -> {}
     }
-}
-
-@Composable
-fun HomeGestureTutorialScreen() {
-    val vm = viewModel<HomeGestureTutorialViewModel>(factory = GestureViewModelFactory())
 }

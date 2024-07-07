@@ -22,6 +22,7 @@ import android.util.Log
 /** An empty logger for release builds. */
 object DebugLogger {
 
+    @JvmOverloads
     @JvmName("logcatMessage")
     inline fun Any.debugLog(
         enabled: Boolean = Build.IS_DEBUGGABLE,

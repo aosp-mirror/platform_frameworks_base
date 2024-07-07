@@ -103,6 +103,8 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ଏହି ସ୍କ୍ରିନସଟକୁ ଚିହ୍ନଟ କରିଛି।"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ଏବଂ ଅନ୍ୟ ଓପନ ଆପ୍ସ ଏହି ସ୍କ୍ରିନସଟକୁ ଚିହ୍ନଟ କରିଛି।"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"ନୋଟରେ ଯୋଗ କରନ୍ତୁ"</string>
+    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
+    <skip />
     <string name="screenrecord_title" msgid="4257171601439507792">"ସ୍କ୍ରିନ ରେକର୍ଡର"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ସ୍କ୍ରିନ ରେକର୍ଡିଂର ପ୍ରକ୍ରିୟାକରଣ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ଏକ ସ୍କ୍ରି‍ନ୍‍ ରେକର୍ଡ୍‍ ସେସନ୍‍ ପାଇଁ ଚାଲୁଥିବା ବିଜ୍ଞପ୍ତି"</string>
@@ -132,6 +134,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"ଆପଣ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;କୁ ରେକର୍ଡ କରିବା ବନ୍ଦ କରିବେ"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"ସ୍କ୍ରିନ ସେୟାର କରାଯାଉଛି"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +142,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"ଆପଣ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;କୁ ସେୟାର କରିବା ବନ୍ଦ କରିବେ"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"ସ୍କ୍ରିନ କାଷ୍ଟ କରାଯାଉଛି"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +196,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ଫେସ ମାଧ୍ୟମରେ ଅନଲକ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଦବାନ୍ତୁ।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ଫେସ ଚିହ୍ନଟ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଦବାନ୍ତୁ।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ଫେସ ଚିହ୍ନଟ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଅନଲକ ଆଇକନ ଦବାନ୍ତୁ।"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ପ୍ରମାଣୀକରଣକୁ ବାତିଲ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"ଅଧିକ ବିକଳ୍ପ"</string>
@@ -472,6 +478,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"ଅଧିକ ୱିଜେଟ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ୱିଜେଟଗୁଡ଼ିକୁ କଷ୍ଟମାଇଜ କରିବା ପାଇଁ ଅଧିକ ସମୟ ଦବାନ୍ତୁ"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ୱିଜେଟଗୁଡ଼ିକୁ କଷ୍ଟମାଇଜ କରନ୍ତୁ"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"ଅକ୍ଷମ କରାଯାଇଥିବା ୱିଜେଟ ପାଇଁ ଆପ ଆଇକନ"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"ଏକ ୱିଜେଟ ପାଇଁ ଆପ ଆଇକନକୁ ଇନଷ୍ଟଲ କରାଯାଉଛି"</string>
     <string name="edit_widget" msgid="9030848101135393954">"ୱିଜେଟକୁ ଏଡିଟ କରନ୍ତୁ"</string>
@@ -1349,7 +1357,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଦ୍ୱାରା ବ୍ୟବହାର କରାଯାଉଛି (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ଏବେ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ଦ୍ୱାରା ବ୍ୟବହାର କରାଯାଉଛି"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"ସିଷ୍ଟମ"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"ସିଷ୍ଟମ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"ସିଷ୍ଟମ ଆପ୍ସ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ମଲ୍ଟିଟାସ୍କିଂ"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"ବର୍ତ୍ତମାନର ଆପ୍ସ"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ଇନପୁଟ"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ଆପ ସର୍ଟକଟ"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ଆକ୍ସେସିବିଲିଟୀ"</string>

@@ -156,7 +156,7 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"モバイル ネットワーク セキュリティ"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"暗号化、暗号化されていないネットワークに関する通知"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"デバイス ID へのアクセスが発生しました"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に付近のネットワークでお使いのデバイスの一意の ID（IMSI または IMEI）が記録されました"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に、お使いのデバイスの一意の ID（IMSI または IMEI）が付近のネットワークで記録されました。"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に、お使いのデバイスの一意の ID（IMSI または IMEI）が付近のネットワークで記録されました。\n\nつまり、あなたの位置情報、アクティビティ、身元などが記録されたことになります。これはよくある事象ですが、プライバシーを保護したいユーザーにとっては問題となる可能性があります。"</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"暗号化されたネットワーク（<xliff:g id="NETWORK_NAME">%1$s</xliff:g>）に接続しました"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> の SIM 接続のセキュリティが強化されました"</string>
@@ -265,6 +265,8 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"バグレポート"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"セッションを終了"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"画面の保存"</string>
+    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
+    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"バグレポート"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"現在のデバイスの状態に関する情報が収集され、その内容がメールで送信されます。バグレポートが開始してから送信可能な状態となるまでには多少の時間がかかりますのでご了承ください。"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"対話型レポート"</string>
@@ -1765,12 +1767,9 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
-    <skip />
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"この機能は、ユーザー補助機能ボタンを次回タップした時に利用できるようになります"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"この機能は、このショートカットを次回使用した時に利用できるようになります。2 本の指で画面の下部から上にスワイプし、素早く離してください。"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"この機能は、このショートカットを次回使用した時に利用できるようになります。3 本の指で画面の下部から上にスワイプし、素早く離してください。"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"拡大"</string>
     <string name="user_switched" msgid="7249833311585228097">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>に切り替えています…"</string>
@@ -2434,12 +2433,21 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"仕組み"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"保留中..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"指紋認証をもう一度設定してください"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> は正常に機能せず、削除されました"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> と <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> は正常に機能せず、削除されました"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> が正常に機能せず、削除されました。指紋認証でスマートフォンのロックを解除するには、設定し直してください。"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> と <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> が正常に機能せず、削除されました。指紋認証でスマートフォンのロックを解除するには、設定し直してください。"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
+    <skip />
     <string name="face_dangling_notification_title" msgid="947852541060975473">"顔認証をもう一度設定してください"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"顔モデルが正常に機能せず、削除されました。顔認証でスマートフォンのロックを解除するには、設定し直してください。"</string>
+    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
+    <skip />
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"設定"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"後で"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> さんのアラーム"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"ユーザーを切り替え"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"ミュート"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"音声をミュートするにはタップします"</string>
 </resources>

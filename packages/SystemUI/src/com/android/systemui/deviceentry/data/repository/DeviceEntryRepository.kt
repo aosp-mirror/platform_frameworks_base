@@ -39,6 +39,12 @@ interface DeviceEntryRepository {
      * the lockscreen.
      */
     val isBypassEnabled: StateFlow<Boolean>
+
+    /**
+     * Reports, to system server, that the user is "present" now. This is a signal that system
+     * server uses to know that the device has been entered.
+     */
+    suspend fun reportUserPresent()
 }
 
 /** Encapsulates application state for device entry. */
@@ -78,6 +84,13 @@ constructor(
                 SharingStarted.Eagerly,
                 initialValue = keyguardBypassController.bypassEnabled,
             )
+
+    override suspend fun reportUserPresent() {
+        withContext(backgroundDispatcher) {
+            val selectedUserId = userRepository.selectedUser.value.userInfo.id
+            lockPatternUtils.userPresent(selectedUserId)
+        }
+    }
 
     companion object {
         private const val TAG = "DeviceEntryRepositoryImpl"

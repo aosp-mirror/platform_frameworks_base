@@ -103,6 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"ಈ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು <xliff:g id="APPNAME">%1$s</xliff:g> ಪತ್ತೆಹಚ್ಚಿದೆ."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ಹಾಗೂ ತೆರೆದಿರುವ ಇತರ ಆ್ಯಪ್‌ಗಳು ಈ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪತ್ತೆಹಚ್ಚಿವೆ."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"ಟಿಪ್ಪಣಿಗೆ ಸೇರಿಸಿ"</string>
+    <string name="backlinks_include_link" msgid="4562093591148248158">"ಲಿಂಕ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡರ್"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೆಶನ್‌ಗಾಗಿ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ನೋಟಿಫಿಕೇಶನ್"</string>
@@ -132,6 +133,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"ಇದರಿಂದ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ನ ಕಂಟೆಂಟ್ ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡುವುದು ನಿಂತುಹೋಗುತ್ತದೆ"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"ಪರದೆಯನ್ನು ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +141,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"ಇದರಿಂದ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ನ ಕಂಟೆಂಟ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುವುದು ನಿಂತುಹೋಗುತ್ತದೆ"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"ಪರದೆಯನ್ನು ಬಿತ್ತರಿಸಲಾಗುತ್ತಿದೆ"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ಮುಖವನ್ನು ಬಳಸಿ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಅನ್‌ಲಾಕ್ ಐಕಾನ್ ಅನ್ನು ಒತ್ತಿ."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"ಮುಖವನ್ನು ಬಳಸಿ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ದೃಢೀಕರಣವನ್ನು ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"ಇನ್ನಷ್ಟು ಆಯ್ಕೆಗಳು"</string>
@@ -472,6 +476,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"ಹೆಚ್ಚಿನ ವಿಜೆಟ್‌ಗಳನ್ನು ಸೇರಿಸಿ"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ದೀರ್ಘಕಾಲ ಒತ್ತಿರಿ"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾದ ವಿಜೆಟ್‌ಗಾಗಿ ಆ್ಯಪ್ ಐಕಾನ್"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾದ ವಿಜೆಟ್‌ಗಾಗಿ ಆ್ಯಪ್ ಐಕಾನ್"</string>
     <string name="edit_widget" msgid="9030848101135393954">"ವಿಜೆಟ್ ಅನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
@@ -1349,7 +1355,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನಿಂದ ಬಳಕೆಯಲ್ಲಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_NAME">%1$s</xliff:g> ಇದನ್ನು ಬಳಸಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"ಸಿಸ್ಟಂ"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"ಸಿಸ್ಟಂ ನಿಯಂತ್ರಣಗಳು"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"ಸಿಸ್ಟಂ ಆ್ಯಪ್‌ಗಳು"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ಮಲ್ಟಿಟಾಸ್ಕಿಂಗ್"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳು"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ಇನ್‌ಪುಟ್"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ಆ್ಯಪ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ"</string>

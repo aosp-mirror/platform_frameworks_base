@@ -16,15 +16,22 @@
 
 package com.android.internal.accessibility.dialog;
 
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
+import android.provider.Flags;
+
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.accessibility.common.ShortcutConstants;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -32,9 +39,13 @@ import java.util.stream.IntStream;
 
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityTargetTest {
+    @Rule
+    public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     private static final int[] EXPECTED_TYPES = { HARDWARE, SOFTWARE };
+    private static final int[] EXPECTED_TYPES_GESTURE = { HARDWARE, SOFTWARE, GESTURE };
 
     @Test
+    @DisableFlags(Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
     public void isRecognizedShortcutType_expectedType_isTrue() {
         for (int type : EXPECTED_TYPES) {
             assertThat(AccessibilityTarget.isRecognizedShortcutType(type)).isTrue();
@@ -42,10 +53,35 @@ public class AccessibilityTargetTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
     public void isRecognizedShortcutType_notExpectedType_isFalse() {
         for (int type: ShortcutConstants.USER_SHORTCUT_TYPES) {
             if (IntStream.of(EXPECTED_TYPES).noneMatch(x -> x == type)) {
                 assertThat(AccessibilityTarget.isRecognizedShortcutType(type)).isFalse();
+            }
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void isRecognizedShortcutType_expectedType_gestureIncluded_isTrue() {
+        for (int type : EXPECTED_TYPES_GESTURE) {
+            if (!AccessibilityTarget.isRecognizedShortcutType(type)) {
+                throw new AssertionError(
+                        "Shortcut type " + type + " should be recognized");
+            }
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void isRecognizedShortcutType_notExpectedType_gestureIncluded_isFalse() {
+        for (int type: ShortcutConstants.USER_SHORTCUT_TYPES) {
+            if (IntStream.of(EXPECTED_TYPES_GESTURE).noneMatch(x -> x == type)) {
+                if (AccessibilityTarget.isRecognizedShortcutType(type)) {
+                    throw new AssertionError(
+                            "Shortcut type " + type + " should not be recognized");
+                }
             }
         }
     }

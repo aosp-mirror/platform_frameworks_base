@@ -335,7 +335,7 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.protolog.LegacyProtoLogImpl;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -3743,6 +3743,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         null /* trigger */, null /* remote */, null /* disp */);
             }
             mCurrentUserId = newUserId;
+            mDisplayWindowSettingsProvider.setOverrideSettingsForUser(newUserId);
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettings(mRoot);
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
 
@@ -5479,6 +5481,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // DisplayWindowSettings are applied. In addition, wide-color/hdr/isTouchDevice also
             // affect the Configuration.
             mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);
+            // Per-user display settings may leave outdated settings after user switches, especially
+            // during reboots starting with the default user without setCurrentUser called.
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettings(mRoot);
         }
     }
 
@@ -8353,6 +8358,26 @@ public class WindowManagerService extends IWindowManager.Stub
         public Context getTopFocusedDisplayUiContext() {
             synchronized (mGlobalLock) {
                 return mRoot.getTopFocusedDisplayContent().getDisplayUiContext();
+            }
+        }
+
+        @Override
+        public void setNonDefaultDisplayRotation(int displayId, @Surface.Rotation int rotation,
+                @NonNull String caller) {
+            if (displayId == Display.DEFAULT_DISPLAY || displayId == Display.INVALID_DISPLAY) {
+                Slog.w(TAG, "Cannot set rotation for display with id: " + displayId);
+                return;
+            }
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                if (displayContent == null) {
+                    Slog.w(TAG, "Cannot set rotation for display " + displayId
+                            + " due to missing DisplayContent");
+                    return;
+                }
+                displayContent.getDisplayRotation().setUserRotation(
+                        displayContent.getDisplayRotation().getUserRotationMode(), rotation,
+                        caller);
             }
         }
 

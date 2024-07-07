@@ -25,6 +25,9 @@ import static android.hardware.display.ColorDisplayManager.COLOR_MODE_NATURAL;
 import static android.hardware.display.ColorDisplayManager.COLOR_MODE_SATURATED;
 import static android.hardware.display.ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MAX;
 import static android.hardware.display.ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MIN;
+import static android.os.UserHandle.USER_SYSTEM;
+import static android.os.UserHandle.getCallingUserId;
+import static android.os.UserManager.isVisibleBackgroundUsersEnabled;
 
 import static com.android.server.display.color.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
 
@@ -80,6 +83,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.accessibility.Flags;
 import com.android.server.display.feature.DisplayManagerFlags;
+import com.android.server.pm.UserManagerService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
@@ -186,9 +190,14 @@ public final class ColorDisplayService extends SystemService {
 
     private final Object mCctTintApplierLock = new Object();
 
+    private final boolean mVisibleBackgroundUsersEnabled;
+    private final UserManagerService mUserManager;
+
     public ColorDisplayService(Context context) {
         super(context);
         mHandler = new TintHandler(DisplayThread.get().getLooper());
+        mVisibleBackgroundUsersEnabled = isVisibleBackgroundUsersEnabled();
+        mUserManager = UserManagerService.getInstance();
     }
 
     @Override
@@ -1745,6 +1754,9 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public void setColorMode(int colorMode) {
             setColorMode_enforcePermission();
+
+            enforceValidCallingUser("setColorMode");
+
             final long token = Binder.clearCallingIdentity();
             try {
                 setColorModeInternal(colorMode);
@@ -1784,6 +1796,9 @@ public final class ColorDisplayService extends SystemService {
             if (!hasTransformsPermission && !hasLegacyPermission) {
                 throw new SecurityException("Permission required to set display saturation level");
             }
+
+            enforceValidCallingUser("setSaturationLevel");
+
             final long token = Binder.clearCallingIdentity();
             try {
                 setSaturationLevelInternal(level);
@@ -1812,6 +1827,8 @@ public final class ColorDisplayService extends SystemService {
         public boolean setAppSaturationLevel(String packageName, int level) {
             super.setAppSaturationLevel_enforcePermission();
 
+            enforceValidCallingUser("setAppSaturationLevel");
+
             final String callingPackageName = LocalServices.getService(PackageManagerInternal.class)
                     .getNameForUid(Binder.getCallingUid());
             final long token = Binder.clearCallingIdentity();
@@ -1838,6 +1855,9 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public boolean setNightDisplayActivated(boolean activated) {
             setNightDisplayActivated_enforcePermission();
+
+            enforceValidCallingUser("setNightDisplayActivated");
+
             final long token = Binder.clearCallingIdentity();
             try {
                 mNightDisplayTintController.setActivated(activated);
@@ -1861,6 +1881,9 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public boolean setNightDisplayColorTemperature(int temperature) {
             setNightDisplayColorTemperature_enforcePermission();
+
+            enforceValidCallingUser("setNightDisplayColorTemperature");
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return mNightDisplayTintController.setColorTemperature(temperature);
@@ -1883,6 +1906,9 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public boolean setNightDisplayAutoMode(int autoMode) {
             setNightDisplayAutoMode_enforcePermission();
+
+            enforceValidCallingUser("setNightDisplayAutoMode");
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return setNightDisplayAutoModeInternal(autoMode);
@@ -1917,6 +1943,9 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public boolean setNightDisplayCustomStartTime(Time startTime) {
             setNightDisplayCustomStartTime_enforcePermission();
+
+            enforceValidCallingUser("setNightDisplayCustomStartTime");
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return setNightDisplayCustomStartTimeInternal(startTime);
@@ -1939,6 +1968,9 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public boolean setNightDisplayCustomEndTime(Time endTime) {
             setNightDisplayCustomEndTime_enforcePermission();
+
+            enforceValidCallingUser("setNightDisplayCustomEndTime");
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return setNightDisplayCustomEndTimeInternal(endTime);
@@ -1961,6 +1993,9 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public boolean setDisplayWhiteBalanceEnabled(boolean enabled) {
             setDisplayWhiteBalanceEnabled_enforcePermission();
+
+            enforceValidCallingUser("setDisplayWhiteBalanceEnabled");
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return setDisplayWhiteBalanceSettingEnabled(enabled);
@@ -1993,6 +2028,9 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public boolean setReduceBrightColorsActivated(boolean activated) {
             setReduceBrightColorsActivated_enforcePermission();
+
+            enforceValidCallingUser("setReduceBrightColorsActivated");
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return setReduceBrightColorsActivatedInternal(activated);
@@ -2025,6 +2063,9 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public boolean setReduceBrightColorsStrength(int strength) {
             setReduceBrightColorsStrength_enforcePermission();
+
+            enforceValidCallingUser("setReduceBrightColorsStrength");
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return setReduceBrightColorsStrengthInternal(strength);
@@ -2063,5 +2104,33 @@ public final class ColorDisplayService extends SystemService {
                 Binder.restoreCallingIdentity(token);
             }
         }
+    }
+
+    /**
+     * This method validates whether the calling user is allowed to set display's color transform
+     * on a device that enables visible background users.
+     * Only system or current user or the user that belongs to the same profile group as the current
+     * user is permitted to set the color transform.
+     */
+    private void enforceValidCallingUser(String method) {
+        if (!mVisibleBackgroundUsersEnabled) {
+            return;
+        }
+
+        int callingUserId = getCallingUserId();
+        if (callingUserId == USER_SYSTEM || callingUserId == mCurrentUser) {
+            return;
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            if (mUserManager.isSameProfileGroup(callingUserId, mCurrentUser)) {
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+
+        throw new SecurityException("Calling user id: " + callingUserId
+                + ", is not permitted to use Method " + method + "().");
     }
 }
