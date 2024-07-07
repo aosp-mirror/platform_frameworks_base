@@ -103,6 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g>এ এই স্ক্ৰীনশ্বটটো চিনাক্ত কৰিছে।"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> আৰু আন খোলা এপ্‌সমূহে এই স্ক্ৰীনশ্বটটো চিনাক্ত কৰিছে।"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"টোকাত যোগ দিয়ক"</string>
+    <string name="backlinks_include_link" msgid="4562093591148248158">"লিংক অন্তৰ্ভুক্ত কৰক"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"স্ক্ৰীন ৰেকৰ্ডাৰ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"স্ক্রীন ৰেকৰ্ডিঙৰ প্ৰক্ৰিয়াকৰণ হৈ আছে"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"স্ক্রীন ৰেকৰ্ডিং ছেশ্বন চলি থকা সময়ত পোৱা জাননী"</string>
@@ -132,6 +133,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"আপুনি &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ৰেকৰ্ড কৰা বন্ধ কৰিব"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"স্ক্ৰীন শ্বেয়াৰ কৰি থকা হৈছে"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +141,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"আপুনি &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; শ্বেয়াৰ কৰা বন্ধ কৰিব"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"স্ক্ৰীন কাষ্ট কৰি থকা হৈছে"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা হৈছে। অব্যাহত ৰাখিবলৈ টিপক।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"মুখাৱয়ব চিনাক্ত কৰা হৈছে। অব্যাহত ৰাখিবলৈ টিপক।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"মুখাৱয়ব চিনাক্ত কৰা হৈছে। অব্যাহত ৰাখিবলৈ আনলক কৰক চিহ্নটোত টিপক।"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা হৈছে। অব্যাহত ৰাখিবলৈ টিপক।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ বাতিল কৰক"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"অধিক বিকল্প"</string>
@@ -472,6 +476,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"অধিক ৱিজেট যোগ দিয়ক"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ৱিজেট কাষ্টমাইজ কৰিবলৈ দীঘলীয়াকৈ টিপক"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ৱিজেট কাষ্টমাইজ কৰক"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"অক্ষম কৰা ৱিজেটৰ বাবে এপৰ চিহ্ন"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"ইনষ্টল কৰি থকা এটা ৱিজেটৰ বাবে এপৰ চিহ্ন"</string>
     <string name="edit_widget" msgid="9030848101135393954">"ৱিজেট সম্পাদনা কৰক"</string>
@@ -550,7 +556,7 @@
     <string name="empty_shade_text" msgid="8935967157319717412">"কোনো জাননী নাই"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"কোনো নতুন জাননী নাই"</string>
     <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"অভিযোজিত জাননী অন কৰা আছে"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"আপোনাৰ ডিভাইচে এতিয়া ভলিউম হ্ৰাস কৰে আৰু আপুনি কম সময়ৰ ভিতৰত বহুতো জাননী পালে দুই মিনিটলৈকে স্ক্ৰীনত ওলোৱা পপ-আপ হ্ৰাস কৰে।"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"আপোনাৰ ডিভাইচে এতিয়া ভলিউম কমায়, কম সময়ৰ ভিতৰত বহুতো জাননী পালে ২ মিনিটলৈকে স্ক্ৰীনত ওলোৱা পপ-আপ কমায়।"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"অফ কৰক"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"পুৰণি জাননী চবলৈ আনলক কৰক"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"এই ডিভাইচটো আপোনাৰ অভিভাৱকে পৰিচালনা কৰে"</string>
@@ -1349,7 +1355,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)এ ব্যৱহাৰ কৰি আছে"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"শেহতীয়াকৈ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)এ ব্যৱহাৰ কৰিছে"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"ছিষ্টেম"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"ছিষ্টেমৰ নিয়ন্ত্ৰণ"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"ছিষ্টেম এপ্‌"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"মাল্টিটাস্কিং"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"শেহতীয়া এপ্‌সমূহ"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"বিভাজিত স্ক্ৰীন"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ইনপুট"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"এপ্ শ্বৰ্টকাটসমূহ"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"সাধ্য সুবিধা"</string>

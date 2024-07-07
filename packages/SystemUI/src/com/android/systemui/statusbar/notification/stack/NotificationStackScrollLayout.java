@@ -2443,8 +2443,9 @@ public class NotificationStackScrollLayout
         return count;
     }
 
-    private void updateContentHeight() {
-        final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mMinimumPaddings;
+    @VisibleForTesting
+    void updateContentHeight() {
+        final float scrimTopPadding = getScrimTopPaddingOrZero();
         final int shelfIntrinsicHeight = mShelf != null ? mShelf.getIntrinsicHeight() : 0;
         final int footerIntrinsicHeight = mFooterView != null ? mFooterView.getIntrinsicHeight() : 0;
         final float height =
@@ -2949,7 +2950,7 @@ public class NotificationStackScrollLayout
         return view.getHeight();
     }
 
-    public int getPositionInLinearLayout(View requestedView) {
+    private int getPositionInLinearLayout(View requestedView) {
         ExpandableNotificationRow childInGroup = null;
         ExpandableNotificationRow requestedRow = null;
         if (isChildInGroup(requestedView)) {
@@ -2958,7 +2959,7 @@ public class NotificationStackScrollLayout
             childInGroup = (ExpandableNotificationRow) requestedView;
             requestedView = requestedRow = childInGroup.getNotificationParent();
         }
-        final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mMinimumPaddings;
+        final float scrimTopPadding = getScrimTopPaddingOrZero();
         int position = (int) scrimTopPadding;
         int visibleIndex = -1;
         ExpandableView lastVisibleChild = null;
@@ -2986,6 +2987,17 @@ public class NotificationStackScrollLayout
             }
         }
         return 0;
+    }
+
+    /**
+     * Returns the top scrim padding, or zero if the SceneContainer flag is enabled.
+     */
+    private int getScrimTopPaddingOrZero() {
+        if (SceneContainerFlag.isEnabled()) {
+            // the scrim padding is set on the notification placeholder
+            return 0;
+        }
+        return mAmbientState.isOnKeyguard() ? 0 : mMinimumPaddings;
     }
 
     @Override

@@ -23,6 +23,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.keyboard.shortcut.shortcutHelperViewModel
+import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testDispatcher
@@ -162,5 +163,35 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             viewModel.onViewClosed()
 
             assertThat(sysUiState.isFlagEnabled(SYSUI_STATE_SHORTCUT_HELPER_SHOWING)).isFalse()
+        }
+
+    @Test
+    fun shortcutsUiState_inactiveByDefault() =
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            assertThat(uiState).isEqualTo(ShortcutsUiState.Inactive)
+        }
+
+    @Test
+    fun shortcutsUiState_featureActive_emitsActive() =
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+
+            assertThat(uiState).isInstanceOf(ShortcutsUiState.Active::class.java)
+        }
+
+    @Test
+    fun shortcutsUiState_featureActive_emitsActiveWithFirstCategorySelectedByDefault() =
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+
+            val activeUiState = uiState as ShortcutsUiState.Active
+            assertThat(activeUiState.defaultSelectedCategory)
+                .isEqualTo(activeUiState.shortcutCategories.first().type)
         }
 }

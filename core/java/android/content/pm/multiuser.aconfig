@@ -151,6 +151,26 @@ flag {
 }
 
 flag {
+    name: "fix_get_user_property_cache"
+    namespace: "multiuser"
+    description: "Cache is not optimised for getUserProperty for values below 0, eg. UserHandler.USER_NULL or UserHandle.USER_ALL"
+    bug: "350416200"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "cache_quiet_mode_state"
+    namespace: "multiuser"
+    description: "Optimise quiet mode state retrieval"
+    bug: "350420769"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "cache_user_serial_number"
     namespace: "multiuser"
     description: "Optimise user serial number retrieval"
@@ -159,7 +179,6 @@ flag {
         purpose: PURPOSE_BUGFIX
   }
 }
-
 
 # This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
 flag {

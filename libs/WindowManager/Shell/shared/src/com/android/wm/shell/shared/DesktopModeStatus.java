@@ -16,21 +16,19 @@
 
 package com.android.wm.shell.shared;
 
-import static android.provider.Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES;
-
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.SystemProperties;
-import android.provider.Settings;
-import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 
 /**
  * Constants for desktop mode feature
  */
+// TODO(b/237575897): Move this file to the `com.android.wm.shell.shared.desktopmode` package
 public class DesktopModeStatus {
 
     private static final String TAG = "DesktopModeStatus";
@@ -178,19 +176,7 @@ public class DesktopModeStatus {
     public static boolean canEnterDesktopMode(@NonNull Context context) {
         if (!isDeviceEligibleForDesktopMode(context)) return false;
 
-        // If dev option has ever been manually toggled by the user, return its value
-        // TODO(b/348193756) : Move the logic for DW override based on toggle overides to a common
-        //  infrastructure and add caching for the computation
-        int defaultOverrideState = -1;
-        int toggleState = Settings.Global.getInt(context.getContentResolver(),
-                DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES, defaultOverrideState);
-        if (toggleState != defaultOverrideState) {
-            Log.d(TAG, "Using Desktop mode dev option overridden state");
-            return toggleState != 0;
-        }
-
-        // Return Desktop windowing flag value
-        return isDesktopModeFlagEnabled();
+        return DesktopModeFlags.DESKTOP_WINDOWING_MODE.isEnabled(context);
     }
 
     /**

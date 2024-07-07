@@ -2916,6 +2916,23 @@ public abstract class Context {
             @Nullable String initialData, @Nullable  Bundle initialExtras);
 
     /**
+     * Similar to above but takes array of names of permissions that a receiver must hold in order
+     * to receive your broadcast. If empty, no permissions are required.
+     *
+     * @see #sendOrderedBroadcastAsUser(Intent, UserHandle, String,
+     *       BroadcastReceiver, Handler, int, String, Bundle)
+     * @hide
+     */
+    @SuppressWarnings("HiddenAbstractMethod")
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+    public void sendOrderedBroadcastAsUserMultiplePermissions(Intent intent,
+            UserHandle user, String[] receiverPermissions, int appOp, Bundle options,
+            BroadcastReceiver resultReceiver, Handler scheduler, int initialCode,
+            String initialData, Bundle initialExtras) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Version of
      * {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String,
      * Bundle)} that allows you to specify the App Op to enforce restrictions on which receivers
@@ -2993,6 +3010,21 @@ public abstract class Context {
             @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
             @Nullable String initialData, @Nullable Bundle initialExtras,
             @Nullable Bundle options) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Like {@link #sendOrderedBroadcast(Intent, String, String, BroadcastReceiver, Handler, int,
+     * String, Bundle)}, but also allows specification of a list of multiple permissions.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ORDERED_BROADCAST_MULTIPLE_PERMISSIONS)
+    @SystemApi
+    public void sendOrderedBroadcastMultiplePermissions(
+            @NonNull Intent intent, @NonNull String[] receiverPermissions,
+            @Nullable String receiverAppOp, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras, @Nullable Bundle options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

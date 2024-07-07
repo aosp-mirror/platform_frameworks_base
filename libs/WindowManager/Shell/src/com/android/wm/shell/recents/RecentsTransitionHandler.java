@@ -74,7 +74,6 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Handles the Recents (overview) animation. Only one of these can run at a time. A recents
@@ -85,7 +84,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
 
     private final Transitions mTransitions;
     private final ShellExecutor mExecutor;
-    private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
     @Nullable
     private final RecentTasksController mRecentTasksController;
     private IApplicationThread mAnimApp = null;
@@ -103,13 +101,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
 
     public RecentsTransitionHandler(ShellInit shellInit, Transitions transitions,
             @Nullable RecentTasksController recentTasksController,
-            HomeTransitionObserver homeTransitionObserver,
-            Supplier<SurfaceControl.Transaction> transactionSupplier) {
+            HomeTransitionObserver homeTransitionObserver) {
         mTransitions = transitions;
         mExecutor = transitions.getMainExecutor();
         mRecentTasksController = recentTasksController;
         mHomeTransitionObserver = homeTransitionObserver;
-        mTransactionSupplier = transactionSupplier;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) return;
         if (recentTasksController == null) return;
         shellInit.addInitCallback(() -> {
@@ -1060,7 +1056,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             final Transitions.TransitionFinishCallback finishCB = mFinishCB;
             mFinishCB = null;
 
-            SurfaceControl.Transaction t = mFinishTransaction;
+            final SurfaceControl.Transaction t = mFinishTransaction;
             final WindowContainerTransaction wct = new WindowContainerTransaction();
 
             if (mKeyguardLocked && mRecentsTask != null) {
@@ -1110,16 +1106,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     }
                 }
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION, "  normal finish");
-                if (toHome && !mOpeningTasks.isEmpty()) {
-                    // Attempting to start a task after swipe to home, don't show it,
-                    // move recents to top
-                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                            "  attempting to start a task after swipe to home");
-                    t = mTransactionSupplier.get();
-                    wct.reorder(mRecentsTask, true /*onTop*/);
-                    mClosingTasks.addAll(mOpeningTasks);
-                    mOpeningTasks.clear();
-                }
                 // The general case: committing to recents, going home, or switching tasks.
                 for (int i = 0; i < mOpeningTasks.size(); ++i) {
                     t.show(mOpeningTasks.get(i).mTaskSurface);
@@ -1187,10 +1173,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     mPipTask = null;
                     mPipTransaction = null;
                 }
-            }
-            if (t != mFinishTransaction) {
-                // apply after merges because these changes are accounting for finishWCT changes.
-                mTransitions.setAfterMergeFinishTransaction(mTransition, t);
             }
             cleanUp();
             finishCB.onTransitionFinished(wct.isEmpty() ? null : wct);

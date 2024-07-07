@@ -17,10 +17,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
-import com.android.systemui.statusbar.notification.collection.NotifPipeline
-import com.android.systemui.statusbar.notification.collection.PipelineDumpable
-import com.android.systemui.statusbar.notification.collection.PipelineDumper
-import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
+import com.android.systemui.statusbar.notification.collection.*
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
@@ -69,6 +66,7 @@ constructor(
     dismissibilityCoordinator: DismissibilityCoordinator,
     dreamCoordinator: DreamCoordinator,
     statsLoggerCoordinator: NotificationStatsLoggerCoordinator,
+    bundleCoordinator: BundleCoordinator,
 ) : NotifCoordinators {
 
     private val mCoreCoordinators: MutableList<CoreCoordinator> = ArrayList()
@@ -132,6 +130,12 @@ constructor(
             mOrderedSections.add(conversationCoordinator.peopleSilentSectioner) // People Silent
         }
         mOrderedSections.add(rankingCoordinator.alertingSectioner) // Alerting
+        if (NotificationClassificationFlag.isEnabled) {
+            mOrderedSections.add(bundleCoordinator.newsSectioner);
+            mOrderedSections.add(bundleCoordinator.socialSectioner);
+            mOrderedSections.add(bundleCoordinator.recsSectioner);
+            mOrderedSections.add(bundleCoordinator.promoSectioner);
+        }
         mOrderedSections.add(rankingCoordinator.silentSectioner) // Silent
         mOrderedSections.add(rankingCoordinator.minimizedSectioner) // Minimized
 

@@ -37,6 +37,7 @@ import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.DisposableHandle
 
 @SysUISingleton
 open class SmartspaceSection
@@ -56,6 +57,7 @@ constructor(
 
     private var smartspaceVisibilityListener: OnGlobalLayoutListener? = null
     private var pastVisibility: Int = -1
+    private var disposableHandle: DisposableHandle? = null
 
     override fun onRebuildBegin() {
         smartspaceController.suppressDisconnects = true
@@ -96,12 +98,14 @@ constructor(
     override fun bindData(constraintLayout: ConstraintLayout) {
         if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
-        KeyguardSmartspaceViewBinder.bind(
-            constraintLayout,
-            keyguardClockViewModel,
-            keyguardSmartspaceViewModel,
-            blueprintInteractor.get(),
-        )
+        disposableHandle?.dispose()
+        disposableHandle =
+            KeyguardSmartspaceViewBinder.bind(
+                constraintLayout,
+                keyguardClockViewModel,
+                keyguardSmartspaceViewModel,
+                blueprintInteractor.get(),
+            )
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
@@ -188,6 +192,8 @@ constructor(
         }
         smartspaceView?.viewTreeObserver?.removeOnGlobalLayoutListener(smartspaceVisibilityListener)
         smartspaceVisibilityListener = null
+
+        disposableHandle?.dispose()
     }
 
     private fun updateVisibility(constraintSet: ConstraintSet) {

@@ -267,6 +267,8 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Hlášení chyb"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Ukončit relaci"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Snímek obrazovky"</string>
+    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
+    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Hlášení chyb"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Shromažďuje informace o aktuálním stavu zařízení. Tyto informace je následně možné poslat v e-mailové zprávě, chvíli však potrvá, než bude hlášení o chybě připraveno k odeslání. Buďte prosím trpěliví."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktivní přehled"</string>
@@ -1767,11 +1769,11 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
     <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
     <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
     <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zvětšení"</string>
     <string name="user_switched" msgid="7249833311585228097">"Aktuální uživatel je <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1988,14 +1990,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Probíhající hovor"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Prověřování příchozího hovoru"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Neklasifikováno"</string>
-    <!-- no translation found for promotional_notification_channel_label (7414844730492860233) -->
-    <skip />
-    <!-- no translation found for social_notification_channel_label (106520267132019945) -->
-    <skip />
-    <!-- no translation found for news_notification_channel_label (4299937455247883311) -->
-    <skip />
-    <!-- no translation found for recs_notification_channel_label (4945985121418684297) -->
-    <skip />
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"Promoakce"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"Sociální sítě"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"Zprávy"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"Doporučení"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Důležitost oznámení určujete vy."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Tato zpráva je důležitá kvůli lidem zapojeným do konverzace."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Vlastní oznámení aplikace"</string>
@@ -2212,10 +2210,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Výběr zkratky přístupnosti na obrazovce"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Zkratka přístupnosti"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Zavřít panel oznámení"</string>
-    <!-- no translation found for accessibility_system_action_menu_label (3385283204496447040) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_media_play_pause_label (1905647491347119748) -->
-    <skip />
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Nabídka"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Přehrát/pozastavit média"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad nahoru"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad dolů"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad doleva"</string>
@@ -2442,12 +2438,21 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Jak to funguje"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Čeká na vyřízení…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Opětovné nastavení odemknutí otiskem prstu"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> nefungoval správně a byl vymazán"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nefungovaly správně a byly vymazány"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> nefungoval správně a byl vymazán. Pokud chcete telefon odemykat otiskem prstu, nastavte jej znovu."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nefungovaly správně a byly vymazány. Pokud chcete telefon odemykat otiskem prstu, nastavte je znovu."</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
+    <skip />
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Nastavte odemknutí obličejem znovu"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Váš model obličeje nefungoval správně a byl vymazán. Pokud chcete telefon odemykat obličejem, nastavte jej znovu."</string>
+    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
+    <skip />
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Nastavit"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Teď ne"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Budík pro uživatele <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Přepnout uživatele"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Ztlumit"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Klepnutím ztlumíte zvuk"</string>
 </resources>

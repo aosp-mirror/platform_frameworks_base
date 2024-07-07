@@ -48,8 +48,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.settingslib.utils.BuildCompatUtils;
-
 /**
  * Converts the user avatar icon to a circularly clipped one with an optional badge and frame
  */
@@ -88,7 +86,7 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
      * @return drawable containing just the badge
      */
     public static Drawable getManagedUserDrawable(Context context) {
-        if (BuildCompatUtils.isAtLeastT()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             return getUpdatableManagedUserDrawable(context);
         } else {
             return getDrawableForDisplayDensity(
@@ -227,7 +225,7 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
     }
 
     private static Drawable getManagementBadge(Context context) {
-        if (BuildCompatUtils.isAtLeastT()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             return getUpdatableManagementBadge(context);
         } else {
             return getDrawableForDisplayDensity(

@@ -10042,6 +10042,8 @@
     <declare-styleable name="PointerIconVectorTheme">
         <attr name="pointerIconVectorFill" format="color" />
         <attr name="pointerIconVectorFillInverse" format="color" />
+        <attr name="pointerIconVectorStroke" format="color" />
+        <attr name="pointerIconVectorStrokeInverse" format="color" />
     </declare-styleable>
 
     <declare-styleable name="Storage">

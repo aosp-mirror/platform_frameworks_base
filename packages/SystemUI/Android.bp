@@ -23,7 +23,10 @@ package {
 // See: http://go/android-license-faq
 license {
     name: "frameworks_base_packages_SystemUI_license",
-    visibility: [":__subpackages__"],
+    visibility: [
+        ":__subpackages__",
+        "//development/samples/SceneTransitionLayoutDemo:__subpackages__",
+    ],
     license_kinds: [
         "SPDX-license-identifier-Apache-2.0",
     ],

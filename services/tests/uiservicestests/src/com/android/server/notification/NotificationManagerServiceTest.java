@@ -39,8 +39,10 @@ import static android.app.Notification.FLAG_NO_DISMISS;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
+import static android.app.Notification.GROUP_ALERT_CHILDREN;
 import static android.app.Notification.VISIBILITY_PRIVATE;
 import static android.app.NotificationChannel.NEWS_ID;
+import static android.app.NotificationChannel.DEFAULT_CHANNEL_ID;
 import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
 import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
@@ -98,11 +100,13 @@ import static android.service.notification.Adjustment.TYPE_NEWS;
 import static android.service.notification.Condition.SOURCE_CONTEXT;
 import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_TRUE;
+import static android.service.notification.Flags.FLAG_NOTIFICATION_FORCE_GROUPING;
 import static android.service.notification.Flags.FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
+import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_LOCKDOWN;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
@@ -117,6 +121,7 @@ import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
 import static com.android.server.notification.Flags.FLAG_ALL_NOTIFS_NEED_TTL;
 import static com.android.server.notification.Flags.FLAG_REJECT_OLD_NOTIFICATIONS;
+import static com.android.server.notification.GroupHelper.AUTOGROUP_KEY;
 import static com.android.server.notification.NotificationManagerService.BITMAP_DURATION;
 import static com.android.server.notification.NotificationManagerService.DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
 import static com.android.server.notification.NotificationManagerService.NOTIFICATION_TTL;
@@ -369,6 +374,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final int TOAST_DURATION = 2_000;
     private static final int SECONDARY_DISPLAY_ID = 42;
     private static final int TEST_PROFILE_USERHANDLE = 12;
+    private static final long DELAY_FORCE_REGROUP_TIME = 3000;
 
     private static final String ACTION_NOTIFICATION_TIMEOUT =
             NotificationManagerService.class.getSimpleName() + ".TIMEOUT";
@@ -2487,40 +2493,369 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
     public void testAutobundledSummary_notificationAdded() {
         NotificationRecord summary =
-                generateNotificationRecord(mTestNotificationChannel, 0, "pkg", true);
+                generateNotificationRecord(mTestNotificationChannel, 0, AUTOGROUP_KEY, true);
         summary.getNotification().flags |= Notification.FLAG_AUTOGROUP_SUMMARY;
         mService.addNotification(summary);
         mService.mSummaryByGroupKey.put("pkg", summary);
         mService.mAutobundledSummaries.put(0, new ArrayMap<>());
         mService.mAutobundledSummaries.get(0).put("pkg", summary.getKey());
 
-        mService.updateAutobundledSummaryLocked(0, "pkg",
+        mService.updateAutobundledSummaryLocked(0, "pkg", AUTOGROUP_KEY,
                 new NotificationAttributes(GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT,
-                    mock(Icon.class), 0, VISIBILITY_PRIVATE), false);
+                    mock(Icon.class), 0,
+                    VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN, DEFAULT_CHANNEL_ID), false);
         waitForIdle();
 
         assertTrue(summary.getSbn().isOngoing());
     }
 
     @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testAutobundledSummary_notificationAdded_forcedGrouping() {
+        NotificationRecord summary =
+                generateNotificationRecord(mTestNotificationChannel, 0, AUTOGROUP_KEY, true);
+        summary.getNotification().flags |= Notification.FLAG_AUTOGROUP_SUMMARY;
+        mService.addNotification(summary);
+        mService.mSummaryByGroupKey.put("pkg", summary);
+        mService.mAutobundledSummaries.put(0, new ArrayMap<>());
+        mService.mAutobundledSummaries.get(0).put(summary.getGroupKey(), summary.getKey());
+
+        mService.updateAutobundledSummaryLocked(0, "pkg", summary.getGroupKey(),
+                new NotificationAttributes(GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT,
+                    mock(Icon.class), 0,
+                    VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN, DEFAULT_CHANNEL_ID), false);
+        waitForIdle();
+
+        assertTrue(summary.getSbn().isOngoing());
+    }
+
+    @Test
+    @DisableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
     public void testAutobundledSummary_notificationRemoved() {
         NotificationRecord summary =
-                generateNotificationRecord(mTestNotificationChannel, 0, "pkg", true);
+                generateNotificationRecord(mTestNotificationChannel, 0, AUTOGROUP_KEY, true);
         summary.getNotification().flags |= Notification.FLAG_AUTOGROUP_SUMMARY;
         summary.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
         mService.addNotification(summary);
         mService.mAutobundledSummaries.put(0, new ArrayMap<>());
         mService.mAutobundledSummaries.get(0).put("pkg", summary.getKey());
-        mService.mSummaryByGroupKey.put("pkg", summary);
+        mService.mSummaryByGroupKey.put(summary.getGroupKey(), summary);
 
-        mService.updateAutobundledSummaryLocked(0, "pkg",
+        mService.updateAutobundledSummaryLocked(0, "pkg", AUTOGROUP_KEY,
                 new NotificationAttributes(GroupHelper.BASE_FLAGS,
-                    mock(Icon.class), 0, VISIBILITY_PRIVATE), false);
+                    mock(Icon.class), 0,
+                    VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN, DEFAULT_CHANNEL_ID), false);
         waitForIdle();
 
         assertFalse(summary.getSbn().isOngoing());
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testAutobundledSummary_notificationRemoved_forceGrouping() {
+        NotificationRecord summary =
+            generateNotificationRecord(mTestNotificationChannel, 0, AUTOGROUP_KEY, true);
+        summary.getNotification().flags |= Notification.FLAG_AUTOGROUP_SUMMARY;
+        summary.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+        mService.addNotification(summary);
+        mService.mAutobundledSummaries.put(0, new ArrayMap<>());
+        mService.mAutobundledSummaries.get(0).put(summary.getGroupKey(), summary.getKey());
+
+        mService.updateAutobundledSummaryLocked(0, "pkg", summary.getGroupKey(),
+                new NotificationAttributes(GroupHelper.BASE_FLAGS,
+                    mock(Icon.class), 0,
+                    VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN, DEFAULT_CHANNEL_ID), false);
+        waitForIdle();
+
+        assertFalse(summary.getSbn().isOngoing());
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testAggregatedSummary_updateSummaryAttributes() {
+        final String aggregateGroupName = "Aggregate_Test";
+        final String newChannelId = "newChannelId";
+        final NotificationChannel newChannel = new NotificationChannel(
+                newChannelId, newChannelId, IMPORTANCE_DEFAULT);
+        mService.setPreferencesHelper(mPreferencesHelper);
+        final NotificationRecord summary =
+                generateNotificationRecord(mTestNotificationChannel, 0, aggregateGroupName, true);
+        final String groupKey = summary.getGroupKey();
+        summary.getNotification().flags |= Notification.FLAG_AUTOGROUP_SUMMARY;
+        mService.addNotification(summary);
+        mService.mAutobundledSummaries.put(0, new ArrayMap<>());
+        mService.mAutobundledSummaries.get(0).put(groupKey, summary.getKey());
+        when(mPreferencesHelper.getNotificationChannel(eq("pkg"), anyInt(),
+                eq(newChannelId), anyBoolean())).thenReturn(newChannel);
+
+        mService.updateAutobundledSummaryLocked(0, "pkg", groupKey,
+                new NotificationAttributes(GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT,
+                    mock(Icon.class), 0, VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN, newChannelId),
+                    false);
+        waitForIdle();
+
+        assertTrue(summary.getSbn().isOngoing());
+        assertThat(summary.getNotification().getGroupAlertBehavior()).isEqualTo(
+                GROUP_ALERT_CHILDREN);
+
+        assertThat(summary.getChannel().getId()).isEqualTo(newChannelId);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testAddAggregateNotification_notifyPostedLocked() throws Exception {
+        final String originalGroupName = "originalGroup";
+        final NotificationRecord r =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, false);
+        mService.addNotification(r);
+        mService.addAutogroupKeyLocked(r.getKey(), "grpKey", true);
+
+        assertThat(r.getSbn().getOverrideGroupKey()).isEqualTo("grpKey");
+        verify(mRankingHandler, times(1)).requestSort();
+        verify(mListeners, times(1)).notifyPostedLocked(eq(r), eq(r));
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testAddAggregateSummaryNotification_convertSummary() throws Exception {
+        final String originalGroupName = "originalGroup";
+        final NotificationRecord r =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, true);
+        final String groupKey = r.getGroupKey();
+        mService.addNotification(r);
+        assertThat(mService.mSummaryByGroupKey.containsKey(groupKey)).isTrue();
+        boolean isConverted = mService.convertSummaryToNotificationLocked(r.getKey());
+
+        assertThat(isConverted).isTrue();
+        assertThat(r.getSbn().isGroup()).isTrue();
+        assertThat(r.getNotification().isGroupSummary()).isFalse();
+        assertThat(mService.mSummaryByGroupKey.containsKey(groupKey)).isFalse();
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            Flags.FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS})
+    public void testAggregateGroups_RemoveAppSummary() throws Exception {
+        final String originalGroupName = "originalGroup";
+        final NotificationRecord r =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, true);
+        mService.addNotification(r);
+        mService.removeAppSummaryLocked(r.getKey());
+
+        assertThat(r.isCanceled).isTrue();
+        waitForIdle();
+        verify(mWorkerHandler, times(1)).scheduleCancelNotification(any(), eq(0));
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testUngroupingAggregateSummary() throws Exception {
+        final String originalGroupName = "originalGroup";
+        final String aggregateGroupName = "Aggregate_Test";
+        final int summaryId = Integer.MAX_VALUE;
+        // Add 2 group notifications without a summary
+        NotificationRecord nr0 =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, false);
+        NotificationRecord nr1 =
+                generateNotificationRecord(mTestNotificationChannel, 1, originalGroupName, false);
+        mService.addNotification(nr0);
+        mService.addNotification(nr1);
+        mService.mSummaryByGroupKey.remove(nr0.getGroupKey());
+
+        // GroupHelper is a mock, so make the calls it would make
+        // Add aggregate group summary
+        NotificationAttributes attr = new NotificationAttributes(GroupHelper.BASE_FLAGS,
+                mock(Icon.class), 0, VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN,
+                nr0.getChannel().getId());
+        NotificationRecord aggregateSummary = mService.createAutoGroupSummary(nr0.getUserId(),
+                nr0.getSbn().getPackageName(), nr0.getKey(), aggregateGroupName, summaryId, attr);
+        mService.addNotification(aggregateSummary);
+        nr0.setOverrideGroupKey(aggregateGroupName);
+        nr1.setOverrideGroupKey(aggregateGroupName);
+        final String fullAggregateGroupKey = nr0.getGroupKey();
+
+        // Check that the aggregate group summary was created
+        assertThat(aggregateSummary.getNotification().getGroup()).isEqualTo(aggregateGroupName);
+        assertThat(aggregateSummary.getNotification().getChannelId()).isEqualTo(
+                nr0.getChannel().getId());
+        assertThat(mService.mSummaryByGroupKey.containsKey(fullAggregateGroupKey)).isTrue();
+
+        // Cancel both children
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, nr0.getSbn().getTag(),
+                nr0.getSbn().getId(), nr0.getSbn().getUserId());
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, nr1.getSbn().getTag(),
+                nr1.getSbn().getId(), nr1.getSbn().getUserId());
+        waitForIdle();
+
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(nr0), any());
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(nr1), any());
+
+        // GroupHelper would send 'remove summary' event
+        mService.clearAutogroupSummaryLocked(nr1.getUserId(), nr1.getSbn().getPackageName(),
+                fullAggregateGroupKey);
+        waitForIdle();
+
+        // Make sure the summary was removed and not re-posted
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(0);
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            Flags.FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS})
+    public void testCancelGroupChildrenForCanceledSummary_singletonGroup() throws Exception {
+        final String originalGroupName = "originalGroup";
+        final String aggregateGroupName = "Aggregate_Test";
+        final int summaryId = Integer.MAX_VALUE;
+        // Add a "singleton group"
+        NotificationRecord nr0 =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, false);
+        NotificationRecord nr1 =
+                generateNotificationRecord(mTestNotificationChannel, 1, originalGroupName, false);
+        final NotificationRecord summary =
+                generateNotificationRecord(mTestNotificationChannel, 2, originalGroupName, true);
+        final String originalGroupKey = summary.getGroupKey();
+        mService.addNotification(nr0);
+        mService.addNotification(nr1);
+        mService.addNotification(summary);
+
+        // GroupHelper is a mock, so make the calls it would make
+        // Remove the app's summary notification
+        mService.removeAppSummaryLocked(summary.getKey());
+        waitForIdle();
+
+        // Add aggregate group summary
+        NotificationAttributes attr = new NotificationAttributes(GroupHelper.BASE_FLAGS,
+                mock(Icon.class), 0, VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN,
+                nr0.getChannel().getId());
+        NotificationRecord aggregateSummary = mService.createAutoGroupSummary(nr0.getUserId(),
+            nr0.getSbn().getPackageName(), nr0.getKey(), aggregateGroupName, summaryId, attr);
+        mService.addNotification(aggregateSummary);
+
+        nr0.setOverrideGroupKey(aggregateGroupName);
+        nr1.setOverrideGroupKey(aggregateGroupName);
+        final String fullAggregateGroupKey = nr0.getGroupKey();
+
+        assertThat(aggregateSummary.getNotification().getGroup()).isEqualTo(aggregateGroupName);
+        assertThat(aggregateSummary.getNotification().getChannelId()).isEqualTo(
+                nr0.getChannel().getId());
+        assertThat(mService.mSummaryByGroupKey.containsKey(fullAggregateGroupKey)).isTrue();
+        assertThat(mService.mSummaryByGroupKey.containsKey(originalGroupKey)).isFalse();
+
+        // Cancel the original app summary (is already removed)
+        mBinderService.cancelNotificationWithTag(summary.getSbn().getPackageName(),
+                summary.getSbn().getPackageName(), summary.getSbn().getTag(),
+                summary.getSbn().getId(), summary.getSbn().getUserId());
+        waitForIdle();
+
+        // Check if NMS.CancelNotificationRunnable calls maybeCancelGroupChildrenForCanceledSummary
+        verify(mGroupHelper, times(1)).maybeCancelGroupChildrenForCanceledSummary(
+                eq(summary.getSbn().getPackageName()), eq(summary.getSbn().getTag()),
+                eq(summary.getSbn().getId()), eq(summary.getSbn().getUserId()),
+                eq(REASON_APP_CANCEL));
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testUpdateChannel_notifyGroupHelper() throws Exception {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        mTestNotificationChannel.setLightColor(Color.CYAN);
+        when(mPreferencesHelper.getNotificationChannel(eq(mPkg), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
+
+        mBinderService.updateNotificationChannelForPackage(mPkg, mUid, mTestNotificationChannel);
+        mTestableLooper.moveTimeForward(DELAY_FORCE_REGROUP_TIME);
+        waitForIdle();
+
+        verify(mGroupHelper, times(1)).onChannelUpdated(eq(Process.myUserHandle().getIdentifier()),
+                eq(mPkg), eq(mTestNotificationChannel), any());
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testSnoozeRunnable_snoozeAggregateGroupChild_summaryNotSnoozed() throws Exception {
+        final String aggregateGroupName = "Aggregate_Test";
+
+        // build autogroup summary notification
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setGroup(aggregateGroupName)
+                .setGroupSummary(true)
+                .setFlag(Notification.FLAG_AUTOGROUP_SUMMARY, true);
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 1,
+                "tag" + System.currentTimeMillis(), mUid, 0, nb.build(),
+                UserHandle.getUserHandleForUid(mUid), null, 0);
+        final NotificationRecord summary = new NotificationRecord(mContext, sbn,
+                mTestNotificationChannel);
+
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, aggregateGroupName, false);
+        mService.addNotification(summary);
+        mService.addNotification(child);
+        when(mSnoozeHelper.canSnooze(anyInt())).thenReturn(true);
+
+        // snooze child only
+        NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
+                mService.new SnoozeNotificationRunnable(
+                    child.getKey(), 100, null);
+        snoozeNotificationRunnable.run();
+
+        // only child should be snoozed
+        verify(mSnoozeHelper, times(1)).snooze(any(NotificationRecord.class), anyLong());
+
+        // both group summary and child should be cancelled
+        assertNull(mService.getNotificationRecord(summary.getKey()));
+        assertNull(mService.getNotificationRecord(child.getKey()));
+
+        assertEquals(4, mNotificationRecordLogger.numCalls());
+        assertEquals(NotificationRecordLogger.NotificationEvent.NOTIFICATION_SNOOZED,
+                mNotificationRecordLogger.event(0));
+        assertEquals(
+                NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_SNOOZED,
+                mNotificationRecordLogger.event(1));
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testOnlyForceGroupIfNeeded_newNotification_notAutogrouped() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
+        when(mGroupHelper.onNotificationPosted(any(), anyBoolean())).thenReturn(false);
+        mService.addEnqueuedNotification(r);
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
+                    r.getUid(), mPostNotificationTrackerFactory.newTracker(null));
+        runnable.run();
+        waitForIdle();
+
+        mTestableLooper.moveTimeForward(DELAY_FORCE_REGROUP_TIME);
+        waitForIdle();
+
+        verify(mGroupHelper, times(1)).onNotificationPosted(any(), anyBoolean());
+        verify(mGroupHelper, times(1)).onNotificationPostedWithDelay(eq(r), any(), any());
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testOnlyForceGroupIfNeeded_newNotification_wasAutogrouped() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
+        when(mGroupHelper.onNotificationPosted(any(), anyBoolean())).thenReturn(true);
+        mService.addEnqueuedNotification(r);
+        NotificationManagerService.PostNotificationRunnable runnable =
+            mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
+                r.getUid(), mPostNotificationTrackerFactory.newTracker(null));
+        runnable.run();
+        waitForIdle();
+
+        mTestableLooper.moveTimeForward(DELAY_FORCE_REGROUP_TIME);
+        waitForIdle();
+
+        verify(mGroupHelper, times(1)).onNotificationPosted(any(), anyBoolean());
+        verify(mGroupHelper, never()).onNotificationPostedWithDelay(eq(r), any(), any());
     }
 
     @Test
@@ -3653,9 +3988,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
         when(mPermissionHelper.isPermissionFixed(mPkg, temp.getUserId())).thenReturn(true);
 
+        NotificationAttributes attr = new NotificationAttributes(GroupHelper.BASE_FLAGS,
+            mock(Icon.class), 0, VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN, DEFAULT_CHANNEL_ID);
+
         NotificationRecord r = mService.createAutoGroupSummary(temp.getUserId(),
-                temp.getSbn().getPackageName(), temp.getKey(), 0, mock(Icon.class), 0,
-                VISIBILITY_PRIVATE);
+            temp.getSbn().getPackageName(), temp.getKey(), AUTOGROUP_KEY, Integer.MAX_VALUE, attr);
 
         assertThat(r.isImportanceFixed()).isTrue();
     }
@@ -4796,6 +5133,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
     public void testSnoozeRunnable_snoozeAutoGroupChild_summaryNotSnoozed() throws Exception {
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, GroupHelper.AUTOGROUP_KEY, true);
@@ -5659,7 +5997,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testAddAutogroup_requestsSort() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
-        mService.addAutogroupKeyLocked(r.getKey(), true);
+        mService.addAutogroupKeyLocked(r.getKey(), "grpKey", true);
 
         verify(mRankingHandler, times(1)).requestSort();
     }
@@ -5679,7 +6017,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         r.setOverrideGroupKey("TEST");
         mService.addNotification(r);
-        mService.addAutogroupKeyLocked(r.getKey(), true);
+        mService.addAutogroupKeyLocked(r.getKey(), "grpName", true);
 
         verify(mRankingHandler, never()).requestSort();
     }
@@ -5689,7 +6027,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testAutogroupSuppressSort_noSort() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
-        mService.addAutogroupKeyLocked(r.getKey(), false);
+        mService.addAutogroupKeyLocked(r.getKey(), "grpName", false);
 
         verify(mRankingHandler, never()).requestSort();
     }
@@ -12688,6 +13026,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
     public void testUngroupingOngoingAutoSummary() throws Exception {
         NotificationRecord nr0 =
                 generateNotificationRecord(mTestNotificationChannel, 0);
@@ -12701,10 +13040,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // grouphelper is a mock here, so make the calls it would make
 
         // add summary
+        NotificationAttributes attr = new NotificationAttributes(
+                GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT, mock(Icon.class), 0,
+                VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN, DEFAULT_CHANNEL_ID);
         mService.addNotification(
                 mService.createAutoGroupSummary(nr1.getUserId(), nr1.getSbn().getPackageName(),
-                    nr1.getKey(), GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT, mock(Icon.class), 0,
-                    VISIBILITY_PRIVATE));
+                    nr1.getKey(), AUTOGROUP_KEY, Integer.MAX_VALUE, attr));
 
         // cancel both children
         mBinderService.cancelNotificationWithTag(mPkg, mPkg, nr0.getSbn().getTag(),
@@ -12714,7 +13055,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         // group helper would send 'remove summary' event
-        mService.clearAutogroupSummaryLocked(nr1.getUserId(), nr1.getSbn().getPackageName());
+        mService.clearAutogroupSummaryLocked(nr1.getUserId(), nr1.getSbn().getPackageName(),
+                AUTOGROUP_KEY);
         waitForIdle();
 
         // make sure the summary was removed and not re-posted
@@ -12722,6 +13064,45 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testUngroupingOngoingAutoSummary_forceGrouping() throws Exception {
+        NotificationRecord nr0 =
+            generateNotificationRecord(mTestNotificationChannel, 0);
+        NotificationRecord nr1 =
+            generateNotificationRecord(mTestNotificationChannel, 0);
+        nr1.getSbn().getNotification().flags |= FLAG_ONGOING_EVENT;
+
+        mService.addNotification(nr0);
+        mService.addNotification(nr1);
+
+        // grouphelper is a mock here, so make the calls it would make
+
+        // add summary
+        NotificationAttributes attr = new NotificationAttributes(
+            GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT, mock(Icon.class), 0,
+            VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN, DEFAULT_CHANNEL_ID);
+        mService.addNotification(
+            mService.createAutoGroupSummary(nr1.getUserId(), nr1.getSbn().getPackageName(),
+                nr1.getKey(), AUTOGROUP_KEY, Integer.MAX_VALUE, attr));
+
+        // cancel both children
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, nr0.getSbn().getTag(),
+            nr0.getSbn().getId(), nr0.getSbn().getUserId());
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, nr1.getSbn().getTag(),
+            nr1.getSbn().getId(), nr1.getSbn().getUserId());
+        waitForIdle();
+
+        // group helper would send 'remove summary' event
+        mService.clearAutogroupSummaryLocked(nr1.getUserId(), nr1.getSbn().getPackageName(),
+            AUTOGROUP_KEY);
+        waitForIdle();
+
+        // make sure the summary was removed and not re-posted
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(0);
+    }
+
+    @Test
+    @DisableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
     public void testUngroupingAutoSummary_differentUsers() throws Exception {
         NotificationRecord nr0 =
                 generateNotificationRecord(mTestNotificationChannel, 0, USER_SYSTEM);
@@ -12729,11 +13110,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 generateNotificationRecord(mTestNotificationChannel, 1, USER_SYSTEM);
 
         // add notifications + summary for USER_SYSTEM
+        NotificationAttributes attr = new NotificationAttributes(
+            GroupHelper.BASE_FLAGS, mock(Icon.class), 0,
+            VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN, DEFAULT_CHANNEL_ID);
         mService.addNotification(nr0);
         mService.addNotification(nr1);
         mService.addNotification(
                 mService.createAutoGroupSummary(nr1.getUserId(), nr1.getSbn().getPackageName(),
-                nr1.getKey(), GroupHelper.BASE_FLAGS, mock(Icon.class), 0, VISIBILITY_PRIVATE));
+                nr1.getKey(), AUTOGROUP_KEY, Integer.MAX_VALUE, attr));
 
         // add notifications + summary for USER_ALL
         NotificationRecord nr0_all =
@@ -12746,7 +13130,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(
                 mService.createAutoGroupSummary(nr0_all.getUserId(),
                 nr0_all.getSbn().getPackageName(),
-                nr0_all.getKey(), GroupHelper.BASE_FLAGS, mock(Icon.class), 0, VISIBILITY_PRIVATE));
+                nr0_all.getKey(), AUTOGROUP_KEY, Integer.MAX_VALUE, attr));
 
         // cancel both children for USER_ALL
         mBinderService.cancelNotificationWithTag(mPkg, mPkg, nr0_all.getSbn().getTag(),
@@ -12757,7 +13141,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // group helper would send 'remove summary' event
         mService.clearAutogroupSummaryLocked(UserHandle.USER_ALL,
-                nr0_all.getSbn().getPackageName());
+                nr0_all.getSbn().getPackageName(), AUTOGROUP_KEY);
         waitForIdle();
 
         // make sure the right summary was removed
@@ -12767,6 +13151,58 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // the USER_SYSTEM notifications + summary were not removed
         assertThat(mService.getNotificationCount(nr0.getSbn().getPackageName(),
                 USER_SYSTEM, 0, null)).isEqualTo(3);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testUngroupingAutoSummary_differentUsers_forceGrouping() throws Exception {
+        NotificationRecord nr0 =
+            generateNotificationRecord(mTestNotificationChannel, 0, USER_SYSTEM);
+        NotificationRecord nr1 =
+            generateNotificationRecord(mTestNotificationChannel, 1, USER_SYSTEM);
+
+        // add notifications + summary for USER_SYSTEM
+        NotificationAttributes attr = new NotificationAttributes(
+            GroupHelper.BASE_FLAGS, mock(Icon.class), 0,
+            VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN, DEFAULT_CHANNEL_ID);
+        mService.addNotification(nr0);
+        mService.addNotification(nr1);
+        mService.addNotification(
+            mService.createAutoGroupSummary(nr1.getUserId(), nr1.getSbn().getPackageName(),
+                nr1.getKey(), AUTOGROUP_KEY, Integer.MAX_VALUE, attr));
+
+        // add notifications + summary for USER_ALL
+        NotificationRecord nr0_all =
+            generateNotificationRecord(mTestNotificationChannel, 2, UserHandle.USER_ALL);
+        NotificationRecord nr1_all =
+            generateNotificationRecord(mTestNotificationChannel, 3, UserHandle.USER_ALL);
+
+        mService.addNotification(nr0_all);
+        mService.addNotification(nr1_all);
+        mService.addNotification(
+            mService.createAutoGroupSummary(nr0_all.getUserId(),
+                nr0_all.getSbn().getPackageName(),
+                nr0_all.getKey(), AUTOGROUP_KEY, Integer.MAX_VALUE, attr));
+
+        // cancel both children for USER_ALL
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, nr0_all.getSbn().getTag(),
+            nr0_all.getSbn().getId(), UserHandle.USER_ALL);
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, nr1_all.getSbn().getTag(),
+            nr1_all.getSbn().getId(), UserHandle.USER_ALL);
+        waitForIdle();
+
+        // group helper would send 'remove summary' event
+        mService.clearAutogroupSummaryLocked(UserHandle.USER_ALL,
+            nr0_all.getSbn().getPackageName(), AUTOGROUP_KEY);
+        waitForIdle();
+
+        // make sure the right summary was removed
+        assertThat(mService.getNotificationCount(nr0_all.getSbn().getPackageName(),
+            UserHandle.USER_ALL, 0, null)).isEqualTo(0);
+
+        // the USER_SYSTEM notifications + summary were not removed
+        assertThat(mService.getNotificationCount(nr0.getSbn().getPackageName(),
+            USER_SYSTEM, 0, null)).isEqualTo(3);
     }
 
     @Test

@@ -32,7 +32,7 @@ import static android.view.WindowInsets.Type.statusBars;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.compatui.AppCompatUtils.isSingleTopActivityTranslucent;
+import static com.android.wm.shell.compatui.AppCompatUtils.isTopActivityExemptFromDesktopWindowing;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
@@ -73,6 +73,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.Cuj;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
@@ -81,7 +82,6 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.common.InteractionJankMonitorUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
@@ -105,7 +105,6 @@ import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 
 import java.io.PrintWriter;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -131,6 +130,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final SyncTransactionQueue mSyncQueue;
     private final DesktopTasksController mDesktopTasksController;
     private final InputManager mInputManager;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private boolean mTransitionDragActive;
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
@@ -186,7 +186,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            InteractionJankMonitor interactionJankMonitor
     ) {
         this(
                 context,
@@ -207,7 +208,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new InputMonitorFactory(),
                 SurfaceControl.Transaction::new,
                 rootTaskDisplayAreaOrganizer,
-                new SparseArray<>());
+                new SparseArray<>(),
+                interactionJankMonitor);
     }
 
     @VisibleForTesting
@@ -230,7 +232,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             InputMonitorFactory inputMonitorFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            SparseArray<DesktopModeWindowDecoration> windowDecorByTaskId) {
+            SparseArray<DesktopModeWindowDecoration> windowDecorByTaskId,
+            InteractionJankMonitor interactionJankMonitor) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -253,6 +256,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mWindowDecorByTaskId = windowDecorByTaskId;
         mSysUIPackageName = mContext.getResources().getString(
                 com.android.internal.R.string.config_systemUi);
+        mInteractionJankMonitor = interactionJankMonitor;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -388,8 +392,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) {
             return;
         }
-        InteractionJankMonitorUtils.beginTracing(
-                Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, mContext, decoration.mTaskSurface, tag);
+        mInteractionJankMonitor.begin(
+                decoration.mTaskSurface, mContext, Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, tag);
         mDesktopTasksController.toggleDesktopTaskSize(decoration.mTaskInfo);
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();
@@ -1029,12 +1033,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && taskInfo.isFocused) {
             return false;
         }
-        // TODO(b/347289970): Consider replacing with API
         if (Flags.enableDesktopWindowingModalsPolicy()
-                && isSingleTopActivityTranslucent(taskInfo)) {
-            return false;
-        }
-        if (isSystemUIApplication(taskInfo)) {
+                && isTopActivityExemptFromDesktopWindowing(mContext, taskInfo)) {
             return false;
         }
         return DesktopModeStatus.canEnterDesktopMode(mContext)
@@ -1077,7 +1077,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         } else {
             dragPositioningCallback =  new VeiledResizeTaskPositioner(
                     mTaskOrganizer, windowDecoration, mDisplayController,
-                    mDragStartListener, mTransitions);
+                    mDragStartListener, mTransitions, mInteractionJankMonitor);
             windowDecoration.setTaskDragResizer(
                     (VeiledResizeTaskPositioner) dragPositioningCallback);
         }
@@ -1111,14 +1111,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private boolean isTaskInSplitScreen(int taskId) {
         return mSplitScreenController != null
                 && mSplitScreenController.isTaskInSplitScreen(taskId);
-    }
-
-    // TODO(b/347289970): Consider replacing with API
-    private boolean isSystemUIApplication(RunningTaskInfo taskInfo) {
-        if (taskInfo.baseActivity != null) {
-            return (Objects.equals(taskInfo.baseActivity.getPackageName(), mSysUIPackageName));
-        }
-        return false;
     }
 
     private void dump(PrintWriter pw, String prefix) {
