@@ -21,8 +21,6 @@ import static android.service.dreams.Flags.dreamHandlesBeingObscured;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamAlphaScaledExpansion;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamYPositionScaledExpansion;
-import static com.android.systemui.Flags.communalHub;
-import static com.android.systemui.Flags.glanceableHubGestureHandle;
 import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM;
 import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
@@ -53,6 +51,7 @@ import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.BlurUtils;
@@ -191,7 +190,6 @@ public class DreamOverlayContainerViewController extends
             DreamOverlayContainerView containerView,
             ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
-            @Named(DreamOverlayModule.HUB_GESTURE_INDICATOR_VIEW) View hubGestureIndicatorView,
             AmbientStatusBarViewController statusBarViewController,
             LowLightTransitionCoordinator lowLightTransitionCoordinator,
             TouchInsetManager.TouchInsetSession touchInsetSession,
@@ -229,12 +227,6 @@ public class DreamOverlayContainerViewController extends
         mComplicationHostViewController = complicationHostViewController;
         mDreamOverlayMaxTranslationY = resources.getDimensionPixelSize(
                 R.dimen.dream_overlay_y_offset);
-
-        if (communalHub() && glanceableHubGestureHandle()) {
-            // TODO(b/339667383): remove this temporary swipe gesture handle
-            hubGestureIndicatorView.setVisibility(View.VISIBLE);
-        }
-
         final View view = mComplicationHostViewController.getView();
 
         mDreamOverlayContentView.addView(view,
@@ -274,13 +266,19 @@ public class DreamOverlayContainerViewController extends
             collectFlow(
                     mView,
                     FlowKt.distinctUntilChanged(combineFlows(
-                            mKeyguardTransitionInteractor.isFinishedInStateWhere(
-                                    KeyguardState::isBouncerState),
+                            mKeyguardTransitionInteractor.isFinishedIn(
+                                    Scenes.Bouncer, KeyguardState.PRIMARY_BOUNCER),
+                            mKeyguardTransitionInteractor.isFinishedIn(
+                                    KeyguardState.ALTERNATE_BOUNCER),
                             mShadeInteractor.isAnyExpanded(),
                             mCommunalInteractor.isCommunalShowing(),
-                            (anyBouncerShowing, shadeExpanded, communalShowing) -> {
-                                mAnyBouncerShowing = anyBouncerShowing;
-                                return anyBouncerShowing || shadeExpanded || communalShowing;
+                            (primaryBouncerShowing,
+                                    alternateBouncerShowing,
+                                    shadeExpanded,
+                                    communalShowing) -> {
+                                mAnyBouncerShowing = primaryBouncerShowing
+                                        || alternateBouncerShowing;
+                                return mAnyBouncerShowing || shadeExpanded || communalShowing;
                             })),
                     mDreamManager::setDreamIsObscured,
                     mBackgroundDispatcher);

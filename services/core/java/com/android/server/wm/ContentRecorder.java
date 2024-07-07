@@ -42,7 +42,7 @@ import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.display.feature.DisplayManagerFlags;
 
 /**

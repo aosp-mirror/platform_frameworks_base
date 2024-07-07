@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
@@ -62,6 +63,9 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
         // CommunalHub dependencies
         communalHub dependsOn MigrateClocksToBlueprint.token
+
+        // DualShade dependencies
+        DualShade.token dependsOn SceneContainerFlag.getMainAconfigFlag()
     }
 
     private inline val politeNotifications

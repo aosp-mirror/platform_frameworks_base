@@ -573,7 +573,7 @@ public final class NavBarHelper implements
         }
     }
 
-    static @TransitionMode int transitionMode(boolean isTransient, int appearance) {
+    public static @TransitionMode int transitionMode(boolean isTransient, int appearance) {
         final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_NAVIGATION_BARS;
         if (isTransient) {
             return MODE_SEMI_TRANSPARENT;

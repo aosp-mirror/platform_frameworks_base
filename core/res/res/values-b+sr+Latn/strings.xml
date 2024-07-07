@@ -266,6 +266,8 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Javi grešku"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Završi sesiju"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Snimak ekrana"</string>
+    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
+    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Javi grešku"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Ovim će se prikupiti informacije o trenutnom stanju uređaja kako bi bile poslate u poruci e-pošte. Od započinjanja izveštaja o grešci do trenutka za njegovo slanje proći će neko vreme; budite strpljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktiv. izveštaj"</string>
@@ -517,11 +519,11 @@
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"prepoznavanje fizičkih aktivnosti"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ova aplikacija može da prepozna fizičke aktivnosti."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"snimanje fotografija i videa"</string>
-    <string name="permdesc_camera" msgid="5240801376168647151">"Ova aplikacija može da snima slike i video snimke pomoću kamere dok se aplikacija koristi."</string>
-    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"da snima slike i video snimke u pozadini"</string>
+    <string name="permdesc_camera" msgid="5240801376168647151">"Ova aplikacija može da snima slike i video pomoću kamere dok se aplikacija koristi."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"da snima slike i video u pozadini"</string>
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Ova aplikacija može da snima fotografije i video snimke pomoću kamere u bilo kom trenutku."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Dozvolite nekoj aplikaciji ili usluzi da pristupa kamerama sistema da bi snimala slike i video snimke"</string>
-    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ova privilegovana sistemska aplikacija može da snima slike i video snimke pomoću kamere sistema u bilo kom trenutku. Aplikacija treba da ima i dozvolu android.permission.CAMERA"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ova privilegovana sistemska aplikacija može da snima slike i video pomoću kamere sistema u bilo kom trenutku. Aplikacija treba da ima i dozvolu android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Dozvolite aplikaciji ili usluzi da dobija povratne pozive o otvaranju ili zatvaranju uređaja sa kamerom."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ova aplikacija može da dobija povratne pozive kada se bilo koji uređaj sa kamerom otvara ili zatvara (pomoću neke aplikacije)."</string>
     <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Dozvolite aplikaciji ili usluzi da pristupa kameri kao korisnik sistema bez grafičkog korisničkog interfejsa."</string>
@@ -1766,11 +1768,11 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
+    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
     <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
+    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
     <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
     <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Uvećanje"</string>
     <string name="user_switched" msgid="7249833311585228097">"Aktuelni korisnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -2435,12 +2437,21 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Princip rada"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Na čekanju..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Ponovo podesite otključavanje otiskom prsta"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> nije funkcionisao i izbrisali smo ga"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nisu funkcionisali i izbrisali smo ih"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> nije funkcionisao i izbrisali smo ga. Ponovo ga podesite da biste telefon otključavali otiskom prsta."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nisu funkcionisali i izbrisali smo ih. Ponovo ih podesite da biste telefon otključavali otiskom prsta."</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
+    <skip />
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Ponovo podesite otključavanje licem"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Vaš model lica nije funkcionisao i izbrisali smo ga. Ponovo ga podesite da biste telefon otključavali licem."</string>
+    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
+    <skip />
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Podesi"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ne sada"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm za: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Promeni korisnika"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Isključi zvuk"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Dodirnite da biste isključili zvuk"</string>
 </resources>

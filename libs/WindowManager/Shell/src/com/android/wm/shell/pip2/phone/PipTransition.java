@@ -71,6 +71,9 @@ public class PipTransition extends PipTransitionController implements
     static final String PIP_START_TX = "pip_start_tx";
     static final String PIP_FINISH_TX = "pip_finish_tx";
     static final String PIP_DESTINATION_BOUNDS = "pip_dest_bounds";
+    static final String ANIMATING_BOUNDS_CHANGE_DURATION =
+            "animating_bounds_change_duration";
+    static final int BOUNDS_CHANGE_JUMPCUT_DURATION = 0;
 
     /**
      * The fixed start delay in ms when fading out the content overlay from bounds animation.
@@ -87,7 +90,7 @@ public class PipTransition extends PipTransitionController implements
     private final PipTransitionState mPipTransitionState;
 
     //
-    // Transition tokens
+    // Transition caches
     //
 
     @Nullable
@@ -96,6 +99,8 @@ public class PipTransition extends PipTransitionController implements
     private IBinder mExitViaExpandTransition;
     @Nullable
     private IBinder mResizeTransition;
+    private int mBoundsChangeDuration = BOUNDS_CHANGE_JUMPCUT_DURATION;
+
 
     //
     // Internal state and relevant cached info
@@ -152,11 +157,12 @@ public class PipTransition extends PipTransitionController implements
     }
 
     @Override
-    public void startResizeTransition(WindowContainerTransaction wct) {
+    public void startResizeTransition(WindowContainerTransaction wct, int duration) {
         if (wct == null) {
             return;
         }
         mResizeTransition = mTransitions.startTransition(TRANSIT_RESIZE_PIP, wct, this);
+        mBoundsChangeDuration = duration;
     }
 
     @Nullable
@@ -272,6 +278,10 @@ public class PipTransition extends PipTransitionController implements
         extra.putParcelable(PIP_START_TX, startTransaction);
         extra.putParcelable(PIP_FINISH_TX, finishTransaction);
         extra.putParcelable(PIP_DESTINATION_BOUNDS, pipChange.getEndAbsBounds());
+        if (mBoundsChangeDuration > BOUNDS_CHANGE_JUMPCUT_DURATION) {
+            extra.putInt(ANIMATING_BOUNDS_CHANGE_DURATION, mBoundsChangeDuration);
+            mBoundsChangeDuration = BOUNDS_CHANGE_JUMPCUT_DURATION;
+        }
 
         mFinishCallback = finishCallback;
         mPipTransitionState.setState(PipTransitionState.CHANGING_PIP_BOUNDS, extra);

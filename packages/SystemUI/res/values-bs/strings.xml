@@ -103,6 +103,8 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Aplikacija <xliff:g id="APPNAME">%1$s</xliff:g> je otkrila ovaj snimak ekrana."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"Aplikacija <xliff:g id="APPNAME">%1$s</xliff:g> i druge otvorene aplikacije su otkrile ovaj snimak ekrana."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Dodaj u bilješku"</string>
+    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
+    <skip />
     <string name="screenrecord_title" msgid="4257171601439507792">"Snimač ekrana"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrađivanje snimka ekrana"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obavještenje za sesiju snimanja ekrana je u toku"</string>
@@ -132,6 +134,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Zaustavit ćete snimanje aplikacije &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Dijeljenje ekrana"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -139,6 +142,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Zaustavit ćete dijeljenje aplikacije &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"Emitiranje ekrana"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -192,6 +196,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Otključano licem. Pritisnite da nastavite."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Lice prepoznato. Pritisnite da nastavite."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Lice prepoznato. Pritisnite ikonu za otklj. da nastavite."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentificirano"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Otkažite autentifikaciju"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Više opcija"</string>
@@ -472,6 +478,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Dodajte još vidžeta"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Pritisnite i zadržite da prilagodite vidžete"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Prilagodite vidžete"</string>
+    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
+    <skip />
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ikona aplikacije za onemogućeni vidžet"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Ikona aplikacije za vidžet koji se instalira"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Uredite vidžet"</string>
@@ -549,8 +557,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Započni odmah"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nema obavještenja"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nema novih obavještenja"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Prilagodljive obavijesti uklj."</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Uređaj sada stišava zvuk i smanjuje broj skočnih prozora na zaslonu na 2 minute kada primite jako puno obavijesti u kratkom vremenskom razdoblju."</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Prilagodljiva obavještenja su uključena"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Uređaj smanjuje jačinu zvuka i broj skočnih prozora na ekranu do dvije minute kada dobijate mnogo obavještenja unutar kratkog vremenskog raspona."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Isključi"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Otključajte da vidite starija obavještenja"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Ovim uređajem upravlja tvoj roditelj"</string>
@@ -1349,7 +1357,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Koristi aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Nedavno je koristila aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Sistem"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Sistemske kontrole"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Sistemske aplikacije"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitasking"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Nedavne aplikacije"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Podijeljeni ekran"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Unos"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Prečice aplikacije"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Pristupačnost"</string>
@@ -1366,10 +1378,10 @@
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
     <skip />
-    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Natrag"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Za povratak trima prstima prijeđite ulijevo ili udesno bilo gdje na dodirnoj podlozi."</string>
-    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Dodirna podloga prikazuje tri prsta koji se kreću udesno i ulijevo"</string>
-    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Na zaslonu uređaja prikazuje se animacija za pokret za povratak"</string>
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Nazad"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Da se vratite, prevucite ulijevo ili udesno s tri prsta bilo gdje na dodirnoj podlozi."</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Dodirna podloga prikazuje tri prsta koji se pomjeraju desno-lijevo"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Ekran uređaja pokazuje animaciju pokreta unazad"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Pozadinsko osvjetljenje tastature"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. nivo od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrole za dom"</string>

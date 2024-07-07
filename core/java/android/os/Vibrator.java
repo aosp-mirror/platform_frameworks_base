@@ -184,16 +184,6 @@ public abstract class Vibrator {
     }
 
     /**
-     * Whether the keyboard vibration is enabled by default.
-     *
-     * @return {@code true} if the keyboard vibration is default enabled, {@code false} otherwise.
-     * @hide
-     */
-    public boolean isDefaultKeyboardVibrationEnabled() {
-        return getConfig().isDefaultKeyboardVibrationEnabled();
-    }
-
-    /**
      * Return the ID of this vibrator.
      *
      * @return A non-negative integer representing the id of the vibrator controlled by this

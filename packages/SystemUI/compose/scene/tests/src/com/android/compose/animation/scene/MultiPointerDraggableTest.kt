@@ -121,6 +121,82 @@ class MultiPointerDraggableTest {
     }
 
     @Test
+    fun shouldNotStartDragEventsWith0PointersDown() {
+        val size = 200f
+        val middle = Offset(size / 2f, size / 2f)
+
+        var started = false
+        var dragged = false
+        var stopped = false
+        var consumedByDescendant = false
+
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            Box(
+                Modifier.size(with(LocalDensity.current) { Size(size, size).toDpSize() })
+                    .multiPointerDraggable(
+                        orientation = Orientation.Vertical,
+                        enabled = { true },
+                        // We want to start a drag gesture immediately
+                        startDragImmediately = { true },
+                        onDragStarted = { _, _, _ ->
+                            started = true
+                            object : DragController {
+                                override fun onDrag(delta: Float) {
+                                    dragged = true
+                                }
+
+                                override fun onStop(velocity: Float, canChangeScene: Boolean) {
+                                    stopped = true
+                                }
+                            }
+                        },
+                    )
+                    .pointerInput(Unit) {
+                        coroutineScope {
+                            awaitPointerEventScope {
+                                while (isActive) {
+                                    val change = awaitPointerEvent().changes.first()
+                                    if (consumedByDescendant) {
+                                        change.consume()
+                                    }
+                                }
+                            }
+                        }
+                    }
+            )
+        }
+
+        // The first part of the gesture is consumed by our descendant
+        consumedByDescendant = true
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, touchSlop))
+        }
+
+        // The events were consumed by our descendant, we should not start a drag gesture.
+        assertThat(started).isFalse()
+        assertThat(dragged).isFalse()
+        assertThat(stopped).isFalse()
+
+        // The next events could be consumed by us
+        consumedByDescendant = false
+        rule.onRoot().performTouchInput {
+            // The pointer is moved to a new position without reporting it
+            updatePointerBy(0, Offset(0f, touchSlop))
+
+            // The pointer report an "up" (0 pointers down) with a new position
+            up()
+        }
+
+        // The "up" event should not be used to start a drag gesture
+        assertThat(started).isFalse()
+        assertThat(dragged).isFalse()
+        assertThat(stopped).isFalse()
+    }
+
+    @Test
     fun handleDisappearingScrollableDuringAGesture() {
         val size = 200f
         val middle = Offset(size / 2f, size / 2f)

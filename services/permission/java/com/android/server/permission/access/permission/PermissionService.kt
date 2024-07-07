@@ -2687,7 +2687,7 @@ class PermissionService(private val service: AccessCheckingService) :
                 runtimePermissionChangedUidDevices.getOrPut(uid) { mutableSetOf() } += deviceId
             }
 
-            if (permission.hasGids && !wasPermissionGranted && isPermissionGranted) {
+            if (permission.hasGids && (wasPermissionGranted != isPermissionGranted)) {
                 gidsChangedUids += uid
             }
         }

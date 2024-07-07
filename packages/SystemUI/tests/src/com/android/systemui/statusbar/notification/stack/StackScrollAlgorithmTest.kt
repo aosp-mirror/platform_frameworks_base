@@ -115,6 +115,17 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableSceneContainer
+    fun resetViewStates_childPositionedAtStackTop() {
+        val stackTop = 100f
+        ambientState.stackTop = stackTop
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat(notificationRow.viewState.yTranslation).isEqualTo(stackTop)
+    }
+
+    @Test
     fun resetViewStates_defaultHun_yTranslationIsInset() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)

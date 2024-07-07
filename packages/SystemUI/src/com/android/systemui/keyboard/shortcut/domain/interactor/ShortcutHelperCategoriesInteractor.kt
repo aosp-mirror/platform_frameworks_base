@@ -35,21 +35,15 @@ constructor(
 
     private val systemsShortcutCategory = categoriesRepository.systemShortcutsCategory
     private val multitaskingShortcutsCategory = categoriesRepository.multitaskingShortcutsCategory
-    private val imeShortcutsCategory =
-        categoriesRepository.imeShortcutsCategory.map { groupSubCategoriesInCategory(it) }
+    private val imeShortcutsCategory = categoriesRepository.imeShortcutsCategory
 
     val shortcutCategories: Flow<List<ShortcutCategory>> =
         combine(systemsShortcutCategory, multitaskingShortcutsCategory, imeShortcutsCategory) {
             shortcutCategories ->
-            shortcutCategories.filterNotNull()
+            shortcutCategories.filterNotNull().map { groupSubCategoriesInCategory(it) }
         }
 
-    private fun groupSubCategoriesInCategory(
-        shortcutCategory: ShortcutCategory?
-    ): ShortcutCategory? {
-        if (shortcutCategory == null) {
-            return null
-        }
+    private fun groupSubCategoriesInCategory(shortcutCategory: ShortcutCategory): ShortcutCategory {
         val subCategoriesWithGroupedShortcuts =
             shortcutCategory.subCategories.map {
                 ShortcutSubCategory(

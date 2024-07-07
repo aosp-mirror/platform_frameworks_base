@@ -176,6 +176,7 @@ constructor(
         addFilter(BubbleNotAllowedSuppressor())
         addFilter(BubbleNoMetadataSuppressor())
         addFilter(HunGroupAlertBehaviorSuppressor())
+        addFilter(HunSilentNotificationSuppressor())
         addFilter(HunJustLaunchedFsiSuppressor())
         addFilter(AlertAppSuspendedSuppressor())
         addFilter(AlertKeyguardVisibilitySuppressor(keyguardNotificationVisibilityProvider))

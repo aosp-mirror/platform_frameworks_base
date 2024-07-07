@@ -40,6 +40,7 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
@@ -144,7 +145,10 @@ constructor(
      */
     override val isCommunalContentFlowFrozen: Flow<Boolean> =
         allOf(
-                keyguardTransitionInteractor.isFinishedInState(KeyguardState.GLANCEABLE_HUB),
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Communal,
+                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB
+                ),
                 keyguardInteractor.isKeyguardOccluded,
                 not(keyguardInteractor.isAbleToDream)
             )
@@ -177,7 +181,10 @@ constructor(
     // opened.
     override val isFocusable: Flow<Boolean> =
         combine(
-                keyguardTransitionInteractor.isFinishedInState(KeyguardState.GLANCEABLE_HUB),
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Communal,
+                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB
+                ),
                 communalInteractor.isIdleOnCommunal,
                 shadeInteractor.isAnyFullyExpanded,
             ) { transitionedToGlanceableHub, isIdleOnCommunal, isAnyFullyExpanded ->
@@ -314,14 +321,6 @@ constructor(
     val touchesAllowed: StateFlow<Boolean> =
         not(shadeInteractor.isAnyFullyExpanded)
             .stateIn(bgScope, SharingStarted.Eagerly, initialValue = false)
-
-    // TODO(b/339667383): remove this temporary swipe gesture handle
-    /**
-     * The dream overlay has its own gesture handle as the SysUI window is not visible above the
-     * dream. This flow will be false when dreaming so that we don't show a duplicate handle when
-     * opening the hub over the dream.
-     */
-    val showGestureIndicator: Flow<Boolean> = not(keyguardInteractor.isDreaming)
 
     /** The type of background to use for the hub. */
     val communalBackground: Flow<CommunalBackgroundType> =

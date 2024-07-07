@@ -193,7 +193,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             .strictness(Strictness.LENIENT)
             .spyStatic(DesktopModeStatus::class.java)
             .startMocking()
-    whenever(DesktopModeStatus.isEnabled()).thenReturn(true)
+    whenever(DesktopModeStatus.isDesktopModeFlagEnabled()).thenReturn(true)
     doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
 
     shellInit = spy(ShellInit(testExecutor))
@@ -264,7 +264,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   fun instantiate_flagOff_doNotAddInitCallback() {
-    whenever(DesktopModeStatus.isEnabled()).thenReturn(false)
+    whenever(DesktopModeStatus.canEnterDesktopMode(context)).thenReturn(false)
     clearInvocations(shellInit)
 
     createController()
@@ -700,19 +700,37 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun moveToDesktop_topActivityTranslucent_doesNothing() {
-    setFlagsRule.enableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  fun moveToDesktop_topActivityTranslucentWithStyleFloating_taskIsMovedToDesktop() {
     val task =
-        setUpFullscreenTask().apply {
-          isTopActivityTransparent = true
-          numActivities = 1
-        }
+      setUpFullscreenTask().apply {
+        isTopActivityTransparent = true
+        isTopActivityStyleFloating = true
+        numActivities = 1
+      }
+
+    controller.moveToDesktop(task, transitionSource = UNKNOWN)
+
+    val wct = getLatestEnterDesktopWct()
+    assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  fun moveToDesktop_topActivityTranslucentWithoutStyleFloating_doesNothing() {
+    val task =
+      setUpFullscreenTask().apply {
+        isTopActivityTransparent = true
+        isTopActivityStyleFloating = false
+        numActivities = 1
+      }
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
     verifyEnterDesktopWCTNotExecuted()
   }
 
   @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
   fun moveToDesktop_systemUIActivity_doesNothing() {
     val task = setUpFullscreenTask()
 
@@ -1087,13 +1105,19 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun handleRequest_fullscreenTask_freeformVisible_returnSwitchToFreeformWCT() {
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
+    val homeTask = setUpHomeTask()
     val freeformTask = setUpFreeformTask()
     markTaskVisible(freeformTask)
     val fullscreenTask = createFullscreenTask()
 
-    val result = controller.handleRequest(Binder(), createTransition(fullscreenTask))
-    assertThat(result?.changes?.get(fullscreenTask.token.asBinder())?.windowingMode)
+    val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+
+    assertNotNull(wct, "should handle request")
+    assertThat(wct.changes[fullscreenTask.token.asBinder()]?.windowingMode)
         .isEqualTo(WINDOWING_MODE_FREEFORM)
+
+    assertThat(wct.hierarchyOps).hasSize(2)
+    wct.assertReorderAt(1, homeTask, toTop = false)
   }
 
   @Test
@@ -1368,20 +1392,40 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun handleRequest_shouldLaunchAsModal_returnSwitchToFullscreenWCT() {
-    setFlagsRule.enableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  fun handleRequest_topActivityTransparentWithStyleFloating_returnSwitchToFreeformWCT() {
+    val freeformTask = setUpFreeformTask()
+    markTaskVisible(freeformTask)
+
     val task =
-        setUpFreeformTask().apply {
-          isTopActivityTransparent = true
-          numActivities = 1
-        }
+      setUpFullscreenTask().apply {
+        isTopActivityTransparent = true
+        isTopActivityStyleFloating = true
+        numActivities = 1
+      }
 
     val result = controller.handleRequest(Binder(), createTransition(task))
     assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)
-        .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
   }
 
   @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+  fun handleRequest_topActivityTransparentWithoutStyleFloating_returnSwitchToFullscreenWCT() {
+    val task =
+      setUpFreeformTask().apply {
+        isTopActivityTransparent = true
+        isTopActivityStyleFloating = false
+        numActivities = 1
+      }
+
+    val result = controller.handleRequest(Binder(), createTransition(task))
+    assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
   fun handleRequest_systemUIActivity_returnSwitchToFullscreenWCT() {
     val task = setUpFreeformTask()
 
@@ -1916,6 +1960,26 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun toggleBounds_togglesToCalculatedBoundsForNonResizable() {
+    val bounds = Rect(0, 0, 200, 100)
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds).apply {
+      topActivityInfo = ActivityInfo().apply {
+        screenOrientation = SCREEN_ORIENTATION_LANDSCAPE
+        configuration.windowConfiguration.appBounds = bounds
+      }
+      isResizeable = false
+    }
+
+    // Bounds should be 1000 x 500, vertically centered in the 1000 x 1000 stable bounds
+    val expectedBounds = Rect(STABLE_BOUNDS.left, 250, STABLE_BOUNDS.right, 750)
+
+    controller.toggleDesktopTaskSize(task)
+    // Assert bounds set to stable bounds
+    val wct = getLatestToggleResizeDesktopTaskWct()
+    assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
+  }
+
+  @Test
   fun toggleBounds_lastBoundsBeforeMaximizeSaved() {
     val bounds = Rect(0, 0, 100, 100)
     val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds)
@@ -1932,6 +1996,46 @@ class DesktopTasksControllerTest : ShellTestCase() {
     // Maximize
     controller.toggleDesktopTaskSize(task)
     task.configuration.windowConfiguration.bounds.set(STABLE_BOUNDS)
+
+    // Restore
+    controller.toggleDesktopTaskSize(task)
+
+    // Assert bounds set to last bounds before maximize
+    val wct = getLatestToggleResizeDesktopTaskWct()
+    assertThat(findBoundsChange(wct, task)).isEqualTo(boundsBeforeMaximize)
+  }
+
+  @Test
+  fun toggleBounds_togglesFromStableBoundsToLastBoundsBeforeMaximize_nonResizeableEqualWidth() {
+    val boundsBeforeMaximize = Rect(0, 0, 100, 100)
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, boundsBeforeMaximize).apply {
+      isResizeable = false
+    }
+
+    // Maximize
+    controller.toggleDesktopTaskSize(task)
+    task.configuration.windowConfiguration.bounds.set(STABLE_BOUNDS.left,
+      boundsBeforeMaximize.top, STABLE_BOUNDS.right, boundsBeforeMaximize.bottom)
+
+    // Restore
+    controller.toggleDesktopTaskSize(task)
+
+    // Assert bounds set to last bounds before maximize
+    val wct = getLatestToggleResizeDesktopTaskWct()
+    assertThat(findBoundsChange(wct, task)).isEqualTo(boundsBeforeMaximize)
+  }
+
+  @Test
+  fun toggleBounds_togglesFromStableBoundsToLastBoundsBeforeMaximize_nonResizeableEqualHeight() {
+    val boundsBeforeMaximize = Rect(0, 0, 100, 100)
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, boundsBeforeMaximize).apply {
+      isResizeable = false
+    }
+
+    // Maximize
+    controller.toggleDesktopTaskSize(task)
+    task.configuration.windowConfiguration.bounds.set(boundsBeforeMaximize.left,
+      STABLE_BOUNDS.top, boundsBeforeMaximize.right, STABLE_BOUNDS.bottom)
 
     // Restore
     controller.toggleDesktopTaskSize(task)

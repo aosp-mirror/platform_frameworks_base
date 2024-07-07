@@ -26,6 +26,7 @@ import android.os.Parcelable;
 import libcore.util.HexEncoding;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A class describing messages send to or from nanoapps through the Context Hub Service.
@@ -272,5 +273,16 @@ public final class NanoAppMessage implements Parcelable {
         }
 
         return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        if (!Flags.fixApiCheck()) {
+            return super.hashCode();
+        }
+
+        return Objects.hash(mNanoAppId, mMessageType, mIsBroadcasted,
+                Arrays.hashCode(mMessageBody), mIsReliable,
+                mMessageSequenceNumber);
     }
 }

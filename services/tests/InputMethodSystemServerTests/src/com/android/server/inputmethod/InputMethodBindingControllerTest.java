@@ -140,7 +140,8 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
         final InputMethodInfo info;
         synchronized (ImfLock.class) {
             mBindingController.setSelectedMethodId(TEST_IME_ID);
-            info = mInputMethodManagerService.queryInputMethodForCurrentUserLocked(TEST_IME_ID);
+            info = InputMethodSettingsRepository.get(mCallingUserId).getMethodMap()
+                    .get(TEST_IME_ID);
         }
         assertThat(info).isNotNull();
         assertThat(info.getId()).isEqualTo(TEST_IME_ID);

@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.os.UserManager;
 import android.view.Choreographer;
 import android.view.IWindowManager;
-import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -222,7 +221,8 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            InteractionJankMonitor interactionJankMonitor) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -239,7 +239,8 @@ public abstract class WMShellModule {
                     syncQueue,
                     transitions,
                     desktopTasksController,
-                    rootTaskDisplayAreaOrganizer);
+                    rootTaskDisplayAreaOrganizer,
+                    interactionJankMonitor);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -402,8 +403,7 @@ public abstract class WMShellModule {
             Optional<RecentTasksController> recentTasksController,
             HomeTransitionObserver homeTransitionObserver) {
         return new RecentsTransitionHandler(shellInit, transitions,
-                recentTasksController.orElse(null), homeTransitionObserver,
-                SurfaceControl.Transaction::new);
+                recentTasksController.orElse(null), homeTransitionObserver);
     }
 
     //
@@ -577,8 +577,8 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static ToggleResizeDesktopTaskTransitionHandler provideToggleResizeDesktopTaskTransitionHandler(
-            Transitions transitions) {
-        return new ToggleResizeDesktopTaskTransitionHandler(transitions);
+            Transitions transitions, InteractionJankMonitor interactionJankMonitor) {
+        return new ToggleResizeDesktopTaskTransitionHandler(transitions, interactionJankMonitor);
     }
 
     @WMSingleton

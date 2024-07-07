@@ -30,8 +30,8 @@ data class ShortcutCategory(
 class ShortcutCategoryBuilder(val type: ShortcutCategoryType) {
     private val subCategories = mutableListOf<ShortcutSubCategory>()
 
-    fun subCategory(label: String, shortcuts: List<Shortcut>) {
-        subCategories += ShortcutSubCategory(label, shortcuts)
+    fun subCategory(label: String, builder: ShortcutSubCategoryBuilder.() -> Unit) {
+        subCategories += ShortcutSubCategoryBuilder(label).apply(builder).build()
     }
 
     fun build() = ShortcutCategory(type, subCategories)

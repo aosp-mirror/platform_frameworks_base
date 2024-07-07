@@ -29,7 +29,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;

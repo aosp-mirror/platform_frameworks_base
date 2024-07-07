@@ -21,8 +21,8 @@ data class Shortcut(val label: String, val commands: List<ShortcutCommand>)
 class ShortcutBuilder(private val label: String) {
     val commands = mutableListOf<ShortcutCommand>()
 
-    fun command(vararg keyCodes: Int) {
-        commands += ShortcutCommand(keyCodes.toList())
+    fun command(builder: ShortcutCommandBuilder.() -> Unit) {
+        commands += ShortcutCommandBuilder().apply(builder).build()
     }
 
     fun build() = Shortcut(label, commands)

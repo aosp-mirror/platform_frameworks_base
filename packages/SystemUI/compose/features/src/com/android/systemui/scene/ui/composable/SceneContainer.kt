@@ -34,6 +34,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
@@ -56,7 +58,6 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
  *   must have entries in this map.
  * @param modifier A modifier.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SceneContainer(
     viewModel: SceneContainerViewModel,
@@ -66,8 +67,6 @@ fun SceneContainer(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val currentSceneKey: SceneKey by viewModel.currentScene.collectAsStateWithLifecycle()
-    val currentDestinations by
-        viewModel.currentDestinationScenes(coroutineScope).collectAsStateWithLifecycle()
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
             initialScene = currentSceneKey,
@@ -88,20 +87,19 @@ fun SceneContainer(
         onDispose { viewModel.setTransitionState(null) }
     }
 
+    val userActionsBySceneKey: Map<SceneKey, Map<UserAction, UserActionResult>> =
+        sceneByKey.values.associate { scene ->
+            val userActions by scene.destinationScenes.collectAsStateWithLifecycle(emptyMap())
+            val resolvedUserActions = viewModel.resolveSceneFamilies(userActions)
+            scene.key to resolvedUserActions
+        }
+
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
         SceneTransitionLayout(state = state, modifier = modifier.fillMaxSize()) {
             sceneByKey.forEach { (sceneKey, composableScene) ->
-                scene(
-                    key = sceneKey,
-                    userActions =
-                        if (sceneKey == currentSceneKey) {
-                            currentDestinations
-                        } else {
-                            viewModel.resolveSceneFamilies(composableScene.destinationScenes.value)
-                        },
-                ) {
+                scene(key = sceneKey, userActions = checkNotNull(userActionsBySceneKey[sceneKey])) {
                     with(composableScene) {
                         this@scene.Content(
                             modifier = Modifier.element(sceneKey.rootElementKey).fillMaxSize(),

@@ -82,7 +82,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
@@ -1578,6 +1578,25 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
         // No eligible activities found, let's remove the configuration listener.
         unregisterActivityConfigurationListener();
+    }
+
+    @Override
+    public boolean onApplyAppSpecificConfig(Configuration inOutConfig) {
+        if (mConfigActivityRecord != null) {
+            // Let the activity decide whether to apply the size override.
+            return false;
+        }
+        final DisplayContent displayContent = mAtm.mWindowManager != null
+                ? mAtm.mWindowManager.getDefaultDisplayContentLocked()
+                : null;
+        return applySizeOverride(
+                displayContent,
+                mInfo,
+                null /* newParentConfiguration */,
+                inOutConfig,
+                false /* optOutEdgeToEdge */,
+                false /* hasFixedRotationTransform */,
+                false /* hasCompatDisplayInsets */);
     }
 
     @Override

@@ -32,6 +32,13 @@ flag {
 }
 
 flag {
+    namespace: "virtual_devices"
+    name: "virtual_display_insets"
+    description: "APIs for specifying virtual display insets (via cutout)"
+    bug: "350007135"
+}
+
+flag {
      namespace: "virtual_devices"
      name: "metrics_collection"
      description: "Enable collection of VDM-related metrics"
@@ -88,4 +95,11 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "virtual_display_rotation_api"
+    description: "API for on-demand rotation of virtual displays"
+    bug: "291748430"
 }
