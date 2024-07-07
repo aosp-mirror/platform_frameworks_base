@@ -53,6 +53,7 @@ import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.log.DebugLogger;
 import com.android.systemui.notetask.NoteTaskController;
 import com.android.systemui.notetask.NoteTaskEntryPoint;
 import com.android.systemui.res.R;
@@ -265,11 +266,15 @@ public class AppClipsTrampolineActivity extends Activity {
             if (statusCode == CAPTURE_CONTENT_FOR_NOTE_SUCCESS) {
                 Uri uri = resultData.getParcelable(EXTRA_SCREENSHOT_URI, Uri.class);
                 convertedData.setData(uri);
-            }
 
-            if (resultData.containsKey(EXTRA_CLIP_DATA)) {
-                ClipData backlinksData = resultData.getParcelable(EXTRA_CLIP_DATA, ClipData.class);
-                convertedData.setClipData(backlinksData);
+                if (resultData.containsKey(EXTRA_CLIP_DATA)) {
+                    ClipData backlinksData = resultData.getParcelable(EXTRA_CLIP_DATA,
+                            ClipData.class);
+                    convertedData.setClipData(backlinksData);
+
+                    DebugLogger.INSTANCE.logcatMessage(this,
+                            () -> "onReceiveResult: sending notes app ClipData");
+                }
             }
 
             // Broadcast no longer required, setting it to null.

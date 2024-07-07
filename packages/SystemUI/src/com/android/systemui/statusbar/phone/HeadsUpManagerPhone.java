@@ -107,7 +107,6 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private int mStatusBarState;
     private AnimationStateHandler mAnimationStateHandler;
 
-    private Handler mBgHandler;
     private int mHeadsUpInset;
 
     // Used for determining the region for touch interaction
@@ -152,8 +151,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             UiEventLogger uiEventLogger,
             JavaAdapter javaAdapter,
             ShadeInteractor shadeInteractor,
-            AvalancheController avalancheController,
-            @Background Handler bgHandler) {
+            AvalancheController avalancheController) {
         super(context, logger, handler, globalSettings, systemClock, executor,
                 accessibilityManagerWrapper, uiEventLogger, avalancheController);
         Resources resources = mContext.getResources();
@@ -163,7 +161,6 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         mGroupMembershipManager = groupMembershipManager;
         mVisualStabilityProvider = visualStabilityProvider;
         mAvalancheController = avalancheController;
-        mBgHandler = bgHandler;
         updateResources();
         configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
             @Override
@@ -405,11 +402,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             // Waiting HUNs in AvalancheController are still promoted to the HUN section and thus
             // seen in open shade; clear them so we don't show them again when the shade closes and
             // reordering is allowed again.
-            int waitingKeysSize = mAvalancheController.getWaitingKeys().size();
-            mBgHandler.post(() -> {
-                // Do this in the background to avoid missing frames when closing the shade
-                mAvalancheController.logDroppedHuns(waitingKeysSize);
-            });
+            final int numDropped = mAvalancheController.getWaitingKeys().size();
+            mAvalancheController.logDroppedHunsInBackground(numDropped);
             mAvalancheController.clearNext();
 
             // In open shade the first HUN is pinned, and visual stability logic prevents us from

@@ -62,6 +62,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLogger.UiEventEnum;
 import com.android.settingslib.Utils;
 import com.android.systemui.Flags;
+import com.android.systemui.log.DebugLogger;
 import com.android.systemui.res.R;
 import com.android.systemui.screenshot.scroll.CropView;
 import com.android.systemui.settings.UserTracker;
@@ -307,13 +308,16 @@ public class AppClipsActivity extends ComponentActivity {
                 && mViewModel.getBacklinksLiveData().getValue() != null) {
             ClipData backlinksData = mViewModel.getBacklinksLiveData().getValue().getClipData();
             data.putParcelable(EXTRA_CLIP_DATA, backlinksData);
+
+            DebugLogger.INSTANCE.logcatMessage(this,
+                    () -> "setResultThenFinish: sending notes app ClipData");
         }
 
         try {
             mResultReceiver.send(Activity.RESULT_OK, data);
             logUiEvent(SCREENSHOT_FOR_NOTE_ACCEPTED);
         } catch (Exception e) {
-            Log.e(TAG, "Error while returning data to trampoline activity", e);
+            Log.e(TAG, "Error while sending data to trampoline activity", e);
         }
 
         // Nullify the ResultReceiver before finishing to avoid resending the result.
@@ -354,6 +358,7 @@ public class AppClipsActivity extends ComponentActivity {
             }
         } catch (Exception e) {
             // Do nothing.
+            Log.e(TAG, "Error while sending trampoline activity error code: " + errorCode, e);
         }
 
         // Nullify the ResultReceiver to avoid resending the result.

@@ -216,3 +216,11 @@ flag {
     description: "Allow privileged apps to call bugreport generation without enforcing user consent and delegate it to the calling app instead"
     bug: "324046728"
 }
+
+flag {
+    name: "get_private_space_settings"
+    namespace: "profile_experiences"
+    description: "Guards a new Private Profile API in LauncherApps"
+    bug: "346294653"
+    is_exported: true
+}

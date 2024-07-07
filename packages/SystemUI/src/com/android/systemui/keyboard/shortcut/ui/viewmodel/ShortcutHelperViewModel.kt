@@ -17,8 +17,10 @@
 package com.android.systemui.keyboard.shortcut.ui.viewmodel
 
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperStateInteractor
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState
+import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -30,6 +32,7 @@ class ShortcutHelperViewModel
 constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val stateInteractor: ShortcutHelperStateInteractor,
+    categoriesInteractor: ShortcutHelperCategoriesInteractor,
 ) {
 
     val shouldShow =
@@ -37,6 +40,18 @@ constructor(
             .map { it is ShortcutHelperState.Active }
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
+
+    val shortcutsUiState =
+        categoriesInteractor.shortcutCategories.map {
+            if (it.isEmpty()) {
+                ShortcutsUiState.Inactive
+            } else {
+                ShortcutsUiState.Active(
+                    shortcutCategories = it,
+                    defaultSelectedCategory = it.first().type,
+                )
+            }
+        }
 
     fun onViewClosed() {
         stateInteractor.onViewClosed()

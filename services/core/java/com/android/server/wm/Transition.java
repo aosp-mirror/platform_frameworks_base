@@ -1694,7 +1694,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // ActivityRecord#canShowWindows() may reject to show its window. The visibility also
         // needs to be updated for STATE_ABORT.
         commitVisibleActivities(transaction);
-        commitVisibleWallpapers();
+        commitVisibleWallpapers(transaction);
 
         if (mTransactionCompletedListeners != null) {
             for (int i = 0; i < mTransactionCompletedListeners.size(); i++) {
@@ -2128,13 +2128,21 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     /**
      * Reset waitingToshow for all wallpapers, and commit the visibility of the visible ones
      */
-    private void commitVisibleWallpapers() {
+    private void commitVisibleWallpapers(SurfaceControl.Transaction t) {
         boolean showWallpaper = shouldWallpaperBeVisible();
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WallpaperWindowToken wallpaper = mParticipants.valueAt(i).asWallpaperToken();
             if (wallpaper != null) {
                 if (!wallpaper.isVisible() && wallpaper.isVisibleRequested()) {
                     wallpaper.commitVisibility(showWallpaper);
+                }
+                if (showWallpaper && Flags.ensureWallpaperInTransitions()
+                        && wallpaper.isVisibleRequested()
+                        && getLeashSurface(wallpaper, t) != wallpaper.getSurfaceControl()) {
+                    // If on a rotation leash, we need to explicitly show the wallpaper surface
+                    // because shell only gets the leash and we don't allow non-transition logic
+                    // to touch the surfaces until the transition is over.
+                    t.show(wallpaper.getSurfaceControl());
                 }
             }
         }
@@ -2837,6 +2845,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     // Use parent rotation because shell doesn't know the surface is rotated.
                     endRotation = parent.getWindowConfiguration().getRotation();
                 }
+            } else if (isWallpaper(target) && Flags.ensureWallpaperInTransitions()
+                    && target.getRelativeDisplayRotation() != 0
+                    && !target.mTransitionController.useShellTransitionsRotation()) {
+                // If the wallpaper is "fixed-rotated", shell is unaware of this, so use the
+                // "as-if-not-rotating" bounds and rotation
+                change.setEndAbsBounds(parent.getBounds());
+                endRotation = parent.getWindowConfiguration().getRotation();
             } else {
                 change.setEndAbsBounds(bounds);
             }

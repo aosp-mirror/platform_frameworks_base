@@ -267,6 +267,23 @@ object KeyguardRootViewBinder {
                             }
                         }
 
+                        launch {
+                            blueprintViewModel.currentTransition.collect { currentTransition ->
+                                // When blueprint/clock transitions end (null), make sure NSSL is in
+                                // the right place
+                                if (currentTransition == null) {
+                                    childViews[nsslPlaceholderId]?.let { notificationListPlaceholder
+                                        ->
+                                        viewModel.onNotificationContainerBoundsChanged(
+                                            notificationListPlaceholder.top.toFloat(),
+                                            notificationListPlaceholder.bottom.toFloat(),
+                                            animate = true,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
                         if (NotificationIconContainerRefactor.isEnabled) {
                             launch {
                                 val iconsAppearTranslationPx =
