@@ -17,7 +17,6 @@
 #ifndef _ANDROID_STRING_POOL_H
 #define _ANDROID_STRING_POOL_H
 
-#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -25,6 +24,7 @@
 
 #include "BigBuffer.h"
 #include "IDiagnostics.h"
+#include "android-base/function_ref.h"
 #include "android-base/macros.h"
 #include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
@@ -205,7 +205,8 @@ class StringPool {
   // Sorts the strings according to their Context using some comparison function.
   // Equal Contexts are further sorted by string value, lexicographically.
   // If no comparison function is provided, values are only sorted lexicographically.
-  void Sort(const std::function<int(const Context&, const Context&)>& cmp = nullptr);
+  void Sort();
+  void Sort(base::function_ref<int(const Context&, const Context&)> cmp);
 
   // Removes any strings that have no references.
   void Prune();

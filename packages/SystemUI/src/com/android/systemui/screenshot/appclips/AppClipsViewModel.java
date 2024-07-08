@@ -54,6 +54,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.log.DebugLogger;
 import com.android.systemui.screenshot.AssistContentRequester;
 import com.android.systemui.screenshot.ImageExporter;
 
@@ -143,6 +144,7 @@ final class AppClipsViewModel extends ViewModel {
      * @param displayId       id of the display to query tasks for Backlinks data
      */
     void triggerBacklinks(Set<Integer> taskIdsToIgnore, int displayId) {
+        DebugLogger.INSTANCE.logcatMessage(this, () -> "Backlinks triggered");
         mBgExecutor.execute(() -> {
             ListenableFuture<InternalBacklinksData> backlinksData = getBacklinksData(
                     taskIdsToIgnore, displayId);
@@ -247,6 +249,10 @@ final class AppClipsViewModel extends ViewModel {
     }
 
     private boolean shouldIncludeTask(RootTaskInfo taskInfo, Set<Integer> taskIdsToIgnore) {
+        DebugLogger.INSTANCE.logcatMessage(this,
+                () -> String.format("shouldIncludeTask taskId %d; topActivity %s", taskInfo.taskId,
+                        taskInfo.topActivity));
+
         // Only consider tasks that shouldn't be ignored, are visible, running, and have a launcher
         // icon. Furthermore, types such as launcher/home/dock/assistant are ignored.
         return !taskIdsToIgnore.contains(taskInfo.taskId)
@@ -267,6 +273,10 @@ final class AppClipsViewModel extends ViewModel {
 
     private ListenableFuture<InternalBacklinksData> getBacklinksDataForTaskId(
             RootTaskInfo taskInfo) {
+        DebugLogger.INSTANCE.logcatMessage(this,
+                () -> String.format("getBacklinksDataForTaskId for taskId %d; topActivity %s",
+                        taskInfo.taskId, taskInfo.topActivity));
+
         SettableFuture<InternalBacklinksData> backlinksData = SettableFuture.create();
         int taskId = taskInfo.taskId;
         mAssistContentRequester.requestAssistContent(taskId, assistContent ->
@@ -295,6 +305,10 @@ final class AppClipsViewModel extends ViewModel {
      */
     private InternalBacklinksData getBacklinksDataFromAssistContent(RootTaskInfo taskInfo,
             @Nullable AssistContent content) {
+        DebugLogger.INSTANCE.logcatMessage(this,
+                () -> String.format("getBacklinksDataFromAssistContent taskId %d; topActivity %s",
+                        taskInfo.taskId, taskInfo.topActivity));
+
         String appName = getAppNameOfTask(taskInfo);
         String packageName = taskInfo.topActivity.getPackageName();
         Drawable appIcon = taskInfo.topActivityInfo.loadIcon(mPackageManager);
@@ -307,22 +321,34 @@ final class AppClipsViewModel extends ViewModel {
 
         // First preference is given to app provided uri.
         if (content.isAppProvidedWebUri()) {
+            DebugLogger.INSTANCE.logcatMessage(this,
+                    () -> "getBacklinksDataFromAssistContent: app has provided a uri");
+
             Uri uri = content.getWebUri();
             Intent backlinksIntent = new Intent(ACTION_VIEW).setData(uri);
             if (doesIntentResolveToSamePackage(backlinksIntent, packageName)) {
+                DebugLogger.INSTANCE.logcatMessage(this,
+                        () -> "getBacklinksDataFromAssistContent: using app provided uri");
                 return new InternalBacklinksData(ClipData.newRawUri(appName, uri), appIcon);
             }
         }
 
         // Second preference is given to app provided, hopefully deep-linking, intent.
         if (content.isAppProvidedIntent()) {
+            DebugLogger.INSTANCE.logcatMessage(this,
+                    () -> "getBacklinksDataFromAssistContent: app has provided an intent");
+
             Intent backlinksIntent = content.getIntent();
             if (doesIntentResolveToSamePackage(backlinksIntent, packageName)) {
+                DebugLogger.INSTANCE.logcatMessage(this,
+                        () -> "getBacklinksDataFromAssistContent: using app provided intent");
                 return new InternalBacklinksData(ClipData.newIntent(appName, backlinksIntent),
                         appIcon);
             }
         }
 
+        DebugLogger.INSTANCE.logcatMessage(this,
+                () -> "getBacklinksDataFromAssistContent: using fallback");
         return fallback;
     }
 
