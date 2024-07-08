@@ -339,7 +339,7 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"Telefonanrufe tätigen und verwalten"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Körpersensoren"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"auf Sensordaten zu deinen Vitaldaten zugreifen"</string>
-    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Benachrichtigungen"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Benachrichtigun­gen"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"Benachrichtigungen anzeigen"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Fensterinhalte abrufen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Die Inhalte eines Fensters, mit dem du interagierst, werden abgerufen."</string>
@@ -2396,17 +2396,12 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages öffnen"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"So funktionierts"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Entsperrung per Fingerabdruck neu einrichten"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> wird nicht mehr erkannt."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> und <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> werden nicht mehr erkannt."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> wird nicht mehr erkannt. Richte die Entsperrung per Fingerabdruck neu ein."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> und <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> werden nicht mehr erkannt. Richte die Entsperrung per Fingerabdruck neu ein."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Entsperrung per Gesichtserkennung neu einrichten"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Dein Gesichtsmodell wird nicht mehr erkannt. Richte die Entsperrung per Gesichtserkennung neu ein."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Einrichten"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Nicht jetzt"</string>
 </resources>
