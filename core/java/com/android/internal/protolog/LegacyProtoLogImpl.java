@@ -97,12 +97,12 @@ public class LegacyProtoLogImpl implements IProtoLog {
     @VisibleForTesting
     @Override
     public void log(LogLevel level, IProtoLogGroup group, long messageHash, int paramsMask,
-            Object[] args) {
+            @Nullable String messageString, Object[] args) {
         if (group.isLogToProto()) {
             logToProto(messageHash, paramsMask, args);
         }
         if (group.isLogToLogcat()) {
-            logToLogcat(group.getTag(), level, messageHash, args);
+            logToLogcat(group.getTag(), level, messageHash, messageString, args);
         }
     }
 
@@ -113,9 +113,12 @@ public class LegacyProtoLogImpl implements IProtoLog {
                 "Not implemented. Only implemented for PerfettoProtoLogImpl.");
     }
 
-    private void logToLogcat(String tag, LogLevel level, long messageHash, Object[] args) {
+    private void logToLogcat(String tag, LogLevel level, long messageHash,
+            @Nullable String messageString, Object[] args) {
         String message = null;
-        final String messageString = mViewerConfig.getViewerString(messageHash);
+        if (messageString == null) {
+            messageString = mViewerConfig.getViewerString(messageHash);
+        }
         if (messageString != null) {
             if (args != null) {
                 try {
