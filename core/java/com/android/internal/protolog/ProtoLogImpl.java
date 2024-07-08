@@ -92,14 +92,6 @@ public class ProtoLogImpl {
     }
 
     /**
-     * Registers available protolog groups. A group must be registered before it can be used.
-     * @param protoLogGroups The groups to register for use in protolog.
-     */
-    public static void registerGroups(IProtoLogGroup... protoLogGroups) {
-        getSingleInstance().registerGroups(protoLogGroups);
-    }
-
-    /**
      * Returns the single instance of the ProtoLogImpl singleton class.
      */
     public static synchronized IProtoLog getSingleInstance() {
