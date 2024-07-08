@@ -100,6 +100,7 @@ val Kosmos.shortcutHelperCategoriesInteractor by
 val Kosmos.shortcutHelperViewModel by
     Kosmos.Fixture {
         ShortcutHelperViewModel(
+            applicationCoroutineScope,
             testDispatcher,
             shortcutHelperStateInteractor,
             shortcutHelperCategoriesInteractor
