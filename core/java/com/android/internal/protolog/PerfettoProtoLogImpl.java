@@ -82,10 +82,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A service for the ProtoLog logging system.
@@ -96,7 +93,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
     private final ProtoLogDataSource mDataSource = new ProtoLogDataSource(
             this::onTracingInstanceStart,
-            this::onTracingFlush,
+            this::dumpTransitionTraceConfig,
             this::onTracingInstanceStop
     );
     private final ProtoLogViewerConfigReader mViewerConfigReader;
@@ -107,8 +104,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     private final int[] mDefaultLogLevelCounts = new int[LogLevel.values().length];
     private final Map<IProtoLogGroup, int[]> mLogLevelCounts = new ArrayMap<>();
 
-    private final Lock mBackgroundServiceLock = new ReentrantLock();
-    private ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
+    private final ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
     public PerfettoProtoLogImpl(String viewerConfigFilePath, Runnable cacheUpdater) {
         this(() -> {
@@ -181,30 +177,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         if (group.isLogToLogcat()) {
             logToLogcat(group.getTag(), logLevel, messageString, args);
         }
-    }
-
-    private void onTracingFlush() {
-        final ExecutorService loggingService;
-        try {
-            mBackgroundServiceLock.lock();
-            loggingService = mBackgroundLoggingService;
-            mBackgroundLoggingService = Executors.newSingleThreadExecutor();
-        } finally {
-            mBackgroundServiceLock.unlock();
-        }
-
-        try {
-            loggingService.shutdown();
-            boolean finished = loggingService.awaitTermination(10, TimeUnit.SECONDS);
-
-            if (!finished) {
-                Log.e(LOG_TAG, "ProtoLog background tracing service didn't finish gracefully.");
-            }
-        } catch (InterruptedException e) {
-            Log.e(LOG_TAG, "Failed to wait for tracing to finish", e);
-        }
-
-        dumpTransitionTraceConfig();
     }
 
     private void dumpTransitionTraceConfig() {
