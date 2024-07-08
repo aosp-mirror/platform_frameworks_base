@@ -711,6 +711,29 @@ public class PerfettoProtoLogImplTest {
                 .isEqualTo("My test null string: null");
     }
 
+    @Test
+    public void supportNullParams() throws IOException {
+        PerfettoTraceMonitor traceMonitor =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(true)
+                        .build();
+
+        try {
+            traceMonitor.start();
+
+            mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP,
+                    "My null args: %d, %f, %b", null, null, null);
+        } finally {
+            traceMonitor.stop(mWriter);
+        }
+
+        final ResultReader reader = new ResultReader(mWriter.write(), mTraceConfig);
+        final ProtoLogTrace protolog = reader.readProtoLogTrace();
+
+        Truth.assertThat(protolog.messages).hasSize(1);
+        Truth.assertThat(protolog.messages.get(0).getMessage())
+                .isEqualTo("My null args: 0, 0, false");
+    }
+
     private enum TestProtoLogGroup implements IProtoLogGroup {
         TEST_GROUP(true, true, false, "TEST_TAG");
 

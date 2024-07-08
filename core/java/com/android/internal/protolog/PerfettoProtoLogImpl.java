@@ -476,13 +476,25 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                                 needsIncrementalState = true;
                                 break;
                             case LogDataType.LONG:
-                                longParams.add(((Number) o).longValue());
+                                if (o == null) {
+                                    longParams.add(0);
+                                } else {
+                                    longParams.add(((Number) o).longValue());
+                                }
                                 break;
                             case LogDataType.DOUBLE:
-                                doubleParams.add(((Number) o).doubleValue());
+                                if (o == null) {
+                                    doubleParams.add(0d);
+                                } else {
+                                    doubleParams.add(((Number) o).doubleValue());
+                                }
                                 break;
                             case LogDataType.BOOLEAN:
-                                booleanParams.add((boolean) o);
+                                if (o == null) {
+                                    booleanParams.add(false);
+                                } else {
+                                    booleanParams.add((boolean) o);
+                                }
                                 break;
                         }
                     } catch (ClassCastException ex) {
