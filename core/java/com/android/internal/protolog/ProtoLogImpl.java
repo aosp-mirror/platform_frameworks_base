@@ -105,13 +105,14 @@ public class ProtoLogImpl {
     public static synchronized IProtoLog getSingleInstance() {
         if (sServiceInstance == null) {
             if (android.tracing.Flags.perfettoProtologTracing()) {
-                sServiceInstance = new PerfettoProtoLogImpl(
-                        sViewerConfigPath, sLogGroups, sCacheUpdater);
+                sServiceInstance = new PerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater);
             } else {
                 sServiceInstance = new LegacyProtoLogImpl(
-                        sLegacyOutputFilePath, sLegacyViewerConfigPath, sLogGroups, sCacheUpdater);
+                        sLegacyOutputFilePath, sLegacyViewerConfigPath, sCacheUpdater);
             }
 
+            IProtoLogGroup[] groups = sLogGroups.values().toArray(new IProtoLogGroup[0]);
+            sServiceInstance.registerGroups(groups);
             sCacheUpdater.run();
         }
         return sServiceInstance;
