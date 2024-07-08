@@ -101,8 +101,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     private final TreeMap<String, IProtoLogGroup> mLogGroups;
     private final Runnable mCacheUpdater;
 
-    private final int[] mDefaultLogLevelCounts = new int[LogLevel.values().length];
-    private final Map<IProtoLogGroup, int[]> mLogLevelCounts = new ArrayMap<>();
+    private final Map<LogLevel, Integer> mDefaultLogLevelCounts = new ArrayMap<>();
+    private final Map<IProtoLogGroup, Map<LogLevel, Integer>> mLogLevelCounts = new ArrayMap<>();
 
     private final ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
@@ -660,10 +660,25 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
     @Override
     public boolean isEnabled(IProtoLogGroup group, LogLevel level) {
-        final int[] groupLevelCount = mLogLevelCounts.get(group);
-        return (groupLevelCount == null && mDefaultLogLevelCounts[level.ordinal()] > 0)
-                || (groupLevelCount != null && groupLevelCount[level.ordinal()] > 0)
-                || group.isLogToLogcat();
+        return group.isLogToLogcat() || getLogFromLevel(group).ordinal() <= level.ordinal();
+    }
+
+    private LogLevel getLogFromLevel(IProtoLogGroup group) {
+        if (mLogLevelCounts.containsKey(group)) {
+            for (LogLevel logLevel : LogLevel.values()) {
+                if (mLogLevelCounts.get(group).getOrDefault(logLevel, 0) > 0) {
+                    return logLevel;
+                }
+            }
+        } else {
+            for (LogLevel logLevel : LogLevel.values()) {
+                if (mDefaultLogLevelCounts.getOrDefault(logLevel, 0) > 0) {
+                    return logLevel;
+                }
+            }
+        }
+
+        return LogLevel.WTF;
     }
 
     /**
@@ -745,22 +760,20 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         this.mTracingInstances.incrementAndGet();
 
         final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
-        for (int i = defaultLogFrom.ordinal(); i < LogLevel.values().length; i++) {
-            mDefaultLogLevelCounts[i]++;
-        }
+        mDefaultLogLevelCounts.put(defaultLogFrom,
+                mDefaultLogLevelCounts.getOrDefault(defaultLogFrom, 0) + 1);
 
         final Set<String> overriddenGroupTags = config.getGroupTagsWithOverriddenConfigs();
 
         for (String overriddenGroupTag : overriddenGroupTags) {
             IProtoLogGroup group = mLogGroups.get(overriddenGroupTag);
 
-            mLogLevelCounts.putIfAbsent(group, new int[LogLevel.values().length]);
-            final int[] logLevelsCountsForGroup = mLogLevelCounts.get(group);
+            mLogLevelCounts.putIfAbsent(group, new ArrayMap<>());
+            final Map<LogLevel, Integer> logLevelsCountsForGroup = mLogLevelCounts.get(group);
 
             final LogLevel logFromLevel = config.getConfigFor(overriddenGroupTag).logFrom;
-            for (int i = defaultLogFrom.ordinal(); i < LogLevel.values().length; i++) {
-                logLevelsCountsForGroup[logFromLevel.ordinal()]++;
-            }
+            logLevelsCountsForGroup.put(logFromLevel,
+                    logLevelsCountsForGroup.getOrDefault(logFromLevel, 0) + 1);
         }
 
         mCacheUpdater.run();
@@ -770,8 +783,10 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         this.mTracingInstances.decrementAndGet();
 
         final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
-        for (int i = defaultLogFrom.ordinal(); i < LogLevel.values().length; i++) {
-            mDefaultLogLevelCounts[i]--;
+        mDefaultLogLevelCounts.put(defaultLogFrom,
+                mDefaultLogLevelCounts.get(defaultLogFrom) - 1);
+        if (mDefaultLogLevelCounts.get(defaultLogFrom) <= 0) {
+            mDefaultLogLevelCounts.remove(defaultLogFrom);
         }
 
         final Set<String> overriddenGroupTags = config.getGroupTagsWithOverriddenConfigs();
@@ -779,13 +794,16 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         for (String overriddenGroupTag : overriddenGroupTags) {
             IProtoLogGroup group = mLogGroups.get(overriddenGroupTag);
 
-            final int[] logLevelsCountsForGroup = mLogLevelCounts.get(group);
+            mLogLevelCounts.putIfAbsent(group, new ArrayMap<>());
+            final Map<LogLevel, Integer> logLevelsCountsForGroup = mLogLevelCounts.get(group);
 
             final LogLevel logFromLevel = config.getConfigFor(overriddenGroupTag).logFrom;
-            for (int i = defaultLogFrom.ordinal(); i < LogLevel.values().length; i++) {
-                logLevelsCountsForGroup[i]--;
+            logLevelsCountsForGroup.put(logFromLevel,
+                    logLevelsCountsForGroup.get(logFromLevel) - 1);
+            if (logLevelsCountsForGroup.get(logFromLevel) <= 0) {
+                logLevelsCountsForGroup.remove(logFromLevel);
             }
-            if (Arrays.stream(logLevelsCountsForGroup).allMatch(it -> it == 0)) {
+            if (logLevelsCountsForGroup.isEmpty()) {
                 mLogLevelCounts.remove(group);
             }
         }
