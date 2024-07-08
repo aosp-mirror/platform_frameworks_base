@@ -210,6 +210,9 @@ class BackNavigationController {
                             + "topRunningActivity=%s, callbackInfo=%s, currentFocus=%s",
                     currentTask, currentActivity, callbackInfo, window);
 
+            // Clear the pointer down outside focus if any.
+            mWindowManagerService.clearPointerDownOutsideFocusRunnable();
+
             // If we don't need to set up the animation, we return early. This is the case when
             // - We have an application callback.
             // - We don't have any ActivityRecord or Task to animate.
