@@ -74,6 +74,7 @@ import com.android.systemui.log.table.TableLogBuffer;
 import com.android.systemui.mediaprojection.MediaProjectionModule;
 import com.android.systemui.mediaprojection.appselector.MediaProjectionActivitiesModule;
 import com.android.systemui.mediaprojection.taskswitcher.MediaProjectionTaskSwitcherModule;
+import com.android.systemui.mediarouter.MediaRouterModule;
 import com.android.systemui.model.SceneContainerPlugin;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.motiontool.MotionToolModule;
@@ -220,6 +221,7 @@ import javax.inject.Named;
         MediaProjectionActivitiesModule.class,
         MediaProjectionModule.class,
         MediaProjectionTaskSwitcherModule.class,
+        MediaRouterModule.class,
         MotionToolModule.class,
         NotificationIconAreaControllerModule.class,
         PeopleHubModule.class,
