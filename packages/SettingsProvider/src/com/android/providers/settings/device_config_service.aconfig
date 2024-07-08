@@ -41,3 +41,14 @@ flag {
     description: "If this flag is detected as true on boot, writes a logfile to track storage migration correctness."
     bug: "328444881"
 }
+
+flag {
+    name: "ignore_xml_for_read_only_flags"
+    namespace: "core_experiments_team_internal"
+    description: "When enabled, ignore any flag in the SettingsProvider XML for RO flags."
+    bug: "345007098"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
