@@ -427,15 +427,10 @@ class DesktopModeFlagsTest : ShellTestCase() {
   }
 
   private fun resetCache() {
-    val cachedToggleOverrideDesktopMode =
-        DESKTOP_WINDOWING_MODE::class.java.getDeclaredField("cachedToggleOverride")
-    cachedToggleOverrideDesktopMode.isAccessible = true
-    cachedToggleOverrideDesktopMode.set(DESKTOP_WINDOWING_MODE, null)
-
-    val cachedToggleOverrideWallpaperActivity =
-      WALLPAPER_ACTIVITY::class.java.getDeclaredField("cachedToggleOverride")
-    cachedToggleOverrideWallpaperActivity.isAccessible = true
-    cachedToggleOverrideWallpaperActivity.set(WALLPAPER_ACTIVITY, null)
+    val cachedToggleOverride =
+      DesktopModeFlags::class.java.getDeclaredField("cachedToggleOverride")
+    cachedToggleOverride.isAccessible = true
+    cachedToggleOverride.set(null, null)
 
     // Clear override cache stored in System property
     System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY)
