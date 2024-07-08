@@ -226,16 +226,24 @@ package com.android.server.display.config {
 
   public class HdrBrightnessConfig {
     ctor public HdrBrightnessConfig();
+    method @NonNull public final boolean getAllowInLowPowerMode();
     method public final java.math.BigInteger getBrightnessDecreaseDebounceMillis();
     method public final java.math.BigInteger getBrightnessIncreaseDebounceMillis();
     method @NonNull public final com.android.server.display.config.NonNegativeFloatToFloatMap getBrightnessMap();
+    method @Nullable public final java.math.BigDecimal getMinimumHdrPercentOfScreenForHbm();
+    method @Nullable public final java.math.BigDecimal getMinimumHdrPercentOfScreenForNbm();
     method public final java.math.BigDecimal getScreenBrightnessRampDecrease();
     method public final java.math.BigDecimal getScreenBrightnessRampIncrease();
+    method @Nullable public final com.android.server.display.config.NonNegativeFloatToFloatMap getSdrHdrRatioMap();
+    method public final void setAllowInLowPowerMode(@NonNull boolean);
     method public final void setBrightnessDecreaseDebounceMillis(java.math.BigInteger);
     method public final void setBrightnessIncreaseDebounceMillis(java.math.BigInteger);
     method public final void setBrightnessMap(@NonNull com.android.server.display.config.NonNegativeFloatToFloatMap);
+    method public final void setMinimumHdrPercentOfScreenForHbm(@Nullable java.math.BigDecimal);
+    method public final void setMinimumHdrPercentOfScreenForNbm(@Nullable java.math.BigDecimal);
     method public final void setScreenBrightnessRampDecrease(java.math.BigDecimal);
     method public final void setScreenBrightnessRampIncrease(java.math.BigDecimal);
+    method public final void setSdrHdrRatioMap(@Nullable com.android.server.display.config.NonNegativeFloatToFloatMap);
   }
 
   public class HighBrightnessMode {

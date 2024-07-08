@@ -54,6 +54,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.server.display.config.HdrBrightnessData;
+import com.android.server.display.config.HighBrightnessModeData;
 import com.android.server.display.config.HysteresisLevels;
 import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
 import com.android.server.display.config.RefreshRateData;
@@ -436,7 +437,7 @@ public final class DisplayDeviceConfigTest {
     public void testHighBrightnessModeDataFromDisplayConfig() throws IOException {
         setupDisplayDeviceConfigFromDisplayConfigFile();
 
-        DisplayDeviceConfig.HighBrightnessModeData hbmData =
+        HighBrightnessModeData hbmData =
                 mDisplayDeviceConfig.getHighBrightnessModeData();
         assertNotNull(hbmData);
         assertEquals(BRIGHTNESS[1], hbmData.transitionPoint, ZERO_DELTA);
@@ -671,14 +672,14 @@ public final class DisplayDeviceConfigTest {
         HdrBrightnessData data = mDisplayDeviceConfig.getHdrBrightnessData();
 
         assertNotNull(data);
-        assertEquals(2, data.mMaxBrightnessLimits.size());
-        assertEquals(13000, data.mBrightnessDecreaseDebounceMillis);
-        assertEquals(0.1f, data.mScreenBrightnessRampDecrease, SMALL_DELTA);
-        assertEquals(1000, data.mBrightnessIncreaseDebounceMillis);
-        assertEquals(0.11f, data.mScreenBrightnessRampIncrease, SMALL_DELTA);
+        assertEquals(2, data.maxBrightnessLimits.size());
+        assertEquals(13000, data.brightnessDecreaseDebounceMillis);
+        assertEquals(0.1f, data.screenBrightnessRampDecrease, SMALL_DELTA);
+        assertEquals(1000, data.brightnessIncreaseDebounceMillis);
+        assertEquals(0.11f, data.screenBrightnessRampIncrease, SMALL_DELTA);
 
-        assertEquals(0.3f, data.mMaxBrightnessLimits.get(500f), SMALL_DELTA);
-        assertEquals(0.6f, data.mMaxBrightnessLimits.get(1200f), SMALL_DELTA);
+        assertEquals(0.3f, data.maxBrightnessLimits.get(500f), SMALL_DELTA);
+        assertEquals(0.6f, data.maxBrightnessLimits.get(1200f), SMALL_DELTA);
     }
 
     private void verifyConfigValuesFromConfigResource() {
