@@ -91,6 +91,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class PerfettoProtoLogImpl implements IProtoLog {
     private static final String LOG_TAG = "ProtoLog";
+    public static final String NULL_STRING = "null";
     private final AtomicInteger mTracingInstances = new AtomicInteger();
 
     private final ProtoLogDataSource mDataSource = new ProtoLogDataSource(
@@ -320,8 +321,14 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             StringBuilder builder = new StringBuilder("UNKNOWN MESSAGE");
             if (args != null) {
                 builder.append(" args = (");
-                builder.append(String.join(", ", Arrays.stream(args).map(
-                        Object::toString).toList()));
+                builder.append(String.join(", ", Arrays.stream(args)
+                        .map(it -> {
+                            if (it == null) {
+                                return "null";
+                            } else {
+                                return it.toString();
+                            }
+                        }).toList()));
                 builder.append(")");
             }
             messageString = builder.toString();
@@ -412,7 +419,11 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 for (Object o : args) {
                     int type = LogDataType.bitmaskToLogDataType(message.getMessageMask(), argIndex);
                     if (type == LogDataType.STRING) {
-                        internStringArg(ctx, o.toString());
+                        if (o == null) {
+                            internStringArg(ctx, NULL_STRING);
+                        } else {
+                            internStringArg(ctx, o.toString());
+                        }
                     }
                     argIndex++;
                 }
@@ -455,7 +466,12 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                     try {
                         switch (type) {
                             case LogDataType.STRING:
-                                final int internedStringId = internStringArg(ctx, o.toString());
+                                final int internedStringId;
+                                if (o == null) {
+                                    internedStringId = internStringArg(ctx, NULL_STRING);
+                                } else {
+                                    internedStringId = internStringArg(ctx, o.toString());
+                                }
                                 os.write(STR_PARAM_IIDS, internedStringId);
                                 needsIncrementalState = true;
                                 break;
