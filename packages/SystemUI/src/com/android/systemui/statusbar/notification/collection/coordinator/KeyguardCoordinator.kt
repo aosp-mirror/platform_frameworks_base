@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.app.NotificationManager
@@ -27,9 +25,10 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
-import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.expansionChanges
 import com.android.systemui.statusbar.notification.collection.GroupEntry
@@ -58,7 +57,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -89,7 +87,7 @@ constructor(
     private val headsUpManager: HeadsUpManager,
     private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
     private val keyguardRepository: KeyguardRepository,
-    private val keyguardTransitionRepository: KeyguardTransitionRepository,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val logger: KeyguardCoordinatorLogger,
     @Application private val scope: CoroutineScope,
     private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
@@ -126,8 +124,9 @@ constructor(
     private suspend fun trackSeenNotifications() {
         // Whether or not keyguard is visible (or occluded).
         val isKeyguardPresent: Flow<Boolean> =
-            keyguardTransitionRepository.transitions
-                .map { step -> step.to != KeyguardState.GONE }
+            keyguardTransitionInteractor
+                .transitionValue(Scenes.Gone, stateWithoutSceneContainer = KeyguardState.GONE)
+                .map { it == 0f }
                 .distinctUntilChanged()
                 .onEach { trackingUnseen -> logger.logTrackingUnseen(trackingUnseen) }
 
