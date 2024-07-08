@@ -111,9 +111,6 @@ public class PerfettoProtoLogImplTest {
         //noinspection ResultOfMethodCallIgnored
         mFile.delete();
 
-        TestProtoLogGroup.TEST_GROUP.setLogToLogcat(false);
-        TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
-
         mViewerConfigBuilder = Protolog.ProtoLogViewerConfig.newBuilder()
                 .addGroups(
                         Protolog.ProtoLogViewerConfig.Group.newBuilder()
@@ -160,9 +157,8 @@ public class PerfettoProtoLogImplTest {
         mCacheUpdater = () -> {};
         mReader = Mockito.spy(new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider));
         mProtoLog = new PerfettoProtoLogImpl(
-                viewerConfigInputStreamProvider, mReader,
+                viewerConfigInputStreamProvider, mReader, new TreeMap<>(),
                 () -> mCacheUpdater.run());
-        mProtoLog.registerGroups(TestProtoLogGroup.values());
     }
 
     @After
@@ -214,15 +210,15 @@ public class PerfettoProtoLogImplTest {
             // Shouldn't be logging anything except WTF unless explicitly requested in the group
             // override.
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.VERBOSE, TestProtoLogGroup.TEST_GROUP, 2,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.WARN, TestProtoLogGroup.TEST_GROUP, 3,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.ERROR, TestProtoLogGroup.TEST_GROUP, 4,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.WTF, TestProtoLogGroup.TEST_GROUP, 5,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
         } finally {
             traceMonitor.stop(mWriter);
         }
@@ -244,15 +240,15 @@ public class PerfettoProtoLogImplTest {
         try {
             traceMonitor.start();
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.VERBOSE, TestProtoLogGroup.TEST_GROUP, 2,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.WARN, TestProtoLogGroup.TEST_GROUP, 3,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.ERROR, TestProtoLogGroup.TEST_GROUP, 4,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.WTF, TestProtoLogGroup.TEST_GROUP, 5,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
         } finally {
             traceMonitor.stop(mWriter);
         }
@@ -278,15 +274,15 @@ public class PerfettoProtoLogImplTest {
         try {
             traceMonitor.start();
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.VERBOSE, TestProtoLogGroup.TEST_GROUP, 2,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.WARN, TestProtoLogGroup.TEST_GROUP, 3,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.ERROR, TestProtoLogGroup.TEST_GROUP, 4,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.WTF, TestProtoLogGroup.TEST_GROUP, 5,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
         } finally {
             traceMonitor.stop(mWriter);
         }
@@ -308,15 +304,15 @@ public class PerfettoProtoLogImplTest {
         try {
             traceMonitor.start();
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.VERBOSE, TestProtoLogGroup.TEST_GROUP, 2,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.WARN, TestProtoLogGroup.TEST_GROUP, 3,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.ERROR, TestProtoLogGroup.TEST_GROUP, 4,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
             mProtoLog.log(LogLevel.WTF, TestProtoLogGroup.TEST_GROUP, 5,
-                    LogDataType.BOOLEAN, new Object[]{true});
+                    LogDataType.BOOLEAN, null, new Object[]{true});
         } finally {
             traceMonitor.stop(mWriter);
         }
@@ -333,14 +329,14 @@ public class PerfettoProtoLogImplTest {
     }
 
     @Test
-    public void log_logcatEnabled() {
+    public void log_logcatEnabledExternalMessage() {
         when(mReader.getViewerString(anyLong())).thenReturn("test %b %d %% 0x%x %s %f");
         PerfettoProtoLogImpl implSpy = Mockito.spy(mProtoLog);
         TestProtoLogGroup.TEST_GROUP.setLogToLogcat(true);
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
         implSpy.log(
-                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
+                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321, null,
                 new Object[]{true, 10000, 30000, "test", 0.000003});
 
         verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
@@ -357,14 +353,29 @@ public class PerfettoProtoLogImplTest {
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
         implSpy.log(
-                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
+                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321, null,
                 new Object[]{true, 10000, 0.0001, 0.00002, "test"});
 
         verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
                 LogLevel.INFO),
-                eq("FORMAT_ERROR \"test %b %d %% %x %s %f\", "
-                        + "args=(true, 10000, 1.0E-4, 2.0E-5, test)"));
+                eq("UNKNOWN MESSAGE (1234) true 10000 1.0E-4 2.0E-5 test"));
         verify(mReader).getViewerString(eq(1234L));
+    }
+
+    @Test
+    public void log_logcatEnabledInlineMessage() {
+        when(mReader.getViewerString(anyLong())).thenReturn("test %d");
+        PerfettoProtoLogImpl implSpy = Mockito.spy(mProtoLog);
+        TestProtoLogGroup.TEST_GROUP.setLogToLogcat(true);
+        TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
+
+        implSpy.log(
+                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d",
+                new Object[]{5});
+
+        verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
+                LogLevel.INFO), eq("test 5"));
+        verify(mReader, never()).getViewerString(anyLong());
     }
 
     @Test
@@ -375,11 +386,11 @@ public class PerfettoProtoLogImplTest {
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
         implSpy.log(
-                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
+                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321, null,
                 new Object[]{5});
 
         verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
-                LogLevel.INFO), eq("UNKNOWN MESSAGE#1234 (5)"));
+                LogLevel.INFO), eq("UNKNOWN MESSAGE (1234) 5"));
         verify(mReader).getViewerString(eq(1234L));
     }
 
@@ -390,7 +401,7 @@ public class PerfettoProtoLogImplTest {
         TestProtoLogGroup.TEST_GROUP.setLogToLogcat(false);
 
         implSpy.log(
-                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
+                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d",
                 new Object[]{5});
 
         verify(implSpy, never()).passToLogcat(any(), any(), any());
@@ -414,7 +425,7 @@ public class PerfettoProtoLogImplTest {
             before = SystemClock.elapsedRealtimeNanos();
             mProtoLog.log(
                     LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, messageHash,
-                    0b1110101001010100,
+                    0b1110101001010100, null,
                     new Object[]{"test", 1, 2, 3, 0.4, 0.5, 0.6, true});
             after = SystemClock.elapsedRealtimeNanos();
         } finally {
@@ -446,8 +457,8 @@ public class PerfettoProtoLogImplTest {
             before = SystemClock.elapsedRealtimeNanos();
             mProtoLog.log(
                     LogLevel.INFO, TestProtoLogGroup.TEST_GROUP,
-                    "My test message :: %s, %d, %o, %x, %f, %b",
-                    "test", 1, 2, 3, 0.4, true);
+                    "My test message :: %s, %d, %o, %x, %f, %e, %g, %b",
+                    "test", 1, 2, 3, 0.4, 0.5, 0.6, true);
             after = SystemClock.elapsedRealtimeNanos();
         } finally {
             traceMonitor.stop(mWriter);
@@ -462,7 +473,7 @@ public class PerfettoProtoLogImplTest {
         Truth.assertThat(protolog.messages.getFirst().getTimestamp().getElapsedNanos())
                 .isAtMost(after);
         Truth.assertThat(protolog.messages.getFirst().getMessage())
-                .isEqualTo("My test message :: test, 2, 4, 6, 0.400000, true");
+                .isEqualTo("My test message :: test, 2, 4, 6, 0.400000, 5.000000e-01, 0.6, true");
     }
 
     private long addMessageToConfig(ProtologCommon.ProtoLogLevel logLevel, String message) {
@@ -491,7 +502,7 @@ public class PerfettoProtoLogImplTest {
             before = SystemClock.elapsedRealtimeNanos();
             mProtoLog.log(
                     LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, messageHash,
-                    0b01100100,
+                    0b01100100, null,
                     new Object[]{"test", 1, 0.1, true});
             after = SystemClock.elapsedRealtimeNanos();
         } finally {
@@ -509,7 +520,7 @@ public class PerfettoProtoLogImplTest {
         try {
             traceMonitor.start();
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
-                    0b11, new Object[]{true});
+                    0b11, null, new Object[]{true});
         } finally {
             traceMonitor.stop(mWriter);
         }
@@ -533,7 +544,7 @@ public class PerfettoProtoLogImplTest {
 
             ProtoLogImpl.setSingleInstance(mProtoLog);
             ProtoLogImpl.d(TestProtoLogGroup.TEST_GROUP, 1,
-                    0b11, true);
+                    0b11, null, true);
         } finally {
             traceMonitor.stop(mWriter);
         }
@@ -607,7 +618,7 @@ public class PerfettoProtoLogImplTest {
                 .isFalse();
         Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.ERROR))
                 .isFalse();
-        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WTF)).isFalse();
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WTF)).isTrue();
 
         PerfettoTraceMonitor traceMonitor1 =
                 PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
@@ -685,7 +696,7 @@ public class PerfettoProtoLogImplTest {
         Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.ERROR))
                 .isFalse();
         Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WTF))
-                .isFalse();
+                .isTrue();
     }
 
     private enum TestProtoLogGroup implements IProtoLogGroup {
