@@ -436,8 +436,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Huruhusu programu yoyote iwekwe kwenye hifadhi ya nje, bila kujali thamani za faili ya maelezo"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Lazimisha shughuli ziweze kubadilishwa ukubwa"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Fanya shughuli zote ziweze kubadilishwa ukubwa kwenye madirisha mengi, bila kuzingatia thamani za faili ya maelezo."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Washa madirisha yenye muundo huru"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Ruhusu uwezo wa kutumia madirisha ya majaribio yenye muundo huru."</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"Washa madirisha yenye muundo huru (yaliyopitwa na wakati)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Ruhusu matumizi ya madirisha ya majaribio yenye muundo huru yaliyopitwa na wakati."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Nenosiri la hifadhi rudufu ya eneo kazi"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Hifadhi rudufu kamili za eneo kazi hazijalindwa kwa sasa"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Gusa ili ubadilishe au uondoe nenosiri la hifadhi rudufu kamili za eneo kazi"</string>

@@ -436,8 +436,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Manifest dəyərindən asılı olmayaraq tətbiqlərin xarici daşıyıcılarda saxlanmasına icazə verilsin"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Çoxpəncərəli rejimdə ölçü dəyişdirilməsi"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Manifest dəyərindən asılı olmayaraq çoxpəncərəli rejimdə pəncərə ölçüsünün dəyişdirilməsinə icazə verilsin"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"İxtiyari formada pəncərə yaradılsın"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Eksperimental olaraq ixtiyari formada pəncərə yaradılsın"</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"İxtiyari formada pəncərələri (köhnə) aktivləşdirin"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Təcrübi köhnə ixtiyari formada pəncərələr üçün dəstəyi aktivləşdirin."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Masaüstü rezerv parolu"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Masaüstü tam rezervlər hazırda qorunmayıblar."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Masaüstünün tam rezerv kopyalanması üçün parolu dəyişmək və ya silmək üçün basın"</string>
