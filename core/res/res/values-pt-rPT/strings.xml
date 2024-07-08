@@ -1402,7 +1402,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Sobreposição a outras apps"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"A app <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplicações"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"O <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras app"</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras app"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Se não quer que a app <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desativar"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"A verificar o <xliff:g id="NAME">%s</xliff:g>…"</string>
@@ -2123,7 +2123,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"O Bluetooth continuará ativado durante o modo de avião."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"A carregar…"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ficheiro}many{{file_name} + # ficheiros}other{{file_name} + # ficheiros}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Não existem pessoas recomendadas com quem partilhar"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Sem pessoas recomendadas com quem partilhar"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicações"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta app não recebeu autorização de gravação, mas pode capturar áudio através deste dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Página inicial"</string>

@@ -328,7 +328,7 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"Telefonanrufe tätigen und verwalten"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Körpersensoren"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"auf Sensordaten zu deinen Vitaldaten zugreifen"</string>
-    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Benachrichtigungen"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Benachrichtigun­gen"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"Benachrichtigungen anzeigen"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Fensterinhalte abrufen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Die Inhalte eines Fensters, mit dem du interagierst, werden abgerufen."</string>
