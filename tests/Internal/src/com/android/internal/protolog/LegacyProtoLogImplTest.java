@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 /**
  * Test class for {@link ProtoLogImpl}.
@@ -89,7 +90,7 @@ public class LegacyProtoLogImplTest {
         //noinspection ResultOfMethodCallIgnored
         mFile.delete();
         mProtoLog = new LegacyProtoLogImpl(mFile, mViewerConfigFilename,
-                1024 * 1024, mReader, 1024, () -> {});
+                1024 * 1024, mReader, 1024, new TreeMap<>(), () -> {});
     }
 
     @After
@@ -141,7 +142,7 @@ public class LegacyProtoLogImplTest {
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
         implSpy.log(
-                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
+                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321, null,
                 new Object[]{true, 10000, 30000, "test", 0.000003});
 
         verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
@@ -158,7 +159,7 @@ public class LegacyProtoLogImplTest {
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
         implSpy.log(
-                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
+                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321, null,
                 new Object[]{true, 10000, 0.0001, 0.00002, "test"});
 
         verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
@@ -175,7 +176,7 @@ public class LegacyProtoLogImplTest {
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
         implSpy.log(
-                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
+                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d",
                 new Object[]{5});
 
         verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
@@ -191,7 +192,7 @@ public class LegacyProtoLogImplTest {
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
         implSpy.log(
-                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
+                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321, null,
                 new Object[]{5});
 
         verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
@@ -207,7 +208,7 @@ public class LegacyProtoLogImplTest {
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
         implSpy.log(
-                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
+                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d",
                 new Object[]{5});
 
         verify(implSpy, never()).passToLogcat(any(), any(), any());
@@ -276,7 +277,7 @@ public class LegacyProtoLogImplTest {
         long before = SystemClock.elapsedRealtimeNanos();
         mProtoLog.log(
                 LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234,
-                0b1110101001010100,
+                0b1110101001010100, null,
                 new Object[]{"test", 1, 2, 3, 0.4, 0.5, 0.6, true});
         long after = SystemClock.elapsedRealtimeNanos();
         mProtoLog.stopProtoLog(mock(PrintWriter.class), true);
@@ -301,7 +302,7 @@ public class LegacyProtoLogImplTest {
         long before = SystemClock.elapsedRealtimeNanos();
         mProtoLog.log(
                 LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234,
-                0b01100100,
+                0b01100100, null,
                 new Object[]{"test", 1, 0.1, true});
         long after = SystemClock.elapsedRealtimeNanos();
         mProtoLog.stopProtoLog(mock(PrintWriter.class), true);
@@ -325,7 +326,7 @@ public class LegacyProtoLogImplTest {
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
         mProtoLog.startProtoLog(mock(PrintWriter.class));
         mProtoLog.log(LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234,
-                0b11, new Object[]{true});
+                0b11, null, new Object[]{true});
         mProtoLog.stopProtoLog(mock(PrintWriter.class), true);
         try (InputStream is = new FileInputStream(mFile)) {
             ProtoInputStream ip = new ProtoInputStream(is);
