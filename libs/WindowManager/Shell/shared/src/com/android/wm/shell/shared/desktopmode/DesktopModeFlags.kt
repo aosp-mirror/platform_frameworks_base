@@ -20,7 +20,6 @@ import android.content.Context
 import android.provider.Settings
 import android.util.Log
 import com.android.window.flags.Flags
-import com.android.wm.shell.shared.DesktopModeStatus
 
 /*
  * A shared class to check desktop mode flags state.
@@ -35,7 +34,7 @@ enum class DesktopModeFlags(
     private val shouldOverrideByDevOption: Boolean
 ) {
   // All desktop mode related flags will be added here
-  DESKTOP_WINDOWING_MODE(DesktopModeStatus::isDesktopModeFlagEnabled, true),
+  DESKTOP_WINDOWING_MODE(Flags::enableDesktopWindowingMode, true),
   WALLPAPER_ACTIVITY(Flags::enableDesktopWindowingWallpaperActivity, true);
 
   // Local cache for toggle override, which is initialized once on its first access. It needs to be

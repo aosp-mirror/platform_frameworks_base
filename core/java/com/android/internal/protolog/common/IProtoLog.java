@@ -27,19 +27,11 @@ public interface IProtoLog {
      * @param group The group this message belongs to.
      * @param messageHash The hash of the message.
      * @param paramsMask The parameters mask of the message.
-     * @param args The arguments of the message.
-     */
-    void log(LogLevel logLevel, IProtoLogGroup group, long messageHash, int paramsMask,
-            Object[] args);
-
-    /**
-     * Log a ProtoLog message
-     * @param logLevel Log level of the proto message.
-     * @param group The group this message belongs to.
      * @param messageString The message string.
      * @param args The arguments of the message.
      */
-    void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object... args);
+    void log(LogLevel logLevel, IProtoLogGroup group, long messageHash, int paramsMask,
+             String messageString, Object[] args);
 
     /**
      * Check if ProtoLog is tracing.
@@ -68,10 +60,4 @@ public interface IProtoLog {
      * @return If we need to log this group and level to either ProtoLog or Logcat.
      */
     boolean isEnabled(IProtoLogGroup group, LogLevel level);
-
-    /**
-     * Registers available protolog groups. A group must be registered before it can be used.
-     * @param protoLogGroups The groups to register for use in protolog.
-     */
-    void registerGroups(IProtoLogGroup... protoLogGroups);
 }

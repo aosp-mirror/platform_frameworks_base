@@ -47,7 +47,7 @@ public class CertificateTransparencyLogInstallReceiver extends ConfigUpdateInsta
     private static final String LOGDIR_PREFIX = "logs-";
 
     public CertificateTransparencyLogInstallReceiver() {
-        super("/data/misc/keychain/trusted_ct_logs/", "ct_logs", "metadata/", "version");
+        super("/data/misc/keychain/ct/", "ct_logs", "metadata/", "version");
     }
 
     @Override
@@ -85,7 +85,7 @@ public class CertificateTransparencyLogInstallReceiver extends ConfigUpdateInsta
             }
         }
         try {
-            // 3. Create /data/misc/keychain/trusted_ct_logs/<new_version>/ .
+            // 3. Create /data/misc/keychain/ct/<new_version>/ .
             newVersion.mkdir();
             if (!newVersion.isDirectory()) {
                 throw new IOException("Unable to make directory " + newVersion.getCanonicalPath());

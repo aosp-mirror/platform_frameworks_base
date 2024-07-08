@@ -130,27 +130,28 @@ class SourceTransformer(
         val hash = CodeUtils.hash(packagePath, messageString, level, group)
 
         val newCall = call.clone()
-        // Remove message string.
-        // Out: ProtoLog.e(GROUP, args)
-        newCall.arguments.removeAt(1)
+        if (!group.textEnabled) {
+            // Remove message string if text logging is not enabled by default.
+            // Out: ProtoLog.e(GROUP, null, arg)
+            newCall.arguments[1].replace(NameExpr("null"))
+        }
         // Insert message string hash as a second argument.
-        // Out: ProtoLog.e(GROUP, 1234, args)
+        // Out: ProtoLog.e(GROUP, 1234, null, arg)
         newCall.arguments.add(1, LongLiteralExpr("" + hash + "L"))
         val argTypes = LogDataType.parseFormatString(messageString)
         val typeMask = LogDataType.logDataTypesToBitMask(argTypes)
         // Insert bitmap representing which Number parameters are to be considered as
         // floating point numbers.
-        // Out: ProtoLog.e(GROUP, 1234, 0, args)
+        // Out: ProtoLog.e(GROUP, 1234, 0, null, arg)
         newCall.arguments.add(2, IntegerLiteralExpr(typeMask))
         // Replace call to a stub method with an actual implementation.
-        // Out: ProtoLogImpl.e(GROUP, 1234, 0, args)
+        // Out: ProtoLogImpl.e(GROUP, 1234, null, arg)
         newCall.setScope(protoLogImplClassNode)
         if (argTypes.size != call.arguments.size - 2) {
             throw InvalidProtoLogCallException(
                 "Number of arguments (${argTypes.size} does not match format" +
                         " string in: $call", ParsingContext(path, call))
         }
-        val argsOffset = 3
         val blockStmt = BlockStmt()
         if (argTypes.isNotEmpty()) {
             // Assign every argument to a variable to check its type in compile time
@@ -159,9 +160,9 @@ class SourceTransformer(
             argTypes.forEachIndexed { idx, type ->
                 val varName = "protoLogParam$idx"
                 val declaration = VariableDeclarator(getASTTypeForDataType(type), varName,
-                    getConversionForType(type)(newCall.arguments[idx + argsOffset].clone()))
+                    getConversionForType(type)(newCall.arguments[idx + 4].clone()))
                 blockStmt.addStatement(ExpressionStmt(VariableDeclarationExpr(declaration)))
-                newCall.setArgument(idx + argsOffset, NameExpr(SimpleName(varName)))
+                newCall.setArgument(idx + 4, NameExpr(SimpleName(varName)))
             }
         } else {
             // Assign (Object[])null as the vararg parameter to prevent allocating an empty

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.shared;
+package com.android.wm.shell.shared.desktopmode;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -23,7 +23,6 @@ import android.os.SystemProperties;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 
 /**
  * Constants for desktop mode feature
@@ -102,16 +101,6 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_max_task_limit", DEFAULT_MAX_TASK_LIMIT);
 
     /**
-     * Return {@code true} if desktop windowing flag is enabled. Only to be used for testing.
-     * Callers should use {@link #canEnterDesktopMode(Context)} to query the state of desktop
-     * windowing.
-     */
-    @VisibleForTesting
-    public static boolean isDesktopModeFlagEnabled() {
-        return Flags.enableDesktopWindowingMode();
-    }
-
-    /**
      * Return {@code true} if veiled resizing is active. If false, fluid resizing is used.
      */
     public static boolean isVeiledResizeEnabled() {
@@ -167,7 +156,7 @@ public class DesktopModeStatus {
 
     /** Returns if desktop mode dev option should be enabled if there is no user override. */
     public static boolean shouldDevOptionBeEnabledByDefault() {
-        return isDesktopModeFlagEnabled();
+        return Flags.enableDesktopWindowingMode();
     }
 
     /**
