@@ -18,12 +18,9 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
 import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
-import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
+
+import static com.android.server.wm.AppCompatUtils.isChangeEnabled;
 
 import android.annotation.NonNull;
 
@@ -36,11 +33,6 @@ public class AppCompatOverrides {
 
     @NonNull
     private final ActivityRecord mActivityRecord;
-
-    @NonNull
-    private final OptPropFactory.OptProp mAllowOrientationOverrideOptProp;
-    @NonNull
-    private final OptPropFactory.OptProp mAllowDisplayOrientationOverrideOptProp;
     @NonNull
     private final OptPropFactory.OptProp mAllowForceResizeOverrideOptProp;
     @NonNull
@@ -69,19 +61,6 @@ public class AppCompatOverrides {
         mAppCompatFocusOverrides = new AppCompatFocusOverrides(mActivityRecord,
                 appCompatConfiguration, optPropBuilder);
 
-        mAllowOrientationOverrideOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
-
-        mAllowDisplayOrientationOverrideOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE,
-                () -> mActivityRecord.mDisplayContent != null
-                        && mActivityRecord.getTask() != null
-                        && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()
-                        && !mActivityRecord.getTask().inMultiWindowMode()
-                        && mActivityRecord.mDisplayContent.getNaturalOrientation()
-                            == ORIENTATION_LANDSCAPE
-        );
-
         mAllowForceResizeOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES);
     }
@@ -106,33 +85,6 @@ public class AppCompatOverrides {
         return mAppCompatFocusOverrides;
     }
 
-    boolean isAllowOrientationOverrideOptOut() {
-        return mAllowOrientationOverrideOptProp.isFalse();
-    }
-
-    boolean isOverrideRespectRequestedOrientationEnabled() {
-        return isCompatChangeEnabled(OVERRIDE_RESPECT_REQUESTED_ORIENTATION);
-    }
-
-    /**
-     * Whether should fix display orientation to landscape natural orientation when a task is
-     * fullscreen and the display is ignoring orientation requests.
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Opt-in per-app override is enabled
-     *     <li>Task is in fullscreen.
-     *     <li>{@link DisplayContent#getIgnoreOrientationRequest} is enabled
-     *     <li>Natural orientation of the display is landscape.
-     * </ul>
-     */
-    boolean shouldUseDisplayLandscapeNaturalOrientation() {
-        return mAllowDisplayOrientationOverrideOptProp
-                .shouldEnableWithOptInOverrideAndOptOutProperty(
-                        isCompatChangeEnabled(OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION));
-    }
-
     /**
      * Whether we should apply the force resize per-app override. When this override is applied it
      * forces the packages it is applied to to be resizable. It won't change whether the app can be
@@ -147,7 +99,7 @@ public class AppCompatOverrides {
      */
     boolean shouldOverrideForceResizeApp() {
         return mAllowForceResizeOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
-                isCompatChangeEnabled(FORCE_RESIZE_APP));
+                isChangeEnabled(mActivityRecord, FORCE_RESIZE_APP));
     }
 
     /**
@@ -162,10 +114,6 @@ public class AppCompatOverrides {
      */
     boolean shouldOverrideForceNonResizeApp() {
         return mAllowForceResizeOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
-                isCompatChangeEnabled(FORCE_NON_RESIZE_APP));
-    }
-
-    private boolean isCompatChangeEnabled(long overrideChangeId) {
-        return mActivityRecord.info.isChangeEnabled(overrideChangeId);
+                isChangeEnabled(mActivityRecord, FORCE_NON_RESIZE_APP));
     }
 }

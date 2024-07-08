@@ -4290,7 +4290,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void finishRelaunching() {
-        mLetterboxUiController.setRelaunchingAfterRequestedOrientationChanged(false);
+        mAppCompatController.getAppCompatOrientationOverrides()
+                .setRelaunchingAfterRequestedOrientationChanged(false);
         mTaskSupervisor.getActivityMetricsLogger().notifyActivityRelaunched(this);
 
         if (mPendingRelaunchCount > 0) {
@@ -8181,7 +8182,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mLastReportedConfiguration.getMergedConfiguration())) {
             ensureActivityConfiguration(false /* ignoreVisibility */);
             if (mPendingRelaunchCount > originalRelaunchingCount) {
-                mLetterboxUiController.setRelaunchingAfterRequestedOrientationChanged(true);
+                mAppCompatController.getAppCompatOrientationOverrides()
+                        .setRelaunchingAfterRequestedOrientationChanged(true);
             }
             if (mTransitionController.inPlayingTransition(this)) {
                 mTransitionController.mValidateActivityCompat.add(this);

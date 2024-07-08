@@ -147,20 +147,6 @@ final class LetterboxUiController {
     }
 
     /**
-     * Sets whether an activity is relaunching after the app has called {@link
-     * android.app.Activity#setRequestedOrientation}.
-     */
-    void setRelaunchingAfterRequestedOrientationChanged(boolean isRelaunching) {
-        getAppCompatOverrides().getAppCompatOrientationOverrides()
-                .setRelaunchingAfterRequestedOrientationChanged(isRelaunching);
-    }
-
-
-    boolean isOverrideRespectRequestedOrientationEnabled() {
-        return getAppCompatOverrides().isOverrideRespectRequestedOrientationEnabled();
-    }
-
-    /**
      * Whether should fix display orientation to landscape natural orientation when a task is
      * fullscreen and the display is ignoring orientation requests.
      *
@@ -174,7 +160,8 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldUseDisplayLandscapeNaturalOrientation() {
-        return getAppCompatOverrides().shouldUseDisplayLandscapeNaturalOrientation();
+        return getAppCompatOverrides().getAppCompatOrientationOverrides()
+                .shouldUseDisplayLandscapeNaturalOrientation();
     }
 
     boolean hasWallpaperBackgroundForLetterbox() {
@@ -798,11 +785,6 @@ final class LetterboxUiController {
             }
         }
         return null;
-    }
-
-    boolean getIsRelaunchingAfterRequestedOrientationChanged() {
-        return getAppCompatOverrides().getAppCompatOrientationOverrides()
-                .getIsRelaunchingAfterRequestedOrientationChanged();
     }
 
     private void adjustBoundsForTaskbar(final WindowState mainWindow, final Rect bounds) {

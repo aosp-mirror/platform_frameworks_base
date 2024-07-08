@@ -788,7 +788,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Change the fixed orientation.
         mActivity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         assertTrue(mActivity.isRelaunching());
-        assertTrue(mActivity.mLetterboxUiController
+        assertTrue(mActivity.mAppCompatController.getAppCompatOrientationOverrides()
                 .getIsRelaunchingAfterRequestedOrientationChanged());
 
         assertFitted();
