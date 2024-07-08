@@ -42,7 +42,6 @@ import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket
 import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.SEQ_NEEDS_INCREMENTAL_STATE;
 import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.TIMESTAMP;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData;
 import android.os.ShellCommand;
@@ -83,6 +82,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * A service for the ProtoLog logging system.
@@ -98,7 +98,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     );
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
-    private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
+    private final TreeMap<String, IProtoLogGroup> mLogGroups;
     private final Runnable mCacheUpdater;
 
     private final int[] mDefaultLogLevelCounts = new int[LogLevel.values().length];
@@ -106,7 +106,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
     private final ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
-    public PerfettoProtoLogImpl(String viewerConfigFilePath, Runnable cacheUpdater) {
+    public PerfettoProtoLogImpl(String viewerConfigFilePath,
+            TreeMap<String, IProtoLogGroup> logGroups, Runnable cacheUpdater) {
         this(() -> {
             try {
                 return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
@@ -114,19 +115,31 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 Slog.w(LOG_TAG, "Failed to load viewer config file " + viewerConfigFilePath, e);
                 return null;
             }
-        }, cacheUpdater);
+        }, logGroups, cacheUpdater);
     }
 
-    public PerfettoProtoLogImpl() {
-        this(null, null, () -> {});
+    public PerfettoProtoLogImpl(IProtoLogGroup[] logGroups) {
+        this(null, logGroups, () -> {});
     }
 
     public PerfettoProtoLogImpl(
             ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            IProtoLogGroup[] logGroups,
             Runnable cacheUpdater
     ) {
         this(viewerConfigInputStreamProvider,
-                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider),
+                new TreeMap<>(Arrays.stream(logGroups)
+                        .collect(Collectors.toMap(IProtoLogGroup::name, group -> group))),
+                cacheUpdater);
+    }
+
+    public PerfettoProtoLogImpl(
+            ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            TreeMap<String, IProtoLogGroup> logGroups,
+            Runnable cacheUpdater
+    ) {
+        this(viewerConfigInputStreamProvider,
+                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider), logGroups,
                 cacheUpdater);
     }
 
@@ -134,6 +147,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     public PerfettoProtoLogImpl(
             ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             ProtoLogViewerConfigReader viewerConfigReader,
+            TreeMap<String, IProtoLogGroup> logGroups,
             Runnable cacheUpdater
     ) {
         Producer.init(InitArguments.DEFAULTS);
@@ -146,6 +160,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         mDataSource.register(params);
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
+        this.mLogGroups = logGroups;
         this.mCacheUpdater = cacheUpdater;
     }
 
@@ -184,7 +199,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                                 tsNanos));
             }
             if (group.isLogToLogcat()) {
-                logToLogcat(group.getTag(), logLevel, messageString, args);
+                logToLogcat(group.getTag(), logLevel, 0, args);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
@@ -192,11 +207,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private void dumpTransitionTraceConfig() {
-        if (mViewerConfigInputStreamProvider == null) {
-            // No viewer config available
-            return;
-        }
-
         ProtoInputStream pis = mViewerConfigInputStreamProvider.getInputStream();
 
         if (pis == null) {
@@ -291,39 +301,35 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             @Nullable Object[] args) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logToLogcat");
         try {
-            String messageString = mViewerConfigReader.getViewerString(messageHash);
+            doLogToLogcat(tag, level, messageHash, args);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
 
-            if (messageString == null) {
-                StringBuilder builder = new StringBuilder("UNKNOWN MESSAGE");
+    private void doLogToLogcat(String tag, LogLevel level, long messageHash,
+            @Nullable Object[] args) {
+        String message = null;
+        String messageString = mViewerConfigReader.getViewerString(messageHash);
+        if (messageString != null) {
+            if (args != null) {
+                try {
+                    message = TextUtils.formatSimple(messageString, args);
+                } catch (Exception ex) {
+                    Slog.w(LOG_TAG, "Invalid ProtoLog format string.", ex);
+                }
+            } else {
+                message = messageString;
+            }
+        }
+        if (message == null) {
+            StringBuilder builder = new StringBuilder("UNKNOWN MESSAGE (" + messageHash + ")");
+            if (args != null) {
                 for (Object o : args) {
                     builder.append(" ").append(o);
                 }
-                messageString = builder.toString();
-                args = new Object[0];
             }
-
-            doLogToLogcat(tag, level, messageString, args);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
-    private void logToLogcat(String tag, LogLevel level, String message, @Nullable Object[] args) {
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logToLogcat");
-        try {
-            doLogToLogcat(tag, level, message, args);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
-    private void doLogToLogcat(String tag, LogLevel level, @NonNull String messageString,
-            @Nullable Object[] args) {
-        String message;
-        if (args != null) {
-            message = TextUtils.formatSimple(messageString, args);
-        } else {
-            message = messageString;
+            message = builder.toString();
         }
         passToLogcat(tag, level, message);
     }
@@ -658,13 +664,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return (groupLevelCount == null && mDefaultLogLevelCounts[level.ordinal()] > 0)
                 || (groupLevelCount != null && groupLevelCount[level.ordinal()] > 0)
                 || group.isLogToLogcat();
-    }
-
-    @Override
-    public void registerGroups(IProtoLogGroup... protoLogGroups) {
-        for (IProtoLogGroup protoLogGroup : protoLogGroups) {
-            mLogGroups.put(protoLogGroup.name(), protoLogGroup);
-        }
     }
 
     /**
