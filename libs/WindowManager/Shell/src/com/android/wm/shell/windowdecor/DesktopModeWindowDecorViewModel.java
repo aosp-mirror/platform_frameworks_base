@@ -970,7 +970,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         relevantDecor.updateHoverAndPressStatus(ev);
                         DesktopModeVisualIndicator.IndicatorType resultType =
                                 mDesktopTasksController.onDragPositioningEndThroughStatusBar(
-                                new PointF(ev.getRawX(), ev.getRawY()), relevantDecor.mTaskInfo);
+                                        new PointF(ev.getRawX(), ev.getRawY()),
+                                        relevantDecor.mTaskInfo,
+                                        relevantDecor.mTaskSurface);
                         // If we are entering split select, handle will no longer be visible and
                         // should not be receiving any input.
                         if (resultType == TO_SPLIT_LEFT_INDICATOR
@@ -1010,7 +1012,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                                     mContext, mDragToDesktopAnimationStartBounds,
                                     relevantDecor.mTaskInfo, relevantDecor.mTaskSurface);
                             mDesktopTasksController.startDragToDesktop(relevantDecor.mTaskInfo,
-                                    mMoveToDesktopAnimator);
+                                    mMoveToDesktopAnimator, relevantDecor.mTaskSurface);
                         }
                     }
                     if (mMoveToDesktopAnimator != null) {
