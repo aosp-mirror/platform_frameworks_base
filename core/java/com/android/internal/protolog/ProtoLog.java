@@ -151,13 +151,11 @@ public class ProtoLog {
     }
 
     /**
-     * Should be called once for each process that wants to use ProtoLog
+     * Registers available protolog groups. A group must be registered before it can be used.
+     * @param protoLogGroups The groups to register for use in protolog.
      */
-    public static synchronized void initialize(IProtoLog protoLogInstance) {
-        if (sProtoLogInstance != null) {
-            throw new IllegalStateException("ProtoLog already initialized in this process");
-        }
-        sProtoLogInstance = protoLogInstance;
+    public static void registerGroups(IProtoLogGroup... protoLogGroups) {
+        sProtoLogInstance.registerGroups(protoLogGroups);
     }
 
     private static void logStringMessage(LogLevel logLevel, IProtoLogGroup group,
