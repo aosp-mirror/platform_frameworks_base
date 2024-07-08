@@ -68,7 +68,7 @@
     <string name="usb_port_enabled" msgid="531823867664717018">"Registrering av ladere og tilbehør er slått på for USB-porten"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Slå på USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Finn ut mer"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"Skjermdump"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Skjermbilde"</string>
     <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Hold ulåst er slått av"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"har sendt et bilde"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Lagrer skjermbildet …"</string>
