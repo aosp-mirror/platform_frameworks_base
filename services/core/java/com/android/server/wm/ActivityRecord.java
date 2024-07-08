@@ -232,6 +232,7 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_F
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutMillisLocked;
+import static com.android.server.wm.DesktopModeLaunchParamsModifier.canEnterDesktopMode;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -9283,18 +9284,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void updateSizeCompatScale(Rect resolvedAppBounds, Rect containerAppBounds) {
-        // Only allow to scale down.
         mSizeCompatScale = mAppCompatController.getTransparentPolicy()
                 .findOpaqueNotFinishingActivityBelow()
                 .map(activityRecord -> activityRecord.mSizeCompatScale)
-                .orElseGet(() -> {
-                    final int contentW = resolvedAppBounds.width();
-                    final int contentH = resolvedAppBounds.height();
-                    final int viewportW = containerAppBounds.width();
-                    final int viewportH = containerAppBounds.height();
-                    return (contentW <= viewportW && contentH <= viewportH) ? 1f : Math.min(
-                            (float) viewportW / contentW, (float) viewportH / contentH);
-                });
+                .orElseGet(() -> calculateSizeCompatScale(resolvedAppBounds, containerAppBounds));
+    }
+
+    private float calculateSizeCompatScale(Rect resolvedAppBounds, Rect containerAppBounds) {
+        final int contentW = resolvedAppBounds.width();
+        final int contentH = resolvedAppBounds.height();
+        final int viewportW = containerAppBounds.width();
+        final int viewportH = containerAppBounds.height();
+        // Allow an application to be up-scaled if its window is smaller than its
+        // original container or if it's a freeform window in desktop mode.
+        boolean shouldAllowUpscaling = !(contentW <= viewportW && contentH <= viewportH)
+                || (canEnterDesktopMode(mAtmService.mContext)
+                    && getWindowingMode() == WINDOWING_MODE_FREEFORM);
+        return shouldAllowUpscaling ? Math.min(
+                (float) viewportW / contentW, (float) viewportH / contentH) : 1f;
     }
 
     private boolean isInSizeCompatModeForBounds(final Rect appBounds, final Rect containerBounds) {
