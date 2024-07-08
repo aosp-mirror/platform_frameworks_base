@@ -62,6 +62,8 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return showNotification();
             case "cancel-notifications":
                 return cancelNotifications();
+            case "get-brightness":
+                return getBrightness();
             case "set-brightness":
                 return setBrightness();
             case "reset-brightness-configuration":
@@ -306,6 +308,25 @@ class DisplayManagerShellCommand extends ShellCommand {
 
     private int cancelNotifications() {
         mService.getDisplayNotificationManager().cancelNotifications();
+        return 0;
+    }
+
+    private int getBrightness() {
+        String displayIdString = getNextArg();
+        if (displayIdString == null) {
+            getErrPrintWriter().println("Error: no display id specified");
+            return 1;
+        }
+        int displayId;
+        try {
+            displayId = Integer.parseInt(displayIdString);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: invalid displayId=" + displayIdString + " not int");
+            return 1;
+        }
+        final Context context = mService.getContext();
+        final DisplayManager dm = context.getSystemService(DisplayManager.class);
+        getOutPrintWriter().println(dm.getBrightness(displayId));
         return 0;
     }
 
