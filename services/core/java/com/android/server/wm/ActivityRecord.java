@@ -6535,9 +6535,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // and the token could be null.
             return;
         }
-        if (r.mDisplayContent.mActivityRefresher != null) {
-            r.mDisplayContent.mActivityRefresher.onActivityRefreshed(r);
-        }
+        r.mDisplayContent.mAppCompatCameraPolicy.onActivityRefreshed(r);
     }
 
     static void splashScreenAttachedLocked(IBinder token) {
@@ -8194,7 +8192,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void setRequestedOrientation(@ActivityInfo.ScreenOrientation int requestedOrientation) {
-        if (mAppCompatController.getAppCompatOrientationOverrides()
+        if (mAppCompatController.getOrientationPolicy()
                 .shouldIgnoreRequestedOrientation(requestedOrientation)) {
             return;
         }
@@ -10030,16 +10028,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return updateReportedConfigurationAndSend();
     }
 
-    /**
-     * @return {@code true} if the Camera is active for the current activity
-     */
-    boolean isCameraActive() {
-        return mDisplayContent != null
-                && mDisplayContent.getDisplayRotationCompatPolicy() != null
-                && mDisplayContent.getDisplayRotationCompatPolicy()
-                    .isCameraActive(this, /* mustBeFullscreen */ true);
-    }
-
     boolean updateReportedConfigurationAndSend() {
         if (isConfigurationDispatchPaused()) {
             Slog.wtf(TAG, "trying to update reported(client) config while dispatch is paused");
@@ -10187,11 +10175,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private void notifyActivityRefresherAboutConfigurationChange(
             Configuration newConfig, Configuration lastReportedConfig) {
-        if (mDisplayContent.mActivityRefresher == null
-                || !shouldBeResumed(/* activeActivity */ null)) {
+        if (!shouldBeResumed(/* activeActivity */ null)) {
             return;
         }
-        mDisplayContent.mActivityRefresher.onActivityConfigurationChanging(
+        mDisplayContent.mAppCompatCameraPolicy.onActivityConfigurationChanging(
                 this, newConfig, lastReportedConfig);
     }
 
