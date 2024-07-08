@@ -92,3 +92,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "volume_dialog_audio_sharing_fix"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to show separate volume bars during audio sharing"
+    bug: "336716411"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
