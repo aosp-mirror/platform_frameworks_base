@@ -72,17 +72,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * A service for the ProtoLog logging system.
@@ -116,21 +111,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 return null;
             }
         }, logGroups, cacheUpdater);
-    }
-
-    public PerfettoProtoLogImpl(IProtoLogGroup[] logGroups) {
-        this(null, logGroups, () -> {});
-    }
-
-    public PerfettoProtoLogImpl(
-            ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            IProtoLogGroup[] logGroups,
-            Runnable cacheUpdater
-    ) {
-        this(viewerConfigInputStreamProvider,
-                new TreeMap<>(Arrays.stream(logGroups)
-                        .collect(Collectors.toMap(IProtoLogGroup::name, group -> group))),
-                cacheUpdater);
     }
 
     public PerfettoProtoLogImpl(
@@ -173,33 +153,12 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             @Nullable String messageString, Object[] args) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "log");
 
+        long tsNanos = SystemClock.elapsedRealtimeNanos();
         try {
-            if (isProtoEnabled()) {
-                long tsNanos = SystemClock.elapsedRealtimeNanos();
-                mBackgroundLoggingService.execute(() ->
-                        logToProto(level, group, messageHash, paramsMask, args, tsNanos));
-            }
+            mBackgroundLoggingService.submit(() ->
+                    logToProto(level, group.name(), messageHash, paramsMask, args, tsNanos));
             if (group.isLogToLogcat()) {
                 logToLogcat(group.getTag(), level, messageHash, messageString, args);
-            }
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
-    @Override
-    public void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object... args) {
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "log");
-
-        try {
-            if (isProtoEnabled()) {
-                long tsNanos = SystemClock.elapsedRealtimeNanos();
-                mBackgroundLoggingService.execute(
-                        () -> logStringMessageToProto(logLevel, group, messageString, args,
-                                tsNanos));
-            }
-            if (group.isLogToLogcat()) {
-                logToLogcat(group.getTag(), logLevel, 0, messageString, args);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
@@ -361,53 +320,25 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         }
     }
 
-    private void logToProto(LogLevel level, IProtoLogGroup logGroup, long messageHash,
-            int paramsMask, Object[] args, long tsNanos) {
+    private void logToProto(LogLevel level, String groupName, long messageHash, int paramsMask,
+            Object[] args, long tsNanos) {
+        if (!isProtoEnabled()) {
+            return;
+        }
+
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logToProto");
         try {
-            doLogToProto(level, logGroup, new Message(messageHash), paramsMask, args, tsNanos);
+            doLogToProto(level, groupName, messageHash, paramsMask, args, tsNanos);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
-    private void logStringMessageToProto(LogLevel logLevel, IProtoLogGroup group,
-            String messageString, Object[] args, long tsNanos) {
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logStringMessageToProto");
-        try {
-            doLogToProto(logLevel, group, messageString, args, tsNanos);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
-    private void doLogToProto(LogLevel level, IProtoLogGroup logGroup, String messageString,
+    private void doLogToProto(LogLevel level, String groupName, long messageHash, int paramsMask,
             Object[] args, long tsNanos) {
-        final List<Integer> argTypes = LogDataType.parseFormatString(messageString);
-        final int typeMask = LogDataType.logDataTypesToBitMask(argTypes);
-        doLogToProto(level, logGroup, new Message(messageString), typeMask, args, tsNanos);
-    }
-
-    private static class Message {
-        private final Optional<Long> mMessageHash;
-        private final Optional<String> mMessageString;
-
-        private Message(Long messageHash) {
-            this.mMessageHash = Optional.of(messageHash);
-            this.mMessageString = Optional.empty();
-        }
-
-        private Message(String messageString) {
-            this.mMessageHash = Optional.empty();
-            this.mMessageString = Optional.of(messageString);
-        }
-    }
-
-    private void doLogToProto(LogLevel level, IProtoLogGroup logGroup, Message message,
-            int paramsMask, Object[] args, long tsNanos) {
         mDataSource.trace(ctx -> {
             final ProtoLogDataSource.TlsState tlsState = ctx.getCustomTlsState();
-            final LogLevel logFrom = tlsState.getLogFromLevel(logGroup.name());
+            final LogLevel logFrom = tlsState.getLogFromLevel(groupName);
 
             if (level.ordinal() < logFrom.ordinal()) {
                 return;
@@ -428,7 +359,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             }
 
             int internedStacktrace = 0;
-            if (tlsState.getShouldCollectStacktrace(logGroup.name())) {
+            if (tlsState.getShouldCollectStacktrace(groupName)) {
                 // Intern stackstraces before creating the trace packet for the proto message so
                 // that the interned stacktrace strings appear before in the trace to make the
                 // trace processing easier.
@@ -436,23 +367,12 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 internedStacktrace = internStacktraceString(ctx, stacktrace);
             }
 
-            boolean needsIncrementalState = false;
-
-            long messageHash = 0;
-            if (message.mMessageHash.isPresent()) {
-                messageHash = message.mMessageHash.get();
-            }
-            if (message.mMessageString.isPresent()) {
-                needsIncrementalState = true;
-                messageHash =
-                        internProtoMessage(ctx, level, logGroup, message.mMessageString.get());
-            }
-
             final ProtoOutputStream os = ctx.newTracePacket();
             os.write(TIMESTAMP, tsNanos);
             long token = os.start(PROTOLOG_MESSAGE);
-
             os.write(MESSAGE_ID, messageHash);
+
+            boolean needsIncrementalState = false;
 
             if (args != null) {
 
@@ -494,7 +414,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 booleanParams.forEach(it -> os.write(BOOLEAN_PARAMS, it ? 1 : 0));
             }
 
-            if (tlsState.getShouldCollectStacktrace(logGroup.name())) {
+            if (tlsState.getShouldCollectStacktrace(groupName)) {
                 os.write(STACKTRACE_IID, internedStacktrace);
             }
 
@@ -505,63 +425,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             }
 
         });
-    }
-
-    private long internProtoMessage(
-            TracingContext<ProtoLogDataSource.Instance, ProtoLogDataSource.TlsState,
-                    ProtoLogDataSource.IncrementalState> ctx, LogLevel level,
-            IProtoLogGroup logGroup, String message) {
-        final ProtoLogDataSource.IncrementalState incrementalState = ctx.getIncrementalState();
-
-        if (!incrementalState.clearReported) {
-            final ProtoOutputStream os = ctx.newTracePacket();
-            os.write(SEQUENCE_FLAGS, SEQ_INCREMENTAL_STATE_CLEARED);
-            incrementalState.clearReported = true;
-        }
-
-
-        if (!incrementalState.protologGroupInterningSet.contains(logGroup.getId())) {
-            incrementalState.protologGroupInterningSet.add(logGroup.getId());
-
-            final ProtoOutputStream os = ctx.newTracePacket();
-            final long protologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
-            final long groupConfigToken = os.start(GROUPS);
-
-            os.write(ID, logGroup.getId());
-            os.write(NAME, logGroup.name());
-            os.write(TAG, logGroup.getTag());
-
-            os.end(groupConfigToken);
-            os.end(protologViewerConfigToken);
-        }
-
-        final Long messageHash = hash(level, logGroup.name(), message);
-        if (!incrementalState.protologMessageInterningSet.contains(messageHash)) {
-            incrementalState.protologMessageInterningSet.add(messageHash);
-
-            final ProtoOutputStream os = ctx.newTracePacket();
-            final long protologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
-            final long messageConfigToken = os.start(MESSAGES);
-
-            os.write(MessageData.MESSAGE_ID, messageHash);
-            os.write(MESSAGE, message);
-            os.write(LEVEL, level.ordinal());
-            os.write(GROUP_ID, logGroup.getId());
-
-            os.end(messageConfigToken);
-            os.end(protologViewerConfigToken);
-        }
-
-        return messageHash;
-    }
-
-    private Long hash(
-            LogLevel logLevel,
-            String logGroup,
-            String messageString
-    ) {
-        final String fullStringIdentifier =  messageString + logLevel + logGroup;
-        return UUID.nameUUIDFromBytes(fullStringIdentifier.getBytes()).getMostSignificantBits();
     }
 
     private static final int STACK_SIZE_TO_PROTO_LOG_ENTRY_CALL = 12;
