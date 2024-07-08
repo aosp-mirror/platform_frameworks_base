@@ -2857,6 +2857,33 @@ public final class NfcAdapter {
     }
 
    /**
+     * Notifies the system of new HCE data for tests.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public void notifyTestHceData(int technology, byte[] data) {
+        try {
+            if (sService == null) {
+                attemptDeadServiceRecovery(null);
+            }
+            sService.notifyTestHceData(technology, data);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return;
+            }
+            try {
+                sService.notifyTestHceData(technology, data);
+            } catch (RemoteException e2) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+        }
+    }
+
+   /**
      * Notifies the system of a an HCE session being deactivated.
      *     *
      * @hide
