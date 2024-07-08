@@ -156,26 +156,38 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     @Override
     public void log(LogLevel level, IProtoLogGroup group, long messageHash, int paramsMask,
             @Nullable Object[] args) {
-        if (isProtoEnabled()) {
-            long tsNanos = SystemClock.elapsedRealtimeNanos();
-            mBackgroundLoggingService.execute(() ->
-                    logToProto(level, group, messageHash, paramsMask, args, tsNanos));
-        }
-        if (group.isLogToLogcat()) {
-            logToLogcat(group.getTag(), level, messageHash, args);
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "log");
+
+        try {
+            if (isProtoEnabled()) {
+                long tsNanos = SystemClock.elapsedRealtimeNanos();
+                mBackgroundLoggingService.execute(() ->
+                        logToProto(level, group, messageHash, paramsMask, args, tsNanos));
+            }
+            if (group.isLogToLogcat()) {
+                logToLogcat(group.getTag(), level, messageHash, args);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
     @Override
     public void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object... args) {
-        if (isProtoEnabled()) {
-            long tsNanos = SystemClock.elapsedRealtimeNanos();
-            mBackgroundLoggingService.execute(
-                    () -> logStringMessageToProto(logLevel, group, messageString, args,
-                            tsNanos));
-        }
-        if (group.isLogToLogcat()) {
-            logToLogcat(group.getTag(), logLevel, messageString, args);
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "log");
+
+        try {
+            if (isProtoEnabled()) {
+                long tsNanos = SystemClock.elapsedRealtimeNanos();
+                mBackgroundLoggingService.execute(
+                        () -> logStringMessageToProto(logLevel, group, messageString, args,
+                                tsNanos));
+            }
+            if (group.isLogToLogcat()) {
+                logToLogcat(group.getTag(), logLevel, messageString, args);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
