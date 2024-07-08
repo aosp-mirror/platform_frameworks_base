@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.shared;
+package com.android.wm.shell.shared.desktopmode;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -23,7 +23,6 @@ import android.os.SystemProperties;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 
 /**
  * Constants for desktop mode feature
