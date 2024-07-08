@@ -141,3 +141,10 @@ flag {
     description: "Whether to enable desktop windowing transition handler and observer instead of task listeners."
     bug: "332682201"
 }
+
+flag {
+    name: "enable_desktop_windowing_multi_instance_features"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable multi-instance support in desktop windowing."
+    bug: "336289597"
+}
