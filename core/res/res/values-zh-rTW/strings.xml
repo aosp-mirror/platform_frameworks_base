@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"錯誤報告"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"結束"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"螢幕截圖"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"錯誤報告"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"這會收集你目前裝置狀態的相關資訊，以便透過電子郵件傳送。從錯誤報告開始建立到準備傳送的這段過程可能需要一點時間，敬請耐心等候。"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"互動式報告"</string>
@@ -1199,7 +1197,7 @@
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"系統儲存空間不足。請確定你已釋出 250MB 的可用空間，然後重新啟動。"</string>
-    <string name="app_running_notification_title" msgid="8985999749231486569">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」目前正在執行"</string>
+    <string name="app_running_notification_title" msgid="8985999749231486569">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在執行中"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"輕觸即可瞭解詳情或停止應用程式。"</string>
     <string name="ok" msgid="2646370155170753815">"確定"</string>
     <string name="cancel" msgid="6908697720451760115">"取消"</string>
@@ -1441,7 +1439,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"在其他應用程式上面顯示"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"「<xliff:g id="NAME">%s</xliff:g>」在其他應用程式上顯示內容"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"「<xliff:g id="NAME">%s</xliff:g>」正在其他應用程式上顯示內容"</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"「<xliff:g id="NAME">%s</xliff:g>」正重疊顯示在其他應用程式上方"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"如果你不想讓「<xliff:g id="NAME">%s</xliff:g>」使用這項功能，請輕觸開啟設定頁面，然後停用此功能。"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"關閉"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"正在檢查 <xliff:g id="NAME">%s</xliff:g>…"</string>
@@ -1767,12 +1765,9 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"下次輕觸無障礙工具按鈕時，就會開啟這項功能"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"下次使用這個捷徑時，就會開啟這項功能。請用 2 指從螢幕底部向上滑動並快速放開。"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"下次使用這個捷徑時，就會開啟這項功能。請用 3 指從螢幕底部向上滑動並快速放開。"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"放大"</string>
     <string name="user_switched" msgid="7249833311585228097">"目前的使用者是 <xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"正在切換至<xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2436,17 +2431,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"運作方式"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"待處理…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"重新設定指紋解鎖"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"系統無法再辨識「<xliff:g id="FINGERPRINT">%s</xliff:g>」。"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"系統無法再辨識「<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>」和「<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>」。"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"系統無法再辨識「<xliff:g id="FINGERPRINT">%s</xliff:g>」，請重新設定指紋解鎖。"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"系統無法再辨識「<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>」和「<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>」，請重新設定指紋解鎖。"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"重新設定人臉解鎖"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"系統無法再辨識你的臉部模型，請重新設定人臉解鎖。"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"設定"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"暫時不要"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g>的鬧鐘"</string>

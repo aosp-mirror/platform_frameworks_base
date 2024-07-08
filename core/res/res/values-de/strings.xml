@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Fehlerbericht"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Sitzung beenden"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Screenshot"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Fehlerbericht"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Bei diesem Fehlerbericht werden Daten zum aktuellen Status deines Geräts erfasst und als E-Mail versandt. Vom Start des Berichts bis zu seinem Versand kann es eine Weile dauern. Bitte habe etwas Geduld."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktiver Bericht"</string>
@@ -347,7 +345,7 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"Telefonanrufe tätigen und verwalten"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Körpersensoren"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"auf Sensordaten zu deinen Vitaldaten zugreifen"</string>
-    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Benachrichtigungen"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Benachrichtigun­gen"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"Benachrichtigungen anzeigen"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Fensterinhalte abrufen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Die Inhalte eines Fensters, mit dem du interagierst, werden abgerufen."</string>
@@ -1767,12 +1765,9 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Die Funktion wird geöffnet, wenn du das nächste Mal auf die Schaltfläche „Bedienungshilfen“ tippst"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Die Funktion wird geöffnet, wenn du diese Touch-Geste für Bedienungshilfen das nächste Mal verwendest. Wische mit 2 Fingern vom unteren Displayrand nach oben und lass dann schnell los."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Die Funktion wird geöffnet, wenn du diese Touch-Geste für Bedienungshilfen das nächste Mal verwendest. Wische mit 3 Fingern vom unteren Displayrand nach oben und lass dann schnell los."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Vergrößerung"</string>
     <string name="user_switched" msgid="7249833311585228097">"Aktueller Nutzer <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Wechseln zu <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2436,17 +2431,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"So funktionierts"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Ausstehend…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Entsperrung per Fingerabdruck neu einrichten"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> wird nicht mehr erkannt."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> und <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> werden nicht mehr erkannt."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> wird nicht mehr erkannt. Richte die Entsperrung per Fingerabdruck neu ein."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> und <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> werden nicht mehr erkannt. Richte die Entsperrung per Fingerabdruck neu ein."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Entsperrung per Gesichtserkennung neu einrichten"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Dein Gesichtsmodell wird nicht mehr erkannt. Richte die Entsperrung per Gesichtserkennung neu ein."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Einrichten"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Nicht jetzt"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Wecker für <xliff:g id="USER_NAME">%s</xliff:g>"</string>
