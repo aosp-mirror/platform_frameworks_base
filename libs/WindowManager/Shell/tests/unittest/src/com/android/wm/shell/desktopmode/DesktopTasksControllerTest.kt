@@ -20,6 +20,7 @@ import android.app.ActivityManager.RecentTaskInfo
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.KeyguardManager
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
+import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
@@ -89,7 +90,7 @@ import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.recents.RecentTasksController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
-import com.android.wm.shell.shared.DesktopModeStatus
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
@@ -137,6 +138,7 @@ import org.mockito.quality.Strictness
  */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
 class DesktopTasksControllerTest : ShellTestCase() {
 
   @JvmField @Rule val setFlagsRule = SetFlagsRule()
@@ -193,7 +195,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
             .strictness(Strictness.LENIENT)
             .spyStatic(DesktopModeStatus::class.java)
             .startMocking()
-    whenever(DesktopModeStatus.isDesktopModeFlagEnabled()).thenReturn(true)
     doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
 
     shellInit = spy(ShellInit(testExecutor))
@@ -263,7 +264,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun instantiate_flagOff_doNotAddInitCallback() {
+  fun instantiate_canNotEnterDesktopMode_doNotAddInitCallback() {
     whenever(DesktopModeStatus.canEnterDesktopMode(context)).thenReturn(false)
     clearInvocations(shellInit)
 

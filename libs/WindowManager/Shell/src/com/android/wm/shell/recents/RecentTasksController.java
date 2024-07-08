@@ -52,9 +52,9 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -640,7 +640,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         @Override
         public ActivityManager.RunningTaskInfo[] getRunningTasks(int maxNum) {
             final ActivityManager.RunningTaskInfo[][] tasks =
-                    new ActivityManager.RunningTaskInfo[][] {null};
+                    new ActivityManager.RunningTaskInfo[][]{null};
             executeRemoteCallWithTaskPermission(mController, "getRunningTasks",
                     (controller) -> tasks[0] = ActivityTaskManager.getInstance().getTasks(maxNum)
                             .toArray(new ActivityManager.RunningTaskInfo[0]),

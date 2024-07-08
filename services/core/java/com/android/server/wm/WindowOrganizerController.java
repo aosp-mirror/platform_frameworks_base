@@ -1596,7 +1596,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case OP_TYPE_REORDER_TO_BOTTOM_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    if (task.mChildren.peekFirst() != taskFragment) {
+                    if (task.getBottomChild() != taskFragment) {
                         task.mChildren.remove(taskFragment);
                         task.mChildren.add(0, taskFragment);
                         if (!taskFragment.hasChild()) {
@@ -1612,7 +1612,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case OP_TYPE_REORDER_TO_TOP_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    if (task.mChildren.peekLast() != taskFragment) {
+                    if (task.getTopChild() != taskFragment) {
                         task.mChildren.remove(taskFragment);
                         task.mChildren.add(taskFragment);
                         if (!taskFragment.hasChild()) {

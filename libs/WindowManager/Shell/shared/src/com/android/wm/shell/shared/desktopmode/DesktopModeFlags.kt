@@ -20,7 +20,6 @@ import android.content.Context
 import android.provider.Settings
 import android.util.Log
 import com.android.window.flags.Flags
-import com.android.wm.shell.shared.DesktopModeStatus
 
 /*
  * A shared class to check desktop mode flags state.
@@ -35,12 +34,8 @@ enum class DesktopModeFlags(
     private val shouldOverrideByDevOption: Boolean
 ) {
   // All desktop mode related flags will be added here
-  DESKTOP_WINDOWING_MODE(DesktopModeStatus::isDesktopModeFlagEnabled, true),
+  DESKTOP_WINDOWING_MODE(Flags::enableDesktopWindowingMode, true),
   WALLPAPER_ACTIVITY(Flags::enableDesktopWindowingWallpaperActivity, true);
-
-  // Local cache for toggle override, which is initialized once on its first access. It needs to be
-  // refreshed only on reboots as overridden state takes effect on reboots.
-  private var cachedToggleOverride: ToggleOverride? = null
 
   /**
    * Determines state of flag based on the actual flag and desktop mode developer option overrides.
@@ -139,13 +134,19 @@ enum class DesktopModeFlags(
         }
   }
 
-  private companion object {
-    const val TAG = "DesktopModeFlags"
+  companion object {
+    private const val TAG = "DesktopModeFlags"
 
     /**
      * Key for non-persistent System Property which is used to store desktop windowing developer
      * option overrides.
      */
-    const val SYSTEM_PROPERTY_OVERRIDE_KEY = "sys.wmshell.desktopmode.dev_toggle_override"
+    private const val SYSTEM_PROPERTY_OVERRIDE_KEY = "sys.wmshell.desktopmode.dev_toggle_override"
+
+    /**
+     * Local cache for toggle override, which is initialized once on its first access. It needs to
+     * be refreshed only on reboots as overridden state takes effect on reboots.
+     */
+    private var cachedToggleOverride: ToggleOverride? = null
   }
 }

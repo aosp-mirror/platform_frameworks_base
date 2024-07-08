@@ -116,7 +116,6 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
@@ -2482,10 +2481,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(activity.mChildren.contains(win4));
 
         // The starting window should be on-top of all other windows.
-        assertEquals(startingWin, activity.mChildren.peekLast());
+        assertEquals(startingWin, activity.getTopChild());
 
         // The base application window should be below all other windows.
-        assertEquals(baseWin, activity.mChildren.peekFirst());
+        assertEquals(baseWin, activity.getBottomChild());
         activity.removeImmediately();
     }
 
@@ -3505,23 +3504,6 @@ public class ActivityRecordTests extends WindowTestsBase {
                 /* transformationApplied */ true, /* callback */ null);
 
         assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_HIDDEN);
-    }
-
-    @Test
-    public void testIsCameraActive() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        final DisplayRotationCompatPolicy displayRotationCompatPolicy = mock(
-                DisplayRotationCompatPolicy.class);
-        when(mDisplayContent.getDisplayRotationCompatPolicy()).thenReturn(
-                displayRotationCompatPolicy);
-
-        when(displayRotationCompatPolicy.isCameraActive(any(ActivityRecord.class),
-                anyBoolean())).thenReturn(false);
-        assertFalse(app.mActivityRecord.isCameraActive());
-
-        when(displayRotationCompatPolicy.isCameraActive(any(ActivityRecord.class),
-                anyBoolean())).thenReturn(true);
-        assertTrue(app.mActivityRecord.isCameraActive());
     }
 
     @Test

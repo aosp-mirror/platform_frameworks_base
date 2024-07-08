@@ -179,7 +179,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
-    protected final WindowList<E> mChildren = new WindowList<E>();
+    protected final ArrayList<E> mChildren = new ArrayList<E>();
 
     // The specified orientation for this window container.
     // Shouldn't be accessed directly since subclasses can override getOverrideOrientation.
@@ -855,7 +855,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mSurfaceFreezer.unfreeze(getSyncTransaction());
         }
         while (!mChildren.isEmpty()) {
-            final E child = mChildren.peekLast();
+            final E child = mChildren.getLast();
             child.removeImmediately();
             // Need to do this after calling remove on the child because the child might try to
             // remove/detach itself from its parent which will cause an exception if we remove
@@ -979,7 +979,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         switch (position) {
             case POSITION_TOP:
-                if (mChildren.peekLast() != child) {
+                if (getTopChild() != child) {
                     mChildren.remove(child);
                     mChildren.add(child);
                     onChildPositionChanged(child);
@@ -990,7 +990,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 }
                 break;
             case POSITION_BOTTOM:
-                if (mChildren.peekFirst() != child) {
+                if (getBottomChild() != child) {
                     mChildren.remove(child);
                     mChildren.addFirst(child);
                     onChildPositionChanged(child);
@@ -1445,7 +1445,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /** Returns the top child container. */
     E getTopChild() {
-        return mChildren.peekLast();
+        final int n = mChildren.size();
+        return n == 0 ? null : mChildren.get(n - 1);
+    }
+
+    E getBottomChild() {
+        final int n = mChildren.size();
+        return n == 0 ? null : mChildren.get(0);
     }
 
     /**
@@ -2550,7 +2556,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         if (mParent != null && mParent == other.mParent) {
-            final WindowList<WindowContainer> list = mParent.mChildren;
+            final ArrayList<WindowContainer> list = mParent.mChildren;
             return list.indexOf(this) > list.indexOf(other) ? 1 : -1;
         }
 
@@ -2587,7 +2593,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
             // The position of the first non-common ancestor in the common ancestor list determines
             // which is greater the which.
-            final WindowList<WindowContainer> list = commonAncestor.mChildren;
+            final ArrayList<WindowContainer> list = commonAncestor.mChildren;
             return list.indexOf(thisParentChain.peekLast()) > list.indexOf(otherParentChain.peekLast())
                     ? 1 : -1;
         } finally {

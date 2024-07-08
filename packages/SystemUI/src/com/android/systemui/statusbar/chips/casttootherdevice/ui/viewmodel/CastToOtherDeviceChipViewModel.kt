@@ -23,7 +23,10 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.chips.casttootherdevice.ui.view.EndCastToOtherDeviceDialogDelegate
+import com.android.systemui.statusbar.chips.casttootherdevice.domain.interactor.MediaRouterChipInteractor
+import com.android.systemui.statusbar.chips.casttootherdevice.domain.model.MediaRouterCastModel
+import com.android.systemui.statusbar.chips.casttootherdevice.ui.view.EndCastScreenToOtherDeviceDialogDelegate
+import com.android.systemui.statusbar.chips.casttootherdevice.ui.view.EndGenericCastToOtherDeviceDialogDelegate
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractor
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
@@ -36,12 +39,14 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /**
- * View model for the cast-to-other-device chip, shown when sharing your phone screen content to a
- * different device. (Triggered from the Quick Settings Cast tile or from the Settings app.)
+ * View model for the cast-to-other-device chip, shown when a user is sharing content to a different
+ * device. (Triggered from the Quick Settings Cast tile or from the Settings app.) The content could
+ * either be the user's screen, or just the user's audio.
  */
 @SysUISingleton
 class CastToOtherDeviceChipViewModel
@@ -49,14 +54,19 @@ class CastToOtherDeviceChipViewModel
 constructor(
     @Application private val scope: CoroutineScope,
     private val mediaProjectionChipInteractor: MediaProjectionChipInteractor,
+    private val mediaRouterChipInteractor: MediaRouterChipInteractor,
     private val systemClock: SystemClock,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
 ) : OngoingActivityChipViewModel {
-    override val chip: StateFlow<OngoingActivityChipModel> =
-        // TODO(b/342169876): The MediaProjection APIs are not invoked for certain
-        // cast-to-other-device events, like audio-only casting. We should also listen to
-        // MediaRouter APIs to cover all cast events.
+    /**
+     * The cast chip to show, based only on MediaProjection API events.
+     *
+     * This chip will only be [OngoingActivityChipModel.Shown] when the user is casting their
+     * *screen*. If the user is only casting audio, this chip will be
+     * [OngoingActivityChipModel.Hidden].
+     */
+    private val projectionChip: StateFlow<OngoingActivityChipModel> =
         mediaProjectionChipInteractor.projection
             .map { projectionModel ->
                 when (projectionModel) {
@@ -65,7 +75,7 @@ constructor(
                         if (projectionModel.type != ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE) {
                             OngoingActivityChipModel.Hidden
                         } else {
-                            createCastToOtherDeviceChip(projectionModel)
+                            createCastScreenToOtherDeviceChip(projectionModel)
                         }
                     }
                 }
@@ -73,41 +83,130 @@ constructor(
             // See b/347726238.
             .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden)
 
+    /**
+     * The cast chip to show, based only on MediaRouter API events.
+     *
+     * This chip will be [OngoingActivityChipModel.Shown] when the user is casting their screen *or*
+     * their audio.
+     *
+     * The MediaProjection APIs are not invoked for casting *only audio* to another device because
+     * MediaProjection is only concerned with *screen* sharing (see b/342169876). We listen to
+     * MediaRouter APIs here to cover audio-only casting.
+     *
+     * Note that this means we will start showing the cast chip before the casting actually starts,
+     * for **both** audio-only casting and screen casting. MediaRouter is aware of all
+     * cast-to-other-device events, and MediaRouter immediately marks a device as "connecting" once
+     * a user selects what device they'd like to cast to, even if they haven't hit "Start casting"
+     * yet. All of SysUI considers "connecting" devices to be casting (see
+     * [com.android.systemui.statusbar.policy.CastDevice.isCasting]), so the chip will follow the
+     * same convention and start showing once a device is selected. See b/269975671.
+     */
+    private val routerChip =
+        mediaRouterChipInteractor.mediaRouterCastingState
+            .map { routerModel ->
+                when (routerModel) {
+                    is MediaRouterCastModel.DoingNothing -> OngoingActivityChipModel.Hidden
+                    is MediaRouterCastModel.Casting -> {
+                        // A consequence of b/269975671 is that MediaRouter will mark a device as
+                        // casting before casting has actually started. To alleviate this bug a bit,
+                        // we won't show a timer for MediaRouter events. That way, we won't show a
+                        // timer if cast hasn't actually started.
+                        //
+                        // This does mean that the audio-only casting chip will *never* show a
+                        // timer, because audio-only casting never activates the MediaProjection
+                        // APIs and those are the only cast APIs that show a timer.
+                        createIconOnlyCastChip()
+                    }
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+
+    override val chip: StateFlow<OngoingActivityChipModel> =
+        combine(projectionChip, routerChip) { projection, router ->
+                // A consequence of b/269975671 is that MediaRouter and MediaProjection APIs fire at
+                // different times when *screen* casting:
+                //
+                // 1. When the user chooses what device to cast to, the MediaRouter APIs mark the
+                // device as casting (even though casting hasn't actually started yet). At this
+                // point, `routerChip` is [OngoingActivityChipModel.Shown] but `projectionChip` is
+                // [OngoingActivityChipModel.Hidden], and we'll show the router chip.
+                //
+                // 2. Once casting has actually started, the MediaProjection APIs become aware of
+                // the device. At this point, both `routerChip` and `projectionChip` are
+                // [OngoingActivityChipModel.Shown].
+                //
+                // Because the MediaProjection APIs have activated, we know that the user is screen
+                // casting (not audio casting). We need to switch to using `projectionChip` because
+                // that chip will show information specific to screen casting. The `projectionChip`
+                // will also show a timer, as opposed to `routerChip`'s icon-only display.
+                if (projection is OngoingActivityChipModel.Shown) {
+                    projection
+                } else {
+                    router
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+
     /** Stops the currently active projection. */
     private fun stopProjecting() {
         mediaProjectionChipInteractor.stopProjecting()
     }
 
-    private fun createCastToOtherDeviceChip(
+    private fun stopMediaRouterCasting() {
+        mediaRouterChipInteractor.stopCasting()
+    }
+
+    private fun createCastScreenToOtherDeviceChip(
         state: ProjectionChipModel.Projecting,
     ): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.Timer(
             icon =
                 Icon.Resource(
                     CAST_TO_OTHER_DEVICE_ICON,
-                    // Note: This string is "Casting screen", which is okay right now because this
-                    // chip does not currently support audio-only casting. If the chip starts
-                    // supporting audio-only casting (see b/342169876), update the content
-                    // description to just "Casting".
+                    // This string is "Casting screen"
                     ContentDescription.Resource(
-                        R.string.cast_to_other_device_chip_accessibility_label,
+                        R.string.cast_screen_to_other_device_chip_accessibility_label,
                     ),
                 ),
             colors = ColorsModel.Red,
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),
             createDialogLaunchOnClickListener(
-                createCastToOtherDeviceDialogDelegate(state),
+                createCastScreenToOtherDeviceDialogDelegate(state),
                 dialogTransitionAnimator,
             ),
         )
     }
 
-    private fun createCastToOtherDeviceDialogDelegate(state: ProjectionChipModel.Projecting) =
-        EndCastToOtherDeviceDialogDelegate(
+    private fun createIconOnlyCastChip(): OngoingActivityChipModel.Shown {
+        return OngoingActivityChipModel.Shown.IconOnly(
+            icon =
+                Icon.Resource(
+                    CAST_TO_OTHER_DEVICE_ICON,
+                    // This string is just "Casting"
+                    ContentDescription.Resource(R.string.accessibility_casting),
+                ),
+            colors = ColorsModel.Red,
+            createDialogLaunchOnClickListener(
+                createGenericCastToOtherDeviceDialogDelegate(),
+                dialogTransitionAnimator,
+            ),
+        )
+    }
+
+    private fun createCastScreenToOtherDeviceDialogDelegate(
+        state: ProjectionChipModel.Projecting,
+    ) =
+        EndCastScreenToOtherDeviceDialogDelegate(
             endMediaProjectionDialogHelper,
             stopAction = this::stopProjecting,
             state,
+        )
+
+    private fun createGenericCastToOtherDeviceDialogDelegate() =
+        EndGenericCastToOtherDeviceDialogDelegate(
+            endMediaProjectionDialogHelper,
+            stopAction = this::stopMediaRouterCasting,
         )
 
     companion object {

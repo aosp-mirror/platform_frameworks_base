@@ -2737,9 +2737,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         final ActivityOptions activityOptions = options != null
                 ? options.getOptions(this)
                 : null;
-        boolean moveHomeTaskForward = true;
         synchronized (mService.mGlobalLock) {
             final boolean isCallerRecents = mRecentTasks.isCallerRecents(callingUid);
+            boolean moveHomeTaskForward = isCallerRecents;
             int activityType = ACTIVITY_TYPE_UNDEFINED;
             if (activityOptions != null) {
                 activityType = activityOptions.getLaunchActivityType();

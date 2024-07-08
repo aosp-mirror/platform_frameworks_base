@@ -34,7 +34,6 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutHelper
-import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
 import com.android.systemui.res.R
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -81,10 +80,7 @@ constructor(
         requireViewById<ComposeView>(R.id.shortcut_helper_compose_container).apply {
             setContent {
                 PlatformTheme {
-                    val shortcutsUiState by
-                        viewModel.shortcutsUiState.collectAsStateWithLifecycle(
-                            initialValue = ShortcutsUiState.Inactive
-                        )
+                    val shortcutsUiState by viewModel.shortcutsUiState.collectAsStateWithLifecycle()
                     ShortcutHelper(
                         shortcutsUiState = shortcutsUiState,
                         onKeyboardSettingsClicked = ::onKeyboardSettingsClicked,
