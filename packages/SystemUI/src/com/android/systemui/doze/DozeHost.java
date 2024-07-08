@@ -18,6 +18,8 @@ package com.android.systemui.doze;
 
 import android.annotation.NonNull;
 
+import androidx.annotation.MainThread;
+
 /**
  * Interface the doze service uses to communicate with the rest of system UI.
  */
@@ -27,6 +29,7 @@ public interface DozeHost {
     void startDozing();
     void pulseWhileDozing(@NonNull PulseCallback callback, int reason);
     void stopDozing();
+    @MainThread
     void dozeTimeTick();
     boolean isPowerSaveActive();
     boolean isPulsingBlocked();
