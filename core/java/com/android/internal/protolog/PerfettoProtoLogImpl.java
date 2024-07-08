@@ -76,6 +76,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -158,17 +159,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
      */
     @VisibleForTesting
     @Override
-    public void log(LogLevel logLevel, IProtoLogGroup group, long messageHash, int paramsMask,
-            @Nullable Object[] args) {
-        log(logLevel, group, new Message(messageHash, paramsMask), args);
-    }
-
-    @Override
-    public void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object... args) {
-        log(logLevel, group, new Message(messageString), args);
-    }
-
-    private void log(LogLevel logLevel, IProtoLogGroup group, Message message,
+    public void log(LogLevel level, IProtoLogGroup group, long messageHash, int paramsMask,
             @Nullable Object[] args) {
         if (isProtoEnabled()) {
             long tsNanos = SystemClock.elapsedRealtimeNanos();
@@ -178,17 +169,31 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             } else {
                 stacktrace = null;
             }
-            try {
-                mBackgroundServiceLock.lock();
-                mBackgroundLoggingService.execute(() ->
-                        logToProto(logLevel, group, message, args, tsNanos,
+            mBackgroundLoggingService.execute(() ->
+                        logToProto(level, group, messageHash, paramsMask, args, tsNanos,
                                 stacktrace));
-            } finally {
-                mBackgroundServiceLock.unlock();
-            }
         }
         if (group.isLogToLogcat()) {
-            logToLogcat(group.getTag(), logLevel, message, args);
+            logToLogcat(group.getTag(), level, messageHash, args);
+        }
+    }
+
+    @Override
+    public void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object... args) {
+        if (isProtoEnabled()) {
+            long tsNanos = SystemClock.elapsedRealtimeNanos();
+            final String stacktrace;
+            if (mCollectStackTraceGroupCounts.getOrDefault(group, 0) > 0) {
+                stacktrace = collectStackTrace();
+            } else {
+                stacktrace = null;
+            }
+            mBackgroundLoggingService.execute(
+                    () -> logStringMessageToProto(logLevel, group, messageString, args,
+                            tsNanos, stacktrace));
+        }
+        if (group.isLogToLogcat()) {
+            logToLogcat(group.getTag(), logLevel, messageString, args);
         }
     }
 
@@ -312,23 +317,25 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         os.end(outMessagesToken);
     }
 
-    private void logToLogcat(String tag, LogLevel level, Message message,
+    private void logToLogcat(String tag, LogLevel level, long messageHash,
             @Nullable Object[] args) {
-        String messageString = message.getMessage(mViewerConfigReader);
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logToLogcat");
+        try {
+            String messageString = mViewerConfigReader.getViewerString(messageHash);
 
-        if (messageString == null) {
-            StringBuilder builder = new StringBuilder("UNKNOWN MESSAGE");
-            if (args != null) {
-                builder.append(" args = (");
-                builder.append(String.join(", ", Arrays.stream(args).map(
-                        Object::toString).toList()));
-                builder.append(")");
+            if (messageString == null) {
+                StringBuilder builder = new StringBuilder("UNKNOWN MESSAGE");
+                for (Object o : args) {
+                    builder.append(" ").append(o);
+                }
+                messageString = builder.toString();
+                args = new Object[0];
             }
-            messageString = builder.toString();
-            args = new Object[0];
-        }
 
-        logToLogcat(tag, level, messageString, args);
+            doLogToLogcat(tag, level, messageString, args);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
     }
 
     private void logToLogcat(String tag, LogLevel level, String message, @Nullable Object[] args) {
@@ -344,13 +351,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             @Nullable Object[] args) {
         String message;
         if (args != null) {
-            try {
-                message = TextUtils.formatSimple(messageString, args);
-            } catch (IllegalArgumentException e) {
-                message = "FORMAT_ERROR \"" + messageString + "\", args=("
-                        + String.join(
-                                ", ", Arrays.stream(args).map(Object::toString).toList()) + ")";
-            }
+            message = TextUtils.formatSimple(messageString, args);
         } else {
             message = messageString;
         }
@@ -384,18 +385,52 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         }
     }
 
-    private void logToProto(LogLevel level, IProtoLogGroup logGroup, Message message, Object[] args,
-            long tsNanos, @Nullable String stacktrace) {
+    private void logToProto(LogLevel level, IProtoLogGroup logGroup, long messageHash,
+            int paramsMask, Object[] args, long tsNanos, @Nullable String stacktrace) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logToProto");
         try {
-            doLogToProto(level, logGroup, message, args, tsNanos, stacktrace);
+            doLogToProto(level, logGroup, new Message(messageHash), paramsMask, args, tsNanos,
+                    stacktrace);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
-    private void doLogToProto(LogLevel level, IProtoLogGroup logGroup, Message message,
+    private void logStringMessageToProto(LogLevel logLevel, IProtoLogGroup group,
+            String messageString, Object[] args, long tsNanos, @Nullable String stacktrace) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logStringMessageToProto");
+        try {
+            doLogToProto(logLevel, group, messageString, args, tsNanos, stacktrace);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    private void doLogToProto(LogLevel level, IProtoLogGroup logGroup, String messageString,
             Object[] args, long tsNanos, @Nullable String stacktrace) {
+        final List<Integer> argTypes = LogDataType.parseFormatString(messageString);
+        final int typeMask = LogDataType.logDataTypesToBitMask(argTypes);
+        doLogToProto(level, logGroup, new Message(messageString), typeMask, args, tsNanos,
+                stacktrace);
+    }
+
+    private static class Message {
+        private final Optional<Long> mMessageHash;
+        private final Optional<String> mMessageString;
+
+        private Message(Long messageHash) {
+            this.mMessageHash = Optional.of(messageHash);
+            this.mMessageString = Optional.empty();
+        }
+
+        private Message(String messageString) {
+            this.mMessageHash = Optional.empty();
+            this.mMessageString = Optional.of(messageString);
+        }
+    }
+
+    private void doLogToProto(LogLevel level, IProtoLogGroup logGroup, Message message,
+            int paramsMask, Object[] args, long tsNanos, @Nullable String stacktrace) {
         mDataSource.trace(ctx -> {
             final ProtoLogDataSource.TlsState tlsState = ctx.getCustomTlsState();
             final LogLevel logFrom = tlsState.getLogFromLevel(logGroup.name());
@@ -410,7 +445,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 // trace processing easier.
                 int argIndex = 0;
                 for (Object o : args) {
-                    int type = LogDataType.bitmaskToLogDataType(message.getMessageMask(), argIndex);
+                    int type = LogDataType.bitmaskToLogDataType(paramsMask, argIndex);
                     if (type == LogDataType.STRING) {
                         internStringArg(ctx, o.toString());
                     }
@@ -429,13 +464,13 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             boolean needsIncrementalState = false;
 
             long messageHash = 0;
-            if (message.mMessageHash != null) {
-                messageHash = message.mMessageHash;
+            if (message.mMessageHash.isPresent()) {
+                messageHash = message.mMessageHash.get();
             }
-            if (message.mMessageString != null) {
+            if (message.mMessageString.isPresent()) {
                 needsIncrementalState = true;
                 messageHash =
-                        internProtoMessage(ctx, level, logGroup, message.mMessageString);
+                        internProtoMessage(ctx, level, logGroup, message.mMessageString.get());
             }
 
             final ProtoOutputStream os = ctx.newTracePacket();
@@ -451,7 +486,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 ArrayList<Double> doubleParams = new ArrayList<>();
                 ArrayList<Boolean> booleanParams = new ArrayList<>();
                 for (Object o : args) {
-                    int type = LogDataType.bitmaskToLogDataType(message.getMessageMask(), argIndex);
+                    int type = LogDataType.bitmaskToLogDataType(paramsMask, argIndex);
                     try {
                         switch (type) {
                             case LogDataType.STRING:
@@ -593,7 +628,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                     ProtoLogDataSource.IncrementalState> ctx,
             Map<String, Integer> internMap,
             long fieldId,
-            @NonNull String string
+            String string
     ) {
         final ProtoLogDataSource.IncrementalState incrementalState = ctx.getIncrementalState();
 
@@ -739,6 +774,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private synchronized void onTracingInstanceStart(ProtoLogDataSource.ProtoLogConfig config) {
+        this.mTracingInstances.incrementAndGet();
+
         final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
         for (int i = defaultLogFrom.ordinal(); i < LogLevel.values().length; i++) {
             mDefaultLogLevelCounts[i]++;
@@ -749,22 +786,12 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         for (String overriddenGroupTag : overriddenGroupTags) {
             IProtoLogGroup group = mLogGroups.get(overriddenGroupTag);
 
-            if (group == null) {
-                throw new IllegalArgumentException("Trying to set config for \""
-                        + overriddenGroupTag + "\" that isn't registered");
-            }
-
             mLogLevelCounts.putIfAbsent(group, new int[LogLevel.values().length]);
             final int[] logLevelsCountsForGroup = mLogLevelCounts.get(group);
 
             final LogLevel logFromLevel = config.getConfigFor(overriddenGroupTag).logFrom;
-            for (int i = logFromLevel.ordinal(); i < LogLevel.values().length; i++) {
-                logLevelsCountsForGroup[i]++;
-            }
-
-            if (config.getConfigFor(overriddenGroupTag).collectStackTrace) {
-                mCollectStackTraceGroupCounts.put(group,
-                        mCollectStackTraceGroupCounts.getOrDefault(group, 0) + 1);
+            for (int i = defaultLogFrom.ordinal(); i < LogLevel.values().length; i++) {
+                logLevelsCountsForGroup[logFromLevel.ordinal()]++;
             }
 
             if (config.getConfigFor(overriddenGroupTag).collectStackTrace) {
@@ -774,8 +801,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         }
 
         mCacheUpdater.run();
-
-        this.mTracingInstances.incrementAndGet();
     }
 
     private synchronized void onTracingInstanceStop(ProtoLogDataSource.ProtoLogConfig config) {
@@ -819,37 +844,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         if (pw != null) {
             pw.println(msg);
             pw.flush();
-        }
-    }
-
-    private static class Message {
-        private final Long mMessageHash;
-        private final Integer mMessageMask;
-        private final String mMessageString;
-
-        private Message(Long messageHash, int messageMask) {
-            this.mMessageHash = messageHash;
-            this.mMessageMask = messageMask;
-            this.mMessageString = null;
-        }
-
-        private Message(String messageString) {
-            this.mMessageHash = null;
-            final List<Integer> argTypes = LogDataType.parseFormatString(messageString);
-            this.mMessageMask = LogDataType.logDataTypesToBitMask(argTypes);
-            this.mMessageString = messageString;
-        }
-
-        private int getMessageMask() {
-            return mMessageMask;
-        }
-
-        private String getMessage(ProtoLogViewerConfigReader viewerConfigReader) {
-            if (mMessageString != null) {
-                return mMessageString;
-            }
-
-            return viewerConfigReader.getViewerString(mMessageHash);
         }
     }
 }
