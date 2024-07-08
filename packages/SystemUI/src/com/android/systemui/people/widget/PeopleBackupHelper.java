@@ -41,6 +41,8 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.people.PeopleBackupFollowUpJob;
 import com.android.systemui.people.SharedPreferencesHelper;
@@ -67,6 +69,7 @@ public class PeopleBackupHelper extends SharedPreferencesBackupHelper {
     private final UserHandle mUserHandle;
     private final PackageManager mPackageManager;
     private final IPeopleManager mIPeopleManager;
+    @Nullable
     private final AppWidgetManager mAppWidgetManager;
 
     /**
@@ -404,6 +407,9 @@ public class PeopleBackupHelper extends SharedPreferencesBackupHelper {
 
     private List<String> getExistingWidgetsForUser(int userId) {
         List<String> existingWidgets = new ArrayList<>();
+        if (mAppWidgetManager == null) {
+            return existingWidgets;
+        }
         int[] ids = mAppWidgetManager.getAppWidgetIds(
                 new ComponentName(mContext, PeopleSpaceWidgetProvider.class));
         for (int id : ids) {
@@ -491,7 +497,11 @@ public class PeopleBackupHelper extends SharedPreferencesBackupHelper {
 
     /** Sends a broadcast to update the existing Conversation widgets. */
     public static void updateWidgets(Context context) {
-        int[] widgetIds = AppWidgetManager.getInstance(context)
+        AppWidgetManager manager = AppWidgetManager.getInstance(context);
+        if (manager == null) {
+            return;
+        }
+        int[] widgetIds = manager
                 .getAppWidgetIds(new ComponentName(context, PeopleSpaceWidgetProvider.class));
         if (DEBUG) {
             for (int id : widgetIds) {

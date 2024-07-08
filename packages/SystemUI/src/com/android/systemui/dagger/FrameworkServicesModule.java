@@ -39,6 +39,7 @@ import android.app.job.JobScheduler;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
+import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.companion.virtual.VirtualDeviceManager;
@@ -363,6 +364,12 @@ public class FrameworkServicesModule {
     @Singleton
     static InputMethodManager provideInputMethodManager(Context context) {
         return context.getSystemService(InputMethodManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static Optional<AppWidgetManager> provideAppWidgetManager(@Application Context context) {
+        return Optional.ofNullable(AppWidgetManager.getInstance(context));
     }
 
     @Provides
