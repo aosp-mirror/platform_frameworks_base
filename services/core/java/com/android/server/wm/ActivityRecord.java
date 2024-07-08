@@ -2917,14 +2917,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /** Makes starting window always fill the associated task. */
     private void attachStartingSurfaceToAssociatedTask() {
-        if (mSyncState == SYNC_STATE_NONE && isEmbedded()) {
-            // Collect this activity since it's starting window will reparent to task. To ensure
-            // any starting window's transaction will occur in order.
-            mTransitionController.collect(this);
-        }
+        mTransitionController.collect(mStartingWindow);
         // Associate the configuration of starting window with the task.
         overrideConfigurationPropagation(mStartingWindow, mStartingData.mAssociatedTask);
-        getSyncTransaction().reparent(mStartingWindow.mSurfaceControl,
+        mStartingWindow.getSyncTransaction().reparent(mStartingWindow.mSurfaceControl,
                 mStartingData.mAssociatedTask.mSurfaceControl);
     }
 
