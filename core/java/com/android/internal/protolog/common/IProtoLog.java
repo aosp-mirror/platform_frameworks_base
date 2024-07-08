@@ -34,6 +34,15 @@ public interface IProtoLog {
              String messageString, Object[] args);
 
     /**
+     * Log a ProtoLog message
+     * @param logLevel Log level of the proto message.
+     * @param group The group this message belongs to.
+     * @param messageString The message string.
+     * @param args The arguments of the message.
+     */
+    void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object... args);
+
+    /**
      * Check if ProtoLog is tracing.
      * @return true iff a ProtoLog tracing session is active.
      */

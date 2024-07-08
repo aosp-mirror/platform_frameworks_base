@@ -44,7 +44,10 @@ public class ProtoLog {
 // LINT.ThenChange(frameworks/base/tools/protologtool/src/com/android/protolog/tool/ProtoLogTool.kt)
 
     // Needs to be set directly otherwise the protologtool tries to transform the method call
+    @Deprecated
     public static boolean REQUIRE_PROTOLOGTOOL = true;
+
+    private static IProtoLog sProtoLogInstance;
 
     /**
      * DEBUG level log.
@@ -52,13 +55,12 @@ public class ProtoLog {
      * @param group         {@code IProtoLogGroup} controlling this log call.
      * @param messageString constant format string for the logged message.
      * @param args          parameters to be used with the format string.
+     *
+     * NOTE: If source code is pre-processed by ProtoLogTool this is not the function call that is
+     *       executed. Check generated code for actual call.
      */
     public static void d(IProtoLogGroup group, String messageString, Object... args) {
-        // Stub, replaced by the ProtoLogTool.
-        if (REQUIRE_PROTOLOGTOOL) {
-            throw new UnsupportedOperationException(
-                    "ProtoLog calls MUST be processed with ProtoLogTool");
-        }
+        logStringMessage(LogLevel.DEBUG, group, messageString, args);
     }
 
     /**
@@ -67,13 +69,12 @@ public class ProtoLog {
      * @param group         {@code IProtoLogGroup} controlling this log call.
      * @param messageString constant format string for the logged message.
      * @param args          parameters to be used with the format string.
+     *
+     * NOTE: If source code is pre-processed by ProtoLogTool this is not the function call that is
+     *       executed. Check generated code for actual call.
      */
     public static void v(IProtoLogGroup group, String messageString, Object... args) {
-        // Stub, replaced by the ProtoLogTool.
-        if (REQUIRE_PROTOLOGTOOL) {
-            throw new UnsupportedOperationException(
-                    "ProtoLog calls MUST be processed with ProtoLogTool");
-        }
+        logStringMessage(LogLevel.VERBOSE, group, messageString, args);
     }
 
     /**
@@ -82,13 +83,12 @@ public class ProtoLog {
      * @param group         {@code IProtoLogGroup} controlling this log call.
      * @param messageString constant format string for the logged message.
      * @param args          parameters to be used with the format string.
+     *
+     * NOTE: If source code is pre-processed by ProtoLogTool this is not the function call that is
+     *       executed. Check generated code for actual call.
      */
     public static void i(IProtoLogGroup group, String messageString, Object... args) {
-        // Stub, replaced by the ProtoLogTool.
-        if (REQUIRE_PROTOLOGTOOL) {
-            throw new UnsupportedOperationException(
-                    "ProtoLog calls MUST be processed with ProtoLogTool");
-        }
+        logStringMessage(LogLevel.INFO, group, messageString, args);
     }
 
     /**
@@ -97,13 +97,12 @@ public class ProtoLog {
      * @param group         {@code IProtoLogGroup} controlling this log call.
      * @param messageString constant format string for the logged message.
      * @param args          parameters to be used with the format string.
+     *
+     * NOTE: If source code is pre-processed by ProtoLogTool this is not the function call that is
+     *       executed. Check generated code for actual call.
      */
     public static void w(IProtoLogGroup group, String messageString, Object... args) {
-        // Stub, replaced by the ProtoLogTool.
-        if (REQUIRE_PROTOLOGTOOL) {
-            throw new UnsupportedOperationException(
-                    "ProtoLog calls MUST be processed with ProtoLogTool");
-        }
+        logStringMessage(LogLevel.WARN, group, messageString, args);
     }
 
     /**
@@ -112,13 +111,12 @@ public class ProtoLog {
      * @param group         {@code IProtoLogGroup} controlling this log call.
      * @param messageString constant format string for the logged message.
      * @param args          parameters to be used with the format string.
+     *
+     * NOTE: If source code is pre-processed by ProtoLogTool this is not the function call that is
+     *       executed. Check generated code for actual call.
      */
     public static void e(IProtoLogGroup group, String messageString, Object... args) {
-        // Stub, replaced by the ProtoLogTool.
-        if (REQUIRE_PROTOLOGTOOL) {
-            throw new UnsupportedOperationException(
-                    "ProtoLog calls MUST be processed with ProtoLogTool");
-        }
+        logStringMessage(LogLevel.ERROR, group, messageString, args);
     }
 
     /**
@@ -127,13 +125,12 @@ public class ProtoLog {
      * @param group         {@code IProtoLogGroup} controlling this log call.
      * @param messageString constant format string for the logged message.
      * @param args          parameters to be used with the format string.
+     *
+     * NOTE: If source code is pre-processed by ProtoLogTool this is not the function call that is
+     *       executed. Check generated code for actual call.
      */
     public static void wtf(IProtoLogGroup group, String messageString, Object... args) {
-        // Stub, replaced by the ProtoLogTool.
-        if (REQUIRE_PROTOLOGTOOL) {
-            throw new UnsupportedOperationException(
-                    "ProtoLog calls MUST be processed with ProtoLogTool");
-        }
+        logStringMessage(LogLevel.WTF, group, messageString, args);
     }
 
     /**
@@ -142,11 +139,7 @@ public class ProtoLog {
      * @return true iff this is being logged.
      */
     public static boolean isEnabled(IProtoLogGroup group, LogLevel level) {
-        if (REQUIRE_PROTOLOGTOOL) {
-            throw new UnsupportedOperationException(
-                    "ProtoLog calls MUST be processed with ProtoLogTool");
-        }
-        return false;
+        return sProtoLogInstance.isEnabled(group, level);
     }
 
     /**
@@ -154,10 +147,28 @@ public class ProtoLog {
      * @return A singleton instance of ProtoLog.
      */
     public static IProtoLog getSingleInstance() {
-        if (REQUIRE_PROTOLOGTOOL) {
-            throw new UnsupportedOperationException(
-                    "ProtoLog calls MUST be processed with ProtoLogTool");
+        return sProtoLogInstance;
+    }
+
+    /**
+     * Should be called once for each process that wants to use ProtoLog
+     */
+    public static synchronized void initialize(IProtoLog protoLogInstance) {
+        if (sProtoLogInstance != null) {
+            throw new IllegalStateException("ProtoLog already initialized in this process");
         }
-        return null;
+        sProtoLogInstance = protoLogInstance;
+    }
+
+    private static void logStringMessage(LogLevel logLevel, IProtoLogGroup group,
+            String stringMessage, Object... args) {
+        if (sProtoLogInstance == null) {
+            throw new IllegalStateException(
+                    "Trying to use ProtoLog before it is initialized in this process.");
+        }
+
+        if (sProtoLogInstance.isEnabled(group, logLevel)) {
+            sProtoLogInstance.log(logLevel, group, stringMessage, args);
+        }
     }
 }

@@ -106,6 +106,13 @@ public class LegacyProtoLogImpl implements IProtoLog {
         }
     }
 
+    @Override
+    public void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object... args) {
+        // This will be removed very soon so no point implementing it here.
+        throw new IllegalStateException(
+                "Not implemented. Only implemented for PerfettoProtoLogImpl.");
+    }
+
     private void logToLogcat(String tag, LogLevel level, long messageHash,
             @Nullable String messageString, Object[] args) {
         String message = null;
