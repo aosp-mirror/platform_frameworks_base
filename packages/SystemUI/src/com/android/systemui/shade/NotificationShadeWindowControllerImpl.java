@@ -644,7 +644,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                     mCurrentState.bouncerShowing,
                     mCurrentState.dozing,
                     mCurrentState.shadeOrQsExpanded,
-                    mCurrentState.dreaming);
+                    mCurrentState.dreaming,
+                    mCurrentState.communalVisible);
         }
     }
 
