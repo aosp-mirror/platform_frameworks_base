@@ -585,9 +585,10 @@ public abstract class WMShellModule {
     @Provides
     static ExitDesktopTaskTransitionHandler provideExitDesktopTaskTransitionHandler(
             Transitions transitions,
-            Context context
-    ) {
-        return new ExitDesktopTaskTransitionHandler(transitions, context);
+            Context context,
+            InteractionJankMonitor interactionJankMonitor) {
+        return new ExitDesktopTaskTransitionHandler(
+            transitions, context, interactionJankMonitor);
     }
 
     @WMSingleton
