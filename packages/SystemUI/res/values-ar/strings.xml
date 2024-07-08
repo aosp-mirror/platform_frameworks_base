@@ -476,8 +476,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"إضافة المزيد من التطبيقات المصغّرة"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"اضغط مع الاستمرار لتخصيص التطبيقات المصغّرة."</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"تخصيص التطبيقات المصغَّرة"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"يجب فتح القفل لتخصيص التطبيقات المصغّرة"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"رمز التطبيق المصغّر غير المفعّل"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"رمز تطبيق مصغَّر جارٍ تثبيته"</string>
     <string name="edit_widget" msgid="9030848101135393954">"تعديل التطبيق المصغَّر"</string>
@@ -799,7 +798,7 @@
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"البحث في الاختصارات"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"لم يُعثَر على اختصارات."</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"النظام"</string>
-    <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"إدخال"</string>
+    <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"الإدخال"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"فتح التطبيقات"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"التطبيق الحالي"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"جارٍ عرض نتائج البحث"</string>
@@ -1375,6 +1374,8 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
     <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"رجوع"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"للرجوع، مرِّر سريعًا لليسار أو لليمين باستخدام ثلاثة أصابع في أي مكان على لوحة اللمس."</string>
