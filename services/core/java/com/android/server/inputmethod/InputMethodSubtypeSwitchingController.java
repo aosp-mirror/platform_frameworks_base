@@ -16,10 +16,8 @@
 
 package com.android.server.inputmethod;
 
-import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.Context;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -163,13 +161,12 @@ final class InputMethodSubtypeSwitchingController {
     @NonNull
     static List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(
             boolean includeAuxiliarySubtypes, boolean isScreenLocked, boolean forImeMenu,
-            @NonNull Context context, @NonNull InputMethodMap methodMap,
-            @UserIdInt int userId) {
+            @NonNull Context context, @NonNull InputMethodSettings settings) {
+        final int userId = settings.getUserId();
         final Context userAwareContext = context.getUserId() == userId
                 ? context
                 : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
         final String mSystemLocaleStr = SystemLocaleWrapper.get(userId).get(0).toLanguageTag();
-        final InputMethodSettings settings = InputMethodSettings.create(methodMap, userId);
 
         final ArrayList<InputMethodInfo> imis = settings.getEnabledInputMethodList();
         if (imis.isEmpty()) {
@@ -480,26 +477,10 @@ final class InputMethodSubtypeSwitchingController {
     }
 
     @NonNull
-    private final Context mContext;
-    @UserIdInt
-    private final int mUserId;
-    @NonNull
     private ControllerImpl mController;
 
-    InputMethodSubtypeSwitchingController(@NonNull Context context,
-            @NonNull InputMethodMap methodMap, @UserIdInt int userId) {
-        mContext = context;
-        mUserId = userId;
-        mController = ControllerImpl.createFrom(null,
-                getSortedInputMethodAndSubtypeList(
-                        false /* includeAuxiliarySubtypes */, false /* isScreenLocked */,
-                        false /* forImeMenu */, context, methodMap, userId));
-    }
-
-    @AnyThread
-    @UserIdInt
-    int getUserId() {
-        return mUserId;
+    InputMethodSubtypeSwitchingController() {
+        mController = ControllerImpl.createFrom(null, Collections.emptyList());
     }
 
     public void onUserActionLocked(@NonNull InputMethodInfo imi,
@@ -507,11 +488,12 @@ final class InputMethodSubtypeSwitchingController {
         mController.onUserActionLocked(imi, subtype);
     }
 
-    public void resetCircularListLocked(@NonNull InputMethodMap methodMap) {
+    public void resetCircularListLocked(@NonNull Context context,
+            @NonNull InputMethodSettings settings) {
         mController = ControllerImpl.createFrom(mController,
                 getSortedInputMethodAndSubtypeList(
                         false /* includeAuxiliarySubtypes */, false /* isScreenLocked */,
-                        false /* forImeMenu */, mContext, methodMap, mUserId));
+                        false /* forImeMenu */, context, settings));
     }
 
     @Nullable

@@ -84,7 +84,7 @@ import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.CollectionUtils;
 import com.android.launcher3.icons.BubbleIconFactory;
@@ -1450,6 +1450,8 @@ public class BubbleController implements ConfigurationChangeListener,
             if (b != null) {
                 // It's in the overflow, so remove it & reinflate
                 mBubbleData.dismissBubbleWithKey(appBubbleKey, Bubbles.DISMISS_NOTIF_CANCEL);
+                // Update the bubble entry in the overflow with the latest intent.
+                b.setAppBubbleIntent(intent);
             } else {
                 // App bubble does not exist, lets add and expand it
                 b = Bubble.createAppBubble(intent, user, icon, mMainExecutor);

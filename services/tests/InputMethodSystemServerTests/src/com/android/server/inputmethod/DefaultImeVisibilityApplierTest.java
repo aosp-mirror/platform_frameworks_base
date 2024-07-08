@@ -37,6 +37,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import static java.util.Objects.requireNonNull;
 
@@ -50,6 +51,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 
@@ -73,9 +75,8 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     @Before
     public void setUp() throws RemoteException {
         super.setUp();
-        mVisibilityApplier =
-                (DefaultImeVisibilityApplier) mInputMethodManagerService.getVisibilityApplier();
         synchronized (ImfLock.class) {
+            mVisibilityApplier = mInputMethodManagerService.getVisibilityApplierLocked();
             mUserId = mInputMethodManagerService.getCurrentImeUserIdLocked();
             mInputMethodManagerService.setAttachedClientForTesting(requireNonNull(
                     mInputMethodManagerService.getClientStateLocked(mMockInputMethodClient)));
@@ -87,7 +88,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         synchronized (ImfLock.class) {
             mVisibilityApplier.performShowIme(new Binder() /* showInputToken */,
                     ImeTracker.Token.empty(), 0 /* showFlags */, null /* resultReceiver */,
-                    SHOW_SOFT_INPUT);
+                    SHOW_SOFT_INPUT, mUserId);
         }
         verifyShowSoftInput(false, true, 0 /* showFlags */);
     }
@@ -96,7 +97,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     public void testPerformHideIme() throws Exception {
         synchronized (ImfLock.class) {
             mVisibilityApplier.performHideIme(new Binder() /* hideInputToken */,
-                    ImeTracker.Token.empty(), null /* resultReceiver */, HIDE_SOFT_INPUT);
+                    ImeTracker.Token.empty(), null /* resultReceiver */, HIDE_SOFT_INPUT, mUserId);
         }
         verifyHideSoftInput(false, true);
     }
@@ -106,7 +107,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         assertThrows(IllegalArgumentException.class, () -> {
             synchronized (ImfLock.class) {
                 mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
-                        STATE_INVALID, mUserId);
+                        STATE_INVALID, eq(SoftInputShowHideReason.NOT_SET), mUserId);
             }
         });
     }
@@ -116,7 +117,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         final var statsToken = ImeTracker.Token.empty();
         synchronized (ImfLock.class) {
             mVisibilityApplier.applyImeVisibility(mWindowToken, statsToken, STATE_SHOW_IME,
-                    mUserId);
+                    eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
         verify(mMockWindowManagerInternal).showImePostLayout(eq(mWindowToken), eq(statsToken));
     }
@@ -126,7 +127,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         final var statsToken = ImeTracker.Token.empty();
         synchronized (ImfLock.class) {
             mVisibilityApplier.applyImeVisibility(mWindowToken, statsToken, STATE_HIDE_IME,
-                    mUserId);
+                    eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
         verify(mMockWindowManagerInternal).hideIme(eq(mWindowToken), anyInt() /* displayId */,
                 eq(statsToken));
@@ -134,20 +135,24 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
 
     @Test
     public void testApplyImeVisibility_hideImeExplicit() throws Exception {
-        mInputMethodManagerService.mImeWindowVis = IME_ACTIVE;
         synchronized (ImfLock.class) {
+            final var bindingController =
+                    mInputMethodManagerService.getInputMethodBindingController(mUserId);
+            when(bindingController.getImeWindowVis()).thenReturn(IME_ACTIVE);
             mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
-                    STATE_HIDE_IME_EXPLICIT, mUserId);
+                    STATE_HIDE_IME_EXPLICIT, eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
         verifyHideSoftInput(true, true);
     }
 
     @Test
     public void testApplyImeVisibility_hideNotAlways() throws Exception {
-        mInputMethodManagerService.mImeWindowVis = IME_ACTIVE;
         synchronized (ImfLock.class) {
+            final var bindingController =
+                    mInputMethodManagerService.getInputMethodBindingController(mUserId);
+            when(bindingController.getImeWindowVis()).thenReturn(IME_ACTIVE);
             mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
-                    STATE_HIDE_IME_NOT_ALWAYS, mUserId);
+                    STATE_HIDE_IME_NOT_ALWAYS, eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
         verifyHideSoftInput(true, true);
     }
@@ -156,7 +161,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     public void testApplyImeVisibility_showImeImplicit() throws Exception {
         synchronized (ImfLock.class) {
             mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
-                    STATE_SHOW_IME_IMPLICIT, mUserId);
+                    STATE_SHOW_IME_IMPLICIT, eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
         verifyShowSoftInput(true, true, 0 /* showFlags */);
     }
@@ -177,7 +182,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
             // Verify hideIme will apply the expected displayId when the default IME
             // visibility applier app STATE_HIDE_IME.
             mVisibilityApplier.applyImeVisibility(mWindowToken, statsToken, STATE_HIDE_IME,
-                    mUserId);
+                    eq(SoftInputShowHideReason.NOT_SET), mUserId);
             verify(mInputMethodManagerService.mWindowManagerInternal).hideIme(
                     eq(mWindowToken), eq(displayIdToShowIme), eq(statsToken));
         }
@@ -186,7 +191,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     @Test
     public void testShowImeScreenshot() {
         synchronized (ImfLock.class) {
-            mVisibilityApplier.showImeScreenshot(mWindowToken, Display.DEFAULT_DISPLAY);
+            mVisibilityApplier.showImeScreenshot(mWindowToken, Display.DEFAULT_DISPLAY, mUserId);
         }
 
         verify(mMockImeTargetVisibilityPolicy).showImeScreenshot(eq(mWindowToken),
@@ -196,7 +201,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     @Test
     public void testRemoveImeScreenshot() {
         synchronized (ImfLock.class) {
-            mVisibilityApplier.removeImeScreenshot(Display.DEFAULT_DISPLAY);
+            mVisibilityApplier.removeImeScreenshot(Display.DEFAULT_DISPLAY, mUserId);
         }
 
         verify(mMockImeTargetVisibilityPolicy).removeImeScreenshot(eq(Display.DEFAULT_DISPLAY));
@@ -217,14 +222,15 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
             final int displayIdToShowIme = bindingController.getDisplayIdToShowIme();
             mInputMethodManagerService.hideCurrentInputLocked(mWindowToken,
                     statsToken, 0 /* flags */, null /* resultReceiver */,
-                    HIDE_SWITCH_USER);
-            mInputMethodManagerService.onUnbindCurrentMethodByReset();
+                    HIDE_SWITCH_USER, mUserId);
+            mInputMethodManagerService.onUnbindCurrentMethodByReset(mUserId);
 
             // Expects applyImeVisibility() -> hideIme() will be called to notify WM for syncing
             // the IME hidden state.
             // The unbind will cancel the previous stats token, and create a new one internally.
             verify(mVisibilityApplier).applyImeVisibility(
-                    eq(mWindowToken), any(), eq(STATE_HIDE_IME), eq(mUserId) /* userId */);
+                    eq(mWindowToken), any(), eq(STATE_HIDE_IME),
+                    eq(SoftInputShowHideReason.NOT_SET), eq(mUserId) /* userId */);
             verify(mInputMethodManagerService.mWindowManagerInternal).hideIme(
                     eq(mWindowToken), eq(displayIdToShowIme), and(not(eq(statsToken)), notNull()));
         }

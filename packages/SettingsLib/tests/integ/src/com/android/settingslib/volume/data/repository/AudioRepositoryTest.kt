@@ -64,6 +64,7 @@ class AudioRepositoryTest {
     @Mock private lateinit var communicationDevice: AudioDeviceInfo
     @Mock private lateinit var contentResolver: ContentResolver
 
+    private val logger = FakeAudioRepositoryLogger()
     private val eventsReceiver = FakeAudioManagerEventsReceiver()
     private val volumeByStream: MutableMap<Int, Int> = mutableMapOf()
     private val isAffectedByRingerModeByStream: MutableMap<Int, Boolean> = mutableMapOf()
@@ -109,6 +110,7 @@ class AudioRepositoryTest {
                 contentResolver,
                 testScope.testScheduler,
                 testScope.backgroundScope,
+                logger,
             )
     }
 
@@ -173,6 +175,15 @@ class AudioRepositoryTest {
             underTest.setVolume(audioStream, 50)
             runCurrent()
 
+            assertThat(logger.logs)
+                .isEqualTo(
+                    listOf(
+                        "onVolumeUpdateReceived audioStream=STREAM_SYSTEM",
+                        "onSetVolumeRequested audioStream=STREAM_SYSTEM",
+                        "onVolumeUpdateReceived audioStream=STREAM_SYSTEM",
+                        "onVolumeUpdateReceived audioStream=STREAM_SYSTEM",
+                    )
+                )
             assertThat(streamModel)
                 .isEqualTo(
                     AudioStreamModel(
@@ -244,6 +255,19 @@ class AudioRepositoryTest {
                         isMuted = false,
                     )
                 )
+        }
+    }
+
+    @Test
+    fun getBluetoothAudioDeviceCategory() {
+        testScope.runTest {
+            `when`(audioManager.getBluetoothAudioDeviceCategory("12:34:56:78")).thenReturn(
+                AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES)
+
+            val category = underTest.getBluetoothAudioDeviceCategory("12:34:56:78")
+            runCurrent()
+
+            assertThat(category).isEqualTo(AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES)
         }
     }
 

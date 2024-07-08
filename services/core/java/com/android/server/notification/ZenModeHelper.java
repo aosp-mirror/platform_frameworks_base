@@ -34,6 +34,7 @@ import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_INIT;
 import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_INIT_USER;
 import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_RESTORE_BACKUP;
 import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI;
+import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_UNKNOWN;
 import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_USER;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
@@ -1132,6 +1133,26 @@ public class ZenModeHelper {
                 rule.component = azr.getOwner();
                 rule.pkg = pkg;
                 modified = true;
+            }
+
+            // Allow updating the CPS backing system rules (e.g. for custom manual -> schedule)
+            if (Flags.modesUi()
+                    && (origin == UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI || origin == UPDATE_ORIGIN_USER)
+                    && Objects.equals(rule.pkg, SystemZenRules.PACKAGE_ANDROID)
+                    && !Objects.equals(rule.component, azr.getOwner())) {
+                rule.component = azr.getOwner();
+                modified = true;
+            }
+
+            if (Flags.modesUi()) {
+                if (!azr.isEnabled() && (isNew || rule.enabled)) {
+                    // Creating a rule as disabled, or disabling a previously enabled rule.
+                    // Record whodunit.
+                    rule.disabledOrigin = origin;
+                } else if (azr.isEnabled()) {
+                    // Enabling or previously enabled. Clear disabler.
+                    rule.disabledOrigin = UPDATE_ORIGIN_UNKNOWN;
+                }
             }
 
             if (!Objects.equals(rule.conditionId, azr.getConditionId())) {

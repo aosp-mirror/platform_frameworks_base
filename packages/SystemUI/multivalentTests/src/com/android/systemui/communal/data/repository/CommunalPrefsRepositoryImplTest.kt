@@ -18,8 +18,8 @@ package com.android.systemui.communal.data.repository
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.UserInfo
+import android.content.pm.UserInfo.FLAG_MAIN
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -30,108 +30,87 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
-import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.settings.UserFileManager
+import com.android.systemui.settings.fakeUserFileManager
 import com.android.systemui.testKosmos
-import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.FakeSharedPreferences
 import com.google.common.truth.Truth.assertThat
-import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.spy
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalPrefsRepositoryImplTest : SysuiTestCase() {
-    @Mock private lateinit var tableLogBuffer: TableLogBuffer
-
-    private lateinit var underTest: CommunalPrefsRepositoryImpl
-
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
-    private lateinit var userRepository: FakeUserRepository
-    private lateinit var userFileManager: UserFileManager
+    private val userFileManager: UserFileManager = spy(kosmos.fakeUserFileManager)
 
-    @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
-        userRepository = kosmos.fakeUserRepository
-        userRepository.setUserInfos(USER_INFOS)
-
-        userFileManager =
-            FakeUserFileManager(
-                mapOf(
-                    USER_INFOS[0].id to FakeSharedPreferences(),
-                    USER_INFOS[1].id to FakeSharedPreferences()
-                )
-            )
+    private val underTest: CommunalPrefsRepositoryImpl by lazy {
+        CommunalPrefsRepositoryImpl(
+            kosmos.testDispatcher,
+            userFileManager,
+            kosmos.broadcastDispatcher,
+            logcatLogBuffer("CommunalPrefsRepositoryImplTest"),
+        )
     }
 
     @Test
     fun isCtaDismissedValue_byDefault_isFalse() =
         testScope.runTest {
-            underTest = createCommunalPrefsRepositoryImpl(userFileManager)
-            val isCtaDismissed by collectLastValue(underTest.isCtaDismissed)
+            val isCtaDismissed by collectLastValue(underTest.isCtaDismissed(MAIN_USER))
             assertThat(isCtaDismissed).isFalse()
         }
 
     @Test
     fun isCtaDismissedValue_onSet_isTrue() =
         testScope.runTest {
-            underTest = createCommunalPrefsRepositoryImpl(userFileManager)
-            val isCtaDismissed by collectLastValue(underTest.isCtaDismissed)
+            val isCtaDismissed by collectLastValue(underTest.isCtaDismissed(MAIN_USER))
 
-            underTest.setCtaDismissedForCurrentUser()
+            underTest.setCtaDismissed(MAIN_USER)
             assertThat(isCtaDismissed).isTrue()
         }
 
     @Test
-    fun isCtaDismissedValue_whenSwitchUser() =
+    fun isCtaDismissedValue_onSetForDifferentUser_isStillFalse() =
         testScope.runTest {
-            underTest = createCommunalPrefsRepositoryImpl(userFileManager)
-            val isCtaDismissed by collectLastValue(underTest.isCtaDismissed)
-            underTest.setCtaDismissedForCurrentUser()
+            val isCtaDismissed by collectLastValue(underTest.isCtaDismissed(MAIN_USER))
 
-            // dismissed true for primary user
-            assertThat(isCtaDismissed).isTrue()
-
-            // switch to secondary user
-            userRepository.setSelectedUserInfo(USER_INFOS[1])
-
-            // dismissed is false for secondary user
+            underTest.setCtaDismissed(SECONDARY_USER)
             assertThat(isCtaDismissed).isFalse()
+        }
 
-            // switch back to primary user
-            userRepository.setSelectedUserInfo(USER_INFOS[0])
+    @Test
+    fun isDisclaimerDismissed_byDefault_isFalse() =
+        testScope.runTest {
+            val isDisclaimerDismissed by
+                collectLastValue(underTest.isDisclaimerDismissed(MAIN_USER))
+            assertThat(isDisclaimerDismissed).isFalse()
+        }
 
-            // dismissed is true for primary user
-            assertThat(isCtaDismissed).isTrue()
+    @Test
+    fun isDisclaimerDismissed_onSet_isTrue() =
+        testScope.runTest {
+            val isDisclaimerDismissed by
+                collectLastValue(underTest.isDisclaimerDismissed(MAIN_USER))
+
+            underTest.setDisclaimerDismissed(MAIN_USER)
+            assertThat(isDisclaimerDismissed).isTrue()
         }
 
     @Test
     fun getSharedPreferences_whenFileRestored() =
         testScope.runTest {
-            val userFileManagerSpy = Mockito.spy(userFileManager)
-            underTest = createCommunalPrefsRepositoryImpl(userFileManagerSpy)
-
-            val isCtaDismissed by collectLastValue(underTest.isCtaDismissed)
-            userRepository.setSelectedUserInfo(USER_INFOS[0])
+            val isCtaDismissed by collectLastValue(underTest.isCtaDismissed(MAIN_USER))
             assertThat(isCtaDismissed).isFalse()
-            clearInvocations(userFileManagerSpy)
+            clearInvocations(userFileManager)
 
             // Received restore finished event.
             kosmos.broadcastDispatcher.sendIntentToMatchingReceiversOnly(
@@ -141,48 +120,12 @@ class CommunalPrefsRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             // Get shared preferences from the restored file.
-            verify(userFileManagerSpy, atLeastOnce())
-                .getSharedPreferences(
-                    FILE_NAME,
-                    Context.MODE_PRIVATE,
-                    userRepository.getSelectedUserInfo().id
-                )
+            verify(userFileManager, atLeastOnce())
+                .getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE, MAIN_USER.id)
         }
-
-    private fun createCommunalPrefsRepositoryImpl(userFileManager: UserFileManager) =
-        CommunalPrefsRepositoryImpl(
-            testScope.backgroundScope,
-            kosmos.testDispatcher,
-            userRepository,
-            userFileManager,
-            kosmos.broadcastDispatcher,
-            logcatLogBuffer("CommunalPrefsRepositoryImplTest"),
-            tableLogBuffer,
-        )
-
-    private class FakeUserFileManager(private val sharedPrefs: Map<Int, SharedPreferences>) :
-        UserFileManager {
-        override fun getFile(fileName: String, userId: Int): File {
-            throw UnsupportedOperationException()
-        }
-
-        override fun getSharedPreferences(
-            fileName: String,
-            mode: Int,
-            userId: Int
-        ): SharedPreferences {
-            if (fileName != FILE_NAME) {
-                throw IllegalArgumentException("Preference files must be $FILE_NAME")
-            }
-            return sharedPrefs.getValue(userId)
-        }
-    }
 
     companion object {
-        val USER_INFOS =
-            listOf(
-                UserInfo(/* id= */ 0, "zero", /* flags= */ 0),
-                UserInfo(/* id= */ 1, "secondary", /* flags= */ 0),
-            )
+        val MAIN_USER = UserInfo(0, "main", FLAG_MAIN)
+        val SECONDARY_USER = UserInfo(1, "secondary", 0)
     }
 }

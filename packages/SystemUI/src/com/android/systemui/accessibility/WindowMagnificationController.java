@@ -1631,8 +1631,23 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         boolean bRTL = isRTL(mContext);
         final int initSize = Math.min(mWindowBounds.width(), mWindowBounds.height()) / 3;
 
-        final int maxHeightSize = mWindowBounds.height() - 2 * mMirrorSurfaceMargin;
-        final int maxWidthSize = mWindowBounds.width() - 2 * mMirrorSurfaceMargin;
+        int maxHeightSize;
+        int maxWidthSize;
+        if (Flags.redesignMagnificationWindowSize()) {
+            // mOuterBorderSize = transparent margin area
+            // mMirrorSurfaceMargin = transparent margin area + orange border width
+            // We would like to allow the width and height to be full size. Therefore, the max
+            // frame size could be calculated as (window bounds - 2 * orange border width).
+            maxHeightSize =
+                    mWindowBounds.height() - 2 * (mMirrorSurfaceMargin - mOuterBorderSize);
+            maxWidthSize  =
+                    mWindowBounds.width() - 2 * (mMirrorSurfaceMargin - mOuterBorderSize);
+        } else {
+            maxHeightSize =
+                    mWindowBounds.height() - 2 * mMirrorSurfaceMargin;
+            maxWidthSize  =
+                    mWindowBounds.width() - 2 * mMirrorSurfaceMargin;
+        }
 
         Rect tempRect = new Rect();
         tempRect.set(mMagnificationFrame);

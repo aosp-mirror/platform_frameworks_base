@@ -16,11 +16,13 @@
 
 package com.android.internal.view;
 
-import android.os.RemoteException;
-import android.view.Surface;
+import android.util.EventLog;
 import android.view.SurfaceHolder;
 
 public class SurfaceCallbackHelper {
+    private static final int LOGTAG_SURFACEVIEW_CALLBACK = 60006;
+    private final String mTag;
+    private boolean mSurfaceRedrawImplemented;
     Runnable mRunnable;
 
     int mFinishDrawingCollected = 0;
@@ -35,12 +37,23 @@ public class SurfaceCallbackHelper {
                         return;
                     }
                     mRunnable.run();
+                    if (mSurfaceRedrawImplemented && mTag != null) {
+                        EventLog.writeEvent(LOGTAG_SURFACEVIEW_CALLBACK, mTag,
+                                "surfaceRedrawNeeded implemented");
+                    }
                 }
             }
     };
 
     public SurfaceCallbackHelper(Runnable callbacksCollected) {
+        // skip logging surfaceRedrawNeeded calls
+        this(callbacksCollected, null);
+    }
+
+    public SurfaceCallbackHelper(Runnable callbacksCollected, String tag) {
         mRunnable = callbacksCollected;
+        mTag = tag;
+        mSurfaceRedrawImplemented = false;
     }
 
     public void dispatchSurfaceRedrawNeededAsync(SurfaceHolder holder, SurfaceHolder.Callback callbacks[]) {
@@ -58,6 +71,7 @@ public class SurfaceCallbackHelper {
             if (c instanceof SurfaceHolder.Callback2) {
                 ((SurfaceHolder.Callback2) c).surfaceRedrawNeededAsync(
                         holder, mFinishDrawingRunnable);
+                mSurfaceRedrawImplemented = true;
             } else {
                 mFinishDrawingRunnable.run();
             }

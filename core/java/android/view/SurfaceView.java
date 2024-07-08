@@ -49,6 +49,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.SurfaceControl.Transaction;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -163,6 +164,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private static final boolean DEBUG_POSITION = false;
 
     private static final long FORWARD_BACK_KEY_TOLERANCE_MS = 100;
+    private static final int LOGTAG_SURFACEVIEW_LAYOUT = 60005;
+    private static final int LOGTAG_SURFACEVIEW_CALLBACK = 60006;
 
     @UnsupportedAppUsage(
             maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
@@ -320,6 +323,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private final ConcurrentLinkedQueue<WindowManager.LayoutParams> mEmbeddedWindowParams =
             new ConcurrentLinkedQueue<>();
 
+    private String mTag = TAG;
+
     private final ISurfaceControlViewHostParent mSurfaceControlViewHostParent =
             new ISurfaceControlViewHostParent.Stub() {
         @Override
@@ -418,13 +423,26 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         updateSurface();
     }
 
+    private void setTag() {
+        String windowName = "";
+        ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot != null) {
+            // strip package name
+            final String[] split = viewRoot.mWindowAttributes.getTitle().toString().split("\\.");
+            if (split.length > 0) {
+                windowName =  " " + split[split.length - 1];
+            }
+        }
+
+        mTag = "SV[" + System.identityHashCode(this) + windowName + "]";
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
+        setTag();
         getViewRootImpl().addSurfaceChangedCallback(this);
         mWindowStopped = false;
-
         mViewVisibility = getVisibility() == VISIBLE;
         updateRequestedVisibility();
 
@@ -1146,12 +1164,21 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     + " format=" + formatChanged + " size=" + sizeChanged
                     + " visible=" + visibleChanged + " alpha=" + alphaChanged
                     + " hint=" + hintChanged
-                    + " visible=" + visibleChanged
                     + " left=" + (mWindowSpaceLeft != mLocation[0])
                     + " top=" + (mWindowSpaceTop != mLocation[1])
                     + " z=" + relativeZChanged
                     + " attached=" + mAttachedToWindow
                     + " lifecycleStrategy=" + surfaceLifecycleStrategyChanged);
+
+            if (creating || formatChanged || sizeChanged  || visibleChanged
+                    || layoutSizeChanged ||  relativeZChanged || !mAttachedToWindow
+                    || surfaceLifecycleStrategyChanged ) {
+                EventLog.writeEvent(LOGTAG_SURFACEVIEW_LAYOUT,
+                        mTag, mRequestedFormat, myWidth, myHeight, mRequestedSubLayer,
+                        (mRequestedWidth > 0 ? "setFixedSize" : "layout"),
+                        (mAttachedToWindow ? 1 : 0),
+                        mRequestedSurfaceLifecycleStrategy, (mRequestedVisible ? 1 : 0));
+            }
 
             try {
                 mVisible = mRequestedVisible;
@@ -1235,6 +1262,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             mIsCreating = true;
                             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
                                     + "visibleChanged -- surfaceCreated");
+                            EventLog.writeEvent(LOGTAG_SURFACEVIEW_CALLBACK, mTag,
+                                "surfaceCreated");
                             callbacks = getSurfaceCallbacks();
                             for (SurfaceHolder.Callback c : callbacks) {
                                 c.surfaceCreated(mSurfaceHolder);
@@ -1244,6 +1273,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                                 || (respectVisibility && visibleChanged) || realSizeChanged) {
                             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
                                     + "surfaceChanged -- format=" + mFormat
+                                    + " w=" + myWidth + " h=" + myHeight);
+                            EventLog.writeEvent(LOGTAG_SURFACEVIEW_CALLBACK, mTag,
+                                    "surfaceChanged -- format=" + mFormat
                                     + " w=" + myWidth + " h=" + myHeight);
                             if (callbacks == null) {
                                 callbacks = getSurfaceCallbacks();
@@ -1256,6 +1288,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             if (DEBUG) {
                                 Log.i(TAG, System.identityHashCode(this) + " surfaceRedrawNeeded");
                             }
+                            EventLog.writeEvent(LOGTAG_SURFACEVIEW_CALLBACK, mTag,
+                                "surfaceRedrawNeeded");
+
                             if (callbacks == null) {
                                 callbacks = getSurfaceCallbacks();
                             }
@@ -1337,7 +1372,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void redrawNeededAsync(SurfaceHolder.Callback[] callbacks,
             Runnable callbacksCollected) {
-        SurfaceCallbackHelper sch = new SurfaceCallbackHelper(callbacksCollected);
+        SurfaceCallbackHelper sch = new SurfaceCallbackHelper(callbacksCollected, mTag);
         sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
     }
 
@@ -2100,6 +2135,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         if (mSurface.isValid()) {
             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
                     + "surfaceDestroyed");
+            EventLog.writeEvent(LOGTAG_SURFACEVIEW_CALLBACK, mTag, "surfaceDestroyed");
             SurfaceHolder.Callback[] callbacks = getSurfaceCallbacks();
             for (SurfaceHolder.Callback c : callbacks) {
                 c.surfaceDestroyed(mSurfaceHolder);

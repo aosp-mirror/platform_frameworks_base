@@ -15,7 +15,8 @@
   limitations under the License.
   -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <item
         android:top="@dimen/settingslib_switch_thumb_margin"
         android:bottom="@dimen/settingslib_switch_thumb_margin">
@@ -23,7 +24,7 @@
             <size
                 android:height="@dimen/settingslib_switch_thumb_size"
                 android:width="@dimen/settingslib_switch_thumb_size"/>
-            <solid android:color="@color/settingslib_state_on_color"/>
+            <solid android:color="?androidprv:attr/materialColorOnPrimary"/>
         </shape>
     </item>
 </layer-list>

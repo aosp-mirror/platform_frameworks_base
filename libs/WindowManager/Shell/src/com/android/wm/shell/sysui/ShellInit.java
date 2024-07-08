@@ -25,8 +25,9 @@ import android.view.SurfaceControl;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
 
@@ -75,6 +76,7 @@ public class ShellInit {
      */
     @VisibleForTesting
     public void init() {
+        ProtoLog.registerGroups(ShellProtoLogGroup.values());
         ProtoLog.v(WM_SHELL_INIT, "Initializing Shell Components: %d", mInitCallbacks.size());
         SurfaceControl.setDebugUsageAfterRelease(true);
         // Init in order of registration

@@ -25,21 +25,10 @@ import java.util.List;
 
 /** Safety Label representation containing zero or more {@link DataCategory} for data shared */
 public class SafetyLabels implements AslMarshallable {
-
-    private final Long mVersion;
     private final DataLabels mDataLabels;
-    private final SecurityLabels mSecurityLabels;
-    private final ThirdPartyVerification mThirdPartyVerification;
 
-    public SafetyLabels(
-            Long version,
-            DataLabels dataLabels,
-            SecurityLabels securityLabels,
-            ThirdPartyVerification thirdPartyVerification) {
-        this.mVersion = version;
+    public SafetyLabels(DataLabels dataLabels) {
         this.mDataLabels = dataLabels;
-        this.mSecurityLabels = securityLabels;
-        this.mThirdPartyVerification = thirdPartyVerification;
     }
 
     /** Returns the data label for the safety label */
@@ -47,26 +36,13 @@ public class SafetyLabels implements AslMarshallable {
         return mDataLabels;
     }
 
-    /** Gets the version of the {@link SafetyLabels}. */
-    public Long getVersion() {
-        return mVersion;
-    }
-
     /** Creates an on-device DOM element from the {@link SafetyLabels}. */
     @Override
     public List<Element> toOdDomElements(Document doc) {
         Element safetyLabelsEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_SAFETY_LABELS);
-        safetyLabelsEle.appendChild(
-                XmlUtils.createOdLongEle(doc, XmlUtils.OD_NAME_VERSION, mVersion));
         if (mDataLabels != null) {
             XmlUtils.appendChildren(safetyLabelsEle, mDataLabels.toOdDomElements(doc));
-        }
-        if (mSecurityLabels != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mSecurityLabels.toOdDomElements(doc));
-        }
-        if (mThirdPartyVerification != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mThirdPartyVerification.toOdDomElements(doc));
         }
         return XmlUtils.listOf(safetyLabelsEle);
     }
@@ -75,16 +51,9 @@ public class SafetyLabels implements AslMarshallable {
     @Override
     public List<Element> toHrDomElements(Document doc) {
         Element safetyLabelsEle = doc.createElement(XmlUtils.HR_TAG_SAFETY_LABELS);
-        safetyLabelsEle.setAttribute(XmlUtils.HR_ATTR_VERSION, String.valueOf(mVersion));
 
         if (mDataLabels != null) {
             XmlUtils.appendChildren(safetyLabelsEle, mDataLabels.toHrDomElements(doc));
-        }
-        if (mSecurityLabels != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mSecurityLabels.toHrDomElements(doc));
-        }
-        if (mThirdPartyVerification != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mThirdPartyVerification.toHrDomElements(doc));
         }
         return XmlUtils.listOf(safetyLabelsEle);
     }

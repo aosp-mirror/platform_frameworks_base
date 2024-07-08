@@ -20,6 +20,7 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -31,6 +32,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doThrow;
@@ -48,12 +51,14 @@ import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.view.Display;
 
 import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.util.IntPair;
 import com.android.server.accessibility.test.MessageCapturingHandler;
@@ -321,7 +326,7 @@ public class AccessibilityManagerTest {
         Throwable rethrownException = assertThrows(RuntimeException.class,
                 () -> manager.enableShortcutsForTargets(
                         /* enable= */ false,
-                        UserShortcutType.HARDWARE,
+                        HARDWARE,
                         Set.of(DALTONIZER_COMPONENT_NAME.flattenToString()),
                         UserHandle.USER_CURRENT
                 ));
@@ -331,7 +336,7 @@ public class AccessibilityManagerTest {
     @Test
     public void enableShortcutsForTargets_verifyServiceMethodCalled() throws Exception {
         AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
-        int shortcutTypes = UserShortcutType.HARDWARE | UserShortcutType.TRIPLETAP;
+        int shortcutTypes = HARDWARE | UserShortcutType.TRIPLETAP;
 
         manager.enableShortcutsForTargets(
                 /* enable= */ false,
@@ -346,6 +351,30 @@ public class AccessibilityManagerTest {
                 List.of(DALTONIZER_COMPONENT_NAME.flattenToString()),
                 UserHandle.USER_CURRENT
         );
+    }
+
+    @Test
+    public void performAccessibilityShortcut_callToService_defaultTypeIsHardware()
+            throws Exception {
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
+
+        manager.performAccessibilityShortcut();
+
+        verify(mMockService).performAccessibilityShortcut(
+                eq(Display.DEFAULT_DISPLAY), eq(HARDWARE), isNull());
+    }
+
+    @Test
+    public void performAccessibilityShortcut_callToService_typeParameterMatches() throws Exception {
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
+        int display = Display.DEFAULT_DISPLAY;
+        String name = LABEL;
+
+        for (int type: ShortcutConstants.USER_SHORTCUT_TYPES) {
+            manager.performAccessibilityShortcut(display, type, name);
+
+            verify(mMockService).performAccessibilityShortcut(display, type, name);
+        }
     }
 
     private class MyAccessibilityProxy extends AccessibilityDisplayProxy {

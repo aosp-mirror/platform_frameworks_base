@@ -1315,6 +1315,47 @@ public class SizeCompatTests extends WindowTestsBase {
 
     @Test
     @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_SMALL})
+    public void testOverrideMinAspectRatioSmall_overridden() {
+        final int dh = 1200;
+        final int dw = 1000;
+        setUpDisplaySizeWithApp(dw, dh);
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = getActivityBuilderOnSameTask()
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+
+        final Rect bounds = activity.getBounds();
+        assertEquals(dh, bounds.height());
+        assertEquals(dh / ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_SMALL_VALUE,
+                bounds.width(), 0.5f);
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_SMALL})
+    public void testOverrideMinAspectRatioSmall_notOverridden() {
+        final int dh = 1200;
+        final int dw = 1000;
+        setUpDisplaySizeWithApp(dw, dh);
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = getActivityBuilderOnSameTask()
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .setMinAspectRatio(OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE)
+                .build();
+
+        // Activity's requested aspect ratio is larger than OVERRIDE_MIN_ASPECT_RATIO_SMALL,
+        // so OVERRIDE_MIN_ASPECT_RATIO_SMALL is ignored.
+        final Rect bounds = activity.getBounds();
+        assertEquals(dh, bounds.height());
+        assertEquals(dh / OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
+                bounds.width(), 0.5f);
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
             ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM})
     public void testOverrideMinAspectRatioMedium() {
         setUpDisplaySizeWithApp(1000, 1200);
@@ -4269,6 +4310,27 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(new Rect(0, notchHeight, 1000, 1200), appBounds);
         assertEquals(new Rect(0, 0, 1000, 1200), bounds);
 
+    }
+
+    @Test
+    public void testInsetOverrideNotAppliedInFreeform() {
+        final int notchHeight = 100;
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2800)
+                .setNotch(notchHeight)
+                .build();
+        setUpApp(display);
+
+        // Simulate inset override for legacy app bound behaviour
+        mActivity.mResolveConfigHint.mUseOverrideInsetsForConfig = true;
+        // Set task as freeform
+        mTask.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
+        prepareUnresizable(mActivity,  SCREEN_ORIENTATION_PORTRAIT);
+
+        Rect bounds = new Rect(mActivity.getWindowConfiguration().getBounds());
+        Rect appBounds = new Rect(mActivity.getWindowConfiguration().getAppBounds());
+        // App bounds should not include insets and should match bounds when in freeform.
+        assertEquals(new Rect(0, 0, 1000, 2800), appBounds);
+        assertEquals(new Rect(0, 0, 1000, 2800), bounds);
     }
 
     private void assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(

@@ -18,7 +18,7 @@ package com.android.systemui.unfold
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.vibrator
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.testKosmos
@@ -30,7 +30,7 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class UnfoldHapticsPlayerTest : SysuiTestCase() {
 

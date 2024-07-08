@@ -367,14 +367,14 @@ open class NotificationShelfTest : SysuiTestCase() {
     @EnableSceneContainer
     fun updateState_withViewInShelf_showShelf() {
         // GIVEN a view is scrolled into the shelf
-        val stackCutoff = 200f
-        val scrimPadding =
-            context.resources.getDimensionPixelSize(R.dimen.notification_side_paddings)
-        val shelfTop = stackCutoff - scrimPadding - shelf.height
+        val stackTop = 200f
+        val stackHeight = 800f
+        whenever(ambientState.stackTop).thenReturn(stackTop)
+        whenever(ambientState.stackHeight).thenReturn(stackHeight)
+        val shelfTop = stackTop + stackHeight - shelf.height
         val stackScrollAlgorithmState = StackScrollAlgorithmState()
         val viewInShelf = mock(ExpandableView::class.java)
 
-        whenever(ambientState.stackCutoff).thenReturn(stackCutoff)
         whenever(ambientState.isShadeExpanded).thenReturn(true)
         whenever(ambientState.lastVisibleBackgroundChild).thenReturn(viewInShelf)
         whenever(viewInShelf.viewState).thenReturn(ExpandableViewState())
@@ -401,57 +401,14 @@ open class NotificationShelfTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun updateState_withViewInShelfDuringExpansion_showShelf() {
-        // GIVEN a view is scrolled into the shelf
-        val stackCutoff = 200f
-        val scrimPadding =
-            context.resources.getDimensionPixelSize(R.dimen.notification_side_paddings)
-        val stackBottom = stackCutoff - scrimPadding
-        val shelfTop = stackBottom - shelf.height
-        val stackScrollAlgorithmState = StackScrollAlgorithmState()
-        val viewInShelf = mock(ExpandableView::class.java)
-
-        // AND a shade expansion is in progress
-        val shadeExpansionFraction = 0.5f
-
-        whenever(ambientState.stackCutoff).thenReturn(stackCutoff)
-        whenever(ambientState.isShadeExpanded).thenReturn(true)
-        whenever(ambientState.lastVisibleBackgroundChild).thenReturn(viewInShelf)
-        whenever(ambientState.isExpansionChanging).thenReturn(true)
-        whenever(ambientState.expansionFraction).thenReturn(shadeExpansionFraction)
-        whenever(viewInShelf.viewState).thenReturn(ExpandableViewState())
-        whenever(viewInShelf.shelfIcon).thenReturn(mock(StatusBarIconView::class.java))
-        whenever(viewInShelf.translationY).thenReturn(shelfTop)
-        whenever(viewInShelf.actualHeight).thenReturn(10)
-        whenever(viewInShelf.isInShelf).thenReturn(true)
-        whenever(viewInShelf.minHeight).thenReturn(10)
-        whenever(viewInShelf.shelfTransformationTarget).thenReturn(null) // use translationY
-        whenever(viewInShelf.isInShelf).thenReturn(true)
-
-        stackScrollAlgorithmState.visibleChildren.add(viewInShelf)
-        stackScrollAlgorithmState.firstViewInShelf = viewInShelf
-
-        // WHEN Shelf's ViewState is updated
-        shelf.updateState(stackScrollAlgorithmState, ambientState)
-
-        // THEN the shelf is visible
-        val shelfState = shelf.viewState as NotificationShelf.ShelfState
-        assertEquals(false, shelfState.hidden)
-        assertEquals(shelf.height, shelfState.height)
-        // AND its translation is scaled by the shade expansion
-        assertEquals((stackBottom * 0.75f) - shelf.height, shelfState.yTranslation)
-    }
-
-    @Test
-    @EnableSceneContainer
     fun updateState_withNullLastVisibleBackgroundChild_hideShelf_withSceneContainer() {
         // GIVEN
-        val stackCutoff = 200f
-        val scrimPadding =
-            context.resources.getDimensionPixelSize(R.dimen.notification_side_paddings)
+        val stackTop = 200f
+        val stackHeight = 800f
+        whenever(ambientState.stackTop).thenReturn(stackTop)
+        whenever(ambientState.stackHeight).thenReturn(stackHeight)
         val paddingBetweenElements =
             context.resources.getDimensionPixelSize(R.dimen.notification_divider_height)
-        whenever(ambientState.stackCutoff).thenReturn(stackCutoff)
         whenever(ambientState.isShadeExpanded).thenReturn(true)
         val lastVisibleBackgroundChild = mock<ExpandableView>()
         val expandableViewState = ExpandableViewState()
@@ -467,7 +424,7 @@ open class NotificationShelfTest : SysuiTestCase() {
         // THEN
         val shelfState = shelf.viewState as NotificationShelf.ShelfState
         assertEquals(true, shelfState.hidden)
-        assertEquals(stackCutoff - scrimPadding + paddingBetweenElements, shelfState.yTranslation)
+        assertEquals(stackTop + stackHeight + paddingBetweenElements, shelfState.yTranslation)
     }
 
     @Test
@@ -501,12 +458,12 @@ open class NotificationShelfTest : SysuiTestCase() {
     @EnableSceneContainer
     fun updateState_withNullFirstViewInShelf_hideShelf_withSceneContainer() {
         // GIVEN
-        val stackCutoff = 200f
-        val scrimPadding =
-            context.resources.getDimensionPixelSize(R.dimen.notification_side_paddings)
+        val stackTop = 200f
+        val stackHeight = 800f
+        whenever(ambientState.stackTop).thenReturn(stackTop)
+        whenever(ambientState.stackHeight).thenReturn(stackHeight)
         val paddingBetweenElements =
             context.resources.getDimensionPixelSize(R.dimen.notification_divider_height)
-        whenever(ambientState.stackCutoff).thenReturn(stackCutoff)
         whenever(ambientState.isShadeExpanded).thenReturn(true)
         val lastVisibleBackgroundChild = mock<ExpandableView>()
         val expandableViewState = ExpandableViewState()
@@ -522,7 +479,7 @@ open class NotificationShelfTest : SysuiTestCase() {
         // THEN
         val shelfState = shelf.viewState as NotificationShelf.ShelfState
         assertEquals(true, shelfState.hidden)
-        assertEquals(stackCutoff - scrimPadding + paddingBetweenElements, shelfState.yTranslation)
+        assertEquals(stackTop + stackHeight + paddingBetweenElements, shelfState.yTranslation)
     }
 
     @Test
@@ -556,12 +513,12 @@ open class NotificationShelfTest : SysuiTestCase() {
     @EnableSceneContainer
     fun updateState_withCollapsedShade_hideShelf_withSceneContainer() {
         // GIVEN
-        val stackCutoff = 200f
-        val scrimPadding =
-            context.resources.getDimensionPixelSize(R.dimen.notification_side_paddings)
+        val stackTop = 200f
+        val stackHeight = 800f
+        whenever(ambientState.stackTop).thenReturn(stackTop)
+        whenever(ambientState.stackHeight).thenReturn(stackHeight)
         val paddingBetweenElements =
             context.resources.getDimensionPixelSize(R.dimen.notification_divider_height)
-        whenever(ambientState.stackCutoff).thenReturn(stackCutoff)
         val lastVisibleBackgroundChild = mock<ExpandableView>()
         val expandableViewState = ExpandableViewState()
         whenever(lastVisibleBackgroundChild.viewState).thenReturn(expandableViewState)
@@ -577,7 +534,7 @@ open class NotificationShelfTest : SysuiTestCase() {
         // THEN
         val shelfState = shelf.viewState as NotificationShelf.ShelfState
         assertEquals(true, shelfState.hidden)
-        assertEquals(stackCutoff - scrimPadding + paddingBetweenElements, shelfState.yTranslation)
+        assertEquals(stackTop + stackHeight + paddingBetweenElements, shelfState.yTranslation)
     }
 
     @Test
@@ -609,12 +566,12 @@ open class NotificationShelfTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun updateState_withHiddenSectionBeforeShelf_hideShelf_withSceneContianer() {
+    fun updateState_withHiddenSectionBeforeShelf_hideShelf_withSceneContainer() {
         // GIVEN
-        val stackCutoff = 200f
-        whenever(ambientState.stackCutoff).thenReturn(stackCutoff)
-        val scrimPadding =
-            context.resources.getDimensionPixelSize(R.dimen.notification_side_paddings)
+        val stackTop = 200f
+        val stackHeight = 800f
+        whenever(ambientState.stackTop).thenReturn(stackTop)
+        whenever(ambientState.stackHeight).thenReturn(stackHeight)
         val paddingBetweenElements =
             context.resources.getDimensionPixelSize(R.dimen.notification_divider_height)
         whenever(ambientState.isShadeExpanded).thenReturn(true)
@@ -646,7 +603,7 @@ open class NotificationShelfTest : SysuiTestCase() {
         // THEN
         val shelfState = shelf.viewState as NotificationShelf.ShelfState
         assertEquals(true, shelfState.hidden)
-        assertEquals(stackCutoff - scrimPadding + paddingBetweenElements, shelfState.yTranslation)
+        assertEquals(stackTop + stackHeight + paddingBetweenElements, shelfState.yTranslation)
     }
 
     @Test

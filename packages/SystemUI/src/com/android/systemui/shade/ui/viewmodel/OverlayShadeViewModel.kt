@@ -51,7 +51,7 @@ constructor(
                 initialValue = Scenes.Lockscreen,
             )
 
-    /** Dictates whether the panel is aligned to the top or the bottom. */
+    /** Dictates the alignment of the overlay shade panel on the screen. */
     val panelAlignment = shadeInteractor.shadeAlignment
 
     /** Notifies that the user has clicked the semi-transparent background scrim. */

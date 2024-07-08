@@ -141,7 +141,7 @@ import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.LocalServices;
@@ -152,7 +152,6 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.Slogf;
-import com.android.window.flags.Flags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -789,13 +788,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
-        if (Flags.bundleClientTransactionFlag()) {
-            // mWmService.mResizingWindows is populated in #applySurfaceChangesTransaction()
-            handleResizingWindows();
+        // mWmService.mResizingWindows is populated in #applySurfaceChangesTransaction()
+        handleResizingWindows();
+        clearFrameChangingWindows();
 
-            // Called after #handleResizingWindows to include WindowStateResizeItem if any.
-            mWmService.mAtmService.getLifecycleManager().dispatchPendingTransactions();
-        }
+        // Called after #handleResizingWindows to include WindowStateResizeItem if any.
+        mWmService.mAtmService.getLifecycleManager().dispatchPendingTransactions();
 
         // Send any pending task-info changes that were queued-up during a layout deferment
         mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -838,11 +836,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         defaultDisplay.pendingLayoutChanges);
             }
         }
-
-        if (!Flags.bundleClientTransactionFlag()) {
-            handleResizingWindows();
-        }
-        clearFrameChangingWindows();
 
         if (mWmService.mDisplayFrozen) {
             ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -2165,6 +2158,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // Use Task#setBoundsUnchecked to skip checking windowing mode as the windowing mode
                 // will be updated later after this is collected in transition.
                 rootTask.setBoundsUnchecked(taskFragment.getBounds());
+                // The exit-PIP activity resumes early for seamless transition. In certain
+                // scenarios, this introduces unintended addition to recents. To address this,
+                // we mark the root task for automatic removal from recents. This ensures that
+                // after the pinned activity reparents to its original task, the root task is
+                // automatically removed from the recents list.
+                rootTask.autoRemoveRecents = true;
 
                 // Move the last recents animation transaction from original task to the new one.
                 if (task.mLastRecentsAnimationTransaction != null) {
@@ -2866,9 +2865,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             ProtoLog.d(WM_DEBUG_STATES, "Create sleep token: tag=%s, displayId=%d", tag, displayId);
         } else {
             throw new RuntimeException("Create the same sleep token twice: " + token);
-        }
-        if (isSwappingDisplay) {
-            display.mWallpaperController.onDisplaySwitchStarted();
         }
         return token;
     }

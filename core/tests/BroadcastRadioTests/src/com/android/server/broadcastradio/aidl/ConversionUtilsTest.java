@@ -562,13 +562,29 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     @Test
     public void programInfoFromHalProgramInfo_withInvalidDabProgramInfo() {
         android.hardware.broadcastradio.ProgramSelector invalidHalDabSelector =
-                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID,
-                new ProgramIdentifier[]{TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
+                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_ENSEMBLE_ID,
+                        new ProgramIdentifier[]{TEST_HAL_DAB_FREQUENCY_ID});
+        ProgramInfo halProgramInfo = AidlTestUtils.makeHalProgramInfo(invalidHalDabSelector,
+                /* logicallyTunedTo= */ null, /* physicallyTunedTo= */ null,
+                TEST_SIGNAL_QUALITY);
+
+        RadioManager.ProgramInfo programInfo =
+                ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
+
+        expect.withMessage("Invalid DAB program info with incorrect type of physically tuned to id")
+                .that(programInfo).isNull();
+    }
+
+    @Test
+    public void tunedProgramInfoFromHalProgramInfo_withInvalidDabProgramInfo() {
+        android.hardware.broadcastradio.ProgramSelector invalidHalDabSelector =
+                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{
+                        TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
         ProgramInfo halProgramInfo = AidlTestUtils.makeHalProgramInfo(invalidHalDabSelector,
                 TEST_HAL_DAB_SID_EXT_ID, TEST_HAL_DAB_ENSEMBLE_ID, TEST_SIGNAL_QUALITY);
 
         RadioManager.ProgramInfo programInfo =
-                ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
+                ConversionUtils.tunedProgramInfoFromHalProgramInfo(halProgramInfo);
 
         expect.withMessage("Invalid DAB program info with incorrect type of physically tuned to id")
                 .that(programInfo).isNull();

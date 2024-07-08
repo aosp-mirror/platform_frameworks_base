@@ -84,9 +84,13 @@ constructor(
                 SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE to { it.scene != Scenes.Gone },
                 SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED to
                     {
-                        it.scene == Scenes.Lockscreen ||
-                            it.scene == Scenes.NotificationsShade ||
-                            it.scene == Scenes.Shade
+                        when {
+                            it.invisibleDueToOcclusion -> false
+                            it.scene == Scenes.Lockscreen -> true
+                            it.scene == Scenes.NotificationsShade -> true
+                            it.scene == Scenes.Shade -> true
+                            else -> false
+                        }
                     },
                 SYSUI_STATE_QUICK_SETTINGS_EXPANDED to
                     {

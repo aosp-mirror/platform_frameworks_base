@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import android.view.Display;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -33,10 +34,12 @@ import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.concurrent.Executor;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class DozeScreenStatePreventingAdapterTest extends SysuiTestCase {
 
     private Executor mExecutor;

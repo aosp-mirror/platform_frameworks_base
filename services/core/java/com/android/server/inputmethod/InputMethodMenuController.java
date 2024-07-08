@@ -79,16 +79,17 @@ final class InputMethodMenuController {
         if (DEBUG) Slog.v(TAG, "Show switching menu. showAuxSubtypes=" + showAuxSubtypes);
 
         final int userId = mService.getCurrentImeUserIdLocked();
+        final var bindingController = mService.getInputMethodBindingController(userId);
 
         hideInputMethodMenuLocked();
 
         if (preferredInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
             final InputMethodSubtype currentSubtype =
-                    mService.getCurrentInputMethodSubtypeLocked();
+                    bindingController.getCurrentInputMethodSubtype();
             if (currentSubtype != null) {
-                final String curMethodId = mService.getSelectedMethodIdLocked();
+                final String curMethodId = bindingController.getSelectedMethodId();
                 final InputMethodInfo currentImi =
-                        mService.queryInputMethodForCurrentUserLocked(curMethodId);
+                        InputMethodSettingsRepository.get(userId).getMethodMap().get(curMethodId);
                 preferredInputMethodSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(
                         currentImi, currentSubtype.hashCode());
             }
@@ -179,7 +180,7 @@ final class InputMethodMenuController {
                     if (subtypeId < 0 || subtypeId >= im.getSubtypeCount()) {
                         subtypeId = NOT_A_SUBTYPE_ID;
                     }
-                    mService.setInputMethodLocked(im.getId(), subtypeId);
+                    mService.setInputMethodLocked(im.getId(), subtypeId, userId);
                 }
                 hideInputMethodMenuLocked();
             }
@@ -200,7 +201,7 @@ final class InputMethodMenuController {
         attrs.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         attrs.setTitle("Select input method");
         w.setAttributes(attrs);
-        mService.updateSystemUiLocked();
+        mService.updateSystemUiLocked(userId);
         mService.sendOnNavButtonFlagsChangedLocked();
         mSwitchingDialog.show();
     }
@@ -238,7 +239,9 @@ final class InputMethodMenuController {
             mSwitchingDialog = null;
             mSwitchingDialogTitleView = null;
 
-            mService.updateSystemUiLocked();
+            // TODO(b/305849394): Make InputMethodMenuController multi-user aware
+            final int userId = mService.getCurrentImeUserIdLocked();
+            mService.updateSystemUiLocked(userId);
             mService.sendOnNavButtonFlagsChangedLocked();
             mDialogBuilder = null;
             mIms = null;

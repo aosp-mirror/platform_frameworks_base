@@ -24,6 +24,7 @@ import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Data label representation with data shared and data collected maps containing zero or more {@link
@@ -138,7 +139,7 @@ public class DataLabels implements AslMarshallable {
                                 "|",
                                 dataType.getPurposes().stream()
                                         .map(DataType.Purpose::toString)
-                                        .toList()));
+                                        .collect(Collectors.toList())));
                 dataLabelsEle.appendChild(hrDataTypeEle);
             }
         }

@@ -935,12 +935,11 @@ public class LauncherApps {
      *
      * @return {@link IntentSender} object which launches the Private Space Settings Activity, if
      * successful, null otherwise.
-     * @hide
      */
     // Alternatively, a system app can access this api for private profile if they've been granted
     // with the {@code android.Manifest.permission#ACCESS_HIDDEN_PROFILES_FULL} permission.
     @Nullable
-    @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @FlaggedApi(Flags.FLAG_GET_PRIVATE_SPACE_SETTINGS)
     @RequiresPermission(conditional = true,
             anyOf = {ACCESS_HIDDEN_PROFILES_FULL, ACCESS_HIDDEN_PROFILES})
     public IntentSender getPrivateSpaceSettingsIntent() {

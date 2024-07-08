@@ -146,6 +146,16 @@ flag {
 }
 
 flag {
+   name: "notification_transparent_header_fix"
+   namespace: "systemui"
+   description: "fix the transparent group header issue for async header inflation."
+   bug: "340161724"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "pss_app_selector_abrupt_exit_fix"
    namespace: "systemui"
    description: "Fixes the app selector abruptly disappearing without an animation, when the"
@@ -214,6 +224,17 @@ flag {
         " before we discovered a resources threading issue, which we worked around by applying the"
         " same color as a tint to the background drawable of footer buttons."
     bug: "294830092"
+}
+
+flag {
+    name: "notification_group_hun_removal_animation_fix"
+    namespace: "systemui"
+    description: "Fix the lack of hun removal animation for group notifications"
+        "(not GROUP_ALERT_SUMMARY)"
+    bug: "343475993"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -510,6 +531,16 @@ flag {
     namespace: "systemui"
     description: "Switches to the new volume panel (without Slices)."
     bug: "202262476"
+}
+
+flag {
+    name: "use_volume_controller"
+    namespace: "systemui"
+    description: "Adds Volume Controller signals to the AudioRepository to update volume"
+    bug: "349348461"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -867,6 +898,13 @@ flag {
 }
 
 flag {
+    name: "keyboard_touchpad_contextual_education"
+    namespace: "systemui"
+    description: "Allow showing education for physical keyboard and touchpad"
+    bug: "317496783"
+}
+
+flag {
   name: "dream_overlay_bouncer_swipe_direction_filtering"
   namespace: "systemui"
   description: "do not initiate bouncer swipe when the direction is opposite of the expansion"
@@ -1014,39 +1052,10 @@ flag {
 }
 
 flag {
-  name: "glanceable_hub_fullscreen_swipe"
-  namespace: "systemui"
-  description: "Increase swipe area for gestures to bring in glanceable hub"
-  bug: "339665673"
-}
-
-flag {
-  name: "glanceable_hub_shortcut_button"
-  namespace: "systemui"
-  description: "Shows a button over the dream and lock screen to open the glanceable hub"
-  bug: "339667383"
-}
-
-flag {
-  name: "glanceable_hub_gesture_handle"
-  namespace: "systemui"
-  description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
-  bug: "339667383"
-}
-
-flag {
   name: "glanceable_hub_allow_keyguard_when_dreaming"
   namespace: "systemui"
   description: "Allows users to exit dream to keyguard with glanceable hub enabled"
   bug: "343505271"
-}
-
-
-flag {
-  name: "new_touchpad_gestures_tutorial"
-  namespace: "systemui"
-  description: "Enables new interactive tutorial for learning touchpad gestures"
-  bug: "309928033"
 }
 
 flag {
@@ -1097,4 +1106,44 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+    name: "media_lockscreen_launch_animation"
+    namespace : "systemui"
+    description : "Enable the origin launch animation for UMO when opening on top of lockscreen."
+    bug : "346865769"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "expand_heads_up_on_inline_reply"
+  namespace: "systemui"
+  description: "Expands heads up notification when users clicks reply button and activate inline reply"
+  bug: "346976443"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "translucent_occluding_activity_fix"
+  namespace: "systemui"
+  description: "Fixes occlusion animation for transluent activities"
+  bug: "303010980"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+   namespace: "systemui"
+   name: "fetch_bookmarks_xml_keyboard_shortcuts"
+   description: "Fetches application launch keyboard shortcuts from system server rather than building a hardcoded list."
+   bug: "312452252"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
 }

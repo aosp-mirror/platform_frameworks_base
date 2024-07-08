@@ -21,18 +21,21 @@ import android.app.StatusBarManager.WINDOW_NAVIGATION_BAR
 import android.app.StatusBarManager.WINDOW_STATE_HIDDEN
 import android.app.StatusBarManager.WINDOW_STATE_SHOWING
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.CommandQueue
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class StatusBarWindowStateControllerTest : SysuiTestCase() {
     private lateinit var controller: StatusBarWindowStateController
     private lateinit var callback: CommandQueue.Callbacks

@@ -25,20 +25,50 @@ sealed class OngoingActivityChipModel {
     data object Hidden : OngoingActivityChipModel()
 
     /** This chip should be shown with the given information. */
-    data class Shown(
-        /** The icon to show on the chip. */
-        val icon: Icon,
+    abstract class Shown(
+        /** The icon to show on the chip. If null, no icon will be shown. */
+        open val icon: Icon?,
+        /** What colors to use for the chip. */
+        open val colors: ColorsModel,
         /**
-         * The time this event started, used to show the timer.
-         *
-         * This time should be relative to
-         * [com.android.systemui.util.time.SystemClock.elapsedRealtime], *not*
-         * [com.android.systemui.util.time.SystemClock.currentTimeMillis] because the
-         * [ChipChronometer] is based off of elapsed realtime. See
-         * [android.widget.Chronometer.setBase].
+         * Listener method to invoke when this chip is clicked. If null, the chip won't be
+         * clickable.
          */
-        val startTimeMs: Long,
-        /** Listener method to invoke when this chip is clicked. */
-        val onClickListener: View.OnClickListener,
-    ) : OngoingActivityChipModel()
+        open val onClickListener: View.OnClickListener?,
+    ) : OngoingActivityChipModel() {
+
+        /** This chip shows only an icon and nothing else. */
+        data class IconOnly(
+            override val icon: Icon,
+            override val colors: ColorsModel,
+            override val onClickListener: View.OnClickListener?,
+        ) : Shown(icon, colors, onClickListener)
+
+        /** The chip shows a timer, counting up from [startTimeMs]. */
+        data class Timer(
+            override val icon: Icon,
+            override val colors: ColorsModel,
+            /**
+             * The time this event started, used to show the timer.
+             *
+             * This time should be relative to
+             * [com.android.systemui.util.time.SystemClock.elapsedRealtime], *not*
+             * [com.android.systemui.util.time.SystemClock.currentTimeMillis] because the
+             * [ChipChronometer] is based off of elapsed realtime. See
+             * [android.widget.Chronometer.setBase].
+             */
+            val startTimeMs: Long,
+            override val onClickListener: View.OnClickListener?,
+        ) : Shown(icon, colors, onClickListener)
+
+        /**
+         * This chip shows a countdown using [secondsUntilStarted]. Used to inform users that an
+         * event is about to start. Typically, a [Countdown] chip will turn into a [Timer] chip.
+         */
+        data class Countdown(
+            override val colors: ColorsModel,
+            /** The number of seconds until an event is started. */
+            val secondsUntilStarted: Long,
+        ) : Shown(icon = null, colors, onClickListener = null)
+    }
 }

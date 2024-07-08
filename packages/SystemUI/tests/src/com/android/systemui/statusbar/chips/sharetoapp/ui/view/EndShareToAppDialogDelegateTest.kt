@@ -59,7 +59,7 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
-        verify(sysuiDialog).setIcon(R.drawable.ic_screenshot_share)
+        verify(sysuiDialog).setIcon(R.drawable.ic_present_to_all)
     }
 
     @Test

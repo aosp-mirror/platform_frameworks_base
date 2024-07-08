@@ -25,6 +25,8 @@ import static android.service.notification.NotificationListenerService.NOTIFICAT
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 
+import static androidx.test.ext.truth.content.IntentSubject.assertThat;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING;
 import static com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR;
@@ -57,6 +59,7 @@ import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -471,7 +474,9 @@ public class BubblesTest extends SysuiTestCase {
                         mock(AvalancheProvider.class),
                         mock(SystemSettings.class),
                         mock(PackageManager.class),
-                        Optional.of(mock(Bubbles.class))
+                        Optional.of(mock(Bubbles.class)),
+                        mContext,
+                        mock(NotificationManager.class)
                         );
         interruptionDecisionProvider.start();
 
@@ -2013,6 +2018,31 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(appBubbleKey);
         assertThat(mBubbleController.isStackExpanded()).isTrue();
         assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNull();
+    }
+
+    @Test
+    public void testShowOrHideAppBubble_updateExistedBubbleInOverflow_updateIntentInBubble() {
+        String appBubbleKey = Bubble.getAppBubbleKeyForApp(mAppBubbleIntent.getPackage(), mUser0);
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+        // Collapse the stack so we don't need to wait for the dismiss animation in the test
+        mBubbleController.collapseStack();
+        // Dismiss the app bubble so it's in the overflow
+        mBubbleController.dismissBubble(appBubbleKey, Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNotNull();
+
+        // Modify the intent to include new extras.
+        Intent newAppBubbleIntent = new Intent(mContext, BubblesTestActivity.class)
+                .setPackage(mContext.getPackageName())
+                .putExtra("hello", "world");
+
+        // Calling this while collapsed will re-add and expand the app bubble
+        mBubbleController.showOrHideAppBubble(newAppBubbleIntent, mUser0, mAppBubbleIcon);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(appBubbleKey);
+        assertThat(mBubbleController.isStackExpanded()).isTrue();
+        assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
+        assertThat(mBubbleData.getBubbles().get(0).getAppBubbleIntent()).extras().string(
+                "hello").isEqualTo("world");
         assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNull();
     }
 

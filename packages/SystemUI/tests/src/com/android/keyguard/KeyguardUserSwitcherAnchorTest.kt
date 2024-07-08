@@ -15,8 +15,8 @@
  */
 package com.android.keyguard
 
-import android.testing.AndroidTestingRunner
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -25,7 +25,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class KeyguardUserSwitcherAnchorTest : SysuiTestCase() {
 

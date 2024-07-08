@@ -78,7 +78,9 @@ public class Utils {
      */
     public static void log(String str) {
         StackTraceElement s = new Throwable().getStackTrace()[1];
-        System.out.println("(" + s.getFileName() + ":" + s.getLineNumber() + ")." + str);
+        System.out.println("(" + s.getFileName()
+                + ":" + s.getLineNumber() + "). "
+                + s.getMethodName() + "() " + str);
     }
 
     /**

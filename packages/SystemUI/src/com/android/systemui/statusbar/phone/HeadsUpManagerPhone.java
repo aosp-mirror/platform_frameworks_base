@@ -31,6 +31,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
@@ -39,6 +40,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener;
+import com.android.systemui.statusbar.notification.collection.provider.OnReorderingBannedListener;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRepository;
@@ -86,7 +88,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private final List<OnHeadsUpPhoneListenerChange> mHeadsUpPhoneListeners = new ArrayList<>();
     private final VisualStabilityProvider mVisualStabilityProvider;
 
-    private final AvalancheController mAvalancheController;
+    private AvalancheController mAvalancheController;
 
     // TODO(b/328393698) move the topHeadsUpRow logic to an interactor
     private final MutableStateFlow<HeadsUpRowRepository> mTopHeadsUpRow =
@@ -104,6 +106,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private boolean mIsExpanded;
     private int mStatusBarState;
     private AnimationStateHandler mAnimationStateHandler;
+
     private int mHeadsUpInset;
 
     // Used for determining the region for touch interaction
@@ -158,7 +161,6 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         mGroupMembershipManager = groupMembershipManager;
         mVisualStabilityProvider = visualStabilityProvider;
         mAvalancheController = avalancheController;
-
         updateResources();
         configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
             @Override
@@ -175,6 +177,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(),
                     this::onShadeOrQsExpanded);
         }
+        mVisualStabilityProvider.addPersistentReorderingBannedListener(mOnReorderingBannedListener);
     }
 
     public void setAnimationStateHandler(AnimationStateHandler handler) {
@@ -382,6 +385,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     private final OnReorderingAllowedListener mOnReorderingAllowedListener = () -> {
         mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
+        mAvalancheController.setEnableAtRuntime(true);
+
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
@@ -390,6 +395,29 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         }
         mEntriesToRemoveWhenReorderingAllowed.clear();
         mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(true);
+    };
+
+    private final OnReorderingBannedListener mOnReorderingBannedListener = () -> {
+        if (mAvalancheController != null) {
+            // Waiting HUNs in AvalancheController are still promoted to the HUN section and thus
+            // seen in open shade; clear them so we don't show them again when the shade closes and
+            // reordering is allowed again.
+            final int numDropped = mAvalancheController.getWaitingKeys().size();
+            mAvalancheController.logDroppedHunsInBackground(numDropped);
+            mAvalancheController.clearNext();
+
+            // In open shade the first HUN is pinned, and visual stability logic prevents us from
+            // unpinning this first HUN as long as the shade remains open. AvalancheController only
+            // shows the next HUN when the currently showing HUN is unpinned, so we must disable
+            // throttling here so that the incoming HUN stream is not forever paused. This is reset
+            // when reorder becomes allowed.
+            mAvalancheController.setEnableAtRuntime(false);
+
+            // Note that we cannot do the above when
+            // 1) the remove runnable runs because its delay means it may not run before shade close
+            // 2) reordering is allowed again (when shade closes) because the HUN appear animation
+            // will have started by then
+        }
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

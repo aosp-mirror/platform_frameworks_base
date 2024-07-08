@@ -47,8 +47,6 @@ import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -183,7 +181,7 @@ import android.window.WindowContainerToken;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
@@ -405,8 +403,6 @@ class Task extends TaskFragment {
     int mCallingUid;
     String mCallingPackage;
     String mCallingFeatureId;
-
-    private static final Rect sTmpBounds = new Rect();
 
     // Last non-fullscreen bounds the task was launched in or resized to.
     // The information is persisted and used to determine the appropriate root task to launch the
@@ -2866,69 +2862,6 @@ class Task extends TaskFragment {
         }
     }
 
-    /**
-     * Calculate the maximum visible area of this task. If the task has only one app,
-     * the result will be visible frame of that app. If the task has more than one apps,
-     * we search from top down if the next app got different visible area.
-     *
-     * This effort is to handle the case where some task (eg. GMail composer) might pop up
-     * a dialog that's different in size from the activity below, in which case we should
-     * be dimming the entire task area behind the dialog.
-     *
-     * @param out the union of visible bounds.
-     */
-    private static void getMaxVisibleBounds(ActivityRecord token, Rect out, boolean[] foundTop) {
-        // skip hidden (or about to hide) apps
-        if (token.mIsExiting || !token.isClientVisible() || !token.isVisibleRequested()) {
-            return;
-        }
-        final WindowState win = token.findMainWindow();
-        if (win == null) {
-            return;
-        }
-        if (!foundTop[0]) {
-            foundTop[0] = true;
-            out.setEmpty();
-        }
-
-        final Rect visibleFrame = sTmpBounds;
-        final WindowManager.LayoutParams attrs = win.mAttrs;
-        visibleFrame.set(win.getFrame());
-        visibleFrame.inset(win.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                visibleFrame, attrs.type, win.getActivityType(), attrs.softInputMode,
-                attrs.flags));
-        out.union(visibleFrame);
-    }
-
-    /** Bounds of the task to be used for dimming, as well as touch related tests. */
-    @Override
-    void getDimBounds(@NonNull Rect out) {
-        if (isRootTask()) {
-            getBounds(out);
-            return;
-        }
-
-        final Task rootTask = getRootTask();
-        if (inFreeformWindowingMode()) {
-            boolean[] foundTop = { false };
-            forAllActivities(a -> { getMaxVisibleBounds(a, out, foundTop); });
-            if (foundTop[0]) {
-                return;
-            }
-        }
-
-        if (!matchParentBounds()) {
-            // When minimizing the root docked task when going home, we don't adjust the task bounds
-            // so we need to intersect the task bounds with the root task bounds here..
-            rootTask.getBounds(mTmpRect);
-            mTmpRect.intersect(getBounds());
-            out.set(mTmpRect);
-        } else {
-            out.set(getBounds());
-        }
-        return;
-    }
-
     void setDragResizing(boolean dragResizing) {
         if (mDragResizing != dragResizing) {
             // No need to check if allowed if it's leaving dragResize
@@ -3478,6 +3411,7 @@ class Task extends TaskFragment {
         info.isVisibleRequested = isVisibleRequested();
         info.isSleeping = shouldSleepActivities();
         info.isTopActivityTransparent = top != null && !top.fillsParent();
+        info.isTopActivityStyleFloating = top != null && top.isStyleFloating();
         appCompatTaskInfo.topActivityLetterboxVerticalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         appCompatTaskInfo.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         appCompatTaskInfo.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
@@ -3524,7 +3458,8 @@ class Task extends TaskFragment {
         appCompatTaskInfo.topActivityBoundsLetterboxed = top != null && top.areBoundsLetterboxed();
         appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode = top == null
                 ? CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE
-                : top.mLetterboxUiController.getFreeformCameraCompatMode();
+                : top.mAppCompatController.getAppCompatCameraOverrides()
+                        .getFreeformCameraCompatMode();
     }
 
     /**
@@ -3586,15 +3521,29 @@ class Task extends TaskFragment {
                 ? null : new PictureInPictureParams(top.pictureInPictureArgs);
     }
 
-    Rect getDisplayCutoutInsets() {
-        if (mDisplayContent == null || getDisplayInfo().displayCutout == null) return null;
+    /** @return The display cutout insets where the main window is not allowed to extend to. */
+    @NonNull Rect getDisplayCutoutInsets() {
+        final Rect displayCutoutInsets = new Rect();
+        if (mDisplayContent == null || getDisplayInfo().displayCutout == null) {
+            return displayCutoutInsets;
+        }
         final WindowState w = getTopVisibleAppMainWindow();
-        final int displayCutoutMode = w == null
-                ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-                : w.getAttrs().layoutInDisplayCutoutMode;
-        return (displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-                || displayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)
-                ? null : getDisplayInfo().displayCutout.getSafeInsets();
+        final Rect displayFrame;
+        if (w != null && w.mHaveFrame) {
+            displayFrame = w.getDisplayFrame();
+        } else {
+            displayFrame = mDisplayContent.getBounds();
+            displayFrame.inset(getDisplayInfo().displayCutout.getSafeInsets());
+        }
+        final Rect taskBounds = getBounds();
+        if (displayCutoutInsets.setIntersect(taskBounds, displayFrame)) {
+            displayCutoutInsets.set(
+                    displayCutoutInsets.left - taskBounds.left,
+                    displayCutoutInsets.top - taskBounds.top,
+                    taskBounds.right - displayCutoutInsets.right,
+                    taskBounds.bottom - displayCutoutInsets.bottom);
+        }
+        return displayCutoutInsets;
     }
 
     /**
@@ -4792,8 +4741,7 @@ class Task extends TaskFragment {
                     // task is still updated by core. Otherwise if the task is collected (e.g.
                     // rotation change) after leaving this scope, the visibility operation will be
                     // put in sync transaction, then it is not synced with reparent.
-                    if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()
-                            && lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
+                    if (lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
                         lastParentBeforePip.prepareSurfaces();
                         // If the moveToFront is a part of finishing transition, then make sure
                         // the z-order of tasks are up-to-date.
@@ -6140,11 +6088,6 @@ class Task extends TaskFragment {
         }
 
         return setBoundsUnchecked(!inMultiWindowMode() ? null : bounds);
-    }
-
-    @Override
-    public void getBounds(Rect bounds) {
-        bounds.set(getBounds());
     }
 
     /**

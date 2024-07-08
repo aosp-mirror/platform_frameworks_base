@@ -41,7 +41,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -64,7 +63,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.view.IWindow;
 import android.view.IWindowId;
@@ -81,13 +79,12 @@ import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 import android.view.WindowRelayoutResult;
-import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerService.H;
 import com.android.window.flags.Flags;
@@ -290,37 +287,12 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         return res;
     }
 
-    /** @deprecated */
-    @Deprecated
-    @Override
-    public int relayoutLegacy(IWindow window, WindowManager.LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
-            int lastSyncSeqId, ClientWindowFrames outFrames,
-            MergedConfiguration mergedConfiguration, SurfaceControl outSurfaceControl,
-            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
-            Bundle outBundle) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
-        int res = mService.relayoutWindow(this, window, attrs,
-                requestedWidth, requestedHeight, viewFlags, flags, seq,
-                lastSyncSeqId, outFrames, mergedConfiguration, outSurfaceControl, outInsetsState,
-                outActiveControls, outBundle);
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        return res;
-    }
-
     @Override
     public void relayoutAsync(IWindow window, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
             int lastSyncSeqId) {
-        if (windowSessionRelayoutInfo()) {
-            relayout(window, attrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
-                    lastSyncSeqId, null /* outRelayoutResult */);
-        } else {
-            relayoutLegacy(window, attrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
-                    lastSyncSeqId, null /* outFrames */, null /* mergedConfiguration */,
-                    null /* outSurfaceControl */, null /* outInsetsState */,
-                    null /* outActiveControls */, null /* outSyncIdBundle */);
-        }
+        relayout(window, attrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
+                lastSyncSeqId, null /* outRelayoutResult */);
     }
 
     @Override
@@ -827,7 +799,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         if (changed && noSystemOverlayPermission) {
             if (mAlertWindowSurfaces.isEmpty()) {
                 cancelAlertWindowNotification();
-            } else if (mAlertWindowNotification == null) {
+            } else if (mAlertWindowNotification == null && !isSatellitePointingUiPackage()) {
                 mAlertWindowNotification = new AlertWindowNotification(mService, mPackageName);
                 if (mShowingAlertWindowNotificationAllowed) {
                     mAlertWindowNotification.post();
@@ -840,6 +812,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             // adjust the importance score for the process.
             setHasOverlayUi(!mAlertWindowSurfaces.isEmpty());
         }
+    }
+
+    // TODO b/349195999 - short term solution to not show the satellite pointing ui notification.
+    private boolean isSatellitePointingUiPackage() {
+        if (mPackageName == null || !mPackageName.equals(mService.mContext.getString(
+            com.android.internal.R.string.config_pointing_ui_package))) {
+            return false;
+        }
+        return ActivityTaskManagerService.checkPermission(
+            android.Manifest.permission.SATELLITE_COMMUNICATION, mPid, mUid) == PERMISSION_GRANTED;
     }
 
     void setShowingAlertWindowNotificationAllowed(boolean allowed) {
@@ -897,6 +879,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 pw.print(" mClientDead="); pw.print(mClientDead);
                 pw.print(" mSurfaceSession="); pw.println(mSurfaceSession);
         pw.print(prefix); pw.print("mPackageName="); pw.println(mPackageName);
+        if (isSatellitePointingUiPackage()) {
+            pw.print(prefix); pw.println("mIsSatellitePointingUiPackage=true");
+        }
     }
 
     @Override

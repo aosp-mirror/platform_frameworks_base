@@ -23,11 +23,15 @@ import android.os.SystemProperties;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 
 /**
  * Constants for desktop mode feature
  */
+// TODO(b/237575897): Move this file to the `com.android.wm.shell.shared.desktopmode` package
 public class DesktopModeStatus {
+
+    private static final String TAG = "DesktopModeStatus";
 
     /**
      * Flag to indicate whether task resizing is veiled.
@@ -98,11 +102,12 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_max_task_limit", DEFAULT_MAX_TASK_LIMIT);
 
     /**
-     * Return {@code true} if desktop windowing is enabled. Only to be used for testing. Callers
-     * should use {@link #canEnterDesktopMode(Context)} to query the state of desktop windowing.
+     * Return {@code true} if desktop windowing flag is enabled. Only to be used for testing.
+     * Callers should use {@link #canEnterDesktopMode(Context)} to query the state of desktop
+     * windowing.
      */
     @VisibleForTesting
-    public static boolean isEnabled() {
+    public static boolean isDesktopModeFlagEnabled() {
         return Flags.enableDesktopWindowingMode();
     }
 
@@ -120,7 +125,7 @@ public class DesktopModeStatus {
      */
     public static boolean useWindowShadow(boolean isFocusedWindow) {
         return USE_WINDOW_SHADOWS
-            || (USE_WINDOW_SHADOWS_FOCUSED_WINDOW && isFocusedWindow);
+                || (USE_WINDOW_SHADOWS_FOCUSED_WINDOW && isFocusedWindow);
     }
 
     /**
@@ -154,10 +159,24 @@ public class DesktopModeStatus {
     }
 
     /**
+     * Return {@code true} if desktop mode dev option should be shown on current device
+     */
+    public static boolean canShowDesktopModeDevOption(@NonNull Context context) {
+        return isDeviceEligibleForDesktopMode(context) && Flags.showDesktopWindowingDevOption();
+    }
+
+    /** Returns if desktop mode dev option should be enabled if there is no user override. */
+    public static boolean shouldDevOptionBeEnabledByDefault() {
+        return isDesktopModeFlagEnabled();
+    }
+
+    /**
      * Return {@code true} if desktop mode is enabled and can be entered on the current device.
      */
     public static boolean canEnterDesktopMode(@NonNull Context context) {
-        return (!enforceDeviceRestrictions() || isDesktopModeSupported(context)) && isEnabled();
+        if (!isDeviceEligibleForDesktopMode(context)) return false;
+
+        return DesktopModeFlags.DESKTOP_WINDOWING_MODE.isEnabled(context);
     }
 
     /**
@@ -180,5 +199,12 @@ public class DesktopModeStatus {
     private static boolean isValidDesktopDensityOverrideSet() {
         return DESKTOP_DENSITY_OVERRIDE >= DESKTOP_DENSITY_MIN
                 && DESKTOP_DENSITY_OVERRIDE <= DESKTOP_DENSITY_MAX;
+    }
+
+    /**
+     * Return {@code true} if desktop mode is unrestricted and is supported in the device.
+     */
+    private static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
+        return !enforceDeviceRestrictions() || isDesktopModeSupported(context);
     }
 }

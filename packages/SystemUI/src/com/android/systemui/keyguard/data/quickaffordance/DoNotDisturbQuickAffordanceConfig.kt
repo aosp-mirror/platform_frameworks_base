@@ -25,9 +25,8 @@ import android.provider.Settings.Global.ZEN_MODE_OFF
 import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import android.service.notification.ZenModeConfig
-import com.android.settingslib.notification.EnableZenModeDialog
-import com.android.settingslib.notification.ZenModeDialogMetricsLogger
-import com.android.systemui.res.R
+import com.android.settingslib.notification.modes.EnableZenModeDialog
+import com.android.settingslib.notification.modes.ZenModeDialogMetricsLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -36,6 +35,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.settings.SecureSettings

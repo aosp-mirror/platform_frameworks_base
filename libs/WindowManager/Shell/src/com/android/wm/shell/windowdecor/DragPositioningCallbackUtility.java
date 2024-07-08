@@ -28,6 +28,8 @@ import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
 
+import androidx.annotation.NonNull;
+
 import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
@@ -106,13 +108,15 @@ public class DragPositioningCallbackUtility {
             repositionTaskBounds.bottom = (candidateBottom < stableBounds.bottom)
                     ? candidateBottom : oldBottom;
         }
-        // If width or height are negative or less than the minimum width or height, revert the
+        // If width or height are negative or exceeding the width or height constraints, revert the
         // respective bounds to use previous bound dimensions.
-        if (repositionTaskBounds.width() < getMinWidth(displayController, windowDecoration)) {
+        if (isExceedingWidthConstraint(repositionTaskBounds, stableBounds, displayController,
+                windowDecoration)) {
             repositionTaskBounds.right = oldRight;
             repositionTaskBounds.left = oldLeft;
         }
-        if (repositionTaskBounds.height() < getMinHeight(displayController, windowDecoration)) {
+        if (isExceedingHeightConstraint(repositionTaskBounds, stableBounds, displayController,
+                windowDecoration)) {
             repositionTaskBounds.top = oldTop;
             repositionTaskBounds.bottom = oldBottom;
         }
@@ -174,6 +178,30 @@ public class DragPositioningCallbackUtility {
         return result;
     }
 
+    private static boolean isExceedingWidthConstraint(@NonNull Rect repositionTaskBounds,
+            Rect maxResizeBounds, DisplayController displayController,
+            WindowDecoration windowDecoration) {
+        // Check if width is less than the minimum width constraint.
+        if (repositionTaskBounds.width() < getMinWidth(displayController, windowDecoration)) {
+            return true;
+        }
+        // Check if width is more than the maximum resize bounds on desktop windowing mode.
+        return isSizeConstraintForDesktopModeEnabled(windowDecoration.mDecorWindowContext)
+                && repositionTaskBounds.width() > maxResizeBounds.width();
+    }
+
+    private static boolean isExceedingHeightConstraint(@NonNull Rect repositionTaskBounds,
+            Rect maxResizeBounds, DisplayController displayController,
+            WindowDecoration windowDecoration) {
+        // Check if height is less than the minimum height constraint.
+        if (repositionTaskBounds.height() < getMinHeight(displayController, windowDecoration)) {
+            return true;
+        }
+        // Check if height is more than the maximum resize bounds on desktop windowing mode.
+        return isSizeConstraintForDesktopModeEnabled(windowDecoration.mDecorWindowContext)
+                && repositionTaskBounds.height() > maxResizeBounds.height();
+    }
+
     private static float getMinWidth(DisplayController displayController,
             WindowDecoration windowDecoration) {
         return windowDecoration.mTaskInfo.minWidth < 0 ? getDefaultMinWidth(displayController,
@@ -210,7 +238,7 @@ public class DragPositioningCallbackUtility {
 
     private static float getDefaultMinSize(DisplayController displayController,
             WindowDecoration windowDecoration) {
-        float density =  displayController.getDisplayLayout(windowDecoration.mTaskInfo.displayId)
+        float density = displayController.getDisplayLayout(windowDecoration.mTaskInfo.displayId)
                 .densityDpi() * DisplayMetrics.DENSITY_DEFAULT_SCALE;
         return windowDecoration.mTaskInfo.defaultMinSize * density;
     }

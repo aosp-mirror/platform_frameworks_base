@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.asStateFlow
 @SysUISingleton
 class FakeShadeRepository @Inject constructor() : ShadeRepository {
     private val _qsExpansion = MutableStateFlow(0f)
-    override val qsExpansion = _qsExpansion
+    @Deprecated("Use ShadeInteractor.qsExpansion instead") override val qsExpansion = _qsExpansion
 
     private val _udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
     override val udfpsTransitionToFullShadeProgress = _udfpsTransitionToFullShadeProgress
@@ -59,12 +59,15 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     private val _legacyIsQsExpanded = MutableStateFlow(false)
     @Deprecated("Use ShadeInteractor instead") override val legacyIsQsExpanded = _legacyIsQsExpanded
 
+    @Deprecated("Use ShadeInteractor.isUserInteractingWithShade instead")
     override val legacyLockscreenShadeTracking = MutableStateFlow(false)
 
     private val _shadeMode = MutableStateFlow<ShadeMode>(ShadeMode.Single)
     override val shadeMode: StateFlow<ShadeMode> = _shadeMode.asStateFlow()
 
-    override val isDualShadeAlignedToBottom = false
+    private var _isDualShadeAlignedToBottom = false
+    override val isDualShadeAlignedToBottom
+        get() = _isDualShadeAlignedToBottom
 
     @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyIsQsExpanded(legacyIsQsExpanded: Boolean) {
@@ -139,8 +142,12 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
         _legacyShadeExpansion.value = expandedFraction
     }
 
-    override fun setShadeMode(shadeMode: ShadeMode) {
-        _shadeMode.value = shadeMode
+    override fun setShadeMode(mode: ShadeMode) {
+        _shadeMode.value = mode
+    }
+
+    fun setDualShadeAlignedToBottom(isAlignedToBottom: Boolean) {
+        _isDualShadeAlignedToBottom = isAlignedToBottom
     }
 }
 

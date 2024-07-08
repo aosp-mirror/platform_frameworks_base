@@ -41,7 +41,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
@@ -53,8 +53,9 @@ import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Responsible supplying PiP Transitions.
@@ -66,7 +67,7 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     protected final ShellTaskOrganizer mShellTaskOrganizer;
     protected final PipMenuController mPipMenuController;
     protected final Transitions mTransitions;
-    private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
+    private final Map<PipTransitionCallback, Executor> mPipTransitionCallbacks = new HashMap<>();
     protected PipTaskOrganizer mPipOrganizer;
     protected DefaultMixedHandler mMixedHandler;
 
@@ -126,8 +127,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     /**
      * Called when the Shell wants to start resizing Pip transition/animation.
+     *
+     * @param duration the suggested duration for resize animation.
      */
-    public void startResizeTransition(WindowContainerTransaction wct) {
+    public void startResizeTransition(WindowContainerTransaction wct, int duration) {
         // Default implementation does nothing.
     }
 
@@ -181,16 +184,18 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     /**
      * Registers {@link PipTransitionCallback} to receive transition callbacks.
      */
-    public void registerPipTransitionCallback(PipTransitionCallback callback) {
-        mPipTransitionCallbacks.add(callback);
+    public void registerPipTransitionCallback(
+            @NonNull PipTransitionCallback callback, @NonNull Executor executor) {
+        mPipTransitionCallbacks.put(callback, executor);
     }
 
     protected void sendOnPipTransitionStarted(
             @PipAnimationController.TransitionDirection int direction) {
         final Rect pipBounds = mPipBoundsState.getBounds();
-        for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-            final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-            callback.onPipTransitionStarted(direction, pipBounds);
+        for (Map.Entry<PipTransitionCallback, Executor> entry
+                : mPipTransitionCallbacks.entrySet()) {
+            entry.getValue().execute(
+                    () -> entry.getKey().onPipTransitionStarted(direction, pipBounds));
         }
         if (isInPipDirection(direction) && Flags.enablePipUiStateCallbackOnEntering()) {
             try {
@@ -207,9 +212,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     protected void sendOnPipTransitionFinished(
             @PipAnimationController.TransitionDirection int direction) {
-        for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-            final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-            callback.onPipTransitionFinished(direction);
+        for (Map.Entry<PipTransitionCallback, Executor> entry
+                : mPipTransitionCallbacks.entrySet()) {
+            entry.getValue().execute(
+                    () -> entry.getKey().onPipTransitionFinished(direction));
         }
         if (isInPipDirection(direction) && Flags.enablePipUiStateCallbackOnEntering()) {
             try {
@@ -226,9 +232,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     protected void sendOnPipTransitionCancelled(
             @PipAnimationController.TransitionDirection int direction) {
-        for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-            final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-            callback.onPipTransitionCanceled(direction);
+        for (Map.Entry<PipTransitionCallback, Executor> entry
+                : mPipTransitionCallbacks.entrySet()) {
+            entry.getValue().execute(
+                    () -> entry.getKey().onPipTransitionCanceled(direction));
         }
     }
 

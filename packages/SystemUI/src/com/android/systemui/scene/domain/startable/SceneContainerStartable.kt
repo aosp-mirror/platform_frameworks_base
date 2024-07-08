@@ -38,7 +38,10 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInt
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
+import com.android.systemui.keyguard.DismissCallbackRegistry
+import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor
 import com.android.systemui.model.SceneContainerPlugin
 import com.android.systemui.model.SysUiState
@@ -82,6 +85,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -104,6 +108,7 @@ constructor(
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val bouncerInteractor: BouncerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val sysUiState: SysUiState,
     @DisplayId private val displayId: Int,
     private val sceneLogger: SceneLogger,
@@ -123,6 +128,8 @@ constructor(
     private val sceneBackInteractor: SceneBackInteractor,
     private val shadeSessionStorage: SessionStorage,
     private val windowMgrLockscreenVisInteractor: WindowManagerLockscreenVisibilityInteractor,
+    private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
+    private val dismissCallbackRegistry: DismissCallbackRegistry,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -140,6 +147,8 @@ constructor(
             hydrateWindowController()
             hydrateBackStack()
             resetShadeSessions()
+            handleKeyguardEnabledness()
+            notifyKeyguardDismissCallbacks()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -413,9 +422,9 @@ constructor(
             powerInteractor.isAsleep.collect { isAsleep ->
                 if (isAsleep) {
                     switchToScene(
-                        // TODO(b/336581871): add sceneState?
                         targetSceneKey = Scenes.Lockscreen,
                         loggingReason = "device is starting to sleep",
+                        sceneState = keyguardTransitionInteractor.asleepKeyguardState.value,
                     )
                 } else {
                     val canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value
@@ -650,10 +659,60 @@ constructor(
         }
     }
 
-    private fun switchToScene(targetSceneKey: SceneKey, loggingReason: String) {
+    private fun handleKeyguardEnabledness() {
+        // Automatically switches scenes when keyguard is enabled or disabled, as needed.
+        applicationScope.launch {
+            keyguardEnabledInteractor.isKeyguardEnabled
+                .sample(
+                    combine(
+                        deviceEntryInteractor.isInLockdown,
+                        deviceEntryInteractor.isDeviceEntered,
+                        ::Pair,
+                    )
+                ) { isKeyguardEnabled, (isInLockdown, isDeviceEntered) ->
+                    when {
+                        !isKeyguardEnabled && !isInLockdown && !isDeviceEntered -> {
+                            keyguardEnabledInteractor.setShowKeyguardWhenReenabled(true)
+                            Scenes.Gone to "Keyguard became disabled"
+                        }
+                        isKeyguardEnabled &&
+                            keyguardEnabledInteractor.isShowKeyguardWhenReenabled() -> {
+                            keyguardEnabledInteractor.setShowKeyguardWhenReenabled(false)
+                            Scenes.Lockscreen to "Keyguard became enabled"
+                        }
+                        else -> null
+                    }
+                }
+                .filterNotNull()
+                .collect { (targetScene, loggingReason) ->
+                    switchToScene(targetScene, loggingReason)
+                }
+        }
+
+        // Clears the showKeyguardWhenReenabled if the auth method changes to an insecure one.
+        applicationScope.launch {
+            authenticationInteractor
+                .get()
+                .authenticationMethod
+                .map { it.isSecure }
+                .distinctUntilChanged()
+                .collect { isAuthenticationMethodSecure ->
+                    if (!isAuthenticationMethodSecure) {
+                        keyguardEnabledInteractor.setShowKeyguardWhenReenabled(false)
+                    }
+                }
+        }
+    }
+
+    private fun switchToScene(
+        targetSceneKey: SceneKey,
+        loggingReason: String,
+        sceneState: Any? = null
+    ) {
         sceneInteractor.changeScene(
             toScene = targetSceneKey,
             loggingReason = loggingReason,
+            sceneState = sceneState,
         )
     }
 
@@ -661,6 +720,18 @@ constructor(
         applicationScope.launch {
             sceneInteractor.currentScene.pairwise().collect { (from, to) ->
                 sceneBackInteractor.onSceneChange(from = from, to = to)
+            }
+        }
+    }
+
+    private fun notifyKeyguardDismissCallbacks() {
+        applicationScope.launch {
+            sceneInteractor.currentScene.pairwise().collect { (from, to) ->
+                when {
+                    from != Scenes.Bouncer -> Unit
+                    to == Scenes.Gone -> dismissCallbackRegistry.notifyDismissSucceeded()
+                    else -> dismissCallbackRegistry.notifyDismissCancelled()
+                }
             }
         }
     }

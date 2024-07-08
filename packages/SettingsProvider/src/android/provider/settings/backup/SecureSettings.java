@@ -134,6 +134,7 @@ public class SecureSettings {
         Settings.Secure.SFPS_PERFORMANT_AUTH_ENABLED,
         Settings.Secure.ACTIVE_UNLOCK_ON_WAKE,
         Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT,
+        Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_LEGACY,
         Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL,
         Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS,
         Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO,
@@ -279,5 +280,6 @@ public class SecureSettings {
         Settings.Secure.ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS,
         Settings.Secure.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS,
         Settings.Secure.ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS,
+        Settings.Secure.MANDATORY_BIOMETRICS,
     };
 }

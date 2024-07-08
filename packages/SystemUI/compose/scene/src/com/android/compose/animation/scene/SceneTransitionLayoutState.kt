@@ -224,6 +224,9 @@ sealed interface TransitionState {
 
         /** The scene this transition is going to. Can't be the same as fromScene */
         val toScene: SceneKey,
+
+        /** The transition that `this` transition is replacing, if any. */
+        internal val replacedTransition: Transition? = null,
     ) : TransitionState {
         /**
          * The key of this transition. This should usually be null, but it can be specified to use a
@@ -279,6 +282,11 @@ sealed interface TransitionState {
 
         init {
             check(fromScene != toScene)
+            check(
+                replacedTransition == null ||
+                    (replacedTransition.fromScene == fromScene &&
+                        replacedTransition.toScene == toScene)
+            )
         }
 
         /**
@@ -319,6 +327,10 @@ sealed interface TransitionState {
         ): Float {
             if (!layoutImpl.state.enableInterruptions) {
                 return 0f
+            }
+
+            if (replacedTransition != null) {
+                return replacedTransition.interruptionProgress(layoutImpl)
             }
 
             fun create(): Animatable<Float, AnimationVector1D> {
@@ -521,6 +533,10 @@ internal abstract class BaseSceneTransitionLayoutState(
                     check(transitionStates.size == 1)
                     check(transitionStates[0] is TransitionState.Idle)
                     transitionStates = listOf(transition)
+                } else if (currentState == transition.replacedTransition) {
+                    // Replace the transition.
+                    transitionStates =
+                        transitionStates.subList(0, transitionStates.lastIndex) + transition
                 } else {
                     // Append the new transition.
                     transitionStates = transitionStates + transition

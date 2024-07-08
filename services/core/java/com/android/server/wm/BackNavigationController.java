@@ -61,7 +61,7 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
@@ -252,7 +252,8 @@ class BackNavigationController {
                 // skip if one of participant activity is translucent
                 backType = BackNavigationInfo.TYPE_CALLBACK;
             } else if (prevActivities.size() > 0) {
-                if (!isOccluded || isAllActivitiesCanShowWhenLocked(prevActivities)) {
+                if ((!isOccluded || isAllActivitiesCanShowWhenLocked(prevActivities))
+                        && isAllActivitiesCreated(prevActivities)) {
                     // We have another Activity in the same currentTask to go to
                     final WindowContainer parent = currentActivity.getParent();
                     final boolean canCustomize = parent != null
@@ -356,8 +357,7 @@ class BackNavigationController {
                                 removedWindowContainer);
                 mBackAnimationInProgress = builder != null;
                 if (mBackAnimationInProgress) {
-                    if (removedWindowContainer.hasCommittedReparentToAnimationLeash()
-                            || removedWindowContainer.mTransitionController.inTransition()
+                    if (removedWindowContainer.mTransitionController.inTransition()
                             || mWindowManagerService.mSyncEngine.hasPendingSyncSets()) {
                         ProtoLog.w(WM_DEBUG_BACK_PREVIEW,
                                 "Pending back animation due to another animation is running");
@@ -543,6 +543,17 @@ class BackNavigationController {
             @NonNull ArrayList<ActivityRecord> prevActivities) {
         for (int i = prevActivities.size() - 1; i >= 0; --i) {
             if (!prevActivities.get(i).canShowWhenLocked()) {
+                return false;
+            }
+        }
+        return !prevActivities.isEmpty();
+    }
+
+    private static boolean isAllActivitiesCreated(
+            @NonNull ArrayList<ActivityRecord> prevActivities) {
+        for (int i = prevActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord check = prevActivities.get(i);
+            if (check.isState(ActivityRecord.State.INITIALIZING)) {
                 return false;
             }
         }
@@ -739,7 +750,7 @@ class BackNavigationController {
                 mObserver.sendResult(null /* result */);
             }
             if (isMonitorAnimationOrTransition()) {
-                clearBackAnimations();
+                clearBackAnimations(true /* cancel */);
             }
             cancelPendingAnimation();
         }
@@ -831,24 +842,23 @@ class BackNavigationController {
      * Cleanup animation, this can either happen when legacy transition ready, or when the Shell
      * transition finish.
      */
-    void clearBackAnimations() {
-        mAnimationHandler.clearBackAnimateTarget();
+    void clearBackAnimations(boolean cancel) {
+        mAnimationHandler.clearBackAnimateTarget(cancel);
         mNavigationMonitor.stopMonitorTransition();
         mWaitTransitionFinish = null;
     }
 
     /**
-     * Called when a transition finished.
-     * Handle the pending animation when the running transition finished.
+     * Handle the pending animation when the running transition finished, all the visibility change
+     * has applied so ready to start pending predictive back animation.
      * @param targets The final animation targets derived in transition.
      * @param finishedTransition The finished transition target.
     */
     void onTransitionFinish(ArrayList<Transition.ChangeInfo> targets,
             @NonNull Transition finishedTransition) {
         if (finishedTransition == mWaitTransitionFinish) {
-            clearBackAnimations();
+            clearBackAnimations(false /* cancel */);
         }
-
         if (!mBackAnimationInProgress || mPendingAnimationBuilder == null) {
             return;
         }
@@ -982,7 +992,7 @@ class BackNavigationController {
             mCloseAdaptor = createAdaptor(close, false, mSwitchType);
             if (mCloseAdaptor.mAnimationTarget == null) {
                 Slog.w(TAG, "composeNewAnimations fail, skip");
-                clearBackAnimateTarget();
+                clearBackAnimateTarget(true /* cancel */);
                 return;
             }
 
@@ -1001,7 +1011,7 @@ class BackNavigationController {
             mOpenAnimAdaptor = new BackWindowAnimationAdaptorWrapper(true, mSwitchType, open);
             if (!mOpenAnimAdaptor.isValid()) {
                 Slog.w(TAG, "compose animations fail, skip");
-                clearBackAnimateTarget();
+                clearBackAnimateTarget(true /* cancel */);
                 return;
             }
             mOpenActivities = openingActivities;
@@ -1013,7 +1023,7 @@ class BackNavigationController {
                 Slog.e(TAG, "Previous animation is running " + this);
                 return false;
             }
-            clearBackAnimateTarget();
+            clearBackAnimateTarget(true /* cancel */);
             if (close == null || open == null || open.length == 0 || open.length > 2) {
                 Slog.e(TAG, "reset animation with null target close: "
                         + close + " open: " + Arrays.toString(open));
@@ -1102,7 +1112,19 @@ class BackNavigationController {
             return false;
         }
 
-        void finishPresentAnimations() {
+        void finishPresentAnimations(boolean cancel) {
+            if (mOpenActivities != null) {
+                for (int i = mOpenActivities.length - 1; i >= 0; --i) {
+                    final ActivityRecord resetActivity = mOpenActivities[i];
+                    if (resetActivity.mDisplayContent.isFixedRotationLaunchingApp(resetActivity)) {
+                        resetActivity.mDisplayContent
+                                .continueUpdateOrientationForDiffOrienLaunchingApp();
+                    }
+                    if (resetActivity.mLaunchTaskBehind) {
+                        restoreLaunchBehind(resetActivity, cancel);
+                    }
+                }
+            }
             if (mCloseAdaptor != null) {
                 mCloseAdaptor.mTarget.cancelAnimation();
                 mCloseAdaptor = null;
@@ -1110,15 +1132,6 @@ class BackNavigationController {
             if (mOpenAnimAdaptor != null) {
                 mOpenAnimAdaptor.cleanUp(mStartingSurfaceTargetMatch);
                 mOpenAnimAdaptor = null;
-            }
-
-            if (mOpenActivities != null) {
-                for (int i = mOpenActivities.length - 1; i >= 0; --i) {
-                    final ActivityRecord resetActivity = mOpenActivities[i];
-                    if (resetActivity.mLaunchTaskBehind) {
-                        restoreLaunchBehind(resetActivity);
-                    }
-                }
             }
         }
 
@@ -1130,10 +1143,10 @@ class BackNavigationController {
             mOpenAnimAdaptor.reparentWindowlessSurfaceToTarget(reparentTransaction);
         }
 
-        void clearBackAnimateTarget() {
+        void clearBackAnimateTarget(boolean cancel) {
             if (mComposed) {
                 mComposed = false;
-                finishPresentAnimations();
+                finishPresentAnimations(cancel);
             }
             mWaitTransition = false;
             mStartingSurfaceTargetMatch = false;
@@ -1322,12 +1335,16 @@ class BackNavigationController {
                 }
                 // If there is only one adaptor, attach the windowless window to top activity,
                 // because fixed rotation only applies on activity.
-                // Note that embedded activity won't use fixed rotation.
-                final Configuration openConfig = mAdaptors.length == 1
+                // Note that embedded activity won't use fixed rotation. Also, there is only one
+                // animation target for closing task.
+                final boolean chooseActivity = mAdaptors.length == 1
+                        && (switchType == ACTIVITY_SWITCH || mainActivity.mDisplayContent
+                                .isFixedRotationLaunchingApp(mainActivity));
+                final Configuration openConfig = chooseActivity
                         ? mainActivity.getConfiguration() : openTask.getConfiguration();
                 mRequestedStartingSurfaceId = openTask.mAtmService.mTaskOrganizerController
                         .addWindowlessStartingSurface(openTask, mainActivity,
-                                mAdaptors.length == 1 ? mainActivity.getSurfaceControl()
+                                chooseActivity ? mainActivity.getSurfaceControl()
                                         : mRemoteAnimationTarget.leash, snapshot, openConfig,
                             new IWindowlessStartingSurfaceCallback.Stub() {
                             // Once the starting surface has been created in shell, it will call
@@ -1649,7 +1666,7 @@ class BackNavigationController {
                                 return;
                             }
                             if (!triggerBack) {
-                                clearBackAnimateTarget();
+                                clearBackAnimateTarget(true /* cancel */);
                             } else {
                                 mWaitTransition = true;
                             }
@@ -1732,25 +1749,23 @@ class BackNavigationController {
                 true /* notifyClients */);
     }
 
-    private static void restoreLaunchBehind(@NonNull ActivityRecord activity) {
+    private static void restoreLaunchBehind(@NonNull ActivityRecord activity, boolean cancel) {
         if (!activity.isAttached()) {
             // The activity was detached from hierarchy.
             return;
         }
-
-        if (activity.mDisplayContent.isFixedRotationLaunchingApp(activity)) {
-            activity.mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp();
-        }
-
-        // Restore the launch-behind state.
-        activity.mTaskSupervisor.scheduleLaunchTaskBehindComplete(activity.token);
         activity.mLaunchTaskBehind = false;
-        // Ignore all change
-        activity.mTransitionController.mSnapshotController
-                .mActivitySnapshotController.clearOnBackPressedActivities();
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                 "Setting Activity.mLauncherTaskBehind to false. Activity=%s",
                 activity);
+        if (cancel) {
+            // Restore the launch-behind state
+            // TODO b/347168362 Change status directly during collecting for a transition.
+            activity.mTaskSupervisor.scheduleLaunchTaskBehindComplete(activity.token);
+            // Ignore all change
+            activity.mTransitionController.mSnapshotController
+                    .mActivitySnapshotController.clearOnBackPressedActivities();
+        }
     }
 
     void checkAnimationReady(WallpaperController wallpaperController) {
@@ -1770,7 +1785,7 @@ class BackNavigationController {
         if (!mBackAnimationInProgress) {
             // gesture is already finished, do not start animation
             if (mPendingAnimation != null) {
-                clearBackAnimations();
+                clearBackAnimations(true /* cancel */);
                 mPendingAnimation = null;
             }
             return;

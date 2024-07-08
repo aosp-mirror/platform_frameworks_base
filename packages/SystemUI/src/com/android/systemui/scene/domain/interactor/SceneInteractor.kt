@@ -22,11 +22,13 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.resolver.SceneResolver
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.getValue
 import com.android.systemui.util.kotlin.pairwiseBy
 import dagger.Lazy
 import javax.inject.Inject
@@ -59,7 +61,8 @@ constructor(
     private val repository: SceneContainerRepository,
     private val logger: SceneLogger,
     private val sceneFamilyResolvers: Lazy<Map<SceneKey, @JvmSuppressWildcards SceneResolver>>,
-    private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
+    private val deviceUnlockedInteractor: Lazy<DeviceUnlockedInteractor>,
+    private val keyguardEnabledInteractor: Lazy<KeyguardEnabledInteractor>,
 ) {
 
     interface OnSceneAboutToChangeListener {
@@ -164,6 +167,10 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = isVisibleInternal()
             )
+
+    /** Whether there's an ongoing remotely-initiated user interaction. */
+    val isRemoteUserInteractionOngoing: StateFlow<Boolean> =
+        repository.isRemoteUserInteractionOngoing
 
     /**
      * The amount of transition into or out of the given [scene].
@@ -381,7 +388,8 @@ constructor(
         val isChangeAllowed =
             to != Scenes.Gone ||
                 inMidTransitionFromGone ||
-                deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked
+                deviceUnlockedInteractor.get().deviceUnlockStatus.value.isUnlocked ||
+                !keyguardEnabledInteractor.get().isKeyguardEnabled.value
         check(isChangeAllowed) {
             "Cannot change to the Gone scene while the device is locked and not currently" +
                 " transitioning from Gone. Current transition state is ${transitionState.value}." +

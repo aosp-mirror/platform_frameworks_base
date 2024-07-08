@@ -136,7 +136,7 @@
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD अडियो"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"हियरिङ डिभाइसहरू"</string>
     <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE अडियो"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"श्रवण यन्त्रहरूमा जडान गरियो"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"हियरिङ डिभाइसमा कनेक्ट गरियो"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE अडियोमा कनेक्ट गरिएको छ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"मिडिया अडियोसँग जडित"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"फोन अडियोमा जडान गरियो"</string>
@@ -154,7 +154,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"फोन अडियोको लागि प्रयोग गर्नुहोस्"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"फाइल ट्रान्सफरका लागि प्रयोग गर्नुहोस्"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"इनपुटको लागि प्रयोग गर्नुहोस्"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"श्रवण यन्त्रहरूका लागि प्रयोग गर्नुहोस्"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"हियरिङ डिभाइसका लागि प्रयोग गर्नुहोस्"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO मा प्रयोग गर्नुहोस्"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"कनेक्ट गर्नुहोस्"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"जोडी"</string>
@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डिबग एपका लागि GPU का डिबग लेयर लोड गर्नुहोस्"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"भर्बोज भेन्डर लगिङ अन गर्नुहोस्"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"बग रिपोर्टहरूमा डिभाइस विशेषका विक्रेताका अतिरिक्त लगहरू समावेश गर्नुहोस्। यी लगमा निजी जानकारी समावेश हुन सक्छन्, यिनले ब्याट्रीको खपत बढाउन र/वा थप भण्डारण प्रयोग गर्न सक्छन्।"</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"विन्डो एनिमेसन स्केल"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"संक्रमण एनिमेसन स्केल"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"एनिमेसनको अवधि मापन"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"अलार्म तथा रिमाइन्डर"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"यो एपलाई अलार्म सेट गर्ने र समयमै पूरा गर्नु पर्ने कारबाहीहरूको रुटिन बनाउने अनुमति दिनुहोस्। यो अनुमति दिइएको छ भने यो एप ब्याकग्राउन्डमा चल्छ र धेरै ब्याट्री खपत हुन्छ।\n\nयो अनुमति दिइएको छैन भने सेट गरिएका अलार्म बज्दैनन् र यो एपले तय गरेका गतिविधि चल्दैनन्।"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"समयतालिका, अलार्म, रिमाइन्डर, घडी"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"बाधा नपुऱ्याउनुहोस्"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"अन गर्नुहोस्"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"बाधा नपुऱ्याउनुहोस् नामक मोडलाई अन गर्नुहोस्"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"कहिल्यै होइन"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"अवधि"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"प्रत्येक पटक सोध्नुहोस्"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"तपाईंले अफ नगरेसम्म"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(कुनै नाम छैन)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"अहिले भर्खरै"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"यो फोन"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"यो ट्याब्लेट"</string>

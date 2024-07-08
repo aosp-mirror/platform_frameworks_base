@@ -133,6 +133,8 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override val topClippingBounds = MutableStateFlow<Int?>(null)
 
+    private var isShowKeyguardWhenReenabled: Boolean = false
+
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
     }
@@ -267,6 +269,14 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     fun setIsEncryptedOrLockdown(value: Boolean) {
         _isEncryptedOrLockdown.value = value
+    }
+
+    override fun setShowKeyguardWhenReenabled(isShowKeyguardWhenReenabled: Boolean) {
+        this.isShowKeyguardWhenReenabled = isShowKeyguardWhenReenabled
+    }
+
+    override fun isShowKeyguardWhenReenabled(): Boolean {
+        return isShowKeyguardWhenReenabled
     }
 }
 

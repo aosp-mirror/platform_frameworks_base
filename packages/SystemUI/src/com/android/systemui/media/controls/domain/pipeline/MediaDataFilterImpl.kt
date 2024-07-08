@@ -116,11 +116,12 @@ constructor(
             return
         }
 
-        mediaFilterRepository.addSelectedUserMediaEntry(data)
+        val isUpdate = mediaFilterRepository.addSelectedUserMediaEntry(data)
 
         mediaLoadingLogger.logMediaLoaded(data.instanceId, data.active, "loading media")
         mediaFilterRepository.addMediaDataLoadingState(
-            MediaDataLoadingModel.Loaded(data.instanceId)
+            MediaDataLoadingModel.Loaded(data.instanceId),
+            isUpdate
         )
 
         // Notify listeners
@@ -180,7 +181,13 @@ constructor(
                     mediaData.instanceId
                 )
                 mediaFilterRepository.addMediaDataLoadingState(
-                    MediaDataLoadingModel.Loaded(lastActiveId)
+                    MediaDataLoadingModel.Loaded(
+                        lastActiveId,
+                        receivedSmartspaceCardLatency =
+                            (systemClock.currentTimeMillis() - data.headphoneConnectionTimeMillis)
+                                .toInt(),
+                        isSsReactivated = true
+                    )
                 )
                 mediaLoadingLogger.logMediaLoaded(
                     mediaData.instanceId,
@@ -317,9 +324,10 @@ constructor(
 
         mediaFilterRepository.allUserEntries.value.forEach { (key, data) ->
             if (lockscreenUserManager.isCurrentProfile(data.userId)) {
-                mediaFilterRepository.addSelectedUserMediaEntry(data)
+                val isUpdate = mediaFilterRepository.addSelectedUserMediaEntry(data)
                 mediaFilterRepository.addMediaDataLoadingState(
-                    MediaDataLoadingModel.Loaded(data.instanceId)
+                    MediaDataLoadingModel.Loaded(data.instanceId),
+                    isUpdate
                 )
                 mediaLoadingLogger.logMediaLoaded(
                     data.instanceId,
@@ -332,8 +340,9 @@ constructor(
     }
 
     /** Invoked when the user has dismissed the media carousel */
-    fun onSwipeToDismiss() {
+    fun onSwipeToDismiss(surface: Int) {
         if (DEBUG) Log.d(TAG, "Media carousel swiped away")
+        mediaFilterRepository.logSmartspaceCardsOnSwipeToDismiss(surface)
         val mediaEntries = mediaFilterRepository.allUserEntries.value.entries
         mediaEntries.forEach { (key, data) ->
             if (mediaFilterRepository.selectedUserEntries.value.containsKey(data.instanceId)) {

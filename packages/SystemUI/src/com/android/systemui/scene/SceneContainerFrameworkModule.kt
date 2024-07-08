@@ -24,6 +24,7 @@ import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInte
 import com.android.systemui.scene.domain.resolver.HomeSceneFamilyResolverModule
 import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolverModule
 import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolverModule
+import com.android.systemui.scene.domain.startable.KeyguardStateCallbackStartable
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.domain.startable.ScrimStartable
 import com.android.systemui.scene.domain.startable.StatusBarStartable
@@ -75,6 +76,11 @@ interface SceneContainerFrameworkModule {
     @IntoMap
     @ClassKey(StatusBarStartable::class)
     fun statusBarStartable(impl: StatusBarStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardStateCallbackStartable::class)
+    fun keyguardStateCallbackStartable(impl: KeyguardStateCallbackStartable): CoreStartable
 
     @Binds
     @IntoMap

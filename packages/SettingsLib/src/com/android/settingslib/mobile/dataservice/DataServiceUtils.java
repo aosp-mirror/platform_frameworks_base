@@ -23,18 +23,7 @@ import android.telephony.UiccPortInfo;
 import android.telephony.UiccSlotInfo;
 import android.telephony.UiccSlotMapping;
 
-import java.util.List;
-
 public class DataServiceUtils {
-
-    public static <T> boolean shouldUpdateEntityList(List<T> oldList, List<T> newList) {
-        if ((oldList != null &&
-                (newList.isEmpty() || !newList.equals(oldList)))
-                || (!newList.isEmpty() && oldList == null)) {
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Represents columns of the MobileNetworkInfoData table, define these columns from
@@ -52,73 +41,16 @@ public class DataServiceUtils {
         public static final String COLUMN_ID = "subId";
 
         /**
-         * The name of the contact discovery enabled state column,
-         * {@see MobileNetworkUtils#isContactDiscoveryEnabled(Context, int)}.
-         */
-        public static final String COLUMN_IS_CONTACT_DISCOVERY_ENABLED =
-                "isContactDiscoveryEnabled";
-
-        /**
-         * The name of the contact discovery visible state column,
-         * {@see MobileNetworkUtils#isContactDiscoveryEnabled(Context, int)}.
-         */
-        public static final String COLUMN_IS_CONTACT_DISCOVERY_VISIBLE =
-                "isContactDiscoveryVisible";
-
-        /**
          * The name of the mobile network data state column,
          * {@see MobileNetworkUtils#isMobileDataEnabled(Context)}.
          */
         public static final String COLUMN_IS_MOBILE_DATA_ENABLED = "isMobileDataEnabled";
 
         /**
-         * The name of the CDMA option state column,
-         * {@see MobileNetworkUtils#isCdmaOptions(Context, int)}.
-         */
-        public static final String COLUMN_IS_CDMA_OPTIONS = "isCdmaOptions";
-
-        /**
-         * The name of the GSM option state column,
-         * {@see MobileNetworkUtils#isGsmOptions(Context, int)}.
-         */
-        public static final String COLUMN_IS_GSM_OPTIONS = "isGsmOptions";
-
-        /**
-         * The name of the world mode state column,
-         * {@see MobileNetworkUtils#isWorldMode(Context, int)}.
-         */
-        public static final String COLUMN_IS_WORLD_MODE = "isWorldMode";
-
-        /**
-         * The name of the display network select options state column,
-         * {@see MobileNetworkUtils#shouldDisplayNetworkSelectOptions(Context, int)}.
-         */
-        public static final String COLUMN_SHOULD_DISPLAY_NETWORK_SELECT_OPTIONS =
-                "shouldDisplayNetworkSelectOptions";
-
-        /**
-         * The name of the TDSCDMA supported state column,
-         * {@see MobileNetworkUtils#isTdscdmaSupported(Context, int)}.
-         */
-        public static final String COLUMN_IS_TDSCDMA_SUPPORTED = "isTdscdmaSupported";
-
-        /**
-         * The name of the active network is cellular state column,
-         * {@see MobileNetworkUtils#activeNetworkIsCellular(Context)}.
-         */
-        public static final String COLUMN_ACTIVE_NETWORK_IS_CELLULAR = "activeNetworkIsCellular";
-
-        /**
          * The name of the show toggle for physicalSim state column,
          * {@see SubscriptionUtil#showToggleForPhysicalSim(SubscriptionManager)}.
          */
         public static final String COLUMN_SHOW_TOGGLE_FOR_PHYSICAL_SIM = "showToggleForPhysicalSim";
-
-        /**
-         * The name of the subscription's data roaming state column,
-         * {@see TelephonyManager#isDataRoamingEnabled()}.
-         */
-        public static final String COLUMN_IS_DATA_ROAMING_ENABLED = "isDataRoamingEnabled";
     }
 
     /**

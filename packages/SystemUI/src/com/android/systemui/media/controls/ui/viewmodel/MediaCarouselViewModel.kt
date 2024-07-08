@@ -98,9 +98,9 @@ constructor(
 
     private var allowReorder = false
 
-    fun onSwipeToDismiss() {
+    fun onSwipeToDismiss(location: Int) {
         logger.logSwipeDismiss()
-        interactor.onSwipeToDismiss()
+        interactor.onSwipeToDismiss(location)
     }
 
     fun onReorderingAllowed() {
@@ -108,12 +108,24 @@ constructor(
         interactor.reorderMedia()
     }
 
+    fun onCardVisibleToUser(
+        qsExpanded: Boolean,
+        visibleIndex: Int,
+        location: Int,
+        isUpdate: Boolean = false
+    ) {
+        // Skip logging if on LS or QQS, and there is no active media card
+        if (!qsExpanded && !interactor.hasActiveMediaOrRecommendation()) return
+        interactor.logSmartspaceSeenCard(visibleIndex, location, isUpdate)
+    }
+
     private fun toViewModel(
         commonModel: MediaCommonModel.MediaControl
     ): MediaCommonViewModel.MediaControl {
         val instanceId = commonModel.mediaLoadedModel.instanceId
         return mediaControlByInstanceId[instanceId]?.copy(
-            immediatelyUpdateUi = commonModel.mediaLoadedModel.immediatelyUpdateUi
+            immediatelyUpdateUi = commonModel.mediaLoadedModel.immediatelyUpdateUi,
+            updateTime = commonModel.updateTime
         )
             ?: MediaCommonViewModel.MediaControl(
                     instanceId = instanceId,
@@ -125,7 +137,8 @@ constructor(
                         mediaControlByInstanceId.remove(instanceId)
                     },
                     onUpdated = { onMediaControlAddedOrUpdated(it, commonModel) },
-                    isMediaFromRec = commonModel.isMediaFromRec
+                    isMediaFromRec = commonModel.isMediaFromRec,
+                    updateTime = commonModel.updateTime
                 )
                 .also { mediaControlByInstanceId[instanceId] = it }
     }
@@ -175,7 +188,6 @@ constructor(
         commonViewModel: MediaCommonViewModel,
         commonModel: MediaCommonModel.MediaControl
     ) {
-        // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_RECEIVED)
         if (commonModel.canBeRemoved && !Utils.useMediaResumption(applicationContext)) {
             // This media control is due for removal as it is now paused + timed out, and resumption
             // setting is off.
@@ -196,8 +208,6 @@ constructor(
             if (!mediaFlags.isPersistentSsCardEnabled()) {
                 commonViewModel.onRemoved(true)
             }
-        } else {
-            // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_RECEIVED)
         }
     }
 

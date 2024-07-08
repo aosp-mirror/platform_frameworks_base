@@ -30,4 +30,5 @@ data class MediaRecsCardViewModel(
     val areTitlesVisible: Boolean,
     val areSubtitlesVisible: Boolean,
     val gutsMenu: GutsViewModel,
+    val onLocationChanged: (Int) -> Unit,
 )

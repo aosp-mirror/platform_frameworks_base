@@ -119,7 +119,7 @@ constructor(
             if (delayed) {
                 scope.launch {
                     delay(125)
-                    animateCollapseShadeInternal()
+                    withContext(mainDispatcher) { animateCollapseShadeInternal() }
                 }
             } else {
                 animateCollapseShadeInternal()
@@ -182,7 +182,11 @@ constructor(
     }
 
     override fun expandToQs() {
-        sceneInteractor.changeScene(SceneFamilies.QuickSettings, "ShadeController.animateExpandQs")
+        sceneInteractor.changeScene(
+            SceneFamilies.QuickSettings,
+            "ShadeController.animateExpandQs",
+            OpenBottomShade.takeIf { shadeInteractor.shadeAlignment == Alignment.BottomEnd }
+        )
     }
 
     override fun setVisibilityListener(listener: ShadeVisibilityListener) {

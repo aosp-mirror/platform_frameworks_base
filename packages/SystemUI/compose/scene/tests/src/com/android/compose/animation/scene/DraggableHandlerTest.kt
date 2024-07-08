@@ -113,7 +113,10 @@ class DraggableHandlerTest {
                     orientation = draggableHandler.orientation,
                     topOrLeftBehavior = nestedScrollBehavior,
                     bottomOrRightBehavior = nestedScrollBehavior,
-                    isExternalOverscrollGesture = { isExternalOverscrollGesture }
+                    isExternalOverscrollGesture = { isExternalOverscrollGesture },
+                    pointersInfoOwner = {
+                        PointersInfo(startedPosition = Offset.Zero, pointersDown = 1)
+                    }
                 )
                 .connection
 
@@ -1213,5 +1216,36 @@ class DraggableHandlerTest {
         controller.onDragStopped(0f)
         onDragStartedImmediately()
         assertTransition(fromScene = SceneA, toScene = SceneB, progress = 50f / 75f)
+    }
+
+    @Test
+    fun requireFullDistanceSwipe() = runGestureTest {
+        mutableUserActionsA[Swipe.Up] = UserActionResult(SceneB, requiresFullDistanceSwipe = true)
+
+        val controller = onDragStarted(overSlop = up(fractionOfScreen = 0.9f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.9f)
+
+        controller.onDragStopped(velocity = 0f)
+        advanceUntilIdle()
+        assertIdle(SceneA)
+
+        val otherController = onDragStarted(overSlop = up(fractionOfScreen = 1f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
+        otherController.onDragStopped(velocity = 0f)
+        advanceUntilIdle()
+        assertIdle(SceneB)
+    }
+
+    @Test
+    fun interceptingTransitionReplacesCurrentTransition() = runGestureTest {
+        val controller = onDragStarted(overSlop = up(fractionOfScreen = 0.5f))
+        val transition = assertThat(layoutState.transitionState).isTransition()
+        controller.onDragStopped(velocity = 0f)
+
+        // Intercept the transition.
+        onDragStartedImmediately()
+        val newTransition = assertThat(layoutState.transitionState).isTransition()
+        assertThat(newTransition).isNotSameInstanceAs(transition)
+        assertThat(newTransition.replacedTransition).isSameInstanceAs(transition)
     }
 }

@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -97,6 +96,7 @@ import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
@@ -138,6 +138,7 @@ constructor(
     private val shadeSession: SaveableSession,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
     private val viewModel: ShadeSceneViewModel,
+    private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
@@ -157,6 +158,7 @@ constructor(
         ShadeScene(
             notificationStackScrollView.get(),
             viewModel = viewModel,
+            notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
@@ -177,6 +179,7 @@ constructor(
 private fun SceneScope.ShadeScene(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneViewModel,
+    notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
@@ -191,6 +194,7 @@ private fun SceneScope.ShadeScene(
             SingleShade(
                 notificationStackScrollView = notificationStackScrollView,
                 viewModel = viewModel,
+                notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
                 createTintedIconManager = createTintedIconManager,
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
@@ -203,6 +207,7 @@ private fun SceneScope.ShadeScene(
             SplitShade(
                 notificationStackScrollView = notificationStackScrollView,
                 viewModel = viewModel,
+                notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
                 createTintedIconManager = createTintedIconManager,
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
@@ -219,6 +224,7 @@ private fun SceneScope.ShadeScene(
 private fun SceneScope.SingleShade(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneViewModel,
+    notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
@@ -330,7 +336,7 @@ private fun SceneScope.SingleShade(
                         NotificationScrollingStack(
                             shadeSession = shadeSession,
                             stackScrollView = notificationStackScrollView,
-                            viewModel = viewModel.notifications,
+                            viewModel = notificationsPlaceholderViewModel,
                             maxScrimTop = { maxNotifScrimTop.value },
                             shadeMode = ShadeMode.Single,
                             shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
@@ -354,7 +360,7 @@ private fun SceneScope.SingleShade(
         }
         NotificationStackCutoffGuideline(
             stackScrollView = notificationStackScrollView,
-            viewModel = viewModel.notifications,
+            viewModel = notificationsPlaceholderViewModel,
             modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
         )
     }
@@ -364,6 +370,7 @@ private fun SceneScope.SingleShade(
 private fun SceneScope.SplitShade(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneViewModel,
+    notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
@@ -431,8 +438,10 @@ private fun SceneScope.SplitShade(
             label = "alphaAnimationBrightnessMirrorContentHiding",
         )
 
-    viewModel.notifications.setAlphaForBrightnessMirror(contentAlpha)
-    DisposableEffect(Unit) { onDispose { viewModel.notifications.setAlphaForBrightnessMirror(1f) } }
+    notificationsPlaceholderViewModel.setAlphaForBrightnessMirror(contentAlpha)
+    DisposableEffect(Unit) {
+        onDispose { notificationsPlaceholderViewModel.setAlphaForBrightnessMirror(1f) }
+    }
 
     val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
 
@@ -474,9 +483,9 @@ private fun SceneScope.SplitShade(
                     BrightnessMirror(
                         viewModel = viewModel.brightnessMirrorViewModel,
                         qsSceneAdapter = viewModel.qsSceneAdapter,
-                        // Need to remove the offset of the header height, as the mirror uses
-                        // the position of the Brightness slider in the window
-                        modifier = Modifier.offset(y = -ShadeHeader.Dimensions.CollapsedHeight)
+                        // Need to use the offset measured from the container as the header
+                        // has to be accounted for
+                        measureFromContainer = true
                     )
                     Column(
                         verticalArrangement = Arrangement.Top,
@@ -533,7 +542,7 @@ private fun SceneScope.SplitShade(
                 NotificationScrollingStack(
                     shadeSession = shadeSession,
                     stackScrollView = notificationStackScrollView,
-                    viewModel = viewModel.notifications,
+                    viewModel = notificationsPlaceholderViewModel,
                     maxScrimTop = { 0f },
                     shouldPunchHoleBehindScrim = false,
                     shouldReserveSpaceForNavBar = false,
@@ -548,7 +557,7 @@ private fun SceneScope.SplitShade(
         }
         NotificationStackCutoffGuideline(
             stackScrollView = notificationStackScrollView,
-            viewModel = viewModel.notifications,
+            viewModel = notificationsPlaceholderViewModel,
             modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
         )
     }

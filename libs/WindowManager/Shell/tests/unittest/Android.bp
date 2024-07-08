@@ -46,6 +46,7 @@ android_test {
         "androidx.dynamicanimation_dynamicanimation",
         "dagger2",
         "frameworks-base-testutils",
+        "kotlin-test",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "mockito-kotlin2",

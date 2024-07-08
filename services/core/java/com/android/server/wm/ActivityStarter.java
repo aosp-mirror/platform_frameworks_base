@@ -127,7 +127,7 @@ import android.window.RemoteTransition;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
 import com.android.server.pm.PackageArchiver;
@@ -1649,7 +1649,8 @@ class ActivityStarter {
                 // activity, so this isn't just deliver-to-top
                 && mMovedToTopActivity == null
                 && !transitionController.hasOrderChanges()
-                && !transitionController.isTransientHide(startedActivityRootTask)) {
+                && !transitionController.isTransientHide(startedActivityRootTask)
+                && !newTransition.hasChanged(mLastStartActivityRecord)) {
             // We just delivered to top, so there isn't an actual transition here.
             if (!forceTransientTransition) {
                 newTransition.abort();
@@ -1792,6 +1793,7 @@ class ActivityStarter {
                     activity.destroyIfPossible("Removes redundant singleInstance");
                 }
             }
+            targetTaskTop.mTransitionController.collect(targetTaskTop);
             recordTransientLaunchIfNeeded(targetTaskTop);
             // Recycle the target task for this launch.
             startResult =

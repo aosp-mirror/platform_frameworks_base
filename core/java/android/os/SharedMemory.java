@@ -278,7 +278,6 @@ public final class SharedMemory implements Parcelable, Closeable {
      */
     @Override
     public void close() {
-        mFileDescriptor.setInt$(-1);
         if (mCleaner != null) {
             mCleaner.clean();
             mCleaner = null;

@@ -53,6 +53,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
@@ -99,6 +100,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.notification.stack.NotificationSwipeHelper.NotificationCallback;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
+import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -135,6 +137,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     @Mock private HeadsUpManager mHeadsUpManager;
+    @Mock private HeadsUpTouchHelper.Callback mHeadsUpCallback;
+    @Mock private Provider<IStatusBarService> mStatusBarService;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private TunerService mTunerService;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
@@ -973,6 +977,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         when(mNotificationStackScrollLayout.getViewTreeObserver())
                 .thenReturn(viewTreeObserver);
         when(mNotificationStackScrollLayout.getContext()).thenReturn(getContext());
+        when(mNotificationStackScrollLayout.getHeadsUpCallback()).thenReturn(mHeadsUpCallback);
+        when(mHeadsUpCallback.getContext()).thenReturn(getContext());
         mController = new NotificationStackScrollLayoutController(
                 mNotificationStackScrollLayout,
                 true,
@@ -981,6 +987,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mVisibilityProvider,
                 mNotificationWakeUpCoordinator,
                 mHeadsUpManager,
+                mStatusBarService,
                 mNotificationRoundnessManager,
                 mTunerService,
                 mDeviceProvisionedController,

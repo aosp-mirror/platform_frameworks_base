@@ -2134,14 +2134,20 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
-            t.traceBegin("StartVpnManagerService");
-            try {
-                vpnManager = VpnManagerService.create(context);
-                ServiceManager.addService(Context.VPN_MANAGEMENT_SERVICE, vpnManager);
-            } catch (Throwable e) {
-                reportWtf("starting VPN Manager Service", e);
+            if (!isWatch || !android.server.Flags.allowRemovingVpnService()) {
+                t.traceBegin("StartVpnManagerService");
+                try {
+                    vpnManager = VpnManagerService.create(context);
+                    ServiceManager.addService(Context.VPN_MANAGEMENT_SERVICE, vpnManager);
+                } catch (Throwable e) {
+                    reportWtf("starting VPN Manager Service", e);
+                }
+                t.traceEnd();
+            } else {
+                // VPN management currently does not work in Wear, so skip starting the
+                // VPN manager SystemService.
+                Slog.i(TAG, "Not starting VpnManagerService");
             }
-            t.traceEnd();
 
             t.traceBegin("StartVcnManagementService");
             try {
@@ -2644,9 +2650,13 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(MediaMetricsManagerService.class);
             t.traceEnd();
 
-            t.traceBegin("StartBackgroundInstallControlService");
-            mSystemServiceManager.startService(BackgroundInstallControlService.class);
-            t.traceEnd();
+            if (!com.android.server.flags.Flags.optionalBackgroundInstallControl()
+                    || SystemProperties.getBoolean(
+                            "ro.system_settings.service.backgound_install_control_enabled", true)) {
+                t.traceBegin("StartBackgroundInstallControlService");
+                mSystemServiceManager.startService(BackgroundInstallControlService.class);
+                t.traceEnd();
+            }
         }
 
         t.traceBegin("StartMediaProjectionManager");

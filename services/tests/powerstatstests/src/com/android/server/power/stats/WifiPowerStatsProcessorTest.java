@@ -99,6 +99,8 @@ public class WifiPowerStatsProcessorTest {
     @Mock
     private WifiManager mWifiManager;
 
+    private MockBatteryStatsImpl mBatteryStats;
+
     private static class ScanTimes {
         public long scanTimeMs;
         public long batchScanTimeMs;
@@ -185,6 +187,8 @@ public class WifiPowerStatsProcessorTest {
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WIFI)).thenReturn(true);
         when(mPowerStatsUidResolver.mapUid(anyInt()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
+
+        mBatteryStats = mStatsRule.getBatteryStats();
     }
 
     @Test
@@ -200,7 +204,7 @@ public class WifiPowerStatsProcessorTest {
 
         PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
 
-        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector);
+        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
 
         // Initial empty WifiActivityEnergyInfo.
@@ -312,7 +316,7 @@ public class WifiPowerStatsProcessorTest {
 
         PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
 
-        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector);
+        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
 
         // Initial empty WifiActivityEnergyInfo.
@@ -425,7 +429,7 @@ public class WifiPowerStatsProcessorTest {
 
         PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
 
-        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector);
+        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
 
         // Establish a baseline

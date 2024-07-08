@@ -35,6 +35,7 @@ import android.provider.Settings
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
@@ -69,6 +70,7 @@ import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
@@ -86,6 +88,7 @@ import java.util.concurrent.Executor
 
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
+@RunWith(AndroidJUnit4::class)
 class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     companion object {
         const val SMARTSPACE_TIME_TOO_EARLY = 1000L

@@ -43,7 +43,6 @@ import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_CONTACTS;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_STARRED;
-import static android.app.NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND;
 import static android.app.NotificationManager.Policy.STATE_PRIORITY_CHANNELS_BLOCKED;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -5013,6 +5012,48 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void updateAutomaticZenRule_changeOwnerForSystemRule_allowed() {
+        when(mContext.checkCallingPermission(anyString()))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        AutomaticZenRule original = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName("android", "some.old.cps"))
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule("android", original,
+                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "reason", Process.SYSTEM_UID);
+
+        AutomaticZenRule update = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName("android", "brand.new.cps"))
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, update, UPDATE_ORIGIN_USER, "reason",
+                Process.SYSTEM_UID);
+
+        AutomaticZenRule result = mZenModeHelper.getAutomaticZenRule(ruleId);
+        assertThat(result).isNotNull();
+        assertThat(result.getOwner().getClassName()).isEqualTo("brand.new.cps");
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void updateAutomaticZenRule_changeOwnerForAppOwnedRule_ignored() {
+        AutomaticZenRule original = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName(mContext.getPackageName(), "old.third.party.cps"))
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), original,
+                UPDATE_ORIGIN_APP, "reason", CUSTOM_PKG_UID);
+
+        AutomaticZenRule update = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName(mContext.getPackageName(), "new.third.party.cps"))
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, update, UPDATE_ORIGIN_USER, "reason",
+                Process.SYSTEM_UID);
+
+        AutomaticZenRule result = mZenModeHelper.getAutomaticZenRule(ruleId);
+        assertThat(result).isNotNull();
+        assertThat(result.getOwner().getClassName()).isEqualTo("old.third.party.cps");
+    }
+
+    @Test
     @EnableFlags(FLAG_MODES_API)
     public void removeAutomaticZenRule_propagatesOriginToEffectsApplier() {
         mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
@@ -6183,6 +6224,101 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertThat(mZenModeHelper.getConfig().manualRule).isNotNull();
         assertThat(mZenModeHelper.getConfig().isManualActive()).isFalse();
         assertThat(mZenModeHelper.getConfig().manualRule.zenDeviceEffects).isEqualTo(effects);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void addAutomaticZenRule_startsDisabled_recordsDisabledOrigin() {
+        AutomaticZenRule startsDisabled = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName(mPkg, "SomeProvider"))
+                .setEnabled(false)
+                .build();
+
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, startsDisabled, UPDATE_ORIGIN_APP,
+                "new", CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(ruleId).disabledOrigin).isEqualTo(
+                UPDATE_ORIGIN_APP);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void updateAutomaticZenRule_disabling_recordsDisabledOrigin() {
+        AutomaticZenRule startsEnabled = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName(mPkg, "SomeProvider"))
+                .setEnabled(true)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, startsEnabled, UPDATE_ORIGIN_APP,
+                "new", CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(ruleId).disabledOrigin).isEqualTo(
+                UPDATE_ORIGIN_UNKNOWN);
+
+        AutomaticZenRule nowDisabled = new AutomaticZenRule.Builder(startsEnabled)
+                .setEnabled(false)
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, nowDisabled, UPDATE_ORIGIN_USER, "off",
+                Process.SYSTEM_UID);
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(ruleId).disabledOrigin).isEqualTo(
+                UPDATE_ORIGIN_USER);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void updateAutomaticZenRule_keepingDisabled_preservesPreviousDisabledOrigin() {
+        AutomaticZenRule startsEnabled = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName(mPkg, "SomeProvider"))
+                .setEnabled(true)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, startsEnabled, UPDATE_ORIGIN_APP,
+                "new", CUSTOM_PKG_UID);
+        AutomaticZenRule nowDisabled = new AutomaticZenRule.Builder(startsEnabled)
+                .setEnabled(false)
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, nowDisabled, UPDATE_ORIGIN_USER, "off",
+                Process.SYSTEM_UID);
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(ruleId).disabledOrigin).isEqualTo(
+                UPDATE_ORIGIN_USER);
+
+        // Now update it again, for an unrelated reason with a different origin.
+        AutomaticZenRule nowRenamed = new AutomaticZenRule.Builder(nowDisabled)
+                .setName("Fancy pants rule")
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, nowRenamed, UPDATE_ORIGIN_APP, "update",
+                CUSTOM_PKG_UID);
+
+        // Identity of the disabler is preserved.
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(ruleId).disabledOrigin).isEqualTo(
+                UPDATE_ORIGIN_USER);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void updateAutomaticZenRule_enabling_clearsDisabledOrigin() {
+        AutomaticZenRule startsEnabled = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName(mPkg, "SomeProvider"))
+                .setEnabled(true)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, startsEnabled, UPDATE_ORIGIN_APP,
+                "new", CUSTOM_PKG_UID);
+        AutomaticZenRule nowDisabled = new AutomaticZenRule.Builder(startsEnabled)
+                .setEnabled(false)
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, nowDisabled, UPDATE_ORIGIN_USER, "off",
+                Process.SYSTEM_UID);
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(ruleId).disabledOrigin).isEqualTo(
+                UPDATE_ORIGIN_USER);
+
+        // Now enable it again
+        AutomaticZenRule nowEnabled = new AutomaticZenRule.Builder(nowDisabled)
+                .setEnabled(true)
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, nowEnabled, UPDATE_ORIGIN_APP, "on",
+                CUSTOM_PKG_UID);
+
+        // Identity of the disabler was cleared.
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(ruleId).disabledOrigin).isEqualTo(
+                UPDATE_ORIGIN_UNKNOWN);
     }
 
     private static void addZenRule(ZenModeConfig config, String id, String ownerPkg, int zenMode,

@@ -34,6 +34,7 @@ import android.view.WindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.Flags.communalHub
+import com.android.systemui.Flags.mediaLockscreenLaunchAnimation
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.DelegateTransitionAnimatorController
 import com.android.systemui.assist.AssistManager
@@ -231,6 +232,7 @@ constructor(
         skipLockscreenChecks: Boolean,
         fillInIntent: Intent?,
         extraOptions: Bundle?,
+        customMessage: String?,
     ) {
         val animationController =
             if (associatedView is ExpandableNotificationRow) {
@@ -339,6 +341,7 @@ constructor(
                     afterKeyguardGone = willLaunchResolverActivity,
                     dismissShade = collapse,
                     willAnimateOnKeyguard = animate,
+                    customMessage = customMessage,
                 )
             }
         } else {
@@ -635,8 +638,9 @@ constructor(
         isActivityIntent: Boolean,
         showOverLockscreen: Boolean,
     ): Boolean {
-        // TODO(b/294418322): Support launch animations when occluded.
-        if (keyguardStateController.isOccluded) {
+        // TODO(b/294418322): always support launch animations when occluded.
+        val ignoreOcclusion = showOverLockscreen && mediaLockscreenLaunchAnimation()
+        if (keyguardStateController.isOccluded && !ignoreOcclusion) {
             return false
         }
 

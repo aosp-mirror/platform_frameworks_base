@@ -306,7 +306,6 @@ internal class ElementNode(
         return layout(placeable.width, placeable.height) { place(transition, placeable) }
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
     private fun Placeable.PlacementScope.place(
         transition: TransitionState.Transition?,
         placeable: Placeable,
@@ -496,6 +495,10 @@ private fun prepareInterruption(
     transition: TransitionState.Transition,
     previousTransition: TransitionState.Transition,
 ) {
+    if (transition.replacedTransition == previousTransition) {
+        return
+    }
+
     val sceneStates = element.sceneStates
     fun updatedSceneState(key: SceneKey): Element.SceneState? {
         return sceneStates[key]?.also { it.selfUpdateValuesBeforeInterruption() }
@@ -561,10 +564,20 @@ private fun reconcileStates(
 }
 
 private fun Element.SceneState.selfUpdateValuesBeforeInterruption() {
-    offsetBeforeInterruption = lastOffset
     sizeBeforeInterruption = lastSize
-    scaleBeforeInterruption = lastScale
-    alphaBeforeInterruption = lastAlpha
+
+    if (lastAlpha > 0f) {
+        offsetBeforeInterruption = lastOffset
+        scaleBeforeInterruption = lastScale
+        alphaBeforeInterruption = lastAlpha
+    } else {
+        // Consider the element as not placed in this scene if it was fully transparent.
+        // TODO(b/290930950): Look into using derived state inside place() instead to not even place
+        // the element at all when alpha == 0f.
+        offsetBeforeInterruption = Offset.Unspecified
+        scaleBeforeInterruption = Scale.Unspecified
+        alphaBeforeInterruption = Element.AlphaUnspecified
+    }
 }
 
 private fun Element.SceneState.updateValuesBeforeInterruption(lastState: Element.SceneState) {
@@ -1075,8 +1088,8 @@ private inline fun <T> computeValue(
             // range.
             val directionSign = if (transition.isUpOrLeft) -1 else 1
             val isToScene = overscroll.scene == transition.toScene
-            val overscrollProgress = transition.progress.let { if (isToScene) it - 1f else it }
-            val progress = directionSign * overscrollProgress
+            val linearProgress = transition.progress.let { if (isToScene) it - 1f else it }
+            val progress = directionSign * overscroll.progressConverter(linearProgress)
             val rangeProgress = propertySpec.range?.progress(progress) ?: progress
 
             // Interpolate between the value at rest and the over scrolled value.

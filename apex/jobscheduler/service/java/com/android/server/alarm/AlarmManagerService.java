@@ -4925,7 +4925,6 @@ public class AlarmManagerService extends SystemService {
             sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
             sdFilter.addAction(Intent.ACTION_USER_STOPPED);
             if (mStartUserBeforeScheduledAlarms) {
-                sdFilter.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED);
                 sdFilter.addAction(Intent.ACTION_USER_REMOVED);
             }
             sdFilter.addAction(Intent.ACTION_UID_REMOVED);
@@ -4956,14 +4955,6 @@ public class AlarmManagerService extends SystemService {
                             mAllowWhileIdleHistory.removeForUser(userHandle);
                             mAllowWhileIdleCompatHistory.removeForUser(userHandle);
                             mTemporaryQuotaReserve.removeForUser(userHandle);
-                        }
-                        return;
-                    case Intent.ACTION_LOCKED_BOOT_COMPLETED:
-                        final int handle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                        if (handle >= 0) {
-                            if (mStartUserBeforeScheduledAlarms) {
-                                mUserWakeupStore.onUserStarted(handle);
-                            }
                         }
                         return;
                     case Intent.ACTION_USER_REMOVED:

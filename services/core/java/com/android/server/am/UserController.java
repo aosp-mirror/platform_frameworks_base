@@ -2335,6 +2335,14 @@ class UserController implements Handler.Callback {
             // Never stop system user
             return;
         }
+        synchronized(mLock) {
+            final UserState uss = mStartedUsers.get(oldUserId);
+            if (uss == null || uss.state == UserState.STATE_STOPPING
+                    || uss.state == UserState.STATE_SHUTDOWN) {
+                // We've stopped (or are stopping) the user anyway, so don't bother scheduling.
+                return;
+            }
+        }
         if (oldUserId == mInjector.getUserManagerInternal().getMainUserId()) {
             // MainUser is currently special for things like Docking, so we'll exempt it for now.
             Slogf.i(TAG, "Exempting user %d from being stopped due to inactivity by virtue "
@@ -2369,6 +2377,12 @@ class UserController implements Handler.Callback {
             }
             if (mPendingTargetUserIds.contains(userIdInteger)) {
                 // We'll soon want to switch to this user, so don't kill it now.
+                return;
+            }
+            final UserInfo currentOrTargetUser = getCurrentUserLU();
+            if (currentOrTargetUser != null && currentOrTargetUser.isGuest()) {
+                // Don't kill any background users for the sake of a Guest. Just reschedule instead.
+                scheduleStopOfBackgroundUser(userId);
                 return;
             }
             Slogf.i(TAG, "Stopping background user %d due to inactivity", userId);

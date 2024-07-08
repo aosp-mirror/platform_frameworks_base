@@ -17,6 +17,7 @@
 package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
@@ -30,6 +31,7 @@ val Kosmos.sceneInteractor by
             repository = sceneContainerRepository,
             logger = sceneLogger,
             sceneFamilyResolvers = { sceneFamilyResolvers },
-            deviceUnlockedInteractor = deviceUnlockedInteractor,
+            deviceUnlockedInteractor = { deviceUnlockedInteractor },
+            keyguardEnabledInteractor = { keyguardEnabledInteractor },
         )
     }

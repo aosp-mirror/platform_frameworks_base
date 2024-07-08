@@ -674,4 +674,11 @@ public class LogModule {
         return factory.create("DeviceEntryIconLog", 100);
     }
 
+    /** Provides a {@link LogBuffer} for use by the volume loggers. */
+    @Provides
+    @SysUISingleton
+    @VolumeLog
+    public static LogBuffer provideVolumeLogBuffer(LogBufferFactory factory) {
+        return factory.create("VolumeLog", 50);
+    }
 }

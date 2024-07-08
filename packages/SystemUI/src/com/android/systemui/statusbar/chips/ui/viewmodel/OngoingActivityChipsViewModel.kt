@@ -72,5 +72,8 @@ constructor(
                     else -> call
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            // Some of the chips could have timers in them and we don't want the start time
+            // for those timers to get reset for any reason. So, as soon as any subscriber has
+            // requested the chip information, we need to maintain it forever. See b/347726238.
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden)
 }

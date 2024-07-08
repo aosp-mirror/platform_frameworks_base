@@ -27,26 +27,17 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
-import com.android.systemui.log.dagger.CommunalTableLog
-import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.settings.UserFileManager
-import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.SharedPreferencesExt.observe
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
 /**
@@ -56,10 +47,16 @@ import kotlinx.coroutines.withContext
 interface CommunalPrefsRepository {
 
     /** Whether the CTA tile has been dismissed. */
-    val isCtaDismissed: Flow<Boolean>
+    fun isCtaDismissed(user: UserInfo): Flow<Boolean>
+
+    /** Whether the lock screen widget disclaimer has been dismissed by the user. */
+    fun isDisclaimerDismissed(user: UserInfo): Flow<Boolean>
 
     /** Save the CTA tile dismissed state for the current user. */
-    suspend fun setCtaDismissedForCurrentUser()
+    suspend fun setCtaDismissed(user: UserInfo)
+
+    /** Save the lock screen widget disclaimer dismissed state for the current user. */
+    suspend fun setDisclaimerDismissed(user: UserInfo)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -67,75 +64,43 @@ interface CommunalPrefsRepository {
 class CommunalPrefsRepositoryImpl
 @Inject
 constructor(
-    @Background private val backgroundScope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    private val userRepository: UserRepository,
     private val userFileManager: UserFileManager,
     broadcastDispatcher: BroadcastDispatcher,
     @CommunalLog logBuffer: LogBuffer,
-    @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) : CommunalPrefsRepository {
+    private val logger by lazy { Logger(logBuffer, TAG) }
 
-    private val logger = Logger(logBuffer, "CommunalPrefsRepositoryImpl")
+    override fun isCtaDismissed(user: UserInfo): Flow<Boolean> =
+        readKeyForUser(user, CTA_DISMISSED_STATE)
+
+    override fun isDisclaimerDismissed(user: UserInfo): Flow<Boolean> =
+        readKeyForUser(user, DISCLAIMER_DISMISSED_STATE)
 
     /**
-     * Emits an event each time a Backup & Restore restoration job is completed. Does not emit an
-     * initial value.
+     * Emits an event each time a Backup & Restore restoration job is completed, and once at the
+     * start of collection.
      */
     private val backupRestorationEvents: Flow<Unit> =
-        broadcastDispatcher.broadcastFlow(
-            filter = IntentFilter(BackupHelper.ACTION_RESTORE_FINISHED),
-            flags = Context.RECEIVER_NOT_EXPORTED,
-            permission = BackupHelper.PERMISSION_SELF,
-        )
-
-    override val isCtaDismissed: Flow<Boolean> =
-        combine(
-                userRepository.selectedUserInfo,
-                // Make sure combine can emit even if we never get a Backup & Restore event,
-                // which is the most common case as restoration only happens on initial device
-                // setup.
-                backupRestorationEvents.emitOnStart().onEach {
-                    logger.i("Restored state for communal preferences.")
-                },
-            ) { user, _ ->
-                user
-            }
-            .flatMapLatest(::observeCtaDismissState)
-            .logDiffsForTable(
-                tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
-                columnName = "isCtaDismissed",
-                initialValue = false,
+        broadcastDispatcher
+            .broadcastFlow(
+                filter = IntentFilter(BackupHelper.ACTION_RESTORE_FINISHED),
+                flags = Context.RECEIVER_NOT_EXPORTED,
+                permission = BackupHelper.PERMISSION_SELF,
             )
-            .stateIn(
-                scope = backgroundScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
+            .onEach { logger.i("Restored state for communal preferences.") }
+            .emitOnStart()
 
-    override suspend fun setCtaDismissedForCurrentUser() =
+    override suspend fun setCtaDismissed(user: UserInfo) =
         withContext(bgDispatcher) {
-            getSharedPrefsForUser(userRepository.getSelectedUserInfo())
-                .edit()
-                .putBoolean(CTA_DISMISSED_STATE, true)
-                .apply()
-
+            getSharedPrefsForUser(user).edit().putBoolean(CTA_DISMISSED_STATE, true).apply()
             logger.i("Dismissed CTA tile")
         }
 
-    private fun observeCtaDismissState(user: UserInfo): Flow<Boolean> =
-        getSharedPrefsForUser(user)
-            .observe()
-            // Emit at the start of collection to ensure we get an initial value
-            .onStart { emit(Unit) }
-            .map { getCtaDismissedState() }
-            .flowOn(bgDispatcher)
-
-    private suspend fun getCtaDismissedState(): Boolean =
+    override suspend fun setDisclaimerDismissed(user: UserInfo) =
         withContext(bgDispatcher) {
-            getSharedPrefsForUser(userRepository.getSelectedUserInfo())
-                .getBoolean(CTA_DISMISSED_STATE, false)
+            getSharedPrefsForUser(user).edit().putBoolean(DISCLAIMER_DISMISSED_STATE, true).apply()
+            logger.i("Dismissed widget disclaimer")
         }
 
     private fun getSharedPrefsForUser(user: UserInfo): SharedPreferences {
@@ -146,9 +111,19 @@ constructor(
         )
     }
 
+    private fun readKeyForUser(user: UserInfo, key: String): Flow<Boolean> {
+        return backupRestorationEvents
+            .flatMapLatest {
+                val sharedPrefs = getSharedPrefsForUser(user)
+                sharedPrefs.observe().emitOnStart().map { sharedPrefs.getBoolean(key, false) }
+            }
+            .flowOn(bgDispatcher)
+    }
+
     companion object {
-        const val TAG = "CommunalRepository"
+        const val TAG = "CommunalPrefsRepository"
         const val FILE_NAME = "communal_hub_prefs"
         const val CTA_DISMISSED_STATE = "cta_dismissed"
+        const val DISCLAIMER_DISMISSED_STATE = "disclaimer_dismissed"
     }
 }

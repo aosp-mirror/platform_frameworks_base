@@ -76,6 +76,16 @@ class AndroidRemoteContext extends RemoteContext {
     }
 
     /**
+     * Override a color to force it to be the color provided
+     *
+     * @param colorName name of color
+     * @param color
+     */
+    public void setNamedColorOverride(String colorName, int color) {
+        int id = mVarNameHashMap.get(colorName).mId;
+        mRemoteComposeState.overrideColor(id, color);
+    }
+    /**
      * Decode a byte array into an image and cache it using the given imageId
      *
      * @param width  with of image to be loaded

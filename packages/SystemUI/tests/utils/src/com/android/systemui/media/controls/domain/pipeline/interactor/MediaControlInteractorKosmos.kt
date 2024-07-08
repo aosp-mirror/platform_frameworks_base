@@ -16,7 +16,6 @@
 
 package com.android.systemui.media.controls.domain.pipeline.interactor
 
-import android.content.applicationContext
 import com.android.systemui.activityIntentHelper
 import com.android.systemui.bluetooth.mockBroadcastDialogController
 import com.android.systemui.kosmos.Kosmos
@@ -31,7 +30,6 @@ import com.android.systemui.statusbar.policy.keyguardStateController
 val Kosmos.mediaControlInteractor by
     Kosmos.Fixture {
         MediaControlInteractor(
-            applicationContext = applicationContext,
             instanceId = mediaInstanceId,
             repository = mediaFilterRepository,
             mediaDataProcessor = mediaDataProcessor,

@@ -48,7 +48,7 @@ import com.android.internal.dynamicanimation.animation.SpringForce
 import com.android.internal.jank.Cuj
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.policy.SystemBarUtils
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.animation.Interpolators
@@ -324,6 +324,7 @@ abstract class CrossActivityBackAnimation(
         enteringHasSameLetterbox = false
         lastPostCommitFlingScale = SPRING_SCALE
         gestureProgress = 0f
+        triggerBack = false
     }
 
     protected fun applyTransform(
@@ -499,10 +500,12 @@ abstract class CrossActivityBackAnimation(
         }
 
         override fun onBackCancelled() {
+            triggerBack = false
             progressAnimator.onBackCancelled { finishAnimation() }
         }
 
         override fun onBackInvoked() {
+            triggerBack = true
             progressAnimator.reset()
             onGestureCommitted(progressAnimator.velocity)
         }

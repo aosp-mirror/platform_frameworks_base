@@ -49,18 +49,6 @@ import java.util.List;
  */
 interface IWindowSession {
 
-    /**
-     * Bundle key to store the latest sync seq id for the relayout configuration.
-     * @see #relayout
-     */
-    const String KEY_RELAYOUT_BUNDLE_SEQID = "seqid";
-    /**
-     * Bundle key to store the latest ActivityWindowInfo associated with the relayout configuration.
-     * Will only be set if the relayout window is an activity window.
-     * @see #relayout
-     */
-    const String KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO = "activity_window_info";
-
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, int requestedVisibleTypes,
             out InputChannel outInputChannel, out InsetsState insetsState,
@@ -83,16 +71,6 @@ interface IWindowSession {
      * grantInputChannel
      */
     void remove(IBinder clientToken);
-
-    /**
-     * @deprecated
-     */
-    int relayoutLegacy(IWindow window, in WindowManager.LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, int seq, int lastSyncSeqId, out ClientWindowFrames outFrames,
-            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out InsetsSourceControl.Array activeControls,
-            out Bundle bundle);
 
     /**
      * Change the parameters of a window.  You supply the

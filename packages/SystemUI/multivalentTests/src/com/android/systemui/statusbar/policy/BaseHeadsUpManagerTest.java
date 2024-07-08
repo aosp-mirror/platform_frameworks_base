@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.os.Handler;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
@@ -81,7 +82,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
 
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
-
+    @Mock private Handler mBgHandler;
     @Mock private DumpManager dumpManager;
     private AvalancheController mAvalancheController;
 
@@ -148,7 +149,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Override
     public void SysuiSetup() throws Exception {
         super.SysuiSetup();
-        mAvalancheController = new AvalancheController(dumpManager, mUiEventLoggerFake);
+        mAvalancheController = new AvalancheController(dumpManager, mUiEventLoggerFake, mBgHandler);
     }
 
     @Test

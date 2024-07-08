@@ -254,7 +254,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
@@ -5046,9 +5046,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             forAllWindows(mApplySurfaceChangesTransaction, true /* traverseTopToBottom */);
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        }
-        if (!com.android.window.flags.Flags.removePrepareSurfaceInPlacement()) {
-            prepareSurfaces();
         }
 
         // This should be called after the insets have been dispatched to clients and we have

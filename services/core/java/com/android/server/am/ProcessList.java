@@ -855,8 +855,8 @@ public final class ProcessList {
                         Slog.i(TAG, "Failed to connect to lmkd, retry after " +
                                 LMKD_RECONNECT_DELAY_MS + " ms");
                         // retry after LMKD_RECONNECT_DELAY_MS
-                        sKillHandler.sendMessageDelayed(sKillHandler.obtainMessage(
-                                KillHandler.LMKD_RECONNECT_MSG), LMKD_RECONNECT_DELAY_MS);
+                        sendMessageDelayed(obtainMessage(
+                                LMKD_RECONNECT_MSG), LMKD_RECONNECT_DELAY_MS);
                     }
                     break;
                 default:
@@ -5559,8 +5559,9 @@ public final class ProcessList {
     void noteAppKill(final ProcessRecord app, final @Reason int reason,
             final @SubReason int subReason, final String msg) {
         if (DEBUG_PROCESSES) {
-            Slog.i(TAG, "note: " + app + " is being killed, reason: " + reason
-                    + ", sub-reason: " + subReason + ", message: " + msg);
+            Slog.i(TAG, "note: " + app + " is being killed, reason: "
+                    + ApplicationExitInfo.reasonCodeToString(reason) + ", sub-reason: "
+                    + ApplicationExitInfo.subreasonToString(subReason) + ", message: " + msg);
         }
         if (app.getPid() > 0 && !app.isolated && app.getDeathRecipient() != null) {
             // We are killing it, put it into the dying process list.

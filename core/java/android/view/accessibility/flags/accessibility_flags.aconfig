@@ -100,6 +100,20 @@ flag {
 
 flag {
     namespace: "accessibility"
+    name: "global_action_menu"
+    description: "Allow AccessibilityService to perform GLOBAL_ACTION_MENU"
+    bug: "334954140"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "global_action_media_play_pause"
+    description: "Allow AccessibilityService to perform GLOBAL_ACTION_MEDIA_PLAY_PAUSE"
+    bug: "334954140"
+}
+
+flag {
+    namespace: "accessibility"
     name: "granular_scrolling"
     is_exported: true
     description: "Allow the use of granular scrolling. This allows scrollable nodes to scroll by increments other than a full screen"

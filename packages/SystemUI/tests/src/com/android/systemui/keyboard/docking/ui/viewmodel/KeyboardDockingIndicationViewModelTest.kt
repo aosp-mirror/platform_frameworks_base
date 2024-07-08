@@ -20,6 +20,7 @@ import android.graphics.Rect
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowMetrics
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
@@ -33,14 +34,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mockito.spy
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.whenever
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class KeyboardDockingIndicationViewModelTest : SysuiTestCase() {
     private val testScope = TestScope(StandardTestDispatcher())
 

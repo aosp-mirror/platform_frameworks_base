@@ -26,7 +26,7 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
  * [isCurrent] indicates whether this tile is part of the current set of tiles that the user sees in
  * Quick Settings.
  */
-class EditTileViewModel(
+data class EditTileViewModel(
     val tileSpec: TileSpec,
     val icon: Icon,
     val label: Text,

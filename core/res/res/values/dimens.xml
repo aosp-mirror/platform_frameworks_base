@@ -355,6 +355,9 @@
     <!-- the padding of the expand icon in the notification header -->
     <dimen name="notification_expand_button_icon_padding">2dp</dimen>
 
+    <!-- the size of the notification close button -->
+    <dimen name="notification_close_button_size">16dp</dimen>
+
     <!-- Vertical margin for the headerless notification content, when content has 1 line -->
     <!-- 16 * 2 (margins) + 24 (1 line) = 56 (notification) -->
     <dimen name="notification_headerless_margin_oneline">16dp</dimen>

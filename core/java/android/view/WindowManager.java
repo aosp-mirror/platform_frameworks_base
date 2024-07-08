@@ -6387,10 +6387,6 @@ public interface WindowManager extends ViewManager {
      * The host is likely to be an {@link AttachedSurfaceControl} so the host token can be
      * retrieved via {@link AttachedSurfaceControl#getInputTransferToken()}.
      * <p><br>
-     * Only the window currently receiving touch is allowed to transfer the gesture so if the caller
-     * attempts to transfer touch gesture from a token that doesn't have touch, it will fail the
-     * transfer.
-     * <p><br>
      * When the host wants to transfer touch gesture to the embedded, it can retrieve the embedded
      * token via {@link SurfaceControlViewHost.SurfacePackage#getInputTransferToken()} or use the
      * value returned from either
@@ -6414,6 +6410,23 @@ public interface WindowManager extends ViewManager {
      * arrives, input dispatcher will do a new round of hit testing. So, if the host window is
      * still the first thing that's being touched, then it will receive the new gesture again. It
      * will again be up to the host to transfer this new gesture to the embedded.
+     * <p><br>
+     * The call can fail for the following reasons:
+     * <ul>
+     * <li>
+     * Caller attempts to transfer touch gesture from a token that doesn't have an active gesture.
+     * </li>
+     * <li>
+     * The gesture is transferred to a token that is not associated with the transferFromToken. For
+     * example, if the caller transfers to a {@link SurfaceControlViewHost} not attached to the
+     * host window via {@link SurfaceView#setChildSurfacePackage(SurfacePackage)}.
+     * </li>
+     * <li>
+     * The active gesture completes before the transfer is complete, such as in the case of a
+     * fling.
+     * </li>
+     * </ul>
+     * <p>
      *
      * @param transferFromToken the InputTransferToken for the currently active gesture
      * @param transferToToken   the InputTransferToken to transfer the gesture to.

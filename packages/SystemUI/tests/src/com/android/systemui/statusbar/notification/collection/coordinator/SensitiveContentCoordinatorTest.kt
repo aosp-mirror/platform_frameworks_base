@@ -23,6 +23,7 @@ import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.service.notification.StatusBarNotification
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING
@@ -54,11 +55,13 @@ import dagger.Component
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class SensitiveContentCoordinatorTest : SysuiTestCase() {
 
     val dynamicPrivacyController: DynamicPrivacyController = mock()

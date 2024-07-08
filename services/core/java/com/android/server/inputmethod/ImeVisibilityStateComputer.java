@@ -38,6 +38,7 @@ import static com.android.server.inputmethod.InputMethodManagerService.computeIm
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.IBinder;
@@ -52,6 +53,7 @@ import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.server.LocalServices;
@@ -553,15 +555,17 @@ public final class ImeVisibilityStateComputer {
         return null;
     }
 
-    IBinder getWindowTokenFrom(IBinder requestImeToken) {
+    @GuardedBy("ImfLock.class")
+    IBinder getWindowTokenFrom(IBinder requestImeToken, @UserIdInt int userId) {
         for (IBinder windowToken : mRequestWindowStateMap.keySet()) {
             final ImeTargetWindowState state = mRequestWindowStateMap.get(windowToken);
             if (state.getRequestImeToken() == requestImeToken) {
                 return windowToken;
             }
         }
+        final var userData = mService.getUserData(userId);
         // Fallback to the focused window for some edge cases (e.g. relaunching the activity)
-        return mService.mImeBindingState.mFocusedWindow;
+        return userData.mImeBindingState.mFocusedWindow;
     }
 
     IBinder getWindowTokenFrom(ImeTargetWindowState windowState) {

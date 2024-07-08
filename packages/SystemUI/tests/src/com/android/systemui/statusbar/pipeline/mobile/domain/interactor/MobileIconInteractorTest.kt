@@ -20,6 +20,7 @@ import android.platform.test.annotations.EnableFlags
 import android.telephony.CellSignalStrength
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.MobileIconCarrierIdOverrides
 import com.android.settingslib.mobile.MobileIconCarrierIdOverridesImpl
@@ -52,11 +53,13 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MobileIconInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconInteractor
     private val mobileMappingsProxy = FakeMobileMappingsProxy()

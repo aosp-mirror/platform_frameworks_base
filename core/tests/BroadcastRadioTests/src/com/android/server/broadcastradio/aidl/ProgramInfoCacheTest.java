@@ -189,13 +189,16 @@ public class ProgramInfoCacheTest {
 
     @Test
     public void updateFromHalProgramListChunk_withInvalidChunk() {
-        RadioManager.ProgramInfo invalidDabInfo = AidlTestUtils.makeProgramInfo(TEST_DAB_SELECTOR,
-                TEST_DAB_DMB_SID_EXT_ID, TEST_DAB_ENSEMBLE_ID, TEST_SIGNAL_QUALITY);
+        ProgramInfo invalidHalDabInfo = AidlTestUtils.makeHalProgramInfo(
+                AidlTestUtils.makeHalSelector(
+                        ConversionUtils.identifierToHalProgramIdentifier(TEST_DAB_ENSEMBLE_ID),
+                        new ProgramIdentifier[]{}), /* logicallyTunedTo= */ null,
+                /* physicallyTunedTo= */ null, TEST_SIGNAL_QUALITY);
         ProgramInfoCache cache = new ProgramInfoCache(/* filter= */ null,
                 /* complete= */ false);
         ProgramListChunk chunk = AidlTestUtils.makeHalChunk(/* purge= */ false,
-                /* complete= */ true, new ProgramInfo[]{AidlTestUtils.programInfoToHalProgramInfo(
-                        invalidDabInfo)}, new ProgramIdentifier[]{});
+                /* complete= */ true, new ProgramInfo[]{invalidHalDabInfo},
+                new ProgramIdentifier[]{});
 
         cache.updateFromHalProgramListChunk(chunk);
 
@@ -447,10 +450,10 @@ public class ProgramInfoCacheTest {
                 /* complete= */ false, TEST_FM_INFO, TEST_RDS_INFO, TEST_DAB_INFO);
         ProgramInfo[] halModified = new android.hardware.broadcastradio.ProgramInfo[1];
         halModified[0] = AidlTestUtils.makeHalProgramInfo(
-                ConversionUtils.programSelectorToHalProgramSelector(TEST_DAB_SELECTOR_ALTERNATIVE),
-                ConversionUtils.identifierToHalProgramIdentifier(TEST_DAB_FREQUENCY_ID_ALTERNATIVE),
-                ConversionUtils.identifierToHalProgramIdentifier(TEST_DAB_FREQUENCY_ID_ALTERNATIVE),
-                TEST_SIGNAL_QUALITY);
+                AidlTestUtils.makeHalSelector(
+                        ConversionUtils.identifierToHalProgramIdentifier(TEST_DAB_ENSEMBLE_ID),
+                        new ProgramIdentifier[]{}), /* logicallyTunedTo= */ null,
+                /* physicallyTunedTo= */ null, TEST_SIGNAL_QUALITY);
         ProgramIdentifier[] halRemoved = new android.hardware.broadcastradio.ProgramIdentifier[1];
         halRemoved[0] = new android.hardware.broadcastradio.ProgramIdentifier();
         ProgramListChunk halChunk = AidlTestUtils.makeHalChunk(/* purge= */ false,

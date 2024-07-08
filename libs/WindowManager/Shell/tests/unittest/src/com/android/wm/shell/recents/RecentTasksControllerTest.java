@@ -399,7 +399,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testGetRecentTasks_proto2Enabled_ignoresMinimizedFreeformTasks() {
+    public void testGetRecentTasks_proto2Enabled_includesMinimizedFreeformTasks() {
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
         ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
@@ -415,8 +415,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
         ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
                 MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
 
-        // 2 freeform tasks should be grouped into one, 1 task should be skipped, 3 total recents
-        // entries
+        // 3 freeform tasks should be grouped into one, 2 single tasks, 3 total recents entries
         assertEquals(3, recentTasks.size());
         GroupedRecentTaskInfo freeformGroup = recentTasks.get(0);
         GroupedRecentTaskInfo singleGroup1 = recentTasks.get(1);
@@ -428,9 +427,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
         assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup2.getType());
 
         // Check freeform group entries
-        assertEquals(2, freeformGroup.getTaskInfoList().size());
+        assertEquals(3, freeformGroup.getTaskInfoList().size());
         assertEquals(t1, freeformGroup.getTaskInfoList().get(0));
-        assertEquals(t5, freeformGroup.getTaskInfoList().get(1));
+        assertEquals(t3, freeformGroup.getTaskInfoList().get(1));
+        assertEquals(t5, freeformGroup.getTaskInfoList().get(2));
 
         // Check single entries
         assertEquals(t2, singleGroup1.getTaskInfo1());

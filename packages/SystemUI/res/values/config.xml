@@ -25,9 +25,6 @@
      (package/class)  -->
     <string name="config_recentsComponent" translatable="false">com.android.systemui.recents.OverviewProxyRecentsImpl</string>
 
-    <!-- Whether or not we show the number in the bar. -->
-    <bool name="config_statusBarShowNumber">false</bool>
-
     <!-- For how long the lock screen can be on before the display turns off. -->
     <integer name="config_lockScreenDisplayTimeout">10000</integer>
 

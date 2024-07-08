@@ -35,7 +35,6 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
 
 /**
  * Class that is able to combine multiple client lifecycle transition requests and/or callbacks,
@@ -72,9 +71,8 @@ class ClientLifecycleManager {
      * @throws RemoteException
      *
      * @see ClientTransaction
-     * @deprecated use {@link #scheduleTransactionItem(IApplicationThread, ClientTransactionItem)}.
      */
-    @Deprecated
+    @VisibleForTesting
     void scheduleTransaction(@NonNull ClientTransaction transaction) throws RemoteException {
         final IApplicationThread client = transaction.getClient();
         try {
@@ -114,22 +112,13 @@ class ClientLifecycleManager {
      */
     void scheduleTransactionItem(@NonNull IApplicationThread client,
             @NonNull ClientTransactionItem transactionItem) throws RemoteException {
-        // The behavior is different depending on the flag.
-        // When flag is on, we wait until RootWindowContainer#performSurfacePlacementNoTrace to
-        // dispatch all pending transactions at once.
-        if (Flags.bundleClientTransactionFlag()) {
-            final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
-            clientTransaction.addTransactionItem(transactionItem);
+        // Wait until RootWindowContainer#performSurfacePlacementNoTrace to dispatch all pending
+        // transactions at once.
+        final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
+        clientTransaction.addTransactionItem(transactionItem);
 
-            onClientTransactionItemScheduled(clientTransaction,
-                    false /* shouldDispatchImmediately */);
-        } else {
-            // TODO(b/260873529): cleanup after launch.
-            final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
-            clientTransaction.addTransactionItem(transactionItem);
-
-            scheduleTransaction(clientTransaction);
-        }
+        onClientTransactionItemScheduled(clientTransaction,
+                false /* shouldDispatchImmediately */);
     }
 
     void scheduleTransactionAndLifecycleItems(@NonNull IApplicationThread client,
@@ -156,27 +145,18 @@ class ClientLifecycleManager {
             @NonNull ClientTransactionItem transactionItem,
             @NonNull ActivityLifecycleItem lifecycleItem,
             boolean shouldDispatchImmediately) throws RemoteException {
-        // The behavior is different depending on the flag.
-        // When flag is on, we wait until RootWindowContainer#performSurfacePlacementNoTrace to
-        // dispatch all pending transactions at once.
-        if (Flags.bundleClientTransactionFlag()) {
-            final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
-            clientTransaction.addTransactionItem(transactionItem);
-            clientTransaction.addTransactionItem(lifecycleItem);
+        // Wait until RootWindowContainer#performSurfacePlacementNoTrace to dispatch all pending
+        // transactions at once.
+        final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
+        clientTransaction.addTransactionItem(transactionItem);
+        clientTransaction.addTransactionItem(lifecycleItem);
 
-            onClientTransactionItemScheduled(clientTransaction, shouldDispatchImmediately);
-        } else {
-            // TODO(b/260873529): cleanup after launch.
-            final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
-            clientTransaction.addTransactionItem(transactionItem);
-            clientTransaction.addTransactionItem(lifecycleItem);
-            scheduleTransaction(clientTransaction);
-        }
+        onClientTransactionItemScheduled(clientTransaction, shouldDispatchImmediately);
     }
 
     /** Executes all the pending transactions. */
     void dispatchPendingTransactions() {
-        if (!Flags.bundleClientTransactionFlag() || mPendingTransactions.isEmpty()) {
+        if (mPendingTransactions.isEmpty()) {
             return;
         }
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "clientTransactionsDispatched");
@@ -196,9 +176,6 @@ class ClientLifecycleManager {
 
     /** Executes the pending transaction for the given client process. */
     void dispatchPendingTransaction(@NonNull IApplicationThread client) {
-        if (!Flags.bundleClientTransactionFlag()) {
-            return;
-        }
         final ClientTransaction pendingTransaction = mPendingTransactions.remove(client.asBinder());
         if (pendingTransaction != null) {
             try {

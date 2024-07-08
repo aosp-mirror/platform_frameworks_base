@@ -74,12 +74,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Expandable
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.load
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.qs.panels.ui.viewmodel.AvailableEditActions
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileUiState
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
@@ -114,6 +114,7 @@ fun Tile(
         showLabels = showLabels,
         label = state.label.toString(),
         iconOnly = iconOnly,
+        clickEnabled = true,
         onClick = tile::onClick,
         onLongClick = tile::onLongClick,
         modifier = modifier,
@@ -127,6 +128,7 @@ fun Tile(
                 secondaryLabel = state.secondaryLabel.toString(),
                 icon = icon,
                 colors = colors,
+                clickEnabled = true,
                 onClick = tile::onSecondaryClick,
                 onLongClick = tile::onLongClick,
             )
@@ -140,7 +142,7 @@ private fun TileContainer(
     showLabels: Boolean,
     label: String,
     iconOnly: Boolean,
-    clickEnabled: Boolean = true,
+    clickEnabled: Boolean = false,
     onClick: (Expandable) -> Unit = {},
     onLongClick: (Expandable) -> Unit = {},
     modifier: Modifier = Modifier,
@@ -168,11 +170,12 @@ private fun TileContainer(
             Box(
                 modifier =
                     Modifier.fillMaxSize()
-                        .combinedClickable(
-                            enabled = clickEnabled,
-                            onClick = { onClick(it) },
-                            onLongClick = { onLongClick(it) }
-                        )
+                        .thenIf(clickEnabled) {
+                            Modifier.combinedClickable(
+                                onClick = { onClick(it) },
+                                onLongClick = { onLongClick(it) }
+                            )
+                        }
                         .tilePadding(),
             ) {
                 content()
@@ -197,7 +200,7 @@ private fun LargeTileContent(
     secondaryLabel: String?,
     icon: Icon,
     colors: TileColors,
-    clickEnabled: Boolean = true,
+    clickEnabled: Boolean = false,
     onClick: (Expandable) -> Unit = {},
     onLongClick: (Expandable) -> Unit = {},
 ) {
@@ -212,13 +215,12 @@ private fun LargeTileContent(
         ) {
             Box(
                 modifier =
-                    Modifier.fillMaxSize()
-                        .clip(TileDefaults.TileShape)
-                        .combinedClickable(
-                            enabled = clickEnabled,
+                    Modifier.fillMaxSize().clip(TileDefaults.TileShape).thenIf(clickEnabled) {
+                        Modifier.combinedClickable(
                             onClick = { onClick(it) },
                             onLongClick = { onLongClick(it) }
                         )
+                    }
             ) {
                 TileIcon(
                     icon = icon,
@@ -269,13 +271,29 @@ fun DefaultEditTileGrid(
     onAddTile: (TileSpec, Int) -> Unit,
     onRemoveTile: (TileSpec) -> Unit,
 ) {
-    val (currentTiles, otherTiles) = tiles.partition { it.isCurrent }
-    val (otherTilesStock, otherTilesCustom) = otherTiles.partition { it.appName == null }
+    val currentListState = rememberEditListState(tiles)
+    val dragAndDropState = rememberDragAndDropState(currentListState)
+
+    val (currentTiles, otherTiles) = currentListState.tiles.partition { it.isCurrent }
+    val (otherTilesStock, otherTilesCustom) =
+        otherTiles
+            .filter { !dragAndDropState.isMoving(it.tileSpec) }
+            .partition { it.appName == null }
     val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
         onAddTile(it, CurrentTilesInteractor.POSITION_AT_END)
     }
 
-    TileLazyGrid(modifier = modifier, columns = columns) {
+    val onDropAdd: (TileSpec, Int) -> Unit by rememberUpdatedState { tileSpec, position ->
+        onAddTile(tileSpec, position)
+    }
+    val onDropRemove: (TileSpec, Int) -> Unit by rememberUpdatedState { tileSpec, _ ->
+        onRemoveTile(tileSpec)
+    }
+
+    TileLazyGrid(
+        modifier = modifier.dragAndDropTileList(dragAndDropState, { true }, onDropAdd),
+        columns = columns
+    ) {
         // These Text are just placeholders to see the different sections. Not final UI.
         item(span = { GridItemSpan(maxLineSpan) }) { Text("Current tiles", color = Color.White) }
 
@@ -285,6 +303,9 @@ fun DefaultEditTileGrid(
             onRemoveTile,
             isIconOnly,
             indicatePosition = true,
+            dragAndDropState = dragAndDropState,
+            acceptDrops = { true },
+            onDrop = onDropAdd,
         )
 
         item(span = { GridItemSpan(maxLineSpan) }) { Text("Tiles to add", color = Color.White) }
@@ -294,6 +315,9 @@ fun DefaultEditTileGrid(
             ClickAction.ADD,
             addTileToEnd,
             isIconOnly,
+            dragAndDropState = dragAndDropState,
+            acceptDrops = { true },
+            onDrop = onDropRemove,
         )
 
         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -305,6 +329,9 @@ fun DefaultEditTileGrid(
             ClickAction.ADD,
             addTileToEnd,
             isIconOnly,
+            dragAndDropState = dragAndDropState,
+            acceptDrops = { true },
+            onDrop = onDropRemove,
         )
     }
 }
@@ -314,6 +341,9 @@ fun LazyGridScope.editTiles(
     clickAction: ClickAction,
     onClick: (TileSpec) -> Unit,
     isIconOnly: (TileSpec) -> Boolean,
+    dragAndDropState: DragAndDropState,
+    acceptDrops: (TileSpec) -> Boolean,
+    onDrop: (TileSpec, Int) -> Unit,
     showLabels: Boolean = false,
     indicatePosition: Boolean = false,
 ) {
@@ -322,41 +352,44 @@ fun LazyGridScope.editTiles(
         key = { tiles[it].tileSpec.spec },
         span = { GridItemSpan(if (isIconOnly(tiles[it].tileSpec)) 1 else 2) },
         contentType = { TileType }
-    ) {
-        val viewModel = tiles[it]
-        val canClick =
-            when (clickAction) {
-                ClickAction.ADD -> AvailableEditActions.ADD in viewModel.availableEditActions
-                ClickAction.REMOVE -> AvailableEditActions.REMOVE in viewModel.availableEditActions
-            }
-        val onClickActionName =
-            when (clickAction) {
-                ClickAction.ADD ->
-                    stringResource(id = R.string.accessibility_qs_edit_tile_add_action)
-                ClickAction.REMOVE ->
-                    stringResource(id = R.string.accessibility_qs_edit_remove_tile_action)
-            }
-        val stateDescription =
-            if (indicatePosition) {
-                stringResource(id = R.string.accessibility_qs_edit_position, it + 1)
-            } else {
-                ""
-            }
-
+    ) { index ->
+        val viewModel = tiles[index]
         val iconOnly = isIconOnly(viewModel.tileSpec)
         val tileHeight = tileHeight(iconOnly && showLabels)
-        EditTile(
-            tileViewModel = viewModel,
-            iconOnly = iconOnly,
-            showLabels = showLabels,
-            clickEnabled = canClick,
-            onClick = { onClick.invoke(viewModel.tileSpec) },
-            modifier =
-                Modifier.height(tileHeight).animateItem().semantics {
-                    onClick(onClickActionName) { false }
-                    this.stateDescription = stateDescription
+
+        if (!dragAndDropState.isMoving(viewModel.tileSpec)) {
+            val onClickActionName =
+                when (clickAction) {
+                    ClickAction.ADD ->
+                        stringResource(id = R.string.accessibility_qs_edit_tile_add_action)
+                    ClickAction.REMOVE ->
+                        stringResource(id = R.string.accessibility_qs_edit_remove_tile_action)
                 }
-        )
+            val stateDescription =
+                if (indicatePosition) {
+                    stringResource(id = R.string.accessibility_qs_edit_position, index + 1)
+                } else {
+                    ""
+                }
+            EditTile(
+                tileViewModel = viewModel,
+                iconOnly = iconOnly,
+                showLabels = showLabels,
+                modifier =
+                    Modifier.height(tileHeight)
+                        .animateItem()
+                        .semantics {
+                            onClick(onClickActionName) { false }
+                            this.stateDescription = stateDescription
+                        }
+                        .dragAndDropTile(dragAndDropState, viewModel.tileSpec, acceptDrops, onDrop)
+                        .dragAndDropTileSource(
+                            viewModel.tileSpec,
+                            onClick,
+                            dragAndDropState,
+                        )
+            )
+        }
     }
 }
 
@@ -365,8 +398,6 @@ fun EditTile(
     tileViewModel: EditTileViewModel,
     iconOnly: Boolean,
     showLabels: Boolean,
-    clickEnabled: Boolean,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val label = tileViewModel.label.load() ?: tileViewModel.tileSpec.spec
@@ -377,9 +408,6 @@ fun EditTile(
         showLabels = showLabels,
         label = label,
         iconOnly = iconOnly,
-        clickEnabled = clickEnabled,
-        onClick = { onClick() },
-        onLongClick = { onClick() },
         modifier = modifier,
     ) {
         if (iconOnly) {
@@ -394,9 +422,6 @@ fun EditTile(
                 secondaryLabel = tileViewModel.appName?.load(),
                 icon = tileViewModel.icon,
                 colors = colors,
-                clickEnabled = clickEnabled,
-                onClick = { onClick() },
-                onLongClick = { onClick() },
             )
         }
     }

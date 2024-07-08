@@ -17,3 +17,11 @@ flag {
     description: "Control the API that allows setting / reading the NetworkProviderInfo's battery charging status"
     bug: "305067231"
 }
+
+flag {
+    name: "legacy_keystore_to_wifi_blobstore_migration"
+    is_exported: true
+    namespace: "wifi"
+    description: "Add API to migrate all values from Legacy Keystore to the new Wifi Blobstore database"
+    bug: "332560152"
+}

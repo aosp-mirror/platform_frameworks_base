@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"អនុញ្ញាតឱ្យ​ផ្ទុក​ស្រទាប់​ជួស​ជុល GPU សម្រាប់​កម្មវិធី​ជួសជុល"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"បើកការកត់ត្រាអ្នកផ្គត់ផ្គង់ឥតសំចៃ"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"រួមបញ្ចូលកំណត់​ហេតុ​អ្នកផ្គត់ផ្គង់​ពាក់ព័ន្ធ​នឹងឧបករណ៍បន្ថែមទៀតនៅក្នុងរបាយការណ៍​អំពីបញ្ហា ដែលអាច​មានផ្ទុកព័ត៌មាន​ឯកជន ប្រើប្រាស់​ថ្មច្រើនជាង និង/ឬប្រើប្រាស់​ទំហំផ្ទុកច្រើនជាង។"</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"មាត្រដ្ឋាន​ចលនា​វិនដូ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"មាត្រដ្ឋាន​ដំណើរ​ផ្លាស់ប្ដូរ​ចលនា"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"មាត្រដ្ឋាន​រយៈពេល​នៃ​កម្មវិធី​ចលនា"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ម៉ោងរោទ៍ និង​ការរំលឹក"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"អនុញ្ញាតឱ្យ​កម្មវិធីនេះ​កំណត់ម៉ោងរោទ៍ និងកំណត់កាលវិភាគសកម្មភាពដែលតម្រូវឱ្យទាន់ពេលវេលា។ ការធ្វើបែបនេះអនុញ្ញាតឱ្យកម្មវិធីនេះដំណើរការនៅផ្ទៃខាងក្រោយ ដែលអាចប្រើថ្មកាន់តែច្រើន។\n\nប្រសិនបើបិទការអនុញ្ញាតនេះ ម៉ោងរោទ៍ដែលមានស្រាប់ និងព្រឹត្តិការណ៍ផ្អែកលើពេលវេលាដែលកំណត់ដោយកម្មវិធីនេះ​នឹងមិនដំណើរការទេ។"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"កាលវិភាគ ម៉ោងរោទ៍ ការរំលឹក នាឡិកា"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"កុំ​រំខាន"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"បើក"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"បើកមុខងារកុំរំខាន"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"កុំឱ្យសោះ"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"រយៈពេល"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"សួរគ្រប់ពេល"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"រហូតទាល់តែ​អ្នកបិទ"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(គ្មាន​ឈ្មោះ)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"អម្បាញ់មិញ"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ទូរសព្ទនេះ"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ថេប្លេតនេះ"</string>

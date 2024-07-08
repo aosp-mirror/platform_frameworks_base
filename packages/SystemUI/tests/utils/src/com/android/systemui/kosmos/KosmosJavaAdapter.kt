@@ -50,6 +50,7 @@ import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.scrimStartable
 import com.android.systemui.scene.sceneContainerConfig
@@ -67,6 +68,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.fakeWifiRepo
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.wifiInteractor
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
+import com.android.systemui.statusbar.ui.viewmodel.keyguardStatusBarViewModel
 import com.android.systemui.util.time.systemClock
 import com.android.systemui.volume.domain.interactor.volumeDialogInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -101,6 +103,7 @@ class KosmosJavaAdapter() {
     val keyguardInteractor by lazy { kosmos.keyguardInteractor }
     val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
     val keyguardTransitionInteractor by lazy { kosmos.keyguardTransitionInteractor }
+    val keyguardStatusBarViewModel by lazy { kosmos.keyguardStatusBarViewModel }
     val powerRepository by lazy { kosmos.fakePowerRepository }
     val clock by lazy { kosmos.systemClock }
     val mobileConnectionsRepository by lazy { kosmos.fakeMobileConnectionsRepository }
@@ -142,4 +145,5 @@ class KosmosJavaAdapter() {
     val ongoingActivityChipsViewModel by lazy { kosmos.ongoingActivityChipsViewModel }
     val scrimController by lazy { kosmos.scrimController }
     val scrimStartable by lazy { kosmos.scrimStartable }
+    val sceneContainerOcclusionInteractor by lazy { kosmos.sceneContainerOcclusionInteractor }
 }

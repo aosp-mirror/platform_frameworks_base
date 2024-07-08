@@ -120,3 +120,24 @@ flag {
     description: "Whether to enable min/max window size constraints when resizing a window in desktop windowing mode"
     bug: "327589741"
 }
+
+flag {
+    name: "show_desktop_windowing_dev_option"
+    namespace: "lse_desktop_experience"
+    description: "Whether to show developer option for enabling desktop windowing mode"
+    bug: "348193756"
+}
+
+flag {
+    name: "enable_desktop_windowing_app_to_web"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable the app-to-web feature and show the open in browser button in the header menu"
+    bug: "349695493"
+}
+
+flag {
+    name: "enable_windowing_transition_handlers_observers"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable desktop windowing transition handler and observer instead of task listeners."
+    bug: "332682201"
+}

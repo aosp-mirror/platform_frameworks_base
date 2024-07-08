@@ -169,6 +169,11 @@ class DividerPresenter implements View.OnTouchListener {
     @GuardedBy("mLock")
     private int mDividerPosition;
 
+    /** Indicates if there are containers to be finished since the divider has appeared. */
+    @GuardedBy("mLock")
+    @VisibleForTesting
+    private boolean mHasContainersToFinish = false;
+
     DividerPresenter(int taskId, @NonNull DragEventCallback dragEventCallback,
             @NonNull Executor callbackExecutor) {
         mTaskId = taskId;
@@ -180,7 +185,8 @@ class DividerPresenter implements View.OnTouchListener {
     void updateDivider(
             @NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentParentInfo parentInfo,
-            @Nullable SplitContainer topSplitContainer) {
+            @Nullable SplitContainer topSplitContainer,
+            boolean isTaskFragmentVanished) {
         if (!Flags.activityEmbeddingInteractiveDividerFlag()) {
             return;
         }
@@ -188,6 +194,18 @@ class DividerPresenter implements View.OnTouchListener {
         synchronized (mLock) {
             // Clean up the decor surface if top SplitContainer is null.
             if (topSplitContainer == null) {
+                // Check if there are containers to finish but the TaskFragment hasn't vanished yet.
+                // Don't remove the decor surface and divider if so as the removal should happen in
+                // a following step when the TaskFragment has vanished. This ensures that the decor
+                // surface is removed only after the resulting Activity is ready to be shown,
+                // otherwise there may be flicker.
+                if (mHasContainersToFinish) {
+                    if (isTaskFragmentVanished) {
+                        setHasContainersToFinish(false);
+                    } else {
+                        return;
+                    }
+                }
                 removeDecorSurfaceAndDivider(wct);
                 return;
             }
@@ -865,6 +883,12 @@ class DividerPresenter implements View.OnTouchListener {
                     calculateMinPosition(),
                     calculateMaxPosition(),
                     isDraggingToFullscreenAllowed(mProperties.mDividerAttributes));
+        }
+    }
+
+    void setHasContainersToFinish(boolean hasContainersToFinish) {
+        synchronized (mLock) {
+            mHasContainersToFinish = hasContainersToFinish;
         }
     }
 

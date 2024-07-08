@@ -59,7 +59,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
@@ -171,11 +171,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
         TaskFragmentOrganizerState(@NonNull ITaskFragmentOrganizer organizer, int pid, int uid,
                 boolean isSystemOrganizer) {
-            if (Flags.bundleClientTransactionFlag()) {
-                mAppThread = getAppThread(pid, uid);
-            } else {
-                mAppThread = null;
-            }
+            mAppThread = getAppThread(pid, uid);
             mOrganizer = organizer;
             mOrganizerPid = pid;
             mOrganizerUid = uid;
@@ -431,13 +427,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return;
             }
             try {
-                if (Flags.bundleClientTransactionFlag()) {
-                    // Dispatch through IApplicationThread to ensure the binder call is in order
-                    // with ClientTransaction.
-                    mAppThread.scheduleTaskFragmentTransaction(mOrganizer, transaction);
-                } else {
-                    mOrganizer.onTransactionReady(transaction);
-                }
+                // Dispatch through IApplicationThread to ensure the binder call is in order
+                // with ClientTransaction.
+                mAppThread.scheduleTaskFragmentTransaction(mOrganizer, transaction);
             } catch (RemoteException e) {
                 Slog.d(TAG, "Exception sending TaskFragmentTransaction", e);
                 return;

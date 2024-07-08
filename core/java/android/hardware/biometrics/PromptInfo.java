@@ -195,6 +195,10 @@ public class PromptInfo implements Parcelable {
             return true;
         } else if (mContentView != null && isContentViewMoreOptionsButtonUsed()) {
             return true;
+        } else if (Flags.mandatoryBiometrics()
+                && (mAuthenticators & BiometricManager.Authenticators.MANDATORY_BIOMETRICS)
+                != 0) {
+            return true;
         }
         return false;
     }

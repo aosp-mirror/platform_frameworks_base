@@ -19,5 +19,5 @@ package com.android.systemui.keyboard.shortcut.shared.model
 sealed interface ShortcutHelperState {
     data object Inactive : ShortcutHelperState
 
-    data class Active(val deviceId: Int? = null) : ShortcutHelperState
+    data class Active(val deviceId: Int) : ShortcutHelperState
 }

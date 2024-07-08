@@ -16,6 +16,8 @@
 
 package com.android.systemui.util.settings;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import android.annotation.UserIdInt;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
@@ -27,6 +29,8 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.settings.UserTracker;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,19 +41,27 @@ public class FakeSettings implements SecureSettings, SystemSettings {
     private final Map<SettingsKey, List<ContentObserver>> mContentObservers =
             new HashMap<>();
     private final Map<String, List<ContentObserver>> mContentObserversAllUsers = new HashMap<>();
+    private final CoroutineDispatcher mDispatcher;
 
     public static final Uri CONTENT_URI = Uri.parse("content://settings/fake");
     @UserIdInt
     private int mUserId = UserHandle.USER_CURRENT;
 
     public FakeSettings() {
+        mDispatcher = StandardTestDispatcher(/* scheduler = */ null, /* name = */ null);
+    }
+
+    public FakeSettings(CoroutineDispatcher dispatcher) {
+        mDispatcher = dispatcher;
     }
 
     public FakeSettings(String initialKey, String initialValue) {
+        mDispatcher = StandardTestDispatcher(/* scheduler = */ null, /* name = */ null);
         putString(initialKey, initialValue);
     }
 
     public FakeSettings(Map<String, String> initialValues) {
+        mDispatcher = StandardTestDispatcher(/* scheduler = */ null, /* name = */ null);
         for (Map.Entry<String, String> kv : initialValues.entrySet()) {
             putString(kv.getKey(), kv.getValue());
         }
@@ -63,6 +75,11 @@ public class FakeSettings implements SecureSettings, SystemSettings {
     @Override
     public UserTracker getUserTracker() {
         return null;
+    }
+
+    @Override
+    public CoroutineDispatcher getBackgroundDispatcher() {
+        return mDispatcher;
     }
 
     @Override

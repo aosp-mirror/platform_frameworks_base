@@ -314,7 +314,6 @@ class SceneTransitionLayoutStateTest {
                         }
                     },
             )
-                as MutableSceneTransitionLayoutStateImpl
 
         // Default transition from A to B.
         assertThat(state.setTargetScene(SceneB, coroutineScope = this)).isNotNull()

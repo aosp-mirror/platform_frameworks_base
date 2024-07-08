@@ -781,6 +781,34 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_CANCEL_BY_APPOPS)
+    public void vibrate_thenDeniedAppOps_getsCancelled() throws Throwable {
+        mockVibrators(1);
+        VibratorManagerService service = createSystemReadyService();
+
+        var vib = vibrate(service,
+                VibrationEffect.createWaveform(new long[]{100, 100, 100, 100}, 0), RINGTONE_ATTRS);
+
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        when(mAppOpsManagerMock.checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
+                eq(AudioAttributes.USAGE_NOTIFICATION_RINGTONE), anyInt(), anyString()))
+                .thenReturn(AppOpsManager.MODE_IGNORED);
+
+        service.mAppOpsChangeListener.onOpChanged(AppOpsManager.OP_VIBRATE, null);
+
+        assertTrue(waitUntil(s -> vib.hasEnded(), service, TEST_TIMEOUT_MILLIS));
+
+        var statsInfoCaptor = ArgumentCaptor.forClass(VibrationStats.StatsInfo.class);
+        verify(mVibratorFrameworkStatsLoggerMock, timeout(TEST_TIMEOUT_MILLIS))
+                .writeVibrationReportedAsync(statsInfoCaptor.capture());
+
+        VibrationStats.StatsInfo touchMetrics = statsInfoCaptor.getAllValues().get(0);
+        assertEquals(Vibration.Status.CANCELLED_BY_APP_OPS.getProtoEnumValue(),
+                touchMetrics.status);
+    }
+
+    @Test
     public void vibrate_withVibrationAttributes_usesCorrespondingAudioUsageInAppOpsManager() {
         VibratorManagerService service = createSystemReadyService();
 

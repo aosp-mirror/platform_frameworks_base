@@ -64,7 +64,7 @@ public class InstallConfirmationFragment extends DialogFragment {
 
         int positiveBtnTextRes;
         if (mDialogData.isAppUpdating()) {
-            if (mDialogData.getDialogMessage() != null) {
+            if (mDialogData.getSourceApp() != null) {
                 positiveBtnTextRes = R.string.update_anyway;
             } else {
                 positiveBtnTextRes = R.string.update;
@@ -88,9 +88,10 @@ public class InstallConfirmationFragment extends DialogFragment {
         TextView viewToEnable;
         if (mDialogData.isAppUpdating()) {
             viewToEnable = dialogView.requireViewById(R.id.install_confirm_question_update);
-            String dialogMessage = mDialogData.getDialogMessage();
-            if (dialogMessage != null) {
-                viewToEnable.setText(Html.fromHtml(dialogMessage, Html.FROM_HTML_MODE_LEGACY));
+            String sourcePackageName = mDialogData.getSourceApp();
+            if (sourcePackageName != null) {
+                // Show the update-ownership change message
+                viewToEnable.setText(Html.fromHtml(sourcePackageName, Html.FROM_HTML_MODE_LEGACY));
             }
         } else {
             viewToEnable = dialogView.requireViewById(R.id.install_confirm_question);

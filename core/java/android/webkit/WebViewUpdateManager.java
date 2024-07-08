@@ -101,6 +101,8 @@ public final class WebViewUpdateManager {
      * enabled for all users.
      */
     @SuppressLint({"ParcelableList", "ArrayReturn"})
+    @RequiresPermission(allOf = {android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.QUERY_ALL_PACKAGES})
     public @NonNull WebViewProviderInfo[] getValidWebViewPackages() {
         try {
             return mService.getValidWebViewPackages();

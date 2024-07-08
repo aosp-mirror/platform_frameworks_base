@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
@@ -34,15 +35,22 @@ import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.Me
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
+import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
+    private val systemClock = kosmos.fakeSystemClock
 
     private val screenRecordState = kosmos.screenRecordRepository.screenRecordState
     private val mediaProjectionState = kosmos.fakeMediaProjectionRepository.mediaProjectionState
@@ -188,6 +196,39 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             assertIsCallChip(latest)
         }
 
+    /** Regression test for b/347726238. */
+    @Test
+    fun chip_timerDoesNotResetAfterSubscribersRestart() =
+        testScope.runTest {
+            var latest: OngoingActivityChipModel? = null
+
+            val job1 = underTest.chip.onEach { latest = it }.launchIn(this)
+
+            // Start a chip with a timer
+            systemClock.setElapsedRealtime(1234)
+            screenRecordState.value = ScreenRecordModel.Recording
+
+            runCurrent()
+
+            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs).isEqualTo(1234)
+
+            // Stop subscribing to the chip flow
+            job1.cancel()
+
+            // Let time pass
+            systemClock.setElapsedRealtime(5678)
+
+            // WHEN we re-subscribe to the chip flow
+            val job2 = underTest.chip.onEach { latest = it }.launchIn(this)
+
+            runCurrent()
+
+            // THEN the old start time is still used
+            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs).isEqualTo(1234)
+
+            job2.cancel()
+        }
+
     companion object {
         fun assertIsScreenRecordChip(latest: OngoingActivityChipModel?) {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
@@ -198,7 +239,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         fun assertIsShareToAppChip(latest: OngoingActivityChipModel?) {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_screenshot_share)
+            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_present_to_all)
         }
 
         fun assertIsCallChip(latest: OngoingActivityChipModel?) {

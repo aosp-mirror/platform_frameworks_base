@@ -27,6 +27,8 @@ import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.core.animation.addListener
+import com.android.internal.jank.Cuj
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
@@ -35,7 +37,8 @@ import java.util.function.Supplier
 /** Handles the animation of quick resizing of desktop tasks. */
 class ToggleResizeDesktopTaskTransitionHandler(
     private val transitions: Transitions,
-    private val transactionSupplier: Supplier<SurfaceControl.Transaction>
+    private val transactionSupplier: Supplier<SurfaceControl.Transaction>,
+    private val interactionJankMonitor: InteractionJankMonitor
 ) : Transitions.TransitionHandler {
 
     private val rectEvaluator = RectEvaluator(Rect())
@@ -44,8 +47,9 @@ class ToggleResizeDesktopTaskTransitionHandler(
     private var boundsAnimator: Animator? = null
 
     constructor(
-        transitions: Transitions
-    ) : this(transitions, Supplier { SurfaceControl.Transaction() })
+        transitions: Transitions,
+        interactionJankMonitor: InteractionJankMonitor
+    ) : this(transitions, Supplier { SurfaceControl.Transaction() }, interactionJankMonitor)
 
     /** Starts a quick resize transition. */
     fun startTransition(wct: WindowContainerTransaction) {
@@ -103,6 +107,8 @@ class ToggleResizeDesktopTaskTransitionHandler(
                             onTaskResizeAnimationListener.onAnimationEnd(taskId)
                             finishCallback.onTransitionFinished(null)
                             boundsAnimator = null
+                            interactionJankMonitor.end(
+                                Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
                         }
                     )
                     addUpdateListener { anim ->

@@ -70,7 +70,7 @@ final class InputMethodBindingController {
     /** Time in milliseconds that the IME service has to bind before it is reconnected. */
     static final long TIME_TO_RECONNECT = 3 * 1000;
 
-    @UserIdInt final int mUserId;
+    @UserIdInt private final int mUserId;
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
     @NonNull private final AutofillSuggestionsController mAutofillController;
@@ -95,6 +95,32 @@ final class InputMethodBindingController {
     /** The display id for which the latest startInput was called. */
     @GuardedBy("ImfLock.class") private int mDisplayIdToShowIme = INVALID_DISPLAY;
     @GuardedBy("ImfLock.class") private int mDeviceIdToShowIme = DEVICE_ID_DEFAULT;
+
+    /**
+     * A set of status bits regarding the active IME.
+     *
+     * <p>This value is a combination of following two bits:</p>
+     * <dl>
+     * <dt>{@link InputMethodService#IME_ACTIVE}</dt>
+     * <dd>
+     *   If this bit is ON, connected IME is ready to accept touch/key events.
+     * </dd>
+     * <dt>{@link InputMethodService#IME_VISIBLE}</dt>
+     * <dd>
+     *   If this bit is ON, some of IME view, e.g. software input, candidate view, is visible.
+     * </dd>
+     * <dt>{@link InputMethodService#IME_INVISIBLE}</dt>
+     * <dd> If this bit is ON, IME is ready with views from last EditorInfo but is
+     *    currently invisible.
+     * </dd>
+     * </dl>
+     * <em>Do not update this value outside of {@link #setImeWindowStatus(IBinder, int, int)} and
+     * {@link InputMethodBindingController#unbindCurrentMethod()}.</em>
+     */
+    @GuardedBy("ImfLock.class") private int mImeWindowVis;
+
+    @GuardedBy("ImfLock.class")
+    private int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
 
     @Nullable private CountDownLatch mLatchForTesting;
 
@@ -382,9 +408,9 @@ final class InputMethodBindingController {
                         InputMethodManager
                                 .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
                     }
-                    mService.initializeImeLocked(mCurMethod, mCurToken);
+                    mService.initializeImeLocked(mCurMethod, mCurToken, mUserId);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
-                    mService.reRequestCurrentClientSessionLocked();
+                    mService.reRequestCurrentClientSessionLocked(mUserId);
                     mAutofillController.performOnCreateInlineSuggestionsRequest();
                 }
 
@@ -437,7 +463,7 @@ final class InputMethodBindingController {
                     mLastBindTime = SystemClock.uptimeMillis();
                     clearCurMethodAndSessions();
                     mService.clearInputShownLocked();
-                    mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
+                    mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME, mUserId);
                 }
             }
         }
@@ -473,7 +499,7 @@ final class InputMethodBindingController {
 
         if (getCurToken() != null) {
             removeCurrentToken();
-            mService.resetSystemUiLocked();
+            mService.resetSystemUiLocked(this);
             mAutofillController.onResetSystemUi();
         }
 
@@ -483,7 +509,7 @@ final class InputMethodBindingController {
 
     @GuardedBy("ImfLock.class")
     private void clearCurMethodAndSessions() {
-        mService.clearClientSessionsLocked();
+        mService.clearClientSessionsLocked(this);
         mCurMethod = null;
         mCurMethodUid = Process.INVALID_UID;
     }
@@ -638,6 +664,36 @@ final class InputMethodBindingController {
         }
     }
 
+    /**
+     * Returns the current {@link InputMethodSubtype}.
+     *
+     * <p>Also this method has had questionable behaviors:</p>
+     * <ul>
+     *     <li>Calling this method can update {@link #mCurrentSubtype}.</li>
+     *     <li>This method may return {@link #mCurrentSubtype} as-is, even if it does not belong to
+     *     the current IME.</li>
+     * </ul>
+     * <p>TODO(b/347083680): Address above issues.</p>
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    InputMethodSubtype getCurrentInputMethodSubtype() {
+        final var selectedMethodId = getSelectedMethodId();
+        if (selectedMethodId == null) {
+            return null;
+        }
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(mUserId);
+        final InputMethodInfo imi = settings.getMethodMap().get(selectedMethodId);
+        if (imi == null || imi.getSubtypeCount() == 0) {
+            return null;
+        }
+        final var subtype = SubtypeUtils.getCurrentInputMethodSubtype(imi, settings,
+                mCurrentSubtype);
+        mCurrentSubtype = subtype;
+        return subtype;
+    }
+
+
     @GuardedBy("ImfLock.class")
     void setDisplayIdToShowIme(int displayId) {
         mDisplayIdToShowIme = displayId;
@@ -656,5 +712,30 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class")
     int getDeviceIdToShowIme() {
         return mDeviceIdToShowIme;
+    }
+
+    @UserIdInt
+    int getUserId() {
+        return mUserId;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void setImeWindowVis(int imeWindowVis) {
+        mImeWindowVis = imeWindowVis;
+    }
+
+    @GuardedBy("ImfLock.class")
+    int getImeWindowVis() {
+        return mImeWindowVis;
+    }
+
+    @GuardedBy("ImfLock.class")
+    int getBackDisposition() {
+        return mBackDisposition;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void setBackDisposition(int backDisposition) {
+        mBackDisposition = backDisposition;
     }
 }

@@ -18,6 +18,8 @@ package android.view
 
 import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.mock
 
 var Kosmos.layoutInflater: LayoutInflater by
     Kosmos.Fixture { LayoutInflater.from(applicationContext) }
+var Kosmos.mockedLayoutInflater: LayoutInflater by Kosmos.Fixture { mock<LayoutInflater>() }

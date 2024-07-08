@@ -16,6 +16,7 @@
 
 package com.android.systemui.common.ui.binder
 
+import android.view.View
 import android.widget.ImageView
 import com.android.systemui.common.shared.model.Icon
 
@@ -28,6 +29,15 @@ object IconViewBinder {
         when (icon) {
             is Icon.Loaded -> view.setImageDrawable(icon.drawable)
             is Icon.Resource -> view.setImageResource(icon.res)
+        }
+    }
+
+    fun bindNullable(icon: Icon?, view: ImageView) {
+        if (icon != null) {
+            view.visibility = View.VISIBLE
+            bind(icon, view)
+        } else {
+            view.visibility = View.GONE
         }
     }
 }

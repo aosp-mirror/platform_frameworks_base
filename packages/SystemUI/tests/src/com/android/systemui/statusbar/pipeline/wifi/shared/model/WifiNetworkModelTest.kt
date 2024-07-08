@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.wifi.shared.model
 
 import android.net.wifi.WifiManager.UNKNOWN_SSID
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableRowLogger
@@ -25,8 +26,10 @@ import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkMode
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel.Companion.MIN_VALID_LEVEL
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class WifiNetworkModelTest : SysuiTestCase() {
     @Test
     fun active_levelsInValidRange_noException() {

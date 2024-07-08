@@ -37,6 +37,7 @@ import android.os.Parcel;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -105,7 +106,7 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     private static final ImmutableSet<Class<?>> UNUSABLE_TYPES =
             ImmutableSet.of(Consumer.class, IBinder.class, MediaSession.Token.class, Parcel.class,
                     PrintWriter.class, Resources.Theme.class, View.class,
-                    LayoutInflater.Factory2.class);
+                    LayoutInflater.Factory2.class, ProtoOutputStream.class);
 
     // Maximum number of times we allow generating the same class recursively.
     // E.g. new RemoteViews.addView(new RemoteViews()) but stop there.

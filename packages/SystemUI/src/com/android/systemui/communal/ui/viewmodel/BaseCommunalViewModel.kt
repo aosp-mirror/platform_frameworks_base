@@ -129,7 +129,6 @@ abstract class BaseCommunalViewModel(
 
     /** Called as the UI requests opening the widget editor with an optional preselected widget. */
     open fun onOpenWidgetEditor(
-        preselectedKey: String? = null,
         shouldOpenWidgetPickerOnStart: Boolean = false,
     ) {}
 
@@ -146,7 +145,7 @@ abstract class BaseCommunalViewModel(
     open fun onReorderWidgetCancel() {}
 
     /** Called as the user request to show the customize widget button. */
-    open fun onShowCustomizeWidgetButton() {}
+    open fun onLongClick() {}
 
     /** Set the key of the currently selected item */
     fun setSelectedKey(key: String?) {

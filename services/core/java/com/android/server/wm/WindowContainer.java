@@ -111,7 +111,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.protolog.common.LogLevel;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
@@ -236,12 +236,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /** Total number of elements in this subtree, including our own hierarchy element. */
     private int mTreeWeight = 1;
-
-    /**
-     * Indicates whether we are animating and have committed the transaction to reparent our
-     * surface to the animation leash
-     */
-    private boolean mCommittedReparentToAnimationLeash;
 
     private int mSyncTransactionCommitCallbackDepth = 0;
 
@@ -2871,20 +2865,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void prepareSurfaces() {
-        // If a leash has been set when the transaction was committed, then the leash reparent has
-        // been committed.
-        mCommittedReparentToAnimationLeash = mSurfaceAnimator.hasLeash();
         for (int i = 0; i < mChildren.size(); i++) {
             mChildren.get(i).prepareSurfaces();
         }
-    }
-
-    /**
-     * @return true if the reparent to animation leash transaction has been committed, false
-     * otherwise.
-     */
-    boolean hasCommittedReparentToAnimationLeash() {
-        return mCommittedReparentToAnimationLeash;
     }
 
     /**
@@ -3986,6 +3969,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * Returns {@code true} if this window container belongs to a different sync group than the
+     * given group.
+     */
+    boolean isDifferentSyncGroup(@Nullable BLASTSyncEngine.SyncGroup group) {
+        if (group == null) return false;
+        final BLASTSyncEngine.SyncGroup thisGroup = getSyncGroup();
+        if (thisGroup == null || group == thisGroup) return false;
+        Slog.d(TAG, this + " uses a different SyncGroup, current=" + thisGroup.mSyncId
+                + " given=" + group.mSyncId);
+        return true;
+    }
+
+    /**
      * Recursively finishes/cleans-up sync state of this subtree and collects all the sync
      * transactions into `outMergedTransaction`.
      * @param outMergedTransaction A transaction to merge all the recorded sync operations into.
@@ -3994,10 +3990,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     void finishSync(Transaction outMergedTransaction, @Nullable BLASTSyncEngine.SyncGroup group,
             boolean cancel) {
-        if (mSyncState == SYNC_STATE_NONE) return;
-        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
-        // If it's null, then we need to clean-up anyways.
-        if (syncGroup != null && group != syncGroup) return;
+        if (mSyncState == SYNC_STATE_NONE) {
+            if (mSyncGroup != null) {
+                Slog.e(TAG, "finishSync: stale group " + mSyncGroup.mSyncId + " of " + this);
+                mSyncGroup = null;
+            }
+            return;
+        }
+        if (isDifferentSyncGroup(group)) return;
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "finishSync cancel=%b for %s", cancel, this);
         outMergedTransaction.merge(mSyncTransaction);
         for (int i = mChildren.size() - 1; i >= 0; --i) {

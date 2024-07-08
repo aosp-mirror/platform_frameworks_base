@@ -36,3 +36,14 @@ val Kosmos.systemUIDialogFactory: SystemUIDialogFactory by
 
 val Kosmos.mockSystemUIDialogFactory: SystemUIDialog.Factory by
     Kosmos.Fixture { mock<SystemUIDialog.Factory>() }
+
+val Kosmos.systemUIDialogDotFactory by
+    Kosmos.Fixture {
+        SystemUIDialog.Factory(
+            applicationContext,
+            systemUIDialogManager,
+            sysUiState,
+            broadcastDispatcher,
+            dialogTransitionAnimator,
+        )
+    }

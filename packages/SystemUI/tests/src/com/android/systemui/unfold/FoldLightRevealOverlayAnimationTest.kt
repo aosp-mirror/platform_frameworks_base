@@ -18,11 +18,14 @@ package com.android.systemui.unfold
 
 import android.os.PowerManager
 import android.os.SystemProperties
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.foldables.FoldLockSettingAvailabilityProvider
+import com.android.internal.jank.Cuj.CUJ_FOLD_ANIM
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.display.data.repository.DeviceStateRepository.DeviceState
 import com.android.systemui.display.data.repository.fakeDeviceStateRepository
 import com.android.systemui.kosmos.Kosmos
@@ -32,27 +35,34 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setScreenPowerState
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.power.shared.model.ScreenPowerState
+import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.util.animation.data.repository.fakeAnimationStatusRepository
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.atLeast
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
+
     private val kosmos = Kosmos()
     private val testScope: TestScope = kosmos.testScope
     private val fakeDeviceStateRepository = kosmos.fakeDeviceStateRepository
@@ -63,6 +73,8 @@ class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
     private val mockFoldLockSettingAvailabilityProvider =
         mock<FoldLockSettingAvailabilityProvider>()
     private val onOverlayReady = mock<Runnable>()
+    private val mockJankMonitor = mock<InteractionJankMonitor>()
+    private val mockScrimView = mock<LightRevealScrim>()
     private lateinit var foldLightRevealAnimation: FoldLightRevealOverlayAnimation
 
     @Before
@@ -71,6 +83,8 @@ class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
         whenever(mockFoldLockSettingAvailabilityProvider.isFoldLockBehaviorAvailable)
             .thenReturn(true)
         fakeAnimationStatusRepository.onAnimationStatusChanged(true)
+        whenever(mockFullScreenController.scrimView).thenReturn(mockScrimView)
+        whenever(mockJankMonitor.begin(any(), eq(CUJ_FOLD_ANIM))).thenReturn(true)
 
         foldLightRevealAnimation =
             FoldLightRevealOverlayAnimation(
@@ -80,7 +94,8 @@ class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 fakeAnimationStatusRepository,
                 mockControllerFactory,
-                mockFoldLockSettingAvailabilityProvider
+                mockFoldLockSettingAvailabilityProvider,
+                mockJankMonitor
             )
         foldLightRevealAnimation.init()
     }
@@ -99,9 +114,9 @@ class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
         testScope.runTest {
             foldDeviceToScreenOff()
             emitLastWakefulnessEventStartingToSleep()
-            advanceTimeBy(SHORT_DELAY_MS)
+            advanceTime(SHORT_DELAY_MS)
             turnScreenOn()
-            advanceTimeBy(ANIMATION_DURATION)
+            advanceTime(ANIMATION_DURATION)
 
             verifyFoldAnimationDidNotPlay()
         }
@@ -111,8 +126,8 @@ class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
         testScope.runTest {
             foldDeviceToScreenOff()
             emitLastWakefulnessEventStartingToSleep()
-            advanceTimeBy(SHORT_DELAY_MS)
-            advanceTimeBy(ANIMATION_DURATION)
+            advanceTime(SHORT_DELAY_MS)
+            advanceTime(ANIMATION_DURATION)
 
             verifyFoldAnimationDidNotPlay()
         }
@@ -122,10 +137,10 @@ class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
         testScope.runTest {
             foldDeviceToScreenOff()
             foldLightRevealAnimation.onScreenTurningOn {}
-            advanceTimeBy(WAIT_FOR_ANIMATION_TIMEOUT_MS)
+            advanceTime(WAIT_FOR_ANIMATION_TIMEOUT_MS)
             powerInteractor.setScreenPowerState(ScreenPowerState.SCREEN_ON)
-            advanceTimeBy(SHORT_DELAY_MS)
-            advanceTimeBy(ANIMATION_DURATION)
+            advanceTime(SHORT_DELAY_MS)
+            advanceTime(ANIMATION_DURATION)
 
             verifyFoldAnimationDidNotPlay()
         }
@@ -135,10 +150,12 @@ class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
         testScope.runTest {
             foldDeviceToScreenOff()
             foldLightRevealAnimation.onScreenTurningOn {}
-            advanceTimeBy(SHORT_DELAY_MS)
-            advanceTimeBy(ANIMATION_DURATION)
+            advanceTime(SHORT_DELAY_MS)
+            clearInvocations(mockFullScreenController)
+
+            // Unfold the device
             fakeDeviceStateRepository.emit(DeviceState.HALF_FOLDED)
-            advanceTimeBy(SHORT_DELAY_MS)
+            advanceTime(SHORT_DELAY_MS)
             powerInteractor.setScreenPowerState(ScreenPowerState.SCREEN_ON)
 
             verifyOverlayWasRemoved()
@@ -149,10 +166,36 @@ class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
         testScope.runTest {
             foldDeviceToScreenOff()
             turnScreenOn()
-            advanceTimeBy(ANIMATION_DURATION)
+            clearInvocations(mockFullScreenController)
+            advanceTime(ANIMATION_DURATION)
 
             verifyOverlayWasRemoved()
         }
+
+    @Test
+    fun foldToScreenOn_jankCujIsStarted() =
+        testScope.runTest {
+            foldDeviceToScreenOff()
+            turnScreenOn()
+            // Cuj has started but not ended
+            verify(mockJankMonitor, times(1)).begin(any(), eq(CUJ_FOLD_ANIM))
+            verify(mockJankMonitor, never()).end(eq(CUJ_FOLD_ANIM))
+        }
+
+    @Test
+    fun foldToScreenOn_animationFinished_jankCujIsFinished() =
+        testScope.runTest {
+            foldDeviceToScreenOff()
+            turnScreenOn()
+
+            advanceTime(ANIMATION_DURATION)
+            verify(mockJankMonitor, times(1)).end(eq(CUJ_FOLD_ANIM))
+        }
+
+    private fun TestScope.advanceTime(timeMs: Long) {
+        animatorTestRule.advanceTimeBy(timeMs)
+        advanceTimeBy(timeMs)
+    }
 
     @Test
     fun unfold_immediatelyRunRunnable() =
@@ -165,18 +208,18 @@ class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
     private suspend fun TestScope.foldDeviceToScreenOff() {
         fakeDeviceStateRepository.emit(DeviceState.HALF_FOLDED)
         powerInteractor.setScreenPowerState(ScreenPowerState.SCREEN_ON)
-        advanceTimeBy(SHORT_DELAY_MS)
+        advanceTime(SHORT_DELAY_MS)
         fakeDeviceStateRepository.emit(DeviceState.FOLDED)
-        advanceTimeBy(SHORT_DELAY_MS)
+        advanceTime(SHORT_DELAY_MS)
         powerInteractor.setScreenPowerState(ScreenPowerState.SCREEN_OFF)
-        advanceTimeBy(SHORT_DELAY_MS)
+        advanceTime(SHORT_DELAY_MS)
     }
 
     private fun TestScope.turnScreenOn() {
         foldLightRevealAnimation.onScreenTurningOn {}
-        advanceTimeBy(SHORT_DELAY_MS)
+        advanceTime(SHORT_DELAY_MS)
         powerInteractor.setScreenPowerState(ScreenPowerState.SCREEN_ON)
-        advanceTimeBy(SHORT_DELAY_MS)
+        advanceTime(SHORT_DELAY_MS)
     }
 
     private fun emitLastWakefulnessEventStartingToSleep() =
@@ -195,6 +238,7 @@ class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
         const val WAIT_FOR_ANIMATION_TIMEOUT_MS = 2000L
         val ANIMATION_DURATION: Long
             get() = SystemProperties.getLong("persist.fold_animation_duration", 200L)
+
         const val SHORT_DELAY_MS = 50L
     }
 }

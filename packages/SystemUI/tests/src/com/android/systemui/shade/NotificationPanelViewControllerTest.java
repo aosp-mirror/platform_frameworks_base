@@ -47,13 +47,14 @@ import android.animation.ValueAnimator;
 import android.graphics.Point;
 import android.os.PowerManager;
 import android.platform.test.annotations.DisableFlags;
-import android.testing.AndroidTestingRunner;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.DejankUtils;
@@ -78,7 +79,7 @@ import org.mockito.InOrder;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NotificationPanelViewControllerTest extends NotificationPanelViewControllerBaseTest {
 

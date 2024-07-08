@@ -20,6 +20,7 @@ import android.graphics.Point
 import android.hardware.biometrics.BiometricSourceType
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
@@ -73,6 +74,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dreamOverlayCallbackController: DreamOverlayCallbackController
     @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Captor private lateinit var updateCallbackCaptor: ArgumentCaptor<KeyguardUpdateMonitorCallback>
     private val mainDispatcher = StandardTestDispatcher()
     private val testDispatcher = StandardTestDispatcher()
@@ -100,6 +102,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 systemClock,
                 facePropertyRepository,
                 userTracker,
+                lockPatternUtils,
             )
     }
 

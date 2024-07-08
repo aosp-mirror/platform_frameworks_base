@@ -20,7 +20,7 @@ import android.view.MotionEvent
 import androidx.lifecycle.LifecycleRegistry
 import com.android.keyguard.AuthKeyguardMessageArea
 import com.android.systemui.animation.ActivityTransitionAnimator
-import com.android.systemui.navigationbar.NavigationBarView
+import com.android.systemui.navigationbar.views.NavigationBarView
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.qs.QSPanelController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow

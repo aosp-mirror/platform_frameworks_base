@@ -305,26 +305,20 @@ constructor(
         dumpManager.registerDumpable(this)
     }
 
-    fun isEnabled(): Boolean {
-        execution.assertIsMainThread()
+    val isEnabled: Boolean = plugin != null
 
-        return plugin != null
-    }
+    val isDateWeatherDecoupled: Boolean = datePlugin != null && weatherPlugin != null
 
-    fun isDateWeatherDecoupled(): Boolean {
-        execution.assertIsMainThread()
-
-        return datePlugin != null && weatherPlugin != null
-    }
-
-    fun isWeatherEnabled(): Boolean {
-       execution.assertIsMainThread()
-       val showWeather = secureSettings.getIntForUser(
-           LOCK_SCREEN_WEATHER_ENABLED,
-           1,
-           userTracker.userId) == 1
-       return showWeather
-    }
+    val isWeatherEnabled: Boolean
+        get() {
+            val showWeather =
+                secureSettings.getIntForUser(
+                    LOCK_SCREEN_WEATHER_ENABLED,
+                    1,
+                    userTracker.userId,
+                ) == 1
+            return showWeather
+        }
 
     private fun updateBypassEnabled() {
         val bypassEnabled = bypassController.bypassEnabled
@@ -337,10 +331,10 @@ constructor(
     fun buildAndConnectDateView(parent: ViewGroup): View? {
         execution.assertIsMainThread()
 
-        if (!isEnabled()) {
+        if (!isEnabled) {
             throw RuntimeException("Cannot build view when not enabled")
         }
-        if (!isDateWeatherDecoupled()) {
+        if (!isDateWeatherDecoupled) {
             throw RuntimeException("Cannot build date view when not decoupled")
         }
 
@@ -361,10 +355,10 @@ constructor(
     fun buildAndConnectWeatherView(parent: ViewGroup): View? {
         execution.assertIsMainThread()
 
-        if (!isEnabled()) {
+        if (!isEnabled) {
             throw RuntimeException("Cannot build view when not enabled")
         }
-        if (!isDateWeatherDecoupled()) {
+        if (!isDateWeatherDecoupled) {
             throw RuntimeException("Cannot build weather view when not decoupled")
         }
 
@@ -385,7 +379,7 @@ constructor(
     fun buildAndConnectView(parent: ViewGroup): View? {
         execution.assertIsMainThread()
 
-        if (!isEnabled()) {
+        if (!isEnabled) {
             throw RuntimeException("Cannot build view when not enabled")
         }
 
@@ -577,7 +571,7 @@ constructor(
     }
 
     private fun filterSmartspaceTarget(t: SmartspaceTarget): Boolean {
-        if (isDateWeatherDecoupled() && t.featureType == SmartspaceTarget.FEATURE_WEATHER) {
+        if (isDateWeatherDecoupled && t.featureType == SmartspaceTarget.FEATURE_WEATHER) {
             return false
         }
         if (!showNotifications) {

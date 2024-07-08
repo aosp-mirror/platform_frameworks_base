@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Učitava otklanjanje grešaka GPU-a u apl. za otklanjanje grešaka"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Opširne evidencije prodavca"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Uvrštava u izveštaje o greškama dodatne posebne evidencije prodavca za uređaje, koje mogu da sadrže privatne podatke, da troše više baterije i/ili da koriste više memorije."</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Razmera animacije prozora"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Razmera animacije prelaza"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatorova razmera trajanja"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmi i podsetnici"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Omogućite ovoj aplikaciji da podešava alarme i zakazuje vremenski osetljive radnje. To omogućava da aplikacija bude pokrenuta u pozadini, što može da troši više baterije.\n\nAko je ova dozvola isključena, postojeći alarmi i događaji zasnovani na vremenu zakazani pomoću ove aplikacije neće raditi."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"zakazati, alarm, podsetnik, sat"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"Ne uznemiravaj"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Uključi"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Uključite režim Ne uznemiravaj"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nikad"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Trajanje"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Pitaj svaki put"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Dok ne isključite"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(Bez imena)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Upravo"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Ovaj telefon"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Ovaj tablet"</string>

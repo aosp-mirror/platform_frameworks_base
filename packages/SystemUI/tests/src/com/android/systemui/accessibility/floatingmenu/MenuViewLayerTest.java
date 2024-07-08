@@ -258,8 +258,9 @@ public class MenuViewLayerTest extends SysuiTestCase {
         setupEnabledAccessibilityServiceList();
 
         mMenuViewLayer.mDismissMenuAction.run();
-        final String value = Settings.Secure.getString(mSpyContext.getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        final String value = Settings.Secure.getStringForUser(mSpyContext.getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT));
 
         assertThat(value).isEqualTo("");
     }
@@ -274,8 +275,9 @@ public class MenuViewLayerTest extends SysuiTestCase {
                 ShortcutConstants.UserShortcutType.HARDWARE)).thenReturn(stubShortcutTargets);
 
         mMenuViewLayer.mDismissMenuAction.run();
-        final String value = Settings.Secure.getString(mSpyContext.getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        final String value = Settings.Secure.getStringForUser(mSpyContext.getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT));
 
         assertThat(value).isEqualTo(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
     }
@@ -445,9 +447,11 @@ public class MenuViewLayerTest extends SysuiTestCase {
     }
 
     private void setupEnabledAccessibilityServiceList() {
-        Settings.Secure.putString(mSpyContext.getContentResolver(),
+        Settings.Secure.putStringForUser(mSpyContext.getContentResolver(),
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
+                TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString(),
+                mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT)
+        );
 
         final ResolveInfo resolveInfo = new ResolveInfo();
         final ServiceInfo serviceInfo = new ServiceInfo();

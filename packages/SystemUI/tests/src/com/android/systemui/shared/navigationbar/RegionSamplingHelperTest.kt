@@ -17,12 +17,12 @@
 package com.android.systemui.shared.navigationbar
 
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.SurfaceControl
 import android.view.View
 import android.view.ViewRootImpl
 import androidx.concurrent.futures.DirectExecutor
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -43,7 +43,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @RunWithLooper
 class RegionSamplingHelperTest : SysuiTestCase() {

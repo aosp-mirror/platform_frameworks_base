@@ -13,9 +13,9 @@ import android.content.pm.PackageManager;
 import android.media.MediaRouter;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class CastControllerImplTest extends SysuiTestCase {
 
