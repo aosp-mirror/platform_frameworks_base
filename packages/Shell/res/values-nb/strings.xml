@@ -25,9 +25,9 @@
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Feilrapporten vises snart på telefonen"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Velg for å dele feilrapporten"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Trykk for å dele feilrapporten"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Velg for å dele feilrapporten uten noen skjermdump, eller vent til skjermdumpen er klar"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Trykk for å dele feilrapporten uten noen skjermdump, eller vent til skjermdumpen er klar"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Trykk for å dele feilrapporten uten noen skjermdump, eller vent til skjermdumpen er klar"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Velg for å dele feilrapporten uten noen skjermbilde, eller vent til skjermbildet er klar"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Trykk for å dele feilrapporten uten noen skjermbilde, eller vent til skjermbildet er klar"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Trykk for å dele feilrapporten uten noen skjermbilde, eller vent til skjermbildet er klar"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Feilrapporter inneholder data fra systemets forskjellige loggfiler. Dette kan inkludere data du ser på som sensitiv (for eksempel appbruk og posisjonsdata). Du bør bare dele feilrapporter med folk og apper du stoler på."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Ikke vis igjen"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Feilrapporter"</string>

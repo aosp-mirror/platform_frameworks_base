@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor.scenetransition
 
 import com.android.systemui.keyguard.data.repository.lockscreenSceneTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.internalKeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -29,5 +30,6 @@ var Kosmos.lockscreenSceneTransitionInteractor by
             applicationScope = applicationCoroutineScope,
             sceneInteractor = sceneInteractor,
             repository = lockscreenSceneTransitionRepository,
+            internalTransitionInteractor = internalKeyguardTransitionInteractor,
         )
     }

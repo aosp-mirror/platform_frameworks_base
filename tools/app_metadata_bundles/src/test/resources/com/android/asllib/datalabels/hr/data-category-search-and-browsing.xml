@@ -1,5 +1,4 @@
 <data-labels>
-    <data-shared dataCategory="search_and_browsing"
-        dataType="web_browsing_history"
+    <data-shared dataType="search_and_browsing_data_type_web_browsing_history"
         purposes="analytics" />
 </data-labels>

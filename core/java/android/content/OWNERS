@@ -14,3 +14,4 @@ per-file ComponentCallbacksController = file:/services/core/java/com/android/ser
 per-file ComponentCallbacksController = charlesccchen@google.com
 per-file AttributionSource* = file:/core/java/android/permission/OWNERS
 per-file Broadcast* = file:/BROADCASTS_OWNERS
+per-file ComponentCallbacks*.java = file:/PERFORMANCE_OWNERS

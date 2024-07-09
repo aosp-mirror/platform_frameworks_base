@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.notification.shared.byIsRowDismissed
 import com.android.systemui.statusbar.notification.shared.byIsSilent
 import com.android.systemui.statusbar.notification.shared.byIsSuppressedFromStatusBar
 import com.android.systemui.statusbar.notification.shared.byKey
+import com.android.systemui.user.domain.UserDomainLayerModule
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -156,7 +157,14 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
 
     private val bubbles: Bubbles = mock()
 
-    @Component(modules = [SysUITestModule::class, BiometricsDomainLayerModule::class])
+    @Component(
+        modules =
+            [
+                SysUITestModule::class,
+                BiometricsDomainLayerModule::class,
+                UserDomainLayerModule::class,
+            ]
+    )
     @SysUISingleton
     interface TestComponent : SysUITestComponent<AlwaysOnDisplayNotificationIconsInteractor> {
 

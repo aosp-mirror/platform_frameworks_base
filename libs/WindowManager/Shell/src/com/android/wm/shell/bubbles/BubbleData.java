@@ -35,7 +35,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubbles.DismissReason;
@@ -602,7 +602,7 @@ public class BubbleData {
         List<Bubble> removedBubbles = filterAllBubbles(bubble ->
                 userId == bubble.getUser().getIdentifier());
         for (Bubble b : removedBubbles) {
-            doRemove(b.getKey(), Bubbles.DISMISS_USER_REMOVED);
+            doRemove(b.getKey(), Bubbles.DISMISS_USER_ACCOUNT_REMOVED);
         }
         if (!removedBubbles.isEmpty()) {
             dispatchPendingChanges();
@@ -678,7 +678,7 @@ public class BubbleData {
                 || reason == Bubbles.DISMISS_SHORTCUT_REMOVED
                 || reason == Bubbles.DISMISS_PACKAGE_REMOVED
                 || reason == Bubbles.DISMISS_USER_CHANGED
-                || reason == Bubbles.DISMISS_USER_REMOVED;
+                || reason == Bubbles.DISMISS_USER_ACCOUNT_REMOVED;
 
         int indexToRemove = indexForKey(key);
         if (indexToRemove == -1) {
@@ -916,6 +916,9 @@ public class BubbleData {
             ((Bubble) bubble).markAsAccessedAt(mTimeSource.currentTimeMillis());
         }
         mSelectedBubble = bubble;
+        if (isOverflow) {
+            mShowingOverflow = true;
+        }
         mStateChange.selectedBubble = bubble;
         mStateChange.selectionChanged = true;
     }

@@ -120,11 +120,13 @@ public abstract class BiometricServiceRegistry<T extends BiometricServiceProvide
         // Register each sensor individually with BiometricService
         final List<P> allProps = new ArrayList<>();
         for (T provider : providers) {
-            final List<P> props = provider.getSensorProperties();
-            for (P prop : props) {
-                registerService(biometricService, prop);
+            if(provider != null) {
+                final List<P> props = provider.getSensorProperties();
+                for (P prop : props) {
+                    registerService(biometricService, prop);
+                }
+                allProps.addAll(props);
             }
-            allProps.addAll(props);
         }
 
         finishRegistration(providers, allProps);

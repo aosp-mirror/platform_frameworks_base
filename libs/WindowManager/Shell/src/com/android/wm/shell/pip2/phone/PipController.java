@@ -36,7 +36,7 @@ import androidx.annotation.BinderThread;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.Preconditions;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -285,7 +285,8 @@ public class PipController implements ConfigurationChangeListener,
     }
 
     private void onSwipePipToHomeAnimationStart(int taskId, ComponentName componentName,
-            Rect destinationBounds, SurfaceControl overlay, Rect appBounds) {
+            Rect destinationBounds, SurfaceControl overlay, Rect appBounds,
+            Rect sourceRectHint) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "onSwipePipToHomeAnimationStart: %s", componentName);
         Bundle extra = new Bundle();
@@ -351,6 +352,7 @@ public class PipController implements ConfigurationChangeListener,
         mPipBoundsAlgorithm.dump(pw, innerPrefix);
         mPipBoundsState.dump(pw, innerPrefix);
         mPipDisplayLayoutState.dump(pw, innerPrefix);
+        mPipTransitionState.dump(pw, innerPrefix);
     }
 
     /**
@@ -409,13 +411,15 @@ public class PipController implements ConfigurationChangeListener,
 
         @Override
         public void stopSwipePipToHome(int taskId, ComponentName componentName,
-                Rect destinationBounds, SurfaceControl overlay, Rect appBounds) {
+                Rect destinationBounds, SurfaceControl overlay, Rect appBounds,
+                Rect sourceRectHint) {
             if (overlay != null) {
                 overlay.setUnreleasedWarningCallSite("PipController.stopSwipePipToHome");
             }
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> controller.onSwipePipToHomeAnimationStart(
-                            taskId, componentName, destinationBounds, overlay, appBounds));
+                            taskId, componentName, destinationBounds, overlay, appBounds,
+                            sourceRectHint));
         }
 
         @Override

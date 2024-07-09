@@ -663,6 +663,7 @@ public final class TransitionInfo implements Parcelable {
         private final Rect mStartAbsBounds = new Rect();
         private final Rect mEndAbsBounds = new Rect();
         private final Point mEndRelOffset = new Point();
+        private final Point mEndParentSize = new Point();
         private ActivityManager.RunningTaskInfo mTaskInfo = null;
         private boolean mAllowEnterPip;
         private int mStartDisplayId = INVALID_DISPLAY;
@@ -697,6 +698,7 @@ public final class TransitionInfo implements Parcelable {
             mStartAbsBounds.readFromParcel(in);
             mEndAbsBounds.readFromParcel(in);
             mEndRelOffset.readFromParcel(in);
+            mEndParentSize.readFromParcel(in);
             mTaskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
             mAllowEnterPip = in.readBoolean();
             mStartDisplayId = in.readInt();
@@ -721,6 +723,7 @@ public final class TransitionInfo implements Parcelable {
             out.mStartAbsBounds.set(mStartAbsBounds);
             out.mEndAbsBounds.set(mEndAbsBounds);
             out.mEndRelOffset.set(mEndRelOffset);
+            out.mEndParentSize.set(mEndParentSize);
             out.mTaskInfo = mTaskInfo;
             out.mAllowEnterPip = mAllowEnterPip;
             out.mStartDisplayId = mStartDisplayId;
@@ -778,6 +781,13 @@ public final class TransitionInfo implements Parcelable {
         /** Sets the offset of this container from its parent surface */
         public void setEndRelOffset(int left, int top) {
             mEndRelOffset.set(left, top);
+        }
+
+        /**
+         * Sets the size of its parent container after the change.
+         */
+        public void setEndParentSize(int width, int height) {
+            mEndParentSize.set(width, height);
         }
 
         /**
@@ -916,6 +926,14 @@ public final class TransitionInfo implements Parcelable {
             return mEndRelOffset;
         }
 
+        /**
+         * Returns the size of parent container after the change.
+         */
+        @NonNull
+        public Point getEndParentSize() {
+            return mEndParentSize;
+        }
+
         /** @return the leash or surface to animate for this container */
         @NonNull
         public SurfaceControl getLeash() {
@@ -1003,6 +1021,7 @@ public final class TransitionInfo implements Parcelable {
             mStartAbsBounds.writeToParcel(dest, flags);
             mEndAbsBounds.writeToParcel(dest, flags);
             mEndRelOffset.writeToParcel(dest, flags);
+            mEndParentSize.writeToParcel(dest, flags);
             dest.writeTypedObject(mTaskInfo, flags);
             dest.writeBoolean(mAllowEnterPip);
             dest.writeInt(mStartDisplayId);
@@ -1054,6 +1073,9 @@ public final class TransitionInfo implements Parcelable {
             sb.append(" eb="); sb.append(mEndAbsBounds);
             if (mEndRelOffset.x != 0 || mEndRelOffset.y != 0) {
                 sb.append(" eo="); sb.append(mEndRelOffset);
+            }
+            if (!mEndParentSize.equals(0, 0)) {
+                sb.append(" epz=").append(mEndParentSize);
             }
             sb.append(" d=");
             if (mStartDisplayId != mEndDisplayId) {

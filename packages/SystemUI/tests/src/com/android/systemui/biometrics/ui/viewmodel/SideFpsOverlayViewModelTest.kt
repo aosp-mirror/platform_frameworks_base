@@ -27,6 +27,7 @@ import android.view.DisplayInfo
 import android.view.WindowInsets
 import android.view.WindowMetrics
 import android.view.windowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.model.KeyPath
 import com.android.keyguard.keyguardUpdateMonitor
@@ -62,7 +63,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
@@ -71,7 +71,7 @@ import org.mockito.junit.MockitoRule
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class SideFpsOverlayViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     @JvmField @Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()

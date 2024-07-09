@@ -2,6 +2,7 @@ package com.android.systemui.animation.back
 
 import android.util.DisplayMetrics
 import android.window.BackEvent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.argumentCaptor
@@ -10,11 +11,10 @@ import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mockito.verify
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class OnBackAnimationCallbackExtensionTest : SysuiTestCase() {
     private val onBackProgress: (BackTransformation) -> Unit = mock()
     private val onBackStart: (BackEvent) -> Unit = mock()

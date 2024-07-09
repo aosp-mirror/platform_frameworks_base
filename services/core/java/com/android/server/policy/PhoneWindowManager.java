@@ -486,7 +486,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     boolean mBootMessageNeedsHiding;
     volatile boolean mBootAnimationDismissable;
-    private KeyguardServiceDelegate mKeyguardDelegate;
+    @VisibleForTesting KeyguardServiceDelegate mKeyguardDelegate;
     private boolean mKeyguardBound;
     final DrawnListener mKeyguardDrawnCallback = new DrawnListener() {
         @Override
@@ -2090,8 +2090,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     "Home - Long Press");
             switch (mLongPressOnHomeBehavior) {
                 case LONG_PRESS_HOME_ALL_APPS:
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
-                    launchAllAppsAction();
+                    if (mHasFeatureLeanback) {
+                        launchAllAppsAction();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
+                    } else {
+                        launchAllAppsViaA11y();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ACCESSIBILITY_ALL_APPS);
+                    }
                     break;
                 case LONG_PRESS_HOME_ASSIST:
                     logKeyboardSystemsEvent(event, KeyboardLogEvent.LAUNCH_ASSISTANT);
@@ -2882,6 +2887,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         ContentResolver resolver = mContext.getContentResolver();
         boolean updateRotation = false;
+        boolean updateKidsModeSettings = false;
+        final boolean kidsModeEnabled;
         synchronized (mLock) {
             mEndcallBehavior = Settings.System.getIntForUser(resolver,
                     Settings.System.END_BUTTON_BEHAVIOR,
@@ -2995,20 +3002,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Secure.STYLUS_BUTTONS_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
             mInputManagerInternal.setStylusButtonMotionEventsEnabled(mStylusButtonsEnabled);
 
-            final boolean kidsModeEnabled = Settings.Secure.getIntForUser(resolver,
+            kidsModeEnabled = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.NAV_BAR_KIDS_MODE, 0, UserHandle.USER_CURRENT) == 1;
             if (mKidsModeEnabled != kidsModeEnabled) {
                 mKidsModeEnabled = kidsModeEnabled;
-                updateKidsModeSettings();
+                updateKidsModeSettings = true;
             }
+        }
+        if (updateKidsModeSettings) {
+            updateKidsModeSettings(kidsModeEnabled);
         }
         if (updateRotation) {
             updateRotation(true);
         }
     }
 
-    private void updateKidsModeSettings() {
-        if (mKidsModeEnabled) {
+    private void updateKidsModeSettings(boolean kidsModeEnabled) {
+        if (kidsModeEnabled) {
             // Needed since many Kids apps aren't optimised to support both orientations and it
             // will be hard for kids to understand the app compat mode.
             // TODO(229961548): Remove ignoreOrientationRequest exception for Kids Mode once
@@ -3678,12 +3688,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_ALL_APPS:
-                if (!down) {
-                    mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
-                    Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
-                    msg.setAsynchronous(true);
-                    msg.sendToTarget();
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
+                if (firstDown) {
+                    if (mHasFeatureLeanback) {
+                        mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
+                        Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
+                        msg.setAsynchronous(true);
+                        msg.sendToTarget();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
+                    } else {
+                        launchAllAppsViaA11y();
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.ACCESSIBILITY_ALL_APPS);
+                    }
                 }
                 return true;
             case KeyEvent.KEYCODE_NOTIFICATION:
@@ -5481,9 +5496,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // In case startedGoingToSleep is called after screenTurnedOff (the source caller is in
         // order but the methods run on different threads) and updateScreenOffSleepToken was
         // skipped. Then acquire sleep token if screen was off.
-        if (!mDefaultDisplayPolicy.isScreenOnFully() && !mDefaultDisplayPolicy.isScreenOnEarly()
-                && com.android.window.flags.Flags.skipSleepingWhenSwitchingDisplay()) {
-            updateScreenOffSleepToken(true /* acquire */, false /* isSwappingDisplay */);
+        if (!mDefaultDisplayPolicy.isScreenOnFully() && !mDefaultDisplayPolicy.isScreenOnEarly()) {
+            updateScreenOffSleepToken(true /* acquire */);
         }
 
         if (mKeyguardDelegate != null) {
@@ -5646,9 +5660,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Display" + displayId + " turned off...");
 
         if (displayId == DEFAULT_DISPLAY) {
-            if (!isSwappingDisplay || mIsGoingToSleepDefaultDisplay
-                    || !com.android.window.flags.Flags.skipSleepingWhenSwitchingDisplay()) {
-                updateScreenOffSleepToken(true /* acquire */, isSwappingDisplay);
+            if (!isSwappingDisplay || mIsGoingToSleepDefaultDisplay) {
+                updateScreenOffSleepToken(true /* acquire */);
             }
             mRequestedOrSleepingDefaultDisplay = false;
             mDefaultDisplayPolicy.screenTurnedOff();
@@ -5707,7 +5720,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (displayId == DEFAULT_DISPLAY) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurningOn",
                     0 /* cookie */);
-            updateScreenOffSleepToken(false /* acquire */, false /* isSwappingDisplay */);
+            updateScreenOffSleepToken(false /* acquire */);
             mDefaultDisplayPolicy.screenTurningOn(screenOnListener);
             mBootAnimationDismissable = false;
 
@@ -6213,9 +6226,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     // TODO (multidisplay): Support multiple displays in WindowManagerPolicy.
-    private void updateScreenOffSleepToken(boolean acquire, boolean isSwappingDisplay) {
+    private void updateScreenOffSleepToken(boolean acquire) {
         if (acquire) {
-            mScreenOffSleepTokenAcquirer.acquire(DEFAULT_DISPLAY, isSwappingDisplay);
+            mScreenOffSleepTokenAcquirer.acquire(DEFAULT_DISPLAY);
         } else {
             mScreenOffSleepTokenAcquirer.release(DEFAULT_DISPLAY);
         }
@@ -6511,6 +6524,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void setSwitchingUser(boolean switching) {
         mKeyguardDelegate.setSwitchingUser(switching);
+        if (switching) {
+            dismissKeyboardShortcutsMenu();
+        }
     }
 
     @Override

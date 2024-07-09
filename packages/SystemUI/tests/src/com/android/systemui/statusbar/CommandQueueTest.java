@@ -42,6 +42,7 @@ import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 import android.view.accessibility.Flags;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.LetterboxDetails;
@@ -54,8 +55,10 @@ import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class CommandQueueTest extends SysuiTestCase {
 
     private static final LetterboxDetails[] TEST_LETTERBOX_DETAILS = new LetterboxDetails[] {

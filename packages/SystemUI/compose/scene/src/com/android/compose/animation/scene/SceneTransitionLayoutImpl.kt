@@ -16,7 +16,6 @@
 
 package com.android.compose.animation.scene
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -213,16 +212,9 @@ internal class SceneTransitionLayoutImpl(
 
     @Composable
     private fun BackHandler() {
-        val targetSceneForBackOrNull =
+        val targetSceneForBack =
             scene(state.transitionState.currentScene).userActions[Back]?.toScene
-        BackHandler(enabled = targetSceneForBackOrNull != null) {
-            targetSceneForBackOrNull?.let { targetSceneForBack ->
-                // TODO(b/290184746): Handle predictive back and use result.distance if specified.
-                if (state.canChangeScene(targetSceneForBack)) {
-                    with(state) { coroutineScope.onChangeScene(targetSceneForBack) }
-                }
-            }
-        }
+        PredictiveBackHandler(state, coroutineScope, targetSceneForBack)
     }
 
     private fun scenesToCompose(): List<Scene> {
@@ -293,7 +285,15 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
                 width = fromSize.width
                 height = fromSize.height
             } else {
-                val size = lerp(fromSize, toSize, transition.progress)
+                val overscrollSpec = transition.currentOverscrollSpec
+                val progress =
+                    when {
+                        overscrollSpec == null -> transition.progress
+                        overscrollSpec.scene == transition.toScene -> 1f
+                        else -> 0f
+                    }
+
+                val size = lerp(fromSize, toSize, progress)
                 width = size.width.coerceAtLeast(0)
                 height = size.height.coerceAtLeast(0)
             }

@@ -21,6 +21,7 @@ import static android.Manifest.permission.DETECT_SCREEN_CAPTURE;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.app.Instrumentation.DEBUG_FINISH_ACTIVITY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
@@ -1150,6 +1151,11 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>To keep the Intent instance for future use, call {@link #setIntent(Intent)}, and use
      * this method to retrieve it.
+     *
+     * <p>Note that in {@link #onNewIntent}, this method will return the original Intent. You can
+     * use {@link #setIntent(Intent)} to update it to the new Intent.
+     *
+     * @return {@link Intent} instance that started this activity, or that was kept for future use
      */
     public Intent getIntent() {
         return mIntent;
@@ -1170,9 +1176,14 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Returns the ComponentCaller instance of the app that launched this activity with the intent
-     * from {@link #getIntent()}. To keep the value of the ComponentCaller instance for new intents,
-     * call {@link #setIntent(Intent, ComponentCaller)} instead of {@link #setIntent(Intent)}.
+     * Returns the ComponentCaller instance of the app that started this activity.
+     *
+     * <p>To keep the ComponentCaller instance for future use, call
+     * {@link #setIntent(Intent, ComponentCaller)}, and use this method to retrieve it.
+     *
+     * <p>Note that in {@link #onNewIntent}, this method will return the original ComponentCaller.
+     * You can use {@link #setIntent(Intent, ComponentCaller)} to update it to the new
+     * ComponentCaller.
      *
      * @return {@link ComponentCaller} instance corresponding to the intent from
      *         {@link #getIntent()}, or {@code null} if the activity was not launched with that
@@ -3691,7 +3702,7 @@ public class Activity extends ContextThemeWrapper
      * @see View#findViewById(int)
      * @see Activity#requireViewById(int)
      */
-    @Nullable
+    /* TODO(b/347672184): Re-add @Nullable */
     public <T extends View> T findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
     }
@@ -7156,8 +7167,8 @@ public class Activity extends ContextThemeWrapper
     /**
      * Returns the ComponentCaller instance of the app that initially launched this activity.
      *
-     * <p>Note that calls to {@link #onNewIntent} have no effect on the returned value of this
-     * method.
+     * <p>Note that calls to {@link #onNewIntent} and {@link #setIntent} have no effect on the
+     * returned value of this method.
      *
      * @return {@link ComponentCaller} instance
      * @see ComponentCaller
@@ -7287,6 +7298,9 @@ public class Activity extends ContextThemeWrapper
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void finish(int finishTask) {
+        if (DEBUG_FINISH_ACTIVITY) {
+            Log.d("Instrumentation", "finishActivity: finishTask=" + finishTask, new Throwable());
+        }
         if (mParent == null) {
             int resultCode;
             Intent resultData;
@@ -7554,6 +7568,12 @@ public class Activity extends ContextThemeWrapper
      * orientation, the screen will immediately be changed (possibly causing
      * the activity to be restarted). Otherwise, this will be used the next
      * time the activity is visible.
+     *
+     * <aside class="note"><b>Note:</b> Device manufacturers can configure devices to override
+     *    (ignore) calls to this method to improve the layout of orientation-restricted apps. See
+     *    <a href="{@docRoot}guide/practices/device-compatibility-mode">
+     *      Device compatibility mode</a>.
+     * </aside>
      *
      * @param requestedOrientation An orientation constant as used in
      * {@link ActivityInfo#screenOrientation ActivityInfo.screenOrientation}.
@@ -9291,11 +9311,11 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
                 "dispatchMultiWindowModeChanged " + this + ": " + isInMultiWindowMode
                         + " " + newConfig);
+        mIsInMultiWindowMode = isInMultiWindowMode;
         mFragments.dispatchMultiWindowModeChanged(isInMultiWindowMode, newConfig);
         if (mWindow != null) {
             mWindow.onMultiWindowModeChanged();
         }
-        mIsInMultiWindowMode = isInMultiWindowMode;
         onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
     }
 
@@ -9304,11 +9324,11 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
                 "dispatchPictureInPictureModeChanged " + this + ": " + isInPictureInPictureMode
                         + " " + newConfig);
+        mIsInPictureInPictureMode = isInPictureInPictureMode;
         mFragments.dispatchPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
         if (mWindow != null) {
             mWindow.onPictureInPictureModeChanged(isInPictureInPictureMode);
         }
-        mIsInPictureInPictureMode = isInPictureInPictureMode;
         onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
     }
 

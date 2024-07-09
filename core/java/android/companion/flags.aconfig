@@ -54,3 +54,11 @@ flag {
     description: "Unpair with an associated bluetooth device"
     bug: "322237619"
 }
+
+flag {
+    name: "association_failure_code"
+    is_exported: true
+    namespace: "companion"
+    description: "Enable association failure code API"
+    bug: "331459560"
+}

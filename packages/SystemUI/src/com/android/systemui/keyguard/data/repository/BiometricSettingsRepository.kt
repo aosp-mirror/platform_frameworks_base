@@ -188,35 +188,33 @@ constructor(
         )
 
     private val isFingerprintEnrolled: Flow<Boolean> =
-        selectedUserId
-            .flatMapLatest { currentUserId ->
-                conflatedCallbackFlow {
-                    val callback =
-                        object : AuthController.Callback {
-                            override fun onEnrollmentsChanged(
-                                sensorBiometricType: BiometricType,
-                                userId: Int,
-                                hasEnrollments: Boolean
-                            ) {
-                                if (sensorBiometricType.isFingerprint && userId == currentUserId) {
-                                    trySendWithFailureLogging(
-                                        hasEnrollments,
-                                        TAG,
-                                        "update fpEnrollment"
-                                    )
-                                }
+        selectedUserId.flatMapLatest { currentUserId ->
+            conflatedCallbackFlow {
+                val callback =
+                    object : AuthController.Callback {
+                        override fun onEnrollmentsChanged(
+                            sensorBiometricType: BiometricType,
+                            userId: Int,
+                            hasEnrollments: Boolean
+                        ) {
+                            if (sensorBiometricType.isFingerprint && userId == currentUserId) {
+                                trySendWithFailureLogging(
+                                    hasEnrollments,
+                                    TAG,
+                                    "update fpEnrollment"
+                                )
                             }
                         }
-                    authController.addCallback(callback)
-                    awaitClose { authController.removeCallback(callback) }
-                }
+                    }
+                authController.addCallback(callback)
+                trySendWithFailureLogging(
+                    authController.isFingerprintEnrolled(currentUserId),
+                    TAG,
+                    "Initial value of fingerprint enrollment"
+                )
+                awaitClose { authController.removeCallback(callback) }
             }
-            .stateIn(
-                scope,
-                started = SharingStarted.Eagerly,
-                initialValue =
-                    authController.isFingerprintEnrolled(userRepository.getSelectedUserInfo().id)
-            )
+        }
 
     private val isFaceEnrolled: Flow<Boolean> =
         selectedUserId.flatMapLatest { selectedUserId: Int ->

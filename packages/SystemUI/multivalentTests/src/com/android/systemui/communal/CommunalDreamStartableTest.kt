@@ -22,7 +22,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
@@ -48,6 +47,7 @@ import org.mockito.Mockito.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@EnableFlags(Flags.FLAG_COMMUNAL_HUB)
 @RunWith(AndroidJUnit4::class)
 class CommunalDreamStartableTest : SysuiTestCase() {
     private val kosmos = testKosmos()
@@ -66,7 +66,6 @@ class CommunalDreamStartableTest : SysuiTestCase() {
                     powerInteractor = kosmos.powerInteractor,
                     keyguardInteractor = kosmos.keyguardInteractor,
                     keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
-                    communalInteractor = kosmos.communalInteractor,
                     dreamManager = dreamManager,
                     bgScope = kosmos.applicationCoroutineScope,
                 )
@@ -78,7 +77,7 @@ class CommunalDreamStartableTest : SysuiTestCase() {
         testScope.runTest {
             keyguardRepository.setDreaming(false)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
-            whenever(dreamManager.canStartDreaming(/* isScreenOn = */ true)).thenReturn(true)
+            whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)
             runCurrent()
 
             verify(dreamManager, never()).startDream()
@@ -94,7 +93,7 @@ class CommunalDreamStartableTest : SysuiTestCase() {
         testScope.runTest {
             keyguardRepository.setDreaming(false)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
-            whenever(dreamManager.canStartDreaming(/* isScreenOn = */ true)).thenReturn(true)
+            whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)
             runCurrent()
 
             verify(dreamManager, never()).startDream()
@@ -120,7 +119,7 @@ class CommunalDreamStartableTest : SysuiTestCase() {
             keyguardRepository.setDreaming(false)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
             // Not eligible to dream
-            whenever(dreamManager.canStartDreaming(/* isScreenOn = */ true)).thenReturn(false)
+            whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(false)
             transition(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB)
 
             verify(dreamManager, never()).startDream()
@@ -131,7 +130,7 @@ class CommunalDreamStartableTest : SysuiTestCase() {
         testScope.runTest {
             keyguardRepository.setDreaming(true)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
-            whenever(dreamManager.canStartDreaming(/* isScreenOn = */ true)).thenReturn(true)
+            whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)
             transition(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB)
 
             verify(dreamManager, never()).startDream()
@@ -142,7 +141,7 @@ class CommunalDreamStartableTest : SysuiTestCase() {
         testScope.runTest {
             keyguardRepository.setDreaming(true)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
-            whenever(dreamManager.canStartDreaming(/* isScreenOn = */ true)).thenReturn(true)
+            whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)
 
             // Verify we do not trigger dreaming for any other state besides glanceable hub
             for (state in KeyguardState.entries) {

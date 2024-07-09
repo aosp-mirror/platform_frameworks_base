@@ -17,8 +17,8 @@
 package com.android.systemui.bluetooth.qsdialog
 
 import android.bluetooth.BluetoothAdapter
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager
@@ -35,7 +35,7 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class BluetoothTileDialogRepositoryTest : SysuiTestCase() {
 

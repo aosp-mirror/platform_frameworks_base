@@ -17,7 +17,7 @@
 package com.android.systemui.deviceentry.data.repository
 
 import android.os.PowerManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -30,7 +30,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class FaceWakeUpTriggersConfigTest : SysuiTestCase() {
     @Mock lateinit var globalSettings: GlobalSettings

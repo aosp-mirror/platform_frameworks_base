@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar.notification.interruption
 
+import android.app.NotificationManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
@@ -68,7 +70,9 @@ constructor(
     private val avalancheProvider: AvalancheProvider,
     private val systemSettings: SystemSettings,
     private val packageManager: PackageManager,
-    private val bubbles: Optional<Bubbles>
+    private val bubbles: Optional<Bubbles>,
+    private val context: Context,
+    private val notificationManager: NotificationManager
 ) : VisualInterruptionDecisionProvider {
 
     init {
@@ -172,6 +176,7 @@ constructor(
         addFilter(BubbleNotAllowedSuppressor())
         addFilter(BubbleNoMetadataSuppressor())
         addFilter(HunGroupAlertBehaviorSuppressor())
+        addFilter(HunSilentNotificationSuppressor())
         addFilter(HunJustLaunchedFsiSuppressor())
         addFilter(AlertAppSuspendedSuppressor())
         addFilter(AlertKeyguardVisibilitySuppressor(keyguardNotificationVisibilityProvider))
@@ -179,7 +184,7 @@ constructor(
         if (NotificationAvalancheSuppression.isEnabled) {
             addFilter(
                 AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                        uiEventLogger)
+                        uiEventLogger, context, notificationManager)
             )
             avalancheProvider.register()
         }

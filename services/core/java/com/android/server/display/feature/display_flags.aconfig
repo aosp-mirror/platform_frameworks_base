@@ -299,3 +299,11 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "offload_session_cancel_block_screen_on"
+    namespace: "wear_frameworks"
+    description: "Flag for DisplayPowerController to start notifying DisplayOffloadSession about cancelling screen on blocker."
+    bug: "331725519"
+    is_fixed_read_only: true
+}

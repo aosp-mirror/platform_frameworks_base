@@ -27,11 +27,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.dream.lowlight.util.TruncatedInterpolator
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutParams
 import com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM
 import com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP
 import com.android.systemui.complication.ComplicationLayoutParams.Position
+import com.android.systemui.dreams.dagger.DreamOverlayComponent.DreamOverlayScope
 import com.android.systemui.dreams.dagger.DreamOverlayModule
 import com.android.systemui.dreams.ui.viewmodel.DreamViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -45,12 +47,13 @@ import javax.inject.Named
 import kotlinx.coroutines.launch
 
 /** Controller for dream overlay animations. */
+@DreamOverlayScope
 class DreamOverlayAnimationsController
 @Inject
 constructor(
     private val mBlurUtils: BlurUtils,
     private val mComplicationHostViewController: ComplicationHostViewController,
-    private val mStatusBarViewController: DreamOverlayStatusBarViewController,
+    private val mStatusBarViewController: AmbientStatusBarViewController,
     private val mOverlayStateController: DreamOverlayStateController,
     @Named(DreamOverlayModule.DREAM_BLUR_RADIUS) private val mDreamBlurRadius: Int,
     private val dreamViewModel: DreamViewModel,

@@ -43,7 +43,8 @@ fun Request.Get.toGet(isPrimary: Boolean): CredentialSelectorUiState.Get {
 
             var icon: Drawable? = null
             // provide icon if all entries have the same provider
-            if (sortedEntries.all {it.providerId == sortedEntries[0].providerId}) {
+            if (sortedEntries.isNotEmpty() &&
+                sortedEntries.all {it.providerId == sortedEntries[0].providerId}) {
                 icon = providerInfos[0].icon
             }
 

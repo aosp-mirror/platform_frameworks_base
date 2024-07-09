@@ -21,6 +21,7 @@ import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.QRCodeScannerTile
+import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.impl.qr.domain.interactor.QRCodeScannerTileDataInteractor
 import com.android.systemui.qs.tiles.impl.qr.domain.interactor.QRCodeScannerTileUserActionInteractor
@@ -45,6 +46,13 @@ interface QRCodeScannerModule {
     @IntoMap
     @StringKey(QRCodeScannerTile.TILE_SPEC)
     fun bindQRCodeScannerTile(qrCodeScannerTile: QRCodeScannerTile): QSTileImpl<*>
+
+    @Binds
+    @IntoMap
+    @StringKey(QR_CODE_SCANNER_TILE_SPEC)
+    fun provideQrCodeScannerAvailabilityInteractor(
+            impl: QRCodeScannerTileDataInteractor
+    ): QSTileAvailabilityInteractor
 
     companion object {
         const val QR_CODE_SCANNER_TILE_SPEC = "qr_code_scanner"

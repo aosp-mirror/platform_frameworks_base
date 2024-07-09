@@ -16,6 +16,7 @@
 
 package com.android.systemui.log.table
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableChange.Companion.IS_INITIAL_PREFIX
@@ -35,9 +36,11 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 class LogDiffsForTableTest : SysuiTestCase() {
 
     private val testDispatcher = UnconfinedTestDispatcher()

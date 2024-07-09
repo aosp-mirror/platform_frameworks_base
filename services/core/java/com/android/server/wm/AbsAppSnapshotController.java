@@ -382,12 +382,6 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
             }
             return null;
         }
-        if (activity.hasCommittedReparentToAnimationLeash()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. App is animating " + activity);
-            }
-            return null;
-        }
         final WindowState mainWindow = activity.findMainWindow();
         if (mainWindow == null) {
             Slog.w(TAG_WM, "Failed to take screenshot. No main window for " + source);

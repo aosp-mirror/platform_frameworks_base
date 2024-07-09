@@ -94,6 +94,33 @@ public final class SessionCommittedEventLogger {
   }
 
   /**
+   * Set how many save infos there are in current session as long as mEventInternal presents.
+   */
+  public void maybeSetSaveInfoCount(int saveInfoCount) {
+        mEventInternal.ifPresent(event -> {
+            event.mSaveInfoCount = saveInfoCount;
+        });
+  }
+
+  /**
+   * Set how many save data types there are in current session as long as mEventInternal presents.
+   */
+  public void maybeSetSaveDataTypeCount(int saveDataTypeCount) {
+        mEventInternal.ifPresent(event -> {
+            event.mSaveDataTypeCount = saveDataTypeCount;
+        });
+  }
+
+  /**
+   * Set whether last fill response in session has save info as long as mEventInternal presents.
+   */
+  public void maybeSetLastFillResponseHasSaveInfo(boolean lastFillResponseHasSaveInfo) {
+        mEventInternal.ifPresent(event -> {
+            event.mLastFillResponseHasSaveInfo = lastFillResponseHasSaveInfo;
+        });
+  }
+
+  /**
    * Log an AUTOFILL_SESSION_COMMITTED event.
    */
   public void logAndEndEvent() {
@@ -109,7 +136,10 @@ public final class SessionCommittedEventLogger {
           + " mRequestCount=" + event.mRequestCount
           + " mCommitReason=" + event.mCommitReason
           + " mSessionDurationMillis=" + event.mSessionDurationMillis
-          + " mServiceUid=" + event.mServiceUid);
+          + " mServiceUid=" + event.mServiceUid
+          + " mSaveInfoCount=" + event.mSaveInfoCount
+          + " mSaveDataTypeCount=" + event.mSaveDataTypeCount
+          + " mLastFillResponseHasSaveInfo=" + event.mLastFillResponseHasSaveInfo);
     }
     FrameworkStatsLog.write(
         AUTOFILL_SESSION_COMMITTED,
@@ -118,7 +148,10 @@ public final class SessionCommittedEventLogger {
         event.mRequestCount,
         event.mCommitReason,
         event.mSessionDurationMillis,
-        event.mServiceUid);
+        event.mServiceUid,
+        event.mSaveInfoCount,
+        event.mSaveDataTypeCount,
+        event.mLastFillResponseHasSaveInfo);
     mEventInternal = Optional.empty();
   }
 
@@ -127,6 +160,9 @@ public final class SessionCommittedEventLogger {
     int mRequestCount = 0;
     int mCommitReason = COMMIT_REASON_UNKNOWN;
     long mSessionDurationMillis = 0;
+    int mSaveInfoCount = -1;
+    int mSaveDataTypeCount = -1;
+    boolean mLastFillResponseHasSaveInfo = false;
     int mServiceUid = -1;
 
     SessionCommittedEventInternal() {

@@ -18,7 +18,7 @@ package com.android.systemui.unfold
 
 import android.content.Context
 import android.content.res.Resources
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
@@ -65,7 +65,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
     private lateinit var displaySwitchLatencyTracker: DisplaySwitchLatencyTracker

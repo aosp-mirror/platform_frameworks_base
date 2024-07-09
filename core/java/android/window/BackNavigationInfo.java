@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -113,6 +114,10 @@ public final class BackNavigationInfo implements Parcelable {
     private final CustomAnimationInfo mCustomAnimationInfo;
 
     private final int mLetterboxColor;
+    @NonNull
+    private final Rect mTouchableRegion;
+
+    private final boolean mAppProgressGenerationAllowed;
 
     /**
      * Create a new {@link BackNavigationInfo} instance.
@@ -128,7 +133,9 @@ public final class BackNavigationInfo implements Parcelable {
             boolean isPrepareRemoteAnimation,
             boolean isAnimationCallback,
             @Nullable CustomAnimationInfo customAnimationInfo,
-            int letterboxColor) {
+            int letterboxColor,
+            @Nullable Rect touchableRegion,
+            boolean appProgressGenerationAllowed) {
         mType = type;
         mOnBackNavigationDone = onBackNavigationDone;
         mOnBackInvokedCallback = onBackInvokedCallback;
@@ -136,6 +143,8 @@ public final class BackNavigationInfo implements Parcelable {
         mAnimationCallback = isAnimationCallback;
         mCustomAnimationInfo = customAnimationInfo;
         mLetterboxColor = letterboxColor;
+        mTouchableRegion = new Rect(touchableRegion);
+        mAppProgressGenerationAllowed = appProgressGenerationAllowed;
     }
 
     private BackNavigationInfo(@NonNull Parcel in) {
@@ -146,6 +155,8 @@ public final class BackNavigationInfo implements Parcelable {
         mAnimationCallback = in.readBoolean();
         mCustomAnimationInfo = in.readTypedObject(CustomAnimationInfo.CREATOR);
         mLetterboxColor = in.readInt();
+        mTouchableRegion = in.readTypedObject(Rect.CREATOR);
+        mAppProgressGenerationAllowed = in.readBoolean();
     }
 
     /** @hide */
@@ -158,6 +169,8 @@ public final class BackNavigationInfo implements Parcelable {
         dest.writeBoolean(mAnimationCallback);
         dest.writeTypedObject(mCustomAnimationInfo, flags);
         dest.writeInt(mLetterboxColor);
+        dest.writeTypedObject(mTouchableRegion, flags);
+        dest.writeBoolean(mAppProgressGenerationAllowed);
     }
 
     /**
@@ -206,6 +219,24 @@ public final class BackNavigationInfo implements Parcelable {
     public int getLetterboxColor() {
         return mLetterboxColor;
     }
+
+    /**
+     * @return The app window region where the client can handle touch event.
+     * @hide
+     */
+    @NonNull
+    public Rect getTouchableRegion() {
+        return mTouchableRegion;
+    }
+
+    /**
+     * @return The client side view is able to intercept back progress event.
+     * @hide
+     */
+    public boolean isAppProgressGenerationAllowed() {
+        return mAppProgressGenerationAllowed;
+    }
+
     /**
      * Callback to be called when the back preview is finished in order to notify the server that
      * it can clean up the resources created for the animation.
@@ -402,6 +433,8 @@ public final class BackNavigationInfo implements Parcelable {
         private boolean mAnimationCallback = false;
 
         private int mLetterboxColor = Color.TRANSPARENT;
+        private Rect mTouchableRegion;
+        private boolean mAppProgressGenerationAllowed;
 
         /**
          * @see BackNavigationInfo#getType()
@@ -478,6 +511,22 @@ public final class BackNavigationInfo implements Parcelable {
         }
 
         /**
+         * @param rect Non-empty for frame of current focus window.
+         */
+        public Builder setTouchableRegion(Rect rect) {
+            mTouchableRegion = new Rect(rect);
+            return this;
+        }
+
+        /**
+         * @param allowed Whether client side view able to intercept back progress event.
+         */
+        public Builder setAppProgressAllowed(boolean allowed) {
+            mAppProgressGenerationAllowed = allowed;
+            return this;
+        }
+
+        /**
          * Builds and returns an instance of {@link BackNavigationInfo}
          */
         public BackNavigationInfo build() {
@@ -486,7 +535,9 @@ public final class BackNavigationInfo implements Parcelable {
                     mPrepareRemoteAnimation,
                     mAnimationCallback,
                     mCustomAnimationInfo,
-                    mLetterboxColor);
+                    mLetterboxColor,
+                    mTouchableRegion,
+                    mAppProgressGenerationAllowed);
         }
     }
 }

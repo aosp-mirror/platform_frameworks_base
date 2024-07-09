@@ -19,6 +19,7 @@ package com.android.server.power.hint;
 import static android.os.Flags.adpfUseFmqChannel;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+import static com.android.server.power.hint.Flags.adpfSessionTag;
 import static com.android.server.power.hint.Flags.powerhintThreadCleanup;
 
 import android.annotation.NonNull;
@@ -28,6 +29,8 @@ import android.app.ActivityManagerInternal;
 import android.app.StatsManager;
 import android.app.UidObserver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.hardware.power.ChannelConfig;
 import android.hardware.power.IPower;
 import android.hardware.power.SessionConfig;
@@ -130,6 +133,7 @@ public final class HintManagerService extends SystemService {
 
     private final IPower mPowerHal;
     private int mPowerHalVersion;
+    private final PackageManager mPackageManager;
 
     private static final String PROPERTY_SF_ENABLE_CPU_HINT = "debug.sf.enable_adpf_cpu_hint";
     private static final String PROPERTY_HWUI_ENABLE_HINT_MANAGER = "debug.hwui.use_hint_manager";
@@ -150,6 +154,11 @@ public final class HintManagerService extends SystemService {
         } else {
             mCleanUpHandler = null;
             mNonIsolatedTids = null;
+        }
+        if (adpfSessionTag()) {
+            mPackageManager = mContext.getPackageManager();
+        } else {
+            mPackageManager = null;
         }
         mActiveSessions = new ArrayMap<>();
         mChannelMap = new ArrayMap<>();
@@ -402,7 +411,7 @@ public final class HintManagerService extends SystemService {
             FgThread.getHandler().post(() -> {
                 synchronized (mLock) {
                     boolean shouldCleanup = false;
-                    if (powerhintThreadCleanup()) {
+                    if (mPowerHalVersion >= 4 && powerhintThreadCleanup()) {
                         int prevProcState = mProcStatesCache.get(uid, Integer.MAX_VALUE);
                         shouldCleanup =
                                 prevProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
@@ -819,6 +828,25 @@ public final class HintManagerService extends SystemService {
                     throw new SecurityException(errMsg);
                 }
 
+                if (adpfSessionTag() && tag == SessionTag.APP) {
+                    // If the category of the app is a game,
+                    // we change the session tag to SessionTag.GAME
+                    // as it was not previously classified
+                    switch (getUidApplicationCategory(callingUid)) {
+                        case ApplicationInfo.CATEGORY_GAME:
+                            tag = SessionTag.GAME;
+                            break;
+                        case ApplicationInfo.CATEGORY_UNDEFINED:
+                            // We use CATEGORY_UNDEFINED to filter the case when
+                            // PackageManager.NameNotFoundException is caught,
+                            // which should not happen.
+                            tag = SessionTag.APP;
+                            break;
+                        default:
+                            tag = SessionTag.APP;
+                    }
+                }
+
                 Long halSessionPtr = null;
                 if (mConfigCreationSupport.get()) {
                     try {
@@ -857,7 +885,10 @@ public final class HintManagerService extends SystemService {
                     }
                 }
 
-                logPerformanceHintSessionAtom(callingUid, halSessionPtr, durationNanos, tids);
+                final long sessionId = config != null ? config.id : halSessionPtr;
+                logPerformanceHintSessionAtom(
+                        callingUid, sessionId, durationNanos, tids, tag);
+
                 synchronized (mLock) {
                     AppHintSession hs = new AppHintSession(callingUid, callingTgid, tids, token,
                             halSessionPtr, durationNanos);
@@ -944,9 +975,20 @@ public final class HintManagerService extends SystemService {
         }
 
         private void logPerformanceHintSessionAtom(int uid, long sessionId,
-                long targetDuration, int[] tids) {
+                long targetDuration, int[] tids, @SessionTag int sessionTag) {
             FrameworkStatsLog.write(FrameworkStatsLog.PERFORMANCE_HINT_SESSION_REPORTED, uid,
-                    sessionId, targetDuration, tids.length);
+                    sessionId, targetDuration, tids.length, sessionTag);
+        }
+
+        private int getUidApplicationCategory(int uid) {
+            try {
+                final String packageName = mPackageManager.getNameForUid(uid);
+                final ApplicationInfo applicationInfo =
+                        mPackageManager.getApplicationInfo(packageName, PackageManager.MATCH_ALL);
+                return applicationInfo.category;
+            } catch (PackageManager.NameNotFoundException e) {
+                return ApplicationInfo.CATEGORY_UNDEFINED;
+            }
         }
     }
 

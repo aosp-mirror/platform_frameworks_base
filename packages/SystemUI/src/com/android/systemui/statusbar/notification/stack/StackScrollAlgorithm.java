@@ -29,6 +29,7 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -332,8 +333,10 @@ public class StackScrollAlgorithm {
 
     private void updateClipping(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-        float drawStart = ambientState.isOnKeyguard() ? 0
+        float stackTop = SceneContainerFlag.isEnabled() ? ambientState.getStackTop()
                 : ambientState.getStackY() - ambientState.getScrollY();
+        float drawStart = ambientState.isOnKeyguard() ? 0
+                : stackTop;
         float clipStart = 0;
         int childCount = algorithmState.visibleChildren.size();
         boolean firstHeadsUp = true;
@@ -442,12 +445,26 @@ public class StackScrollAlgorithm {
         state.visibleChildren.clear();
         state.visibleChildren.ensureCapacity(childCount);
         int notGoneIndex = 0;
+        boolean emptyShadeVisible = false;
         for (int i = 0; i < childCount; i++) {
             ExpandableView v = (ExpandableView) mHostView.getChildAt(i);
             if (v.getVisibility() != View.GONE) {
                 if (v == ambientState.getShelf()) {
                     continue;
                 }
+                if (FooterViewRefactor.isEnabled()) {
+                    if (v instanceof EmptyShadeView) {
+                        emptyShadeVisible = true;
+                    }
+                    if (v instanceof FooterView) {
+                        if (emptyShadeVisible || notGoneIndex == 0) {
+                            // if the empty shade is visible or the footer is the first visible
+                            // view, we're in a transitory state so let's leave the footer alone.
+                            continue;
+                        }
+                    }
+                }
+
                 notGoneIndex = updateNotGoneIndex(state, notGoneIndex, v);
                 if (v instanceof ExpandableNotificationRow row) {
 
@@ -470,11 +487,8 @@ public class StackScrollAlgorithm {
         // expanded. Consider updating these states in updateContentView instead so that we don't
         // have to recalculate in every frame.
         float currentY = -ambientState.getScrollY();
-        if (!ambientState.isOnKeyguard()
-                || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding())) {
-            // add top padding at the start as long as we're not on the lock screen
-            currentY += mNotificationScrimPadding;
-        }
+        // add top padding at the start as long as we're not on the lock screen
+        currentY += getScrimTopPaddingOrZero(ambientState);
         state.firstViewInShelf = null;
         for (int i = 0; i < state.visibleChildren.size(); i++) {
             final ExpandableView view = state.visibleChildren.get(i);
@@ -531,11 +545,9 @@ public class StackScrollAlgorithm {
      */
     protected void updatePositionsForState(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-        if (!ambientState.isOnKeyguard()
-                || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding())) {
-            algorithmState.mCurrentYPosition += mNotificationScrimPadding;
-            algorithmState.mCurrentExpandedYPosition += mNotificationScrimPadding;
-        }
+        float scrimTopPadding = getScrimTopPaddingOrZero(ambientState);
+        algorithmState.mCurrentYPosition += scrimTopPadding;
+        algorithmState.mCurrentExpandedYPosition += scrimTopPadding;
 
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
@@ -563,9 +575,7 @@ public class StackScrollAlgorithm {
                 && algorithmState.firstViewInShelf != null;
 
         final float shelfHeight = showingShelf ? ambientState.getShelf().getIntrinsicHeight() : 0f;
-        final float scrimPadding = ambientState.isOnKeyguard()
-                && (!ambientState.isBypassEnabled() || !ambientState.isPulseExpanding())
-                ? 0 : mNotificationScrimPadding;
+        final float scrimPadding = getScrimTopPaddingOrZero(ambientState);
 
         final float stackHeight = ambientState.getStackHeight() - shelfHeight - scrimPadding;
         final float stackEndHeight = ambientState.getStackEndHeight() - shelfHeight - scrimPadding;
@@ -575,6 +585,21 @@ public class StackScrollAlgorithm {
             return 0f;
         }
         return stackHeight / stackEndHeight;
+    }
+
+    /**
+     * Returns the top scrim padding, or zero if the SceneContainer flag is enabled.
+     */
+    private float getScrimTopPaddingOrZero(AmbientState ambientState) {
+        if (SceneContainerFlag.isEnabled()) {
+            // the scrim padding is set on the notification placeholder
+            return 0f;
+        }
+
+        boolean shouldUsePadding =
+                !ambientState.isOnKeyguard()
+                        || (ambientState.isBypassEnabled() && ambientState.isPulseExpanding());
+        return shouldUsePadding ? mNotificationScrimPadding : 0f;
     }
 
     private boolean hasNonClearableNotifs(StackScrollAlgorithmState algorithmState) {
@@ -641,9 +666,13 @@ public class StackScrollAlgorithm {
         // Incoming views have yTranslation=0 by default.
         viewState.setYTranslation(algorithmState.mCurrentYPosition);
 
-        float viewEnd = viewState.getYTranslation() + viewState.height + ambientState.getStackY();
+        float stackTop = SceneContainerFlag.isEnabled()
+                ? ambientState.getStackTop()
+                : ambientState.getStackY();
+        float viewEnd = stackTop + viewState.getYTranslation() + viewState.height;
         maybeUpdateHeadsUpIsVisible(viewState, ambientState.isShadeExpanded(),
                 view.mustStayOnScreen(),
+                // TODO(b/332574413) use the position from the HeadsUpNotificationPlaceholder
                 /* topVisible= */ viewState.getYTranslation() >= mNotificationScrimPadding,
                 viewEnd, /* hunMax */ ambientState.getMaxHeadsUpTranslation()
         );
@@ -681,7 +710,9 @@ public class StackScrollAlgorithm {
             }
         } else {
             if (view instanceof EmptyShadeView) {
-                float fullHeight = ambientState.getLayoutMaxHeight() + mMarginBottom
+                float fullHeight = SceneContainerFlag.isEnabled()
+                        ? ambientState.getStackCutoff() - ambientState.getStackTop()
+                        : ambientState.getLayoutMaxHeight() + mMarginBottom
                         - ambientState.getStackY();
                 viewState.setYTranslation((fullHeight - getMaxAllowedChildHeight(view)) / 2f);
             } else if (view != ambientState.getTrackedHeadsUpRow()) {
@@ -726,7 +757,7 @@ public class StackScrollAlgorithm {
                 + mPaddingBetweenElements;
 
         setLocation(view.getViewState(), algorithmState.mCurrentYPosition, i);
-        viewState.setYTranslation(viewState.getYTranslation() + ambientState.getStackY());
+        viewState.setYTranslation(viewState.getYTranslation() + stackTop);
     }
 
     @VisibleForTesting
@@ -869,6 +900,7 @@ public class StackScrollAlgorithm {
                     // Ensure that the heads up is always visible even when scrolled off.
                     // NSSL y starts at top of screen in non-split-shade, but below the qs offset
                     // in split shade, so we only need to inset by the scrim padding in split shade.
+                    // TODO(b/332574413) get the clamp inset from HeadsUpNotificationPlaceholder
                     final float clampInset = ambientState.getUseSplitShade()
                             ? mNotificationScrimPadding : mQuickQsOffsetHeight;
                     clampHunToTop(clampInset, ambientState.getStackTranslation(),
@@ -1002,8 +1034,11 @@ public class StackScrollAlgorithm {
         // Animate pinned HUN bottom corners to and from original roundness.
         final float originalCornerRadius =
                 row.isLastInSection() ? 1f : (mSmallCornerRadius / mLargeCornerRadius);
+        final float stackTop = SceneContainerFlag.isEnabled()
+                ? ambientState.getStackTop()
+                : ambientState.getStackY();
         final float bottomValue = computeCornerRoundnessForPinnedHun(mHostView.getHeight(),
-                ambientState.getStackY(), getMaxAllowedChildHeight(row), originalCornerRadius);
+                stackTop, getMaxAllowedChildHeight(row), originalCornerRadius);
         row.requestBottomRoundness(bottomValue, STACK_SCROLL_ALGO);
         row.addOnDetachResetRoundness(STACK_SCROLL_ALGO);
     }

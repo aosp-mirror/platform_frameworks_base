@@ -26,11 +26,13 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
+import static com.android.systemui.Flags.glanceableHubBackGesture;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_AWAKE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_COMMUNAL_HUB_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DOZING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DREAMING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE;
@@ -62,6 +64,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -73,7 +76,6 @@ import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 
-import com.android.compose.animation.scene.SceneKey;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
@@ -91,20 +93,18 @@ import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarController;
-import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.navigationbar.buttons.KeyButtonView;
+import com.android.systemui.navigationbar.views.NavigationBar;
+import com.android.systemui.navigationbar.views.NavigationBarView;
+import com.android.systemui.navigationbar.views.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
-import com.android.systemui.scene.shared.model.Scenes;
+import com.android.systemui.scene.shared.model.SceneFamilies;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
-import com.android.systemui.shade.domain.interactor.ShadeInteractor;
-import com.android.systemui.shade.shared.model.ShadeMode;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -115,7 +115,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
-import com.android.wm.shell.shared.DesktopModeStatus;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInterface;
 
 import dagger.Lazy;
@@ -158,7 +158,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final ScreenPinningRequest mScreenPinningRequest;
     private final NotificationShadeWindowController mStatusBarWinController;
     private final Provider<SceneInteractor> mSceneInteractor;
-    private final Provider<ShadeInteractor> mShadeInteractor;
 
     private final Runnable mConnectionRunnable = () ->
             internalConnectToCurrentUser("runnable: startConnectionToCurrentUser");
@@ -181,7 +180,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private boolean mBound;
     private boolean mIsEnabled;
 
-    private boolean mIsNonPrimaryUser;
+    private boolean mIsSystemOrVisibleBgUser;
     private int mCurrentBoundedUserId = -1;
     private boolean mInputFocusTransferStarted;
     private float mInputFocusTransferStartY;
@@ -247,7 +246,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             // Gesture was too short to be picked up by scene container touch
                             // handling; programmatically start the transition to shade scene.
                             mSceneInteractor.get().changeScene(
-                                    getShadeSceneKey(),
+                                    SceneFamilies.NotifShade,
                                     "short launcher swipe"
                             );
                         }
@@ -267,7 +266,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                                 "trackpad swipe");
                     } else if (action == ACTION_UP) {
                         mSceneInteractor.get().changeScene(
-                                getShadeSceneKey(),
+                                SceneFamilies.NotifShade,
                                 "short trackpad swipe"
                         );
                     }
@@ -632,8 +631,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             NotificationShadeWindowController statusBarWinController,
             SysUiState sysUiState,
             Provider<SceneInteractor> sceneInteractor,
-            Provider<ShadeInteractor> shadeInteractor,
             UserTracker userTracker,
+            UserManager userManager,
             WakefulnessLifecycle wakefulnessLifecycle,
             UiEventLogger uiEventLogger,
             DisplayTracker displayTracker,
@@ -644,10 +643,18 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
             BroadcastDispatcher broadcastDispatcher
     ) {
-        // b/241601880: This component shouldn't be running for a non-primary user
-        mIsNonPrimaryUser = !Process.myUserHandle().equals(UserHandle.SYSTEM);
-        if (mIsNonPrimaryUser) {
-            Log.wtf(TAG_OPS, "Unexpected initialization for non-primary user", new Throwable());
+        // b/241601880: This component should only be running for primary users or
+        // secondaryUsers when visibleBackgroundUsers are supported.
+        boolean isSystemUser = Process.myUserHandle().equals(UserHandle.SYSTEM);
+        boolean isVisibleBackgroundUser =
+                userManager.isVisibleBackgroundUsersSupported() && !userManager.isUserForeground();
+        if (!isSystemUser && isVisibleBackgroundUser) {
+            Log.d(TAG_OPS, "Initialization for visibleBackgroundUser");
+        }
+        mIsSystemOrVisibleBgUser = isSystemUser || isVisibleBackgroundUser;
+        if (!mIsSystemOrVisibleBgUser) {
+            Log.wtf(TAG_OPS, "Unexpected initialization for non-system foreground user",
+                    new Throwable());
         }
 
         mContext = context;
@@ -659,7 +666,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mScreenPinningRequest = screenPinningRequest;
         mStatusBarWinController = statusBarWinController;
         mSceneInteractor = sceneInteractor;
-        mShadeInteractor = shadeInteractor;
         mUserTracker = userTracker;
         mConnectionBackoffAttempts = 0;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(
@@ -788,7 +794,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private void onStatusBarStateChanged(boolean keyguardShowing, boolean keyguardOccluded,
             boolean keyguardGoingAway, boolean bouncerShowing, boolean isDozing,
-            boolean panelExpanded, boolean isDreaming) {
+            boolean panelExpanded, boolean isDreaming, boolean communalShowing) {
         mSysUiState.setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
                         keyguardShowing && !keyguardOccluded)
                 .setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
@@ -798,6 +804,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 .setFlag(SYSUI_STATE_BOUNCER_SHOWING, bouncerShowing)
                 .setFlag(SYSUI_STATE_DEVICE_DOZING, isDozing)
                 .setFlag(SYSUI_STATE_DEVICE_DREAMING, isDreaming)
+                .setFlag(SYSUI_STATE_COMMUNAL_HUB_SHOWING,
+                        glanceableHubBackGesture() && communalShowing)
                 .commitUpdate(mContext.getDisplayId());
     }
 
@@ -839,11 +847,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     private void internalConnectToCurrentUser(String reason) {
-        if (mIsNonPrimaryUser) {
+        if (!mIsSystemOrVisibleBgUser) {
             // This should not happen, but if any per-user SysUI component has a dependency on OPS,
             // then this could get triggered
-            Log.w(TAG_OPS, "Skipping connection to overview service due to non-primary user "
-                    + "caller");
+            Log.w(TAG_OPS,
+                    "Skipping connection to overview service due to non-system foreground user "
+                            + "caller");
             return;
         }
         disconnectFromLauncherService(reason);
@@ -923,12 +932,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             mOverviewProxy = null;
             notifyConnectionChanged();
         }
-    }
-
-    private SceneKey getShadeSceneKey() {
-        return mShadeInteractor.get().getShadeMode().getValue() == ShadeMode.dual()
-                ? Scenes.NotificationsShade
-                : Scenes.Shade;
     }
 
     private void notifyHomeRotationEnabled(boolean enabled) {

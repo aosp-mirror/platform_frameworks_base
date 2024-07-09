@@ -48,7 +48,8 @@ internal constructor(
 ) {
     private val transitionCache =
         mutableMapOf<
-            SceneKey, MutableMap<SceneKey, MutableMap<TransitionKey?, TransitionSpecImpl>>
+            SceneKey,
+            MutableMap<SceneKey, MutableMap<TransitionKey?, TransitionSpecImpl>>
         >()
 
     private val overscrollCache =
@@ -87,8 +88,7 @@ internal constructor(
         return transition(from, to, key) {
                 (it.from == to && it.to == null) || (it.to == from && it.from == null)
             }
-            ?.reversed()
-            ?: defaultTransition(from, to)
+            ?.reversed() ?: defaultTransition(from, to)
     }
 
     private fun transition(
@@ -257,12 +257,24 @@ interface OverscrollSpec {
 
     /** The [TransformationSpec] associated to this [OverscrollSpec]. */
     val transformationSpec: TransformationSpec
+
+    /**
+     * Function that takes a linear overscroll progress value ranging from 0 to +/- infinity and
+     * outputs the desired **overscroll progress value**.
+     *
+     * When the progress value is:
+     * - 0, the user is not overscrolling.
+     * - 1, the user overscrolled by exactly the [OverscrollBuilder.distance].
+     * - Greater than 1, the user overscrolled more than the [OverscrollBuilder.distance].
+     */
+    val progressConverter: (Float) -> Float
 }
 
 internal class OverscrollSpecImpl(
     override val scene: SceneKey,
     override val orientation: Orientation,
     override val transformationSpec: TransformationSpecImpl,
+    override val progressConverter: (Float) -> Float,
 ) : OverscrollSpec
 
 /**

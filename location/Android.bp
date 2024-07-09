@@ -39,6 +39,12 @@ java_sdk_library {
             "frameworks/base/core/java",
         ],
     },
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+        warning_checks: [
+            "FlaggedApi",
+        ],
+    },
 }
 
 platform_compat_config {

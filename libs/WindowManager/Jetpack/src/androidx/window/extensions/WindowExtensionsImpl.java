@@ -24,6 +24,7 @@ import android.app.Application;
 import android.app.compat.CompatChanges;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -50,6 +51,11 @@ class WindowExtensionsImpl implements WindowExtensions {
     private static final String TAG = "WindowExtensionsImpl";
 
     /**
+     * The value of the system property that indicates no override is set.
+     */
+    private static final int NO_LEVEL_OVERRIDE = -1;
+
+    /**
      * The min version of the WM Extensions that must be supported in the current platform version.
      */
     @VisibleForTesting
@@ -66,14 +72,30 @@ class WindowExtensionsImpl implements WindowExtensions {
 
     WindowExtensionsImpl() {
         mIsActivityEmbeddingEnabled = isActivityEmbeddingEnabled();
-        Log.i(TAG, "Initializing Window Extensions, vendor API level=" + mVersion
-                + ", activity embedding enabled=" + mIsActivityEmbeddingEnabled);
+
+        Log.i(TAG, generateLogMessage());
+    }
+
+    private String generateLogMessage() {
+        final StringBuilder logBuilder = new StringBuilder("Initializing Window Extensions, "
+                + "vendor API level=" + mVersion);
+        final int levelOverride = getLevelOverride();
+        if (levelOverride != NO_LEVEL_OVERRIDE) {
+            logBuilder.append(", override to ").append(levelOverride);
+        }
+        logBuilder.append(", activity embedding enabled=").append(mIsActivityEmbeddingEnabled);
+        return logBuilder.toString();
     }
 
     // TODO(b/241126279) Introduce constants to better version functionality
     @Override
     public int getVendorApiLevel() {
-        return mVersion;
+        final int levelOverride = getLevelOverride();
+        return (levelOverride != NO_LEVEL_OVERRIDE) ? levelOverride : mVersion;
+    }
+
+    private int getLevelOverride() {
+        return SystemProperties.getInt("persist.wm.debug.ext_version_override", NO_LEVEL_OVERRIDE);
     }
 
     @NonNull

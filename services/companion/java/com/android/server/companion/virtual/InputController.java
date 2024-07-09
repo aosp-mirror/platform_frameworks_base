@@ -31,6 +31,7 @@ import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
+import android.hardware.input.VirtualRotaryEncoderScrollEvent;
 import android.hardware.input.VirtualStylusButtonEvent;
 import android.hardware.input.VirtualStylusMotionEvent;
 import android.hardware.input.VirtualTouchEvent;
@@ -76,6 +77,7 @@ class InputController {
     static final String PHYS_TYPE_TOUCHSCREEN = "Touchscreen";
     static final String PHYS_TYPE_NAVIGATION_TOUCHPAD = "NavigationTouchpad";
     static final String PHYS_TYPE_STYLUS = "Stylus";
+    static final String PHYS_TYPE_ROTARY_ENCODER = "RotaryEncoder";
     @StringDef(prefix = { "PHYS_TYPE_" }, value = {
             PHYS_TYPE_DPAD,
             PHYS_TYPE_KEYBOARD,
@@ -83,6 +85,7 @@ class InputController {
             PHYS_TYPE_TOUCHSCREEN,
             PHYS_TYPE_NAVIGATION_TOUCHPAD,
             PHYS_TYPE_STYLUS,
+            PHYS_TYPE_ROTARY_ENCODER,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface PhysType {
@@ -204,6 +207,15 @@ class InputController {
                 productId, deviceToken, displayId, phys,
                 () -> mNativeWrapper.openUinputStylus(deviceName, vendorId, productId, phys,
                         height, width));
+    }
+
+    void createRotaryEncoder(@NonNull String deviceName, int vendorId, int productId,
+            @NonNull IBinder deviceToken, int displayId) throws DeviceCreationException {
+        final String phys = createPhys(PHYS_TYPE_ROTARY_ENCODER);
+        createDeviceInternal(InputDeviceDescriptor.TYPE_ROTARY_ENCODER, deviceName, vendorId,
+                productId, deviceToken, displayId, phys,
+                () -> mNativeWrapper.openUinputRotaryEncoder(deviceName, vendorId, productId,
+                        phys));
     }
 
     void unregisterInputDevice(@NonNull IBinder token) {
@@ -403,6 +415,20 @@ class InputController {
         }
     }
 
+    boolean sendRotaryEncoderScrollEvent(@NonNull IBinder token,
+            @NonNull VirtualRotaryEncoderScrollEvent event) {
+        synchronized (mLock) {
+            final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
+                    token);
+            if (inputDeviceDescriptor == null) {
+                return false;
+            }
+            return mNativeWrapper.writeRotaryEncoderScrollEvent(
+                    inputDeviceDescriptor.getNativePointer(), event.getScrollAmount(),
+                    event.getEventTimeNanos());
+        }
+    }
+
     public void dump(@NonNull PrintWriter fout) {
         fout.println("    InputController: ");
         synchronized (mLock) {
@@ -449,6 +475,9 @@ class InputController {
             int productId, String phys, int height, int width);
     private static native long nativeOpenUinputStylus(String deviceName, int vendorId,
             int productId, String phys, int height, int width);
+    private static native long nativeOpenUinputRotaryEncoder(String deviceName, int vendorId,
+            int productId, String phys);
+
     private static native void nativeCloseUinput(long ptr);
     private static native boolean nativeWriteDpadKeyEvent(long ptr, int androidKeyCode, int action,
             long eventTimeNanos);
@@ -466,6 +495,8 @@ class InputController {
     private static native boolean nativeWriteStylusMotionEvent(long ptr, int toolType, int action,
             int locationX, int locationY, int pressure, int tiltX, int tiltY, long eventTimeNanos);
     private static native boolean nativeWriteStylusButtonEvent(long ptr, int buttonCode, int action,
+            long eventTimeNanos);
+    private static native boolean nativeWriteRotaryEncoderScrollEvent(long ptr, float scrollAmount,
             long eventTimeNanos);
 
     /** Wrapper around the static native methods for tests. */
@@ -493,6 +524,11 @@ class InputController {
         public long openUinputStylus(String deviceName, int vendorId, int productId, String phys,
                 int height, int width) {
             return nativeOpenUinputStylus(deviceName, vendorId, productId, phys, height, width);
+        }
+
+        public long openUinputRotaryEncoder(String deviceName, int vendorId, int productId,
+                String phys) {
+            return nativeOpenUinputRotaryEncoder(deviceName, vendorId, productId, phys);
         }
 
         public void closeUinput(long ptr) {
@@ -542,6 +578,11 @@ class InputController {
                 long eventTimeNanos) {
             return nativeWriteStylusButtonEvent(ptr, buttonCode, action, eventTimeNanos);
         }
+
+        public boolean writeRotaryEncoderScrollEvent(long ptr, float scrollAmount,
+                long eventTimeNanos) {
+            return nativeWriteRotaryEncoderScrollEvent(ptr, scrollAmount, eventTimeNanos);
+        }
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -553,6 +594,7 @@ class InputController {
         static final int TYPE_DPAD = 4;
         static final int TYPE_NAVIGATION_TOUCHPAD = 5;
         static final int TYPE_STYLUS = 6;
+        static final int TYPE_ROTARY_ENCODER = 7;
         @IntDef(prefix = { "TYPE_" }, value = {
                 TYPE_KEYBOARD,
                 TYPE_MOUSE,
@@ -560,6 +602,7 @@ class InputController {
                 TYPE_DPAD,
                 TYPE_NAVIGATION_TOUCHPAD,
                 TYPE_STYLUS,
+                TYPE_ROTARY_ENCODER,
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Type {
@@ -821,6 +864,8 @@ class InputController {
                 return "virtual_devices.value_virtual_navigationtouchpad_created_count";
             case InputDeviceDescriptor.TYPE_STYLUS:
                 return "virtual_devices.value_virtual_stylus_created_count";
+            case InputDeviceDescriptor.TYPE_ROTARY_ENCODER:
+                return "virtual_devices.value_virtual_rotary_created_count";
             default:
                 Log.e(TAG, "No metric known for input type: " + type);
                 return null;

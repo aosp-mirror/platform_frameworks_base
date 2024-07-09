@@ -137,6 +137,7 @@ public class BiometricManager {
                 BIOMETRIC_WEAK,
                 BIOMETRIC_CONVENIENCE,
                 DEVICE_CREDENTIAL,
+                MANDATORY_BIOMETRICS,
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Types {}
@@ -213,6 +214,21 @@ public class BiometricManager {
          * @see android.security.keystore.KeyGenParameterSpec.Builder
          */
         int DEVICE_CREDENTIAL = 1 << 15;
+
+        /**
+         * The bit is used to request for mandatory biometrics.
+         *
+         * <p> The requirements to trigger mandatory biometrics are as follows:
+         * 1. User must have enabled the toggle for mandatory biometrics is settings
+         * 2. User must have enrollments for all {@link #BIOMETRIC_STRONG} sensors available
+         * 3. The device must not be in a trusted location
+         * </p>
+         *
+         * <p> If all the above conditions are satisfied, only {@link #BIOMETRIC_STRONG} sensors
+         * will be eligible for authentication, and device credential fallback will be dropped.
+         * @hide
+         */
+        int MANDATORY_BIOMETRICS = 1 << 16;
 
     }
 

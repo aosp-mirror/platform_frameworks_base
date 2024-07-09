@@ -4069,8 +4069,10 @@ public class AudioManager {
     private boolean delegateSoundEffectToVdm(@SystemSoundEffect int effectType) {
         if (hasCustomPolicyVirtualDeviceContext()) {
             VirtualDeviceManager vdm = getVirtualDeviceManager();
-            vdm.playSoundEffect(mOriginalContextDeviceId, effectType);
-            return true;
+            if (vdm != null) {
+                vdm.playSoundEffect(mOriginalContextDeviceId, effectType);
+                return true;
+            }
         }
         return false;
     }
@@ -6999,6 +7001,23 @@ public class AudioManager {
     public boolean isStreamAffectedByMute(int streamType) {
         try {
             return getService().isStreamAffectedByMute(streamType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Check whether a user can mute this stream type from a given UI element.
+     *
+     * <p>Only useful for volume controllers.
+     *
+     * @param streamType type of stream to check if it's mutable from UI
+     *
+     * @hide
+     */
+    public boolean isStreamMutableByUi(int streamType) {
+        try {
+            return getService().isStreamMutableByUi(streamType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

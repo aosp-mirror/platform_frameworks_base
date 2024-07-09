@@ -36,18 +36,11 @@ public class TransparencyInfoFactory implements AslMarshallableFactory<Transpare
             return null;
         }
 
-        Element developerInfoEle =
-                XmlUtils.getSingleChildElement(
-                        transparencyInfoEle, XmlUtils.HR_TAG_DEVELOPER_INFO, false);
-        DeveloperInfo developerInfo =
-                new DeveloperInfoFactory().createFromHrElements(XmlUtils.listOf(developerInfoEle));
-
         Element appInfoEle =
-                XmlUtils.getSingleChildElement(
-                        transparencyInfoEle, XmlUtils.HR_TAG_APP_INFO, false);
+                XmlUtils.getSingleChildElement(transparencyInfoEle, XmlUtils.HR_TAG_APP_INFO, true);
         AppInfo appInfo = new AppInfoFactory().createFromHrElements(XmlUtils.listOf(appInfoEle));
 
-        return new TransparencyInfo(developerInfo, appInfo);
+        return new TransparencyInfo(appInfo);
     }
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
@@ -60,17 +53,10 @@ public class TransparencyInfoFactory implements AslMarshallableFactory<Transpare
             return null;
         }
 
-        Element developerInfoEle =
-                XmlUtils.getOdPbundleWithName(
-                        transparencyInfoEle, XmlUtils.OD_NAME_DEVELOPER_INFO, false);
-        DeveloperInfo developerInfo =
-                new DeveloperInfoFactory().createFromOdElements(XmlUtils.listOf(developerInfoEle));
-
         Element appInfoEle =
-                XmlUtils.getOdPbundleWithName(
-                        transparencyInfoEle, XmlUtils.OD_NAME_APP_INFO, false);
+                XmlUtils.getOdPbundleWithName(transparencyInfoEle, XmlUtils.OD_NAME_APP_INFO, true);
         AppInfo appInfo = new AppInfoFactory().createFromOdElements(XmlUtils.listOf(appInfoEle));
 
-        return new TransparencyInfo(developerInfo, appInfo);
+        return new TransparencyInfo(appInfo);
     }
 }

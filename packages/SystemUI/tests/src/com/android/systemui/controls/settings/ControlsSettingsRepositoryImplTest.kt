@@ -19,6 +19,7 @@ package com.android.systemui.controls.settings
 
 import android.content.pm.UserInfo
 import android.provider.Settings
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.user.data.repository.FakeUserRepository
@@ -33,10 +34,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class ControlsSettingsRepositoryImplTest : SysuiTestCase() {
 

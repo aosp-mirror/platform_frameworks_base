@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.OverscrollScope
-import com.android.compose.animation.scene.Scene
+import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.TransitionState
 
@@ -33,7 +33,7 @@ internal class Translate(
 ) : PropertyTransformation<Offset> {
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: Scene,
+        scene: SceneKey,
         element: Element,
         sceneState: Element.SceneState,
         transition: TransitionState.Transition,
@@ -55,7 +55,7 @@ internal class OverscrollTranslate(
 ) : PropertyTransformation<Offset> {
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: Scene,
+        scene: SceneKey,
         element: Element,
         sceneState: Element.SceneState,
         transition: TransitionState.Transition,

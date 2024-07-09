@@ -1,0 +1,2 @@
+# To avoid VerifyError on nano proto files (b/324063814)
+rule com.**.nano.**   devicenano.@0

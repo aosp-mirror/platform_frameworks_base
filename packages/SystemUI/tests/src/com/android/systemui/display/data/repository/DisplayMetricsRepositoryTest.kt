@@ -19,6 +19,7 @@ package com.android.systemui.display.data.repository
 import android.content.Context
 import android.util.DisplayMetrics
 import android.view.Display
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.LogBuffer
@@ -33,9 +34,11 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 class DisplayMetricsRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: DisplayMetricsRepository
 

@@ -35,12 +35,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManagerInternal;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -127,7 +130,7 @@ public class InputMethodManagerServiceTestBase {
     protected IInputMethodInvoker mMockInputMethodInvoker;
     protected InputMethodManagerService mInputMethodManagerService;
     protected ServiceThread mServiceThread;
-    protected ServiceThread mPackageMonitorThread;
+    protected ServiceThread mIoThread;
     protected boolean mIsLargeScreen;
     private InputManagerGlobal.TestSession mInputManagerGlobalSession;
 
@@ -182,6 +185,9 @@ public class InputMethodManagerServiceTestBase {
         doNothing().when(mContext).enforceCallingPermission(anyString(), anyString());
         doNothing().when(mContext).sendBroadcastAsUser(any(), any());
         doReturn(null).when(mContext).registerReceiver(any(), any());
+        doReturn(null).when(mContext).registerReceiver(
+                any(BroadcastReceiver.class),
+                any(IntentFilter.class), anyString(), any(Handler.class));
         doReturn(null)
                 .when(mContext)
                 .registerReceiverAsUser(any(), any(), any(), anyString(), any(), anyInt());
@@ -189,6 +195,7 @@ public class InputMethodManagerServiceTestBase {
         // Injecting and mocked InputMethodBindingController and InputMethod.
         mMockInputMethodInvoker = IInputMethodInvoker.create(mMockInputMethod);
         mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mMockIInputManager);
+        when(mMockInputMethodBindingController.getUserId()).thenReturn(mCallingUserId);
         synchronized (ImfLock.class) {
             when(mMockInputMethodBindingController.getCurMethod())
                     .thenReturn(mMockInputMethodInvoker);
@@ -226,14 +233,14 @@ public class InputMethodManagerServiceTestBase {
                         "immstest1",
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
-        mPackageMonitorThread =
+        mIoThread =
                 new ServiceThread(
                         "immstest2",
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
         mInputMethodManagerService = new InputMethodManagerService(mContext,
-                InputMethodManagerService.shouldEnableExperimentalConcurrentMultiUserMode(mContext),
-                mServiceThread, mPackageMonitorThread,
+                InputMethodManagerService.shouldEnableConcurrentMultiUserMode(mContext),
+                mServiceThread, mIoThread,
                 unusedUserId -> mMockInputMethodBindingController);
         spyOn(mInputMethodManagerService);
 
@@ -267,8 +274,8 @@ public class InputMethodManagerServiceTestBase {
             mInputMethodManagerService.mInputMethodDeviceConfigs.destroy();
         }
 
-        if (mPackageMonitorThread != null) {
-            mPackageMonitorThread.quitSafely();
+        if (mIoThread != null) {
+            mIoThread.quitSafely();
         }
 
         if (mServiceThread != null) {

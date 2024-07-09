@@ -30,3 +30,6 @@ fun <K, V, R, M : MutableMap<in K, in R>> Map<out K, V>.mapValuesNotNullTo(
     }
     return destination
 }
+
+/** Returns a map with all entries containing `null` values removed. */
+fun <K, V> Map<K, V?>.filterValuesNotNull(): Map<K, V> = mapValuesNotNull { it.value }

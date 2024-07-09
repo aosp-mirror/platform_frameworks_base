@@ -51,7 +51,7 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
     private long mLastUpdateTimestamp;
 
     private PowerStats.Descriptor mDescriptor;
-    private final BinaryStatePowerStatsLayout mStatsLayout = new BinaryStatePowerStatsLayout();
+    private final BinaryStatePowerStatsLayout mStatsLayout;
     private PowerStats mPowerStats;
     private PowerEstimationPlan mPlan;
     private long[] mTmpDeviceStatsArray;
@@ -59,9 +59,17 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
 
     BinaryStatePowerStatsProcessor(int powerComponentId,
             PowerStatsUidResolver uidResolver, double averagePowerMilliAmp) {
+        this(powerComponentId, uidResolver, averagePowerMilliAmp,
+                new BinaryStatePowerStatsLayout());
+    }
+
+    BinaryStatePowerStatsProcessor(int powerComponentId,
+            PowerStatsUidResolver uidResolver, double averagePowerMilliAmp,
+            BinaryStatePowerStatsLayout statsLayout) {
         mPowerComponentId = powerComponentId;
         mUsageBasedPowerEstimator = new UsageBasedPowerEstimator(averagePowerMilliAmp);
         mUidResolver = uidResolver;
+        mStatsLayout = statsLayout;
     }
 
     protected abstract @BinaryState int getBinaryState(BatteryStats.HistoryItem item);
@@ -107,7 +115,7 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
                 mInitiatingUid = mUidResolver.mapUid(item.eventTag.uid);
             }
         } else {
-            recordUsageDuration(item.time);
+            recordUsageDuration(mPowerStats, mInitiatingUid, item.time);
             mInitiatingUid = Process.INVALID_UID;
             if (!mEnergyConsumerSupported) {
                 flushPowerStats(stats, item.time);
@@ -117,20 +125,16 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
         mLastState = state;
     }
 
-    private void recordUsageDuration(long time) {
-        if (mLastState == STATE_OFF) {
-            return;
-        }
-
+    protected void recordUsageDuration(PowerStats powerStats, int uid, long time) {
         long durationMs = time - mLastStateTimestamp;
         mStatsLayout.setUsageDuration(mPowerStats.stats,
                 mStatsLayout.getUsageDuration(mPowerStats.stats) + durationMs);
 
-        if (mInitiatingUid != Process.INVALID_UID) {
-            long[] uidStats = mPowerStats.uidStats.get(mInitiatingUid);
+        if (uid != Process.INVALID_UID) {
+            long[] uidStats = mPowerStats.uidStats.get(uid);
             if (uidStats == null) {
                 uidStats = new long[mDescriptor.uidStatsArrayLength];
-                mPowerStats.uidStats.put(mInitiatingUid, uidStats);
+                mPowerStats.uidStats.put(uid, uidStats);
                 mStatsLayout.setUidUsageDuration(uidStats, durationMs);
             } else {
                 mStatsLayout.setUsageDuration(mPowerStats.stats,
@@ -143,7 +147,11 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
     void addPowerStats(PowerComponentAggregatedPowerStats stats, PowerStats powerStats,
             long timestampMs) {
         ensureInitialized();
-        recordUsageDuration(timestampMs);
+
+        if (mLastState == STATE_ON) {
+            recordUsageDuration(mPowerStats, mInitiatingUid, timestampMs);
+        }
+
         long consumedEnergy = mStatsLayout.getConsumedEnergy(powerStats.stats, 0);
         if (consumedEnergy != BatteryStats.POWER_DATA_UNAVAILABLE) {
             mEnergyConsumerSupported = true;
@@ -169,14 +177,16 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
 
     @Override
     void finish(PowerComponentAggregatedPowerStats stats, long timestampMs) {
-        recordUsageDuration(timestampMs);
+        if (mLastState == STATE_ON) {
+            recordUsageDuration(mPowerStats, mInitiatingUid, timestampMs);
+        }
         flushPowerStats(stats, timestampMs);
 
         if (mPlan == null) {
             mPlan = new PowerEstimationPlan(stats.getConfig());
         }
 
-        computeDevicePowerEstimates(stats);
+        computeDevicePowerEstimates(stats, mPlan, mEnergyConsumerSupported);
         combineDevicePowerEstimates(stats);
 
         List<Integer> uids = new ArrayList<>();
@@ -186,9 +196,10 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
         computeUidPowerEstimates(stats, uids);
     }
 
-    private void computeDevicePowerEstimates(PowerComponentAggregatedPowerStats stats) {
-        for (int i = mPlan.deviceStateEstimations.size() - 1; i >= 0; i--) {
-            DeviceStateEstimation estimation = mPlan.deviceStateEstimations.get(i);
+    protected void computeDevicePowerEstimates(PowerComponentAggregatedPowerStats stats,
+            PowerEstimationPlan plan, boolean energyConsumerSupported) {
+        for (int i = plan.deviceStateEstimations.size() - 1; i >= 0; i--) {
+            DeviceStateEstimation estimation = plan.deviceStateEstimations.get(i);
             if (!stats.getDeviceStats(mTmpDeviceStatsArray, estimation.stateValues)) {
                 continue;
             }
@@ -196,7 +207,7 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
             long duration = mStatsLayout.getUsageDuration(mTmpDeviceStatsArray);
             if (duration > 0) {
                 double power;
-                if (mEnergyConsumerSupported) {
+                if (energyConsumerSupported) {
                     power = uCtoMah(mStatsLayout.getConsumedEnergy(mTmpDeviceStatsArray, 0));
                 } else {
                     power = mUsageBasedPowerEstimator.calculatePower(duration);

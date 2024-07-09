@@ -128,6 +128,7 @@ private class NestedScrollToSceneNode(
     bottomOrRightBehavior: NestedScrollBehavior,
     isExternalOverscrollGesture: () -> Boolean,
 ) : DelegatingNode() {
+    lateinit var pointersInfoOwner: PointersInfoOwner
     private var priorityNestedScrollConnection: PriorityNestedScrollConnection =
         scenePriorityNestedScrollConnection(
             layoutImpl = layoutImpl,
@@ -135,6 +136,7 @@ private class NestedScrollToSceneNode(
             topOrLeftBehavior = topOrLeftBehavior,
             bottomOrRightBehavior = bottomOrRightBehavior,
             isExternalOverscrollGesture = isExternalOverscrollGesture,
+            pointersInfoOwner = { pointersInfoOwner.pointersInfo() }
         )
 
     private var nestedScrollNode: DelegatableNode =
@@ -144,6 +146,7 @@ private class NestedScrollToSceneNode(
         )
 
     override fun onAttach() {
+        pointersInfoOwner = requireAncestorPointersInfoOwner()
         delegate(nestedScrollNode)
     }
 
@@ -171,6 +174,7 @@ private class NestedScrollToSceneNode(
                 topOrLeftBehavior = topOrLeftBehavior,
                 bottomOrRightBehavior = bottomOrRightBehavior,
                 isExternalOverscrollGesture = isExternalOverscrollGesture,
+                pointersInfoOwner = pointersInfoOwner,
             )
         nestedScrollNode =
             nestedScrollModifierNode(
@@ -187,6 +191,7 @@ private fun scenePriorityNestedScrollConnection(
     topOrLeftBehavior: NestedScrollBehavior,
     bottomOrRightBehavior: NestedScrollBehavior,
     isExternalOverscrollGesture: () -> Boolean,
+    pointersInfoOwner: PointersInfoOwner,
 ) =
     NestedScrollHandlerImpl(
             layoutImpl = layoutImpl,
@@ -194,5 +199,6 @@ private fun scenePriorityNestedScrollConnection(
             topOrLeftBehavior = topOrLeftBehavior,
             bottomOrRightBehavior = bottomOrRightBehavior,
             isExternalOverscrollGesture = isExternalOverscrollGesture,
+            pointersInfoOwner = pointersInfoOwner,
         )
         .connection

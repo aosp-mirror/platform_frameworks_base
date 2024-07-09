@@ -1,0 +1,5 @@
+# Android Accessibility Framework owners
+include /core/java/android/view/accessibility/a11ychecker/OWNERS
+include /services/accessibility/OWNERS
+
+yaraabdullatif@google.com

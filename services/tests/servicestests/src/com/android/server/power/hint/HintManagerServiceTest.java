@@ -46,6 +46,8 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.hardware.power.ChannelConfig;
 import android.hardware.power.IPower;
 import android.hardware.power.SessionConfig;
@@ -131,6 +133,7 @@ public class HintManagerServiceTest {
         makeWorkDuration(2L, 13L, 2L, 0L, 6L),
         makeWorkDuration(2L, 13L, 2L, 8L, 0L),
     };
+    private static final String TEST_APP_NAME = "com.android.test.app";
 
     @Mock
     private Context mContext;
@@ -140,12 +143,15 @@ public class HintManagerServiceTest {
     private IPower mIPowerMock;
     @Mock
     private ActivityManagerInternal mAmInternalMock;
+    @Mock
+    private PackageManager mMockPackageManager;
     @Rule
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private HintManagerService mService;
     private ChannelConfig mConfig;
+    private ApplicationInfo mApplicationInfo;
 
     private static Answer<Long> fakeCreateWithConfig(Long ptr, Long sessionId) {
         return new Answer<Long>() {
@@ -162,6 +168,12 @@ public class HintManagerServiceTest {
         mConfig = new ChannelConfig();
         mConfig.readFlagBitmask = 1;
         mConfig.writeFlagBitmask = 2;
+        mApplicationInfo = new ApplicationInfo();
+        mApplicationInfo.category = ApplicationInfo.CATEGORY_GAME;
+        when(mContext.getPackageManager()).thenReturn(mMockPackageManager);
+        when(mMockPackageManager.getNameForUid(anyInt())).thenReturn(TEST_APP_NAME);
+        when(mMockPackageManager.getApplicationInfo(eq(TEST_APP_NAME), anyInt()))
+                .thenReturn(mApplicationInfo);
         when(mNativeWrapperMock.halGetHintSessionPreferredRate())
                 .thenReturn(DEFAULT_HINT_PREFERRED_RATE);
         when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_A),
@@ -557,6 +569,44 @@ public class HintManagerServiceTest {
         a.setThreads(SESSION_TIDS_A);
         verify(mNativeWrapperMock, never()).halSetThreads(anyLong(), any());
     }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_POWERHINT_THREAD_CLEANUP)
+    public void testNoCleanupDeadThreadsForPrevPowerHalVersion() throws Exception {
+        reset(mIPowerMock);
+        when(mIPowerMock.getInterfaceVersion()).thenReturn(3);
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+        int threadCount = 2;
+
+        // session 1 has 2 non-isolated tids
+        long sessionPtr1 = 111;
+        CountDownLatch stopLatch1 = new CountDownLatch(1);
+        int[] tids1 = createThreads(threadCount, stopLatch1);
+        when(mNativeWrapperMock.halCreateHintSessionWithConfig(eq(TGID), eq(UID), eq(tids1),
+                eq(DEFAULT_TARGET_DURATION), anyInt(), any(SessionConfig.class)))
+                .thenReturn(sessionPtr1);
+        AppHintSession session1 = (AppHintSession) service.getBinderServiceInstance()
+                .createHintSessionWithConfig(token, tids1, DEFAULT_TARGET_DURATION,
+                        SessionTag.OTHER, new SessionConfig());
+        assertNotNull(session1);
+
+        // trigger UID state change by making the process foreground->background, but because the
+        // power hal version is too low, this should result in no cleanup as setThreads don't fire.
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+                CLEAN_UP_UID_DELAY_MILLIS));
+        verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
+        reset(mNativeWrapperMock);
+        // this should resume but not update the threads as no cleanup was performed
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
+        verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
+    }
+
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_POWERHINT_THREAD_CLEANUP)

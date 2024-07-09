@@ -30,7 +30,6 @@ import static org.mockito.Mockito.verify;
 import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -39,6 +38,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /** Tests for {@link MenuItemAccessibilityDelegate}. */
 @SmallTest
 @TestableLooper.RunWithLooper
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();

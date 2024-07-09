@@ -25,6 +25,7 @@ import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.AttributeSet;
@@ -39,8 +40,6 @@ import androidx.annotation.VisibleForTesting;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.SwitchPreferenceCompat;
-
-import com.android.settingslib.utils.BuildCompatUtils;
 
 /**
  * Version of SwitchPreferenceCompat that can be disabled by a device admin
@@ -164,7 +163,7 @@ public class RestrictedSwitchPreference extends SwitchPreferenceCompat {
 
     private static String getUpdatableEnterpriseString(
             Context context, String updatableStringId, int resId) {
-        if (!BuildCompatUtils.isAtLeastT()) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             return context.getString(resId);
         }
         return context.getSystemService(DevicePolicyManager.class).getResources().getString(

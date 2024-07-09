@@ -75,12 +75,7 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
     }
 
     @Override
-    public void onFillRequestFailure(int requestId, @Nullable CharSequence message) {
-
-    }
-
-    @Override
-    public void onFillRequestTimeout(int requestId) {
+    public void onFillRequestFailure(int requestId, Throwable t) {
 
     }
 

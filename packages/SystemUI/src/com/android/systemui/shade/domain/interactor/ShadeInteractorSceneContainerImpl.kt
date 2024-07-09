@@ -21,25 +21,23 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** ShadeInteractor implementation for Scene Container. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class ShadeInteractorSceneContainerImpl
 @Inject
@@ -52,10 +50,11 @@ constructor(
     override val shadeMode: StateFlow<ShadeMode> = shadeRepository.shadeMode
 
     override val shadeExpansion: StateFlow<Float> =
-        sceneBasedExpansion(sceneInteractor, notificationsScene)
+        sceneBasedExpansion(sceneInteractor, SceneFamilies.NotifShade)
             .stateIn(scope, SharingStarted.Eagerly, 0f)
 
-    private val sceneBasedQsExpansion = sceneBasedExpansion(sceneInteractor, quickSettingsScene)
+    private val sceneBasedQsExpansion =
+        sceneBasedExpansion(sceneInteractor, SceneFamilies.QuickSettings)
 
     override val qsExpansion: StateFlow<Float> =
         combine(
@@ -78,23 +77,38 @@ constructor(
             .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isQsBypassingShade: Flow<Boolean> =
-        sceneInteractor.transitionState
-            .map { state ->
-                when (state) {
-                    is ObservableTransitionState.Idle -> false
-                    is ObservableTransitionState.Transition ->
-                        state.toScene == quickSettingsScene && state.fromScene != notificationsScene
-                }
+        combine(
+                sceneInteractor.resolveSceneFamily(SceneFamilies.QuickSettings),
+                sceneInteractor.resolveSceneFamily(SceneFamilies.NotifShade),
+                ::Pair
+            )
+            .flatMapLatestConflated { (quickSettingsScene, notificationsScene) ->
+                sceneInteractor.transitionState
+                    .map { state ->
+                        when (state) {
+                            is ObservableTransitionState.Idle -> false
+                            is ObservableTransitionState.Transition ->
+                                state.toScene == quickSettingsScene &&
+                                    state.fromScene != notificationsScene
+                        }
+                    }
+                    .distinctUntilChanged()
             }
             .distinctUntilChanged()
 
     override val isQsFullscreen: Flow<Boolean> =
-        sceneInteractor.transitionState
-            .map { state ->
-                when (state) {
-                    is ObservableTransitionState.Idle -> state.currentScene == quickSettingsScene
-                    is ObservableTransitionState.Transition -> false
-                }
+        sceneInteractor
+            .resolveSceneFamily(SceneFamilies.QuickSettings)
+            .flatMapLatestConflated { quickSettingsScene ->
+                sceneInteractor.transitionState
+                    .map { state ->
+                        when (state) {
+                            is ObservableTransitionState.Idle ->
+                                state.currentScene == quickSettingsScene
+                            is ObservableTransitionState.Transition -> false
+                        }
+                    }
+                    .distinctUntilChanged()
             }
             .distinctUntilChanged()
 
@@ -108,34 +122,39 @@ constructor(
             .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isUserInteractingWithShade: Flow<Boolean> =
-        sceneBasedInteracting(sceneInteractor, notificationsScene)
+        sceneBasedInteracting(sceneInteractor, SceneFamilies.NotifShade)
 
     override val isUserInteractingWithQs: Flow<Boolean> =
-        sceneBasedInteracting(sceneInteractor, quickSettingsScene)
+        sceneBasedInteracting(sceneInteractor, SceneFamilies.QuickSettings)
 
     /**
      * Returns a flow that uses scene transition progress to and from a scene that is pulled down
      * from the top of the screen to a 0-1 expansion amount float.
      */
     fun sceneBasedExpansion(sceneInteractor: SceneInteractor, sceneKey: SceneKey) =
-        sceneInteractor.transitionState
-            .flatMapLatest { state ->
-                when (state) {
-                    is ObservableTransitionState.Idle ->
-                        if (state.currentScene == sceneKey) {
-                            flowOf(1f)
-                        } else {
-                            flowOf(0f)
+        sceneInteractor
+            .resolveSceneFamily(sceneKey)
+            .flatMapLatestConflated { resolvedSceneKey ->
+                sceneInteractor.transitionState
+                    .flatMapLatestConflated { state ->
+                        when (state) {
+                            is ObservableTransitionState.Idle ->
+                                if (state.currentScene == resolvedSceneKey) {
+                                    flowOf(1f)
+                                } else {
+                                    flowOf(0f)
+                                }
+                            is ObservableTransitionState.Transition ->
+                                if (state.toScene == resolvedSceneKey) {
+                                    state.progress
+                                } else if (state.fromScene == resolvedSceneKey) {
+                                    state.progress.map { progress -> 1 - progress }
+                                } else {
+                                    flowOf(0f)
+                                }
                         }
-                    is ObservableTransitionState.Transition ->
-                        if (state.toScene == sceneKey) {
-                            state.progress
-                        } else if (state.fromScene == sceneKey) {
-                            state.progress.map { progress -> 1 - progress }
-                        } else {
-                            flowOf(0f)
-                        }
-                }
+                    }
+                    .distinctUntilChanged()
             }
             .distinctUntilChanged()
 
@@ -145,29 +164,16 @@ constructor(
      */
     fun sceneBasedInteracting(sceneInteractor: SceneInteractor, sceneKey: SceneKey) =
         sceneInteractor.transitionState
-            .map { state ->
+            .flatMapLatestConflated { state ->
                 when (state) {
-                    is ObservableTransitionState.Idle -> false
+                    is ObservableTransitionState.Idle -> flowOf(false)
                     is ObservableTransitionState.Transition ->
-                        state.isInitiatedByUserInput &&
-                            (state.toScene == sceneKey || state.fromScene == sceneKey)
+                        sceneInteractor.resolveSceneFamily(sceneKey).map { resolvedSceneKey ->
+                            state.isInitiatedByUserInput &&
+                                (state.toScene == resolvedSceneKey ||
+                                    state.fromScene == resolvedSceneKey)
+                        }
                 }
             }
             .distinctUntilChanged()
-
-    private val notificationsScene: SceneKey
-        get() =
-            if (shadeMode.value is ShadeMode.Dual) {
-                Scenes.NotificationsShade
-            } else {
-                Scenes.Shade
-            }
-
-    private val quickSettingsScene: SceneKey
-        get() =
-            if (shadeMode.value is ShadeMode.Dual) {
-                Scenes.QuickSettingsShade
-            } else {
-                Scenes.QuickSettings
-            }
 }

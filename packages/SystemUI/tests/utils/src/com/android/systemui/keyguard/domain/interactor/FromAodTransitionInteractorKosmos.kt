@@ -29,6 +29,7 @@ val Kosmos.fromAodTransitionInteractor by
         FromAodTransitionInteractor(
             transitionRepository = fakeKeyguardTransitionRepository,
             transitionInteractor = keyguardTransitionInteractor,
+            internalTransitionInteractor = internalKeyguardTransitionInteractor,
             scope = applicationCoroutineScope,
             bgDispatcher = testDispatcher,
             mainDispatcher = testDispatcher,

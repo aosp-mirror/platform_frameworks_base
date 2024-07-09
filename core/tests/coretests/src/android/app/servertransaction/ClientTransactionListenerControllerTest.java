@@ -20,9 +20,6 @@ import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.window.flags.Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG;
-import static com.android.window.flags.Flags.FLAG_WINDOW_TOKEN_CONFIG_THREAD_SAFE;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -105,8 +102,6 @@ public class ClientTransactionListenerControllerTest {
 
     @Before
     public void setup() {
-        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
         MockitoAnnotations.initMocks(this);
         mDisplayManager = new DisplayManagerGlobal(mIDisplayManager);
         mHandler = getInstrumentation().getContext().getMainThreadHandler();
@@ -192,8 +187,6 @@ public class ClientTransactionListenerControllerTest {
 
     @Test
     public void testWindowTokenClient_onConfigurationChanged() {
-        mSetFlagsRule.enableFlags(FLAG_WINDOW_TOKEN_CONFIG_THREAD_SAFE);
-
         doNothing().when(mController).onContextConfigurationPreChanged(any());
         doNothing().when(mController).onContextConfigurationPostChanged(any());
 

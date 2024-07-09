@@ -73,7 +73,7 @@ stack traces when specific surface transaction calls are made, which is possible
 following system properties for example:
 ```shell
 # Enabling
-adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha  # matches the name of the SurfaceControlTransaction method
+adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha,setPosition  # matches the name of the SurfaceControlTransaction methods
 adb shell setprop persist.wm.debug.sc.tx.log_match_name com.android.systemui # matches the name of the surface
 adb reboot
 adb logcat -s "SurfaceControlRegistry"
@@ -87,7 +87,17 @@ adb reboot
 It is not necessary to set both `log_match_call` and `log_match_name`, but note logs can be quite
 noisy if unfiltered.
 
-## Tracing activity starts in the app process
+It can sometimes be useful to trace specific logs and when they are applied (sometimes we build
+transactions that can be applied later).  You can do this by adding the "merge" and "apply" calls to
+the set of requested calls:
+```shell
+# Enabling
+adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha,merge,apply  # apply will dump logs of each setAlpha or merge call on that tx
+adb reboot
+adb logcat -s "SurfaceControlRegistry"
+```
+
+## Tracing activity starts & finishes in the app process
 
 It's sometimes useful to know when to see a stack trace of when an activity starts in the app code
 (ie. if you are repro'ing a bug related to activity starts). You can enable this system property to
@@ -100,6 +110,19 @@ adb logcat -s "Instrumentation"
 
 # Disabling
 adb shell setprop persist.wm.debug.start_activity \"\"
+adb reboot
+```
+
+Likewise, to trace where a finish() call may be made in the app process, you can enable this system
+property:
+```shell
+# Enabling
+adb shell setprop persist.wm.debug.finish_activity true
+adb reboot
+adb logcat -s "Instrumentation"
+
+# Disabling
+adb shell setprop persist.wm.debug.finish_activity \"\"
 adb reboot
 ```
 

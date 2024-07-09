@@ -24,7 +24,6 @@ import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.traces.parsers.toFlickerComponent
-import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
@@ -173,12 +172,6 @@ class EnterSystemSplitTest(flicker: LegacyFlickerTest) : ActivityEmbeddingTestBa
                 )
                 .isLower(2)
         }
-    }
-
-    @FlakyTest(bugId = 342596801)
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
     }
 
     @Ignore("Not applicable to this CUJ.")

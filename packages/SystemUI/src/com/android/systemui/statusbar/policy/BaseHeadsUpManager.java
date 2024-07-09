@@ -834,6 +834,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
          * @return true if the notification is sticky
          */
         public boolean isSticky() {
+            if (mEntry == null) return false;
             return (mEntry.isRowPinned() && mExpanded)
                     || mRemoteInputActive
                     || hasFullScreenIntent(mEntry);

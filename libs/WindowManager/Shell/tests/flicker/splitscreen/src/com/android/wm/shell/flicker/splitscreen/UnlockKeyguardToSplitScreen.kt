@@ -47,7 +47,7 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTestsSplitScreen:UnlockKeyguardToSplitScreen`
  */
 @RequiresDevice
-@Postsubmit
+@FlakyTest(bugId = 293578017)
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -61,7 +61,6 @@ class UnlockKeyguardToSplitScreen(override val flicker: LegacyFlickerTest) :
         }
 
     @Test
-    @FlakyTest(bugId = 293578017)
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 

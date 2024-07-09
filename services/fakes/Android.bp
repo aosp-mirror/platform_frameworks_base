@@ -16,5 +16,5 @@ filegroup {
         "java/**/*.java",
     ],
     path: "java",
-    visibility: ["//frameworks/base"],
+    visibility: ["//frameworks/base/ravenwood:__subpackages__"],
 }

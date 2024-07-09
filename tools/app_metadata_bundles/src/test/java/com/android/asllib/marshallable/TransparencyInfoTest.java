@@ -29,30 +29,11 @@ public class TransparencyInfoTest {
             "com/android/asllib/transparencyinfo/hr";
     private static final String TRANSPARENCY_INFO_OD_PATH =
             "com/android/asllib/transparencyinfo/od";
-
-    private static final String VALID_EMPTY_FILE_NAME = "valid-empty.xml";
-    private static final String WITH_DEVELOPER_INFO_FILE_NAME = "with-developer-info.xml";
     private static final String WITH_APP_INFO_FILE_NAME = "with-app-info.xml";
 
     @Before
     public void setUp() throws Exception {
         System.out.println("set up.");
-    }
-
-    /** Test for transparency info valid empty. */
-    @Test
-    public void testTransparencyInfoValidEmptyFile() throws Exception {
-        System.out.println("starting testTransparencyInfoValidEmptyFile.");
-        testHrToOdTransparencyInfo(VALID_EMPTY_FILE_NAME);
-        testOdToHrTransparencyInfo(VALID_EMPTY_FILE_NAME);
-    }
-
-    /** Test for transparency info with developer info. */
-    @Test
-    public void testTransparencyInfoWithDeveloperInfo() throws Exception {
-        System.out.println("starting testTransparencyInfoWithDeveloperInfo.");
-        testHrToOdTransparencyInfo(WITH_DEVELOPER_INFO_FILE_NAME);
-        testOdToHrTransparencyInfo(WITH_DEVELOPER_INFO_FILE_NAME);
     }
 
     /** Test for transparency info with app info. */

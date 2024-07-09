@@ -28,3 +28,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "wear_frameworks"
+    name: "optional_background_install_control"
+    description: "Enable BackgroundInstallControl based on system feature to prevent it from starting on form factors."
+    bug: "340928990"
+}

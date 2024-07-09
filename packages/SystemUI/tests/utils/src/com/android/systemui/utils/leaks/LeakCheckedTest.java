@@ -109,7 +109,7 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
                 } else if (cls == ZenModeController.class) {
                     obj = new FakeZenModeController(this);
                 } else if (cls == CastController.class) {
-                    obj = new FakeCastController(this);
+                    obj = new LeakCheckerCastController(this);
                 } else if (cls == HotspotController.class) {
                     obj = new FakeHotspotController(this);
                 } else if (cls == FlashlightController.class) {

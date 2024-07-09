@@ -19,6 +19,7 @@ package com.android.systemui.biometrics.domain.interactor
 import android.app.ActivityManager
 import android.content.ComponentName
 import android.hardware.biometrics.BiometricFingerprintConstants
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.app.activityTaskManager
 import com.android.systemui.SysuiTestCase
@@ -37,13 +38,12 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class BiometricStatusInteractorImplTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private lateinit var underTest: BiometricStatusInteractorImpl

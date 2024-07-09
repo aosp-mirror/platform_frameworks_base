@@ -662,8 +662,7 @@ public final class PlaybackActivityMonitor
         synchronized(mPlayerLock) {
             pw.println("\n  playback listeners:");
             for (PlayMonitorClient pmc : mClients) {
-                pw.print(" " + (pmc.isPrivileged() ? "(S)" : "(P)")
-                        + pmc.toString());
+                pw.println(" " + pmc);
             }
             pw.println("\n");
             // all players
@@ -1031,7 +1030,8 @@ public final class PlaybackActivityMonitor
         if (pcdb == null) {
             return;
         }
-        final PlayMonitorClient pmc = new PlayMonitorClient(pcdb, isPrivileged);
+        final PlayMonitorClient pmc = new PlayMonitorClient(pcdb, isPrivileged,
+                Binder.getCallingUid(), Binder.getCallingPid());
         if (pmc.init()) {
             mClients.add(pmc);
         }
@@ -1103,10 +1103,22 @@ public final class PlaybackActivityMonitor
         private boolean mIsReleased = false;
         @GuardedBy("this")
         private int mErrorCount = 0;
+        private final int mUid;
+        private final int mPid;
 
-        PlayMonitorClient(IPlaybackConfigDispatcher pcdb, boolean isPrivileged) {
+        PlayMonitorClient(IPlaybackConfigDispatcher pcdb, boolean isPrivileged,
+                int uid, int pid) {
             mDispatcherCb = pcdb;
             mIsPrivileged = isPrivileged;
+            mUid = uid;
+            mPid = pid;
+        }
+
+        @Override
+        public String toString() {
+            return "PlayMonitorClient:"
+                    + (isPrivileged() ? "S" : "P")
+                    + " uid:" + mUid + " pid:" + mPid;
         }
 
         @Override

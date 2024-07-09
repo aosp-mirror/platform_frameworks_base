@@ -18,6 +18,7 @@ package com.android.systemui.media.controls.shared
 
 import android.app.smartspace.SmartspaceAction
 import android.graphics.drawable.Icon
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
@@ -26,8 +27,10 @@ import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.res.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class SmartspaceMediaDataTest : SysuiTestCase() {
 
     private val icon: Icon = Icon.createWithResource(context, R.drawable.ic_media_play)

@@ -2003,7 +2003,7 @@ public final class AutofillManagerService
                 final AutofillManagerServiceImpl service =
                         peekServiceForUserWithLocalBinderIdentityLocked(userId);
                 if (service != null) {
-                    service.setViewAutofilled(sessionId, getCallingUid(), id);
+                    service.setViewAutofilledLocked(sessionId, getCallingUid(), id);
                 } else if (sVerbose) {
                     Slog.v(TAG, "setAutofillFailure(): no service for " + userId);
                 }

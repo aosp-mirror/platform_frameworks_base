@@ -1331,6 +1331,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * This change id is the gatekeeper for all treatments that force a given min aspect ratio.
      * Enabling this change will allow the following min aspect ratio treatments to be applied:
      * <ul>
+     *  <li>OVERRIDE_MIN_ASPECT_RATIO_SMALL
      *  <li>OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
      *  <li>OVERRIDE_MIN_ASPECT_RATIO_LARGE
      * </ul>
@@ -1370,6 +1371,22 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @Overridable
     @TestApi
     public static final long OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY = 203647190L; // buganizer id
+
+    /**
+     * This change id sets the activity's min aspect ratio to a small value as defined by
+     * OVERRIDE_MIN_ASPECT_RATIO_SMALL_VALUE.
+     *
+     * This treatment only takes effect if OVERRIDE_MIN_ASPECT_RATIO is also enabled.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    // TODO(b/349060719): Add CTS tests.
+    public static final long OVERRIDE_MIN_ASPECT_RATIO_SMALL = 349045028L; // buganizer id
+
+    /** @hide Small override aspect ratio, currently 4:3.  */
+    public static final float OVERRIDE_MIN_ASPECT_RATIO_SMALL_VALUE = 4 / 3f;
 
     /**
      * This change id sets the activity's min aspect ratio to a medium value as defined by

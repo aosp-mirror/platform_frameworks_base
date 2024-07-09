@@ -83,6 +83,8 @@ import com.android.internal.os.ProcLocksReader;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.ServiceThread;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -97,8 +99,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-
-import dalvik.annotation.optimization.NeverCompile;
 
 public final class CachedAppOptimizer {
 
@@ -248,7 +248,7 @@ public final class CachedAppOptimizer {
     private static final int COMPACT_ACTION_ANON_FLAG = 2;
 
     private static final String ATRACE_COMPACTION_TRACK = "Compaction";
-    private static final String ATRACE_FREEZER_TRACK = "Freezer";
+    public static final String ATRACE_FREEZER_TRACK = "Freezer";
 
     private static final int FREEZE_BINDER_TIMEOUT_MS = 0;
     private static final int FREEZE_DEADLOCK_TIMEOUT_MS = 1000;

@@ -21,11 +21,11 @@ import static org.mockito.Mockito.verify;
 import android.content.pm.ActivityInfo;
 import android.hardware.display.DisplayManager;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -39,7 +39,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 /** Tests the ModeSwitchesController. */
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class ModeSwitchesControllerTest extends SysuiTestCase {

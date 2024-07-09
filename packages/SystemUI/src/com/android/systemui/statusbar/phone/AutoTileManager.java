@@ -39,7 +39,7 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.CastController.CastDevice;
+import com.android.systemui.statusbar.policy.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DataSaverController.Listener;
 import com.android.systemui.statusbar.policy.DeviceControlsController;
@@ -430,8 +430,7 @@ public class AutoTileManager implements UserAwareController {
 
             boolean isCasting = false;
             for (CastDevice device : mCastController.getCastDevices()) {
-                if (device.state == CastDevice.STATE_CONNECTED
-                        || device.state == CastDevice.STATE_CONNECTING) {
+                if (device.isCasting()) {
                     isCasting = true;
                     break;
                 }

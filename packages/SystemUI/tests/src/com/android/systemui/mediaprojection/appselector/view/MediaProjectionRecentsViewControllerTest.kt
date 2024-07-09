@@ -22,6 +22,7 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_PSS_APP_SELECTOR_ABRUPT_EXIT_FIX
 import com.android.systemui.Flags.FLAG_PSS_APP_SELECTOR_RECENTS_SPLIT_SCREEN
@@ -36,6 +37,7 @@ import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.any
@@ -43,6 +45,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MediaProjectionRecentsViewControllerTest : SysuiTestCase() {
 
     @get:Rule val expect: Expect = Expect.create()

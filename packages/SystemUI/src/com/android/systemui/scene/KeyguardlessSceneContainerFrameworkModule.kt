@@ -20,8 +20,13 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.notifications.ui.composable.NotificationsShadeSessionModule
 import com.android.systemui.scene.domain.SceneDomainModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
+import com.android.systemui.scene.domain.resolver.HomeSceneFamilyResolverModule
+import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolverModule
+import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolverModule
+import com.android.systemui.scene.domain.startable.KeyguardStateCallbackStartable
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.domain.startable.ScrimStartable
+import com.android.systemui.scene.domain.startable.StatusBarStartable
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shared.flag.DualShade
@@ -42,6 +47,11 @@ import dagger.multibindings.IntoMap
             QuickSettingsSceneModule::class,
             ShadeSceneModule::class,
             SceneDomainModule::class,
+
+            // List SceneResolver modules for supported SceneFamilies
+            HomeSceneFamilyResolverModule::class,
+            NotifShadeSceneFamilyResolverModule::class,
+            QuickSettingsSceneFamilyResolverModule::class,
         ],
 )
 interface KeyguardlessSceneContainerFrameworkModule {
@@ -55,6 +65,16 @@ interface KeyguardlessSceneContainerFrameworkModule {
     @IntoMap
     @ClassKey(ScrimStartable::class)
     fun scrimStartable(impl: ScrimStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(StatusBarStartable::class)
+    fun statusBarStartable(impl: StatusBarStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardStateCallbackStartable::class)
+    fun keyguardStateCallbackStartable(impl: KeyguardStateCallbackStartable): CoreStartable
 
     @Binds
     @IntoMap

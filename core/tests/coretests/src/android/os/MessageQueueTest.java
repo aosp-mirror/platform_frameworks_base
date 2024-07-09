@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.MediumTest;
@@ -154,7 +153,6 @@ public class MessageQueueTest {
 
     @Test
     @MediumTest
-    @IgnoreUnderRavenwood(reason = "Flaky test, b/315872700")
     public void testFieldIntegrity() throws Exception {
 
         TestHandlerThread tester = new TestFieldIntegrityHandler() {

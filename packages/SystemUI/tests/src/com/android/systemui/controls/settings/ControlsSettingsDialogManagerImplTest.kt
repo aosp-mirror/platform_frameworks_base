@@ -22,8 +22,8 @@ import android.content.SharedPreferences
 import android.database.ContentObserver
 import android.provider.Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS
 import android.provider.Settings.Secure.LOCKSCREEN_SHOW_CONTROLS
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.settings.ControlsSettingsDialogManager.Companion.PREFS_SETTINGS_DIALOG_ATTEMPTS
@@ -52,7 +52,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class ControlsSettingsDialogManagerImplTest : SysuiTestCase() {
 

@@ -24,6 +24,7 @@ import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
+import com.android.systemui.user.domain.UserDomainLayerModule
 import com.android.systemui.util.mockito.any
 import dagger.BindsInstance
 import dagger.Component
@@ -120,6 +121,7 @@ class InWindowLauncherUnlockAnimationManagerTest : SysuiTestCase() {
             [
                 SysUITestModule::class,
                 BiometricsDomainLayerModule::class,
+                UserDomainLayerModule::class,
             ]
     )
     interface TestComponent {

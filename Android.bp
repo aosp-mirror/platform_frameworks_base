@@ -115,7 +115,7 @@ filegroup {
         ":android.security.legacykeystore-java-source",
         ":android.security.maintenance-java-source",
         ":android.security.metrics-java-source",
-        ":android.system.keystore2-V3-java-source",
+        ":android.system.keystore2-V4-java-source",
         ":android.hardware.cas-V1-java-source",
         ":credstore_aidl",
         ":dumpstate_aidl",
@@ -404,6 +404,7 @@ java_defaults {
         "android.hardware.common.fmq-V1-java",
         "bouncycastle-repackaged-unbundled",
         "com.android.sysprop.foldlockbehavior",
+        "com.android.sysprop.view",
         "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
@@ -510,6 +511,9 @@ java_library {
     },
     lint: {
         baseline_filename: "lint-baseline.xml",
+        warning_checks: [
+            "FlaggedApi",
+        ],
     },
     jarjar_prefix: "com.android.internal.hidden_from_bootclasspath",
 }

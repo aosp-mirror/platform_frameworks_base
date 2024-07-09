@@ -1,4 +1,16 @@
 <bundle>
     <long name="version" value="123456"/>
-    <pbundle_as_map name="transparency_info"/>
+    <pbundle_as_map name="transparency_info">
+        <pbundle_as_map name="app_info">
+            <boolean name="aps_compliant" value="false"/>
+            <string name="privacy_policy" value="www.example.com"/>
+            <string-array name="first_party_endpoints" num="1">
+                <item value="url1"/>
+            </string-array>
+            <string-array name="service_provider_endpoints" num="2">
+                <item value="url55"/>
+                <item value="url56"/>
+            </string-array>
+        </pbundle_as_map>
+    </pbundle_as_map>
 </bundle>

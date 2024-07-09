@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -30,11 +29,11 @@ var Kosmos.fromLockscreenTransitionInteractor by
         FromLockscreenTransitionInteractor(
             transitionRepository = keyguardTransitionRepository,
             transitionInteractor = keyguardTransitionInteractor,
+            internalTransitionInteractor = internalKeyguardTransitionInteractor,
             scope = applicationCoroutineScope,
             bgDispatcher = testDispatcher,
             mainDispatcher = testDispatcher,
             keyguardInteractor = keyguardInteractor,
-            flags = featureFlagsClassic,
             shadeRepository = shadeRepository,
             powerInteractor = powerInteractor,
             glanceableHubTransitions = glanceableHubTransitions,

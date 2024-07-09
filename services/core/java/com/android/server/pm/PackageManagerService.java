@@ -186,6 +186,7 @@ import com.android.internal.pm.pkg.component.ParsedInstrumentation;
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.telephony.CarrierAppUtils;
+import com.android.internal.telephony.TelephonyPermissions;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
@@ -3999,7 +4000,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 final PackageMetrics.ComponentStateMetrics componentStateMetrics =
                         new PackageMetrics.ComponentStateMetrics(setting,
                                 UserHandle.getUid(userId, packageSetting.getAppId()),
-                                packageSetting.getEnabled(userId), callingUid);
+                                setting.isComponent() ? computer.getComponentEnabledSettingInternal(
+                                        setting.getComponentName(), callingUid, userId)
+                                        : packageSetting.getEnabled(userId), callingUid);
                 if (!setEnabledSettingInternalLocked(computer, packageSetting, setting, userId,
                         callingPackage)) {
                     continue;
@@ -4347,7 +4350,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     public PackageFreezer freezePackage(String packageName, int userId, String killReason,
             int exitInfoReason, InstallRequest request) {
-        return new PackageFreezer(packageName, userId, killReason, this, exitInfoReason, request);
+        return freezePackage(packageName, userId, killReason, exitInfoReason, request,
+                /* waitAppKilled= */ false);
+    }
+
+    private PackageFreezer freezePackage(String packageName, int userId, String killReason,
+            int exitInfoReason, InstallRequest request, boolean waitAppKilled) {
+        return new PackageFreezer(packageName, userId, killReason, this, exitInfoReason, request,
+                waitAppKilled);
     }
 
     public PackageFreezer freezePackageForDelete(String packageName, int userId, int deleteFlags,
@@ -4483,8 +4493,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     void setSystemAppHiddenUntilInstalled(@NonNull Computer snapshot, String packageName,
             boolean hidden) {
         final int callingUid = Binder.getCallingUid();
-        final boolean calledFromSystemOrPhone = callingUid == Process.PHONE_UID
-                || callingUid == Process.SYSTEM_UID;
+        final boolean calledFromSystemOrPhone = TelephonyPermissions.isSystemOrPhone(callingUid);
         if (!calledFromSystemOrPhone) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
                     "setSystemAppHiddenUntilInstalled");
@@ -4772,7 +4781,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     final boolean succeeded;
                     try (PackageFreezer freezer = freezePackage(packageName, UserHandle.USER_ALL,
                             "clearApplicationUserData",
-                            ApplicationExitInfo.REASON_USER_REQUESTED, null /* request */)) {
+                            ApplicationExitInfo.REASON_USER_REQUESTED, null /* request */,
+                            /* waitAppKilled= */ true)) {
                         try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
                             succeeded = clearApplicationUserDataLIF(snapshotComputer(), packageName,
                                     userId);

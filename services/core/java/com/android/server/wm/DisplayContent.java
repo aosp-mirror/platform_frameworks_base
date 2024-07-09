@@ -254,7 +254,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
@@ -474,12 +474,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final DisplayPolicy mDisplayPolicy;
     private final DisplayRotation mDisplayRotation;
 
-    @Nullable
-    final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
-    @Nullable
-    final CameraStateMonitor mCameraStateMonitor;
-    @Nullable
-    final ActivityRefresher mActivityRefresher;
+    @NonNull
+    AppCompatCameraPolicy mAppCompatCameraPolicy;
 
     DisplayFrames mDisplayFrames;
     final DisplayUpdater mDisplayUpdater;
@@ -682,7 +678,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * the case of the IME moving to a SurfaceControlViewHost backed EmbeddedWindow
      */
     private InputTarget mLastImeInputTarget;
-
 
     /**
      * Tracks the windowToken of the input method input target and the corresponding
@@ -1189,6 +1184,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mDeviceStateController = deviceStateController;
 
+        mAppCompatCameraPolicy = new AppCompatCameraPolicy(mWmService, this);
         mDisplayPolicy = new DisplayPolicy(mWmService, this);
         mDisplayRotation = new DisplayRotation(mWmService, this, mDisplayInfo.address,
                 mDeviceStateController, root.getDisplayRotationCoordinator());
@@ -1229,25 +1225,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         onDisplayChanged(this);
         updateDisplayAreaOrganizers();
 
-        // Not checking DeviceConfig value here to allow enabling via DeviceConfig
-        // without the need to restart the device.
-        final boolean shouldCreateDisplayRotationCompatPolicy =
-                mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
-        if (shouldCreateDisplayRotationCompatPolicy) {
-            mCameraStateMonitor = new CameraStateMonitor(this, mWmService.mH);
-            mActivityRefresher = new ActivityRefresher(mWmService, mWmService.mH);
-            mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(
-                    this, mCameraStateMonitor, mActivityRefresher);
-
-            mCameraStateMonitor.startListeningToCameraState();
-        } else {
-            // These are to satisfy the `final` check.
-            mCameraStateMonitor = null;
-            mActivityRefresher = null;
-            mDisplayRotationCompatPolicy = null;
-        }
-
-
         mRotationReversionController = new DisplayRotationReversionController(this);
 
         mInputMonitor = new InputMonitor(mWmService, this);
@@ -1263,6 +1240,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 R.bool.config_defaultInTouchMode);
         mWmService.mInputManager.setInTouchMode(mInTouchMode, mWmService.MY_PID, mWmService.MY_UID,
                 /* hasPermission= */ true, mDisplayId);
+        mAppCompatCameraPolicy.start();
     }
 
     private void beginHoldScreenUpdate() {
@@ -1295,15 +1273,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mHoldScreenWakeLock.release();
             }
         }
-    }
-
-    /**
-     * @return The {@link DisplayRotationCompatPolicy} for this DisplayContent
-     */
-    // TODO(b/335387481) Allow access to DisplayRotationCompatPolicy only with getters
-    @Nullable
-    DisplayRotationCompatPolicy getDisplayRotationCompatPolicy() {
-        return mDisplayRotationCompatPolicy;
     }
 
     @Override
@@ -2872,12 +2841,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
-        if (mDisplayRotationCompatPolicy != null) {
-            int compatOrientation = mDisplayRotationCompatPolicy.getOrientation();
-            if (compatOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                mLastOrientationSource = null;
-                return compatOrientation;
-            }
+        final int compatOrientation = mAppCompatCameraPolicy.getOrientation();
+        if (compatOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+            mLastOrientationSource = null;
+            return compatOrientation;
         }
 
         final int orientation = super.getOrientation();
@@ -3347,12 +3314,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         getPendingTransaction().apply();
         mWmService.mWindowPlacerLocked.requestTraversal();
 
-        if (mDisplayRotationCompatPolicy != null) {
-            mDisplayRotationCompatPolicy.dispose();
-        }
-        if (mCameraStateMonitor != null) {
-            mCameraStateMonitor.dispose();
-        }
+        mAppCompatCameraPolicy.dispose();
     }
 
     /** Returns true if a removal action is still being deferred. */
@@ -5025,9 +4987,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        if (!com.android.window.flags.Flags.removePrepareSurfaceInPlacement()) {
-            prepareSurfaces();
-        }
 
         // This should be called after the insets have been dispatched to clients and we have
         // committed finish drawing windows.
@@ -5719,15 +5678,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      */
     boolean supportsSystemDecorations() {
+        boolean forceDesktopModeOnDisplay = forceDesktopMode();
+
+        if (com.android.window.flags.Flags.rearDisplayDisableForceDesktopSystemDecorations()) {
+            // System decorations should not be forced on a rear display due to security policies.
+            forceDesktopModeOnDisplay =
+                    forceDesktopModeOnDisplay && ((mDisplay.getFlags() & Display.FLAG_REAR) == 0);
+        }
+
         return (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
                 || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
-                || forceDesktopMode())
+                || forceDesktopModeOnDisplay)
                 // VR virtual display will be used to run and render 2D app within a VR experience.
                 && mDisplayId != mWmService.mVr2dDisplayId
                 // Do not show system decorations on untrusted virtual display.
-                && isTrusted()
-                // No system decoration on rear display.
-                && (mDisplay.getFlags() & Display.FLAG_REAR) == 0;
+                && isTrusted();
     }
 
     /**

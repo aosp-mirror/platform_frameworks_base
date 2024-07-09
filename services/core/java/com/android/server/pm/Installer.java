@@ -408,16 +408,6 @@ public class Installer extends SystemService {
         }
     }
 
-    public void restoreconAppData(String uuid, String packageName, int userId, int flags, int appId,
-            String seInfo) throws InstallerException {
-        if (!checkBeforeRemote()) return;
-        try {
-            mInstalld.restoreconAppData(uuid, packageName, userId, flags, appId, seInfo);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
     public void migrateAppData(String uuid, String packageName, int userId, int flags)
             throws InstallerException {
         if (!checkBeforeRemote()) return;

@@ -18,79 +18,104 @@ package com.android.systemui.statusbar.chips.screenrecord.domain.interactor
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.res.R
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
+import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.chips.ui.viewmodel.screenRecordChipInteractor
-import com.android.systemui.util.time.fakeSystemClock
+import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 
 @SmallTest
 class ScreenRecordChipInteractorTest : SysuiTestCase() {
-    private val kosmos = Kosmos()
+    private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
     private val screenRecordRepo = kosmos.screenRecordRepository
-    private val systemClock = kosmos.fakeSystemClock
+    private val mediaProjectionRepo = kosmos.fakeMediaProjectionRepository
 
     private val underTest = kosmos.screenRecordChipInteractor
 
     @Test
-    fun chip_doingNothingState_isHidden() =
+    fun screenRecordState_doingNothingState_matches() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.screenRecordState)
 
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.DoingNothing
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            assertThat(latest).isInstanceOf(ScreenRecordChipModel.DoingNothing::class.java)
         }
 
     @Test
-    fun chip_startingState_isHidden() =
+    fun screenRecordState_startingState_matches() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.screenRecordState)
 
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Starting(400)
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            assertThat(latest).isEqualTo(ScreenRecordChipModel.Starting(400))
         }
 
     @Test
-    fun chip_recordingState_isShownWithIcon() =
+    fun screenRecordState_recordingState_matches() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.screenRecordState)
 
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.stat_sys_screen_record)
+            assertThat(latest).isInstanceOf(ScreenRecordChipModel.Recording::class.java)
         }
 
     @Test
-    fun chip_timeResetsOnEachNewRecording() =
+    fun screenRecordState_projectionIsNotProjecting_recordedTaskNull() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.screenRecordState)
 
-            systemClock.setElapsedRealtime(1234)
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionRepo.mediaProjectionState.value = MediaProjectionState.NotProjecting
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).startTimeMs).isEqualTo(1234)
+            assertThat(latest).isEqualTo(ScreenRecordChipModel.Recording(recordedTask = null))
+        }
 
-            screenRecordRepo.screenRecordState.value = ScreenRecordModel.DoingNothing
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+    @Test
+    fun screenRecordState_projectionIsEntireScreen_recordedTaskNull() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.screenRecordState)
 
-            systemClock.setElapsedRealtime(5678)
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen("host.package")
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).startTimeMs).isEqualTo(5678)
+            assertThat(latest).isEqualTo(ScreenRecordChipModel.Recording(recordedTask = null))
+        }
+
+    @Test
+    fun screenRecordState_projectionIsSingleTask_recordedTaskMatches() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.screenRecordState)
+
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            val task = createTask(taskId = 1)
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.SingleTask("host.package", task)
+
+            assertThat(latest).isEqualTo(ScreenRecordChipModel.Recording(recordedTask = task))
+        }
+
+    @Test
+    fun stopRecording_sendsToRepo() =
+        testScope.runTest {
+            assertThat(screenRecordRepo.stopRecordingInvoked).isFalse()
+
+            underTest.stopRecording()
+            runCurrent()
+
+            assertThat(screenRecordRepo.stopRecordingInvoked).isTrue()
         }
 }

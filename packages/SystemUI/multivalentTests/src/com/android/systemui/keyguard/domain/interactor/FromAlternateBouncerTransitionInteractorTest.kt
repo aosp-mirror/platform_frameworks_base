@@ -32,10 +32,14 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -76,6 +80,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun transitionToGone_keyguardOccluded_biometricAuthenticated() =
         testScope.runTest {
             transitionRepository.sendTransitionSteps(
@@ -85,10 +90,33 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             )
             reset(transitionRepository)
 
+            kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(null)
             kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+            assertThat(transitionRepository).noTransitionsStarted()
+
             kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(true)
             runCurrent()
             kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(null)
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(from = KeyguardState.ALTERNATE_BOUNCER, to = KeyguardState.GONE)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun transitionToGone_keyguardOccludedThenAltBouncer_authed_wmStateRefactor() =
+        testScope.runTest {
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.OCCLUDED,
+                to = KeyguardState.ALTERNATE_BOUNCER,
+                testScope
+            )
+            reset(transitionRepository)
+
+            // Authentication results in calling startDismissKeyguardTransition.
+            kosmos.keyguardTransitionInteractor.startDismissKeyguardTransition()
             runCurrent()
 
             assertThat(transitionRepository)
@@ -142,5 +170,38 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
                     from = KeyguardState.ALTERNATE_BOUNCER,
                     to = KeyguardState.OCCLUDED
                 )
+        }
+
+    @Test
+    fun transitionToGone_whenOpeningGlanceableHubEditMode() =
+        testScope.runTest {
+            kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(true)
+            runCurrent()
+
+            // On Glanceable hub and edit mode activity is started
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.ALTERNATE_BOUNCER,
+                testScope
+            )
+            reset(transitionRepository)
+
+            kosmos.communalInteractor.setEditModeOpen(true)
+            runCurrent()
+
+            // Auth and alternate bouncer is hidden
+            kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(false)
+            advanceTimeBy(200) // advance past delay
+
+            // Then no transition should occur yet
+            assertThat(transitionRepository).noTransitionsStarted()
+
+            // When keyguard is going away
+            kosmos.fakeKeyguardRepository.setKeyguardGoingAway(true)
+            runCurrent()
+
+            // Then transition to GONE should occur
+            assertThat(transitionRepository)
+                .startedTransition(from = KeyguardState.ALTERNATE_BOUNCER, to = KeyguardState.GONE)
         }
 }

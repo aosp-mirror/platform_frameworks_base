@@ -193,6 +193,7 @@ import sun.misc.Cleaner;
 @RequiresFeature(PackageManager.FEATURE_AUTOFILL)
 public final class AutofillManager {
 
+    private static final boolean DBG = false;
     private static final String TAG = "AutofillManager";
 
     /**
@@ -747,7 +748,16 @@ public final class AutofillManager {
 
     // Controls logic around apps changing some properties of their views when activity loses
     // focus due to autofill showing biometric activity, password manager, or password breach check.
-    private boolean mRelayoutFix;
+    // Deprecated. TODO: Remove it after ramp of new solution.
+    private boolean mRelayoutFixDeprecated;
+
+    // Controls logic around apps changing some properties of their views when activity loses
+    // focus due to autofill showing biometric activity, password manager, or password breach check.
+    private final boolean mRelayoutFix;
+
+    // Controls logic around apps changing some properties of their views when activity loses
+    // focus due to autofill showing biometric activity, password manager, or password breach check.
+    private final boolean mRelativePositionForRelayout;
 
     // Indicates whether the credman integration is enabled.
     private final boolean mIsCredmanIntegrationEnabled;
@@ -977,8 +987,28 @@ public final class AutofillManager {
         mShouldIncludeInvisibleViewInAssistStructure =
                 AutofillFeatureFlags.shouldIncludeInvisibleViewInAssistStructure();
 
-        mRelayoutFix = AutofillFeatureFlags.shouldIgnoreRelayoutWhenAuthPending();
+        mRelayoutFixDeprecated = AutofillFeatureFlags.shouldIgnoreRelayoutWhenAuthPending();
+        mRelayoutFix = AutofillFeatureFlags.enableRelayoutFixes();
+        mRelativePositionForRelayout = AutofillFeatureFlags.enableRelativeLocationForRelayout();
         mIsCredmanIntegrationEnabled = Flags.autofillCredmanIntegration();
+    }
+
+    /**
+     * Whether to apply relayout fixes.
+     *
+     * @hide
+     */
+    public boolean isRelayoutFixEnabled() {
+        return mRelayoutFix;
+    }
+
+    /**
+     * Whether to use relative positions and locations of the views for disambiguation.
+     *
+     * @hide
+     */
+    public boolean isRelativePositionForRelayoutEnabled() {
+        return mRelativePositionForRelayout;
     }
 
     /**
@@ -1778,7 +1808,7 @@ public final class AutofillManager {
                 }
                 return;
             }
-            if (mRelayoutFix && mState == STATE_PENDING_AUTHENTICATION) {
+            if (mRelayoutFixDeprecated && mState == STATE_PENDING_AUTHENTICATION) {
                 if (sVerbose) {
                     Log.v(TAG, "notifyViewVisibilityChanged(): ignoring in auth pending mode");
                 }
@@ -2027,7 +2057,31 @@ public final class AutofillManager {
         if (!hasAutofillFeature()) {
             return;
         }
+        if (DBG) {
+            Log.v(TAG, "notifyValueChanged() called with virtualId:" + virtualId + " value:"
+                    + value);
+        }
         synchronized (mLock) {
+            if (mLastAutofilledData != null) {
+                AutofillId id = new AutofillId(view.getAutofillId(), virtualId, mSessionId);
+                if (mLastAutofilledData.containsKey(id)) {
+                    if (Objects.equals(mLastAutofilledData.get(id), value)) {
+                        // Indicates that the view was autofilled
+                        if (sDebug) {
+                            Log.v(TAG, "notifyValueChanged() virtual view autofilled successfully:"
+                                    + virtualId + " value:" + value);
+                        }
+                        try {
+                            mService.setViewAutofilled(mSessionId, id, mContext.getUserId());
+                        } catch (RemoteException e) {
+                            // The failure could be a consequence of something going wrong on the
+                            // server side. Do nothing here since it's just logging, but it's
+                            // possible follow-up actions may fail.
+                            Log.w(TAG, "RemoteException caught but ignored " + e);
+                        }
+                    }
+                }
+            }
             if (!mEnabled || !isActiveLocked()) {
                 if (sVerbose) {
                     Log.v(TAG, "notifyValueChanged(" + view.getAutofillId() + ":" + virtualId
@@ -2892,7 +2946,7 @@ public final class AutofillManager {
             Intent fillInIntent, boolean authenticateInline) {
         synchronized (mLock) {
             if (sessionId == mSessionId) {
-                if (mRelayoutFix) {
+                if (mRelayoutFixDeprecated) {
                     mState = STATE_PENDING_AUTHENTICATION;
                 }
                 final AutofillClient client = getClient();
@@ -2985,14 +3039,32 @@ public final class AutofillManager {
                 mLastAutofilledData.put(view.getAutofillId(), targetValue);
             }
             view.setAutofilled(true, hideHighlight);
+            if (sDebug) {
+                Log.d(TAG, "View " + view.getAutofillId() + " autofilled synchronously.");
+            }
             try {
                 mService.setViewAutofilled(mSessionId, view.getAutofillId(), mContext.getUserId());
             } catch (RemoteException e) {
                 // The failure could be a consequence of something going wrong on the server side.
                 // Do nothing here since it's just logging, but it's possible follow-up actions may
                 // fail.
+                Log.w(TAG, "Unable to log due to " + e);
+            }
+        } else {
+            if (sDebug) {
+                Log.d(TAG, "View " + view.getAutofillId() + " " + view.getClass().toString()
+                        + " from " + view.getClass().getPackageName()
+                        + " : didn't fill in synchronously. It may fill asynchronously.");
             }
         }
+    }
+
+    /**
+     * Returns String with text "null" if the object is null, or the actual string represented by
+     * the object.
+     */
+    private @NonNull String getString(Object obj) {
+        return obj == null ? "null" : obj.toString();
     }
 
     private void onGetCredentialException(int sessionId, AutofillId id, String errorType,
@@ -3114,6 +3186,10 @@ public final class AutofillManager {
 
             ArrayList<AutofillId> failedIds = new ArrayList<>();
 
+            if (mLastAutofilledData == null) {
+                mLastAutofilledData = new ParcelableMap(itemCount);
+            }
+
             for (int i = 0; i < itemCount; i++) {
                 final AutofillId id = ids.get(i);
                 final AutofillValue value = values.get(i);
@@ -3126,6 +3202,9 @@ public final class AutofillManager {
                     failedIds.add(id);
                     continue;
                 }
+                // Mark the view as to be autofilled with 'value'
+                mLastAutofilledData.put(id, value);
+
                 if (id.isVirtualInt()) {
                     if (virtualValues == null) {
                         // Most likely there will be just one view with virtual children.
@@ -3139,12 +3218,6 @@ public final class AutofillManager {
                     }
                     valuesByParent.put(id.getVirtualChildIntId(), value);
                 } else {
-                    // Mark the view as to be autofilled with 'value'
-                    if (mLastAutofilledData == null) {
-                        mLastAutofilledData = new ParcelableMap(itemCount - i);
-                    }
-                    mLastAutofilledData.put(id, value);
-
                     view.autofill(value);
 
                     // Set as autofilled if the values match now, e.g. when the value was updated
@@ -3575,40 +3648,14 @@ public final class AutofillManager {
         // isCredential field indicates that the developer might be calling Credman, and we should
         // suppress autofill dialogs. But it is not a good enough indicator that there is a valid
         // credman option.
-        if (view.isCredential()) {
-            return true;
-        }
-        return containsAutofillHintPrefix(view, View.AUTOFILL_HINT_CREDENTIAL_MANAGER);
+        return view.isCredential() || isCredmanRequested(view);
     }
 
     private boolean isCredmanRequested(View view) {
         if (view == null) {
             return false;
         }
-        if (view.getViewCredentialHandler() != null) {
-            return true;
-        }
-
-        String[] hints = view.getAutofillHints();
-        if (hints == null) {
-            return false;
-        }
-        // if hint starts with 'credential=', then we assume that there is a valid
-        // credential option set by the client.
-        return containsAutofillHintPrefix(view, View.AUTOFILL_HINT_CREDENTIAL_MANAGER + "=");
-    }
-
-    private boolean containsAutofillHintPrefix(View view, String prefix) {
-        String[] hints = view.getAutofillHints();
-        if (hints == null) {
-            return false;
-        }
-        for (String hint : hints) {
-            if (hint != null && hint.startsWith(prefix)) {
-                return true;
-            }
-        }
-        return false;
+        return view.getViewCredentialHandler() != null;
     }
 
     /**
@@ -3760,7 +3807,7 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     private boolean isPendingAuthenticationLocked() {
-        return mRelayoutFix && mState == STATE_PENDING_AUTHENTICATION;
+        return mRelayoutFixDeprecated && mState == STATE_PENDING_AUTHENTICATION;
     }
 
     @GuardedBy("mLock")
@@ -4304,18 +4351,27 @@ public final class AutofillManager {
                         addToSet(mInvisibleDialogTrackedIds, id);
                     }
                 }
+            } else {
+                if (sDebug) {
+                    // isClientVisibleForAutofillLocked() is checking whether
+                    // activity has stopped under the hood
+                    Log.d(TAG, "notifyViewVisibilityChangedLocked(): ignoring "
+                            + "view visibility change since activity has stopped");
+                }
             }
 
             if (mIsTrackedSaveView && mVisibleTrackedIds.isEmpty()) {
                 if (sVerbose) {
-                    Log.v(TAG, "No more visible ids. Invisible = " + mInvisibleTrackedIds);
+                    Log.v(TAG, "No more visible tracked save ids. Invisible = "
+                            + mInvisibleTrackedIds);
                 }
                 finishSessionLocked(/* commitReason= */ COMMIT_REASON_VIEW_CHANGED);
 
             }
             if (mVisibleDialogTrackedIds.isEmpty()) {
                 if (sVerbose) {
-                    Log.v(TAG, "No more visible ids. Invisible = " + mInvisibleDialogTrackedIds);
+                    Log.v(TAG, "No more visible tracked fill dialog ids. Invisible = "
+                            + mInvisibleDialogTrackedIds);
                 }
                 processNoVisibleTrackedAllViews();
             }

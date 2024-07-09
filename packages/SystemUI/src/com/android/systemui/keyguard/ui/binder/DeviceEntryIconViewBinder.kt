@@ -38,7 +38,9 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.util.kotlin.DisposableHandles
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
@@ -64,8 +66,9 @@ object DeviceEntryIconViewBinder {
         falsingManager: FalsingManager,
         vibratorHelper: VibratorHelper,
         overrideColor: Color? = null,
-    ) {
+    ): DisposableHandle {
         DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()
+        val disposables = DisposableHandles()
         val longPressHandlingView = view.longPressHandlingView
         val fgIconView = view.iconView
         val bgView = view.bgView
@@ -83,118 +86,125 @@ object DeviceEntryIconViewBinder {
                 }
             }
 
-        view.repeatWhenAttached {
-            // Repeat on CREATED so that the view will always observe the entire
-            // GONE => AOD transition (even though the view may not be visible until the middle
-            // of the transition.
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch("$TAG#viewModel.isVisible") {
-                    viewModel.isVisible.collect { isVisible ->
-                        longPressHandlingView.isInvisible = !isVisible
+        disposables +=
+            view.repeatWhenAttached {
+                // Repeat on CREATED so that the view will always observe the entire
+                // GONE => AOD transition (even though the view may not be visible until the middle
+                // of the transition.
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    launch("$TAG#viewModel.isVisible") {
+                        viewModel.isVisible.collect { isVisible ->
+                            longPressHandlingView.isInvisible = !isVisible
+                        }
                     }
-                }
-                launch("$TAG#viewModel.isLongPressEnabled") {
-                    viewModel.isLongPressEnabled.collect { isEnabled ->
-                        longPressHandlingView.setLongPressHandlingEnabled(isEnabled)
+                    launch("$TAG#viewModel.isLongPressEnabled") {
+                        viewModel.isLongPressEnabled.collect { isEnabled ->
+                            longPressHandlingView.setLongPressHandlingEnabled(isEnabled)
+                        }
                     }
-                }
-                launch("$TAG#viewModel.isUdfpsSupported") {
-                    viewModel.isUdfpsSupported.collect { udfpsSupported ->
-                        longPressHandlingView.longPressDuration =
-                            if (udfpsSupported) {
-                                {
-                                    view.resources
-                                        .getInteger(R.integer.config_udfpsDeviceEntryIconLongPress)
-                                        .toLong()
+                    launch("$TAG#viewModel.isUdfpsSupported") {
+                        viewModel.isUdfpsSupported.collect { udfpsSupported ->
+                            longPressHandlingView.longPressDuration =
+                                if (udfpsSupported) {
+                                    {
+                                        view.resources
+                                            .getInteger(
+                                                R.integer.config_udfpsDeviceEntryIconLongPress
+                                            )
+                                            .toLong()
+                                    }
+                                } else {
+                                    {
+                                        view.resources
+                                            .getInteger(R.integer.config_lockIconLongPress)
+                                            .toLong()
+                                    }
+                                }
+                        }
+                    }
+                    launch("$TAG#viewModel.accessibilityDelegateHint") {
+                        viewModel.accessibilityDelegateHint.collect { hint ->
+                            view.accessibilityHintType = hint
+                            if (hint != DeviceEntryIconView.AccessibilityHintType.NONE) {
+                                view.setOnClickListener {
+                                    vibratorHelper.performHapticFeedback(
+                                        view,
+                                        HapticFeedbackConstants.CONFIRM,
+                                    )
+                                    applicationScope.launch { viewModel.onUserInteraction() }
                                 }
                             } else {
-                                {
-                                    view.resources
-                                        .getInteger(R.integer.config_lockIconLongPress)
-                                        .toLong()
-                                }
+                                view.setOnClickListener(null)
                             }
+                        }
                     }
-                }
-                launch("$TAG#viewModel.accessibilityDelegateHint") {
-                    viewModel.accessibilityDelegateHint.collect { hint ->
-                        view.accessibilityHintType = hint
-                        if (hint != DeviceEntryIconView.AccessibilityHintType.NONE) {
-                            view.setOnClickListener {
-                                vibratorHelper.performHapticFeedback(
-                                    view,
-                                    HapticFeedbackConstants.CONFIRM,
-                                )
-                                applicationScope.launch { viewModel.onUserInteraction() }
+                    launch("$TAG#viewModel.useBackgroundProtection") {
+                        viewModel.useBackgroundProtection.collect { useBackgroundProtection ->
+                            if (useBackgroundProtection) {
+                                bgView.visibility = View.VISIBLE
+                            } else {
+                                bgView.visibility = View.GONE
                             }
-                        } else {
-                            view.setOnClickListener(null)
                         }
                     }
-                }
-                launch("$TAG#viewModel.useBackgroundProtection") {
-                    viewModel.useBackgroundProtection.collect { useBackgroundProtection ->
-                        if (useBackgroundProtection) {
-                            bgView.visibility = View.VISIBLE
-                        } else {
-                            bgView.visibility = View.GONE
+                    launch("$TAG#viewModel.burnInOffsets") {
+                        viewModel.burnInOffsets.collect { burnInOffsets ->
+                            view.translationX = burnInOffsets.x.toFloat()
+                            view.translationY = burnInOffsets.y.toFloat()
+                            view.aodFpDrawable.progress = burnInOffsets.progress
                         }
                     }
-                }
-                launch("$TAG#viewModel.burnInOffsets") {
-                    viewModel.burnInOffsets.collect { burnInOffsets ->
-                        view.translationX = burnInOffsets.x.toFloat()
-                        view.translationY = burnInOffsets.y.toFloat()
-                        view.aodFpDrawable.progress = burnInOffsets.progress
-                    }
-                }
 
-                launch("$TAG#viewModel.deviceEntryViewAlpha") {
-                    viewModel.deviceEntryViewAlpha.collect { alpha -> view.alpha = alpha }
-                }
-            }
-        }
-
-        fgIconView.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Start with an empty state
-                fgIconView.setImageState(StateSet.NOTHING, /* merge */ false)
-                launch("$TAG#fpIconView.viewModel") {
-                    fgViewModel.viewModel.collect { viewModel ->
-                        fgIconView.setImageState(
-                            view.getIconState(viewModel.type, viewModel.useAodVariant),
-                            /* merge */ false
-                        )
-                        if (viewModel.type.contentDescriptionResId != -1) {
-                            fgIconView.contentDescription =
-                                fgIconView.resources.getString(
-                                    viewModel.type.contentDescriptionResId
-                                )
-                        }
-                        fgIconView.imageTintList =
-                            ColorStateList.valueOf(overrideColor?.toArgb() ?: viewModel.tint)
-                        fgIconView.setPadding(
-                            viewModel.padding,
-                            viewModel.padding,
-                            viewModel.padding,
-                            viewModel.padding,
-                        )
+                    launch("$TAG#viewModel.deviceEntryViewAlpha") {
+                        viewModel.deviceEntryViewAlpha.collect { alpha -> view.alpha = alpha }
                     }
                 }
             }
-        }
 
-        bgView.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch("$TAG#bgViewModel.alpha") {
-                    bgViewModel.alpha.collect { alpha -> bgView.alpha = alpha }
-                }
-                launch("$TAG#bgViewModel.color") {
-                    bgViewModel.color.collect { color ->
-                        bgView.imageTintList = ColorStateList.valueOf(color)
+        disposables +=
+            fgIconView.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    // Start with an empty state
+                    fgIconView.setImageState(StateSet.NOTHING, /* merge */ false)
+                    launch("$TAG#fpIconView.viewModel") {
+                        fgViewModel.viewModel.collect { viewModel ->
+                            fgIconView.setImageState(
+                                view.getIconState(viewModel.type, viewModel.useAodVariant),
+                                /* merge */ false
+                            )
+                            if (viewModel.type.contentDescriptionResId != -1) {
+                                fgIconView.contentDescription =
+                                    fgIconView.resources.getString(
+                                        viewModel.type.contentDescriptionResId
+                                    )
+                            }
+                            fgIconView.imageTintList =
+                                ColorStateList.valueOf(overrideColor?.toArgb() ?: viewModel.tint)
+                            fgIconView.setPadding(
+                                viewModel.padding,
+                                viewModel.padding,
+                                viewModel.padding,
+                                viewModel.padding,
+                            )
+                        }
                     }
                 }
             }
-        }
+
+        disposables +=
+            bgView.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    launch("$TAG#bgViewModel.alpha") {
+                        bgViewModel.alpha.collect { alpha -> bgView.alpha = alpha }
+                    }
+                    launch("$TAG#bgViewModel.color") {
+                        bgViewModel.color.collect { color ->
+                            bgView.imageTintList = ColorStateList.valueOf(color)
+                        }
+                    }
+                }
+            }
+
+        return disposables
     }
 }

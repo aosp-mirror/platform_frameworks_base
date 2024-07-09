@@ -24,6 +24,8 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.shared.model.ShadeAlignment
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
@@ -51,6 +53,7 @@ constructor(
     keyguardRepository: KeyguardRepository,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     powerInteractor: PowerInteractor,
+    shadeRepository: ShadeRepository,
     userSetupRepository: UserSetupRepository,
     userSwitcherInteractor: UserSwitcherInteractor,
     private val baseShadeInteractor: BaseShadeInteractor,
@@ -97,6 +100,13 @@ constructor(
                 isAsleep -> isPulsing
                 else -> true
             }
+        }
+
+    override val shadeAlignment: ShadeAlignment =
+        if (shadeRepository.isDualShadeAlignedToBottom) {
+            ShadeAlignment.Bottom
+        } else {
+            ShadeAlignment.Top
         }
 
     override val isExpandToQsEnabled: Flow<Boolean> =

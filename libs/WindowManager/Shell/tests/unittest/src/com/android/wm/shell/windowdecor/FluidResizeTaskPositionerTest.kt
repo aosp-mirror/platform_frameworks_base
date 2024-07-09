@@ -2,6 +2,8 @@ package com.android.wm.shell.windowdecor
 
 import android.app.ActivityManager
 import android.app.WindowConfiguration
+import android.content.Context
+import android.content.res.Resources
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.IBinder
@@ -17,6 +19,7 @@ import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
 import android.window.WindowContainerTransaction.Change.CHANGE_DRAG_RESIZING
 import androidx.test.filters.SmallTest
+import com.android.wm.shell.R
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
@@ -83,7 +86,10 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     private lateinit var mockTransaction: SurfaceControl.Transaction
     @Mock
     private lateinit var mockTransitionBinder: IBinder
-
+    @Mock
+    private lateinit var mockContext: Context
+    @Mock
+    private lateinit var mockResources: Resources
     private lateinit var taskPositioner: FluidResizeTaskPositioner
 
     @Before
@@ -119,6 +125,12 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         }
         `when`(mockWindowDecoration.calculateValidDragArea()).thenReturn(VALID_DRAG_AREA)
         mockWindowDecoration.mDisplay = mockDisplay
+        mockWindowDecoration.mDecorWindowContext = mockContext
+        whenever(mockWindowDecoration.mDecorWindowContext.resources).thenReturn(mockResources)
+        whenever(mockResources.getDimensionPixelSize(R.dimen.desktop_mode_minimum_window_width))
+                .thenReturn(DESKTOP_MODE_MIN_WIDTH)
+        whenever(mockResources.getDimensionPixelSize(R.dimen.desktop_mode_minimum_window_height))
+                .thenReturn(DESKTOP_MODE_MIN_HEIGHT)
         whenever(mockDisplay.displayId).thenAnswer { DISPLAY_ID }
         whenever(mockTransitions.startTransition(anyInt(), any(), any()))
                 .doReturn(mockTransitionBinder)
@@ -788,6 +800,8 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         private const val TASK_ID = 5
         private const val MIN_WIDTH = 10
         private const val MIN_HEIGHT = 10
+        private const val DESKTOP_MODE_MIN_WIDTH = 20
+        private const val DESKTOP_MODE_MIN_HEIGHT = 20
         private const val DENSITY_DPI = 20
         private const val DEFAULT_MIN = 40
         private const val DISPLAY_ID = 1

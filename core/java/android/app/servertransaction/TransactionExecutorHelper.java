@@ -226,29 +226,6 @@ public class TransactionExecutorHelper {
     }
 
     /**
-     * Return the index of the last callback that requests the state in which activity will be after
-     * execution. If there is a group of callbacks in the end that requests the same specific state
-     * or doesn't request any - we will find the first one from such group.
-     *
-     * E.g. ActivityResult requests RESUMED post-execution state, Configuration does not request any
-     * specific state. If there is a sequence
-     *   Configuration - ActivityResult - Configuration - ActivityResult
-     * index 1 will be returned, because ActivityResult request on position 1 will be the last
-     * request that moves activity to the RESUMED state where it will eventually end.
-     * @deprecated to be removed with {@link TransactionExecutor#executeCallbacks}.
-     */
-    @Deprecated
-    static int lastCallbackRequestingState(@NonNull ClientTransaction transaction) {
-        final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
-        if (callbacks == null || callbacks.isEmpty()
-                || transaction.getLifecycleStateRequest() == null) {
-            return -1;
-        }
-        return lastCallbackRequestingStateIndex(callbacks, 0, callbacks.size() - 1,
-                transaction.getLifecycleStateRequest().getActivityToken());
-    }
-
-    /**
      * Returns the index of the last callback between the start index and last index that requests
      * the state for the given activity token in which that activity will be after execution.
      * If there is a group of callbacks in the end that requests the same specific state or doesn't

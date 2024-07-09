@@ -25,7 +25,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
-import com.android.systemui.util.settings.SystemSettings;
 
 import dagger.Module;
 import dagger.Provides;
@@ -40,7 +39,6 @@ import javax.inject.Named;
         subcomponents = {
                 DreamClockTimeComplicationComponent.class,
                 DreamHomeControlsComplicationComponent.class,
-                OpenHubComplicationComponent.class,
                 DreamMediaEntryComplicationComponent.class
         })
 public interface RegisteredComplicationsModule {
@@ -48,8 +46,6 @@ public interface RegisteredComplicationsModule {
     String DREAM_SMARTSPACE_LAYOUT_PARAMS = "smartspace_layout_params";
     String DREAM_HOME_CONTROLS_CHIP_LAYOUT_PARAMS = "home_controls_chip_layout_params";
     String DREAM_MEDIA_ENTRY_LAYOUT_PARAMS = "media_entry_layout_params";
-    String OPEN_HUB_CHIP_LAYOUT_PARAMS = "open_hub_chip_layout_params";
-    String OPEN_HUB_CHIP_REPLACE_HOME_CONTROLS = "open_hub_chip_replace_home_controls";
 
     int DREAM_CLOCK_TIME_COMPLICATION_WEIGHT = 1;
     int DREAM_CLOCK_TIME_COMPLICATION_WEIGHT_NO_SMARTSPACE = 2;
@@ -113,26 +109,6 @@ public interface RegisteredComplicationsModule {
     }
 
     /**
-     * Provides layout parameters for the open hub complication.
-     */
-    @Provides
-    @Named(OPEN_HUB_CHIP_LAYOUT_PARAMS)
-    static ComplicationLayoutParams provideOpenHubLayoutParams(
-            @Named(OPEN_HUB_CHIP_REPLACE_HOME_CONTROLS) boolean replaceHomeControls) {
-        int position = ComplicationLayoutParams.POSITION_BOTTOM | (replaceHomeControls
-                ? ComplicationLayoutParams.POSITION_START
-                : ComplicationLayoutParams.POSITION_END);
-        int direction = replaceHomeControls ? ComplicationLayoutParams.DIRECTION_END
-                : ComplicationLayoutParams.DIRECTION_START;
-        return new ComplicationLayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                position,
-                direction,
-                DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT);
-    }
-
-    /**
      * Provides layout parameters for the smartspace complication.
      */
     @Provides
@@ -147,15 +123,5 @@ public interface RegisteredComplicationsModule {
                 DREAM_SMARTSPACE_COMPLICATION_WEIGHT,
                 res.getDimensionPixelSize(R.dimen.dream_overlay_complication_smartspace_padding),
                 res.getDimensionPixelSize(R.dimen.dream_overlay_complication_smartspace_max_width));
-    }
-
-    /**
-     * If true, the home controls chip should not be shown and the open hub chip should be shown in
-     * its place.
-     */
-    @Provides
-    @Named(OPEN_HUB_CHIP_REPLACE_HOME_CONTROLS)
-    static boolean providesOpenHubChipReplaceHomeControls(SystemSettings systemSettings) {
-        return systemSettings.getBool(OPEN_HUB_CHIP_REPLACE_HOME_CONTROLS, false);
     }
 }

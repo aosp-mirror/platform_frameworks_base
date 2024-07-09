@@ -147,6 +147,40 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testFindTask_includeLaunchedFromBubbled() {
+        final ComponentName component = ComponentName.createRelative(
+                DEFAULT_COMPONENT_PACKAGE_NAME, ".BubbledActivity");
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        final ActivityRecord activity = new ActivityBuilder(mWm.mAtmService)
+                .setComponent(component)
+                .setActivityOptions(opts)
+                .setCreateTask(true)
+                .build();
+
+        assertEquals(activity, mWm.mRoot.findTask(activity, activity.getTaskDisplayArea(),
+                true /* includeLaunchedFromBubble */));
+    }
+
+    @Test
+    public void testFindTask_ignoreLaunchedFromBubbled() {
+        final ComponentName component = ComponentName.createRelative(
+                DEFAULT_COMPONENT_PACKAGE_NAME, ".BubbledActivity");
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        final ActivityRecord activity = new ActivityBuilder(mWm.mAtmService)
+                .setComponent(component)
+                .setActivityOptions(opts)
+                .setCreateTask(true)
+                .build();
+
+        assertNull(mWm.mRoot.findTask(activity, activity.getTaskDisplayArea(),
+                false /* includeLaunchedFromBubble */));
+    }
+
+    @Test
     public void testAllPausedActivitiesComplete() {
         DisplayContent displayContent = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
         ActivityRecord activity = createActivityRecord(displayContent);
@@ -358,6 +392,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertEquals(newPipTask, mDisplayContent.getDefaultTaskDisplayArea().getRootPinnedTask());
         assertNotEquals(newPipTask, activity1.getTask());
         assertFalse("Created PiP task must not be in recents", newPipTask.inRecents);
+        assertThat(newPipTask.autoRemoveRecents).isTrue();
+        assertThat(activity1.getTask().autoRemoveRecents).isFalse();
     }
 
     /**
@@ -393,6 +429,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         bounds.scale(0.5f);
         task.setBounds(bounds);
         assertFalse(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertThat(task.autoRemoveRecents).isFalse();
     }
 
     /**
@@ -417,6 +454,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
         assertTrue(task.inPinnedWindowingMode());
+        assertThat(task.autoRemoveRecents).isFalse();
     }
 
     /**
@@ -446,6 +484,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         ensureTaskPlacement(fullscreenTask, secondActivity);
         assertTrue(pinnedRootTask.inPinnedWindowingMode());
         assertEquals(WINDOWING_MODE_FULLSCREEN, fullscreenTask.getWindowingMode());
+        assertThat(pinnedRootTask.autoRemoveRecents).isTrue();
+        assertThat(secondActivity.getTask().autoRemoveRecents).isFalse();
     }
 
     @Test

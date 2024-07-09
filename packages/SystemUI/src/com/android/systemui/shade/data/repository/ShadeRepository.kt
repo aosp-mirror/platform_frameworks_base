@@ -15,7 +15,10 @@
  */
 package com.android.systemui.shade.data.repository
 
+import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.res.R
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
@@ -104,6 +107,9 @@ interface ShadeRepository {
 
     val shadeMode: StateFlow<ShadeMode>
 
+    /** Whether dual shade should be aligned to the bottom (true) or to the top (false). */
+    val isDualShadeAlignedToBottom: Boolean
+
     /** True when QS is taking up the entire screen, i.e. fully expanded on a non-unfolded phone. */
     @Deprecated("Use ShadeInteractor instead") val legacyQsFullscreen: StateFlow<Boolean>
 
@@ -174,7 +180,8 @@ interface ShadeRepository {
 
 /** Business logic for shade interactions */
 @SysUISingleton
-class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
+class ShadeRepositoryImpl @Inject constructor(@Application applicationContext: Context) :
+    ShadeRepository {
     private val _qsExpansion = MutableStateFlow(0f)
     override val qsExpansion: StateFlow<Float> = _qsExpansion.asStateFlow()
 
@@ -222,6 +229,9 @@ class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
 
     val _shadeMode = MutableStateFlow(if (DualShade.isEnabled) ShadeMode.Dual else ShadeMode.Single)
     override val shadeMode: StateFlow<ShadeMode> = _shadeMode.asStateFlow()
+
+    override val isDualShadeAlignedToBottom =
+        applicationContext.resources.getBoolean(R.bool.config_dualShadeAlignedToBottom)
 
     override fun setShadeMode(shadeMode: ShadeMode) {
         _shadeMode.value = shadeMode

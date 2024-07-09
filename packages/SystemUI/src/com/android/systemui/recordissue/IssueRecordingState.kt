@@ -18,11 +18,12 @@ package com.android.systemui.recordissue
 
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.tiles.RecordIssueTile
+import com.android.systemui.recordissue.RecordIssueModule.Companion.TILE_SPEC
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
-import com.android.traceur.TraceUtils.PresetTraceType
+import com.android.traceur.PresetTraceConfigs
+import com.android.traceur.TraceConfig
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 
@@ -35,11 +36,7 @@ constructor(
 ) {
 
     private val prefs =
-        userFileManager.getSharedPreferences(
-            RecordIssueTile.TILE_SPEC,
-            Context.MODE_PRIVATE,
-            userTracker.userId
-        )
+        userFileManager.getSharedPreferences(TILE_SPEC, Context.MODE_PRIVATE, userTracker.userId)
 
     var takeBugreport
         get() = prefs.getBoolean(KEY_TAKE_BUG_REPORT, false)
@@ -57,8 +54,8 @@ constructor(
         get() = prefs.getInt(KEY_ISSUE_TYPE_RES, ISSUE_TYPE_NOT_SET)
         set(value) = prefs.edit().putInt(KEY_ISSUE_TYPE_RES, value).apply()
 
-    val traceType: PresetTraceType
-        get() = ALL_ISSUE_TYPES[issueTypeRes] ?: PresetTraceType.UNSET
+    val traceConfig: TraceConfig
+        get() = ALL_ISSUE_TYPES[issueTypeRes] ?: PresetTraceConfigs.getDefaultConfig()
 
     private val listeners = CopyOnWriteArrayList<Runnable>()
 
@@ -87,12 +84,12 @@ constructor(
         const val KEY_ISSUE_TYPE_RES = "key_issueTypeRes"
         const val ISSUE_TYPE_NOT_SET = -1
 
-        val ALL_ISSUE_TYPES: Map<Int, PresetTraceType> =
+        val ALL_ISSUE_TYPES: Map<Int, TraceConfig?> =
             hashMapOf(
-                Pair(R.string.performance, PresetTraceType.PERFORMANCE),
-                Pair(R.string.user_interface, PresetTraceType.UI),
-                Pair(R.string.battery, PresetTraceType.BATTERY),
-                Pair(R.string.thermal, PresetTraceType.THERMAL)
+                Pair(R.string.performance, PresetTraceConfigs.getPerformanceConfig()),
+                Pair(R.string.user_interface, PresetTraceConfigs.getUiConfig()),
+                Pair(R.string.battery, PresetTraceConfigs.getBatteryConfig()),
+                Pair(R.string.thermal, PresetTraceConfigs.getThermalConfig()),
             )
     }
 }

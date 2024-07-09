@@ -21,12 +21,15 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
@@ -46,7 +49,40 @@ constructor(
     val repository: KeyguardRepository,
     val biometricSettingsRepository: BiometricSettingsRepository,
     transitionInteractor: KeyguardTransitionInteractor,
+    internalTransitionInteractor: InternalKeyguardTransitionInteractor,
 ) {
+
+    /**
+     * Whether the keyguard is enabled, per [KeyguardService]. If the keyguard is not enabled, the
+     * lockscreen cannot be shown and the device will go from AOD/DOZING directly to GONE.
+     *
+     * Keyguard can be disabled by selecting Security: "None" in settings, or by apps that hold
+     * permission to do so (such as Phone).
+     *
+     * If the keyguard is disabled while we're locked, we will transition to GONE unless we're in
+     * lockdown mode. If the keyguard is re-enabled, we'll transition back to LOCKSCREEN if we were
+     * locked when it was disabled.
+     */
+    val isKeyguardEnabled: StateFlow<Boolean> = repository.isKeyguardEnabled
+
+    /**
+     * Whether we need to show the keyguard when the keyguard is re-enabled, since we hid it when it
+     * became disabled.
+     */
+    val showKeyguardWhenReenabled: Flow<Boolean> =
+        repository.isKeyguardEnabled
+            .onEach { SceneContainerFlag.assertInLegacyMode() }
+            // Whenever the keyguard is disabled...
+            .filter { enabled -> !enabled }
+            .sampleCombine(
+                internalTransitionInteractor.currentTransitionInfoInternal,
+                biometricSettingsRepository.isCurrentUserInLockdown
+            )
+            .map { (_, transitionInfo, inLockdown) ->
+                // ...we hide the keyguard, if it's showing and we're not in lockdown. In that case,
+                // we want to remember that and re-show it when keyguard is enabled again.
+                transitionInfo.to != KeyguardState.GONE && !inLockdown
+            }
 
     init {
         /**
@@ -58,7 +94,7 @@ constructor(
                 .filter { enabled -> !enabled }
                 .sampleCombine(
                     biometricSettingsRepository.isCurrentUserInLockdown,
-                    transitionInteractor.currentTransitionInfoInternal,
+                    internalTransitionInteractor.currentTransitionInfoInternal,
                 )
                 .collect { (_, inLockdown, currentTransitionInfo) ->
                     if (currentTransitionInfo.to != KeyguardState.GONE && !inLockdown) {
@@ -68,25 +104,15 @@ constructor(
         }
     }
 
-    /**
-     * Whether we need to show the keyguard when the keyguard is re-enabled, since we hid it when it
-     * became disabled.
-     */
-    val showKeyguardWhenReenabled: Flow<Boolean> =
-        repository.isKeyguardEnabled
-            // Whenever the keyguard is disabled...
-            .filter { enabled -> !enabled }
-            .sampleCombine(
-                transitionInteractor.currentTransitionInfoInternal,
-                biometricSettingsRepository.isCurrentUserInLockdown
-            )
-            .map { (_, transitionInfo, inLockdown) ->
-                // ...we hide the keyguard, if it's showing and we're not in lockdown. In that case,
-                // we want to remember that and re-show it when keyguard is enabled again.
-                transitionInfo.to != KeyguardState.GONE && !inLockdown
-            }
-
     fun notifyKeyguardEnabled(enabled: Boolean) {
         repository.setKeyguardEnabled(enabled)
+    }
+
+    fun setShowKeyguardWhenReenabled(isShowKeyguardWhenReenabled: Boolean) {
+        repository.setShowKeyguardWhenReenabled(isShowKeyguardWhenReenabled)
+    }
+
+    fun isShowKeyguardWhenReenabled(): Boolean {
+        return repository.isShowKeyguardWhenReenabled()
     }
 }

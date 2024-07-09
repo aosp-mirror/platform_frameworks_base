@@ -84,6 +84,10 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"فقاعة"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"إدارة"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"تم إغلاق الفقاعة."</string>
+    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
+    <skip />
+    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
+    <skip />
     <string name="restart_button_description" msgid="4564728020654658478">"انقر لإعادة تشغيل هذا التطبيق للحصول على تجربة عرض أفضل."</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"يمكنك تغيير نسبة العرض إلى الارتفاع لهذا التطبيق من خلال \"الإعدادات\"."</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"تغيير نسبة العرض إلى الارتفاع"</string>

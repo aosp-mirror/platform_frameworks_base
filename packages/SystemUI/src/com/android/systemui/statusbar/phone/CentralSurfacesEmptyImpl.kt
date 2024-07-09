@@ -16,12 +16,11 @@
 
 package com.android.systemui.statusbar.phone
 
-import android.content.Intent
 import android.view.MotionEvent
 import androidx.lifecycle.LifecycleRegistry
 import com.android.keyguard.AuthKeyguardMessageArea
 import com.android.systemui.animation.ActivityTransitionAnimator
-import com.android.systemui.navigationbar.NavigationBarView
+import com.android.systemui.navigationbar.views.NavigationBarView
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.qs.QSPanelController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -71,7 +70,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun getNavigationBarView(): NavigationBarView? = null
     override fun setBouncerShowing(bouncerShowing: Boolean) {}
     override fun isScreenFullyOff() = false
-    override fun getEmergencyActionIntent(): Intent? = null
     override fun isCameraAllowedByAdmin() = false
     override fun isGoingToSleep() = false
     override fun notifyBiometricAuthModeChanged() {}

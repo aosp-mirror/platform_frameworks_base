@@ -98,9 +98,9 @@ constructor(
 
     private var allowReorder = false
 
-    fun onSwipeToDismiss() {
+    fun onSwipeToDismiss(location: Int) {
         logger.logSwipeDismiss()
-        interactor.onSwipeToDismiss()
+        interactor.onSwipeToDismiss(location)
     }
 
     fun onReorderingAllowed() {
@@ -108,12 +108,24 @@ constructor(
         interactor.reorderMedia()
     }
 
+    fun onCardVisibleToUser(
+        qsExpanded: Boolean,
+        visibleIndex: Int,
+        location: Int,
+        isUpdate: Boolean = false
+    ) {
+        // Skip logging if on LS or QQS, and there is no active media card
+        if (!qsExpanded && !interactor.hasActiveMediaOrRecommendation()) return
+        interactor.logSmartspaceSeenCard(visibleIndex, location, isUpdate)
+    }
+
     private fun toViewModel(
         commonModel: MediaCommonModel.MediaControl
     ): MediaCommonViewModel.MediaControl {
         val instanceId = commonModel.mediaLoadedModel.instanceId
         return mediaControlByInstanceId[instanceId]?.copy(
-            immediatelyUpdateUi = commonModel.mediaLoadedModel.immediatelyUpdateUi
+            immediatelyUpdateUi = commonModel.mediaLoadedModel.immediatelyUpdateUi,
+            updateTime = commonModel.updateTime
         )
             ?: MediaCommonViewModel.MediaControl(
                     instanceId = instanceId,
@@ -125,7 +137,8 @@ constructor(
                         mediaControlByInstanceId.remove(instanceId)
                     },
                     onUpdated = { onMediaControlAddedOrUpdated(it, commonModel) },
-                    isMediaFromRec = commonModel.isMediaFromRec
+                    isMediaFromRec = commonModel.isMediaFromRec,
+                    updateTime = commonModel.updateTime
                 )
                 .also { mediaControlByInstanceId[instanceId] = it }
     }
@@ -155,13 +168,17 @@ constructor(
                             mediaFlags.isPersistentSsCardEnabled(),
                     recsViewModel = recommendationsViewModel,
                     onAdded = { commonViewModel ->
-                        onMediaRecommendationAddedOrUpdated(commonViewModel)
+                        onMediaRecommendationAddedOrUpdated(
+                            commonViewModel as MediaCommonViewModel.MediaRecommendations
+                        )
                     },
                     onRemoved = { immediatelyRemove ->
                         onMediaRecommendationRemoved(commonModel, immediatelyRemove)
                     },
                     onUpdated = { commonViewModel ->
-                        onMediaRecommendationAddedOrUpdated(commonViewModel)
+                        onMediaRecommendationAddedOrUpdated(
+                            commonViewModel as MediaCommonViewModel.MediaRecommendations
+                        )
                     },
                 )
                 .also { mediaRecs = it }
@@ -171,7 +188,6 @@ constructor(
         commonViewModel: MediaCommonViewModel,
         commonModel: MediaCommonModel.MediaControl
     ) {
-        // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_RECEIVED)
         if (commonModel.canBeRemoved && !Utils.useMediaResumption(applicationContext)) {
             // This media control is due for removal as it is now paused + timed out, and resumption
             // setting is off.
@@ -185,13 +201,13 @@ constructor(
         }
     }
 
-    private fun onMediaRecommendationAddedOrUpdated(commonViewModel: MediaCommonViewModel) {
+    private fun onMediaRecommendationAddedOrUpdated(
+        commonViewModel: MediaCommonViewModel.MediaRecommendations
+    ) {
         if (!interactor.isRecommendationActive()) {
             if (!mediaFlags.isPersistentSsCardEnabled()) {
                 commonViewModel.onRemoved(true)
             }
-        } else {
-            // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_RECEIVED)
         }
     }
 
@@ -201,6 +217,7 @@ constructor(
     ) {
         if (immediatelyRemove || isReorderingAllowed()) {
             interactor.dismissSmartspaceRecommendation(commonModel.recsLoadingModel.key, 0L)
+            mediaRecs = null
             if (!immediatelyRemove) {
                 // Although it wasn't requested, we were able to process the removal
                 // immediately since reordering is allowed. So, notify hosts to update

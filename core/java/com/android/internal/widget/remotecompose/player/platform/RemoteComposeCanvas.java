@@ -42,6 +42,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     boolean mInActionDown = false;
     boolean mDebug = false;
     Point mActionDownPoint = new Point(0, 0);
+    AndroidRemoteContext mARContext = new AndroidRemoteContext();
 
     public RemoteComposeCanvas(Context context) {
         super(context);
@@ -85,9 +86,8 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         mDocument.initializeContext(mARContext);
         setContentDescription(mDocument.getDocument().getContentDescription());
         requestLayout();
+        invalidate();
     }
-
-    AndroidRemoteContext mARContext = new AndroidRemoteContext();
 
     @Override
     public void onViewAttachedToWindow(View view) {
@@ -119,8 +119,21 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         removeAllViews();
     }
 
+    public String[] getNamedColors() {
+        return mDocument.getNamedColors();
+    }
 
-    public  interface ClickCallbacks {
+    /**
+     * set the color associated with this name.
+     *
+     * @param colorName Name of color typically "android.xxx"
+     * @param colorValue "the argb value"
+     */
+    public void setColor(String colorName, int colorValue) {
+        mARContext.setNamedColorOverride(colorName, colorValue);
+    }
+
+    public interface ClickCallbacks {
         void click(int id, String metadata);
     }
 
@@ -213,6 +226,9 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         setMeasuredDimension(w, h);
     }
 
+    private int mCount;
+    private long mTime = System.nanoTime();
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -224,6 +240,17 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         mARContext.mWidth = getWidth();
         mARContext.mHeight = getHeight();
         mDocument.paint(mARContext, mTheme);
+        if (mDebug) {
+            mCount++;
+            if (System.nanoTime() - mTime > 1000000000L) {
+                System.out.println(" count " + mCount + " fps");
+                mCount = 0;
+                mTime = System.nanoTime();
+            }
+        }
+        if (mDocument.needsRepaint() > 0) {
+            invalidate();
+        }
     }
 
 }

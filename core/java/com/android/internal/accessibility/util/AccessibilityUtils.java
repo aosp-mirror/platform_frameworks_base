@@ -126,7 +126,7 @@ public final class AccessibilityUtils {
     }
 
     /**
-     * Changes an accessibility component's state.
+     * Changes an accessibility component's state for the calling process userId
      */
     public static void setAccessibilityServiceState(Context context, ComponentName componentName,
             boolean enabled) {

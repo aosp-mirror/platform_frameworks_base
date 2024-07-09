@@ -1196,11 +1196,12 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(RecoverySystemService.Lifecycle.class);
         t.traceEnd();
 
+        // Initialize RescueParty.
+        RescueParty.registerHealthObserver(mSystemContext);
         if (!Flags.recoverabilityDetection()) {
             // Now that we have the bare essentials of the OS up and running, take
             // note that we just booted, which might send out a rescue party if
             // we're stuck in a runtime restart loop.
-            RescueParty.registerHealthObserver(mSystemContext);
             PackageWatchdog.getInstance(mSystemContext).noteBoot();
         }
 
@@ -1923,7 +1924,11 @@ public final class SystemServer implements Dumpable {
             startRotationResolverService(context, t);
             startSystemCaptionsManagerService(context, t);
             startTextToSpeechManagerService(context, t);
-            startWearableSensingService(t);
+            if (!isWatch || !android.server.Flags.removeWearableSensingServiceFromWear()) {
+                startWearableSensingService(t);
+            } else {
+                Slog.d(TAG, "Not starting WearableSensingService");
+            }
             startOnDeviceIntelligenceService(t);
 
             if (deviceHasConfigString(
@@ -2129,14 +2134,20 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
-            t.traceBegin("StartVpnManagerService");
-            try {
-                vpnManager = VpnManagerService.create(context);
-                ServiceManager.addService(Context.VPN_MANAGEMENT_SERVICE, vpnManager);
-            } catch (Throwable e) {
-                reportWtf("starting VPN Manager Service", e);
+            if (!isWatch || !android.server.Flags.allowRemovingVpnService()) {
+                t.traceBegin("StartVpnManagerService");
+                try {
+                    vpnManager = VpnManagerService.create(context);
+                    ServiceManager.addService(Context.VPN_MANAGEMENT_SERVICE, vpnManager);
+                } catch (Throwable e) {
+                    reportWtf("starting VPN Manager Service", e);
+                }
+                t.traceEnd();
+            } else {
+                // VPN management currently does not work in Wear, so skip starting the
+                // VPN manager SystemService.
+                Slog.i(TAG, "Not starting VpnManagerService");
             }
-            t.traceEnd();
 
             t.traceBegin("StartVcnManagementService");
             try {
@@ -2434,11 +2445,11 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            t.traceBegin("CertBlacklister");
+            t.traceBegin("CertBlocklister");
             try {
-                CertBlacklister blacklister = new CertBlacklister(context);
+                CertBlocklister blocklister = new CertBlocklister(context);
             } catch (Throwable e) {
-                reportWtf("starting CertBlacklister", e);
+                reportWtf("starting CertBlocklister", e);
             }
             t.traceEnd();
 
@@ -2639,9 +2650,13 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(MediaMetricsManagerService.class);
             t.traceEnd();
 
-            t.traceBegin("StartBackgroundInstallControlService");
-            mSystemServiceManager.startService(BackgroundInstallControlService.class);
-            t.traceEnd();
+            if (!com.android.server.flags.Flags.optionalBackgroundInstallControl()
+                    || SystemProperties.getBoolean(
+                            "ro.system_settings.service.backgound_install_control_enabled", true)) {
+                t.traceBegin("StartBackgroundInstallControlService");
+                mSystemServiceManager.startService(BackgroundInstallControlService.class);
+                t.traceEnd();
+            }
         }
 
         t.traceBegin("StartMediaProjectionManager");
@@ -2917,10 +2932,10 @@ public final class SystemServer implements Dumpable {
         t.traceEnd();
 
         if (Flags.recoverabilityDetection()) {
-            // Now that we have the essential services needed for rescue party, initialize
-            // RescuParty. note that we just booted, which might send out a rescue party if
-            // we're stuck in a runtime restart loop.
-            RescueParty.registerHealthObserver(mSystemContext);
+            // Now that we have the essential services needed for mitigations, register the boot
+            // with package watchdog.
+            // Note that we just booted, which might send out a rescue party if we're stuck in a
+            // runtime restart loop.
             PackageWatchdog.getInstance(mSystemContext).noteBoot();
         }
 

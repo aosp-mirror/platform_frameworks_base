@@ -124,7 +124,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.LauncherAppsService.LauncherAppsServiceInternal;
@@ -609,11 +609,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         int effects = TRANSACT_EFFECTS_NONE;
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
+        mService.mTaskSupervisor.beginDeferResume();
+        boolean deferResume = true;
         mService.mTaskSupervisor.setDeferRootVisibilityUpdate(true /* deferUpdate */);
-        final boolean shouldDeferTransitionReady = transition != null && !t.isEmpty()
-                && (transition.isCollecting() || Flags.alwaysDeferTransitionWhenApplyWct());
-        if (shouldDeferTransitionReady) {
-            transition.deferTransitionReady();
+        boolean deferTransitionReady = false;
+        if (transition != null && !t.isEmpty()) {
+            if (transition.isCollecting()) {
+                deferTransitionReady = true;
+                transition.deferTransitionReady();
+            } else {
+                Slog.w(TAG, "Transition is not collecting when applyTransaction."
+                        + " transition=" + transition + " state=" + transition.getState());
+                transition = null;
+            }
         }
         try {
             final ArraySet<WindowContainer<?>> haveConfigChanges = new ArraySet<>();
@@ -750,6 +758,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
                 mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
+                mService.mTaskSupervisor.endDeferResume();
+                deferResume = false;
                 // Already calls ensureActivityConfig
                 mService.mRootWindowContainer.ensureActivitiesVisible();
                 mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -767,10 +777,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 mService.mWindowManager.mWindowPlacerLocked.requestTraversal();
             }
         } finally {
-            if (shouldDeferTransitionReady) {
+            if (deferTransitionReady) {
                 transition.continueTransitionReady();
             }
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
+            if (deferResume) {
+                mService.mTaskSupervisor.endDeferResume();
+            }
             mService.continueWindowLayout();
         }
         return effects;
@@ -865,15 +878,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         final int childWindowingMode = c.getActivityWindowingMode();
         if (!ActivityTaskManagerService.isPip2ExperimentEnabled()
-                && tr.getWindowingMode() == WINDOWING_MODE_PINNED
-                && (childWindowingMode == WINDOWING_MODE_PINNED
-                || childWindowingMode == WINDOWING_MODE_UNDEFINED)) {
-            // If setActivityWindowingMode requested to match its pinned task's windowing mode,
-            // remove any inconsistency checking timeout callbacks for PiP.
-            Slog.d(TAG, "Task and activity windowing modes match, so remove any timeout "
-                    + "abort PiP callbacks scheduled if needed; task_win_mode="
-                    + tr.getWindowingMode() + ", activity_win_mode=" + childWindowingMode);
-            mService.mRootWindowContainer.removeAllMaybeAbortPipEnterRunnable();
+                && tr.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            if (childWindowingMode == WINDOWING_MODE_PINNED
+                    || childWindowingMode == WINDOWING_MODE_UNDEFINED) {
+                // If setActivityWindowingMode requested to match its pinned task's windowing mode,
+                // remove any inconsistency checking timeout callbacks for PiP.
+                Slog.d(TAG, "Task and activity windowing modes match, so remove any timeout "
+                        + "abort PiP callbacks scheduled if needed; task_win_mode="
+                        + tr.getWindowingMode() + ", activity_win_mode=" + childWindowingMode);
+                mService.mRootWindowContainer.removeAllMaybeAbortPipEnterRunnable();
+            } else if (shouldApplyLifecycleEffectOnPipChange()) {
+                // This is leaving PiP: task is pinned mode and activity changes to non-pip mode.
+                // Then the activity can be resumed because it becomes focusable.
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
         }
         if (childWindowingMode > -1) {
             tr.forAllActivities(a -> { a.setWindowingMode(childWindowingMode); });
@@ -898,6 +916,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (canEnterPip) {
                     canEnterPip = mService.mActivityClientController
                             .requestPictureInPictureMode(activity);
+                    if (canEnterPip && shouldApplyLifecycleEffectOnPipChange()) {
+                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                    }
                 }
                 if (!canEnterPip) {
                     // Restore the flag to its previous state when the activity cannot enter PIP.
@@ -907,6 +928,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         return effects;
+    }
+
+    // TODO(b/333452456): For testing on local easier. Remove after the use case is gone.
+    @VisibleForTesting
+    static boolean shouldApplyLifecycleEffectOnPipChange() {
+        return android.os.SystemProperties.getBoolean(
+                "persist.wm.debug.apply_lifecycle_on_pip_change", false)
+                || com.android.window.flags.Flags.applyLifecycleOnPipChange();
     }
 
     private int applyDisplayAreaChanges(DisplayArea displayArea,
@@ -1092,6 +1121,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 if (activity.isVisible() || activity.isVisibleRequested()) {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
                     // Prevent the transition from being executed too early if the activity is
                     // visible.
                     activity.finishIfPossible("finish-activity-op", false /* oomAdj */);
@@ -1109,6 +1139,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
                 final SafeActivityOptions safeOptions =
                         SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid);
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 waitAsyncStart(() -> mService.mTaskSupervisor.startActivityFromRecents(
                         caller.mPid, caller.mUid, taskId, safeOptions));
                 break;
@@ -1565,7 +1596,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case OP_TYPE_REORDER_TO_BOTTOM_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    if (task.mChildren.peekFirst() != taskFragment) {
+                    if (task.getBottomChild() != taskFragment) {
                         task.mChildren.remove(taskFragment);
                         task.mChildren.add(0, taskFragment);
                         if (!taskFragment.hasChild()) {
@@ -1581,7 +1612,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case OP_TYPE_REORDER_TO_TOP_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    if (task.mChildren.peekLast() != taskFragment) {
+                    if (task.getTopChild() != taskFragment) {
                         task.mChildren.remove(taskFragment);
                         task.mChildren.add(taskFragment);
                         if (!taskFragment.hasChild()) {

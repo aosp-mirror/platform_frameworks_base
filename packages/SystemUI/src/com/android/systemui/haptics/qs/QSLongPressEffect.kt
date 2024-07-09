@@ -17,21 +17,19 @@
 package com.android.systemui.haptics.qs
 
 import android.os.VibrationEffect
-import android.view.View
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.animation.Expandable
+import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 
 /**
  * A class that handles the long press visuo-haptic effect for a QS tile.
  *
- * The class is also a [View.OnTouchListener] to handle the touch events, clicks and long-press
- * gestures of the tile. The class also provides a [State] tha can be used to determine the current
- * state of the long press effect.
+ * The class can contain references to a [QSTile] and an [Expandable] to perform clicks and
+ * long-clicks on the tile. The class also provides a [State] tha can be used to determine the
+ * current state of the long press effect.
  *
  * @property[vibratorHelper] The [VibratorHelper] to deliver haptic effects.
  * @property[effectDuration] The duration of the effect in ms.
@@ -41,7 +39,7 @@ class QSLongPressEffect
 @Inject
 constructor(
     private val vibratorHelper: VibratorHelper?,
-    keyguardInteractor: KeyguardInteractor,
+    private val keyguardStateController: KeyguardStateController,
 ) {
 
     var effectDuration = 0
@@ -51,19 +49,12 @@ constructor(
     var state = State.IDLE
         private set
 
-    /** Flow for view control and action */
-    private val _postedActionType = MutableStateFlow<ActionType?>(null)
-    val actionType: Flow<ActionType?> =
-        combine(
-            _postedActionType,
-            keyguardInteractor.isKeyguardDismissible,
-        ) { action, isDismissible ->
-            if (!isDismissible && action == ActionType.LONG_PRESS) {
-                ActionType.RESET_AND_LONG_PRESS
-            } else {
-                action
-            }
-        }
+    /** Callback object for effect actions */
+    var callback: Callback? = null
+
+    /** The [QSTile] and [Expandable] used to perform a long-click and click actions */
+    var qsTile: QSTile? = null
+    var expandable: Expandable? = null
 
     /** Haptic effects */
     private val durations =
@@ -106,33 +97,25 @@ constructor(
             State.IDLE -> {
                 setState(State.TIMEOUT_WAIT)
             }
-            State.RUNNING_BACKWARDS -> _postedActionType.value = ActionType.CANCEL_ANIMATOR
+            State.RUNNING_BACKWARDS_FROM_UP,
+            State.RUNNING_BACKWARDS_FROM_CANCEL -> callback?.onCancelAnimator()
             else -> {}
         }
     }
 
     fun handleActionUp() {
-        when (state) {
-            State.TIMEOUT_WAIT -> {
-                _postedActionType.value = ActionType.CLICK
-                setState(State.IDLE)
-            }
-            State.RUNNING_FORWARD -> {
-                _postedActionType.value = ActionType.REVERSE_ANIMATOR
-                setState(State.RUNNING_BACKWARDS)
-            }
-            else -> {}
+        if (state == State.RUNNING_FORWARD) {
+            setState(State.RUNNING_BACKWARDS_FROM_UP)
+            callback?.onReverseAnimator()
         }
     }
 
     fun handleActionCancel() {
         when (state) {
-            State.TIMEOUT_WAIT -> {
-                setState(State.IDLE)
-            }
+            State.TIMEOUT_WAIT -> setState(State.IDLE)
             State.RUNNING_FORWARD -> {
-                _postedActionType.value = ActionType.REVERSE_ANIMATOR
-                setState(State.RUNNING_BACKWARDS)
+                setState(State.RUNNING_BACKWARDS_FROM_CANCEL)
+                callback?.onReverseAnimator()
             }
             else -> {}
         }
@@ -145,13 +128,24 @@ constructor(
 
     /** This function is called both when an animator completes or gets cancelled */
     fun handleAnimationComplete() {
-        if (state == State.RUNNING_FORWARD) {
-            vibrate(snapEffect)
-            _postedActionType.value = ActionType.LONG_PRESS
-        }
-        if (state != State.TIMEOUT_WAIT) {
-            // This will happen if the animator did not finish by being cancelled
-            setState(State.IDLE)
+        when (state) {
+            State.RUNNING_FORWARD -> {
+                setState(State.IDLE)
+                vibrate(snapEffect)
+                if (keyguardStateController.isUnlocked) {
+                    qsTile?.longClick(expandable)
+                } else {
+                    callback?.onResetProperties()
+                    qsTile?.longClick(expandable)
+                }
+            }
+            State.RUNNING_BACKWARDS_FROM_UP -> {
+                setState(State.IDLE)
+                callback?.onEffectFinishedReversing()
+                qsTile?.click(expandable)
+            }
+            State.RUNNING_BACKWARDS_FROM_CANCEL -> setState(State.IDLE)
+            else -> {}
         }
     }
 
@@ -161,12 +155,19 @@ constructor(
 
     fun handleTimeoutComplete() {
         if (state == State.TIMEOUT_WAIT) {
-            _postedActionType.value = ActionType.START_ANIMATOR
+            callback?.onStartAnimator()
         }
     }
 
-    fun clearActionType() {
-        _postedActionType.value = null
+    fun onTileClick(): Boolean {
+        if (state == State.TIMEOUT_WAIT) {
+            setState(State.IDLE)
+            qsTile?.let {
+                it.click(expandable)
+                return true
+            }
+        }
+        return false
     }
 
     /**
@@ -195,18 +196,30 @@ constructor(
 
     enum class State {
         IDLE, /* The effect is idle waiting for touch input */
-        TIMEOUT_WAIT, /* The effect is waiting for a [PRESSED_TIMEOUT] period */
+        TIMEOUT_WAIT, /* The effect is waiting for a tap timeout period */
         RUNNING_FORWARD, /* The effect is running normally */
-        RUNNING_BACKWARDS, /* The effect was interrupted and is now running backwards */
+        /* The effect was interrupted by an ACTION_UP and is now running backwards */
+        RUNNING_BACKWARDS_FROM_UP,
+        /* The effect was interrupted by an ACTION_CANCEL and is now running backwards */
+        RUNNING_BACKWARDS_FROM_CANCEL,
     }
 
-    /* A type of action to perform on the view depending on the effect's state and logic */
-    enum class ActionType {
-        CLICK,
-        LONG_PRESS,
-        RESET_AND_LONG_PRESS,
-        START_ANIMATOR,
-        REVERSE_ANIMATOR,
-        CANCEL_ANIMATOR,
+    /** Callbacks to notify view and animator actions */
+    interface Callback {
+
+        /** Reset the tile visual properties */
+        fun onResetProperties()
+
+        /** Event where the effect completed by being reversed */
+        fun onEffectFinishedReversing()
+
+        /** Start the effect animator */
+        fun onStartAnimator()
+
+        /** Reverse the effect animator */
+        fun onReverseAnimator()
+
+        /** Cancel the effect animator */
+        fun onCancelAnimator()
     }
 }

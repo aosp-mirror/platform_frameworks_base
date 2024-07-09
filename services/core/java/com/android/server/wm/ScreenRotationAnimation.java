@@ -57,7 +57,7 @@ import android.window.ScreenCapture;
 
 import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.display.DisplayControl;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
@@ -815,10 +815,8 @@ class ScreenRotationAnimation {
                 if (mDisplayContent.getRotationAnimation() == ScreenRotationAnimation.this) {
                     // It also invokes kill().
                     mDisplayContent.setRotationAnimation(null);
-                    if (mDisplayContent.mDisplayRotationCompatPolicy != null) {
-                        mDisplayContent.mDisplayRotationCompatPolicy
-                                .onScreenRotationAnimationFinished();
-                    }
+                    mDisplayContent.mAppCompatCameraPolicy
+                            .onScreenRotationAnimationFinished();
                 } else {
                     kill();
                 }

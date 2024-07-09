@@ -20,6 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.panels.domain.interactor.EditTilesListInteractor
 import com.android.systemui.qs.panels.domain.interactor.GridLayoutTypeInteractor
+import com.android.systemui.qs.panels.domain.interactor.TilesAvailabilityInteractor
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
@@ -46,6 +47,7 @@ class EditModeViewModel
 constructor(
     private val editTilesListInteractor: EditTilesListInteractor,
     private val currentTilesInteractor: CurrentTilesInteractor,
+    private val tilesAvailabilityInteractor: TilesAvailabilityInteractor,
     private val minTilesInteractor: MinimumTilesInteractor,
     @Named("Default") private val defaultGridLayout: GridLayout,
     @Application private val applicationScope: CoroutineScope,
@@ -82,11 +84,21 @@ constructor(
      *   Quick Settings.
      * * The tiles that are not current will preserve their relative order even when the current
      *   tiles change.
+     * * Tiles that are not available will be filtered out. None of them can be current (as they
+     *   cannot be created), and they won't be able to be added.
      */
     val tiles =
         isEditing.flatMapLatest {
             if (it) {
                 val editTilesData = editTilesListInteractor.getTilesToEdit()
+                // Query only the non current platform tiles, as any current tile is clearly
+                // available
+                val unavailable =
+                    tilesAvailabilityInteractor.getUnavailableTiles(
+                        editTilesData.stockTiles
+                            .map { it.tileSpec }
+                            .minus(currentTilesInteractor.currentTilesSpecs.toSet())
+                    )
                 currentTilesInteractor.currentTiles.map { tiles ->
                     val currentSpecs = tiles.map { it.spec }
                     val canRemoveTiles = currentSpecs.size > minimumTiles
@@ -95,27 +107,29 @@ constructor(
                     val currentTiles = currentSpecs.map { allTilesMap.get(it) }.filterNotNull()
                     val nonCurrentTiles = allTiles.filter { it.tileSpec !in currentSpecs }
 
-                    (currentTiles + nonCurrentTiles).map {
-                        val current = it.tileSpec in currentSpecs
-                        val availableActions = buildSet {
-                            if (current) {
-                                add(AvailableEditActions.MOVE)
-                                if (canRemoveTiles) {
-                                    add(AvailableEditActions.REMOVE)
+                    (currentTiles + nonCurrentTiles)
+                        .filterNot { it.tileSpec in unavailable }
+                        .map {
+                            val current = it.tileSpec in currentSpecs
+                            val availableActions = buildSet {
+                                if (current) {
+                                    add(AvailableEditActions.MOVE)
+                                    if (canRemoveTiles) {
+                                        add(AvailableEditActions.REMOVE)
+                                    }
+                                } else {
+                                    add(AvailableEditActions.ADD)
                                 }
-                            } else {
-                                add(AvailableEditActions.ADD)
                             }
+                            EditTileViewModel(
+                                it.tileSpec,
+                                it.icon,
+                                it.label,
+                                it.appName,
+                                current,
+                                availableActions
+                            )
                         }
-                        EditTileViewModel(
-                            it.tileSpec,
-                            it.icon,
-                            it.label,
-                            it.appName,
-                            current,
-                            availableActions
-                        )
-                    }
                 }
             } else {
                 emptyFlow()
@@ -132,13 +146,16 @@ constructor(
         _isEditing.value = false
     }
 
-    /** Immediately moves [tileSpec] to [position]. */
-    fun moveTile(tileSpec: TileSpec, position: Int) {
-        throw NotImplementedError("This is not supported yet")
-    }
-
-    /** Immediately adds [tileSpec] to the current tiles at [position]. */
+    /**
+     * Immediately adds [tileSpec] to the current tiles at [position]. If the [tileSpec] was already
+     * present, it will be moved to the new position.
+     */
     fun addTile(tileSpec: TileSpec, position: Int = POSITION_AT_END) {
+        // Removing tile if it's already present to insert it at the new index.
+        if (currentTilesInteractor.currentTilesSpecs.contains(tileSpec)) {
+            removeTile(tileSpec)
+        }
+
         currentTilesInteractor.addTile(tileSpec, position)
     }
 

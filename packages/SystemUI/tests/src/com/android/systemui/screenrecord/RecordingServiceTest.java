@@ -35,8 +35,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -60,7 +60,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class RecordingServiceTest extends SysuiTestCase {
 

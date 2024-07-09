@@ -34,6 +34,10 @@ public class DataLabelsTest {
             "data-labels-accessed-invalid-bool.xml";
     private static final String COLLECTED_VALID_BOOL_FILE_NAME =
             "data-labels-collected-valid-bool.xml";
+    private static final String COLLECTED_EPHEMERAL_FILE_NAME =
+            "data-labels-collected-ephemeral.xml";
+    private static final String COLLECTED_EPHEMERAL_COLLISION_FILE_NAME =
+            "data-labels-collected-ephemeral-collision.xml";
     private static final String COLLECTED_INVALID_BOOL_FILE_NAME =
             "data-labels-collected-invalid-bool.xml";
     private static final String SHARED_VALID_BOOL_FILE_NAME = "data-labels-shared-valid-bool.xml";
@@ -69,27 +73,27 @@ public class DataLabelsTest {
         System.out.println("set up.");
     }
 
-    /** Test for data labels accessed valid bool. */
-    @Test
-    public void testDataLabelsAccessedValidBool() throws Exception {
-        System.out.println("starting testDataLabelsAccessedValidBool.");
-        testHrToOdDataLabels(ACCESSED_VALID_BOOL_FILE_NAME);
-        testOdToHrDataLabels(ACCESSED_VALID_BOOL_FILE_NAME);
-    }
-
-    /** Test for data labels accessed invalid bool. */
-    @Test
-    public void testDataLabelsAccessedInvalidBool() throws Exception {
-        System.out.println("starting testDataLabelsAccessedInvalidBool.");
-        hrToOdExpectException(ACCESSED_INVALID_BOOL_FILE_NAME);
-    }
-
     /** Test for data labels collected valid bool. */
     @Test
     public void testDataLabelsCollectedValidBool() throws Exception {
         System.out.println("starting testDataLabelsCollectedValidBool.");
         testHrToOdDataLabels(COLLECTED_VALID_BOOL_FILE_NAME);
         testOdToHrDataLabels(COLLECTED_VALID_BOOL_FILE_NAME);
+    }
+
+    /** Test for data labels collected ephemeral. */
+    @Test
+    public void testDataLabelsCollectedEphemeral() throws Exception {
+        System.out.println("starting testDataLabelsCollectedEphemeral.");
+        testHrToOdDataLabels(COLLECTED_EPHEMERAL_FILE_NAME);
+        testOdToHrDataLabels(COLLECTED_EPHEMERAL_FILE_NAME);
+    }
+
+    /** Test for data labels ephemeral collision. */
+    @Test
+    public void testDataLabelsCollectedEphemeralCollision() throws Exception {
+        System.out.println("starting testDataLabelsCollectedEphemeralCollision.");
+        hrToOdExpectException(COLLECTED_EPHEMERAL_COLLISION_FILE_NAME);
     }
 
     /** Test for data labels collected invalid bool. */

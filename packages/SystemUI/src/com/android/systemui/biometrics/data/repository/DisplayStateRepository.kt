@@ -139,9 +139,10 @@ constructor(
             }
             .stateIn(
                 backgroundScope,
-                started = SharingStarted.WhileSubscribed(),
+                started = SharingStarted.Eagerly,
                 initialValue = false,
             )
+
     private fun dpiFromPx(size: Float, densityDpi: Int): Float {
         val densityRatio = densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT
         return size / densityRatio

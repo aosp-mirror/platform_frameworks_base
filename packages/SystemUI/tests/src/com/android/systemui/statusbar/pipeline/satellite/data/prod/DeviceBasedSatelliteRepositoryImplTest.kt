@@ -32,9 +32,12 @@ import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_NOT_CO
 import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_OFF
 import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_UNAVAILABLE
 import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_UNKNOWN
+import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_ERROR
 import android.telephony.satellite.SatelliteManager.SatelliteException
 import android.telephony.satellite.SatelliteModemStateCallback
+import android.telephony.satellite.SatelliteProvisionStateCallback
 import android.telephony.satellite.SatelliteSupportedStateCallback
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -59,8 +62,10 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
@@ -70,6 +75,7 @@ import org.mockito.MockitoAnnotations
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
     private lateinit var underTest: DeviceBasedSatelliteRepositoryImpl
 
@@ -326,6 +332,229 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun satelliteProvisioned_notSupported_defaultFalse() =
+        testScope.runTest {
+            // GIVEN satellite is not supported
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = false,
+            )
+
+            assertThat(underTest.isSatelliteProvisioned.value).isFalse()
+        }
+
+    @Test
+    fun satelliteProvisioned_supported_defaultFalse() =
+        testScope.runTest {
+            // GIVEN satellite is supported
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = true,
+            )
+
+            // THEN default provisioned state is false
+            assertThat(underTest.isSatelliteProvisioned.value).isFalse()
+        }
+
+    @Test
+    fun satelliteProvisioned_returnsException_defaultsToFalse() =
+        testScope.runTest {
+            // GIVEN satellite is supported on device
+            doAnswer {
+                val callback: OutcomeReceiver<Boolean, SatelliteException> =
+                    it.getArgument(1) as OutcomeReceiver<Boolean, SatelliteException>
+                callback.onResult(true)
+            }
+                .whenever(satelliteManager)
+                .requestIsSupported(any(), any())
+
+            // GIVEN satellite returns an error when asked if provisioned
+            doAnswer {
+                val receiver = it.arguments[1] as OutcomeReceiver<Boolean, SatelliteException>
+                receiver.onError(SatelliteException(SATELLITE_RESULT_ERROR))
+                null
+            }
+                .whenever(satelliteManager)
+                .requestIsProvisioned(
+                    any(),
+                    any<OutcomeReceiver<Boolean, SatelliteException>>()
+                )
+
+            // GIVEN we've been up long enough to start querying
+            systemClock.setUptimeMillis(Process.getStartUptimeMillis() + MIN_UPTIME)
+
+            underTest =
+                DeviceBasedSatelliteRepositoryImpl(
+                    Optional.of(satelliteManager),
+                    telephonyManager,
+                    dispatcher,
+                    testScope.backgroundScope,
+                    logBuffer = FakeLogBuffer.Factory.create(),
+                    verboseLogBuffer = FakeLogBuffer.Factory.create(),
+                    systemClock,
+                )
+
+            // WHEN we try to check for provisioned status
+            val provisioned by collectLastValue(underTest.isSatelliteProvisioned)
+
+            // THEN well, first we don't throw...
+            // AND THEN we assume that it's not provisioned
+            assertThat(provisioned).isFalse()
+        }
+
+    @Test
+    fun satelliteProvisioned_throwsWhenQuerying_defaultsToFalse() =
+        testScope.runTest {
+            // GIVEN satellite is supported on device
+            doAnswer {
+                val callback: OutcomeReceiver<Boolean, SatelliteException> =
+                    it.getArgument(1) as OutcomeReceiver<Boolean, SatelliteException>
+                callback.onResult(true)
+            }
+                .whenever(satelliteManager)
+                .requestIsSupported(any(), any())
+
+            // GIVEN satellite throws when asked if provisioned
+            whenever(satelliteManager.requestIsProvisioned(any(), any()))
+                .thenThrow(SecurityException())
+
+            // GIVEN we've been up long enough to start querying
+            systemClock.setUptimeMillis(Process.getStartUptimeMillis() + MIN_UPTIME)
+
+            underTest =
+                DeviceBasedSatelliteRepositoryImpl(
+                    Optional.of(satelliteManager),
+                    telephonyManager,
+                    dispatcher,
+                    testScope.backgroundScope,
+                    logBuffer = FakeLogBuffer.Factory.create(),
+                    verboseLogBuffer = FakeLogBuffer.Factory.create(),
+                    systemClock,
+                )
+
+            // WHEN we try to check for provisioned status
+            val provisioned by collectLastValue(underTest.isSatelliteProvisioned)
+
+            // THEN well, first we don't throw...
+            // AND THEN we assume that it's not provisioned
+            assertThat(provisioned).isFalse()
+        }
+
+    @Test
+    fun satelliteProvisioned_supported_provisioned_queriesInitialStateBeforeCallbacks() =
+        testScope.runTest {
+            // GIVEN satellite is supported, and provisioned
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = true,
+                initialSatelliteIsProvisioned = true,
+            )
+
+            val provisioned by collectLastValue(underTest.isSatelliteProvisioned)
+
+            runCurrent()
+
+            // THEN the current state is requested
+            verify(satelliteManager, atLeastOnce()).requestIsProvisioned(any(), any())
+
+            // AND the state is correct
+            assertThat(provisioned).isTrue()
+        }
+
+    @Test
+    fun satelliteProvisioned_supported_notProvisioned_queriesInitialStateBeforeCallbacks() =
+        testScope.runTest {
+            // GIVEN satellite is supported, and provisioned
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = true,
+                initialSatelliteIsProvisioned = false,
+            )
+
+            val provisioned by collectLastValue(underTest.isSatelliteProvisioned)
+
+            runCurrent()
+
+            // THEN the current state is requested
+            verify(satelliteManager, atLeastOnce()).requestIsProvisioned(any(), any())
+
+            // AND the state is correct
+            assertThat(provisioned).isFalse()
+        }
+
+    @Test
+    fun satelliteProvisioned_supported_notInitiallyProvisioned_tracksCallback() =
+        testScope.runTest {
+            // GIVEN satellite is not supported
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = true,
+                initialSatelliteIsProvisioned = false,
+            )
+
+            val provisioned by collectLastValue(underTest.isSatelliteProvisioned)
+            runCurrent()
+
+            val callback =
+                withArgCaptor<SatelliteProvisionStateCallback> {
+                    verify(satelliteManager).registerForProvisionStateChanged(any(), capture())
+                }
+
+            // WHEN provisioning state changes
+            callback.onSatelliteProvisionStateChanged(true)
+
+            // THEN the value is reflected in the repo
+            assertThat(provisioned).isTrue()
+        }
+
+    @Test
+    fun satelliteProvisioned_supported_tracksCallback_reRegistersOnCrash() =
+        testScope.runTest {
+            // GIVEN satellite is supported
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = true,
+            )
+
+            val provisioned by collectLastValue(underTest.isSatelliteProvisioned)
+
+            runCurrent()
+
+            val callback =
+                withArgCaptor<SatelliteProvisionStateCallback> {
+                    verify(satelliteManager).registerForProvisionStateChanged(any(), capture())
+                }
+            val telephonyCallback =
+                MobileTelephonyHelpers.getTelephonyCallbackForType<
+                    TelephonyCallback.RadioPowerStateListener
+                >(
+                    telephonyManager
+                )
+
+            // GIVEN satellite is currently provisioned
+            callback.onSatelliteProvisionStateChanged(true)
+
+            assertThat(provisioned).isTrue()
+
+            // WHEN a crash event happens (detected by radio state change)
+            telephonyCallback.onRadioPowerStateChanged(TelephonyManager.RADIO_POWER_ON)
+            runCurrent()
+            telephonyCallback.onRadioPowerStateChanged(TelephonyManager.RADIO_POWER_OFF)
+            runCurrent()
+
+            // THEN listeners are re-registered
+            verify(satelliteManager, times(2)).registerForProvisionStateChanged(any(), any())
+            // AND the state is queried again
+            verify(satelliteManager, times(2)).requestIsProvisioned(any(), any())
+        }
+
+    @Test
     fun satelliteNotSupported_listenersAreNotRegistered() =
         testScope.runTest {
             // GIVEN satellite is not supported
@@ -539,6 +768,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
         uptime: Long = MIN_UPTIME,
         satMan: SatelliteManager? = satelliteManager,
         satelliteSupported: Boolean = true,
+        initialSatelliteIsProvisioned: Boolean = true,
     ) {
         doAnswer {
                 val callback: OutcomeReceiver<Boolean, SatelliteException> =
@@ -547,6 +777,14 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             }
             .whenever(satelliteManager)
             .requestIsSupported(any(), any())
+
+        doAnswer {
+            val callback: OutcomeReceiver<Boolean, SatelliteException> =
+                it.getArgument(1) as OutcomeReceiver<Boolean, SatelliteException>
+            callback.onResult(initialSatelliteIsProvisioned)
+        }
+            .whenever(satelliteManager)
+            .requestIsProvisioned(any(), any())
 
         systemClock.setUptimeMillis(Process.getStartUptimeMillis() + uptime)
 

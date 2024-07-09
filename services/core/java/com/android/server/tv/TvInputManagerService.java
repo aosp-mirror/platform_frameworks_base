@@ -341,10 +341,16 @@ public final class TvInputManagerService extends SystemService {
         }, UserHandle.ALL, intentFilter, null, null);
     }
 
+    private static boolean hasAlwaysBoundPermission(PackageManager pm, ComponentName component) {
+        return pm.checkPermission(android.Manifest.permission.ALWAYS_BOUND_TV_INPUT,
+                component.getPackageName()) == PackageManager.PERMISSION_GRANTED;
+    }
+
     private static boolean hasHardwarePermission(PackageManager pm, ComponentName component) {
         return pm.checkPermission(android.Manifest.permission.TV_INPUT_HARDWARE,
                 component.getPackageName()) == PackageManager.PERMISSION_GRANTED;
     }
+
     @GuardedBy("mLock")
     private void buildTvInputListLocked(int userId, String[] updatedPackages) {
         UserState userState = getOrCreateUserStateLocked(userId);
@@ -3526,7 +3532,7 @@ public final class TvInputManagerService extends SystemService {
                 continue;
             }
             ComponentName component = new ComponentName(si.packageName, si.name);
-            if (hasHardwarePermission(pm, component)) {
+            if (!hasAlwaysBoundPermission(pm, component) && hasHardwarePermission(pm, component)) {
                 updateServiceConnectionLocked(component, userId);
             }
         }

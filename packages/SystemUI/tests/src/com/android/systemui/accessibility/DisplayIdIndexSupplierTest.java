@@ -20,10 +20,10 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 import android.hardware.display.DisplayManager;
-import android.testing.AndroidTestingRunner;
 import android.view.Display;
 
 import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class DisplayIdIndexSupplierTest extends SysuiTestCase {
 
     private DisplayIdIndexSupplier<Object> mDisplayIdIndexSupplier;

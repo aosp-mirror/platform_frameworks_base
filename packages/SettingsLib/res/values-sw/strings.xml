@@ -96,7 +96,7 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Imeunganishwa (hamna simu au kifaa cha sauti), kiasi cha chaji ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Inatumika. Chaji ya betri imefika <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Inatumika. Kushoto: chaji ya betri imefika <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Kulia: chaji ya betri imefika <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
-    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Inatumika. Kushoto: chaji ya betri imefika <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Inatumika. Kushoto: chaji <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Inatumika. Kulia: chaji ya betri imefika <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Chaji ya betri ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Chaji ya betri ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -408,6 +408,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Ruhusu upakiaji wa safu za utatuzi wa GPU za programu za utatuzi"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Washa uwekaji kumbukumbu za muuzaji kwa kutumia sauti"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Jumuisha kumbukumbu zaidi za muuzaji ambazo ni mahususi kwa kifaa kwenye ripoti za hitilafu, ambazo huenda zikawa na maelezo ya faragha, zikatumia chaji nyingi ya betri na/au zikatumia nafasi kubwa ya hifadhi."</string>
+    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
+    <skip />
+    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Uhuishaji kwenye dirisha"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Mageuzi ya kipimo cha uhuishaji"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Mizani ya muda wa uhuishaji"</string>
@@ -557,6 +569,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Kengele na vikumbusho"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Ruhusu programu hii iweke kengele na ratiba za vitendo vingine vinavyotegemea wakati. Hatua hii inairuhusu programu itumike chinichini, hali inayoweza kutumia chaji nyingi ya betri.\n\nIkiwa ruhusa hii itazimwa, kengele zilizopo na ratiba za vitendo vinavyotegemea wakati zilizowekwa na programu hii hazitafanya kazi."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ratiba, kengele, kikumbusho, saa"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"Usinisumbue"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Washa"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Washa kipengele cha Usinisumbue"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Kamwe usiwashe"</string>
@@ -569,6 +582,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Muda"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Uliza kila wakati"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Hadi utakapoizima"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(Hakuna jina)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Sasa hivi"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Simu hii"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Kishikwambi hiki"</string>

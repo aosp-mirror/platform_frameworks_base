@@ -80,7 +80,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
@@ -2294,10 +2294,8 @@ public class DisplayRotation {
                     mInHalfFoldTransition = false;
                     mDeviceState = DeviceStateController.DeviceState.UNKNOWN;
                 }
-                mDisplayRotationCompatPolicySummary = dc.mDisplayRotationCompatPolicy == null
-                        ? null
-                        : dc.mDisplayRotationCompatPolicy
-                                .getSummaryForDisplayRotationHistoryRecord();
+                mDisplayRotationCompatPolicySummary = dc.mAppCompatCameraPolicy
+                        .getSummaryForDisplayRotationHistoryRecord();
                 mRotationReversionSlots =
                         dr.mDisplayContent.getRotationReversionController().getSlotsCopy();
             }

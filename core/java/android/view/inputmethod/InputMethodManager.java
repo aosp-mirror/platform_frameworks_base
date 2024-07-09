@@ -129,6 +129,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2630,13 +2631,17 @@ public final class InputMethodManager {
                 return false;
             }
             if (useDelegation) {
+                WeakReference<Executor> executorRef = new WeakReference<>(executor);
+                WeakReference<Consumer<Boolean>> callbackRef = new WeakReference<>(callback);
                 if (useCallback) {
                     IBooleanListener listener = new IBooleanListener.Stub() {
                         @Override
                         public void onResult(boolean value) {
-                            executor.execute(() -> {
-                                callback.accept(value);
-                            });
+                            Executor executor = executorRef.get();
+                            Consumer<Boolean> callback = callbackRef.get();
+                            if (executor != null && callback != null) {
+                                executor.execute(() -> callback.accept(value));
+                            }
                         }
                     };
                     if (!IInputMethodManagerGlobalInvoker.acceptStylusHandwritingDelegationAsync(

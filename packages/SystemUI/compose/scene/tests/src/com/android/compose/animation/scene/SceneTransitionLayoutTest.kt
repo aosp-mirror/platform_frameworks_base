@@ -16,11 +16,13 @@
 
 package com.android.compose.animation.scene
 
+import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -167,9 +169,44 @@ class SceneTransitionLayoutTest {
 
         assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
 
-        rule.activity.onBackPressed()
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
         rule.waitForIdle()
         assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
+    }
+
+    @Test
+    fun testPredictiveBack() {
+        rule.setContent { TestContent() }
+
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+
+        // Start back.
+        val dispatcher = rule.activity.onBackPressedDispatcher
+        rule.runOnUiThread {
+            dispatcher.dispatchOnBackStarted(backEvent())
+            dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
+        }
+
+        val transition = assertThat(layoutState.transitionState).isTransition()
+        assertThat(transition).hasFromScene(SceneA)
+        assertThat(transition).hasToScene(SceneB)
+        assertThat(transition).hasProgress(0.4f)
+
+        // Cancel it.
+        rule.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
+        rule.waitForIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+        assertThat(layoutState.transitionState).isIdle()
+
+        // Start again and commit it.
+        rule.runOnUiThread {
+            dispatcher.dispatchOnBackStarted(backEvent())
+            dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
+            dispatcher.onBackPressed()
+        }
+        rule.waitForIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
+        assertThat(layoutState.transitionState).isIdle()
     }
 
     @Test
@@ -333,6 +370,42 @@ class SceneTransitionLayoutTest {
     }
 
     @Test
+    fun layoutSizeDoesNotOverscrollWhenOverscrollIsSpecified() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions { overscroll(SceneB, Orientation.Horizontal) }
+                )
+            }
+
+        val layoutTag = "layout"
+        rule.setContent {
+            SceneTransitionLayout(state, Modifier.testTag(layoutTag)) {
+                scene(SceneA) { Box(Modifier.size(50.dp)) }
+                scene(SceneB) { Box(Modifier.size(70.dp)) }
+            }
+        }
+
+        // Overscroll on A at -100%: size should be interpolated given that there is no overscroll
+        // defined for scene A.
+        var progress by mutableStateOf(-1f)
+        rule.runOnIdle {
+            state.startTransition(transition(from = SceneA, to = SceneB, progress = { progress }))
+        }
+        rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(30.dp)
+
+        // Middle of the transition.
+        progress = 0.5f
+        rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(60.dp)
+
+        // Overscroll on B at 200%: size should not be interpolated given that there is an
+        // overscroll defined for scene B.
+        progress = 2f
+        rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(70.dp)
+    }
+
+    @Test
     fun multipleTransitionsWillComposeMultipleScenes() {
         val duration = 10 * 16L
 
@@ -486,5 +559,14 @@ class SceneTransitionLayoutTest {
         assertThat(keyInA).isEqualTo(SceneA)
         assertThat(keyInB).isEqualTo(SceneB)
         assertThat(keyInC).isEqualTo(SceneC)
+    }
+
+    private fun backEvent(progress: Float = 0f): BackEventCompat {
+        return BackEventCompat(
+            touchX = 0f,
+            touchY = 0f,
+            progress = progress,
+            swipeEdge = BackEventCompat.EDGE_LEFT,
+        )
     }
 }

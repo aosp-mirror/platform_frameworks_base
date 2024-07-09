@@ -424,7 +424,9 @@ class InsetsPolicy {
                 // Use task bounds to calculating rounded corners if the task is not floating.
                 final InsetsState state = copyState ? new InsetsState(originalState)
                         : originalState;
-                state.setRoundedCornerFrame(task.getBounds());
+                state.setRoundedCornerFrame(token.isFixedRotationTransforming()
+                        ? token.getFixedRotationTransformDisplayBounds()
+                        : task.getBounds());
                 return state;
             }
         }

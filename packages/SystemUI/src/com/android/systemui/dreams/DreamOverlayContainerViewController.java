@@ -21,8 +21,6 @@ import static android.service.dreams.Flags.dreamHandlesBeingObscured;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamAlphaScaledExpansion;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamYPositionScaledExpansion;
-import static com.android.systemui.Flags.communalHub;
-import static com.android.systemui.Flags.glanceableHubGestureHandle;
 import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM;
 import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
@@ -40,6 +38,7 @@ import android.view.ViewGroup;
 
 import com.android.app.animation.Interpolators;
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController;
 import com.android.systemui.ambient.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
@@ -52,9 +51,11 @@ import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.ViewController;
 
 import kotlinx.coroutines.CoroutineDispatcher;
@@ -72,10 +73,12 @@ import javax.inject.Named;
 public class DreamOverlayContainerViewController extends
         ViewController<DreamOverlayContainerView> implements
         LowLightTransitionCoordinator.LowLightEnterListener {
-    private final DreamOverlayStatusBarViewController mStatusBarViewController;
+    private final AmbientStatusBarViewController mStatusBarViewController;
+    private final TouchInsetManager.TouchInsetSession mTouchInsetSession;
     private final BlurUtils mBlurUtils;
     private final DreamOverlayAnimationsController mDreamOverlayAnimationsController;
     private final DreamOverlayStateController mStateController;
+
     private final LowLightTransitionCoordinator mLowLightTransitionCoordinator;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final ShadeInteractor mShadeInteractor;
@@ -187,9 +190,9 @@ public class DreamOverlayContainerViewController extends
             DreamOverlayContainerView containerView,
             ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
-            @Named(DreamOverlayModule.HUB_GESTURE_INDICATOR_VIEW) View hubGestureIndicatorView,
-            DreamOverlayStatusBarViewController statusBarViewController,
+            AmbientStatusBarViewController statusBarViewController,
             LowLightTransitionCoordinator lowLightTransitionCoordinator,
+            TouchInsetManager.TouchInsetSession touchInsetSession,
             BlurUtils blurUtils,
             @Main Handler handler,
             @Background CoroutineDispatcher backgroundDispatcher,
@@ -209,6 +212,7 @@ public class DreamOverlayContainerViewController extends
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
+        mTouchInsetSession = touchInsetSession;
         mBlurUtils = blurUtils;
         mDreamOverlayAnimationsController = animationsController;
         mStateController = stateController;
@@ -223,12 +227,6 @@ public class DreamOverlayContainerViewController extends
         mComplicationHostViewController = complicationHostViewController;
         mDreamOverlayMaxTranslationY = resources.getDimensionPixelSize(
                 R.dimen.dream_overlay_y_offset);
-
-        if (communalHub() && glanceableHubGestureHandle()) {
-            // TODO(b/339667383): remove this temporary swipe gesture handle
-            hubGestureIndicatorView.setVisibility(View.VISIBLE);
-        }
-
         final View view = mComplicationHostViewController.getView();
 
         mDreamOverlayContentView.addView(view,
@@ -268,13 +266,19 @@ public class DreamOverlayContainerViewController extends
             collectFlow(
                     mView,
                     FlowKt.distinctUntilChanged(combineFlows(
-                            mKeyguardTransitionInteractor.isFinishedInStateWhere(
-                                    KeyguardState::isBouncerState),
+                            mKeyguardTransitionInteractor.isFinishedIn(
+                                    Scenes.Bouncer, KeyguardState.PRIMARY_BOUNCER),
+                            mKeyguardTransitionInteractor.isFinishedIn(
+                                    KeyguardState.ALTERNATE_BOUNCER),
                             mShadeInteractor.isAnyExpanded(),
                             mCommunalInteractor.isCommunalShowing(),
-                            (anyBouncerShowing, shadeExpanded, communalShowing) -> {
-                                mAnyBouncerShowing = anyBouncerShowing;
-                                return anyBouncerShowing || shadeExpanded || communalShowing;
+                            (primaryBouncerShowing,
+                                    alternateBouncerShowing,
+                                    shadeExpanded,
+                                    communalShowing) -> {
+                                mAnyBouncerShowing = primaryBouncerShowing
+                                        || alternateBouncerShowing;
+                                return mAnyBouncerShowing || shadeExpanded || communalShowing;
                             })),
                     mDreamManager::setDreamIsObscured,
                     mBackgroundDispatcher);
@@ -294,6 +298,7 @@ public class DreamOverlayContainerViewController extends
         mHandler.removeCallbacksAndMessages(null);
         mPrimaryBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
         mBouncerlessScrimController.removeCallback(mBouncerlessExpansionCallback);
+        mTouchInsetSession.clear();
 
         mDreamOverlayAnimationsController.cancelAnimations();
     }

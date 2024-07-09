@@ -58,6 +58,10 @@ import java.util.Objects;
 final class NavigationBarController {
 
     private interface Callback {
+
+        default void updateInsets(@NonNull InputMethodService.Insets originalInsets) {
+        }
+
         default void updateTouchableInsets(@NonNull InputMethodService.Insets originalInsets,
                 @NonNull ViewTreeObserver.InternalInsetsInfo dest) {
         }
@@ -94,6 +98,15 @@ final class NavigationBarController {
     NavigationBarController(@NonNull InputMethodService inputMethodService) {
         mImpl = InputMethodService.canImeRenderGesturalNavButtons()
                 ? new Impl(inputMethodService) : Callback.NOOP;
+    }
+
+    /**
+     * Update the given insets to be at least as big as the IME navigation bar, when visible.
+     *
+     * @param originalInsets the insets to check and modify to include the IME navigation bar.
+     */
+    void updateInsets(@NonNull InputMethodService.Insets originalInsets) {
+        mImpl.updateInsets(originalInsets);
     }
 
     void updateTouchableInsets(@NonNull InputMethodService.Insets originalInsets,
@@ -267,6 +280,24 @@ final class NavigationBarController {
                 mNavigationBarFrame.setOnApplyWindowInsetsListener(null);
             }
             mNavigationBarFrame = null;
+        }
+
+        @Override
+        public void updateInsets(@NonNull InputMethodService.Insets originalInsets) {
+            if (!mImeDrawsImeNavBar || mNavigationBarFrame == null
+                    || mNavigationBarFrame.getVisibility() != View.VISIBLE
+                    || mService.isFullscreenMode()) {
+                return;
+            }
+
+            final int[] loc = new int[2];
+            mNavigationBarFrame.getLocationInWindow(loc);
+            if (originalInsets.contentTopInsets > loc[1]) {
+                originalInsets.contentTopInsets = loc[1];
+            }
+            if (originalInsets.visibleTopInsets > loc[1]) {
+                originalInsets.visibleTopInsets = loc[1];
+            }
         }
 
         @Override

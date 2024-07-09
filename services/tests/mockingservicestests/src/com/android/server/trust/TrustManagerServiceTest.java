@@ -43,6 +43,7 @@ import static java.util.Collections.singleton;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
@@ -72,9 +73,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.security.KeyStoreAuthorization;
 import android.service.trust.GrantTrustResult;
@@ -124,9 +122,6 @@ public class TrustManagerServiceTest {
             .build();
 
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
-
-    @Rule
     public final MockContext mMockContext = new MockContext(
             ApplicationProvider.getApplicationContext());
 
@@ -148,6 +143,7 @@ public class TrustManagerServiceTest {
     private final Map<ComponentName, ITrustAgentService.Stub> mMockTrustAgents = new HashMap<>();
 
     private @Mock ActivityManager mActivityManager;
+    private @Mock ActivityManagerInternal mActivityManagerInternal;
     private @Mock AlarmManager mAlarmManager;
     private @Mock BiometricManager mBiometricManager;
     private @Mock DevicePolicyManager mDevicePolicyManager;
@@ -164,6 +160,7 @@ public class TrustManagerServiceTest {
     private HandlerThread mHandlerThread;
     private TrustManagerService mService;
     private ITrustManager mTrustManager;
+    private ActivityManagerInternal mPreviousActivityManagerInternal;
 
     @Before
     public void setUp() throws Exception {
@@ -216,6 +213,11 @@ public class TrustManagerServiceTest {
         mMockContext.setMockPackageManager(mPackageManager);
         mMockContext.addMockSystemService(UserManager.class, mUserManager);
         doReturn(mWindowManager).when(() -> WindowManagerGlobal.getWindowManagerService());
+        mPreviousActivityManagerInternal = LocalServices.getService(
+                ActivityManagerInternal.class);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.addService(ActivityManagerInternal.class,
+                mActivityManagerInternal);
         LocalServices.addService(SystemServiceManager.class, mock(SystemServiceManager.class));
 
         grantPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE);
@@ -263,7 +265,14 @@ public class TrustManagerServiceTest {
     @After
     public void tearDown() {
         LocalServices.removeServiceForTest(SystemServiceManager.class);
-        mHandlerThread.quit();
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        if (mPreviousActivityManagerInternal != null) {
+            LocalServices.addService(ActivityManagerInternal.class,
+                    mPreviousActivityManagerInternal);
+        }
+        if (mHandlerThread != null) {
+            mHandlerThread.quit();
+        }
     }
 
     @Test
@@ -418,7 +427,6 @@ public class TrustManagerServiceTest {
     // user, not the profile.  This matches the authentication that is needed to unlock the device
     // for the profile again.
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testLockDeviceForManagedProfileWithUnifiedChallenge_usesParentBiometricSids()
             throws Exception {
         setupMocksForProfile(/* unifiedChallenge= */ true);
@@ -617,7 +625,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockEnabled_whenWeakFingerprintIsSetupAndAllowed()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -626,7 +633,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockEnabled_whenWeakFaceIsSetupAndAllowed() throws Exception {
         setupStrongAuthTrackerToAllowEverything();
         setupFace(SensorProperties.STRENGTH_WEAK);
@@ -634,7 +640,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockEnabled_whenConvenienceFingerprintIsSetupAndAllowed()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -643,7 +648,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockEnabled_whenConvenienceFaceIsSetupAndAllowed()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -652,7 +656,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenStrongAuthRequired() throws Exception {
         setupStrongAuthTracker(StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN, true);
         setupFace(SensorProperties.STRENGTH_WEAK);
@@ -660,7 +663,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenNonStrongBiometricNotAllowed() throws Exception {
         setupStrongAuthTracker(StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED,
                 /* isNonStrongBiometricAllowed= */ false);
@@ -669,7 +671,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenWeakFingerprintSensorIsPresentButNotEnrolled()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -678,7 +679,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenWeakFaceSensorIsPresentButNotEnrolled()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -687,7 +687,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void
             testKeystoreWeakUnlockDisabled_whenWeakFingerprintIsSetupButForbiddenByDevicePolicy()
             throws Exception {
@@ -699,7 +698,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenWeakFaceIsSetupButForbiddenByDevicePolicy()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -710,7 +708,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenOnlyStrongFingerprintIsSetup() throws Exception {
         setupStrongAuthTrackerToAllowEverything();
         setupFingerprint(SensorProperties.STRENGTH_STRONG);
@@ -718,7 +715,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenOnlyStrongFaceIsSetup() throws Exception {
         setupStrongAuthTrackerToAllowEverything();
         setupFace(SensorProperties.STRENGTH_STRONG);
@@ -726,7 +722,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenNoBiometricsAreSetup() throws Exception {
         setupStrongAuthTrackerToAllowEverything();
         verifyWeakUnlockDisabled();

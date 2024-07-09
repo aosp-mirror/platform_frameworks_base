@@ -21,8 +21,8 @@ import android.content.pm.PackageManager
 import android.os.PowerManager
 import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.widget.LockPatternUtils
@@ -45,7 +45,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class EmergencyButtonControllerTest : SysuiTestCase() {
     @Mock lateinit var emergencyButton: EmergencyButton

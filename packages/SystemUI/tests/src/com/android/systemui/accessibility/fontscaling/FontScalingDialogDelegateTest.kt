@@ -18,12 +18,12 @@ package com.android.systemui.accessibility.fontscaling
 import android.content.res.Configuration
 import android.os.Handler
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.SeekBar
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -58,7 +58,7 @@ private const val OFF: Int = 0
 
 /** Tests for [FontScalingDialogDelegate]. */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class FontScalingDialogDelegateTest : SysuiTestCase() {
     private lateinit var fontScalingDialogDelegate: FontScalingDialogDelegate

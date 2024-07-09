@@ -1026,12 +1026,7 @@ public class TrustManagerService extends SystemService {
                 continue;
             }
 
-            final boolean trusted;
-            if (android.security.Flags.fixUnlockedDeviceRequiredKeysV2()) {
-                trusted = getUserTrustStateInner(id) == TrustState.TRUSTED;
-            } else {
-                trusted = aggregateIsTrusted(id);
-            }
+            final boolean trusted = getUserTrustStateInner(id) == TrustState.TRUSTED;
             boolean showingKeyguard = true;
             boolean biometricAuthenticated = false;
             boolean currentUserIsUnlocked = false;
@@ -1092,19 +1087,15 @@ public class TrustManagerService extends SystemService {
 
     private void notifyKeystoreOfDeviceLockState(int userId, boolean isLocked) {
         if (isLocked) {
-            if (android.security.Flags.fixUnlockedDeviceRequiredKeysV2()) {
-                // A profile with unified challenge is unlockable not by its own biometrics and
-                // trust agents, but rather by those of the parent user.  Therefore, when protecting
-                // the profile's UnlockedDeviceRequired keys, we must use the parent's list of
-                // biometric SIDs and weak unlock methods, not the profile's.
-                int authUserId = mLockPatternUtils.isProfileWithUnifiedChallenge(userId)
-                        ? resolveProfileParent(userId) : userId;
+            // A profile with unified challenge is unlockable not by its own biometrics and
+            // trust agents, but rather by those of the parent user.  Therefore, when protecting
+            // the profile's UnlockedDeviceRequired keys, we must use the parent's list of
+            // biometric SIDs and weak unlock methods, not the profile's.
+            int authUserId = mLockPatternUtils.isProfileWithUnifiedChallenge(userId)
+                    ? resolveProfileParent(userId) : userId;
 
-                mKeyStoreAuthorization.onDeviceLocked(userId, getBiometricSids(authUserId),
-                        isWeakUnlockMethodEnabled(authUserId));
-            } else {
-                mKeyStoreAuthorization.onDeviceLocked(userId, getBiometricSids(userId), false);
-            }
+            mKeyStoreAuthorization.onDeviceLocked(userId, getBiometricSids(authUserId),
+                    isWeakUnlockMethodEnabled(authUserId));
         } else {
             // Notify Keystore that the device is now unlocked for the user.  Note that for unlocks
             // with LSKF, this is redundant with the call from LockSettingsService which provides
@@ -1870,6 +1861,11 @@ public class TrustManagerService extends SystemService {
 
         @Override
         public boolean isInSignificantPlace() {
+            if (android.security.Flags.significantPlaces()) {
+                mSignificantPlaceServiceWatcher.runOnBinder(
+                        binder -> ISignificantPlaceProvider.Stub.asInterface(binder)
+                                .onSignificantPlaceCheck());
+            }
             return mIsInSignificantPlace;
         }
 

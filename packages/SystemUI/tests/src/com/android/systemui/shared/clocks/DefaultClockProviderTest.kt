@@ -19,10 +19,10 @@ package com.android.systemui.shared.clocks
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.testing.AndroidTestingRunner
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.customization.R
@@ -53,7 +53,7 @@ import org.mockito.junit.MockitoJUnit
 private fun DefaultClockProvider.createClock(id: ClockId): DefaultClockController =
     createClock(ClockSettings(id, null)) as DefaultClockController
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class DefaultClockProviderTest : SysuiTestCase() {
 

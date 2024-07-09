@@ -34,7 +34,6 @@ public class SafetyLabelsFactory implements AslMarshallableFactory<SafetyLabels>
             AslgenUtil.logI("No SafetyLabels found in hr format.");
             return null;
         }
-        long version = XmlUtils.tryGetVersion(safetyLabelsEle);
 
         DataLabels dataLabels =
                 new DataLabelsFactory()
@@ -44,23 +43,7 @@ public class SafetyLabelsFactory implements AslMarshallableFactory<SafetyLabels>
                                                 safetyLabelsEle,
                                                 XmlUtils.HR_TAG_DATA_LABELS,
                                                 false)));
-        SecurityLabels securityLabels =
-                new SecurityLabelsFactory()
-                        .createFromHrElements(
-                                XmlUtils.listOf(
-                                        XmlUtils.getSingleChildElement(
-                                                safetyLabelsEle,
-                                                XmlUtils.HR_TAG_SECURITY_LABELS,
-                                                false)));
-        ThirdPartyVerification thirdPartyVerification =
-                new ThirdPartyVerificationFactory()
-                        .createFromHrElements(
-                                XmlUtils.listOf(
-                                        XmlUtils.getSingleChildElement(
-                                                safetyLabelsEle,
-                                                XmlUtils.HR_TAG_THIRD_PARTY_VERIFICATION,
-                                                false)));
-        return new SafetyLabels(version, dataLabels, securityLabels, thirdPartyVerification);
+        return new SafetyLabels(dataLabels);
     }
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
@@ -71,7 +54,6 @@ public class SafetyLabelsFactory implements AslMarshallableFactory<SafetyLabels>
             AslgenUtil.logI("No SafetyLabels found in od format.");
             return null;
         }
-        Long version = XmlUtils.getOdLongEle(safetyLabelsEle, XmlUtils.OD_NAME_VERSION, true);
 
         DataLabels dataLabels =
                 new DataLabelsFactory()
@@ -81,22 +63,7 @@ public class SafetyLabelsFactory implements AslMarshallableFactory<SafetyLabels>
                                                 safetyLabelsEle,
                                                 XmlUtils.OD_NAME_DATA_LABELS,
                                                 false)));
-        SecurityLabels securityLabels =
-                new SecurityLabelsFactory()
-                        .createFromOdElements(
-                                XmlUtils.listOf(
-                                        XmlUtils.getOdPbundleWithName(
-                                                safetyLabelsEle,
-                                                XmlUtils.OD_NAME_SECURITY_LABELS,
-                                                false)));
-        ThirdPartyVerification thirdPartyVerification =
-                new ThirdPartyVerificationFactory()
-                        .createFromOdElements(
-                                XmlUtils.listOf(
-                                        XmlUtils.getOdPbundleWithName(
-                                                safetyLabelsEle,
-                                                XmlUtils.OD_NAME_THIRD_PARTY_VERIFICATION,
-                                                false)));
-        return new SafetyLabels(version, dataLabels, securityLabels, thirdPartyVerification);
+
+        return new SafetyLabels(dataLabels);
     }
 }

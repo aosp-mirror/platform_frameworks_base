@@ -105,7 +105,17 @@ constructor(
                         is ObservableTransitionState.Transition ->
                             when {
                                 transitionState.fromScene == Scenes.Lockscreen &&
-                                    transitionState.toScene == Scenes.Gone -> flowOf(true)
+                                    transitionState.toScene == Scenes.Gone ->
+                                    sceneInteractor
+                                        .get()
+                                        .isTransitionUserInputOngoing
+                                        .flatMapLatestConflated { isUserInputOngoing ->
+                                            if (isUserInputOngoing) {
+                                                isDeviceEntered
+                                            } else {
+                                                flowOf(true)
+                                            }
+                                        }
                                 transitionState.fromScene == Scenes.Bouncer &&
                                     transitionState.toScene == Scenes.Gone ->
                                     transitionState.progress.map { progress ->
@@ -119,7 +129,7 @@ constructor(
                     }
                 }
             } else {
-                transitionInteractor.isInTransitionToAnyState.flatMapLatest { isInTransition ->
+                transitionInteractor.isInTransition.flatMapLatest { isInTransition ->
                     if (!isInTransition) {
                         defaultSurfaceBehindVisibility
                     } else {
@@ -196,11 +206,11 @@ constructor(
             transitionInteractor.currentKeyguardState
                 .sample(transitionInteractor.startedStepWithPrecedingStep, ::Pair)
                 .map { (currentState, startedWithPrev) ->
-                    val startedFromStep = startedWithPrev?.previousValue
-                    val startedStep = startedWithPrev?.newValue
+                    val startedFromStep = startedWithPrev.previousValue
+                    val startedStep = startedWithPrev.newValue
                     val returningToGoneAfterCancellation =
-                        startedStep?.to == KeyguardState.GONE &&
-                            startedFromStep?.transitionState == TransitionState.CANCELED &&
+                        startedStep.to == KeyguardState.GONE &&
+                            startedFromStep.transitionState == TransitionState.CANCELED &&
                             startedFromStep.from == KeyguardState.GONE
 
                     if (!returningToGoneAfterCancellation) {
@@ -229,11 +239,14 @@ constructor(
     val aodVisibility: Flow<Boolean> =
         combine(
                 keyguardInteractor.isDozing,
+                keyguardInteractor.isAodAvailable,
                 keyguardInteractor.biometricUnlockState,
-            ) { isDozing, biometricUnlockState ->
+            ) { isDozing, isAodAvailable, biometricUnlockState ->
                 // AOD is visible if we're dozing, unless we are wake and unlocking (where we go
                 // directly from AOD to unlocked while dozing).
-                isDozing && !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
+                isDozing &&
+                    isAodAvailable &&
+                    !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
             }
             .distinctUntilChanged()
 

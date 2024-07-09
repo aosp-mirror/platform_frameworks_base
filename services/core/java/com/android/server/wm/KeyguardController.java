@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
@@ -538,13 +537,6 @@ class KeyguardController {
                 || !mWindowManager.isKeyguardSecure(mService.getCurrentUserId());
     }
 
-    /**
-     * @return Whether the dream activity is on top of default display.
-     */
-    boolean isShowingDream() {
-        return getDisplayState(DEFAULT_DISPLAY).mShowingDream;
-    }
-
     private void updateKeyguardSleepToken() {
         for (int displayNdx = mRootWindowContainer.getChildCount() - 1;
              displayNdx >= 0; displayNdx--) {
@@ -631,7 +623,6 @@ class KeyguardController {
          * Note that this can be true even if the keyguard is disabled or not showing.
          */
         private boolean mOccluded;
-        private boolean mShowingDream;
 
         private ActivityRecord mTopOccludesActivity;
         private ActivityRecord mDismissingKeyguardActivity;
@@ -665,17 +656,14 @@ class KeyguardController {
             final boolean lastKeyguardGoingAway = mKeyguardGoingAway;
 
             final ActivityRecord lastDismissKeyguardActivity = mDismissingKeyguardActivity;
-            final ActivityRecord lastTurnScreenOnActivity = mTopTurnScreenOnActivity;
 
             mRequestDismissKeyguard = false;
             mOccluded = false;
-            mShowingDream = false;
 
             mTopOccludesActivity = null;
             mDismissingKeyguardActivity = null;
             mTopTurnScreenOnActivity = null;
 
-            boolean occludedByActivity = false;
             final Task task = getRootTaskForControllingOccluding(display);
             final ActivityRecord top = task != null ? task.getTopNonFinishingActivity() : null;
             if (top != null) {
@@ -697,21 +685,18 @@ class KeyguardController {
 
                 // Only the top activity may control occluded, as we can't occlude the Keyguard
                 // if the top app doesn't want to occlude it.
-                occludedByActivity = mTopOccludesActivity != null
+                mOccluded = mTopOccludesActivity != null
                         || (mDismissingKeyguardActivity != null
                         && task.topRunningActivity() == mDismissingKeyguardActivity
                         && controller.canShowWhileOccluded(
                                 true /* dismissKeyguard */, false /* showWhenLocked */));
                 // FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD only apply for secondary display.
                 if (mDisplayId != DEFAULT_DISPLAY) {
-                    occludedByActivity |= display.canShowWithInsecureKeyguard()
+                    mOccluded |= display.canShowWithInsecureKeyguard()
                             && controller.canDismissKeyguard();
                 }
             }
 
-            mShowingDream = display.getDisplayPolicy().isShowingDreamLw() && (top != null
-                    && top.getActivityType() == ACTIVITY_TYPE_DREAM);
-            mOccluded = mShowingDream || occludedByActivity;
             mRequestDismissKeyguard = lastDismissKeyguardActivity != mDismissingKeyguardActivity
                     && !mOccluded && !mKeyguardGoingAway
                     && mDismissingKeyguardActivity != null;
@@ -724,7 +709,7 @@ class KeyguardController {
 
             if (mTopTurnScreenOnActivity != null
                     && !mService.mWindowManager.mPowerManager.isInteractive()
-                    && (mRequestDismissKeyguard || occludedByActivity)) {
+                    && (mRequestDismissKeyguard || mOccluded)) {
                 controller.mTaskSupervisor.wakeUp("handleTurnScreenOn");
                 mTopTurnScreenOnActivity.setCurrentLaunchCanTurnScreenOn(false);
             }
