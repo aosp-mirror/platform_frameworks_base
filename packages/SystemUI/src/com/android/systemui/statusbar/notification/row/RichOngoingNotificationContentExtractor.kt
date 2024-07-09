@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.row
 
 import android.app.Notification
+import android.app.Notification.RichOngoingStyle
 import android.app.PendingIntent
 import android.content.Context
 import android.util.Log
@@ -68,12 +69,14 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
         builder: Notification.Builder,
         systemUIContext: Context,
         packageContext: Context
-    ): RichOngoingContentModel? =
+    ): RichOngoingContentModel? {
+        if (builder.style !is RichOngoingStyle) return null
+
         try {
             val sbn = entry.sbn
             val notification = sbn.notification
             val icon = IconModel(notification.smallIcon)
-            if (sbn.packageName == "com.google.android.deskclock") {
+            return if (sbn.packageName == "com.google.android.deskclock") {
                 when (notification.channelId) {
                     "Timers v2" -> {
                         parseTimerNotification(notification, icon)
@@ -90,8 +93,9 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
             } else null
         } catch (e: Exception) {
             Log.e("RONs", "Error parsing RON", e)
-            null
+            return null
         }
+    }
 
     /**
      * FOR PROTOTYPING ONLY: create a RON TimerContentModel using the time information available
