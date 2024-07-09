@@ -661,10 +661,7 @@ private fun Toolbar(
         val addWidgetText = stringResource(R.string.hub_mode_add_widget_button_text)
         ToolbarButton(
             isPrimary = !removeEnabled,
-            modifier =
-                Modifier.align(Alignment.CenterStart).semantics {
-                    contentDescription = addWidgetText
-                },
+            modifier = Modifier.align(Alignment.CenterStart),
             onClick = onOpenWidgetPicker,
         ) {
             Icon(Icons.Default.Add, null)
