@@ -7532,6 +7532,7 @@ public final class ViewRootImpl implements ViewParent,
                             animationCallback.onBackCancelled();
                         } else {
                             topCallback.onBackInvoked();
+                            return FINISH_HANDLED;
                         }
                         break;
                 }
@@ -7539,16 +7540,14 @@ public final class ViewRootImpl implements ViewParent,
                 if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
                     if (!keyEvent.isCanceled()) {
                         topCallback.onBackInvoked();
+                        return FINISH_HANDLED;
                     } else {
                         Log.d(mTag, "Skip onBackInvoked(), reason: keyEvent.isCanceled=true");
                     }
                 }
             }
-            if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
-                // forward a cancelled event so that following stages cancel their back logic
-                keyEvent.cancel();
-            }
-            return FORWARD;
+
+            return FINISH_NOT_HANDLED;
         }
 
         @Override
