@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.content.ClipDescription.EXTRA_HIDE_DRAG_SOURCE_TASK_ID;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
@@ -48,6 +49,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -117,6 +119,8 @@ class DragState {
     InputInterceptor mInputInterceptor;
     ArrayList<WindowState> mNotifiedWindows;
     boolean mDragInProgress;
+    // Set to non -1 value if a valid app requests DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START
+    int mCallingTaskIdToHide;
     /**
      * Whether if animation is completed. Needs to be volatile to update from the animation thread
      * without having a WM lock.
@@ -320,12 +324,12 @@ class DragState {
                 }
             }
             final boolean targetInterceptsGlobalDrag = targetInterceptsGlobalDrag(touchedWin);
-            return obtainDragEvent(DragEvent.ACTION_DROP, x, y, mData,
+            return obtainDragEvent(DragEvent.ACTION_DROP, x, y, mDataDescription, mData,
                     /* includeDragSurface= */ targetInterceptsGlobalDrag,
                     /* includeDragFlags= */ targetInterceptsGlobalDrag,
                     dragAndDropPermissions);
         } else {
-            return obtainDragEvent(DragEvent.ACTION_DROP, x, y, mData,
+            return obtainDragEvent(DragEvent.ACTION_DROP, x, y, mDataDescription, mData,
                     /* includeDragSurface= */ includePrivateInfo,
                     /* includeDragFlags= */ includePrivateInfo,
                     null /* dragAndDropPermissions */);
@@ -527,11 +531,24 @@ class DragState {
                 Slog.d(TAG_WM, "Sending DRAG_STARTED to new window " + newWin);
             }
             // Only allow the extras to be dispatched to a global-intercepting drag target
-            ClipData data = interceptsGlobalDrag ? mData.copyForTransferWithActivityInfo() : null;
+            ClipData data = null;
+            if (interceptsGlobalDrag) {
+                data = mData.copyForTransferWithActivityInfo();
+                PersistableBundle extras = data.getDescription().getExtras() != null
+                        ? data.getDescription().getExtras()
+                        : new PersistableBundle();
+                extras.putInt(EXTRA_HIDE_DRAG_SOURCE_TASK_ID, mCallingTaskIdToHide);
+                // Note that setting extras always copies the bundle
+                data.getDescription().setExtras(extras);
+                if (DEBUG_DRAG) {
+                    Slog.d(TAG_WM, "Adding EXTRA_HIDE_DRAG_SOURCE_TASK_ID=" + mCallingTaskIdToHide);
+                }
+            }
+            ClipDescription description = data != null ? data.getDescription() : mDataDescription;
             DragEvent event = obtainDragEvent(DragEvent.ACTION_DRAG_STARTED,
                     newWin.translateToWindowX(touchX), newWin.translateToWindowY(touchY),
-                    data, false /* includeDragSurface */, true /* includeDragFlags */,
-                    null /* dragAndDropPermission */);
+                    description, data, false /* includeDragSurface */,
+                    true /* includeDragFlags */, null /* dragAndDropPermission */);
             try {
                 newWin.mClient.dispatchDragEvent(event);
                 // track each window that we've notified that the drag is starting
@@ -700,37 +717,51 @@ class DragState {
         return mDragInProgress;
     }
 
-    private DragEvent obtainDragEvent(int action, float x, float y, ClipData data,
-            boolean includeDragSurface, boolean includeDragFlags,
+    private DragEvent obtainDragEvent(int action, float x, float y, ClipDescription description,
+            ClipData data, boolean includeDragSurface, boolean includeDragFlags,
             IDragAndDropPermissions dragAndDropPermissions) {
         return DragEvent.obtain(action, x, y, mThumbOffsetX, mThumbOffsetY,
                 includeDragFlags ? mFlags : 0,
-                null  /* localState */, mDataDescription, data,
+                null  /* localState */, description, data,
                 includeDragSurface ? mSurfaceControl : null,
                 dragAndDropPermissions, false /* result */);
     }
 
     private ValueAnimator createReturnAnimationLocked() {
-        final ValueAnimator animator = ValueAnimator.ofPropertyValuesHolder(
-                PropertyValuesHolder.ofFloat(
-                        ANIMATED_PROPERTY_X, mCurrentX - mThumbOffsetX,
-                        mOriginalX - mThumbOffsetX),
-                PropertyValuesHolder.ofFloat(
-                        ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY,
-                        mOriginalY - mThumbOffsetY),
-                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
-                        mAnimatedScale),
-                PropertyValuesHolder.ofFloat(
-                        ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, mOriginalAlpha / 2));
+        final ValueAnimator animator;
+        final long duration;
+        if (mCallingTaskIdToHide != -1) {
+            animator = ValueAnimator.ofPropertyValuesHolder(
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_X, mCurrentX, mCurrentX),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_Y, mCurrentY, mCurrentY),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
+                            mAnimatedScale),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0f));
+            duration = MIN_ANIMATION_DURATION_MS;
+        } else {
+            animator = ValueAnimator.ofPropertyValuesHolder(
+                    PropertyValuesHolder.ofFloat(
+                            ANIMATED_PROPERTY_X, mCurrentX - mThumbOffsetX,
+                            mOriginalX - mThumbOffsetX),
+                    PropertyValuesHolder.ofFloat(
+                            ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY,
+                            mOriginalY - mThumbOffsetY),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
+                            mAnimatedScale),
+                    PropertyValuesHolder.ofFloat(
+                            ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, mOriginalAlpha / 2));
 
-        final float translateX = mOriginalX - mCurrentX;
-        final float translateY = mOriginalY - mCurrentY;
-        // Adjust the duration to the travel distance.
-        final double travelDistance = Math.sqrt(translateX * translateX + translateY * translateY);
-        final double displayDiagonal =
-                Math.sqrt(mDisplaySize.x * mDisplaySize.x + mDisplaySize.y * mDisplaySize.y);
-        final long duration = MIN_ANIMATION_DURATION_MS + (long) (travelDistance / displayDiagonal
-                * (MAX_ANIMATION_DURATION_MS - MIN_ANIMATION_DURATION_MS));
+            final float translateX = mOriginalX - mCurrentX;
+            final float translateY = mOriginalY - mCurrentY;
+            // Adjust the duration to the travel distance.
+            final double travelDistance = Math.sqrt(
+                    translateX * translateX + translateY * translateY);
+            final double displayDiagonal =
+                    Math.sqrt(mDisplaySize.x * mDisplaySize.x + mDisplaySize.y * mDisplaySize.y);
+            duration = MIN_ANIMATION_DURATION_MS + (long) (travelDistance / displayDiagonal
+                    * (MAX_ANIMATION_DURATION_MS - MIN_ANIMATION_DURATION_MS));
+        }
+
         final AnimationListener listener = new AnimationListener();
         animator.setDuration(duration);
         animator.setInterpolator(mCubicEaseOutInterpolator);
@@ -742,13 +773,24 @@ class DragState {
     }
 
     private ValueAnimator createCancelAnimationLocked() {
-        final ValueAnimator animator = ValueAnimator.ofPropertyValuesHolder(
-                PropertyValuesHolder.ofFloat(
-                        ANIMATED_PROPERTY_X, mCurrentX - mThumbOffsetX, mCurrentX),
-                PropertyValuesHolder.ofFloat(
-                        ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY, mCurrentY),
-                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale, 0),
-                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0));
+        final ValueAnimator animator;
+        if (mCallingTaskIdToHide != -1) {
+             animator = ValueAnimator.ofPropertyValuesHolder(
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_X, mCurrentX, mCurrentX),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_Y, mCurrentY, mCurrentY),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
+                            mAnimatedScale),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0f));
+        } else {
+            animator = ValueAnimator.ofPropertyValuesHolder(
+                    PropertyValuesHolder.ofFloat(
+                            ANIMATED_PROPERTY_X, mCurrentX - mThumbOffsetX, mCurrentX),
+                    PropertyValuesHolder.ofFloat(
+                            ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY, mCurrentY),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale, 0),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0));
+        }
+
         final AnimationListener listener = new AnimationListener();
         animator.setDuration(MIN_ANIMATION_DURATION_MS);
         animator.setInterpolator(mCubicEaseOutInterpolator);

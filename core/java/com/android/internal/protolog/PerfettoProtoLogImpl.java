@@ -47,7 +47,6 @@ import android.annotation.Nullable;
 import android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData;
 import android.os.ShellCommand;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.text.TextUtils;
 import android.tracing.perfetto.DataSourceParams;
 import android.tracing.perfetto.InitArguments;
@@ -338,16 +337,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         logToLogcat(tag, level, messageString, args);
     }
 
-    private void logToLogcat(String tag, LogLevel level, String message, @Nullable Object[] args) {
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logToLogcat");
-        try {
-            doLogToLogcat(tag, level, message, args);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
-    private void doLogToLogcat(String tag, LogLevel level, @NonNull String messageString,
+    private void logToLogcat(String tag, LogLevel level, String messageString,
             @Nullable Object[] args) {
         String message;
         if (args != null) {
@@ -393,16 +383,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
     private void logToProto(LogLevel level, IProtoLogGroup logGroup, Message message, Object[] args,
             long tsNanos, @Nullable String stacktrace) {
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logToProto");
-        try {
-            doLogToProto(level, logGroup, message, args, tsNanos, stacktrace);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
-    private void doLogToProto(LogLevel level, IProtoLogGroup logGroup, Message message,
-            Object[] args, long tsNanos, @Nullable String stacktrace) {
         mDataSource.trace(ctx -> {
             final ProtoLogDataSource.TlsState tlsState = ctx.getCustomTlsState();
             final LogLevel logFrom = tlsState.getLogFromLevel(logGroup.name());

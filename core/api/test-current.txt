@@ -1982,6 +1982,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public float getRs2Value();
     method public int getStreamMinVolumeInt(int);
     method @NonNull public java.util.Map<java.lang.Integer,java.lang.Boolean> getSurroundFormats();
+    method @NonNull public android.media.VolumePolicy getVolumePolicy();
     method public boolean hasRegisteredDynamicPolicy();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public boolean isCsdEnabled();
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE, android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED}) public boolean isFullVolumeDevice();
@@ -2071,6 +2072,20 @@ package android.media {
   public final class PlaybackParams implements android.os.Parcelable {
     method public int getAudioStretchMode();
     method public android.media.PlaybackParams setAudioStretchMode(int);
+  }
+
+  public final class VolumePolicy implements android.os.Parcelable {
+    ctor public VolumePolicy(boolean, boolean, boolean, int);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int A11Y_MODE_INDEPENDENT_A11Y_VOLUME = 1; // 0x1
+    field public static final int A11Y_MODE_MEDIA_A11Y_VOLUME = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.VolumePolicy> CREATOR;
+    field @NonNull public static final android.media.VolumePolicy DEFAULT;
+    field public final boolean doNotDisturbWhenSilent;
+    field public final int vibrateToSilentDebounce;
+    field public final boolean volumeDownToEnterSilent;
+    field public final boolean volumeUpToExitSilent;
   }
 
   public static final class VolumeShaper.Configuration.Builder {

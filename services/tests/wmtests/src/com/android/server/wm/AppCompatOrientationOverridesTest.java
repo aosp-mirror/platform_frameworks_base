@@ -15,12 +15,8 @@
  */
 package com.android.server.wm;
 
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
-import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.AppCompatOrientationOverrides.OrientationOverridesState.MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP;
@@ -31,7 +27,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.compat.testing.PlatformCompatChangeRule;
-import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
@@ -60,82 +55,6 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
 
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION})
-    public void testShouldIgnoreRequestedOrientation_activityRelaunching_returnsTrue() {
-        runTestScenario((robot) -> {
-            robot.conf().enablePolicyForIgnoringRequestedOrientation(true);
-            robot.activity().createActivityWithComponent();
-            robot.prepareRelaunchingAfterRequestedOrientationChanged(true);
-
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ true,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
-        });
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION})
-    public void testShouldIgnoreRequestedOrientation_cameraCompatTreatment_returnsTrue() {
-        runTestScenario((robot) -> {
-            robot.applyOnConf((c) -> {
-                c.enableCameraCompatTreatment(true);
-                c.enableCameraCompatTreatmentAtBuildTime(true);
-                c.enablePolicyForIgnoringRequestedOrientation(true);
-            });
-            robot.applyOnActivity((a) -> {
-                a.createActivityWithComponentInNewTask();
-                a.enableTreatmentForTopActivity(true);
-            });
-            robot.prepareRelaunchingAfterRequestedOrientationChanged(false);
-
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ true,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
-        });
-    }
-
-    @Test
-    public void testShouldIgnoreRequestedOrientation_overrideDisabled_returnsFalse() {
-        runTestScenario((robot) -> {
-            robot.conf().enablePolicyForIgnoringRequestedOrientation(true);
-
-            robot.activity().createActivityWithComponent();
-            robot.prepareRelaunchingAfterRequestedOrientationChanged(true);
-
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ false,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
-        });
-    }
-
-    @Test
-    public void testShouldIgnoreRequestedOrientation_propertyIsTrue_returnsTrue() {
-        runTestScenario((robot) -> {
-            robot.conf().enablePolicyForIgnoringRequestedOrientation(true);
-            robot.prop().enable(PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION);
-
-            robot.activity().createActivityWithComponent();
-            robot.prepareRelaunchingAfterRequestedOrientationChanged(true);
-
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ true,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
-        });
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION})
-    public void testShouldIgnoreRequestedOrientation_propertyIsFalseAndOverride_returnsFalse()
-            throws Exception {
-        runTestScenario((robot) -> {
-            robot.conf().enablePolicyForIgnoringRequestedOrientation(true);
-            robot.prop().disable(PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION);
-
-            robot.activity().createActivityWithComponent();
-            robot.prepareRelaunchingAfterRequestedOrientationChanged(true);
-
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ false,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
-        });
-    }
 
     @Test
     public void testShouldIgnoreOrientationRequestLoop_overrideDisabled_returnsFalse() {
@@ -239,21 +158,6 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
         });
     }
 
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH})
-    public void testShouldIgnoreRequestedOrientation_flagIsDisabled_returnsFalse() {
-        runTestScenario((robot) -> {
-            robot.conf().enablePolicyForIgnoringRequestedOrientation(true);
-            robot.applyOnActivity((a) -> {
-                a.createActivityWithComponent();
-                a.setLetterboxedForFixedOrientationAndAspectRatio(false);
-            });
-
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ false,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
-        });
-    }
-
     /**
      * Runs a test scenario providing a Robot.
      */
@@ -276,10 +180,6 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
             mTestCurrentTimeMillisSupplier = new CurrentTimeMillisSupplierFake();
         }
 
-        void prepareRelaunchingAfterRequestedOrientationChanged(boolean enabled) {
-            getTopOrientationOverrides().setRelaunchingAfterRequestedOrientationChanged(enabled);
-        }
-
         // Useful to reduce timeout during tests
         void prepareMockedTime() {
             getTopOrientationOverrides().mOrientationOverridesState.mCurrentTimeMillisSupplier =
@@ -288,12 +188,6 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
 
         void delay() {
             mTestCurrentTimeMillisSupplier.delay(SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS);
-        }
-
-        void checkShouldIgnoreRequestedOrientation(boolean expected,
-                @Configuration.Orientation int requestedOrientation) {
-            assertEquals(expected, getTopOrientationOverrides()
-                    .shouldIgnoreRequestedOrientation(requestedOrientation));
         }
 
         void checkExpectedLoopCount(int expectedCount) {

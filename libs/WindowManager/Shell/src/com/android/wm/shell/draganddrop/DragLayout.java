@@ -51,8 +51,10 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.widget.LinearLayout;
+import android.window.WindowContainerToken;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.ProtoLog;
@@ -483,13 +485,13 @@ public class DragLayout extends LinearLayout
     /**
      * Handles the drop onto a target and animates out the visible drop targets.
      */
-    public boolean drop(DragEvent event, SurfaceControl dragSurface,
-            Runnable dropCompleteCallback) {
+    public boolean drop(DragEvent event, @NonNull SurfaceControl dragSurface,
+            @Nullable WindowContainerToken hideTaskToken, Runnable dropCompleteCallback) {
         final boolean handledDrop = mCurrentTarget != null;
         mHasDropped = true;
 
         // Process the drop
-        mPolicy.handleDrop(mCurrentTarget);
+        mPolicy.handleDrop(mCurrentTarget, hideTaskToken);
 
         // Start animating the drop UI out with the drag surface
         hide(event, dropCompleteCallback);
@@ -499,7 +501,7 @@ public class DragLayout extends LinearLayout
         return handledDrop;
     }
 
-    private void hideDragSurface(SurfaceControl dragSurface) {
+    private void hideDragSurface(@NonNull SurfaceControl dragSurface) {
         final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
         final ValueAnimator dragSurfaceAnimator = ValueAnimator.ofFloat(0f, 1f);
         // Currently the splash icon animation runs with the default ValueAnimator duration of

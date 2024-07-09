@@ -186,6 +186,7 @@ constructor(
         interactor.configurationBasedDimensions
             .map {
                 when {
+                    !it.useSplitShade -> 0
                     it.useLargeScreenHeader -> it.marginTopLargeScreen
                     else -> it.marginTop
                 }

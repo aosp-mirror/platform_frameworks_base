@@ -20,6 +20,7 @@ package com.android.systemui.keyboard.data.repository
 import android.hardware.input.InputManager
 import android.hardware.input.InputManager.KeyboardBacklightListener
 import android.hardware.input.KeyboardBacklightState
+import android.testing.TestableLooper
 import android.view.InputDevice
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -27,11 +28,13 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.inputdevice.data.repository.InputDeviceRepository
 import com.android.systemui.keyboard.data.model.Keyboard
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,6 +56,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@TestableLooper.RunWithLooper
 @RunWith(AndroidJUnit4::class)
 class KeyboardRepositoryTest : SysuiTestCase() {
 
@@ -63,6 +67,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: KeyboardRepository
     private lateinit var dispatcher: CoroutineDispatcher
+    private lateinit var inputDeviceRepo: InputDeviceRepository
     private lateinit var testScope: TestScope
 
     @Before
@@ -75,7 +80,9 @@ class KeyboardRepositoryTest : SysuiTestCase() {
         }
         dispatcher = StandardTestDispatcher()
         testScope = TestScope(dispatcher)
-        underTest = KeyboardRepositoryImpl(testScope.backgroundScope, dispatcher, inputManager)
+        val handler = FakeHandler(TestableLooper.get(this).looper)
+        inputDeviceRepo = InputDeviceRepository(handler, testScope.backgroundScope, inputManager)
+        underTest = KeyboardRepositoryImpl(dispatcher, inputManager, inputDeviceRepo)
     }
 
     @Test
@@ -363,6 +370,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
         private val maxBrightnessLevel: Int
     ) : KeyboardBacklightState() {
         override fun getBrightnessLevel() = brightnessLevel
+
         override fun getMaxBrightnessLevel() = maxBrightnessLevel
     }
 }

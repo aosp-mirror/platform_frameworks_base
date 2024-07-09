@@ -19,8 +19,11 @@ package com.android.systemui.statusbar.chips.mediaprojection.domain.interactor
 import android.content.pm.PackageManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepository
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import com.android.systemui.util.Utils
 import javax.inject.Inject
@@ -45,12 +48,16 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val mediaProjectionRepository: MediaProjectionRepository,
     private val packageManager: PackageManager,
+    @StatusBarChipsLog private val logger: LogBuffer,
 ) {
     val projection: StateFlow<ProjectionChipModel> =
         mediaProjectionRepository.mediaProjectionState
             .map { state ->
                 when (state) {
-                    is MediaProjectionState.NotProjecting -> ProjectionChipModel.NotProjecting
+                    is MediaProjectionState.NotProjecting -> {
+                        logger.log(TAG, LogLevel.INFO, {}, { "State: NotProjecting" })
+                        ProjectionChipModel.NotProjecting
+                    }
                     is MediaProjectionState.Projecting -> {
                         val type =
                             if (isProjectionToOtherDevice(state.hostPackage)) {
@@ -58,6 +65,15 @@ constructor(
                             } else {
                                 ProjectionChipModel.Type.SHARE_TO_APP
                             }
+                        logger.log(
+                            TAG,
+                            LogLevel.INFO,
+                            {
+                                str1 = type.name
+                                str2 = state.hostPackage
+                            },
+                            { "State: Projecting(type=$str1 hostPackage=$str2)" }
+                        )
                         ProjectionChipModel.Projecting(type, state)
                     }
                 }
@@ -80,5 +96,9 @@ constructor(
         // because it means that any projection by those headless remote display packages will be
         // marked as going to a different device, even if that isn't always true. See b/321078669.
         return Utils.isHeadlessRemoteDisplayProvider(packageManager, packageName)
+    }
+
+    companion object {
+        private const val TAG = "MediaProjection"
     }
 }
