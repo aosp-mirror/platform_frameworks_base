@@ -2246,6 +2246,8 @@ public class CameraTestUtils extends Assert {
         clientAttribution.uid = -1; // USE_CALLING_UID
         clientAttribution.pid = -1; // USE_CALLING_PID
         clientAttribution.deviceId = contextAttribution.deviceId;
+        clientAttribution.packageName = context.getOpPackageName();
+        clientAttribution.attributionTag = context.getAttributionTag();
         clientAttribution.next = new AttributionSourceState[0];
         return clientAttribution;
     }
