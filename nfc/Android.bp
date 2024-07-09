@@ -59,9 +59,6 @@ java_sdk_library {
         "android.nfc",
         "com.android.nfc",
     ],
-    hidden_api_packages: [
-        "com.android.nfc",
-    ],
     impl_library_visibility: [
         "//frameworks/base:__subpackages__",
         "//cts/tests/tests/nfc",
