@@ -43,6 +43,7 @@ import static java.util.Collections.singleton;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
@@ -142,6 +143,7 @@ public class TrustManagerServiceTest {
     private final Map<ComponentName, ITrustAgentService.Stub> mMockTrustAgents = new HashMap<>();
 
     private @Mock ActivityManager mActivityManager;
+    private @Mock ActivityManagerInternal mActivityManagerInternal;
     private @Mock AlarmManager mAlarmManager;
     private @Mock BiometricManager mBiometricManager;
     private @Mock DevicePolicyManager mDevicePolicyManager;
@@ -158,6 +160,7 @@ public class TrustManagerServiceTest {
     private HandlerThread mHandlerThread;
     private TrustManagerService mService;
     private ITrustManager mTrustManager;
+    private ActivityManagerInternal mPreviousActivityManagerInternal;
 
     @Before
     public void setUp() throws Exception {
@@ -210,6 +213,11 @@ public class TrustManagerServiceTest {
         mMockContext.setMockPackageManager(mPackageManager);
         mMockContext.addMockSystemService(UserManager.class, mUserManager);
         doReturn(mWindowManager).when(() -> WindowManagerGlobal.getWindowManagerService());
+        mPreviousActivityManagerInternal = LocalServices.getService(
+                ActivityManagerInternal.class);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.addService(ActivityManagerInternal.class,
+                mActivityManagerInternal);
         LocalServices.addService(SystemServiceManager.class, mock(SystemServiceManager.class));
 
         grantPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE);
@@ -257,7 +265,14 @@ public class TrustManagerServiceTest {
     @After
     public void tearDown() {
         LocalServices.removeServiceForTest(SystemServiceManager.class);
-        mHandlerThread.quit();
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        if (mPreviousActivityManagerInternal != null) {
+            LocalServices.addService(ActivityManagerInternal.class,
+                    mPreviousActivityManagerInternal);
+        }
+        if (mHandlerThread != null) {
+            mHandlerThread.quit();
+        }
     }
 
     @Test
