@@ -179,6 +179,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @BackNavigationInfo.BackTargetType
     private int mPreviousNavigationType;
     private Runnable mPilferPointerCallback;
+    private BackAnimation.TopUiRequest mRequestTopUiCallback;
 
     public BackAnimationController(
             @NonNull ShellInit shellInit,
@@ -356,6 +357,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             mShellExecutor.execute(() -> {
                 mPilferPointerCallback = callback;
             });
+        }
+
+        @Override
+        public void setTopUiRequestCallback(TopUiRequest topUiRequest) {
+            mShellExecutor.execute(() -> mRequestTopUiCallback = topUiRequest);
         }
     }
 
@@ -550,6 +556,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             if (!mShellBackAnimationRegistry.startGesture(backType)) {
                 mActiveCallback = null;
             }
+            requestTopUi(true, backType);
             tryPilferPointers();
         } else {
             mActiveCallback = mBackNavigationInfo.getOnBackInvokedCallback();
@@ -899,6 +906,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             mPreviousNavigationType = mBackNavigationInfo.getType();
             mBackNavigationInfo.onBackNavigationFinished(triggerBack);
             mBackNavigationInfo = null;
+            requestTopUi(false, mPreviousNavigationType);
         }
     }
 
@@ -959,6 +967,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             mCurrentTracker.updateStartLocation();
             BackMotionEvent startEvent = mCurrentTracker.createStartEvent(mApps[0]);
             dispatchOnBackStarted(mActiveCallback, startEvent);
+        }
+    }
+
+    private void requestTopUi(boolean hasTopUi, int backType) {
+        if (mRequestTopUiCallback != null && (backType == BackNavigationInfo.TYPE_CROSS_TASK
+                || backType == BackNavigationInfo.TYPE_CROSS_ACTIVITY)) {
+            mRequestTopUiCallback.requestTopUi(hasTopUi, TAG);
         }
     }
 
