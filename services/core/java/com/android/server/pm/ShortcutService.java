@@ -3443,6 +3443,14 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
+        public void removeShortcutChangeCallback(
+                @NonNull LauncherApps.ShortcutChangeCallback callback) {
+            synchronized (mServiceLock) {
+                mShortcutChangeCallbacks.remove(Objects.requireNonNull(callback));
+            }
+        }
+
+        @Override
         public int getShortcutIconResId(int launcherUserId, @NonNull String callingPackage,
                 @NonNull String packageName, @NonNull String shortcutId, int userId) {
             Objects.requireNonNull(callingPackage, "callingPackage");
