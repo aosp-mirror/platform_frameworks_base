@@ -70,7 +70,6 @@ import android.app.ActivityManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -80,7 +79,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
 import android.media.AudioManagerInternal;
@@ -195,7 +193,6 @@ import java.lang.annotation.Target;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -349,8 +346,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     private UserDataRepository mUserDataRepository;
 
-    @MultiUserUnawareField
-    final SettingsObserver mSettingsObserver;
     final WindowManagerInternal mWindowManagerInternal;
     private final ActivityManagerInternal mActivityManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
@@ -570,82 +565,52 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @NonNull
     private final ImeTrackerService mImeTrackerService;
 
-    class SettingsObserver extends ContentObserver {
-
-        /**
-         * <em>This constructor must be called within the lock.</em>
-         */
-        SettingsObserver(Handler handler) {
-            super(handler);
+    @GuardedBy("ImfLock.class")
+    private void onSecureSettingsChangedLocked(@NonNull String key, @UserIdInt int userId) {
+        if (!mConcurrentMultiUserModeEnabled && userId != mCurrentUserId) {
+            return;
         }
-
-        void registerContentObserverForAllUsers() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
-                    Settings.Secure.DEFAULT_INPUT_METHOD), false, this, UserHandle.ALL);
-            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
-                    Settings.Secure.ENABLED_INPUT_METHODS), false, this, UserHandle.ALL);
-            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
-                    Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE), false, this, UserHandle.ALL);
-            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
-                    Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD), false, this, UserHandle.ALL);
-            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
-                    Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE), false, this, UserHandle.ALL);
-            resolver.registerContentObserverAsUser(Settings.Secure.getUriFor(
-                    STYLUS_HANDWRITING_ENABLED), false, this, UserHandle.ALL);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, @NonNull Collection<Uri> uris, int flags,
-                @UserIdInt int userId) {
-            uris.forEach(uri -> onChangeInternal(uri, userId));
-        }
-
-        private void onChangeInternal(@NonNull Uri uri, @UserIdInt int userId) {
-            final Uri showImeUri = Settings.Secure.getUriFor(
-                    Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD);
-            final Uri accessibilityRequestingNoImeUri = Settings.Secure.getUriFor(
-                    Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE);
-            final Uri stylusHandwritingEnabledUri = Settings.Secure.getUriFor(
-                    STYLUS_HANDWRITING_ENABLED);
-            synchronized (ImfLock.class) {
-                if (!mConcurrentMultiUserModeEnabled && mCurrentUserId != userId) {
-                    return;
+        switch (key) {
+            case Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD: {
+                mMenuController.updateKeyboardFromSettingsLocked();
+                break;
+            }
+            case Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE: {
+                final int accessibilitySoftKeyboardSetting = Settings.Secure.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, 0, userId);
+                mVisibilityStateComputer.getImePolicy().setA11yRequestNoSoftKeyboard(
+                        accessibilitySoftKeyboardSetting);
+                final var userData = getUserData(userId);
+                if (mVisibilityStateComputer.getImePolicy().isA11yRequestNoSoftKeyboard()) {
+                    hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,
+                            0 /* flags */, SoftInputShowHideReason.HIDE_SETTINGS_ON_CHANGE, userId);
+                } else if (isShowRequestedForCurrentWindow(userId)) {
+                    showCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,
+                            InputMethodManager.SHOW_IMPLICIT,
+                            SoftInputShowHideReason.SHOW_SETTINGS_ON_CHANGE, userId);
                 }
-
-                if (showImeUri.equals(uri)) {
-                    mMenuController.updateKeyboardFromSettingsLocked();
-                } else if (accessibilityRequestingNoImeUri.equals(uri)) {
-                    final int accessibilitySoftKeyboardSetting = Settings.Secure.getIntForUser(
-                            mContext.getContentResolver(),
-                            Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, 0, userId);
-                    mVisibilityStateComputer.getImePolicy().setA11yRequestNoSoftKeyboard(
-                            accessibilitySoftKeyboardSetting);
-                    final var userData = getUserData(userId);
-                    if (mVisibilityStateComputer.getImePolicy().isA11yRequestNoSoftKeyboard()) {
-                        hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,
-                                0 /* flags */, SoftInputShowHideReason.HIDE_SETTINGS_ON_CHANGE,
-                                userId);
-                    } else if (isShowRequestedForCurrentWindow(userId)) {
-                        showCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,
-                                InputMethodManager.SHOW_IMPLICIT,
-                                SoftInputShowHideReason.SHOW_SETTINGS_ON_CHANGE, userId);
-                    }
-                } else if (stylusHandwritingEnabledUri.equals(uri)) {
-                    InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
-                    InputMethodManager
-                            .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
-                } else {
-                    boolean enabledChanged = false;
-                    String newEnabled = InputMethodSettingsRepository.get(userId)
-                            .getEnabledInputMethodsStr();
-                    final var userData = getUserData(userId);
-                    if (!userData.mLastEnabledInputMethodsStr.equals(newEnabled)) {
-                        userData.mLastEnabledInputMethodsStr = newEnabled;
-                        enabledChanged = true;
-                    }
-                    updateInputMethodsFromSettingsLocked(enabledChanged, userId);
+                break;
+            }
+            case STYLUS_HANDWRITING_ENABLED: {
+                InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
+                InputMethodManager
+                        .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
+                break;
+            }
+            case Settings.Secure.DEFAULT_INPUT_METHOD:
+            case Settings.Secure.ENABLED_INPUT_METHODS:
+            case Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE: {
+                boolean enabledChanged = false;
+                String newEnabled = InputMethodSettingsRepository.get(userId)
+                        .getEnabledInputMethodsStr();
+                final var userData = getUserData(userId);
+                if (!userData.mLastEnabledInputMethodsStr.equals(newEnabled)) {
+                    userData.mLastEnabledInputMethodsStr = newEnabled;
+                    enabledChanged = true;
                 }
+                updateInputMethodsFromSettingsLocked(enabledChanged, userId);
+                break;
             }
         }
     }
@@ -1118,8 +1083,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
             SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mHandler);
             mImeTrackerService = new ImeTrackerService(mHandler);
-            // Note: SettingsObserver doesn't register observers in its constructor.
-            mSettingsObserver = new SettingsObserver(mHandler);
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
             mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
@@ -1389,7 +1352,19 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }, "Lazily initialize IMMS#mImeDrawsImeNavBarRes");
 
                 mMyPackageMonitor.register(mContext, UserHandle.ALL, mIoHandler);
-                mSettingsObserver.registerContentObserverForAllUsers();
+                SecureSettingsChangeCallback.register(mHandler, mContext.getContentResolver(),
+                        new String[] {
+                                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
+                                Settings.Secure.DEFAULT_INPUT_METHOD,
+                                Settings.Secure.ENABLED_INPUT_METHODS,
+                                Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
+                                Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
+                                Settings.Secure.STYLUS_HANDWRITING_ENABLED,
+                        }, (key, flags, userId) -> {
+                            synchronized (ImfLock.class) {
+                                onSecureSettingsChangedLocked(key, userId);
+                            }
+                        });
 
                 final IntentFilter broadcastFilterForAllUsers = new IntentFilter();
                 broadcastFilterForAllUsers.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);

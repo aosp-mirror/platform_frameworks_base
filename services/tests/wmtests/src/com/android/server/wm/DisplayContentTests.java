@@ -117,8 +117,8 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.view.Display;
@@ -2832,7 +2832,7 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(true).when(() ->
                 DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
 
-        assertNotNull(createNewDisplay().mCameraCompatFreeformPolicy);
+        assertTrue(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
     @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
@@ -2841,14 +2841,14 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(true).when(() ->
                 DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
 
-        assertNull(createNewDisplay().mCameraCompatFreeformPolicy);
+        assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
     @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
     public void desktopWindowingFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
-        assertNull(createNewDisplay().mCameraCompatFreeformPolicy);
+        assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
     private void removeRootTaskTests(Runnable runnable) {

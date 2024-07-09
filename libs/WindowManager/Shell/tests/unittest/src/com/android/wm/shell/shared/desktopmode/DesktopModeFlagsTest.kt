@@ -22,13 +22,10 @@ import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.dx.mockito.inline.extended.ExtendedMockito
-import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
 import com.android.window.flags.Flags.FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.DESKTOP_WINDOWING_MODE
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ToggleOverride.OVERRIDE_OFF
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ToggleOverride.OVERRIDE_ON
@@ -39,8 +36,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.whenever
-import org.mockito.quality.Strictness
 
 /**
  * Test class for [DesktopModeFlags]
@@ -185,27 +180,6 @@ class DesktopModeFlagsTest : ShellTestCase() {
 
     // Keep overrides constant through the process
     assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
-  }
-
-  @Test
-  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  fun isEnabled_noOverride_featureFlagOnThenOff_returnsTrueAndFalse() {
-    setOverride(null)
-    // For overridableFlag, in absence of overrides, follow flag
-    assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
-
-    val mockitoSession: StaticMockitoSession =
-        ExtendedMockito.mockitoSession()
-            .strictness(Strictness.LENIENT)
-            .spyStatic(DesktopModeStatus::class.java)
-            .startMocking()
-    try {
-      // No caching of flags
-      whenever(DesktopModeStatus.isDesktopModeFlagEnabled()).thenReturn(false)
-      assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse()
-    } finally {
-      mockitoSession.finishMocking()
-    }
   }
 
   @Test
@@ -453,15 +427,10 @@ class DesktopModeFlagsTest : ShellTestCase() {
   }
 
   private fun resetCache() {
-    val cachedToggleOverrideDesktopMode =
-        DESKTOP_WINDOWING_MODE::class.java.getDeclaredField("cachedToggleOverride")
-    cachedToggleOverrideDesktopMode.isAccessible = true
-    cachedToggleOverrideDesktopMode.set(DESKTOP_WINDOWING_MODE, null)
-
-    val cachedToggleOverrideWallpaperActivity =
-      WALLPAPER_ACTIVITY::class.java.getDeclaredField("cachedToggleOverride")
-    cachedToggleOverrideWallpaperActivity.isAccessible = true
-    cachedToggleOverrideWallpaperActivity.set(WALLPAPER_ACTIVITY, null)
+    val cachedToggleOverride =
+      DesktopModeFlags::class.java.getDeclaredField("cachedToggleOverride")
+    cachedToggleOverride.isAccessible = true
+    cachedToggleOverride.set(null, null)
 
     // Clear override cache stored in System property
     System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY)

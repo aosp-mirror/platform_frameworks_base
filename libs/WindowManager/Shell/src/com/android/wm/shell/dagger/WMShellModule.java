@@ -77,10 +77,10 @@ import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
-import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.shared.annotations.ShellAnimationThread;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -585,9 +585,10 @@ public abstract class WMShellModule {
     @Provides
     static ExitDesktopTaskTransitionHandler provideExitDesktopTaskTransitionHandler(
             Transitions transitions,
-            Context context
-    ) {
-        return new ExitDesktopTaskTransitionHandler(transitions, context);
+            Context context,
+            InteractionJankMonitor interactionJankMonitor) {
+        return new ExitDesktopTaskTransitionHandler(
+            transitions, context, interactionJankMonitor);
     }
 
     @WMSingleton

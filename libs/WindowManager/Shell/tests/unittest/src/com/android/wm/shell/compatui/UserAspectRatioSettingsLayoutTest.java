@@ -19,6 +19,7 @@ package com.android.wm.shell.compatui;
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.window.flags.Flags.FLAG_APP_COMPAT_UI_FRAMEWORK;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -28,6 +29,9 @@ import android.app.ActivityManager;
 import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
 import android.content.ComponentName;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -47,6 +51,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import junit.framework.Assert;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -86,6 +91,10 @@ public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
     private UserAspectRatioSettingsLayout mLayout;
     private TaskInfo mTaskInfo;
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -107,6 +116,7 @@ public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testOnClickForUserAspectRatioSettingsButton() {
         final ImageButton button = mLayout.findViewById(R.id.user_aspect_ratio_settings_button);
         button.performClick();
@@ -123,6 +133,7 @@ public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testOnLongClickForUserAspectRatioButton() {
         doNothing().when(mWindowManager).onUserAspectRatioSettingsButtonLongClicked();
 
@@ -133,6 +144,7 @@ public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testOnClickForUserAspectRatioSettingsHint() {
         mWindowManager.mHasUserAspectRatioSettingsButton = true;
         mWindowManager.createLayout(/* canShow= */ true);

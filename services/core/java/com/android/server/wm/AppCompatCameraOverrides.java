@@ -97,8 +97,7 @@ class AppCompatCameraOverrides {
      * </ul>
      */
     boolean shouldOverrideMinAspectRatioForCamera() {
-        return mActivityRecord.isCameraActive()
-                && mAllowMinAspectRatioOverrideOptProp
+        return isCameraActive() && mAllowMinAspectRatioOverrideOptProp
                 .shouldEnableWithOptInOverrideAndOptOutProperty(
                         isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA));
     }
@@ -171,6 +170,15 @@ class AppCompatCameraOverrides {
     boolean shouldApplyFreeformTreatmentForCameraCompat() {
         return Flags.cameraCompatForFreeform() && !isCompatChangeEnabled(
                 OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
+    }
+
+    /**
+     * @return {@code true} if the Camera is active for the current activity
+     */
+    boolean isCameraActive() {
+        return mActivityRecord.mDisplayContent != null
+                && mActivityRecord.mDisplayContent.mAppCompatCameraPolicy
+                    .isCameraActive(mActivityRecord, /* mustBeFullscreen */ true);
     }
 
     /**
