@@ -56,6 +56,7 @@ import android.hardware.input.InputSettings;
 import android.hardware.input.KeyGlyphMap;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.KeyboardLayoutSelectionResult;
+import android.hardware.input.KeyboardSystemShortcut;
 import android.hardware.input.TouchCalibration;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
@@ -157,6 +158,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
+    private static final int MSG_LOG_KEYBOARD_SYSTEM_SHORTCUT = 4;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -1176,6 +1178,11 @@ public class InputManagerService extends IInputManager.Stub
             mTempTabletModeChangedListenersToNotify.get(i).notifyTabletModeChanged(
                     whenNanos, inTabletMode);
         }
+    }
+
+    private void logKeyboardSystemShortcut(int deviceId, KeyboardSystemShortcut shortcut) {
+        mHandler.obtainMessage(MSG_LOG_KEYBOARD_SYSTEM_SHORTCUT, deviceId, 0,
+                shortcut).sendToTarget();
     }
 
     @Override // Binder call
@@ -2871,6 +2878,17 @@ public class InputManagerService extends IInputManager.Stub
                     boolean inTabletMode = (boolean) args.arg1;
                     deliverTabletModeChanged(whenNanos, inTabletMode);
                     break;
+                case MSG_LOG_KEYBOARD_SYSTEM_SHORTCUT:
+                    int deviceId = msg.arg1;
+                    KeyboardSystemShortcut shortcut = (KeyboardSystemShortcut) msg.obj;
+                    InputDevice device = getInputDevice(deviceId);
+                    // Logging Keyboard system event only for an external HW keyboard. We should not
+                    // log events for virtual keyboards or internal Key events.
+                    if (device == null || device.isVirtual() || !device.isFullKeyboard()
+                            || !device.isExternal()) {
+                        return;
+                    }
+                    KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(device, shortcut);
             }
         }
     }
@@ -3195,6 +3213,13 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public int getLastUsedInputDeviceId() {
             return mNative.getLastUsedInputDeviceId();
+        }
+
+        @Override
+        public void notifyKeyboardShortcutTriggered(int deviceId, int[] keycodes, int modifierState,
+                @KeyboardSystemShortcut.SystemShortcut int shortcut) {
+            logKeyboardSystemShortcut(deviceId,
+                    new KeyboardSystemShortcut(keycodes, modifierState, shortcut));
         }
     }
 
