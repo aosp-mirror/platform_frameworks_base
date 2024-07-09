@@ -41,6 +41,7 @@ import android.content.res.Configuration;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -227,14 +228,16 @@ public class InputMethodManagerServiceTestBase {
                         "immstest1",
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
+        mServiceThread.start();
         mIoThread =
                 new ServiceThread(
                         "immstest2",
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
+        mIoThread.start();
         mInputMethodManagerService = new InputMethodManagerService(mContext,
                 InputMethodManagerService.shouldEnableConcurrentMultiUserMode(mContext),
-                mServiceThread, mIoThread,
+                mServiceThread.getLooper(), Handler.createAsync(mIoThread.getLooper()),
                 unusedUserId -> mMockInputMethodBindingController);
         spyOn(mInputMethodManagerService);
 
