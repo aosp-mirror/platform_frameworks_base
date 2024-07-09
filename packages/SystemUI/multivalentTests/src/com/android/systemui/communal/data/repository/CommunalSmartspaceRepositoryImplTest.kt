@@ -64,10 +64,9 @@ class CommunalSmartspaceRepositoryImplTest : SysuiTestCase() {
 
     @DisableFlags(FLAG_REMOTE_VIEWS)
     @Test
-    fun communalTimers_doNotListenForSmartspaceUpdatesWhenRemoteViewsFlagDisabled() =
+    fun startListening_remoteViewsFlagDisabled_doNotListenForSmartspaceUpdates() =
         testScope.runTest {
-            collectLastValue(underTest.timers)
-            runCurrent()
+            underTest.startListening()
             fakeExecutor.runAllReady()
 
             verify(smartspaceController, never()).addListener(any())
@@ -75,8 +74,27 @@ class CommunalSmartspaceRepositoryImplTest : SysuiTestCase() {
 
     @EnableFlags(FLAG_REMOTE_VIEWS)
     @Test
+    fun startListening_remoteViewsFlagEnabled_listenForSmartspaceUpdates() =
+        testScope.runTest {
+            underTest.startListening()
+            fakeExecutor.runAllReady()
+
+            // Verify listener added
+            val listener = captureSmartspaceTargetListener()
+
+            underTest.stopListening()
+            fakeExecutor.runAllReady()
+
+            // Verify listener removed
+            verify(smartspaceController).removeListener(listener)
+        }
+
+    @EnableFlags(FLAG_REMOTE_VIEWS)
+    @Test
     fun communalTimers_onlyShowTimersWithRemoteViews() =
         testScope.runTest {
+            underTest.startListening()
+
             val communalTimers by collectLastValue(underTest.timers)
             runCurrent()
             fakeExecutor.runAllReady()

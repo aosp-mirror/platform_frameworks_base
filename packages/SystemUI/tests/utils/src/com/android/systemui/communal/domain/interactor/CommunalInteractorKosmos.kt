@@ -64,13 +64,17 @@ val Kosmos.communalInteractor by Fixture {
 
 val Kosmos.editWidgetsActivityStarter by Fixture<EditWidgetsActivityStarter> { mock() }
 
-suspend fun Kosmos.setCommunalAvailable(available: Boolean) {
-    fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, available)
-    if (available) {
+suspend fun Kosmos.setCommunalEnabled(enabled: Boolean) {
+    fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, enabled)
+    if (enabled) {
         fakeUserRepository.asMainUser()
     } else {
         fakeUserRepository.asDefaultUser()
     }
+}
+
+suspend fun Kosmos.setCommunalAvailable(available: Boolean) {
+    setCommunalEnabled(available)
     with(fakeKeyguardRepository) {
         setIsEncryptedOrLockdown(!available)
         setKeyguardShowing(available)

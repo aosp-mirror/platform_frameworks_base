@@ -28,4 +28,18 @@ class FakeCommunalSmartspaceRepository : CommunalSmartspaceRepository {
     fun setTimers(timers: List<CommunalSmartspaceTimer>) {
         _timers.value = timers
     }
+
+    private var isListening = false
+
+    override fun startListening() {
+        isListening = true
+    }
+
+    override fun stopListening() {
+        isListening = false
+    }
+
+    fun isListening(): Boolean {
+        return isListening
+    }
 }

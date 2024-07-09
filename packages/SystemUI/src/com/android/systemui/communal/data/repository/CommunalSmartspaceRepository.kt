@@ -27,13 +27,16 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 
 interface CommunalSmartspaceRepository {
     /** Smartspace timer targets for the communal surface. */
     val timers: Flow<List<CommunalSmartspaceTimer>>
+
+    /** Start listening for smartspace updates. */
+    fun startListening()
+
+    /** Stop listening for smartspace updates. */
+    fun stopListening()
 }
 
 @SysUISingleton
@@ -46,24 +49,7 @@ constructor(
 
     private val _timers: MutableStateFlow<List<CommunalSmartspaceTimer>> =
         MutableStateFlow(emptyList())
-    override val timers: Flow<List<CommunalSmartspaceTimer>> =
-        if (!android.app.smartspace.flags.Flags.remoteViews()) emptyFlow()
-        else
-            _timers
-                .onStart {
-                    uiExecutor.execute {
-                        communalSmartspaceController.addListener(
-                            listener = this@CommunalSmartspaceRepositoryImpl
-                        )
-                    }
-                }
-                .onCompletion {
-                    uiExecutor.execute {
-                        communalSmartspaceController.removeListener(
-                            listener = this@CommunalSmartspaceRepositoryImpl
-                        )
-                    }
-                }
+    override val timers: Flow<List<CommunalSmartspaceTimer>> = _timers
 
     override fun onSmartspaceTargetsUpdated(targetsNullable: MutableList<out Parcelable>?) {
         val targets = targetsNullable?.filterIsInstance<SmartspaceTarget>() ?: emptyList()
@@ -81,5 +67,23 @@ constructor(
                         remoteViews = target.remoteViews!!,
                     )
                 }
+    }
+
+    override fun startListening() {
+        if (android.app.smartspace.flags.Flags.remoteViews()) {
+            uiExecutor.execute {
+                communalSmartspaceController.addListener(
+                    listener = this@CommunalSmartspaceRepositoryImpl
+                )
+            }
+        }
+    }
+
+    override fun stopListening() {
+        uiExecutor.execute {
+            communalSmartspaceController.removeListener(
+                listener = this@CommunalSmartspaceRepositoryImpl
+            )
+        }
     }
 }

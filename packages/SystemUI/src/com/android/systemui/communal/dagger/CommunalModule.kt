@@ -54,6 +54,7 @@ import kotlinx.coroutines.CoroutineScope
             CommunalPrefsRepositoryModule::class,
             CommunalSettingsRepositoryModule::class,
             CommunalSmartspaceRepositoryModule::class,
+            CommunalStartableModule::class,
         ]
 )
 interface CommunalModule {
