@@ -633,7 +633,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
 
     @Test
     @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
-    fun headsUpAnimationsEnabled_keyguardShowing_false() =
+    fun headsUpAnimationsEnabled_keyguardShowing_true() =
         testScope.runTest {
             val animationsEnabled by collectLastValue(underTest.headsUpAnimationsEnabled)
 
@@ -641,6 +641,6 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
             fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
             runCurrent()
 
-            assertThat(animationsEnabled).isFalse()
+            assertThat(animationsEnabled).isTrue()
         }
 }
