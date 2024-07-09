@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.compose.animation.scene
+package com.android.systemui.communal.ui.compose
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.input.pointer.PointerInputChange
@@ -22,9 +22,11 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import com.android.compose.animation.scene.Edge
+import com.android.compose.animation.scene.SwipeDetector
+import com.android.compose.animation.scene.SwipeSource
+import com.android.compose.animation.scene.SwipeSourceDetector
 import kotlin.math.abs
-
-private const val TRAVEL_RATIO_THRESHOLD = .5f
 
 /**
  * {@link CommunalSwipeDetector} provides an implementation of {@link SwipeDetector} and {@link
@@ -33,6 +35,10 @@ private const val TRAVEL_RATIO_THRESHOLD = .5f
  */
 class CommunalSwipeDetector(private var lastDirection: SwipeSource? = null) :
     SwipeSourceDetector, SwipeDetector {
+    companion object {
+        private const val TRAVEL_RATIO_THRESHOLD = .5f
+    }
+
     override fun source(
         layoutSize: IntSize,
         position: IntOffset,
