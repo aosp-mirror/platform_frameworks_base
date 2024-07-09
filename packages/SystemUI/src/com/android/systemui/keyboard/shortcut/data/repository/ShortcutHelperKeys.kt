@@ -222,7 +222,7 @@ object ShortcutHelperKeys {
                 { context ->
                     context.getString(R.string.keyboard_key_forward_del)
                 },
-            KEYCODE_ESCAPE to { "Esc" },
+            KEYCODE_ESCAPE to { context -> context.getString(R.string.keyboard_key_esc) },
             KEYCODE_SYSRQ to { "SysRq" },
             KEYCODE_BREAK to { "Break" },
             KEYCODE_SCROLL_LOCK to { "Scroll Lock" },

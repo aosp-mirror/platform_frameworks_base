@@ -2038,6 +2038,8 @@
     <string name="keyboard_key_page_down">Page Down</string>
     <!-- Name used to refer to the "Delete" key on the keyboard. -->
     <string name="keyboard_key_forward_del">Delete</string>
+    <!-- Name used to refer to the "Esc" or "Escape" key on the keyboard. -->
+    <string name="keyboard_key_esc">Esc</string>
     <!-- Name used to refer to the "Home" move key on the keyboard. -->
     <string name="keyboard_key_move_home">Home</string>
     <!-- Name used to refer to the "End" move key on the keyboard. -->
