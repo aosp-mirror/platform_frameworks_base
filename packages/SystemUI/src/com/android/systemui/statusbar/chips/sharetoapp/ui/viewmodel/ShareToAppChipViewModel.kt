@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel
 
+import android.content.Context
 import androidx.annotation.DrawableRes
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
@@ -48,6 +49,7 @@ class ShareToAppChipViewModel
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
+    private val context: Context,
     private val mediaProjectionChipInteractor: MediaProjectionChipInteractor,
     private val systemClock: SystemClock,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
@@ -97,6 +99,7 @@ constructor(
     private fun createShareToAppDialogDelegate(state: ProjectionChipModel.Projecting) =
         EndShareToAppDialogDelegate(
             endMediaProjectionDialogHelper,
+            context,
             stopAction = this::stopProjecting,
             state,
         )
