@@ -52,6 +52,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
@@ -353,6 +354,12 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                 pd.dragSession.initialize();
                 pd.activeDragCount++;
                 pd.dragLayout.prepare(pd.dragSession, mLogger.logStart(pd.dragSession));
+                if (pd.dragSession.hideDragSourceTaskId != -1) {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                            "Hiding task surface: taskId=%d", pd.dragSession.hideDragSourceTaskId);
+                    mShellTaskOrganizer.setTaskSurfaceVisibility(
+                            pd.dragSession.hideDragSourceTaskId, false /* visible */);
+                }
                 setDropTargetWindowVisibility(pd, View.VISIBLE);
                 notifyListeners(l -> {
                     l.onDragStarted();
@@ -382,6 +389,13 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                 if (pd.dragLayout.hasDropped()) {
                     mLogger.logDrop();
                 } else {
+                    if (pd.dragSession.hideDragSourceTaskId != -1) {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                                "Re-showing task surface: taskId=%d",
+                                pd.dragSession.hideDragSourceTaskId);
+                        mShellTaskOrganizer.setTaskSurfaceVisibility(
+                                pd.dragSession.hideDragSourceTaskId, true /* visible */);
+                    }
                     pd.activeDragCount--;
                     pd.dragLayout.hide(event, () -> {
                         if (pd.activeDragCount == 0) {
@@ -435,7 +449,16 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
     private boolean handleDrop(DragEvent event, PerDisplay pd) {
         final SurfaceControl dragSurface = event.getDragSurface();
         pd.activeDragCount--;
-        return pd.dragLayout.drop(event, dragSurface, () -> {
+        // Find the token of the task to hide as a part of entering split
+        WindowContainerToken hideTaskToken = null;
+        if (pd.dragSession.hideDragSourceTaskId != -1) {
+            ActivityManager.RunningTaskInfo info = mShellTaskOrganizer.getRunningTaskInfo(
+                    pd.dragSession.hideDragSourceTaskId);
+            if (info != null) {
+                hideTaskToken = info.token;
+            }
+        }
+        return pd.dragLayout.drop(event, dragSurface, hideTaskToken, () -> {
             if (pd.activeDragCount == 0) {
                 // Hide the window if another drag hasn't been started while animating the drop
                 setDropTargetWindowVisibility(pd, View.INVISIBLE);

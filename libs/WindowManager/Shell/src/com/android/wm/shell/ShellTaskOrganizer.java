@@ -699,6 +699,22 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         }
     }
 
+    /**
+     * Shows/hides the given task surface.  Not for general use as changing the task visibility may
+     * conflict with other Transitions.  This is currently ONLY used to temporarily hide a task
+     * while a drag is in session.
+     */
+    public void setTaskSurfaceVisibility(int taskId, boolean visible) {
+        synchronized (mLock) {
+            final TaskAppearedInfo info = mTasks.get(taskId);
+            if (info != null) {
+                SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                t.setVisibility(info.getLeash(), visible);
+                t.apply();
+            }
+        }
+    }
+
     private boolean updateTaskListenerIfNeeded(RunningTaskInfo taskInfo, SurfaceControl leash,
             TaskListener oldListener, TaskListener newListener) {
         if (oldListener == newListener) return false;
