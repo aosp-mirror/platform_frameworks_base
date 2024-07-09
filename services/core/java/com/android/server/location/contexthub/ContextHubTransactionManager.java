@@ -474,9 +474,8 @@ import java.util.concurrent.atomic.AtomicInteger;
                 return;
             }
 
-            Integer transactionMessageSequenceNumber = transaction.getMessageSequenceNumber();
+            int transactionMessageSequenceNumber = transaction.getMessageSequenceNumber();
             if (transaction.getTransactionType() != ContextHubTransaction.TYPE_RELIABLE_MESSAGE
-                    || transactionMessageSequenceNumber == null
                     || transactionMessageSequenceNumber != messageSequenceNumber) {
                 Log.w(TAG, "Received unexpected message transaction response (expected message "
                         + "sequence number = "
@@ -494,7 +493,8 @@ import java.util.concurrent.atomic.AtomicInteger;
         ContextHubServiceTransaction transaction =
                 mReliableMessageTransactionMap.get(messageSequenceNumber);
         if (transaction == null) {
-            Log.w(TAG, "Could not find reliable message transaction with message sequence number"
+            Log.w(TAG, "Could not find reliable message transaction with "
+                    + "message sequence number = "
                     + messageSequenceNumber);
             return;
         }

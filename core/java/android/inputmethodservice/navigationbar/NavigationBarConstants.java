@@ -17,6 +17,7 @@
 package android.inputmethodservice.navigationbar;
 
 import android.annotation.ColorInt;
+import android.graphics.Color;
 
 final class NavigationBarConstants {
     private NavigationBarConstants() {
@@ -27,13 +28,13 @@ final class NavigationBarConstants {
     // TODO(b/215443343): Handle this in the drawable then remove this constant.
     static final float NAVBAR_BACK_BUTTON_IME_OFFSET = 2.0f;
 
-    // Copied from "light_mode_icon_color_single_tone" at packages/SettingsLib/res/values/colors.xml
+    // Copied from "white" at packages/SettingsLib/res/values/colors.xml
     @ColorInt
-    static final int LIGHT_MODE_ICON_COLOR_SINGLE_TONE = 0xffffffff;
+    static final int WHITE = Color.WHITE;
 
-    // Copied from "dark_mode_icon_color_single_tone" at packages/SettingsLib/res/values/colors.xml
+    // Copied from "black" at packages/SettingsLib/res/values/colors.xml
     @ColorInt
-    static final int DARK_MODE_ICON_COLOR_SINGLE_TONE = 0x99000000;
+    static final int BLACK = Color.BLACK;
 
     // Copied from "navigation_bar_deadzone_hold"
     static final int NAVIGATION_BAR_DEADZONE_HOLD = 333;

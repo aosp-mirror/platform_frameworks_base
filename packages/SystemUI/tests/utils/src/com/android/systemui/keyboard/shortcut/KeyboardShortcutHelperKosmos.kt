@@ -24,6 +24,7 @@ import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperTestHelper
+import com.android.systemui.keyboard.shortcut.data.source.AppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.InputShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.MultitaskingShortcutsSource
@@ -39,6 +40,15 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
 import com.android.systemui.settings.displayTracker
+import com.android.systemui.util.icons.fakeAppCategoryIconProvider
+
+var Kosmos.shortcutHelperAppCategoriesShortcutsSource: KeyboardShortcutGroupsSource by
+    Kosmos.Fixture {
+        AppCategoriesShortcutsSource(
+            fakeAppCategoryIconProvider,
+            mainResources,
+        )
+    }
 
 var Kosmos.shortcutHelperSystemShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { SystemShortcutsSource(mainResources) }
@@ -67,6 +77,7 @@ val Kosmos.shortcutHelperCategoriesRepository by
             testDispatcher,
             shortcutHelperSystemShortcutsSource,
             shortcutHelperMultiTaskingShortcutsSource,
+            shortcutHelperAppCategoriesShortcutsSource,
             shortcutHelperInputShortcutsSource,
             fakeInputManager.inputManager,
             shortcutHelperStateRepository,

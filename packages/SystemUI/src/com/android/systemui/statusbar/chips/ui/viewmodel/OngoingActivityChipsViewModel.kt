@@ -18,6 +18,9 @@ package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.call.ui.viewmodel.CallChipViewModel
 import com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel.CastToOtherDeviceChipViewModel
 import com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.ScreenRecordChipViewModel
@@ -45,6 +48,7 @@ constructor(
     shareToAppChipViewModel: ShareToAppChipViewModel,
     castToOtherDeviceChipViewModel: CastToOtherDeviceChipViewModel,
     callChipViewModel: CallChipViewModel,
+    @StatusBarChipsLog private val logger: LogBuffer,
 ) {
     /**
      * A flow modeling the chip that should be shown in the status bar after accounting for possibly
@@ -60,6 +64,17 @@ constructor(
                 castToOtherDeviceChipViewModel.chip,
                 callChipViewModel.chip,
             ) { screenRecord, shareToApp, castToOtherDevice, call ->
+                logger.log(
+                    TAG,
+                    LogLevel.INFO,
+                    {
+                        str1 = screenRecord.logName
+                        str2 = shareToApp.logName
+                        str3 = castToOtherDevice.logName
+                    },
+                    { "Chips: ScreenRecord=$str1 > ShareToApp=$str2 > CastToOther=$str3..." },
+                )
+                logger.log(TAG, LogLevel.INFO, { str1 = call.logName }, { "... > Call=$str1" })
                 // This `when` statement shows the priority order of the chips
                 when {
                     // Screen recording also activates the media projection APIs, so whenever the
@@ -76,4 +91,8 @@ constructor(
             // for those timers to get reset for any reason. So, as soon as any subscriber has
             // requested the chip information, we need to maintain it forever. See b/347726238.
             .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden)
+
+    companion object {
+        private const val TAG = "ChipsViewModel"
+    }
 }

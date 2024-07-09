@@ -107,7 +107,7 @@ android_test {
     instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
     test_config_template: "AndroidTestTemplate.xml",
     srcs: [
-        ":WMShellFlickerTestsSplitScreenGroup1-src",
+        ":WMShellFlickerTestsSplitScreenGroup2-src",
     ],
     static_libs: [
         "WMShellFlickerTestsBase",
@@ -124,7 +124,7 @@ android_test {
     instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
     test_config_template: "AndroidTestTemplate.xml",
     srcs: [
-        ":WMShellFlickerTestsSplitScreenGroup1-src",
+        ":WMShellFlickerTestsSplitScreenGroup3-src",
     ],
     static_libs: [
         "WMShellFlickerTestsBase",

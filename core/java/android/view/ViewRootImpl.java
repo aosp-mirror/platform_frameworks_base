@@ -1207,6 +1207,8 @@ public final class ViewRootImpl implements ViewParent,
     private final Rect mChildBoundingInsets = new Rect();
     private boolean mChildBoundingInsetsChanged = false;
 
+    private final boolean mDisableDrawWakeLock;
+
     private String mTag = TAG;
     private String mFpsTraceName;
     private String mLargestViewTraceName;
@@ -1336,6 +1338,10 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mAppStartInfoTimestampsFlagValue = android.app.Flags.appStartInfoTimestamps();
+
+        // Disable DRAW_WAKE_LOCK starting U.
+        mDisableDrawWakeLock =
+                CompatChanges.isChangeEnabled(DISABLE_DRAW_WAKE_LOCK) && disableDrawWakeLock();
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -2472,11 +2478,7 @@ public final class ViewRootImpl implements ViewParent,
 
     void pokeDrawLockIfNeeded() {
         // Disable DRAW_WAKE_LOCK starting U. Otherwise, only need to acquire it for DOZE state.
-        if (CompatChanges.isChangeEnabled(DISABLE_DRAW_WAKE_LOCK) && disableDrawWakeLock()) {
-            return;
-        }
-
-        if (mAttachInfo.mDisplayState != Display.STATE_DOZE) {
+        if (mDisableDrawWakeLock || mAttachInfo.mDisplayState != Display.STATE_DOZE) {
             // In DOZE_SUSPEND, Android shouldn't control the display; therefore we only poke the
             // draw wake lock when display state is DOZE. Noted that Display#isDozeState includes
             // DOZE_SUSPEND as well, so, it's not feasible here.
