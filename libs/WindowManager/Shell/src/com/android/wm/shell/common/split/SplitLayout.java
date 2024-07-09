@@ -652,9 +652,18 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 .ofInt(from, to)
                 .setDuration(duration);
         mDividerFlingAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+
+        // If the divider is being physically controlled by the user, we use a cool parallax effect
+        // on the task windows. So if this "snap" animation is an extension of a user-controlled
+        // movement, we pass in true here to continue the parallax effect smoothly.
+        boolean isBeingMovedByUser = mSplitWindowManager.getDividerView() != null
+                && mSplitWindowManager.getDividerView().isMoving();
+
         mDividerFlingAnimator.addUpdateListener(
                 animation -> updateDividerBounds(
-                        (int) animation.getAnimatedValue(), false /* shouldUseParallaxEffect */)
+                        (int) animation.getAnimatedValue(),
+                        isBeingMovedByUser /* shouldUseParallaxEffect */
+                )
         );
         mDividerFlingAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
