@@ -42,6 +42,7 @@ import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -81,6 +82,7 @@ class HandleMenu {
     // those as well.
     final Point mGlobalMenuPosition = new Point();
     private final boolean mShouldShowWindowingPill;
+    private final boolean mShouldShowBrowserPill;
     private final Bitmap mAppIconBitmap;
     private final CharSequence mAppName;
     private final View.OnClickListener mOnClickListener;
@@ -101,7 +103,7 @@ class HandleMenu {
             View.OnClickListener onClickListener, View.OnTouchListener onTouchListener,
             Bitmap appIcon, CharSequence appName, DisplayController displayController,
             SplitScreenController splitScreenController, boolean shouldShowWindowingPill,
-            int captionHeight) {
+            boolean shouldShowBrowserPill, int captionHeight) {
         mParentDecor = parentDecor;
         mContext = mParentDecor.mDecorWindowContext;
         mTaskInfo = mParentDecor.mTaskInfo;
@@ -113,6 +115,7 @@ class HandleMenu {
         mAppIconBitmap = appIcon;
         mAppName = appName;
         mShouldShowWindowingPill = shouldShowWindowingPill;
+        mShouldShowBrowserPill = shouldShowBrowserPill;
         mCaptionHeight = captionHeight;
         loadHandleMenuDimensions();
         updateHandleMenuPillPositions();
@@ -170,6 +173,7 @@ class HandleMenu {
             setupWindowingPill(handleMenu);
         }
         setupMoreActionsPill(handleMenu);
+        setupOpenInBrowserPill(handleMenu);
     }
 
     /**
@@ -226,6 +230,15 @@ class HandleMenu {
         if (!SHOULD_SHOW_MORE_ACTIONS_PILL) {
             handleMenu.findViewById(R.id.more_actions_pill).setVisibility(View.GONE);
         }
+    }
+
+    private void setupOpenInBrowserPill(View handleMenu) {
+        if (!mShouldShowBrowserPill) {
+            handleMenu.findViewById(R.id.open_in_browser_pill).setVisibility(View.GONE);
+            return;
+        }
+        final Button browserButton = handleMenu.findViewById(R.id.open_in_browser_button);
+        browserButton.setOnClickListener(mOnClickListener);
     }
 
     /**
@@ -423,6 +436,10 @@ class HandleMenu {
             menuHeight -= loadDimensionPixelSize(resources,
                     R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
         }
+        if (!mShouldShowBrowserPill) {
+            menuHeight -= loadDimensionPixelSize(resources,
+                    R.dimen.desktop_mode_handle_menu_open_in_browser_pill_height);
+        }
         return menuHeight;
     }
 
@@ -457,6 +474,7 @@ class HandleMenu {
         private int mCaptionHeight;
         private DisplayController mDisplayController;
         private SplitScreenController mSplitScreenController;
+        private boolean mShowBrowserPill;
 
         Builder(@NonNull DesktopModeWindowDecoration parent) {
             mParent = parent;
@@ -507,10 +525,15 @@ class HandleMenu {
             return this;
         }
 
+        Builder setBrowserLinkAvailable(Boolean showBrowserPill) {
+            mShowBrowserPill = showBrowserPill;
+            return this;
+        }
+
         HandleMenu build() {
             return new HandleMenu(mParent, mLayoutId, mOnClickListener,
                     mOnTouchListener, mAppIcon, mName, mDisplayController, mSplitScreenController,
-                    mShowWindowingPill, mCaptionHeight);
+                    mShowWindowingPill, mShowBrowserPill, mCaptionHeight);
         }
     }
 }
