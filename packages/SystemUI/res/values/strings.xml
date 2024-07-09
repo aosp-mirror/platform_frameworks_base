@@ -1235,6 +1235,10 @@
     <string name="accessibility_action_label_remove_widget">remove widget</string>
     <!-- Label for accessibility action to place a widget in edit mode after selecting move widget. [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_label_place_widget">place selected widget</string>
+    <!-- Title in the communal widget picker. [CHAR LIMIT=50] -->
+    <string name="communal_widget_picker_title">Lock screen widgets</string>
+    <!-- Text displayed below the title in the communal widget picker providing additional details about the communal surface. [CHAR LIMIT=80] -->
+    <string name="communal_widget_picker_description">Anyone can view widgets on your lock screen, even if your tablet\'s locked.</string>
     <!-- Title shown above information regarding lock screen widgets. [CHAR LIMIT=50] -->
     <string name="communal_widgets_disclaimer_title">Lock screen widgets</string>
     <!-- Information about lock screen widgets presented to the user. [CHAR LIMIT=NONE] -->
