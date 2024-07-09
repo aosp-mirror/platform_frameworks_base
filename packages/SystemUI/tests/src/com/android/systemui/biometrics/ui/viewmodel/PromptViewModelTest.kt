@@ -1799,8 +1799,10 @@ internal data class TestCase(
             when {
                 fingerprint != null && face != null -> "coex"
                 fingerprint != null && fingerprint.isAnySidefpsType -> "fingerprint only, sideFps"
-                fingerprint != null && !fingerprint.isAnySidefpsType ->
-                    "fingerprint only, non-sideFps"
+                fingerprint != null && fingerprint.isAnyUdfpsType -> "fingerprint only, udfps"
+                fingerprint != null &&
+                    fingerprint.sensorType == FingerprintSensorProperties.TYPE_REAR ->
+                    "fingerprint only, rearFps"
                 face != null -> "face only"
                 else -> "?"
             }

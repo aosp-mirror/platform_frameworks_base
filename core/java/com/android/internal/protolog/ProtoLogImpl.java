@@ -54,33 +54,48 @@ public class ProtoLogImpl {
     private static Runnable sCacheUpdater;
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void d(IProtoLogGroup group, long messageHash, int paramsMask, Object... args) {
-        getSingleInstance().log(LogLevel.DEBUG, group, messageHash, paramsMask, args);
+    public static void d(IProtoLogGroup group, long messageHash, int paramsMask,
+            @Nullable String messageString,
+            Object... args) {
+        getSingleInstance()
+                .log(LogLevel.DEBUG, group, messageHash, paramsMask, messageString, args);
     }
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void v(IProtoLogGroup group, long messageHash, int paramsMask, Object... args) {
-        getSingleInstance().log(LogLevel.VERBOSE, group, messageHash, paramsMask, args);
+    public static void v(IProtoLogGroup group, long messageHash, int paramsMask,
+            @Nullable String messageString,
+            Object... args) {
+        getSingleInstance().log(LogLevel.VERBOSE, group, messageHash, paramsMask, messageString,
+                args);
     }
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void i(IProtoLogGroup group, long messageHash, int paramsMask, Object... args) {
-        getSingleInstance().log(LogLevel.INFO, group, messageHash, paramsMask, args);
+    public static void i(IProtoLogGroup group, long messageHash, int paramsMask,
+            @Nullable String messageString,
+            Object... args) {
+        getSingleInstance().log(LogLevel.INFO, group, messageHash, paramsMask, messageString, args);
     }
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void w(IProtoLogGroup group, long messageHash, int paramsMask, Object... args) {
-        getSingleInstance().log(LogLevel.WARN, group, messageHash, paramsMask, args);
+    public static void w(IProtoLogGroup group, long messageHash, int paramsMask,
+            @Nullable String messageString,
+            Object... args) {
+        getSingleInstance().log(LogLevel.WARN, group, messageHash, paramsMask, messageString, args);
     }
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void e(IProtoLogGroup group, long messageHash, int paramsMask, Object... args) {
-        getSingleInstance().log(LogLevel.ERROR, group, messageHash, paramsMask, args);
+    public static void e(IProtoLogGroup group, long messageHash, int paramsMask,
+            @Nullable String messageString,
+            Object... args) {
+        getSingleInstance()
+                .log(LogLevel.ERROR, group, messageHash, paramsMask, messageString, args);
     }
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void wtf(IProtoLogGroup group, long messageHash, int paramsMask, Object... args) {
-        getSingleInstance().log(LogLevel.WTF, group, messageHash, paramsMask, args);
+    public static void wtf(IProtoLogGroup group, long messageHash, int paramsMask,
+            @Nullable String messageString,
+            Object... args) {
+        getSingleInstance().log(LogLevel.WTF, group, messageHash, paramsMask, messageString, args);
     }
 
     /**
@@ -92,27 +107,18 @@ public class ProtoLogImpl {
     }
 
     /**
-     * Registers available protolog groups. A group must be registered before it can be used.
-     * @param protoLogGroups The groups to register for use in protolog.
-     */
-    public static void registerGroups(IProtoLogGroup... protoLogGroups) {
-        getSingleInstance().registerGroups(protoLogGroups);
-    }
-
-    /**
      * Returns the single instance of the ProtoLogImpl singleton class.
      */
     public static synchronized IProtoLog getSingleInstance() {
         if (sServiceInstance == null) {
             if (android.tracing.Flags.perfettoProtologTracing()) {
-                sServiceInstance = new PerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater);
+                sServiceInstance = new PerfettoProtoLogImpl(
+                        sViewerConfigPath, sLogGroups, sCacheUpdater);
             } else {
                 sServiceInstance = new LegacyProtoLogImpl(
-                        sLegacyOutputFilePath, sLegacyViewerConfigPath, sCacheUpdater);
+                        sLegacyOutputFilePath, sLegacyViewerConfigPath, sLogGroups, sCacheUpdater);
             }
 
-            IProtoLogGroup[] groups = sLogGroups.values().toArray(new IProtoLogGroup[0]);
-            sServiceInstance.registerGroups(groups);
             sCacheUpdater.run();
         }
         return sServiceInstance;

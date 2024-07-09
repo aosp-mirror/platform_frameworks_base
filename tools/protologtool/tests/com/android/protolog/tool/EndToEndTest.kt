@@ -60,7 +60,7 @@ class EndToEndTest {
                 .containsMatch(Pattern.compile("\\{ String protoLogParam0 = " +
                         "String\\.valueOf\\(argString\\); long protoLogParam1 = argInt; " +
                         "com\\.android\\.internal\\.protolog.ProtoLogImpl_.*\\.d\\(" +
-                        "GROUP, -6872339441335321086L, 4, protoLogParam0, protoLogParam1" +
+                        "GROUP, -6872339441335321086L, 4, null, protoLogParam0, protoLogParam1" +
                         "\\); \\}"))
     }
 

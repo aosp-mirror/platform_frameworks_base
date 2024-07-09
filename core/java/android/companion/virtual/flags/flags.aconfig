@@ -103,3 +103,10 @@ flag {
     description: "API for on-demand rotation of virtual displays"
     bug: "291748430"
 }
+
+flag {
+    namespace: "virtual_devices"
+    name: "high_resolution_scroll"
+    description: "Enable high resolution scroll"
+    bug: "335160780"
+}

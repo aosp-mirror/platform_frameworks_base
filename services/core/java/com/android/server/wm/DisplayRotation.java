@@ -2294,10 +2294,8 @@ public class DisplayRotation {
                     mInHalfFoldTransition = false;
                     mDeviceState = DeviceStateController.DeviceState.UNKNOWN;
                 }
-                mDisplayRotationCompatPolicySummary = dc.mDisplayRotationCompatPolicy == null
-                        ? null
-                        : dc.mDisplayRotationCompatPolicy
-                                .getSummaryForDisplayRotationHistoryRecord();
+                mDisplayRotationCompatPolicySummary = dc.mAppCompatCameraPolicy
+                        .getSummaryForDisplayRotationHistoryRecord();
                 mRotationReversionSlots =
                         dr.mDisplayContent.getRotationReversionController().getSlotsCopy();
             }

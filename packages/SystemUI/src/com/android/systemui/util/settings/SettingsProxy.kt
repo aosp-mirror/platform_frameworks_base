@@ -19,6 +19,7 @@ import android.content.ContentResolver
 import android.database.ContentObserver
 import android.net.Uri
 import android.provider.Settings.SettingNotFoundException
+import androidx.annotation.WorkerThread
 import com.android.app.tracing.TraceUtils.trace
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -59,10 +60,13 @@ interface SettingsProxy {
     fun getUriFor(name: String): Uri
 
     /**
-     * Convenience wrapper around [ContentResolver.registerContentObserver].'
-     *
+     * Registers listener for a given content observer <b>while blocking the current thread</b>.
      * Implicitly calls [getUriFor] on the passed in name.
+     *
+     * This should not be called from the main thread, use [registerContentObserver] or
+     * [registerContentObserverAsync] instead.
      */
+    @WorkerThread
     fun registerContentObserverSync(name: String, settingsObserver: ContentObserver) {
         registerContentObserverSync(getUriFor(name), settingsObserver)
     }
@@ -90,7 +94,13 @@ interface SettingsProxy {
             registerContentObserverSync(getUriFor(name), settingsObserver)
         }
 
-    /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
+    /**
+     * Registers listener for a given content observer <b>while blocking the current thread</b>.
+     *
+     * This should not be called from the main thread, use [registerContentObserver] or
+     * [registerContentObserverAsync] instead.
+     */
+    @WorkerThread
     fun registerContentObserverSync(uri: Uri, settingsObserver: ContentObserver) =
         registerContentObserverSync(uri, false, settingsObserver)
 
@@ -157,7 +167,13 @@ interface SettingsProxy {
             registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
         }
 
-    /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
+    /**
+     * Registers listener for a given content observer <b>while blocking the current thread</b>.
+     *
+     * This should not be called from the main thread, use [registerContentObserver] or
+     * [registerContentObserverAsync] instead.
+     */
+    @WorkerThread
     fun registerContentObserverSync(
         uri: Uri,
         notifyForDescendants: Boolean,
@@ -200,7 +216,13 @@ interface SettingsProxy {
             registerContentObserverSync(uri, notifyForDescendants, settingsObserver)
         }
 
-    /** See [ContentResolver.unregisterContentObserver]. */
+    /**
+     * Unregisters the given content observer <b>while blocking the current thread</b>.
+     *
+     * This should not be called from the main thread, use [unregisterContentObserver] or
+     * [unregisterContentObserverAsync] instead.
+     */
+    @WorkerThread
     fun unregisterContentObserverSync(settingsObserver: ContentObserver) {
         trace({ "SP#unregisterObserver" }) {
             getContentResolver().unregisterContentObserver(settingsObserver)

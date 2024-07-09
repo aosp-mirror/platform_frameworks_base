@@ -79,10 +79,10 @@ public class AppCompatOverrides {
         mLetterboxConfiguration = letterboxConfiguration;
         mActivityRecord = activityRecord;
 
-        mAppCompatOrientationOverrides = new AppCompatOrientationOverrides(mActivityRecord,
-                mLetterboxConfiguration, optPropBuilder);
         mAppCompatCameraOverrides = new AppCompatCameraOverrides(mActivityRecord,
                 mLetterboxConfiguration, optPropBuilder);
+        mAppCompatOrientationOverrides = new AppCompatOrientationOverrides(mActivityRecord,
+                mLetterboxConfiguration, optPropBuilder, mAppCompatCameraOverrides);
 
         mFakeFocusOptProp = optPropBuilder.create(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS,
                 mLetterboxConfiguration::isCompatFakeFocusEnabled);
@@ -111,19 +111,6 @@ public class AppCompatOverrides {
         mAllowUserAspectRatioFullscreenOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
                 mLetterboxConfiguration::isUserAppAspectRatioFullscreenEnabled);
-    }
-
-    /**
-     * @return {@code true} if the App Compat Camera Policy is active for the current activity.
-     */
-    boolean isCameraCompatTreatmentActive() {
-        final DisplayContent displayContent = mActivityRecord.mDisplayContent;
-        if (displayContent == null) {
-            return false;
-        }
-        return displayContent.mDisplayRotationCompatPolicy != null
-                && displayContent.mDisplayRotationCompatPolicy
-                    .isTreatmentEnabledForActivity(mActivityRecord);
     }
 
     @NonNull

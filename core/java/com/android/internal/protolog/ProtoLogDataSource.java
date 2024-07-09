@@ -40,7 +40,6 @@ import com.android.internal.protolog.common.LogLevel;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -139,8 +138,6 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
     }
 
     public static class IncrementalState {
-        public final Set<Integer> protologGroupInterningSet = new HashSet<>();
-        public final Set<Long> protologMessageInterningSet = new HashSet<>();
         public final Map<String, Integer> argumentInterningMap = new HashMap<>();
         public final Map<String, Integer> stacktraceInterningMap = new HashMap<>();
         public boolean clearReported = false;

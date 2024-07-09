@@ -53,6 +53,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
+import static android.app.WindowConfiguration.isFloating;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.OUTLINE;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
@@ -342,6 +343,7 @@ import android.service.contentcapture.ActivityEvent;
 import android.service.dreams.DreamActivity;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.MergedConfiguration;
@@ -2923,14 +2925,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /** Makes starting window always fill the associated task. */
     private void attachStartingSurfaceToAssociatedTask() {
-        if (mSyncState == SYNC_STATE_NONE && isEmbedded()) {
-            // Collect this activity since it's starting window will reparent to task. To ensure
-            // any starting window's transaction will occur in order.
-            mTransitionController.collect(this);
-        }
+        mTransitionController.collect(mStartingWindow);
         // Associate the configuration of starting window with the task.
         overrideConfigurationPropagation(mStartingWindow, mStartingData.mAssociatedTask);
-        getSyncTransaction().reparent(mStartingWindow.mSurfaceControl,
+        mStartingWindow.getSyncTransaction().reparent(mStartingWindow.mSurfaceControl,
                 mStartingData.mAssociatedTask.mSurfaceControl);
     }
 
@@ -6537,9 +6535,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // and the token could be null.
             return;
         }
-        if (r.mDisplayContent.mActivityRefresher != null) {
-            r.mDisplayContent.mActivityRefresher.onActivityRefreshed(r);
-        }
+        r.mDisplayContent.mAppCompatCameraPolicy.onActivityRefreshed(r);
     }
 
     static void splashScreenAttachedLocked(IBinder token) {
@@ -8196,7 +8192,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void setRequestedOrientation(@ActivityInfo.ScreenOrientation int requestedOrientation) {
-        if (mAppCompatController.getAppCompatOrientationOverrides()
+        if (mAppCompatController.getOrientationPolicy()
                 .shouldIgnoreRequestedOrientation(requestedOrientation)) {
             return;
         }
@@ -8685,7 +8681,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             resolvedConfig.windowConfiguration.setMaxBounds(mTmpBounds);
         }
 
-        applySizeOverrideIfNeeded(newParentConfiguration, resolvedConfig);
+        applySizeOverrideIfNeeded(newParentConfiguration, parentWindowingMode, resolvedConfig);
         mResolveConfigHint.resetTmpOverrides();
 
         logAppCompatState();
@@ -8708,15 +8704,85 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * TODO: Consider integrate this with computeConfigByResolveHint()
      */
     private void applySizeOverrideIfNeeded(Configuration newParentConfiguration,
-            Configuration inOutConfig) {
-        applySizeOverride(
-                mDisplayContent,
-                info.applicationInfo,
-                newParentConfiguration,
-                inOutConfig,
-                mOptOutEdgeToEdge,
-                hasFixedRotationTransform(),
-                getCompatDisplayInsets() != null);
+            int parentWindowingMode, Configuration inOutConfig) {
+        if (mDisplayContent == null) {
+            return;
+        }
+        final Rect parentBounds = newParentConfiguration.windowConfiguration.getBounds();
+        int rotation = newParentConfiguration.windowConfiguration.getRotation();
+        if (rotation == ROTATION_UNDEFINED && !isFixedRotationTransforming()) {
+            rotation = mDisplayContent.getRotation();
+        }
+        if (!mOptOutEdgeToEdge && (!mResolveConfigHint.mUseOverrideInsetsForConfig
+                || getCompatDisplayInsets() != null
+                || (isFloating(parentWindowingMode)
+                        // Check the requested windowing mode of activity as well in case it is
+                        // switching between PiP and fullscreen.
+                        && (inOutConfig.windowConfiguration.getWindowingMode()
+                                == WINDOWING_MODE_UNDEFINED
+                                || isFloating(inOutConfig.windowConfiguration.getWindowingMode())))
+                || rotation == ROTATION_UNDEFINED)) {
+            // If the insets configuration decoupled logic is not enabled for the app, or the app
+            // already has a compat override, or the context doesn't contain enough info to
+            // calculate the override, skip the override.
+            return;
+        }
+        // Make sure the orientation related fields will be updated by the override insets, because
+        // fixed rotation has assigned the fields from display's configuration.
+        if (hasFixedRotationTransform()) {
+            inOutConfig.windowConfiguration.setAppBounds(null);
+            inOutConfig.screenWidthDp = Configuration.SCREEN_WIDTH_DP_UNDEFINED;
+            inOutConfig.screenHeightDp = Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+            inOutConfig.smallestScreenWidthDp = Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+            inOutConfig.orientation = ORIENTATION_UNDEFINED;
+        }
+
+        // Override starts here.
+        final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+        final int dw = rotated ? mDisplayContent.mBaseDisplayHeight
+                : mDisplayContent.mBaseDisplayWidth;
+        final int dh = rotated ? mDisplayContent.mBaseDisplayWidth
+                : mDisplayContent.mBaseDisplayHeight;
+        final Rect nonDecorInsets = mDisplayContent.getDisplayPolicy()
+                .getDecorInsetsInfo(rotation, dw, dh).mOverrideNonDecorInsets;
+        // This should be the only place override the configuration for ActivityRecord. Override
+        // the value if not calculated yet.
+        Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+        if (outAppBounds == null || outAppBounds.isEmpty()) {
+            inOutConfig.windowConfiguration.setAppBounds(parentBounds);
+            outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+            outAppBounds.inset(nonDecorInsets);
+        }
+        float density = inOutConfig.densityDpi;
+        if (density == Configuration.DENSITY_DPI_UNDEFINED) {
+            density = newParentConfiguration.densityDpi;
+        }
+        density *= DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
+            inOutConfig.screenWidthDp = (int) (outAppBounds.width() / density + 0.5f);
+        }
+        if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
+            inOutConfig.screenHeightDp = (int) (outAppBounds.height() / density + 0.5f);
+        }
+        if (inOutConfig.smallestScreenWidthDp
+                == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
+                && parentWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+            // For the case of PIP transition and multi-window environment, the
+            // smallestScreenWidthDp is handled already. Override only if the app is in
+            // fullscreen.
+            final DisplayInfo info = new DisplayInfo(mDisplayContent.getDisplayInfo());
+            mDisplayContent.computeSizeRanges(info, rotated, dw, dh,
+                    mDisplayContent.getDisplayMetrics().density,
+                    inOutConfig, true /* overrideConfig */);
+        }
+
+        // It's possible that screen size will be considered in different orientation with or
+        // without considering the system bar insets. Override orientation as well.
+        if (inOutConfig.orientation == ORIENTATION_UNDEFINED) {
+            inOutConfig.orientation =
+                    (inOutConfig.screenWidthDp <= inOutConfig.screenHeightDp)
+                            ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+        }
     }
 
     private void computeConfigByResolveHint(@NonNull Configuration resolvedConfig,
@@ -9962,16 +10028,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return updateReportedConfigurationAndSend();
     }
 
-    /**
-     * @return {@code true} if the Camera is active for the current activity
-     */
-    boolean isCameraActive() {
-        return mDisplayContent != null
-                && mDisplayContent.getDisplayRotationCompatPolicy() != null
-                && mDisplayContent.getDisplayRotationCompatPolicy()
-                    .isCameraActive(this, /* mustBeFullscreen */ true);
-    }
-
     boolean updateReportedConfigurationAndSend() {
         if (isConfigurationDispatchPaused()) {
             Slog.wtf(TAG, "trying to update reported(client) config while dispatch is paused");
@@ -10119,11 +10175,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private void notifyActivityRefresherAboutConfigurationChange(
             Configuration newConfig, Configuration lastReportedConfig) {
-        if (mDisplayContent.mActivityRefresher == null
-                || !shouldBeResumed(/* activeActivity */ null)) {
+        if (!shouldBeResumed(/* activeActivity */ null)) {
             return;
         }
-        mDisplayContent.mActivityRefresher.onActivityConfigurationChanging(
+        mDisplayContent.mAppCompatCameraPolicy.onActivityConfigurationChanging(
                 this, newConfig, lastReportedConfig);
     }
 

@@ -61,7 +61,7 @@ class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
             underTest.getDialogMessage(
                 MediaProjectionState.Projecting.EntireScreen("host.package"),
                 R.string.accessibility_home,
-                R.string.cast_to_other_device_stop_dialog_message_specific_app
+                R.string.cast_screen_to_other_device_stop_dialog_message_specific_app,
             )
 
         assertThat(result).isEqualTo(context.getString(R.string.accessibility_home))
@@ -84,7 +84,7 @@ class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
             underTest.getDialogMessage(
                 projectionState,
                 R.string.accessibility_home,
-                R.string.cast_to_other_device_stop_dialog_message_specific_app
+                R.string.cast_screen_to_other_device_stop_dialog_message_specific_app,
             )
 
         assertThat(result).isEqualTo(context.getString(R.string.accessibility_home))
@@ -109,7 +109,7 @@ class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
             underTest.getDialogMessage(
                 projectionState,
                 R.string.accessibility_home,
-                R.string.cast_to_other_device_stop_dialog_message_specific_app
+                R.string.cast_screen_to_other_device_stop_dialog_message_specific_app,
             )
 
         // It'd be nice to use the R.string resources directly, but they include the <b> tags which
@@ -123,7 +123,7 @@ class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
             underTest.getDialogMessage(
                 specificTaskInfo = null,
                 R.string.accessibility_home,
-                R.string.cast_to_other_device_stop_dialog_message_specific_app,
+                R.string.cast_screen_to_other_device_stop_dialog_message_specific_app,
             )
 
         assertThat(result).isEqualTo(context.getString(R.string.accessibility_home))
@@ -141,7 +141,7 @@ class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
             underTest.getDialogMessage(
                 task,
                 R.string.accessibility_home,
-                R.string.cast_to_other_device_stop_dialog_message_specific_app
+                R.string.cast_screen_to_other_device_stop_dialog_message_specific_app,
             )
 
         assertThat(result).isEqualTo(context.getString(R.string.accessibility_home))
@@ -161,7 +161,7 @@ class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
             underTest.getDialogMessage(
                 task,
                 R.string.accessibility_home,
-                R.string.cast_to_other_device_stop_dialog_message_specific_app
+                R.string.cast_screen_to_other_device_stop_dialog_message_specific_app,
             )
 
         assertThat(result.toString()).isEqualTo("You will stop casting Fake Package")
@@ -186,7 +186,7 @@ class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
             underTest.getDialogMessage(
                 projectionState,
                 R.string.accessibility_home,
-                R.string.cast_to_other_device_stop_dialog_message_specific_app
+                R.string.cast_screen_to_other_device_stop_dialog_message_specific_app,
             )
 
         assertThat(result.toString()).isEqualTo("You will stop casting Fake & Package <Here>")

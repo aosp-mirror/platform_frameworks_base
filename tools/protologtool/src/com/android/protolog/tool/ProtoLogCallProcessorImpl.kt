@@ -120,8 +120,6 @@ class ProtoLogCallProcessorImpl(
 
                         logCallVisitor?.processCall(call, messageString, getLevelForMethodName(
                             call.name.toString(), call, context), groupMap.getValue(groupName))
-                    } else if (call.name.id == "initialize") {
-                        // No processing
                     } else {
                         // Process non-log message calls
                         otherCallVisitor?.processCall(call)

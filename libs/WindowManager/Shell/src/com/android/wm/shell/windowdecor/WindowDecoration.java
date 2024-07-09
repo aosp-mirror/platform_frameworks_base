@@ -55,7 +55,7 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.shared.DesktopModeStatus;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams.OccludingCaptionElement;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer;
 

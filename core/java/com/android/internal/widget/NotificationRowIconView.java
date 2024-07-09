@@ -35,8 +35,10 @@ import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
 import android.widget.RemoteViews;
 
+import com.android.internal.R;
+
 /**
- * An image view that holds the icon displayed on the left side of a notification row.
+ * An image view that holds the icon displayed at the start of a notification row.
  */
 @RemoteViews.RemoteView
 public class NotificationRowIconView extends CachingIconView {
@@ -98,9 +100,12 @@ public class NotificationRowIconView extends CachingIconView {
                 setPadding(0, 0, 0, 0);
 
                 // Make the background white in case the icon itself doesn't have one.
-                int white = Color.rgb(255, 255, 255);
-                ColorFilter colorFilter = new PorterDuffColorFilter(white,
+                ColorFilter colorFilter = new PorterDuffColorFilter(Color.WHITE,
                         PorterDuff.Mode.SRC_ATOP);
+
+                if (mOriginalBackground == null) {
+                    setBackground(getContext().getDrawable(R.drawable.notification_icon_circle));
+                }
                 getBackground().mutate().setColorFilter(colorFilter);
             } else {
                 // Restore original padding and background if needed
