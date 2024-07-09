@@ -25,6 +25,7 @@ import android.frameworks.location.altitude.IAltitudeService;
 import android.location.Location;
 import android.location.altitude.AltitudeConverter;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.server.SystemService;
 
@@ -37,6 +38,8 @@ import java.io.IOException;
  * @hide
  */
 public class AltitudeService extends IAltitudeService.Stub {
+
+    private static final String TAG = "AltitudeService";
 
     private final AltitudeConverter mAltitudeConverter = new AltitudeConverter();
     private final Context mContext;
@@ -59,6 +62,7 @@ public class AltitudeService extends IAltitudeService.Stub {
         try {
             mAltitudeConverter.addMslAltitudeToLocation(mContext, location);
         } catch (IOException e) {
+            Log.e(TAG, "", e);
             response.success = false;
             return response;
         }
@@ -74,6 +78,7 @@ public class AltitudeService extends IAltitudeService.Stub {
         try {
             return mAltitudeConverter.getGeoidHeight(mContext, request);
         } catch (IOException e) {
+            Log.e(TAG, "", e);
             GetGeoidHeightResponse response = new GetGeoidHeightResponse();
             response.success = false;
             return response;
