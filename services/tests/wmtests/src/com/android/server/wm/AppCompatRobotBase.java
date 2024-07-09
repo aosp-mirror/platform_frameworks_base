@@ -28,6 +28,8 @@ abstract class AppCompatRobotBase {
     private static final int DEFAULT_DISPLAY_WIDTH = 1000;
     private static final int DEFAULT_DISPLAY_HEIGHT = 2000;
 
+    static final float FLOAT_TOLLERANCE = 0.01f;
+
     @NonNull
     private final AppCompatActivityRobot mActivityRobot;
     @NonNull

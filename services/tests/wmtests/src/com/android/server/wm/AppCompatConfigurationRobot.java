@@ -70,4 +70,14 @@ class AppCompatConfigurationRobot {
     void enableCompatFakeFocus(boolean enabled) {
         doReturn(enabled).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
     }
+
+    void enableDisplayAspectRatioEnabledForFixedOrientationLetterbox(boolean enabled) {
+        doReturn(enabled).when(mAppCompatConfiguration)
+                .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
+    }
+
+    void setFixedOrientationLetterboxAspectRatio(float aspectRatio) {
+        doReturn(aspectRatio).when(mAppCompatConfiguration)
+                .getFixedOrientationLetterboxAspectRatio();
+    }
 }
