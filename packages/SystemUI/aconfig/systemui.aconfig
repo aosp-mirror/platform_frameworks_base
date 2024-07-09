@@ -591,13 +591,6 @@ flag {
 }
 
 flag {
-    name: "screenshot_shelf_ui2"
-    namespace: "systemui"
-    description: "Use new shelf UI flow for screenshots"
-    bug: "329659738"
-}
-
-flag {
    name: "run_fingerprint_detect_on_dismissible_keyguard"
    namespace: "systemui"
    description: "Run fingerprint detect instead of authenticate if the keyguard is dismissible."
