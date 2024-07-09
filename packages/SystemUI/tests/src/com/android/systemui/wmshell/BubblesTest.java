@@ -86,6 +86,7 @@ import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.testing.TestableLooper;
+import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
@@ -183,6 +184,7 @@ import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
+import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -192,7 +194,6 @@ import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -216,6 +217,9 @@ import platform.test.runner.parameterized.Parameters;
 @RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class BubblesTest extends SysuiTestCase {
+
+    private static final String TAG = "BubblesTest";
+
     @Mock
     private CommonNotifCollection mCommonNotifCollection;
     @Mock
@@ -240,8 +244,6 @@ public class BubblesTest extends SysuiTestCase {
     private KeyguardViewMediator mKeyguardViewMediator;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
-    @Mock
-    private FloatingContentCoordinator mFloatingContentCoordinator;
     @Mock
     private BubbleDataRepository mDataRepository;
     @Mock
@@ -372,6 +374,7 @@ public class BubblesTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        PhysicsAnimatorTestUtils.prepareForTest();
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             doReturn(true).when(mTransitions).isRegistered();
@@ -494,7 +497,7 @@ public class BubblesTest extends SysuiTestCase {
                 mShellCommandHandler,
                 mShellController,
                 mBubbleData,
-                mFloatingContentCoordinator,
+                new FloatingContentCoordinator(),
                 mDataRepository,
                 mStatusBarService,
                 mWindowManager,
@@ -571,11 +574,31 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         ArrayList<Bubble> bubbles = new ArrayList<>(mBubbleData.getBubbles());
         for (int i = 0; i < bubbles.size(); i++) {
             mBubbleController.removeBubble(bubbles.get(i).getKey(),
                     Bubbles.DISMISS_NO_LONGER_BUBBLE);
+        }
+        mTestableLooper.processAllMessages();
+
+        // check that no animations are running before finishing the test to make sure that the
+        // state gets cleaned up correctly between tests.
+        int retryCount = 0;
+        while (PhysicsAnimatorTestUtils.isAnyAnimationRunning() && retryCount <= 10) {
+            Log.d(
+                    TAG,
+                    String.format("waiting for animations to complete. attempt %d", retryCount));
+            // post a message to the looper and wait for it to be processed
+            mTestableLooper.runWithLooper(() -> {});
+            retryCount++;
+        }
+        mTestableLooper.processAllMessages();
+        if (PhysicsAnimatorTestUtils.isAnyAnimationRunning()) {
+            Log.d(TAG, "finished waiting for animations to complete but animations are still "
+                    + "running");
+        } else {
+            Log.d(TAG, "no animations are running");
         }
     }
 
@@ -1853,7 +1876,6 @@ public class BubblesTest extends SysuiTestCase {
                 any(Bubble.class), anyBoolean(), anyBoolean());
     }
 
-    @Ignore("reason = b/351977103")
     @Test
     public void testShowStackEdu_isNotConversationBubble() {
         // Setup
