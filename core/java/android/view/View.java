@@ -22,6 +22,7 @@ import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
 import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
+import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
@@ -19630,7 +19631,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setLeft(int left) {
         if (left != mLeft) {
-            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
@@ -25584,6 +25584,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
                 mSizeBasedFrameRateCategoryAndReason = category | FRAME_RATE_CATEGORY_REASON_LARGE;
             }
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
         }
 
         onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
@@ -33897,8 +33898,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected int calculateFrameRateCategory() {
+        ViewRootImpl viewRootImpl = getViewRootImpl();
+        ViewParent parent = mParent;
+        boolean isInputMethodWindowType =
+                viewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD;
+
+        // boost frame rate when the position or the size changed.
+        if (((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
+                || mLastFrameTop != mTop)
+                && viewRootImpl.shouldCheckFrameRateCategory()
+                && parent instanceof View
+                && ((View) parent).mFrameContentVelocity <= 0
+                && !isInputMethodWindowType) {
+
+            return FRAME_RATE_CATEGORY_HIGH_HINT | FRAME_RATE_CATEGORY_REASON_BOOST;
+        }
         int category;
-        switch (getViewRootImpl().intermittentUpdateState()) {
+        switch (viewRootImpl.intermittentUpdateState()) {
             case ViewRootImpl.INTERMITTENT_STATE_INTERMITTENT -> {
                 if (!sToolkitFrameRateBySizeReadOnlyFlagValue) {
                     category = FRAME_RATE_CATEGORY_NORMAL;
@@ -33932,66 +33949,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         float velocity = mFrameContentVelocity;
         final float frameRate = mPreferredFrameRate;
-        ViewParent parent = mParent;
-        boolean isInputMethodWindowType = false;
-        if (mAttachInfo != null && mAttachInfo.mViewRootImpl != null) {
-            isInputMethodWindowType =
-                    mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD;
-        }
-        if (velocity <= 0 && Float.isNaN(frameRate)) {
-            // The most common case is when nothing is set, so this special case is called
-            // often.
-            if (mAttachInfo.mViewVelocityApi
-                    && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
-                    PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
-                    || mLastFrameTop != mTop)
-                    && viewRootImpl.shouldCheckFrameRate(false)
-                    && parent instanceof View
-                    && ((View) parent).mFrameContentVelocity <= 0
-                    && !isInputMethodWindowType) {
-                viewRootImpl.votePreferredFrameRate(MAX_FRAME_RATE, FRAME_RATE_COMPATIBILITY_GTE);
-            }
-            if (viewRootImpl.shouldCheckFrameRateCategory()) {
-                int frameRateCategory = calculateFrameRateCategory();
-                int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
-                int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
-                viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
-                mLastFrameRateCategory = frameRateCategory;
-            }
-            mLastFrameLeft = mLeft;
-            mLastFrameTop = mTop;
-            return;
-        }
-        if (viewRootImpl.shouldCheckFrameRate(frameRate > 0f)) {
+
+        if (viewRootImpl.shouldCheckFrameRate(frameRate > 0f)
+                && (frameRate > 0 || (mAttachInfo.mViewVelocityApi && velocity > 0f))) {
             float velocityFrameRate = 0f;
-            if (mAttachInfo.mViewVelocityApi) {
-                if (velocity < 0f
-                        && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
-                        PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
-                        || mLastFrameTop != mTop)
-                        && mParent instanceof View
-                        && ((View) mParent).mFrameContentVelocity <= 0
-                        && !isInputMethodWindowType
-                ) {
-                    // This current calculation is very simple. If something on the screen
-                    // moved, then it votes for the highest velocity.
-                    velocityFrameRate = MAX_FRAME_RATE;
-                } else if (velocity > 0f) {
-                    velocityFrameRate = convertVelocityToFrameRate(velocity);
-                }
+            if (mAttachInfo.mViewVelocityApi && velocity > 0f) {
+                velocityFrameRate = convertVelocityToFrameRate(velocity);
             }
-            if (velocityFrameRate > 0f || frameRate > 0f) {
-                int compatibility;
-                float frameRateToSet;
-                if (frameRate >= velocityFrameRate) {
-                    compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-                    frameRateToSet = frameRate;
-                } else {
-                    compatibility = FRAME_RATE_COMPATIBILITY_GTE;
-                    frameRateToSet = velocityFrameRate;
-                }
-                viewRootImpl.votePreferredFrameRate(frameRateToSet, compatibility);
+            int compatibility;
+            float frameRateToSet;
+            if (frameRate >= velocityFrameRate) {
+                compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+                frameRateToSet = frameRate;
+            } else {
+                compatibility = FRAME_RATE_COMPATIBILITY_GTE;
+                frameRateToSet = velocityFrameRate;
             }
+            viewRootImpl.votePreferredFrameRate(frameRateToSet, compatibility);
         }
 
         if (viewRootImpl.shouldCheckFrameRateCategory()) {
