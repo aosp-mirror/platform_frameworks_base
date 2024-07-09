@@ -8998,16 +8998,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return inTransitionSelfOrParent();
     }
 
-    boolean isDisplaySleepingAndSwapping() {
-        for (int i = mDisplayContent.mAllSleepTokens.size() - 1; i >= 0; i--) {
-            RootWindowContainer.SleepToken sleepToken = mDisplayContent.mAllSleepTokens.get(i);
-            if (sleepToken.isDisplaySwapping()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Whether this activity is letterboxed for fixed orientation. If letterboxed due to fixed
      * orientation then aspect ratio restrictions are also already respected.
