@@ -107,6 +107,8 @@ public class Instrumentation {
     // If set, will print the stack trace for activity starts within the process
     static final boolean DEBUG_START_ACTIVITY = Build.IS_DEBUGGABLE &&
             SystemProperties.getBoolean("persist.wm.debug.start_activity", false);
+    static final boolean DEBUG_FINISH_ACTIVITY = Build.IS_DEBUGGABLE &&
+            SystemProperties.getBoolean("persist.wm.debug.finish_activity", false);
 
     /**
      * @hide

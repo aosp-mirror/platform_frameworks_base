@@ -20,6 +20,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
+import com.android.systemui.statusbar.chips.statusBarChipsLogger
 
 val Kosmos.screenRecordChipInteractor: ScreenRecordChipInteractor by
     Kosmos.Fixture {
@@ -27,5 +28,6 @@ val Kosmos.screenRecordChipInteractor: ScreenRecordChipInteractor by
             scope = applicationCoroutineScope,
             screenRecordRepository = screenRecordRepository,
             mediaProjectionRepository = fakeMediaProjectionRepository,
+            logger = statusBarChipsLogger,
         )
     }

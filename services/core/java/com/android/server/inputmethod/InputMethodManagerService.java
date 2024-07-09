@@ -2521,6 +2521,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         hideStatusBarIconLocked();
         getUserData(userId).mInFullscreenMode = false;
         mWindowManagerInternal.setDismissImeOnBackKeyPressed(false);
+        scheduleResetStylusHandwriting();
     }
 
     @BinderThread

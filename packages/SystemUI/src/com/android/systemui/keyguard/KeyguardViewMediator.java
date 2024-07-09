@@ -2722,13 +2722,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         if (mGoingToSleep) {
             mUpdateMonitor.clearFingerprintRecognizedWhenKeyguardDone(currentUser);
             Log.i(TAG, "Device is going to sleep, aborting keyguardDone");
-            return;
-        }
-        setPendingLock(false); // user may have authenticated during the screen off animation
+        } else {
+            setPendingLock(false); // user may have authenticated during the screen off animation
 
-        handleHide();
-        mKeyguardInteractor.keyguardDoneAnimationsFinished();
-        mUpdateMonitor.clearFingerprintRecognizedWhenKeyguardDone(currentUser);
+            handleHide();
+            mKeyguardInteractor.keyguardDoneAnimationsFinished();
+            mUpdateMonitor.clearFingerprintRecognizedWhenKeyguardDone(currentUser);
+        }
         Trace.endSection();
     }
 

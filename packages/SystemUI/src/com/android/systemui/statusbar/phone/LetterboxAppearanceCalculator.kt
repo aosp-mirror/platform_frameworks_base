@@ -39,7 +39,7 @@ data class LetterboxAppearance(
 ) {
     override fun toString(): String {
         val appearanceString =
-                ViewDebug.flagsToString(InsetsFlags::class.java, "appearance", appearance)
+            ViewDebug.flagsToString(InsetsFlags::class.java, "appearance", appearance)
         return "LetterboxAppearance{$appearanceString, $appearanceRegions}"
     }
 }
@@ -57,14 +57,16 @@ constructor(
     private val letterboxBackgroundProvider: LetterboxBackgroundProvider,
 ) : Dumpable {
 
-    private val darkAppearanceIconColor = context.getColor(
-        // For a dark background status bar, use a *light* icon color.
-        com.android.settingslib.R.color.light_mode_icon_color_single_tone
-    )
-    private val lightAppearanceIconColor = context.getColor(
-        // For a light background status bar, use a *dark* icon color.
-        com.android.settingslib.R.color.dark_mode_icon_color_single_tone
-    )
+    private val darkAppearanceIconColor =
+        context.getColor(
+            // For a dark background status bar, use a *light* icon color.
+            com.android.settingslib.R.color.white
+        )
+    private val lightAppearanceIconColor =
+        context.getColor(
+            // For a light background status bar, use a *dark* icon color.
+            com.android.settingslib.R.color.black
+        )
 
     init {
         dumpManager.registerCriticalDumpable(this)
@@ -85,7 +87,11 @@ constructor(
         lastAppearanceRegions = originalAppearanceRegions
         lastLetterboxes = letterboxes
         return getLetterboxAppearanceInternal(
-                letterboxes, originalAppearance, originalAppearanceRegions, statusBarBounds)
+                letterboxes,
+                originalAppearance,
+                originalAppearanceRegions,
+                statusBarBounds
+            )
             .also { lastLetterboxAppearance = it }
     }
 
@@ -138,7 +144,9 @@ constructor(
                 // full bounds of its window.
                 // Here we want the bounds to be only for the inner bounds of the letterboxed app.
                 AppearanceRegion(
-                    appearanceRegion.appearance, matchingLetterbox.letterboxInnerBounds)
+                    appearanceRegion.appearance,
+                    matchingLetterbox.letterboxInnerBounds
+                )
             }
         }
 
@@ -148,7 +156,8 @@ constructor(
     ): LetterboxAppearance {
         return LetterboxAppearance(
             originalAppearance or APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS,
-            originalAppearanceRegions)
+            originalAppearanceRegions
+        )
     }
 
     @Appearance
@@ -215,7 +224,9 @@ constructor(
            lastAppearanceRegion: $lastAppearanceRegions,
            lastLetterboxes: $lastLetterboxes,
            lastLetterboxAppearance: $lastLetterboxAppearance
-       """.trimIndent())
+       """
+                .trimIndent()
+        )
     }
 }
 

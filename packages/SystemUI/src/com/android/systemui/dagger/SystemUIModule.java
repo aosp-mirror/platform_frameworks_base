@@ -61,6 +61,7 @@ import com.android.systemui.display.DisplayModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.education.dagger.ContextualEducationModule;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagDependenciesModule;
 import com.android.systemui.flags.FlagsModule;
@@ -110,6 +111,7 @@ import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.chips.StatusBarChipsModule;
 import com.android.systemui.statusbar.connectivity.ConnectivityModule;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.disableflags.dagger.DisableFlagsModule;
@@ -244,6 +246,7 @@ import javax.inject.Named;
         SmartspaceModule.class,
         StatusBarEventsModule.class,
         StatusBarModule.class,
+        StatusBarChipsModule.class,
         StatusBarPipelineModule.class,
         StatusBarPolicyModule.class,
         StatusBarViewBinderModule.class,
@@ -259,7 +262,8 @@ import javax.inject.Named;
         UserModule.class,
         UtilModule.class,
         NoteTaskModule.class,
-        WalletModule.class
+        WalletModule.class,
+        ContextualEducationModule.class
         },
         subcomponents = {
             ComplicationComponent.class,

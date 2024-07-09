@@ -102,3 +102,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "extreme_power_low_state_vulnerability"
+    namespace: "pixel_energizer"
+    description: "the battery saver can pause all non-essential apps and their corresponding notification when device is in locked state to introduce the security vulnerability"
+    bug: "346513692"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

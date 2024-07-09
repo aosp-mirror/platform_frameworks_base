@@ -5496,9 +5496,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // In case startedGoingToSleep is called after screenTurnedOff (the source caller is in
         // order but the methods run on different threads) and updateScreenOffSleepToken was
         // skipped. Then acquire sleep token if screen was off.
-        if (!mDefaultDisplayPolicy.isScreenOnFully() && !mDefaultDisplayPolicy.isScreenOnEarly()
-                && com.android.window.flags.Flags.skipSleepingWhenSwitchingDisplay()) {
-            updateScreenOffSleepToken(true /* acquire */, false /* isSwappingDisplay */);
+        if (!mDefaultDisplayPolicy.isScreenOnFully() && !mDefaultDisplayPolicy.isScreenOnEarly()) {
+            updateScreenOffSleepToken(true /* acquire */);
         }
 
         if (mKeyguardDelegate != null) {
@@ -5661,9 +5660,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Display" + displayId + " turned off...");
 
         if (displayId == DEFAULT_DISPLAY) {
-            if (!isSwappingDisplay || mIsGoingToSleepDefaultDisplay
-                    || !com.android.window.flags.Flags.skipSleepingWhenSwitchingDisplay()) {
-                updateScreenOffSleepToken(true /* acquire */, isSwappingDisplay);
+            if (!isSwappingDisplay || mIsGoingToSleepDefaultDisplay) {
+                updateScreenOffSleepToken(true /* acquire */);
             }
             mRequestedOrSleepingDefaultDisplay = false;
             mDefaultDisplayPolicy.screenTurnedOff();
@@ -5722,7 +5720,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (displayId == DEFAULT_DISPLAY) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurningOn",
                     0 /* cookie */);
-            updateScreenOffSleepToken(false /* acquire */, false /* isSwappingDisplay */);
+            updateScreenOffSleepToken(false /* acquire */);
             mDefaultDisplayPolicy.screenTurningOn(screenOnListener);
             mBootAnimationDismissable = false;
 
@@ -6228,9 +6226,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     // TODO (multidisplay): Support multiple displays in WindowManagerPolicy.
-    private void updateScreenOffSleepToken(boolean acquire, boolean isSwappingDisplay) {
+    private void updateScreenOffSleepToken(boolean acquire) {
         if (acquire) {
-            mScreenOffSleepTokenAcquirer.acquire(DEFAULT_DISPLAY, isSwappingDisplay);
+            mScreenOffSleepTokenAcquirer.acquire(DEFAULT_DISPLAY);
         } else {
             mScreenOffSleepTokenAcquirer.release(DEFAULT_DISPLAY);
         }

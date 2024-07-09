@@ -39,5 +39,6 @@ var Kosmos.fromDozingTransitionInteractor by
             powerInteractor = powerInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
             deviceEntryRepository = deviceEntryRepository,
+            wakeToGoneInteractor = keyguardWakeDirectlyToGoneInteractor,
         )
     }
