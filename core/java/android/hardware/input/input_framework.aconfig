@@ -68,3 +68,10 @@ flag {
     description: "Controls if the mouse keys accessibility feature for physical keyboard is available to the user"
     bug: "341799888"
 }
+
+flag {
+    namespace: "input_native"
+    name: "touchpad_visualizer"
+    description: "Enables a developer overlay that displays raw touchpad input data and gesture recognition status in real-time."
+    bug: "286551975"
+}
