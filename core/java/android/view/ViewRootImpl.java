@@ -23,7 +23,7 @@ import static android.graphics.HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUN
 import static android.os.IInputConstants.INVALID_INPUT_EVENT_ID;
 import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.util.SequenceUtils.getInitSeq;
-import static android.util.SequenceUtils.isIncomingSeqNewer;
+import static android.util.SequenceUtils.isIncomingSeqStale;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_LOCATION;
@@ -2329,23 +2329,23 @@ public final class ViewRootImpl implements ViewParent,
         if (mLastReportedFrames == null) {
             return;
         }
-        if (isIncomingSeqNewer(mLastReportedFrames.seq, inOutFrames.seq)) {
+        if (isIncomingSeqStale(mLastReportedFrames.seq, inOutFrames.seq)) {
+            // If the incoming is stale, use the last reported instead.
+            inOutFrames.setTo(mLastReportedFrames);
+        } else {
             // Keep track of the latest.
             mLastReportedFrames.setTo(inOutFrames);
-        } else {
-            // If the last reported frames is newer, use the last reported instead.
-            inOutFrames.setTo(mLastReportedFrames);
         }
     }
 
     private void onInsetsStateChanged(@NonNull InsetsState insetsState) {
         if (insetsControlSeq()) {
-            if (isIncomingSeqNewer(mLastReportedInsetsStateSeq, insetsState.getSeq())) {
-                mLastReportedInsetsStateSeq = insetsState.getSeq();
-            } else {
-                // The last reported InsetsState is newer. Skip.
+            if (isIncomingSeqStale(mLastReportedInsetsStateSeq, insetsState.getSeq())) {
+                // The incoming is stale. Skip.
                 return;
             }
+            // Keep track of the latest.
+            mLastReportedInsetsStateSeq = insetsState.getSeq();
         }
 
         if (mTranslator != null) {
@@ -2362,13 +2362,13 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (insetsControlSeq()) {
-            if (isIncomingSeqNewer(mLastReportedActiveControlsSeq, activeControls.getSeq())) {
-                mLastReportedActiveControlsSeq = activeControls.getSeq();
-            } else {
-                // The last reported controls is newer. Skip.
+            if (isIncomingSeqStale(mLastReportedActiveControlsSeq, activeControls.getSeq())) {
+                // The incoming is stale. Skip.
                 activeControls.release();
                 return;
             }
+            // Keep track of the latest.
+            mLastReportedActiveControlsSeq = activeControls.getSeq();
         }
 
         final InsetsSourceControl[] controls = activeControls.get();
