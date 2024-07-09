@@ -15,6 +15,9 @@
  */
 package com.android.ravenwood.common;
 
+import android.system.ErrnoException;
+import android.system.StructStat;
+
 import java.io.FileDescriptor;
 
 /**
@@ -31,19 +34,25 @@ public class RavenwoodRuntimeNative {
 
     public static native void applyFreeFunction(long freeFunction, long nativePtr);
 
-    public static native long nLseek(int fd, long offset, int whence);
+    private static native long nLseek(int fd, long offset, int whence) throws ErrnoException;
 
-    public static native int[] nPipe2(int flags);
+    private static native int[] nPipe2(int flags) throws ErrnoException;
 
-    public static native int nDup(int oldfd);
+    private static native int nDup(int oldfd) throws ErrnoException;
 
-    public static native int nFcntlInt(int fd, int cmd, int arg);
+    private static native int nFcntlInt(int fd, int cmd, int arg) throws ErrnoException;
 
-    public static long lseek(FileDescriptor fd, long offset, int whence) {
+    private static native StructStat nFstat(int fd) throws ErrnoException;
+
+    public static native StructStat lstat(String path) throws ErrnoException;
+
+    public static native StructStat stat(String path) throws ErrnoException;
+
+    public static long lseek(FileDescriptor fd, long offset, int whence) throws ErrnoException {
         return nLseek(JvmWorkaround.getInstance().getFdInt(fd), offset, whence);
     }
 
-    public static FileDescriptor[] pipe2(int flags) {
+    public static FileDescriptor[] pipe2(int flags) throws ErrnoException {
         var fds = nPipe2(flags);
         var ret = new FileDescriptor[] {
                 new FileDescriptor(),
@@ -55,7 +64,7 @@ public class RavenwoodRuntimeNative {
         return ret;
     }
 
-    public static FileDescriptor dup(FileDescriptor fd) {
+    public static FileDescriptor dup(FileDescriptor fd) throws ErrnoException {
         var fdInt = nDup(JvmWorkaround.getInstance().getFdInt(fd));
 
         var retFd = new java.io.FileDescriptor();
@@ -63,9 +72,15 @@ public class RavenwoodRuntimeNative {
         return retFd;
     }
 
-    public static int fcntlInt(FileDescriptor fd, int cmd, int arg) {
+    public static int fcntlInt(FileDescriptor fd, int cmd, int arg) throws ErrnoException {
         var fdInt = JvmWorkaround.getInstance().getFdInt(fd);
 
         return nFcntlInt(fdInt, cmd, arg);
+    }
+
+    public static StructStat fstat(FileDescriptor fd) throws ErrnoException {
+        var fdInt = JvmWorkaround.getInstance().getFdInt(fd);
+
+        return nFstat(fdInt);
     }
 }
