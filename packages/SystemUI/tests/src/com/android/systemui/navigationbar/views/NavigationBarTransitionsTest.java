@@ -103,7 +103,7 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
     public void setIsLightsOut_AutoDim() {
         mTransitions.setAutoDim(true);
 
-        assertTrue(mTransitions.isLightsOut(BarTransitions.MODE_OPAQUE));
+        assertTrue(mTransitions.isLightsOut(BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT));
 
         assertTrue(mTransitions.isLightsOut(BarTransitions.MODE_LIGHTS_OUT));
     }

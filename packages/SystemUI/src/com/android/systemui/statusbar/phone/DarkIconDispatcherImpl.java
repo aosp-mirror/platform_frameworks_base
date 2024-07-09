@@ -74,9 +74,9 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
             mLightModeIconColorSingleTone = Color.WHITE;
         } else {
             mDarkModeIconColorSingleTone = context.getColor(
-                    com.android.settingslib.R.color.dark_mode_icon_color_single_tone);
+                    com.android.settingslib.R.color.black);
             mLightModeIconColorSingleTone = context.getColor(
-                    com.android.settingslib.R.color.light_mode_icon_color_single_tone);
+                    com.android.settingslib.R.color.white);
         }
 
         mTransitionsController = lightBarTransitionsControllerFactory.create(this);
