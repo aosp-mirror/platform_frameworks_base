@@ -128,17 +128,20 @@ public class BackgroundActivityStartController {
 
     // TODO(b/263368846) Rename when ASM logic is moved in
     @Retention(SOURCE)
-    @IntDef({BAL_BLOCK,
-            BAL_ALLOW_DEFAULT,
-            BAL_ALLOW_ALLOWLISTED_UID,
+    @IntDef({
             BAL_ALLOW_ALLOWLISTED_COMPONENT,
-            BAL_ALLOW_VISIBLE_WINDOW,
+            BAL_ALLOW_ALLOWLISTED_UID,
+            BAL_ALLOW_BOUND_BY_FOREGROUND,
+            BAL_ALLOW_DEFAULT,
+            BAL_ALLOW_FOREGROUND,
+            BAL_ALLOW_GRACE_PERIOD,
             BAL_ALLOW_PENDING_INTENT,
             BAL_ALLOW_PERMISSION,
             BAL_ALLOW_SAW_PERMISSION,
-            BAL_ALLOW_GRACE_PERIOD,
-            BAL_ALLOW_FOREGROUND,
-            BAL_ALLOW_SDK_SANDBOX
+            BAL_ALLOW_SDK_SANDBOX,
+            BAL_ALLOW_TOKEN,
+            BAL_ALLOW_VISIBLE_WINDOW,
+            BAL_BLOCK
     })
     public @interface BalCode {}
 
@@ -195,10 +198,19 @@ public class BackgroundActivityStartController {
     static final int BAL_ALLOW_NON_APP_VISIBLE_WINDOW =
             FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_NON_APP_VISIBLE_WINDOW;
 
+    /** Process belongs to a SDK sandbox */
+    static final int BAL_ALLOW_TOKEN =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_TOKEN;
+
+    /** Process belongs to a SDK sandbox */
+    static final int BAL_ALLOW_BOUND_BY_FOREGROUND =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_BOUND_BY_FOREGROUND;
+
     static String balCodeToString(@BalCode int balCode) {
         return switch (balCode) {
             case BAL_ALLOW_ALLOWLISTED_COMPONENT -> "BAL_ALLOW_ALLOWLISTED_COMPONENT";
             case BAL_ALLOW_ALLOWLISTED_UID -> "BAL_ALLOW_ALLOWLISTED_UID";
+            case BAL_ALLOW_BOUND_BY_FOREGROUND -> "BAL_ALLOW_BOUND_BY_FOREGROUND";
             case BAL_ALLOW_DEFAULT -> "BAL_ALLOW_DEFAULT";
             case BAL_ALLOW_FOREGROUND -> "BAL_ALLOW_FOREGROUND";
             case BAL_ALLOW_GRACE_PERIOD -> "BAL_ALLOW_GRACE_PERIOD";
@@ -207,6 +219,7 @@ public class BackgroundActivityStartController {
             case BAL_ALLOW_PERMISSION -> "BAL_ALLOW_PERMISSION";
             case BAL_ALLOW_SAW_PERMISSION -> "BAL_ALLOW_SAW_PERMISSION";
             case BAL_ALLOW_SDK_SANDBOX -> "BAL_ALLOW_SDK_SANDBOX";
+            case BAL_ALLOW_TOKEN -> "BAL_ALLOW_TOKEN";
             case BAL_ALLOW_VISIBLE_WINDOW -> "BAL_ALLOW_VISIBLE_WINDOW";
             case BAL_BLOCK -> "BAL_BLOCK";
             default -> throw new IllegalArgumentException("Unexpected value: " + balCode);
@@ -1042,7 +1055,9 @@ public class BackgroundActivityStartController {
                     || balCode == BAL_ALLOW_PENDING_INTENT
                     || balCode == BAL_ALLOW_SAW_PERMISSION
                     || balCode == BAL_ALLOW_VISIBLE_WINDOW
-                    || balCode == BAL_ALLOW_NON_APP_VISIBLE_WINDOW) {
+                    || balCode == BAL_ALLOW_NON_APP_VISIBLE_WINDOW
+                    || balCode == BAL_ALLOW_TOKEN
+                    || balCode == BAL_ALLOW_BOUND_BY_FOREGROUND) {
                 return true;
             }
         }
@@ -1266,7 +1281,8 @@ public class BackgroundActivityStartController {
                 || balCode == BAL_ALLOW_PERMISSION
                 || balCode == BAL_ALLOW_SAW_PERMISSION
                 || balCode == BAL_ALLOW_VISIBLE_WINDOW
-                || balCode == BAL_ALLOW_NON_APP_VISIBLE_WINDOW) {
+                || balCode == BAL_ALLOW_NON_APP_VISIBLE_WINDOW
+                || balCode == BAL_ALLOW_BOUND_BY_FOREGROUND) {
             return;
         }
 
@@ -1572,7 +1588,7 @@ public class BackgroundActivityStartController {
         }
 
         if (balCode == BAL_ALLOW_VISIBLE_WINDOW || balCode == BAL_ALLOW_NON_APP_VISIBLE_WINDOW
-                || balCode == BAL_ALLOW_FOREGROUND) {
+                || balCode == BAL_ALLOW_FOREGROUND || balCode == BAL_ALLOW_BOUND_BY_FOREGROUND) {
             Task task = sourceRecord != null ? sourceRecord.getTask() : targetTask;
             if (task != null && task.getDisplayArea() != null) {
                 joiner.add(prefix + "Tasks: ");
