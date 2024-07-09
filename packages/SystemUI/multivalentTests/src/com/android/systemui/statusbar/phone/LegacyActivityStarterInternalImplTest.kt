@@ -38,6 +38,8 @@ import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
@@ -101,6 +103,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var activityIntentHelper: ActivityIntentHelper
     @Mock private lateinit var communalSceneInteractor: CommunalSceneInteractor
+    @Mock private lateinit var communalSettingsInteractor: CommunalSettingsInteractor
     private lateinit var underTest: LegacyActivityStarterInternalImpl
     private val mainExecutor = FakeExecutor(FakeSystemClock())
     private val shadeAnimationInteractor =
@@ -135,6 +138,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
                 activityIntentHelper = activityIntentHelper,
                 mainExecutor = mainExecutor,
                 communalSceneInteractor = communalSceneInteractor,
+                communalSettingsInteractor = communalSettingsInteractor,
             )
         `when`(userTracker.userHandle).thenReturn(UserHandle.OWNER)
         `when`(communalSceneInteractor.isCommunalVisible).thenReturn(MutableStateFlow(false))
@@ -352,6 +356,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
         `when`(pendingIntent.isActivity).thenReturn(true)
         `when`(keyguardStateController.isShowing).thenReturn(true)
         `when`(keyguardStateController.isOccluded).thenReturn(true)
+        `when`(communalSettingsInteractor.isCommunalFlagEnabled()).thenReturn(true)
         `when`(communalSceneInteractor.isCommunalVisible).thenReturn(MutableStateFlow(true))
         `when`(communalSceneInteractor.isLaunchingWidget).thenReturn(MutableStateFlow(true))
         `when`(activityIntentHelper.wouldPendingLaunchResolverActivity(eq(pendingIntent), anyInt()))
