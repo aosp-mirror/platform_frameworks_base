@@ -623,7 +623,7 @@ final class InputMonitor {
                     // occlusion detection depending on the type or if it's a trusted overlay.
                     populateOverlayInputInfo(inputWindowHandle, w);
                     setInputWindowInfoIfNeeded(mInputTransaction,
-                            w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);
+                            w.mWinAnimator.mSurfaceControl, inputWindowHandle);
                     return;
                 }
                 // Skip this window because it cannot possibly receive input.
@@ -687,7 +687,7 @@ final class InputMonitor {
             if (w.mWinAnimator.hasSurface()) {
                 populateInputWindowHandle(inputWindowHandle, w);
                 setInputWindowInfoIfNeeded(mInputTransaction,
-                        w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);
+                        w.mWinAnimator.mSurfaceControl, inputWindowHandle);
             }
         }
     }

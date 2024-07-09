@@ -4082,12 +4082,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Transaction t = mWmService.mTransactionFactory.get();
         forAllWindows(w -> {
             final WindowStateAnimator wsa = w.mWinAnimator;
-            if (wsa.mSurfaceController == null) {
+            if (wsa.mSurfaceControl == null) {
                 return;
             }
             if (!mWmService.mSessions.contains(wsa.mSession)) {
                 Slog.w(TAG_WM, "LEAKED SURFACE (session doesn't exist): "
-                        + w + " surface=" + wsa.mSurfaceController
+                        + w + " surface=" + wsa.mSurfaceControl
                         + " token=" + w.mToken
                         + " pid=" + w.mSession.mPid
                         + " uid=" + w.mSession.mUid);
@@ -4096,7 +4096,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mTmpWindow = w;
             } else if (w.mActivityRecord != null && !w.mActivityRecord.isClientVisible()) {
                 Slog.w(TAG_WM, "LEAKED SURFACE (app token hidden): "
-                        + w + " surface=" + wsa.mSurfaceController
+                        + w + " surface=" + wsa.mSurfaceControl
                         + " token=" + w.mActivityRecord);
                 ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE LEAK DESTROY: %s", w);
                 wsa.destroySurface(t);

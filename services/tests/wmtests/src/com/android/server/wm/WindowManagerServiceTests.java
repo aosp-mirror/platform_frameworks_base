@@ -253,22 +253,18 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final Session session = createTestSession(mAtm, wpc.getPid(), wpc.mUid);
         spyOn(session);
         assertTrue(session.mCanAddInternalSystemWindow);
-        final WindowSurfaceController winSurface = mock(WindowSurfaceController.class);
-        session.onWindowSurfaceVisibilityChanged(winSurface, true /* visible */,
-                LayoutParams.TYPE_PHONE);
+        final WindowState window = createWindow(null, LayoutParams.TYPE_PHONE, "win");
+        session.onWindowSurfaceVisibilityChanged(window, true /* visible */);
         verify(session).setHasOverlayUi(true);
-        session.onWindowSurfaceVisibilityChanged(winSurface, false /* visible */,
-                LayoutParams.TYPE_PHONE);
+        session.onWindowSurfaceVisibilityChanged(window, false /* visible */);
         verify(session).setHasOverlayUi(false);
     }
 
     @Test
     public void testRelayoutExitingWindow() {
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "appWin");
-        final WindowSurfaceController surfaceController = mock(WindowSurfaceController.class);
-        win.mWinAnimator.mSurfaceController = surfaceController;
         win.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
-        doReturn(true).when(surfaceController).hasSurface();
+        win.mWinAnimator.mSurfaceControl = mock(SurfaceControl.class);
         spyOn(win.mTransitionController);
         doReturn(true).when(win.mTransitionController).isShellTransitionsEnabled();
         doReturn(true).when(win.mTransitionController).inTransition(
@@ -306,7 +302,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         // and WMS#tryStartExitingAnimation() will destroy the surface directly.
         assertFalse(win.mAnimatingExit);
         assertFalse(win.mHasSurface);
-        assertNull(win.mWinAnimator.mSurfaceController);
+        assertNull(win.mWinAnimator.mSurfaceControl);
 
         // Invisible requested activity should not get the last config even if its view is visible.
         mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
