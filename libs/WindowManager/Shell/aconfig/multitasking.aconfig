@@ -113,16 +113,6 @@ flag {
 }
 
 flag {
-    name: "animate_bubble_size_change"
-    namespace: "multitasking"
-    description: "Turns on the animation for bubble bar icons size change"
-    bug: "335575529"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "enable_taskbar_on_phones"
     namespace: "multitasking"
     description: "Enables taskbar on phones"
