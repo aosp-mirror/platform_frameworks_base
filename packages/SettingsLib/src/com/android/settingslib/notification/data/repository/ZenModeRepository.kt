@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Handler
 import com.android.settingslib.flags.Flags
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
@@ -50,6 +51,9 @@ class ZenModeRepositoryImpl(
     private val notificationManager: NotificationManager,
     val scope: CoroutineScope,
     val backgroundCoroutineContext: CoroutineContext,
+    // This is nullable just to simplify testing, since SettingsLib doesn't have a good way
+    // to create a fake handler.
+    val backgroundHandler: Handler?,
 ) : ZenModeRepository {
 
     private val notificationBroadcasts =
@@ -69,7 +73,14 @@ class ZenModeRepositoryImpl(
                         if (Flags.volumePanelBroadcastFix() && android.app.Flags.modesApi())
                             addAction(
                                 NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED)
-                    })
+                    },
+                    /* broadcastPermission = */ null,
+                    /* scheduler = */ if (Flags.volumePanelBroadcastFix()) {
+                        backgroundHandler
+                    } else {
+                        null
+                    },
+                )
 
                 awaitClose { context.unregisterReceiver(receiver) }
             }

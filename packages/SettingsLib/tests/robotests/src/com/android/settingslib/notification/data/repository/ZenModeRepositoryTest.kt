@@ -69,6 +69,7 @@ class ZenModeRepositoryTest {
                 notificationManager,
                 testScope.backgroundScope,
                 testScope.testScheduler,
+                backgroundHandler = null,
             )
     }
 
