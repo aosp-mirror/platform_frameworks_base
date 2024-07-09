@@ -436,8 +436,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"允許將任何應用程式寫入外部儲存空間 (無論資訊清單值為何)"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"將活動強制設為可調整大小"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"將所有活動設為可配合多重視窗環境調整大小 (無論資訊清單值為何)。"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"啟用自由形式視窗"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"啟用實驗版自由形式視窗的支援功能。"</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"啟用自由形式視窗 (舊版)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"啟用實驗性舊版自由形式視窗支援功能。"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"電腦備份密碼"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"尚未設定密碼保護電腦的完整備份"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"輕觸即可變更或移除電腦完整備份的密碼"</string>

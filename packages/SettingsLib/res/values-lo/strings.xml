@@ -436,8 +436,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ເຮັດໃຫ້ທຸກແອັບມີສິດໄດ້ຮັບການຂຽນໃສ່ພື້ນທີ່ຈັດເກັບຂໍ້ມູນພາຍນອກ, ໂດຍບໍ່ຄຳນຶງເຖິງຄ່າ manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ບັງ​ຄັງ​ໃຫ້​ການ​ເຄື່ອນ​ໄຫວ​ປ່ຽນ​ຂະ​ໜາດ​ໄດ້"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ເຮັດໃຫ້ທຸກການ​ເຄື່ອນ​ໄຫວສາມາດປັບຂະໜາດໄດ້ສຳລັບຫຼາຍໜ້າຈໍ, ໂດຍບໍ່ຄຳນຶງເຖິງຄ່າ manifest."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"ເປີດໃຊ້ໜ້າຈໍຮູບແບບອິດສະຫຼະ"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ເປີດໃຊ້ການຮອງຮັບໜ້າຈໍຮູບແບບອິດສະຫຼະແບບທົດລອງ."</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"ເປີດການນຳໃຊ້ໜ້າຈໍຮູບແບບອິດສະຫຼະ (ແບບເກົ່າ)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"ເປີດການນຳໃຊ້ການຮອງຮັບໜ້າຈໍຮູບແບບອິດສະຫຼະແບບເກົ່າເວີຊັນທົດລອງ."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ລະຫັດຜ່ານການສຳຮອງຂໍ້ມູນເດັສທັອບ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ການ​ສຳຮອງ​ຂໍ້ມູນ​ເຕັມຮູບແບບ​ໃນ​ເດັສທັອບ​ຍັງ​ບໍ່​ໄດ້​ຮັບ​ການ​ປ້ອງກັນ​ໃນ​ເວລາ​ນີ້"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ແຕະເພື່ອປ່ຽນ ຫຼື ລຶບລະຫັດຂອງການສຳຮອງຂໍ້ມູນເຕັມຮູບແບບໃນເດັສທັອບ"</string>
