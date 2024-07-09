@@ -740,8 +740,6 @@ final class SettingsState {
     // The settings provider must hold its lock when calling here.
     @GuardedBy("mLock")
     public void removeSettingsForPackageLocked(String packageName) {
-        boolean removedSomething = false;
-
         final int settingCount = mSettings.size();
         for (int i = settingCount - 1; i >= 0; i--) {
             String name = mSettings.keyAt(i);
@@ -752,13 +750,8 @@ final class SettingsState {
             }
             Setting setting = mSettings.valueAt(i);
             if (packageName.equals(setting.packageName)) {
-                mSettings.removeAt(i);
-                removedSomething = true;
+                deleteSettingLocked(setting.name);
             }
-        }
-
-        if (removedSomething) {
-            scheduleWriteIfNeededLocked();
         }
     }
 
