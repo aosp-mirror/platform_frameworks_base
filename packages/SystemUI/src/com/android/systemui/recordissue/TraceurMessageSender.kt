@@ -35,7 +35,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.traceur.FileSender
 import com.android.traceur.MessageConstants
-import com.android.traceur.TraceUtils.PresetTraceType
+import com.android.traceur.TraceConfig
 import javax.inject.Inject
 
 private const val TAG = "TraceurMessageSender"
@@ -93,9 +93,9 @@ class TraceurMessageSender @Inject constructor(@Background private val backgroun
     }
 
     @WorkerThread
-    fun startTracing(traceType: PresetTraceType) {
+    fun startTracing(traceType: TraceConfig) {
         val data =
-            Bundle().apply { putSerializable(MessageConstants.INTENT_EXTRA_TRACE_TYPE, traceType) }
+            Bundle().apply { putParcelable(MessageConstants.INTENT_EXTRA_TRACE_TYPE, traceType) }
         notifyTraceur(MessageConstants.START_WHAT, data)
     }
 
