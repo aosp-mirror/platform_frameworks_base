@@ -64,6 +64,7 @@ public class CollapsingToolbarAppCompatActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        EdgeToEdgeUtils.enable(this);
         super.onCreate(savedInstanceState);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             DynamicColors.applyToActivityIfAvailable(this);
