@@ -661,10 +661,7 @@ private fun Toolbar(
         val addWidgetText = stringResource(R.string.hub_mode_add_widget_button_text)
         ToolbarButton(
             isPrimary = !removeEnabled,
-            modifier =
-                Modifier.align(Alignment.CenterStart).semantics {
-                    contentDescription = addWidgetText
-                },
+            modifier = Modifier.align(Alignment.CenterStart),
             onClick = onOpenWidgetPicker,
         ) {
             Icon(Icons.Default.Add, null)
@@ -701,7 +698,7 @@ private fun Toolbar(
                         ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.Close, stringResource(R.string.button_to_remove_widget))
+                    Icon(Icons.Default.Close, contentDescription = null)
                     Text(
                         text = stringResource(R.string.button_to_remove_widget),
                     )
@@ -714,10 +711,7 @@ private fun Toolbar(
             modifier = Modifier.align(Alignment.CenterEnd),
             onClick = onEditDone,
         ) {
-            Icon(
-                Icons.Default.Check,
-                stringResource(id = R.string.hub_mode_editing_exit_button_text)
-            )
+            Icon(Icons.Default.Check, contentDescription = null)
             Text(
                 text = stringResource(R.string.hub_mode_editing_exit_button_text),
             )

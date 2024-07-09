@@ -186,7 +186,16 @@ constructor(
                 AppWidgetManager.EXTRA_CATEGORY_FILTER,
                 CommunalWidgetCategories.defaultCategories
             )
+
+            communalSettingsInteractor.workProfileUserDisallowedByDevicePolicy.value?.let {
+                putExtra(EXTRA_USER_ID_FILTER, arrayListOf(it.id))
+            }
             putExtra(EXTRA_UI_SURFACE_KEY, EXTRA_UI_SURFACE_VALUE)
+            putExtra(EXTRA_PICKER_TITLE, resources.getString(R.string.communal_widget_picker_title))
+            putExtra(
+                EXTRA_PICKER_DESCRIPTION,
+                resources.getString(R.string.communal_widget_picker_description)
+            )
             putParcelableArrayListExtra(EXTRA_ADDED_APP_WIDGETS_KEY, excludeList)
         }
     }
@@ -214,8 +223,11 @@ constructor(
 
         private const val EXTRA_DESIRED_WIDGET_WIDTH = "desired_widget_width"
         private const val EXTRA_DESIRED_WIDGET_HEIGHT = "desired_widget_height"
+        private const val EXTRA_PICKER_TITLE = "picker_title"
+        private const val EXTRA_PICKER_DESCRIPTION = "picker_description"
         private const val EXTRA_UI_SURFACE_KEY = "ui_surface"
         private const val EXTRA_UI_SURFACE_VALUE = "widgets_hub"
+        private const val EXTRA_USER_ID_FILTER = "filtered_user_ids"
         const val EXTRA_ADDED_APP_WIDGETS_KEY = "added_app_widgets"
     }
 }

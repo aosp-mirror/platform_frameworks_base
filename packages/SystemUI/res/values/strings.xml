@@ -321,11 +321,11 @@
     <!-- A toast message shown when the screen recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
     <string name="screenrecord_start_error">Error starting screen recording</string>
     <!-- Title for a dialog shown to the user that will let them stop recording their screen [CHAR LIMIT=50] -->
-    <string name="screenrecord_stop_dialog_title">Stop recording screen?</string>
-    <!-- Text telling a user that they will stop recording their screen if they click the "Stop recording" button [CHAR LIMIT=100] -->
-    <string name="screenrecord_stop_dialog_message">You will stop recording your screen</string>
-    <!-- Text telling a user that they will stop recording the contents of the specified [app_name] if they click the "Stop recording" button. Note that the app name will appear in bold. [CHAR LIMIT=100] -->
-    <string name="screenrecord_stop_dialog_message_specific_app">You will stop recording &lt;b><xliff:g id="app_name" example="Photos App">%1$s</xliff:g>&lt;/b></string>
+    <string name="screenrecord_stop_dialog_title">Stop recording?</string>
+    <!-- Text telling a user that they're currently recording their screen [CHAR LIMIT=100] -->
+    <string name="screenrecord_stop_dialog_message">You\'re currently recording your entire screen</string>
+    <!-- Text telling a user that they're currently recording the contents of the specified [app_name]. [CHAR LIMIT=100] -->
+    <string name="screenrecord_stop_dialog_message_specific_app">You\'re currently recording <xliff:g id="app_name" example="Photos App">%1$s</xliff:g></string>
     <!-- Button to stop a screen recording [CHAR LIMIT=35] -->
     <string name="screenrecord_stop_dialog_button">Stop recording</string>
 
@@ -333,25 +333,33 @@
     <string name="share_to_app_chip_accessibility_label">Sharing screen</string>
     <!-- Title for a dialog shown to the user that will let them stop sharing their screen to another app on the device [CHAR LIMIT=50] -->
     <string name="share_to_app_stop_dialog_title">Stop sharing screen?</string>
-    <!-- Text telling a user that they will stop sharing their screen if they click the "Stop sharing" button [CHAR LIMIT=100] -->
-    <string name="share_to_app_stop_dialog_message">You will stop sharing your screen</string>
-    <!-- Text telling a user that they will stop sharing the contents of the specified [app_name] if they click the "Stop sharing" button. Note that the app name will appear in bold. [CHAR LIMIT=100] -->
-    <string name="share_to_app_stop_dialog_message_specific_app">You will stop sharing &lt;b><xliff:g id="app_name" example="Photos App">%1$s</xliff:g>&lt;/b></string>
+    <!-- Text telling a user that they're currently sharing their entire screen to [host_app_name] (i.e. [host_app_name] can currently see all screen content) [CHAR LIMIT=150] -->
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app">You\'re currently sharing your entire screen with <xliff:g id="host_app_name" example="Screen Recorder App">%1$s</xliff:g></string>
+    <!-- Text telling a user that they're currently sharing their entire screen to an app (but we don't know what app) [CHAR LIMIT=150] -->
+    <string name="share_to_app_stop_dialog_message_entire_screen">You\'re currently sharing your entire screen with an app</string>
+    <!-- Text telling a user that they're currently sharing the contents of [app_being_shared_name]. (i.e. some app can currently see the content of [app_being_shared_name]). [CHAR LIMIT=150] -->
+    <string name="share_to_app_stop_dialog_message_single_app_specific">You\'re currently sharing <xliff:g id="app_being_shared_name" example="Photos App">%1$s</xliff:g></string>
+    <!-- Text telling a user that they're currently sharing their screen [CHAR LIMIT=150] -->
+    <string name="share_to_app_stop_dialog_message_single_app_generic">You\'re currently sharing an app</string>
     <!-- Button to stop screen sharing [CHAR LIMIT=35] -->
     <string name="share_to_app_stop_dialog_button">Stop sharing</string>
 
     <!-- Content description for the status bar chip shown to the user when they're casting their screen to a different device [CHAR LIMIT=NONE] -->
     <string name="cast_screen_to_other_device_chip_accessibility_label">Casting screen</string>
-    <!-- Title for a dialog shown to the user that will let them stop casting their screen to a different device [CHAR LIMIT=50] -->
-    <string name="cast_screen_to_other_device_stop_dialog_title">Stop casting screen?</string>
     <!-- Title for a dialog shown to the user that will let them stop casting to a different device [CHAR LIMIT=50] -->
     <string name="cast_to_other_device_stop_dialog_title">Stop casting?</string>
-    <!-- Text telling a user that they will stop casting their screen to a different device if they click the "Stop casting" button [CHAR LIMIT=100] -->
-    <string name="cast_screen_to_other_device_stop_dialog_message">You will stop casting your screen</string>
-    <!-- Text telling a user that they will stop casting the contents of the specified [app_name] to a different device if they click the "Stop casting" button. Note that the app name will appear in bold.  [CHAR LIMIT=100] -->
-    <string name="cast_screen_to_other_device_stop_dialog_message_specific_app">You will stop casting &lt;b><xliff:g id="app_name" example="Photos App">%1$s</xliff:g>&lt;/b></string>
-    <!-- Text telling a user that they're currently casting to a different device [CHAR LIMIT=100] -->
-    <string name="cast_to_other_device_stop_dialog_message">You\'re currently casting</string>
+    <!-- Text telling a user that they're currently casting their screen to a different device. The device receiving the cast is named [device_name]. [CHAR LIMIT=150] -->
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device">You\'re currently casting your entire screen to <xliff:g id="device_name" example="Living Room Device">%1$s</xliff:g></string>
+    <!-- Text telling a user that they're currently casting their screen to a nearby device. [CHAR LIMIT=150] -->
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen">You\'re currently casting your entire screen to a nearby device</string>
+    <!-- Text telling a user that they're currently casting the contents of [app_being_shared_name] to a different device. The device receiving the cast is named [device_name]. [CHAR LIMIT=150] -->
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device">You\'re currently casting <xliff:g id="app_being_shared_name" example="Photos App">%1$s</xliff:g> to <xliff:g id="device_name" example="Living Room Device">%2$s</xliff:g></string>
+    <!-- Text telling a user that they're currently casting the contents of [app_being_shared_name] to a different device. [CHAR LIMIT=150] -->
+    <string name="cast_to_other_device_stop_dialog_message_specific_app">You\'re currently casting <xliff:g id="app_being_shared_name" example="Photos App">%1$s</xliff:g> to a nearby device</string>
+    <!-- Text telling a user that they're currently casting to a different device. The device receiving the cast is named [device_name]. [CHAR LIMIT=100] -->
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device">You\'re currently casting to <xliff:g id="device_name" example="Living Room Device">%1$s</xliff:g></string>
+    <!-- Text telling a user that they're currently casting to a nearby device [CHAR LIMIT=100] -->
+    <string name="cast_to_other_device_stop_dialog_message_generic">You\'re currently casting to a nearby device</string>
     <!-- Button to stop screen casting to a different device [CHAR LIMIT=35] -->
     <string name="cast_to_other_device_stop_dialog_button">Stop casting</string>
 
@@ -1235,6 +1243,10 @@
     <string name="accessibility_action_label_remove_widget">remove widget</string>
     <!-- Label for accessibility action to place a widget in edit mode after selecting move widget. [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_label_place_widget">place selected widget</string>
+    <!-- Title in the communal widget picker. [CHAR LIMIT=50] -->
+    <string name="communal_widget_picker_title">Lock screen widgets</string>
+    <!-- Text displayed below the title in the communal widget picker providing additional details about the communal surface. [CHAR LIMIT=80] -->
+    <string name="communal_widget_picker_description">Anyone can view widgets on your lock screen, even if your tablet\'s locked.</string>
     <!-- Title shown above information regarding lock screen widgets. [CHAR LIMIT=50] -->
     <string name="communal_widgets_disclaimer_title">Lock screen widgets</string>
     <!-- Information about lock screen widgets presented to the user. [CHAR LIMIT=NONE] -->

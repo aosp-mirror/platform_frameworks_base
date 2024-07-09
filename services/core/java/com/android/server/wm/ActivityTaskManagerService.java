@@ -5056,16 +5056,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void acquire(int displayId) {
-            acquire(displayId, false /* isSwappingDisplay */);
-        }
-
-        @Override
-        public void acquire(int displayId, boolean isSwappingDisplay) {
             synchronized (mGlobalLock) {
                 if (!mSleepTokens.contains(displayId)) {
                     mSleepTokens.append(displayId,
-                            mRootWindowContainer.createSleepToken(mTag, displayId,
-                                    isSwappingDisplay));
+                            mRootWindowContainer.createSleepToken(mTag, displayId));
                     updateSleepIfNeededLocked();
                 }
             }

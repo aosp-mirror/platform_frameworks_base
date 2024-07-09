@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.util.SequenceUtils.getInitSeq;
 import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
@@ -1555,9 +1556,9 @@ public class ViewRootImplTest {
         final InsetsState state0 = new InsetsState();
         final InsetsState state1 = new InsetsState();
         state0.setDisplayFrame(new Rect(0, 0, 500, 1000));
-        state0.setSeq(10000);
+        state0.setSeq(getInitSeq() + 10000);
         state1.setDisplayFrame(new Rect(0, 0, 1500, 2000));
-        state1.setSeq(10001);
+        state1.setSeq(getInitSeq() + 10001);
         final InsetsSourceControl.Array array = new InsetsSourceControl.Array();
 
         sInstrumentation.runOnMainSync(() -> {

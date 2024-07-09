@@ -2006,6 +2006,7 @@
   <java-symbol type="array" name="config_notificationFallbackVibeWaveform" />
   <java-symbol type="bool" name="config_enableServerNotificationEffectsForAutomotive" />
   <java-symbol type="bool" name="config_useAttentionLight" />
+  <java-symbol type="bool" name="config_enableNotificationAccessibilityEvents" />
   <java-symbol type="bool" name="config_adaptive_sleep_available" />
   <java-symbol type="bool" name="config_camera_autorotate"/>
   <java-symbol type="bool" name="config_animateScreenLights" />

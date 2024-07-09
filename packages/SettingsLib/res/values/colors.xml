@@ -14,7 +14,8 @@
      limitations under the License.
 -->
 
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <color name="disabled_text_color">#66000000</color> <!-- 38% black -->
 
     <color name="bt_color_icon_1">#b4a50e0e</color> <!-- 72% Material Red 900 -->
@@ -33,8 +34,8 @@
     <color name="bt_color_bg_6">#e9d2fd</color> <!-- Material Purple 100 -->
     <color name="bt_color_bg_7">#cbf0f8</color> <!-- Material Cyan 100 -->
 
-    <color name="dark_mode_icon_color_single_tone">#99000000</color>
-    <color name="light_mode_icon_color_single_tone">#ffffff</color>
+    <color name="black">@*android:color/black</color>
+    <color name="white">@*android:color/white</color>
 
     <color name="user_avatar_color_bg">?android:attr/colorBackgroundFloating</color>
 

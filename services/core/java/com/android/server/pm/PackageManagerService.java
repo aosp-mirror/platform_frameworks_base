@@ -186,6 +186,7 @@ import com.android.internal.pm.pkg.component.ParsedInstrumentation;
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.telephony.CarrierAppUtils;
+import com.android.internal.telephony.TelephonyPermissions;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
@@ -4492,8 +4493,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     void setSystemAppHiddenUntilInstalled(@NonNull Computer snapshot, String packageName,
             boolean hidden) {
         final int callingUid = Binder.getCallingUid();
-        final boolean calledFromSystemOrPhone = callingUid == Process.PHONE_UID
-                || callingUid == Process.SYSTEM_UID;
+        final boolean calledFromSystemOrPhone = TelephonyPermissions.isSystemOrPhone(callingUid);
         if (!calledFromSystemOrPhone) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
                     "setSystemAppHiddenUntilInstalled");

@@ -18,25 +18,22 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.inWindowLauncherUnlockAnimationRepository
+import com.android.systemui.keyguard.data.repository.keyguardSurfaceBehindRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.util.mockTopActivityClassName
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.system.ActivityManagerWrapper
-import com.android.systemui.user.domain.UserDomainLayerModule
-import dagger.BindsInstance
-import dagger.Component
+import com.android.systemui.shared.system.activityManagerWrapper
+import com.android.systemui.testKosmos
 import junit.framework.Assert.assertEquals
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -49,10 +46,16 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
-    private lateinit var underTest: InWindowLauncherUnlockAnimationInteractor
-
-    private lateinit var testComponent: TestComponent
-    private lateinit var testScope: TestScope
+    private val kosmos = testKosmos()
+    private val underTest =
+        InWindowLauncherUnlockAnimationInteractor(
+            kosmos.inWindowLauncherUnlockAnimationRepository,
+            kosmos.applicationCoroutineScope,
+            kosmos.keyguardTransitionInteractor,
+            { kosmos.keyguardSurfaceBehindRepository },
+            kosmos.activityManagerWrapper,
+        )
+    private val testScope = kosmos.testScope
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
     @Mock private lateinit var activityManagerWrapper: ActivityManagerWrapper
 
@@ -62,19 +65,9 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        testComponent =
-            DaggerInWindowLauncherUnlockAnimationInteractorTest_TestComponent.factory()
-                .create(
-                    test = this,
-                    mocks =
-                        TestMocksModule(
-                            activityManagerWrapper = activityManagerWrapper,
-                        ),
-                )
-        underTest = testComponent.underTest
-        testScope = testComponent.testScope
-        transitionRepository = testComponent.transitionRepository
+        transitionRepository = kosmos.fakeKeyguardTransitionRepository
 
+        activityManagerWrapper = kosmos.activityManagerWrapper
         activityManagerWrapper.mockTopActivityClassName(launcherClassName)
     }
 
@@ -92,7 +85,7 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
             )
 
             // Put launcher on top
-            testComponent.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
+            kosmos.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
                 launcherClassName
             )
             activityManagerWrapper.mockTopActivityClassName(launcherClassName)
@@ -175,7 +168,7 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
             )
 
             // Put not launcher on top
-            testComponent.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
+            kosmos.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
                 launcherClassName
             )
             activityManagerWrapper.mockTopActivityClassName("not_launcher")
@@ -252,7 +245,7 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
             )
 
             // Put launcher on top
-            testComponent.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
+            kosmos.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
                 launcherClassName
             )
             activityManagerWrapper.mockTopActivityClassName(launcherClassName)
@@ -296,7 +289,7 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
             )
 
             // Put Launcher on top and begin transitioning to GONE.
-            testComponent.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
+            kosmos.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
                 launcherClassName
             )
             activityManagerWrapper.mockTopActivityClassName(launcherClassName)
@@ -316,7 +309,7 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
                 values
             )
 
-            testComponent.surfaceBehindRepository.setSurfaceRemoteAnimationTargetAvailable(true)
+            kosmos.keyguardSurfaceBehindRepository.setSurfaceRemoteAnimationTargetAvailable(true)
             runCurrent()
 
             assertEquals(
@@ -360,7 +353,7 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
             )
 
             // Put Launcher on top and begin transitioning to GONE.
-            testComponent.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
+            kosmos.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
                 launcherClassName
             )
             activityManagerWrapper.mockTopActivityClassName(launcherClassName)
@@ -402,7 +395,7 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
             )
 
             // Put Launcher on top and begin transitioning to GONE.
-            testComponent.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
+            kosmos.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
                 launcherClassName
             )
             activityManagerWrapper.mockTopActivityClassName(launcherClassName)
@@ -427,7 +420,7 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
                     to = KeyguardState.AOD,
                 )
             )
-            testComponent.surfaceBehindRepository.setSurfaceRemoteAnimationTargetAvailable(true)
+            kosmos.keyguardSurfaceBehindRepository.setSurfaceRemoteAnimationTargetAvailable(true)
             runCurrent()
 
             assertEquals(
@@ -437,29 +430,4 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
                 values
             )
         }
-
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                BiometricsDomainLayerModule::class,
-                UserDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent {
-        val underTest: InWindowLauncherUnlockAnimationInteractor
-        val testScope: TestScope
-        val transitionRepository: FakeKeyguardTransitionRepository
-        val surfaceBehindRepository: FakeKeyguardSurfaceBehindRepository
-        val inWindowLauncherUnlockAnimationRepository: InWindowLauncherUnlockAnimationRepository
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                mocks: TestMocksModule,
-            ): TestComponent
-        }
-    }
 }

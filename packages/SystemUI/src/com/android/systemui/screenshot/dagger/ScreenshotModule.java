@@ -16,15 +16,12 @@
 
 package com.android.systemui.screenshot.dagger;
 
-import static com.android.systemui.Flags.screenshotShelfUi2;
-
 import android.app.Service;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.screenshot.ImageCapture;
 import com.android.systemui.screenshot.ImageCaptureImpl;
-import com.android.systemui.screenshot.LegacyScreenshotViewProxy;
 import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
 import com.android.systemui.screenshot.ScreenshotShelfViewProxy;
@@ -96,14 +93,7 @@ public abstract class ScreenshotModule {
         return new ScreenshotViewModel(accessibilityManager);
     }
 
-    @Provides
-    static ScreenshotViewProxy.Factory providesScreenshotViewProxyFactory(
-            ScreenshotShelfViewProxy.Factory shelfScreenshotViewProxyFactory,
-            LegacyScreenshotViewProxy.Factory legacyScreenshotViewProxyFactory) {
-        if (screenshotShelfUi2()) {
-            return shelfScreenshotViewProxyFactory;
-        } else {
-            return legacyScreenshotViewProxyFactory;
-        }
-    }
+    @Binds
+    abstract ScreenshotViewProxy.Factory bindScreenshotViewProxyFactory(
+            ScreenshotShelfViewProxy.Factory shelfScreenshotViewProxyFactory);
 }

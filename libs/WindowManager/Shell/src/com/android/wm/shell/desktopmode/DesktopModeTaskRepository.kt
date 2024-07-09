@@ -26,8 +26,8 @@ import android.window.WindowContainerToken
 import androidx.core.util.forEach
 import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
-import com.android.wm.shell.util.KtProtoLog
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -142,7 +142,7 @@ class DesktopModeTaskRepository {
 
         val added = displayData.getOrCreate(displayId).activeTasks.add(taskId)
         if (added) {
-            KtProtoLog.d(
+            ProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopTaskRepo: add active task=%d displayId=%d",
                 taskId,
@@ -167,7 +167,7 @@ class DesktopModeTaskRepository {
             }
         }
         if (result) {
-            KtProtoLog.d(WM_SHELL_DESKTOP_MODE, "DesktopTaskRepo: remove active task=%d", taskId)
+            ProtoLog.d(WM_SHELL_DESKTOP_MODE, "DesktopTaskRepo: remove active task=%d", taskId)
         }
         return result
     }
@@ -180,7 +180,7 @@ class DesktopModeTaskRepository {
     fun addClosingTask(displayId: Int, taskId: Int): Boolean {
         val added = displayData.getOrCreate(displayId).closingTasks.add(taskId)
         if (added) {
-            KtProtoLog.d(
+            ProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopTaskRepo: added closing task=%d displayId=%d",
                 taskId,
@@ -203,7 +203,7 @@ class DesktopModeTaskRepository {
             }
         }
         if (removed) {
-            KtProtoLog.d(WM_SHELL_DESKTOP_MODE, "DesktopTaskRepo: remove closing task=%d", taskId)
+            ProtoLog.d(WM_SHELL_DESKTOP_MODE, "DesktopTaskRepo: remove closing task=%d", taskId)
         }
         return removed
     }
@@ -316,14 +316,14 @@ class DesktopModeTaskRepository {
 
         // Check if count changed
         if (prevCount != newCount) {
-            KtProtoLog.d(
+            ProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopTaskRepo: update task visibility taskId=%d visible=%b displayId=%d",
                 taskId,
                 visible,
                 displayId
             )
-            KtProtoLog.d(
+            ProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopTaskRepo: visibleTaskCount has changed from %d to %d",
                 prevCount,
@@ -341,7 +341,7 @@ class DesktopModeTaskRepository {
 
     /** Get number of tasks that are marked as visible on given [displayId] */
     fun getVisibleTaskCount(displayId: Int): Int {
-        KtProtoLog.d(
+        ProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTaskRepo: visibleTaskCount= %d",
             displayData[displayId]?.visibleTasks?.size ?: 0
@@ -353,7 +353,7 @@ class DesktopModeTaskRepository {
     // TODO(b/342417921): Identify if there is additional checks needed to move tasks for
     // multi-display scenarios.
     fun addOrMoveFreeformTaskToTop(displayId: Int, taskId: Int) {
-        KtProtoLog.d(
+        ProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTaskRepo: add or move task to top: display=%d, taskId=%d",
             displayId,
@@ -365,7 +365,7 @@ class DesktopModeTaskRepository {
 
     /** Mark a Task as minimized. */
     fun minimizeTask(displayId: Int, taskId: Int) {
-        KtProtoLog.v(
+        ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeTaskRepository: minimize Task: display=%d, task=%d",
             displayId,
@@ -376,7 +376,7 @@ class DesktopModeTaskRepository {
 
     /** Mark a Task as non-minimized. */
     fun unminimizeTask(displayId: Int, taskId: Int) {
-        KtProtoLog.v(
+        ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeTaskRepository: unminimize Task: display=%d, task=%d",
             displayId,
@@ -387,7 +387,7 @@ class DesktopModeTaskRepository {
 
     /** Remove the task from the ordered list. */
     fun removeFreeformTask(displayId: Int, taskId: Int) {
-        KtProtoLog.d(
+        ProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTaskRepo: remove freeform task from ordered list: display=%d, taskId=%d",
             displayId,
@@ -395,7 +395,7 @@ class DesktopModeTaskRepository {
         )
         displayData[displayId]?.freeformTasksInZOrder?.remove(taskId)
         boundsBeforeMaximizeByTaskId.remove(taskId)
-        KtProtoLog.d(
+        ProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTaskRepo: remaining freeform tasks: %s",
             displayData[displayId]?.freeformTasksInZOrder?.toDumpString() ?: ""

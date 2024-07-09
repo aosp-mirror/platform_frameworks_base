@@ -97,7 +97,7 @@ adb reboot
 adb logcat -s "SurfaceControlRegistry"
 ```
 
-## Tracing activity starts in the app process
+## Tracing activity starts & finishes in the app process
 
 It's sometimes useful to know when to see a stack trace of when an activity starts in the app code
 (ie. if you are repro'ing a bug related to activity starts). You can enable this system property to
@@ -110,6 +110,19 @@ adb logcat -s "Instrumentation"
 
 # Disabling
 adb shell setprop persist.wm.debug.start_activity \"\"
+adb reboot
+```
+
+Likewise, to trace where a finish() call may be made in the app process, you can enable this system
+property:
+```shell
+# Enabling
+adb shell setprop persist.wm.debug.finish_activity true
+adb reboot
+adb logcat -s "Instrumentation"
+
+# Disabling
+adb shell setprop persist.wm.debug.finish_activity \"\"
 adb reboot
 ```
 

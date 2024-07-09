@@ -20,6 +20,7 @@ import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
@@ -386,11 +387,11 @@ constructor(
         combine(
             widgetRepository.communalWidgets
                 .map { filterWidgetsByExistingUsers(it) }
-                .combine(communalSettingsInteractor.allowedByDevicePolicyForWorkProfile) {
+                .combine(communalSettingsInteractor.workProfileUserDisallowedByDevicePolicy) {
                     // exclude widgets under work profile if not allowed by device policy
                     widgets,
-                    allowedForWorkProfile ->
-                    filterWidgetsAllowedByDevicePolicy(widgets, allowedForWorkProfile)
+                    disallowedByPolicyUser ->
+                    filterWidgetsAllowedByDevicePolicy(widgets, disallowedByPolicyUser)
                 },
             updateOnWorkProfileBroadcastReceived,
         ) { widgets, _ ->
@@ -418,13 +419,11 @@ constructor(
     /** Filter widgets based on whether their associated profile is allowed by device policy. */
     private fun filterWidgetsAllowedByDevicePolicy(
         list: List<CommunalWidgetContentModel>,
-        allowedByDevicePolicyForWorkProfile: Boolean
+        disallowedByDevicePolicyUser: UserInfo?
     ): List<CommunalWidgetContentModel> =
-        if (allowedByDevicePolicyForWorkProfile) {
+        if (disallowedByDevicePolicyUser == null) {
             list
         } else {
-            // Get associated work profile for the currently selected user.
-            val workProfile = userTracker.userProfiles.find { it.isManagedProfile }
             list.filter { model ->
                 val uid =
                     when (model) {
@@ -432,7 +431,7 @@ constructor(
                             model.providerInfo.profile.identifier
                         is CommunalWidgetContentModel.Pending -> model.user.identifier
                     }
-                uid != workProfile?.id
+                uid != disallowedByDevicePolicyUser.id
             }
         }
 

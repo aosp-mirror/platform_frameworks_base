@@ -104,7 +104,7 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
 
     private fun initScreenShareSpinner() {
         val adapter = OptionsAdapter(dialog.context.applicationContext, screenShareOptions)
-        screenShareModeSpinner = dialog.requireViewById(R.id.screen_share_mode_spinner)
+        screenShareModeSpinner = dialog.requireViewById(R.id.screen_share_mode_options)
         screenShareModeSpinner.adapter = adapter
         screenShareModeSpinner.onItemSelectedListener = this
 

@@ -604,11 +604,12 @@ public abstract class WMShellModule {
             Context context,
             Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             Transitions transitions,
+            ShellTaskOrganizer shellTaskOrganizer,
             ShellInit shellInit
     ) {
         return desktopModeTaskRepository.flatMap(repository ->
                 Optional.of(new DesktopTasksTransitionObserver(
-                        context, repository, transitions, shellInit))
+                        context, repository, transitions, shellTaskOrganizer, shellInit))
         );
     }
 

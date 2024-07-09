@@ -533,6 +533,9 @@
     <!-- If this is true, key chords can be used to take a screenshot on the device. -->
     <bool name="config_enableScreenshotChord">true</bool>
 
+    <!-- If this is true, accessibility events on notifications are sent. -->
+    <bool name="config_enableNotificationAccessibilityEvents">true</bool>
+
     <!-- If this is true, allow wake from theater mode when plugged in or unplugged. -->
     <bool name="config_allowTheaterModeWakeFromUnplug">false</bool>
     <!-- If this is true, allow wake from theater mode from gesture. -->

@@ -135,6 +135,9 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private var isShowKeyguardWhenReenabled: Boolean = false
 
+    private val _canIgnoreAuthAndReturnToGone = MutableStateFlow(false)
+    override val canIgnoreAuthAndReturnToGone = _canIgnoreAuthAndReturnToGone.asStateFlow()
+
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
     }
@@ -277,6 +280,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun isShowKeyguardWhenReenabled(): Boolean {
         return isShowKeyguardWhenReenabled
+    }
+
+    override fun setCanIgnoreAuthAndReturnToGone(canWake: Boolean) {
+        _canIgnoreAuthAndReturnToGone.value = canWake
     }
 }
 
