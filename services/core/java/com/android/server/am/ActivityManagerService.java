@@ -2075,7 +2075,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.setPersistent(true);
                 app.setPid(MY_PID);
                 app.mState.setMaxAdj(ProcessList.SYSTEM_ADJ);
-                app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
+                app.makeActive(new ApplicationThreadDeferred(mSystemThread.getApplicationThread()),
+                        mProcessStats);
                 app.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_SYSTEM);
                 addPidLocked(app);
                 updateLruProcessLocked(app, false, null);
@@ -4871,7 +4872,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Make app active after binding application or client may be running requests (e.g
             // starting activities) before it is ready.
             synchronized (mProcLock) {
-                app.makeActive(thread, mProcessStats);
+                app.makeActive(new ApplicationThreadDeferred(thread), mProcessStats);
                 checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             }
             app.setPendingFinishAttach(true);
