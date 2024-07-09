@@ -436,8 +436,13 @@ public class BtHelper {
         if (mBluetoothHeadset == null || mBluetoothHeadsetDevice == null) {
             return false;
         }
-        return mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
-                == BluetoothHeadset.STATE_AUDIO_CONNECTED;
+        try {
+            return mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
+                    == BluetoothHeadset.STATE_AUDIO_CONNECTED;
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while getting audio state of " + mBluetoothHeadsetDevice, e);
+        }
+        return false;
     }
 
     // @GuardedBy("mDeviceBroker.mSetModeLock")
@@ -1051,12 +1056,16 @@ public class BtHelper {
     }
 
     private void checkScoAudioState() {
-        if (mBluetoothHeadset != null
-                && mBluetoothHeadsetDevice != null
-                && mScoAudioState == SCO_STATE_INACTIVE
-                && mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
-                != BluetoothHeadset.STATE_AUDIO_DISCONNECTED) {
-            mScoAudioState = SCO_STATE_ACTIVE_EXTERNAL;
+        try {
+            if (mBluetoothHeadset != null
+                    && mBluetoothHeadsetDevice != null
+                    && mScoAudioState == SCO_STATE_INACTIVE
+                    && mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
+                    != BluetoothHeadset.STATE_AUDIO_DISCONNECTED) {
+                mScoAudioState = SCO_STATE_ACTIVE_EXTERNAL;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while getting audio state of " + mBluetoothHeadsetDevice, e);
         }
     }
 
