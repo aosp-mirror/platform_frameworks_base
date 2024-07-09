@@ -56,6 +56,8 @@ import android.hardware.camera2.utils.ConcurrentCameraIdCombination;
 import android.hardware.camera2.utils.ExceptionUtils;
 import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.devicestate.feature.flags.FeatureFlags;
+import android.hardware.devicestate.feature.flags.FeatureFlagsImpl;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Handler;
@@ -247,14 +249,22 @@ public final class CameraManager {
         private ArrayList<WeakReference<DeviceStateListener>> mDeviceStateListeners =
                 new ArrayList<>();
         private boolean mFoldedDeviceState;
+        private final FeatureFlags mDeviceStateManagerFlags;
 
         public FoldStateListener(Context context) {
             mFoldedDeviceStates = context.getResources().getIntArray(
                     com.android.internal.R.array.config_foldedDeviceStates);
+            mDeviceStateManagerFlags = new FeatureFlagsImpl();
         }
 
-        private synchronized void handleStateChange(int state) {
-            boolean folded = ArrayUtils.contains(mFoldedDeviceStates, state);
+        private synchronized void handleStateChange(DeviceState state) {
+            final boolean folded;
+            if (mDeviceStateManagerFlags.deviceStatePropertyMigration()) {
+                folded = state.hasProperty(
+                        DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY);
+            } else {
+                folded = ArrayUtils.contains(mFoldedDeviceStates, state.getIdentifier());
+            }
 
             mFoldedDeviceState = folded;
             Iterator<WeakReference<DeviceStateListener>> it = mDeviceStateListeners.iterator();
@@ -276,10 +286,8 @@ public final class CameraManager {
 
         @SuppressWarnings("FlaggedApi")
         @Override
-        public void onDeviceStateChanged(DeviceState state) {
-            // Suppressing the FlaggedAPI warning as this specific API isn't new, just moved to
-            // system API which requires it to be flagged.
-            handleStateChange(state.getIdentifier());
+        public void onDeviceStateChanged(@NonNull DeviceState state) {
+            handleStateChange(state);
         }
     }
 
