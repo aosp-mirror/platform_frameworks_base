@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.smartspace.data.repository
+package com.android.systemui.communal.data.repository
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
 
-val Kosmos.fakeSmartspaceRepository by Fixture { FakeSmartspaceRepository() }
+val Kosmos.fakeCommunalSmartspaceRepository by Kosmos.Fixture { FakeCommunalSmartspaceRepository() }
 
-val Kosmos.smartspaceRepository by Fixture<SmartspaceRepository> { fakeSmartspaceRepository }
+val Kosmos.communalSmartspaceRepository by
+    Kosmos.Fixture<CommunalSmartspaceRepository> { fakeCommunalSmartspaceRepository }
