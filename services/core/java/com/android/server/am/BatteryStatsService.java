@@ -3252,6 +3252,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 .setMaxStatsAgeMs(0)
                 .includeProcessStateData()
                 .includePowerModels();
+        if (Flags.batteryUsageStatsByPowerAndScreenState()) {
+            builder.includeScreenStateData().includePowerStateData();
+        }
         if (model == BatteryConsumer.POWER_MODEL_POWER_PROFILE) {
             builder.powerProfileModeledOnly();
         }
@@ -3270,7 +3273,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         if (proto) {
             batteryUsageStats.dumpToProto(fd);
         } else {
-            batteryUsageStats.dump(pw, "");
+            batteryUsageStats.dump(pw, "  ");
         }
     }
 
