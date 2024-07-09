@@ -497,7 +497,8 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void testValidateFlags() {
         final Session session = getTestSession();
         try {
-            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION);
+            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                    0 /* callingUid */);
             fail("Expected failure without permission");
         } catch (SecurityException e) {
             // Expected failure
@@ -510,7 +511,8 @@ public class DragDropControllerTests extends WindowTestsBase {
                 .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
         final Session session = createTestSession(mAtm);
         try {
-            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION);
+            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                    0 /* callingUid */);
             // Expected pass
         } catch (SecurityException e) {
             fail("Expected no failure with permission");

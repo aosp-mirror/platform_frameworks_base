@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.dagger;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.os.Handler;
 import android.service.notification.NotificationListenerService;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -283,9 +284,11 @@ public interface NotificationsModule {
             Context context,
             NotificationManager notificationManager,
             @Application CoroutineScope coroutineScope,
-            @Background CoroutineContext coroutineContext) {
+            @Background CoroutineContext coroutineContext,
+            @Background Handler handler
+    ) {
         return new ZenModeRepositoryImpl(context, notificationManager,
-                coroutineScope, coroutineContext);
+                coroutineScope, coroutineContext, handler);
     }
 
     @Provides

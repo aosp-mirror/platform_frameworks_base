@@ -190,6 +190,15 @@ java_library {
     ],
 }
 
+java_library {
+    name: "WindowManager-Shell-shared-desktopMode",
+
+    srcs: [
+        "shared/**/desktopmode/*.java",
+        "shared/**/desktopmode/*.kt",
+    ],
+}
+
 android_library {
     name: "WindowManager-Shell",
     srcs: [

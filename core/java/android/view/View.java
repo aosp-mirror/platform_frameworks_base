@@ -5512,6 +5512,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG = 1 << 13;
 
     /**
+     * Flag indicating that this drag will result in the caller activity's task to be hidden for the
+     * duration of the drag, this means that the source activity will not receive drag events for
+     * the current drag gesture. Only the current voice interaction service may use this flag.
+     * @hide
+     */
+    public static final int DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START = 1 << 14;
+
+    /**
      * Vertical scroll factor cached by {@link #getVerticalScrollFactor}.
      */
     private float mVerticalScrollFactor;

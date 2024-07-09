@@ -69,6 +69,7 @@ class AppCompatActivityRobot {
 
     private final int mDisplayWidth;
     private final int mDisplayHeight;
+    private DisplayContent mDisplayContent;
 
     AppCompatActivityRobot(@NonNull WindowManagerService wm,
             @NonNull ActivityTaskManagerService atm, @NonNull ActivityTaskSupervisor supervisor,
@@ -79,6 +80,7 @@ class AppCompatActivityRobot {
         mDisplayHeight = displayHeight;
         mActivityStack = new TestComponentStack<>();
         mTaskStack = new TestComponentStack<>();
+        createNewDisplay();
     }
 
     AppCompatActivityRobot(@NonNull WindowManagerService wm,
@@ -87,12 +89,18 @@ class AppCompatActivityRobot {
     }
 
     void createActivityWithComponent() {
-        createActivityWithComponentInNewTask(/* inNewTask */ mTaskStack.isEmpty());
+        createActivityWithComponentInNewTask(/* inNewTask */ mTaskStack.isEmpty(),
+                /* inNewDisplay */ false);
     }
 
     void createActivityWithComponentInNewTask() {
-        createActivityWithComponentInNewTask(/* inNewTask */ true);
+        createActivityWithComponentInNewTask(/* inNewTask */ true, /* inNewDisplay */ false);
     }
+
+    void createActivityWithComponentInNewTaskAndDisplay() {
+        createActivityWithComponentInNewTask(/* inNewTask */ true, /* inNewDisplay */ true);
+    }
+
 
     void configureTopActivity(float minAspect, float maxAspect, int screenOrientation,
             boolean isUnresizable) {
@@ -110,9 +118,19 @@ class AppCompatActivityRobot {
                 /* isUnresizable */ true);
     }
 
+    void activateCameraInPolicy(boolean isCameraActive) {
+        doReturn(isCameraActive).when(mDisplayContent.mAppCompatCameraPolicy)
+                .isCameraActive(any(ActivityRecord.class), anyBoolean());
+    }
+
     @NonNull
     ActivityRecord top() {
         return mActivityStack.top();
+    }
+
+    @NonNull
+    DisplayContent displayContent() {
+        return mDisplayContent;
     }
 
     @NonNull
@@ -130,7 +148,7 @@ class AppCompatActivityRobot {
     }
 
     void enableTreatmentForTopActivity(boolean enabled) {
-        doReturn(enabled).when(getTopDisplayRotationCompatPolicy())
+        doReturn(enabled).when(mDisplayContent.mAppCompatCameraPolicy)
                 .isTreatmentEnabledForActivity(eq(mActivityStack.top()));
     }
 
@@ -164,7 +182,7 @@ class AppCompatActivityRobot {
     }
 
     void setIgnoreOrientationRequest(boolean enabled) {
-        mActivityStack.top().mDisplayContent.setIgnoreOrientationRequest(enabled);
+        mDisplayContent.setIgnoreOrientationRequest(enabled);
     }
 
     void setTopActivityAsEmbedded(boolean embedded) {
@@ -179,20 +197,22 @@ class AppCompatActivityRobot {
         mActivityStack.applyTo(/* fromTop */ fromTop, ActivityRecord::removeImmediately);
     }
 
+    void createNewDisplay() {
+        mDisplayContent = new TestDisplayContent.Builder(mAtm, mDisplayWidth, mDisplayHeight)
+                .build();
+        spyOnAppCompatCameraPolicy();
+    }
+
     void createNewTask() {
-        final DisplayContent displayContent = new TestDisplayContent
-                .Builder(mAtm, mDisplayWidth, mDisplayHeight).build();
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
-                .setDisplay(displayContent).build();
+                .setDisplay(mDisplayContent).build();
         mTaskStack.push(newTask);
     }
 
     void createNewTaskWithBaseActivity() {
-        final DisplayContent displayContent = new TestDisplayContent
-                .Builder(mAtm, mDisplayWidth, mDisplayHeight).build();
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
                 .setCreateActivity(true)
-                .setDisplay(displayContent).build();
+                .setDisplay(mDisplayContent).build();
         mTaskStack.push(newTask);
         pushActivity(newTask.getTopNonFinishingActivity());
     }
@@ -319,7 +339,10 @@ class AppCompatActivityRobot {
         pushActivity(newActivity);
     }
 
-    private void createActivityWithComponentInNewTask(boolean inNewTask) {
+    private void createActivityWithComponentInNewTask(boolean inNewTask, boolean inNewDisplay) {
+        if (inNewDisplay) {
+            createNewDisplay();
+        }
         if (inNewTask) {
             createNewTask();
         }
@@ -369,7 +392,8 @@ class AppCompatActivityRobot {
     }
 
     private DisplayRotationCompatPolicy getTopDisplayRotationCompatPolicy() {
-        return mActivityStack.top().mDisplayContent.mDisplayRotationCompatPolicy;
+        return mActivityStack.top().mDisplayContent
+                .mAppCompatCameraPolicy.mDisplayRotationCompatPolicy;
     }
 
     // We add the activity to the stack and spyOn() on its properties.
@@ -377,10 +401,16 @@ class AppCompatActivityRobot {
         mActivityStack.push(activity);
         spyOn(activity);
         spyOn(activity.mAppCompatController.getTransparentPolicy());
-        if (activity.mDisplayContent != null
-                && activity.mDisplayContent.mDisplayRotationCompatPolicy != null) {
-            spyOn(activity.mDisplayContent.mDisplayRotationCompatPolicy);
-        }
         spyOn(activity.mLetterboxUiController);
+    }
+
+    private void spyOnAppCompatCameraPolicy() {
+        spyOn(mDisplayContent.mAppCompatCameraPolicy);
+        if (mDisplayContent.mAppCompatCameraPolicy.hasDisplayRotationCompatPolicy()) {
+            spyOn(mDisplayContent.mAppCompatCameraPolicy.mDisplayRotationCompatPolicy);
+        }
+        if (mDisplayContent.mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy()) {
+            spyOn(mDisplayContent.mAppCompatCameraPolicy.mCameraCompatFreeformPolicy);
+        }
     }
 }

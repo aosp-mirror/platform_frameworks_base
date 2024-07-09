@@ -136,6 +136,14 @@ public class ClipDescription implements Parcelable {
             "android.intent.extra.LOGGING_INSTANCE_ID";
 
     /**
+     * The id of the task containing the window that initiated the drag that should be hidden.
+     * Only provided to internal drag handlers as a part of the DRAG_START event.
+     * @hide
+     */
+    public static final String EXTRA_HIDE_DRAG_SOURCE_TASK_ID =
+            "android.intent.extra.HIDE_DRAG_SOURCE_TASK_ID";
+
+    /**
      * Indicates that a ClipData contains potentially sensitive information, such as a
      * password or credit card number.
      * <p>

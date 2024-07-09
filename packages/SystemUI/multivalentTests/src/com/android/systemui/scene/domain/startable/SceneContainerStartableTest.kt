@@ -85,6 +85,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -181,6 +182,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
             kosmos.headsUpNotificationRepository.activeHeadsUpRows.value =
                 buildNotificationRows(isPinned = false)
+            advanceTimeBy(50L) // account for HeadsUpNotificationInteractor debounce
             assertThat(isVisible).isFalse()
         }
 

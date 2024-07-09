@@ -19,7 +19,7 @@ package android.util;
 
 import static android.util.SequenceUtils.getInitSeq;
 import static android.util.SequenceUtils.getNextSeq;
-import static android.util.SequenceUtils.isIncomingSeqNewer;
+import static android.util.SequenceUtils.isIncomingSeqStale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -60,30 +60,35 @@ public class SequenceUtilsTest {
     }
 
     @Test
-    public void testIsIncomingSeqNewer() {
-        assertTrue(isIncomingSeqNewer(getInitSeq() + 1, getInitSeq() + 10));
-        assertFalse(isIncomingSeqNewer(getInitSeq() + 10, getInitSeq() + 1));
-        assertTrue(isIncomingSeqNewer(-100, 100));
-        assertFalse(isIncomingSeqNewer(100, -100));
-        assertTrue(isIncomingSeqNewer(1, 2));
-        assertFalse(isIncomingSeqNewer(2, 1));
+    public void testIsIncomingSeqStale() {
+        assertFalse(isIncomingSeqStale(getInitSeq() + 1, getInitSeq() + 10));
+        assertTrue(isIncomingSeqStale(getInitSeq() + 10, getInitSeq() + 1));
+        assertFalse(isIncomingSeqStale(-100, 100));
+        assertTrue(isIncomingSeqStale(100, -100));
+        assertFalse(isIncomingSeqStale(1, 2));
+        assertTrue(isIncomingSeqStale(2, 1));
 
         // Possible incoming seq are all newer than the initial seq.
-        assertTrue(isIncomingSeqNewer(getInitSeq(), getInitSeq() + 1));
-        assertTrue(isIncomingSeqNewer(getInitSeq(), -100));
-        assertTrue(isIncomingSeqNewer(getInitSeq(), 0));
-        assertTrue(isIncomingSeqNewer(getInitSeq(), 100));
-        assertTrue(isIncomingSeqNewer(getInitSeq(), Integer.MAX_VALUE));
-        assertTrue(isIncomingSeqNewer(getInitSeq(), getNextSeq(Integer.MAX_VALUE)));
+        assertFalse(isIncomingSeqStale(getInitSeq(), getInitSeq()));
+        assertFalse(isIncomingSeqStale(getInitSeq(), getInitSeq() + 1));
+        assertFalse(isIncomingSeqStale(getInitSeq(), -100));
+        assertFalse(isIncomingSeqStale(getInitSeq(), 0));
+        assertFalse(isIncomingSeqStale(getInitSeq(), 100));
+        assertFalse(isIncomingSeqStale(getInitSeq(), Integer.MAX_VALUE));
+        assertFalse(isIncomingSeqStale(getInitSeq(), getNextSeq(Integer.MAX_VALUE)));
 
         // False for the same seq.
-        assertFalse(isIncomingSeqNewer(getInitSeq(), getInitSeq()));
-        assertFalse(isIncomingSeqNewer(100, 100));
-        assertFalse(isIncomingSeqNewer(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        assertFalse(isIncomingSeqStale(100, 100));
+        assertFalse(isIncomingSeqStale(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
-        // True when there is a large jump (overflow).
-        assertTrue(isIncomingSeqNewer(Integer.MAX_VALUE, getInitSeq() + 1));
-        assertTrue(isIncomingSeqNewer(Integer.MAX_VALUE, getInitSeq() + 100));
-        assertTrue(isIncomingSeqNewer(Integer.MAX_VALUE, getNextSeq(Integer.MAX_VALUE)));
+        // False when there is a large jump (overflow).
+        assertFalse(isIncomingSeqStale(Integer.MAX_VALUE, getInitSeq() + 1));
+        assertFalse(isIncomingSeqStale(Integer.MAX_VALUE, getInitSeq() + 100));
+        assertFalse(isIncomingSeqStale(Integer.MAX_VALUE, getNextSeq(Integer.MAX_VALUE)));
+
+        // True when the large jump is opposite (curSeq is newer).
+        assertTrue(isIncomingSeqStale(getInitSeq() + 1, Integer.MAX_VALUE));
+        assertTrue(isIncomingSeqStale(getInitSeq() + 100, Integer.MAX_VALUE));
+        assertTrue(isIncomingSeqStale(getNextSeq(Integer.MAX_VALUE), Integer.MAX_VALUE));
     }
 }

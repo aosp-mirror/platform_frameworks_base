@@ -30,7 +30,7 @@ class MediaProjectionPermissionDialogDelegate(
     private val onStartRecordingClicked: Consumer<MediaProjectionPermissionDialogDelegate>,
     private val onCancelClicked: Runnable,
     private val appName: String?,
-    private val forceShowPartialScreenshare: Boolean,
+    forceShowPartialScreenshare: Boolean,
     hostUid: Int,
     mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
 ) :

@@ -23,13 +23,17 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 class ShortcutHelperViewModel
 @Inject
 constructor(
+    @Background private val backgroundScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val stateInteractor: ShortcutHelperStateInteractor,
     categoriesInteractor: ShortcutHelperCategoriesInteractor,
@@ -42,16 +46,22 @@ constructor(
             .flowOn(backgroundDispatcher)
 
     val shortcutsUiState =
-        categoriesInteractor.shortcutCategories.map {
-            if (it.isEmpty()) {
-                ShortcutsUiState.Inactive
-            } else {
-                ShortcutsUiState.Active(
-                    shortcutCategories = it,
-                    defaultSelectedCategory = it.first().type,
-                )
+        categoriesInteractor.shortcutCategories
+            .map {
+                if (it.isEmpty()) {
+                    ShortcutsUiState.Inactive
+                } else {
+                    ShortcutsUiState.Active(
+                        shortcutCategories = it,
+                        defaultSelectedCategory = it.first().type,
+                    )
+                }
             }
-        }
+            .stateIn(
+                scope = backgroundScope,
+                started = SharingStarted.Lazily,
+                initialValue = ShortcutsUiState.Inactive
+            )
 
     fun onViewClosed() {
         stateInteractor.onViewClosed()

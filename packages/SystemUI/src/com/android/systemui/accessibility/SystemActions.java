@@ -233,7 +233,7 @@ public class SystemActions implements CoreStartable, ConfigurationController.Con
         // NotificationShadeWindowController.registerCallback() only keeps weak references.
         mNotificationShadeCallback =
                 (keyguardShowing, keyguardOccluded, keyguardGoingAway, bouncerShowing, mDozing,
-                        panelExpanded, isDreaming) ->
+                        panelExpanded, isDreaming, communalShowing) ->
                         registerOrUnregisterDismissNotificationShadeAction();
         mScreenshotHelper = new ScreenshotHelper(mContext);
     }

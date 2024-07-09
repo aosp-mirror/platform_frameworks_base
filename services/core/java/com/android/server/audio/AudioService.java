@@ -977,7 +977,7 @@ public class AudioService extends IAudioService.Stub
 
     private NotificationManager mNm;
     private AudioManagerInternal.RingerModeDelegate mRingerModeDelegate;
-    private VolumePolicy mVolumePolicy = VolumePolicy.DEFAULT;
+    private volatile VolumePolicy mVolumePolicy = VolumePolicy.DEFAULT;
     private long mLoweredFromNormalToVibrateTime;
 
     // Array of Uids of valid assistant services to check if caller is one of them
@@ -12099,6 +12099,11 @@ public class AudioService extends IAudioService.Stub
             mVolumePolicy = policy;
             if (DEBUG_VOL) Log.d(TAG, "Volume policy changed: " + mVolumePolicy);
         }
+    }
+
+    @Override
+    public VolumePolicy getVolumePolicy() {
+        return mVolumePolicy;
     }
 
     /** Interface used for enforcing the safe hearing standard. */

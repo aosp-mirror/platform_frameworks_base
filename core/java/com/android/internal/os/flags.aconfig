@@ -9,3 +9,14 @@ flag {
     is_fixed_read_only: true
     bug: "241474956"
 }
+
+flag {
+    name: "use_transaction_codes_for_unknown_methods"
+    namespace: "dropbox"
+    description: "Use transaction codes when the method names is unknown"
+    bug: "350041302"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

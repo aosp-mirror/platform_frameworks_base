@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.platform.test.flag.junit.FlagsParameterization
@@ -27,10 +29,13 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
+import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
@@ -38,6 +43,8 @@ import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -198,6 +205,44 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
                 unfoldProvider.onTransitionFinished()
                 assertThat(translations?.start).isEqualTo(0f)
                 assertThat(translations?.end).isEqualTo(-0f)
+            }
+        }
+
+    @Test
+    fun isContentVisible_whenNotOccluded_visible() =
+        with(kosmos) {
+            testScope.runTest {
+                val isContentVisible by collectLastValue(underTest.isContentVisible)
+
+                keyguardOcclusionRepository.setShowWhenLockedActivityInfo(false, null)
+                runCurrent()
+                assertThat(isContentVisible).isTrue()
+            }
+        }
+
+    @Test
+    fun isContentVisible_whenOccluded_notVisible() =
+        with(kosmos) {
+            testScope.runTest {
+                val isContentVisible by collectLastValue(underTest.isContentVisible)
+
+                keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true, null)
+                runCurrent()
+                assertThat(isContentVisible).isFalse()
+            }
+        }
+
+    @Test
+    fun isContentVisible_whenOccluded_notVisible_evenIfShadeShown() =
+        with(kosmos) {
+            testScope.runTest {
+                val isContentVisible by collectLastValue(underTest.isContentVisible)
+                keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true, null)
+                runCurrent()
+
+                sceneInteractor.snapToScene(Scenes.Shade, "")
+                runCurrent()
+                assertThat(isContentVisible).isFalse()
             }
         }
 

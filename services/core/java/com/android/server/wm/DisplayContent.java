@@ -263,7 +263,6 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.RegionUtils;
 import com.android.server.wm.utils.RotationCache;
 import com.android.server.wm.utils.WmDisplayCutout;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -475,14 +474,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final DisplayPolicy mDisplayPolicy;
     private final DisplayRotation mDisplayRotation;
 
-    @Nullable
-    final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
-    @Nullable
-    final CameraCompatFreeformPolicy mCameraCompatFreeformPolicy;
-    @Nullable
-    final CameraStateMonitor mCameraStateMonitor;
-    @Nullable
-    final ActivityRefresher mActivityRefresher;
+    @NonNull
+    AppCompatCameraPolicy mAppCompatCameraPolicy;
 
     DisplayFrames mDisplayFrames;
     final DisplayUpdater mDisplayUpdater;
@@ -1191,6 +1184,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mDeviceStateController = deviceStateController;
 
+        mAppCompatCameraPolicy = new AppCompatCameraPolicy(mWmService, this);
         mDisplayPolicy = new DisplayPolicy(mWmService, this);
         mDisplayRotation = new DisplayRotation(mWmService, this, mDisplayInfo.address,
                 mDeviceStateController, root.getDisplayRotationCoordinator());
@@ -1231,40 +1225,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         onDisplayChanged(this);
         updateDisplayAreaOrganizers();
 
-        // Not checking DeviceConfig value here to allow enabling via DeviceConfig
-        // without the need to restart the device.
-        final boolean shouldCreateDisplayRotationCompatPolicy =
-                mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
-        final boolean shouldCreateCameraCompatFreeformPolicy = Flags.cameraCompatForFreeform()
-                && DesktopModeLaunchParamsModifier.canEnterDesktopMode(mWmService.mContext);
-        if (shouldCreateDisplayRotationCompatPolicy || shouldCreateCameraCompatFreeformPolicy) {
-            mCameraStateMonitor = new CameraStateMonitor(this, mWmService.mH);
-            mActivityRefresher = new ActivityRefresher(mWmService, mWmService.mH);
-            if (shouldCreateDisplayRotationCompatPolicy) {
-                mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(this,
-                        mCameraStateMonitor, mActivityRefresher);
-                mDisplayRotationCompatPolicy.start();
-            } else {
-                mDisplayRotationCompatPolicy = null;
-            }
-
-            if (shouldCreateCameraCompatFreeformPolicy) {
-                mCameraCompatFreeformPolicy = new CameraCompatFreeformPolicy(this,
-                        mCameraStateMonitor, mActivityRefresher);
-                mCameraCompatFreeformPolicy.start();
-            } else {
-                mCameraCompatFreeformPolicy = null;
-            }
-
-            mCameraStateMonitor.startListeningToCameraState();
-        } else {
-            // These are to satisfy the `final` check.
-            mCameraStateMonitor = null;
-            mActivityRefresher = null;
-            mDisplayRotationCompatPolicy = null;
-            mCameraCompatFreeformPolicy = null;
-        }
-
         mRotationReversionController = new DisplayRotationReversionController(this);
 
         mInputMonitor = new InputMonitor(mWmService, this);
@@ -1280,6 +1240,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 R.bool.config_defaultInTouchMode);
         mWmService.mInputManager.setInTouchMode(mInTouchMode, mWmService.MY_PID, mWmService.MY_UID,
                 /* hasPermission= */ true, mDisplayId);
+        mAppCompatCameraPolicy.start();
     }
 
     private void beginHoldScreenUpdate() {
@@ -1312,15 +1273,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mHoldScreenWakeLock.release();
             }
         }
-    }
-
-    /**
-     * @return The {@link DisplayRotationCompatPolicy} for this DisplayContent
-     */
-    // TODO(b/335387481) Allow access to DisplayRotationCompatPolicy only with getters
-    @Nullable
-    DisplayRotationCompatPolicy getDisplayRotationCompatPolicy() {
-        return mDisplayRotationCompatPolicy;
     }
 
     @Override
@@ -2889,12 +2841,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
-        if (mDisplayRotationCompatPolicy != null) {
-            int compatOrientation = mDisplayRotationCompatPolicy.getOrientation();
-            if (compatOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                mLastOrientationSource = null;
-                return compatOrientation;
-            }
+        final int compatOrientation = mAppCompatCameraPolicy.getOrientation();
+        if (compatOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+            mLastOrientationSource = null;
+            return compatOrientation;
         }
 
         final int orientation = super.getOrientation();
@@ -3364,17 +3314,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         getPendingTransaction().apply();
         mWmService.mWindowPlacerLocked.requestTraversal();
 
-        if (mDisplayRotationCompatPolicy != null) {
-            mDisplayRotationCompatPolicy.dispose();
-        }
-
-        if (mCameraCompatFreeformPolicy != null) {
-            mCameraCompatFreeformPolicy.dispose();
-        }
-
-        if (mCameraStateMonitor != null) {
-            mCameraStateMonitor.dispose();
-        }
+        mAppCompatCameraPolicy.dispose();
     }
 
     /** Returns true if a removal action is still being deferred. */
