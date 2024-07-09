@@ -18,7 +18,6 @@ package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
 import android.app.Flags
 import android.os.UserHandle
-import android.provider.Settings.Global.ZEN_MODE_OFF
 import com.android.settingslib.notification.data.repository.ZenModeRepository
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
@@ -31,9 +30,10 @@ import kotlinx.coroutines.flow.map
 
 class ModesTileDataInteractor @Inject constructor(val zenModeRepository: ZenModeRepository) :
     QSTileDataInteractor<ModesTileModel> {
-    // TODO(b/346519570): This should be checking for any enabled modes.
     private val zenModeActive =
-        zenModeRepository.globalZenMode.map { it != ZEN_MODE_OFF }.distinctUntilChanged()
+        zenModeRepository.modes
+            .map { modes -> modes.any { mode -> mode.isActive } }
+            .distinctUntilChanged()
 
     override fun tileData(
         user: UserHandle,

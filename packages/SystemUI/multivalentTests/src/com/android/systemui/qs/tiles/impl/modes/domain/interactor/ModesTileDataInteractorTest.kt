@@ -20,9 +20,6 @@ import android.app.Flags
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-import android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
-import android.provider.Settings.Global.ZEN_MODE_OFF
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.data.repository.FakeZenModeRepository
@@ -65,24 +62,28 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
 
     @EnableFlags(Flags.FLAG_MODES_UI)
     @Test
-    fun dataMatchesTheRepository() = runTest {
+    fun isActivatedWhenModesChange() = runTest {
         val dataList: List<ModesTileModel> by
             collectValues(underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest)))
         runCurrent()
+        assertThat(dataList.map { it.isActivated }).containsExactly(false).inOrder()
 
-        // Enable zen mode
-        zenModeRepository.updateZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS)
+        // Add active mode
+        zenModeRepository.addMode(id = "One", active = true)
         runCurrent()
+        assertThat(dataList.map { it.isActivated }).containsExactly(false, true).inOrder()
 
-        // Change zen mode: it's still enabled, so this shouldn't cause another emission
-        zenModeRepository.updateZenMode(ZEN_MODE_NO_INTERRUPTIONS)
+        // Add another mode: state hasn't changed, so this shouldn't cause another emission
+        zenModeRepository.addMode(id = "Two", active = true)
         runCurrent()
+        assertThat(dataList.map { it.isActivated }).containsExactly(false, true).inOrder()
 
-        // Disable zen mode
-        zenModeRepository.updateZenMode(ZEN_MODE_OFF)
+        // Remove a mode and disable the other
+        zenModeRepository.removeMode("One")
         runCurrent()
-
-        assertThat(dataList.map { it.isActivated }).containsExactly(false, true, false)
+        zenModeRepository.deactivateMode("Two")
+        runCurrent()
+        assertThat(dataList.map { it.isActivated }).containsExactly(false, true, false).inOrder()
     }
 
     private companion object {
