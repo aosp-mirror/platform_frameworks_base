@@ -16,8 +16,10 @@
 
 package com.android.systemui.keyboard.shortcut.ui.composable
 
+import android.graphics.drawable.Icon
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +45,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Search
@@ -75,6 +78,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -86,11 +90,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
+import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutIcon
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
@@ -221,6 +227,7 @@ private val ShortcutCategory.icon: ImageVector
             ShortcutCategoryType.SYSTEM -> Icons.Default.Tv
             ShortcutCategoryType.MULTI_TASKING -> Icons.Default.VerticalSplit
             ShortcutCategoryType.IME -> Icons.Default.Keyboard
+            ShortcutCategoryType.APP_CATEGORIES -> Icons.Default.Apps
         }
 
 private val ShortcutCategory.labelResId: Int
@@ -229,6 +236,7 @@ private val ShortcutCategory.labelResId: Int
             ShortcutCategoryType.SYSTEM -> R.string.shortcut_helper_category_system
             ShortcutCategoryType.MULTI_TASKING -> R.string.shortcut_helper_category_multitasking
             ShortcutCategoryType.IME -> R.string.shortcut_helper_category_input
+            ShortcutCategoryType.APP_CATEGORIES -> R.string.shortcut_helper_category_app_shortcuts
         }
 
 @Composable
@@ -359,16 +367,45 @@ private fun SubCategoryTitle(title: String) {
 @Composable
 private fun ShortcutViewDualPane(shortcut: Shortcut) {
     Row(Modifier.padding(vertical = 16.dp)) {
-        ShortcutDescriptionText(
+        Row(
             modifier = Modifier.width(160.dp).align(Alignment.CenterVertically),
-            shortcut = shortcut,
-        )
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (shortcut.icon != null) {
+                ShortcutIcon(
+                    shortcut.icon,
+                    modifier = Modifier.size(36.dp),
+                )
+            }
+            ShortcutDescriptionText(
+                shortcut = shortcut,
+            )
+        }
         Spacer(modifier = Modifier.width(16.dp))
         ShortcutKeyCombinations(
             modifier = Modifier.weight(1f),
             shortcut = shortcut,
         )
     }
+}
+
+@Composable
+fun ShortcutIcon(
+    icon: ShortcutIcon,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+) {
+    val context = LocalContext.current
+    val drawable =
+        remember(icon.packageName, icon.resourceId) {
+            Icon.createWithResource(icon.packageName, icon.resourceId).loadDrawable(context)
+        } ?: return
+    Image(
+        painter = rememberDrawablePainter(drawable),
+        contentDescription = contentDescription,
+        modifier = modifier,
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)

@@ -20,10 +20,12 @@ import android.app.Activity
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags.keyboardShortcutHelperRewrite
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
+import com.android.systemui.keyboard.shortcut.data.source.AppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.InputShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.MultitaskingShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.SystemShortcutsSource
+import com.android.systemui.keyboard.shortcut.qualifiers.AppCategoriesShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.InputShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.MultitaskingShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.SystemShortcuts
@@ -55,6 +57,12 @@ interface ShortcutHelperModule {
     @Binds
     @InputShortcuts
     fun inputShortcutsSources(impl: InputShortcutsSource): KeyboardShortcutGroupsSource
+
+    @Binds
+    @AppCategoriesShortcuts
+    fun appCategoriesShortcutsSource(
+        impl: AppCategoriesShortcutsSource
+    ): KeyboardShortcutGroupsSource
 
     companion object {
         @Provides

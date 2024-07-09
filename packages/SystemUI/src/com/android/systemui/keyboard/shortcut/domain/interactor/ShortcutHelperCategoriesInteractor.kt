@@ -24,7 +24,6 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 
 @SysUISingleton
 class ShortcutHelperCategoriesInteractor
@@ -33,13 +32,13 @@ constructor(
     categoriesRepository: ShortcutHelperCategoriesRepository,
 ) {
 
-    private val systemsShortcutCategory = categoriesRepository.systemShortcutsCategory
-    private val multitaskingShortcutsCategory = categoriesRepository.multitaskingShortcutsCategory
-    private val imeShortcutsCategory = categoriesRepository.imeShortcutsCategory
-
     val shortcutCategories: Flow<List<ShortcutCategory>> =
-        combine(systemsShortcutCategory, multitaskingShortcutsCategory, imeShortcutsCategory) {
-            shortcutCategories ->
+        combine(
+            categoriesRepository.systemShortcutsCategory,
+            categoriesRepository.multitaskingShortcutsCategory,
+            categoriesRepository.imeShortcutsCategory,
+            categoriesRepository.appCategoriesShortcutsCategory,
+        ) { shortcutCategories ->
             shortcutCategories.filterNotNull().map { groupSubCategoriesInCategory(it) }
         }
 
@@ -62,6 +61,10 @@ constructor(
             .groupBy { it.label }
             .entries
             .map { (commonLabel, groupedShortcuts) ->
-                Shortcut(label = commonLabel, commands = groupedShortcuts.flatMap { it.commands })
+                Shortcut(
+                    label = commonLabel,
+                    icon = groupedShortcuts.firstOrNull()?.icon,
+                    commands = groupedShortcuts.flatMap { it.commands }
+                )
             }
 }
