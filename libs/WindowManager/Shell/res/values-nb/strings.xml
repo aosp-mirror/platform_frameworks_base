@@ -117,7 +117,7 @@
     <string name="more_button_text" msgid="3655388105592893530">"Mer"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Svevende"</string>
     <string name="select_text" msgid="5139083974039906583">"Velg"</string>
-    <string name="screenshot_text" msgid="1477704010087786671">"Skjermdump"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Skjermbilde"</string>
     <string name="close_text" msgid="4986518933445178928">"Lukk"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Lukk menyen"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Åpne menyen"</string>
