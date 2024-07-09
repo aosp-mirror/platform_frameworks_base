@@ -65,7 +65,7 @@ class DefaultClockProvider(
             throw IllegalArgumentException("$id is unsupported by $TAG")
         }
 
-        // TODO: Update placeholder to actual resource
+        // TODO(b/352049256): Update placeholder to actual resource
         return resources.getDrawable(R.drawable.clock_default_thumbnail, null)
     }
 }
