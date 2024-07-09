@@ -2397,17 +2397,12 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir Mensajes"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cómo funciona"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Vuelve a configurar el Desbloqueo con huellas dactilares"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Ya no se puede reconocer <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Ya no se pueden reconocer <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> y <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"Ya no se puede reconocer <xliff:g id="FINGERPRINT">%s</xliff:g>. Vuelve a configurar el Desbloqueo con huellas dactilares."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"Ya no se pueden reconocer <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> y <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>. Vuelve a configurar el Desbloqueo con huellas dactilares."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Vuelve a configurar el Desbloqueo facial"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Ya no se puede reconocer tu modelo de rostro. Vuelve a configurar el Desbloqueo facial."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configurar"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ahora no"</string>
 </resources>
