@@ -111,6 +111,7 @@ import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.chips.StatusBarChipsModule;
 import com.android.systemui.statusbar.connectivity.ConnectivityModule;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.disableflags.dagger.DisableFlagsModule;
@@ -245,6 +246,7 @@ import javax.inject.Named;
         SmartspaceModule.class,
         StatusBarEventsModule.class,
         StatusBarModule.class,
+        StatusBarChipsModule.class,
         StatusBarPipelineModule.class,
         StatusBarPolicyModule.class,
         StatusBarViewBinderModule.class,

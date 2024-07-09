@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.call.domain.interactor
+package com.android.systemui.statusbar.chips
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.statusbar.chips.statusBarChipsLogger
-import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
+import dagger.Module
+import dagger.Provides
 
-val Kosmos.callChipInteractor: CallChipInteractor by
-    Kosmos.Fixture {
-        CallChipInteractor(
-            scope = applicationCoroutineScope,
-            repository = ongoingCallRepository,
-            logger = statusBarChipsLogger,
-        )
+@Module
+abstract class StatusBarChipsModule {
+    companion object {
+        @Provides
+        @SysUISingleton
+        @StatusBarChipsLog
+        fun provideChipsLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("StatusBarChips", 200)
+        }
     }
+}
