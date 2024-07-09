@@ -648,7 +648,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * Handles {@link Intent#ACTION_LOCALE_CHANGED}.
      *
      * <p>Note: For historical reasons, {@link Intent#ACTION_LOCALE_CHANGED} has been sent to all
-     * the users. We should ignore this event if this is about any background user's locale.</p>
+     * the users.</p>
      */
     void onActionLocaleChanged(@NonNull LocaleList prevLocales, @NonNull LocaleList newLocales) {
         if (DEBUG) {
@@ -665,13 +665,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         AdditionalSubtypeMapRepository.get(userId),
                         DirectBootAwareness.AUTO);
                 InputMethodSettingsRepository.put(userId, settings);
+
+                if (mConcurrentMultiUserModeEnabled || userId == mCurrentUserId) {
+                    postInputMethodSettingUpdatedLocked(true /* resetDefaultEnabledIme */, userId);
+                    // If the locale is changed, needs to reset the default ime
+                    resetDefaultImeLocked(mContext, userId);
+                    updateFromSettingsLocked(true, userId);
+                }
             }
-            // TODO(b/305849394): Dispatch this to non-current users.
-            final int userId = mCurrentUserId;
-            postInputMethodSettingUpdatedLocked(true /* resetDefaultEnabledIme */, userId);
-            // If the locale is changed, needs to reset the default ime
-            resetDefaultImeLocked(mContext, userId);
-            updateFromSettingsLocked(true, userId);
         }
     }
 
