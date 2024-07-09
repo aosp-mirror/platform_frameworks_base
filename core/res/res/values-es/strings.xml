@@ -1402,7 +1402,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Mostrar sobre otras aplicaciones"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> se muestra sobre otras aplicaciones"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> se muestra sobre otras apps"</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> se muestra sobre otras aplicaciones"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Si no quieres que <xliff:g id="NAME">%s</xliff:g> utilice esta función, toca la notificación para abrir los ajustes y desactivarla."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desactivar"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Comprobando <xliff:g id="NAME">%s</xliff:g>…"</string>
