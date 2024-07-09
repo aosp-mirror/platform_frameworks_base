@@ -102,11 +102,7 @@ constructor(
                 if (alternateBouncerSupported) {
                     combine(
                             keyguardTransitionInteractor.get().currentKeyguardState,
-                            if (SceneContainerFlag.isEnabled) {
-                                sceneInteractor.get().currentScene
-                            } else {
-                                flowOf(Scenes.Lockscreen)
-                            },
+                            sceneInteractor.get().currentScene,
                             ::Pair
                         )
                         .flatMapLatest { (currentKeyguardState, transitionState) ->
@@ -220,6 +216,7 @@ constructor(
         return (systemClock.uptimeMillis() - bouncerRepository.lastAlternateBouncerVisibleTime) >
             MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS
     }
+
     /**
      * Should only be called through StatusBarKeyguardViewManager which propagates the source of
      * truth to other concerned controllers. Will hide the alternate bouncer if it's no longer

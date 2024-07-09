@@ -137,6 +137,8 @@ constructor(
                                 (KeyguardWmStateRefactor.isEnabled && canWakeDirectlyToGone)
 
                         if (shouldTransitionToGone) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                            if (SceneContainerFlag.isEnabled) return@collect
                             startTransitionTo(
                                 toState = KeyguardState.GONE,
                             )

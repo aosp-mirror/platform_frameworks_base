@@ -40,7 +40,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -81,25 +80,18 @@ constructor(
     }
 
     val surfaceBehindVisibility: Flow<Boolean?> =
-        if (SceneContainerFlag.isEnabled) {
-            // The edge Scenes.Bouncer <-> Scenes.Gone is handled by STL
-            flowOf(null)
-        } else {
-            transitionInteractor
-                .transition(
-                    edge = Edge.INVALID,
-                    edgeWithoutSceneContainer =
-                        Edge.create(from = KeyguardState.PRIMARY_BOUNCER, to = KeyguardState.GONE)
-                )
-                .map<TransitionStep, Boolean?> {
-                    it.value > TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD
-                }
-                .onStart {
-                    // Default to null ("don't care, use a reasonable default").
-                    emit(null)
-                }
-                .distinctUntilChanged()
-        }
+        transitionInteractor
+            .transition(
+                edge = Edge.INVALID,
+                edgeWithoutSceneContainer =
+                    Edge.create(from = KeyguardState.PRIMARY_BOUNCER, to = KeyguardState.GONE)
+            )
+            .map<TransitionStep, Boolean?> { it.value > TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD }
+            .onStart {
+                // Default to null ("don't care, use a reasonable default").
+                emit(null)
+            }
+            .distinctUntilChanged()
 
     fun dismissPrimaryBouncer() {
         scope.launch { startTransitionTo(KeyguardState.GONE) }
