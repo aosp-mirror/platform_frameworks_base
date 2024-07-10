@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 
 import android.app.ActivityManager
+import android.content.Context
 import androidx.annotation.DrawableRes
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
@@ -47,6 +48,7 @@ class ScreenRecordChipViewModel
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
+    private val context: Context,
     private val interactor: ScreenRecordChipInteractor,
     private val systemClock: SystemClock,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
@@ -90,6 +92,7 @@ constructor(
     ): EndScreenRecordingDialogDelegate {
         return EndScreenRecordingDialogDelegate(
             endMediaProjectionDialogHelper,
+            context,
             stopAction = interactor::stopRecording,
             recordedTask,
         )

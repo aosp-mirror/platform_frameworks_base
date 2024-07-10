@@ -18,8 +18,6 @@ package com.android.systemui.clipboardoverlay.dagger;
 
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
-import static com.android.systemui.Flags.screenshotShelfUi2;
-
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import android.content.Context;
@@ -59,13 +57,8 @@ public interface ClipboardOverlayModule {
      */
     @Provides
     static ClipboardOverlayView provideClipboardOverlayView(@OverlayWindowContext Context context) {
-        if (screenshotShelfUi2()) {
-            return (ClipboardOverlayView) LayoutInflater.from(context).inflate(
-                    R.layout.clipboard_overlay2, null);
-        } else {
-            return (ClipboardOverlayView) LayoutInflater.from(context).inflate(
-                    R.layout.clipboard_overlay, null);
-        }
+        return (ClipboardOverlayView) LayoutInflater.from(context).inflate(
+                R.layout.clipboard_overlay, null);
     }
 
     @Qualifier

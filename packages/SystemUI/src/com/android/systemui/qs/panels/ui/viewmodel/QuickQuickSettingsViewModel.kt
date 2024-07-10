@@ -26,8 +26,8 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
@@ -54,14 +54,24 @@ constructor(
             quickQuickSettingsRowInteractor.defaultRows
         )
 
-    val tileViewModels: Flow<List<SizedTile<TileViewModel>>> =
-        columns.flatMapLatest { columns ->
-            tilesInteractor.currentTiles.combine(rows, ::Pair).mapLatest { (tiles, rows) ->
-                tiles
-                    .map { SizedTile(TileViewModel(it.tile, it.spec), it.spec.width) }
-                    .let { splitInRowsSequence(it, columns).take(rows).toList().flatten() }
+    val tileViewModels: StateFlow<List<SizedTile<TileViewModel>>> =
+        columns
+            .flatMapLatest { columns ->
+                tilesInteractor.currentTiles.combine(rows, ::Pair).mapLatest { (tiles, rows) ->
+                    tiles
+                        .map { SizedTile(TileViewModel(it.tile, it.spec), it.spec.width) }
+                        .let { splitInRowsSequence(it, columns).take(rows).toList().flatten() }
+                }
             }
-        }
+            .stateIn(
+                applicationScope,
+                SharingStarted.WhileSubscribed(),
+                tilesInteractor.currentTiles.value
+                    .map { SizedTile(TileViewModel(it.tile, it.spec), it.spec.width) }
+                    .let {
+                        splitInRowsSequence(it, columns.value).take(rows.value).toList().flatten()
+                    }
+            )
 
     private val TileSpec.width: Int
         get() = if (iconTilesViewModel.isIconTile(this)) 1 else 2

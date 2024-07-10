@@ -135,5 +135,24 @@
             android:drawableTint="?androidprv:attr/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton"/>
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/open_in_browser_pill"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/desktop_mode_handle_menu_open_in_browser_pill_height"
+        android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
+        android:layout_marginStart="1dp"
+        android:orientation="vertical"
+        android:elevation="1dp"
+        android:background="@drawable/desktop_mode_decor_handle_menu_background">
+
+        <Button
+            android:id="@+id/open_in_browser_button"
+            android:contentDescription="@string/open_in_browser_text"
+            android:text="@string/open_in_browser_text"
+            android:drawableStart="@drawable/desktop_mode_ic_handle_menu_open_in_browser"
+            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            style="@style/DesktopModeHandleMenuActionButton"/>
+    </LinearLayout>
 </LinearLayout>
 

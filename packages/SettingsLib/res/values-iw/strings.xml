@@ -436,8 +436,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"מאפשר כתיבה של כל אפליקציה באחסון חיצוני, ללא התחשבות בערכי המניפסט"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"אילוץ יכולת קביעת גודל של הפעילויות"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"מאפשר יכולת קביעת גודל של כל הפעילויות לריבוי חלונות, ללא התחשבות בערכי המניפסט."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"הפעלת האפשרות לשנות את הגודל והמיקום של החלונות"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"הפעלת תמיכה בתכונה הניסיונית של שינוי הגודל והמיקום של החלונות."</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"הפעלת שינוי הגודל והמיקום של החלונות (מדור קודם)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"הפעלת תמיכה בתכונה הניסיונית מדור קודם של שינוי הגודל והמיקום של החלונות."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"סיסמת גיבוי שולחן העבודה"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"גיבויים מלאים בשולחן העבודה אינם מוגנים כעת"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"יש להקיש כדי לשנות או להסיר את הסיסמה לגיבויים מלאים בשולחן העבודה"</string>

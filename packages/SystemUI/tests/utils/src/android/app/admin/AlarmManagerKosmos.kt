@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.controls.domain.pipeline
+package android.app.admin
 
+import android.app.AlarmManager
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.log.logcatLogBuffer
-import org.mockito.Mockito.mock
+import com.android.systemui.util.mockito.mock
 
-val Kosmos.mediaLoadingLogger by
-    Kosmos.Fixture { MediaLoadingLogger(logcatLogBuffer("MediaLoadingLogBuffer")) }
-val Kosmos.mockMediaLoadingLogger by Kosmos.Fixture { mock(MediaLoadingLogger::class.java) }
+var Kosmos.alarmManager by Kosmos.Fixture { mock<AlarmManager>() }

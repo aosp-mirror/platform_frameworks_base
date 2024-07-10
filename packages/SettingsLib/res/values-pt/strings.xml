@@ -436,8 +436,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Qualificar apps para gravação em armazenamento externo, independentemente dos valores do manifesto"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forçar atividades a serem redimensionáveis"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Tornar todas as atividades redimensionáveis para várias janelas, independentemente dos valores do manifesto"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Ativar janelas de forma livre"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Ativar a compatibilidade com janelas experimentais de forma livre"</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"Ativar janelas de forma livre (legado)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Ativar a compatibilidade com janelas experimentais legadas de forma livre."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Senha de backup local"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Os backups completos não estão protegidos no momento"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Toque para alterar ou remover a senha de backups completos do desktop"</string>

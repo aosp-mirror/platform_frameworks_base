@@ -58,12 +58,12 @@ constructor(
     val viewParams: Flow<KeyguardSurfaceBehindModel> =
         combine(
                 transitionInteractor.isInTransition(
-                    Edge.create(to = Scenes.Gone),
-                    edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE)
+                    edge = Edge.create(to = Scenes.Gone),
+                    edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE),
                 ),
                 transitionInteractor.isFinishedIn(
-                    Scenes.Gone,
-                    stateWithoutSceneContainer = KeyguardState.GONE
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = KeyguardState.GONE,
                 ),
                 notificationLaunchInteractor.isLaunchAnimationRunning,
             ) { transitioningToGone, isOnGone, notifAnimationRunning ->
@@ -112,8 +112,8 @@ constructor(
         notificationLaunchInteractor.isLaunchAnimationRunning
             .sample(
                 transitionInteractor.isFinishedIn(
-                    Scenes.Gone,
-                    stateWithoutSceneContainer = KeyguardState.GONE
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = KeyguardState.GONE,
                 ),
                 ::Pair
             )

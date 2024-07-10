@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 
+import android.content.Context
 import androidx.annotation.DrawableRes
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
@@ -53,6 +54,7 @@ class CastToOtherDeviceChipViewModel
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
+    private val context: Context,
     private val mediaProjectionChipInteractor: MediaProjectionChipInteractor,
     private val mediaRouterChipInteractor: MediaRouterChipInteractor,
     private val systemClock: SystemClock,
@@ -115,7 +117,7 @@ constructor(
                         // This does mean that the audio-only casting chip will *never* show a
                         // timer, because audio-only casting never activates the MediaProjection
                         // APIs and those are the only cast APIs that show a timer.
-                        createIconOnlyCastChip()
+                        createIconOnlyCastChip(routerModel.deviceName)
                     }
                 }
             }
@@ -178,7 +180,7 @@ constructor(
         )
     }
 
-    private fun createIconOnlyCastChip(): OngoingActivityChipModel.Shown {
+    private fun createIconOnlyCastChip(deviceName: String?): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.IconOnly(
             icon =
                 Icon.Resource(
@@ -188,7 +190,7 @@ constructor(
                 ),
             colors = ColorsModel.Red,
             createDialogLaunchOnClickListener(
-                createGenericCastToOtherDeviceDialogDelegate(),
+                createGenericCastToOtherDeviceDialogDelegate(deviceName),
                 dialogTransitionAnimator,
             ),
         )
@@ -199,13 +201,16 @@ constructor(
     ) =
         EndCastScreenToOtherDeviceDialogDelegate(
             endMediaProjectionDialogHelper,
+            context,
             stopAction = this::stopProjecting,
             state,
         )
 
-    private fun createGenericCastToOtherDeviceDialogDelegate() =
+    private fun createGenericCastToOtherDeviceDialogDelegate(deviceName: String?) =
         EndGenericCastToOtherDeviceDialogDelegate(
             endMediaProjectionDialogHelper,
+            context,
+            deviceName,
             stopAction = this::stopMediaRouterCasting,
         )
 

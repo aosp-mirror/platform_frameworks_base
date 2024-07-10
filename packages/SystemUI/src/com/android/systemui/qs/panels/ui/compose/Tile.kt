@@ -22,6 +22,7 @@ import android.graphics.drawable.Animatable
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.service.quicksettings.Tile.STATE_INACTIVE
 import android.text.TextUtils
+import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
@@ -81,7 +82,6 @@ import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.load
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileUiState
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toUiState
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
@@ -91,7 +91,6 @@ import com.android.systemui.res.R
 import java.util.function.Supplier
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.mapLatest
 
 object TileType
 
@@ -103,29 +102,27 @@ fun Tile(
     showLabels: Boolean = false,
     modifier: Modifier,
 ) {
-    val state: TileUiState by
-        tile.state
-            .mapLatest { it.toUiState() }
-            .collectAsStateWithLifecycle(tile.currentState.toUiState())
-    val colors = TileDefaults.getColorForState(state.state)
+    val state by tile.state.collectAsStateWithLifecycle(tile.currentState)
+    val uiState = remember(state) { state.toUiState() }
+    val colors = TileDefaults.getColorForState(uiState.state)
 
     TileContainer(
         colors = colors,
         showLabels = showLabels,
-        label = state.label.toString(),
+        label = uiState.label,
         iconOnly = iconOnly,
         clickEnabled = true,
         onClick = tile::onClick,
         onLongClick = tile::onLongClick,
         modifier = modifier,
     ) {
-        val icon = getTileIcon(icon = state.icon)
+        val icon = getTileIcon(icon = uiState.icon)
         if (iconOnly) {
             TileIcon(icon = icon, color = colors.icon, modifier = Modifier.align(Alignment.Center))
         } else {
             LargeTileContent(
-                label = state.label.toString(),
-                secondaryLabel = state.secondaryLabel.toString(),
+                label = uiState.label,
+                secondaryLabel = uiState.secondaryLabel,
                 icon = icon,
                 colors = colors,
                 clickEnabled = true,
@@ -234,17 +231,24 @@ private fun LargeTileContent(
             Text(
                 label,
                 color = colors.label,
-                modifier = Modifier.basicMarquee(),
+                modifier = Modifier.tileMarquee(),
             )
             if (!TextUtils.isEmpty(secondaryLabel)) {
                 Text(
                     secondaryLabel ?: "",
                     color = colors.secondaryLabel,
-                    modifier = Modifier.basicMarquee(),
+                    modifier = Modifier.tileMarquee(),
                 )
             }
         }
     }
+}
+
+private fun Modifier.tileMarquee(): Modifier {
+    return basicMarquee(
+        iterations = 1,
+        initialDelayMillis = 200,
+    )
 }
 
 @Composable
@@ -452,6 +456,7 @@ private fun TileIcon(
     animateToEnd: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
+    Log.d("Fabian", "Recomposing tile icon")
     val iconModifier = modifier.size(dimensionResource(id = R.dimen.qs_icon_size))
     val context = LocalContext.current
     val loadedDrawable =
