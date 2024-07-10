@@ -5360,6 +5360,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             saveTriggerId = null;
         }
 
+        boolean hasAuthentication = (response.getAuthentication() != null);
+
         // Must also track that are part of datasets, otherwise the FillUI won't be hidden when
         // they go away (if they're not savable).
 
@@ -5379,6 +5381,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         }
                     }
                 }
+                if (dataset.getAuthentication() != null) {
+                    hasAuthentication = true;
+                }
             }
         }
 
@@ -5390,7 +5395,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + " hasSaveInfo: " + (saveInfo != null));
             }
             mClient.setTrackedViews(id, toArray(trackedViews), mSaveOnAllViewsInvisible,
-                    saveOnFinish, toArray(fillableIds), saveTriggerId);
+                    saveOnFinish, toArray(fillableIds), saveTriggerId, hasAuthentication);
         } catch (RemoteException e) {
             Slog.w(TAG, "Cannot set tracked ids", e);
         }

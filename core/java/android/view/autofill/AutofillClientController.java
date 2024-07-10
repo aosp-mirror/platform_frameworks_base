@@ -582,4 +582,9 @@ public final class AutofillClientController implements AutofillManager.AutofillC
             Log.e(TAG, "authenticate() failed for intent:" + intent, e);
         }
     }
+
+    @Override
+    public boolean isActivityResumed() {
+        return mActivity.isResumed();
+    }
 }
