@@ -40,6 +40,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -64,6 +65,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -948,9 +950,25 @@ private fun WidgetContent(
     val selectedKey by viewModel.selectedKey.collectAsStateWithLifecycle()
     val selectedIndex =
         selectedKey?.let { key -> contentListState.list.indexOfFirst { it.key == key } }
+
+    val isSelected = selectedKey == model.key
+
+    val selectableModifier =
+        if (viewModel.isEditMode) {
+            Modifier.selectable(
+                selected = isSelected,
+                onClick = { viewModel.setSelectedKey(model.key) },
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            )
+        } else {
+            Modifier
+        }
+
     Box(
         modifier =
             modifier
+                .then(selectableModifier)
                 .thenIf(!viewModel.isEditMode && model.inQuietMode) {
                     Modifier.pointerInput(Unit) {
                         // consume tap to prevent the child view from triggering interactions with
