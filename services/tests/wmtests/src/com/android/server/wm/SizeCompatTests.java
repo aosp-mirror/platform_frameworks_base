@@ -1081,10 +1081,11 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Simulate the user selecting the fullscreen user aspect ratio override
         spyOn(activity.mWmService.mLetterboxConfiguration);
-        spyOn(activity.mLetterboxUiController);
+        spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
         doReturn(true).when(activity.mWmService.mLetterboxConfiguration)
                 .isUserAppAspectRatioFullscreenEnabled();
-        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN).when(activity.mLetterboxUiController)
+        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN)
+                .when(activity.mAppCompatController.getAppCompatAspectRatioOverrides())
                 .getUserMinAspectRatioOverrideCode();
         assertFalse(activity.shouldCreateCompatDisplayInsets());
     }
@@ -2081,9 +2082,10 @@ public class SizeCompatTests extends WindowTestsBase {
                 .isUserAppAspectRatioFullscreenEnabled();
 
         // Set user aspect ratio override
-        spyOn(mActivity.mLetterboxUiController);
-        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN).when(mActivity.mLetterboxUiController)
-                .getUserMinAspectRatioOverrideCode();
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN)
+                .when(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                    .getUserMinAspectRatioOverrideCode();
 
         prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_PORTRAIT);
 
@@ -2105,9 +2107,10 @@ public class SizeCompatTests extends WindowTestsBase {
                 .isUserAppAspectRatioFullscreenEnabled();
 
         // Set user aspect ratio override
-        spyOn(mActivity.mLetterboxUiController);
-        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN).when(mActivity.mLetterboxUiController)
-                .getUserMinAspectRatioOverrideCode();
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN)
+                .when(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                    .getUserMinAspectRatioOverrideCode();
 
         prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -2124,9 +2127,10 @@ public class SizeCompatTests extends WindowTestsBase {
         final int displayHeight = 1400;
         setUpDisplaySizeWithApp(displayWidth, displayHeight);
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        spyOn(mActivity.mLetterboxUiController);
-        doReturn(true).when(mActivity.mLetterboxUiController)
-                .isSystemOverrideToFullscreenEnabled();
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        doReturn(true).when(
+                mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                    .isSystemOverrideToFullscreenEnabled();
 
         prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_PORTRAIT);
 
@@ -2143,9 +2147,10 @@ public class SizeCompatTests extends WindowTestsBase {
         final int displayHeight = 1600;
         setUpDisplaySizeWithApp(displayWidth, displayHeight);
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        spyOn(mActivity.mLetterboxUiController);
-        doReturn(true).when(mActivity.mLetterboxUiController)
-                .isSystemOverrideToFullscreenEnabled();
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        doReturn(true).when(
+                mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                    .isSystemOverrideToFullscreenEnabled();
 
         prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -4204,9 +4209,10 @@ public class SizeCompatTests extends WindowTestsBase {
 
         Configuration parentConfig = mActivity.getParent().getConfiguration();
 
-        float actual = mActivity.mLetterboxUiController
-                .getFixedOrientationLetterboxAspectRatio(parentConfig);
-        float expected = mActivity.mLetterboxUiController.getSplitScreenAspectRatio();
+        final AppCompatAspectRatioOverrides aspectRatioOverrides =
+                mActivity.mAppCompatController.getAppCompatAspectRatioOverrides();
+        float actual = aspectRatioOverrides.getFixedOrientationLetterboxAspectRatio(parentConfig);
+        float expected = aspectRatioOverrides.getSplitScreenAspectRatio();
 
         assertEquals(expected, actual, DELTA_ASPECT_RATIO_TOLERANCE);
     }

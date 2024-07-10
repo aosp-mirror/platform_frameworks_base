@@ -33,6 +33,8 @@ class AppCompatController {
     @NonNull
     private final AppCompatOrientationPolicy mOrientationPolicy;
     @NonNull
+    private final AppCompatAspectRatioPolicy mAppCompatAspectRatioPolicy;
+    @NonNull
     private final AppCompatOverrides mAppCompatOverrides;
 
     AppCompatController(@NonNull WindowManagerService wmService,
@@ -45,12 +47,9 @@ class AppCompatController {
                 wmService.mLetterboxConfiguration);
         mAppCompatOverrides = new AppCompatOverrides(activityRecord,
                 wmService.mLetterboxConfiguration, optPropBuilder);
-        // TODO(b/341903757) Remove BooleanSuppliers after fixing dependency with aspectRatio.
-        final LetterboxUiController tmpController = activityRecord.mLetterboxUiController;
-        mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord,
-                mAppCompatOverrides, tmpController::shouldApplyUserFullscreenOverride,
-                tmpController::shouldApplyUserMinAspectRatioOverride,
-                tmpController::isSystemOverrideToFullscreenEnabled);
+        mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord, mAppCompatOverrides);
+        mAppCompatAspectRatioPolicy = new AppCompatAspectRatioPolicy(activityRecord,
+                mTransparentPolicy, mOrientationPolicy, mAppCompatOverrides);
     }
 
     @NonNull
@@ -61,6 +60,11 @@ class AppCompatController {
     @NonNull
     AppCompatOrientationPolicy getOrientationPolicy() {
         return mOrientationPolicy;
+    }
+
+    @NonNull
+    AppCompatAspectRatioPolicy getAppCompatAspectRatioPolicy() {
+        return mAppCompatAspectRatioPolicy;
     }
 
     @NonNull
@@ -76,6 +80,11 @@ class AppCompatController {
     @NonNull
     AppCompatCameraOverrides getAppCompatCameraOverrides() {
         return mAppCompatOverrides.getAppCompatCameraOverrides();
+    }
+
+    @NonNull
+    AppCompatAspectRatioOverrides getAppCompatAspectRatioOverrides() {
+        return mAppCompatOverrides.getAppCompatAspectRatioOverrides();
     }
 
     @Nullable

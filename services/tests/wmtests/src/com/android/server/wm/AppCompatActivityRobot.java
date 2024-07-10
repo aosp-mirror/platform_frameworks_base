@@ -163,8 +163,8 @@ class AppCompatActivityRobot {
     }
 
     void setShouldApplyUserMinAspectRatioOverride(boolean enabled) {
-        doReturn(enabled).when(mActivityStack.top()
-                .mLetterboxUiController).shouldApplyUserMinAspectRatioOverride();
+        doReturn(enabled).when(mActivityStack.top().mAppCompatController
+                .getAppCompatAspectRatioOverrides()).shouldApplyUserMinAspectRatioOverride();
     }
 
     void setShouldCreateCompatDisplayInsets(boolean enabled) {
@@ -172,13 +172,14 @@ class AppCompatActivityRobot {
     }
 
     void setShouldApplyUserFullscreenOverride(boolean enabled) {
-        doReturn(enabled).when(mActivityStack.top()
-                .mLetterboxUiController).shouldApplyUserFullscreenOverride();
+        doReturn(enabled).when(mActivityStack.top().mAppCompatController
+                .getAppCompatAspectRatioOverrides()).shouldApplyUserFullscreenOverride();
     }
 
     void setGetUserMinAspectRatioOverrideCode(@PackageManager.UserMinAspectRatio int orientation) {
         doReturn(orientation).when(mActivityStack.top()
-                .mLetterboxUiController).getUserMinAspectRatioOverrideCode();
+                .mAppCompatController.getAppCompatAspectRatioOverrides())
+                .getUserMinAspectRatioOverrideCode();
     }
 
     void setIgnoreOrientationRequest(boolean enabled) {
@@ -401,6 +402,7 @@ class AppCompatActivityRobot {
         mActivityStack.push(activity);
         spyOn(activity);
         spyOn(activity.mAppCompatController.getTransparentPolicy());
+        spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
         spyOn(activity.mLetterboxUiController);
     }
 
