@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility
 
+import android.util.MathUtils.sqrt
+
 import android.companion.virtual.VirtualDeviceManager
 import android.companion.virtual.VirtualDeviceParams
 import android.content.Context
@@ -59,6 +61,7 @@ class MouseKeysInterceptorTest {
     companion object {
         const val DISPLAY_ID = 1
         const val DEVICE_ID = 123
+        const val MOUSE_POINTER_MOVEMENT_STEP = 1.8f
         // This delay is required for key events to be sent and handled correctly.
         // The handler only performs a move/scroll event if it receives the key event
         // at INTERVAL_MILLIS (which happens in practice). Hence, we need this delay in the tests.
@@ -113,8 +116,7 @@ class MouseKeysInterceptorTest {
         Mockito.`when`(iInputManager.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
         Mockito.`when`(mockAms.traceManager).thenReturn(mockTraceManager)
 
-        mouseKeysInterceptor = MouseKeysInterceptor(mockAms, mockInputManager,
-            testLooper.looper, DISPLAY_ID)
+        mouseKeysInterceptor = MouseKeysInterceptor(mockAms, testLooper.looper, DISPLAY_ID)
         // VirtualMouse is created on a separate thread.
         // Wait for VirtualMouse to be created before running tests
         TimeUnit.MILLISECONDS.sleep(20L)
@@ -145,7 +147,7 @@ class MouseKeysInterceptorTest {
     fun whenMouseDirectionalKeyIsPressed_relativeEventIsSent() {
         // There should be some delay between the downTime of the key event and calling onKeyEvent
         val downTime = clock.now() - KEYBOARD_POST_EVENT_DELAY_MILLIS
-        val keyCode = MouseKeysInterceptor.MouseKeyEvent.DOWN_MOVE.getKeyCodeValue()
+        val keyCode = MouseKeysInterceptor.MouseKeyEvent.DIAGONAL_DOWN_LEFT_MOVE.keyCodeValue
         val downEvent = KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN,
             keyCode, 0, 0, DEVICE_ID, 0)
 
@@ -153,14 +155,15 @@ class MouseKeysInterceptorTest {
         testLooper.dispatchAll()
 
         // Verify the sendRelativeEvent method is called once and capture the arguments
-        verifyRelativeEvents(arrayOf<Float>(0f), arrayOf<Float>(1.8f))
+        verifyRelativeEvents(arrayOf(-MOUSE_POINTER_MOVEMENT_STEP / sqrt(2.0f)),
+            arrayOf(MOUSE_POINTER_MOVEMENT_STEP / sqrt(2.0f)))
     }
 
     @Test
     fun whenClickKeyIsPressed_buttonEventIsSent() {
         // There should be some delay between the downTime of the key event and calling onKeyEvent
         val downTime = clock.now() - KEYBOARD_POST_EVENT_DELAY_MILLIS
-        val keyCode = MouseKeysInterceptor.MouseKeyEvent.LEFT_CLICK.getKeyCodeValue()
+        val keyCode = MouseKeysInterceptor.MouseKeyEvent.LEFT_CLICK.keyCodeValue
         val downEvent = KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN,
             keyCode, 0, 0, DEVICE_ID, 0)
         mouseKeysInterceptor.onKeyEvent(downEvent, 0)
@@ -179,7 +182,7 @@ class MouseKeysInterceptorTest {
     @Test
     fun whenHoldKeyIsPressed_buttonEventIsSent() {
         val downTime = clock.now() - KEYBOARD_POST_EVENT_DELAY_MILLIS
-        val keyCode = MouseKeysInterceptor.MouseKeyEvent.HOLD.getKeyCodeValue()
+        val keyCode = MouseKeysInterceptor.MouseKeyEvent.HOLD.keyCodeValue
         val downEvent = KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN,
             keyCode, 0, 0, DEVICE_ID, 0)
         mouseKeysInterceptor.onKeyEvent(downEvent, 0)
@@ -195,7 +198,7 @@ class MouseKeysInterceptorTest {
     @Test
     fun whenReleaseKeyIsPressed_buttonEventIsSent() {
         val downTime = clock.now() - KEYBOARD_POST_EVENT_DELAY_MILLIS
-        val keyCode = MouseKeysInterceptor.MouseKeyEvent.RELEASE.getKeyCodeValue()
+        val keyCode = MouseKeysInterceptor.MouseKeyEvent.RELEASE.keyCodeValue
         val downEvent = KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN,
             keyCode, 0, 0, DEVICE_ID, 0)
         mouseKeysInterceptor.onKeyEvent(downEvent, 0)
@@ -209,18 +212,38 @@ class MouseKeysInterceptorTest {
     }
 
     @Test
-    fun whenScrollUpKeyIsPressed_scrollEventIsSent() {
+    fun whenScrollToggleOn_ScrollUpKeyIsPressed_scrollEventIsSent() {
         // There should be some delay between the downTime of the key event and calling onKeyEvent
         val downTime = clock.now() - KEYBOARD_POST_EVENT_DELAY_MILLIS
-        val keyCode = MouseKeysInterceptor.MouseKeyEvent.SCROLL_UP.getKeyCodeValue()
+        val keyCodeScrollToggle = MouseKeysInterceptor.MouseKeyEvent.SCROLL_TOGGLE.keyCodeValue
+        val keyCodeScroll = MouseKeysInterceptor.MouseKeyEvent.UP_MOVE_OR_SCROLL.keyCodeValue
+
+        val scrollToggleDownEvent = KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN,
+            keyCodeScrollToggle, 0, 0, DEVICE_ID, 0)
+        val scrollDownEvent = KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN,
+            keyCodeScroll, 0, 0, DEVICE_ID, 0)
+
+        mouseKeysInterceptor.onKeyEvent(scrollToggleDownEvent, 0)
+        mouseKeysInterceptor.onKeyEvent(scrollDownEvent, 0)
+        testLooper.dispatchAll()
+
+        // Verify the sendScrollEvent method is called once and capture the arguments
+        verifyScrollEvents(arrayOf<Float>(0f), arrayOf<Float>(1.0f))
+    }
+
+    @Test
+    fun whenScrollToggleOff_DirectionalUpKeyIsPressed_RelativeEventIsSent() {
+        // There should be some delay between the downTime of the key event and calling onKeyEvent
+        val downTime = clock.now() - KEYBOARD_POST_EVENT_DELAY_MILLIS
+        val keyCode = MouseKeysInterceptor.MouseKeyEvent.UP_MOVE_OR_SCROLL.keyCodeValue
         val downEvent = KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN,
             keyCode, 0, 0, DEVICE_ID, 0)
 
         mouseKeysInterceptor.onKeyEvent(downEvent, 0)
         testLooper.dispatchAll()
 
-        // Verify the sendScrollEvent method is called once and capture the arguments
-        verifyScrollEvents(arrayOf<Float>(0f), arrayOf<Float>(1.0f))
+        // Verify the sendRelativeEvent method is called once and capture the arguments
+        verifyRelativeEvents(arrayOf<Float>(0f), arrayOf<Float>(-MOUSE_POINTER_MOVEMENT_STEP))
     }
 
     private fun verifyRelativeEvents(expectedX: Array<Float>, expectedY: Array<Float>) {
