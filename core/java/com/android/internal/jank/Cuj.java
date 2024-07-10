@@ -160,8 +160,13 @@ public class Cuj {
      */
     public static final int CUJ_DESKTOP_MODE_RESIZE_WINDOW = 106;
 
-    /** Track entering desktop mode interaction. */
-    public static final int CUJ_DESKTOP_MODE_ENTER_MODE = 107;
+    /**
+     * Track entering desktop mode interaction via app handle drag.
+     *
+     * <p>Tracking starts when the app handle is dragged and
+     * finishes when the window animation to desktop ends after app handle release.
+     */
+    public static final int CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_DRAG = 107;
 
     /** Track exiting desktop mode interaction. */
     public static final int CUJ_DESKTOP_MODE_EXIT_MODE = 108;
@@ -175,9 +180,17 @@ public class Cuj {
     /** Track launching a dialog from a status bar chip. */
     public static final int CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP = 111;
 
+    /**
+     * Track entering desktop mode interaction via app handle menu.
+     *
+     * <p>Tracking starts after windowing mode option in the app handle menu is clicked and
+     * finishes when the window animation to desktop ends.
+     */
+    public static final int CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU = 112;
+
 
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU;
 
     /** @hide */
     @IntDef({
@@ -276,7 +289,8 @@ public class Cuj {
             CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW,
             CUJ_FOLD_ANIM,
             CUJ_DESKTOP_MODE_RESIZE_WINDOW,
-            CUJ_DESKTOP_MODE_ENTER_MODE,
+            CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_DRAG,
+            CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU,
             CUJ_DESKTOP_MODE_EXIT_MODE,
             CUJ_DESKTOP_MODE_MINIMIZE_WINDOW,
             CUJ_DESKTOP_MODE_DRAG_WINDOW,
@@ -389,7 +403,8 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_MAXIMIZE_WINDOW;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_FOLD_ANIM] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__FOLD_ANIM;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_RESIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_RESIZE_WINDOW;
-        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_MODE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_MODE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_DRAG] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_MODE_APP_HANDLE_DRAG;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_EXIT_MODE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_EXIT_MODE;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_MINIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_MINIMIZE_WINDOW;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_DRAG_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_DRAG_WINDOW;
@@ -602,8 +617,10 @@ public class Cuj {
                 return "FOLD_ANIM";
             case CUJ_DESKTOP_MODE_RESIZE_WINDOW:
                 return "DESKTOP_MODE_RESIZE_WINDOW";
-            case CUJ_DESKTOP_MODE_ENTER_MODE:
-                return "DESKTOP_MODE_ENTER_MODE";
+            case CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_DRAG:
+                return "DESKTOP_MODE_ENTER_MODE_APP_HANDLE_DRAG";
+            case CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU:
+                return "DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU";
             case CUJ_DESKTOP_MODE_EXIT_MODE:
                 return "DESKTOP_MODE_EXIT_MODE";
             case CUJ_DESKTOP_MODE_MINIMIZE_WINDOW:
