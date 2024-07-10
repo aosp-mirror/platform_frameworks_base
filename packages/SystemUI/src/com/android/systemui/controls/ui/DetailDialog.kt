@@ -18,7 +18,7 @@ package com.android.systemui.controls.ui
 
 import android.app.Activity
 import android.app.ActivityOptions
-import android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+import android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
 import android.app.Dialog
 import android.app.PendingIntent
 import android.content.ComponentName
@@ -93,8 +93,8 @@ class DetailDialog(
                 0 /* enterResId */,
                 0 /* exitResId */
             ).apply {
-                pendingIntentBackgroundActivityStartMode = MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
+                pendingIntentBackgroundActivityStartMode =
+                    MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
                 taskAlwaysOnTop = true
             }
 
