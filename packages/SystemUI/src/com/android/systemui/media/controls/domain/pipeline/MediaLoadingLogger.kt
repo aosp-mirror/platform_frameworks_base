@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.controls.shared
+package com.android.systemui.media.controls.domain.pipeline
 
 import com.android.internal.logging.InstanceId
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.log.dagger.MediaLog
+import com.android.systemui.log.dagger.MediaLoadingLog
 import javax.inject.Inject
 
 /** A buffered log for media loading events. */
 @SysUISingleton
-class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
+class MediaLoadingLogger @Inject constructor(@MediaLoadingLog private val buffer: LogBuffer) {
 
     fun logMediaLoaded(instanceId: InstanceId, active: Boolean, reason: String) {
         buffer.log(
@@ -78,43 +78,7 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
         )
     }
 
-    fun logMediaCardAdded(instanceId: InstanceId) {
-        buffer.log(
-            TAG,
-            LogLevel.DEBUG,
-            { str1 = instanceId.toString() },
-            { "adding media card $str1 to carousel" }
-        )
-    }
-
-    fun logMediaCardRemoved(instanceId: InstanceId) {
-        buffer.log(
-            TAG,
-            LogLevel.DEBUG,
-            { str1 = instanceId.toString() },
-            { "removing media card $str1 from carousel" }
-        )
-    }
-
-    fun logMediaRecommendationCardAdded(key: String) {
-        buffer.log(
-            TAG,
-            LogLevel.DEBUG,
-            { str1 = key },
-            { "adding recommendation card $str1 to carousel" }
-        )
-    }
-
-    fun logMediaRecommendationCardRemoved(key: String) {
-        buffer.log(
-            TAG,
-            LogLevel.DEBUG,
-            { str1 = key },
-            { "removing recommendation card $str1 from carousel" }
-        )
-    }
-
     companion object {
-        private const val TAG = "MediaLog"
+        private const val TAG = "MediaLoadingLog"
     }
 }

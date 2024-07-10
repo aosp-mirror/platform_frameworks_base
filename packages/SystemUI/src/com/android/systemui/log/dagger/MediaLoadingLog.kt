@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.controls.shared
+package com.android.systemui.log.dagger
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.log.logcatLogBuffer
-import org.mockito.Mockito.mock
+import com.android.systemui.log.LogBuffer
+import javax.inject.Qualifier
 
-var Kosmos.mediaLogger by Kosmos.Fixture { MediaLogger(logcatLogBuffer("MediaLogBuffer")) }
-val Kosmos.mockMediaLogger by Kosmos.Fixture { mock(MediaLogger::class.java) }
+/** A [LogBuffer] for [com.android.systemui.media.controls.domain.pipeline.MediaLoadingLogger] */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class MediaLoadingLog

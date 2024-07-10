@@ -21,7 +21,6 @@ import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
-import com.android.systemui.media.controls.shared.mediaLogger
 import com.android.systemui.media.controls.util.mediaFlags
 import com.android.systemui.media.controls.util.mediaUiEventLogger
 import com.android.systemui.settings.userTracker
@@ -46,6 +45,6 @@ val Kosmos.mediaDataFilter by
             logger = mediaUiEventLogger,
             mediaFlags = mediaFlags,
             mediaFilterRepository = mediaFilterRepository,
-            mediaLogger = mediaLogger,
+            mediaLoadingLogger = mediaLoadingLogger,
         )
     }

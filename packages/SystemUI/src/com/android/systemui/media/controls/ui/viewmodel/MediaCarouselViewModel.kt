@@ -23,7 +23,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.media.controls.domain.pipeline.interactor.factory.MediaControlInteractorFactory
-import com.android.systemui.media.controls.shared.MediaLogger
 import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
@@ -53,7 +52,6 @@ constructor(
     private val recommendationsViewModel: MediaRecommendationsViewModel,
     private val logger: MediaUiEventLogger,
     private val mediaFlags: MediaFlags,
-    private val mediaLogger: MediaLogger,
 ) {
 
     val mediaItems: StateFlow<List<MediaCommonViewModel>> =
@@ -133,14 +131,10 @@ constructor(
                     instanceId = instanceId,
                     immediatelyUpdateUi = commonModel.mediaLoadedModel.immediatelyUpdateUi,
                     controlViewModel = createMediaControlViewModel(instanceId),
-                    onAdded = {
-                        mediaLogger.logMediaCardAdded(instanceId)
-                        onMediaControlAddedOrUpdated(it, commonModel)
-                    },
+                    onAdded = { onMediaControlAddedOrUpdated(it, commonModel) },
                     onRemoved = {
                         interactor.removeMediaControl(instanceId, delay = 0L)
                         mediaControlByInstanceId.remove(instanceId)
-                        mediaLogger.logMediaCardRemoved(instanceId)
                     },
                     onUpdated = { onMediaControlAddedOrUpdated(it, commonModel) },
                     isMediaFromRec = commonModel.isMediaFromRec,
@@ -174,9 +168,6 @@ constructor(
                             mediaFlags.isPersistentSsCardEnabled(),
                     recsViewModel = recommendationsViewModel,
                     onAdded = { commonViewModel ->
-                        mediaLogger.logMediaRecommendationCardAdded(
-                            commonModel.recsLoadingModel.key
-                        )
                         onMediaRecommendationAddedOrUpdated(
                             commonViewModel as MediaCommonViewModel.MediaRecommendations
                         )
@@ -224,7 +215,6 @@ constructor(
         commonModel: MediaCommonModel.MediaRecommendations,
         immediatelyRemove: Boolean
     ) {
-        mediaLogger.logMediaRecommendationCardRemoved(commonModel.recsLoadingModel.key)
         if (immediatelyRemove || isReorderingAllowed()) {
             interactor.dismissSmartspaceRecommendation(commonModel.recsLoadingModel.key, 0L)
             mediaRecs = null
