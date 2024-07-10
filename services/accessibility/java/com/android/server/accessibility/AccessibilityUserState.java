@@ -232,6 +232,8 @@ class AccessibilityUserState {
         mAccessibilityShortcutKeyTargets.clear();
         mAccessibilityButtonTargets.clear();
         mAccessibilityGestureTargets.clear();
+        mAccessibilityQsTargets.clear();
+        mA11yTilesInQsPanel.clear();
         mTargetAssignedToAccessibilityButton = null;
         mIsTouchExplorationEnabled = false;
         mServiceHandlesDoubleTap = false;
