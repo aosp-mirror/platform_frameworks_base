@@ -31,9 +31,7 @@ import java.util.Map;
 public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
 
     /** Creates a {@link DataLabels} from the human-readable DOM element. */
-    @Override
-    public DataLabels createFromHrElements(List<Element> elements) throws MalformedXmlException {
-        Element ele = XmlUtils.getSingleElement(elements);
+    public DataLabels createFromHrElement(Element ele) throws MalformedXmlException {
         if (ele == null) {
             AslgenUtil.logI("Found no DataLabels in hr format.");
             return null;
@@ -83,9 +81,7 @@ public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
     }
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
-    @Override
-    public DataLabels createFromOdElements(List<Element> elements) throws MalformedXmlException {
-        Element dataLabelsEle = XmlUtils.getSingleElement(elements);
+    public DataLabels createFromOdElement(Element dataLabelsEle) throws MalformedXmlException {
         if (dataLabelsEle == null) {
             AslgenUtil.logI("Found no DataLabels in od format.");
             return null;
@@ -111,7 +107,7 @@ public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
         for (Element dataCategoryEle : dataCategoryEles) {
             String dataCategoryName = dataCategoryEle.getAttribute(XmlUtils.OD_ATTR_NAME);
             DataCategory dataCategory =
-                    new DataCategoryFactory().createFromOdElements(List.of(dataCategoryEle));
+                    new DataCategoryFactory().createFromOdElement(dataCategoryEle);
             dataCategoryMap.put(dataCategoryName, dataCategory);
         }
         return dataCategoryMap;
