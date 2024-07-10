@@ -40,8 +40,8 @@ flag {
 flag {
     name: "enable_windowing_edge_drag_resize"
     namespace: "lse_desktop_experience"
-    description: "Enables edge drag resizing for all input sources"
-    bug: "323383067"
+    description: "Enables edge drag resizing for stylus input (cursor is enabled by default)"
+    bug: "337782092"
 }
 
 flag {
