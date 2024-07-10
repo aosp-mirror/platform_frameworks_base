@@ -236,14 +236,16 @@ public class InputMethodManagerServiceTestBase {
                         "immstest1",
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
+        mServiceThread.start();
         mIoThread =
                 new ServiceThread(
                         "immstest2",
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
+        mIoThread.start();
         mInputMethodManagerService = new InputMethodManagerService(mContext,
                 InputMethodManagerService.shouldEnableConcurrentMultiUserMode(mContext),
-                mServiceThread, mIoThread,
+                mServiceThread.getLooper(), Handler.createAsync(mIoThread.getLooper()),
                 unusedUserId -> mMockInputMethodBindingController);
         spyOn(mInputMethodManagerService);
 

@@ -88,6 +88,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -923,16 +924,43 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     public static final class Lifecycle extends SystemService {
         private final InputMethodManagerService mService;
 
-
         public Lifecycle(Context context) {
-            this(context, new InputMethodManagerService(context,
-                            shouldEnableConcurrentMultiUserMode(context)));
+            this(context, createServiceForProduction(context));
         }
 
-        public Lifecycle(
-                Context context, @NonNull InputMethodManagerService inputMethodManagerService) {
+        @VisibleForTesting
+        Lifecycle(Context context, @NonNull InputMethodManagerService inputMethodManagerService) {
             super(context);
             mService = inputMethodManagerService;
+        }
+
+        /**
+         * Does initialization then instantiate {@link InputMethodManagerService} for production
+         * configurations.
+         *
+         * <p>We have this abstraction just because several unit tests directly initialize
+         * {@link InputMethodManagerService} with some mocked/emulated dependencies.</p>
+         *
+         * @param context {@link Context} to be used to set up
+         * @return {@link InputMethodManagerService} object to be used
+         */
+        @NonNull
+        private static InputMethodManagerService createServiceForProduction(
+                @NonNull Context context) {
+            // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
+            // additional subtypes in switchUserOnHandlerLocked().
+            final ServiceThread thread = new ServiceThread(HANDLER_THREAD_NAME,
+                    Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
+            thread.start();
+
+            final ServiceThread ioThread = new ServiceThread(PACKAGE_MONITOR_THREAD_NAME,
+                    Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
+            ioThread.start();
+
+            return new InputMethodManagerService(context,
+                    shouldEnableConcurrentMultiUserMode(context), thread.getLooper(),
+                    Handler.createAsync(ioThread.getLooper()),
+                    null /* bindingControllerForTesting */);
         }
 
         @Override
@@ -1042,17 +1070,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         mHandler.post(task);
     }
 
-    public InputMethodManagerService(Context context,
-            boolean concurrentMultiUserModeEnabled) {
-        this(context, concurrentMultiUserModeEnabled, null, null, null);
-    }
-
     @VisibleForTesting
     InputMethodManagerService(
             Context context,
             boolean concurrentMultiUserModeEnabled,
-            @Nullable ServiceThread serviceThreadForTesting,
-            @Nullable ServiceThread ioThreadForTesting,
+            @NonNull Looper uiLooper,
+            @NonNull Handler ioHandler,
             @Nullable IntFunction<InputMethodBindingController> bindingControllerForTesting) {
         synchronized (ImfLock.class) {
             mConcurrentMultiUserModeEnabled = concurrentMultiUserModeEnabled;
@@ -1060,28 +1083,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mRes = context.getResources();
             SecureSettingsWrapper.onStart(mContext);
 
-            // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
-            // additional subtypes in switchUserOnHandlerLocked().
-            final ServiceThread thread =
-                    serviceThreadForTesting != null
-                            ? serviceThreadForTesting
-                            : new ServiceThread(
-                                    HANDLER_THREAD_NAME,
-                                    Process.THREAD_PRIORITY_FOREGROUND,
-                                    true /* allowIo */);
-            thread.start();
-            mHandler = Handler.createAsync(thread.getLooper(), this);
-            {
-                final ServiceThread ioThread =
-                        ioThreadForTesting != null
-                                ? ioThreadForTesting
-                                : new ServiceThread(
-                                        PACKAGE_MONITOR_THREAD_NAME,
-                                        Process.THREAD_PRIORITY_FOREGROUND,
-                                        true /* allowIo */);
-                ioThread.start();
-                mIoHandler = Handler.createAsync(ioThread.getLooper());
-            }
+            mHandler = Handler.createAsync(uiLooper, this);
+            mIoHandler = ioHandler;
             SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mHandler);
             mImeTrackerService = new ImeTrackerService(mHandler);
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
@@ -1129,7 +1132,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mNonPreemptibleInputMethods = mRes.getStringArray(
                     com.android.internal.R.array.config_nonPreemptibleInputMethods);
             Runnable discardDelegationTextRunnable = () -> discardHandwritingDelegationText();
-            mHwController = new HandwritingModeController(mContext, thread.getLooper(),
+            mHwController = new HandwritingModeController(mContext, uiLooper,
                     new InkWindowInitializer(), discardDelegationTextRunnable);
             registerDeviceListenerAndCheckStylusSupport();
         }
