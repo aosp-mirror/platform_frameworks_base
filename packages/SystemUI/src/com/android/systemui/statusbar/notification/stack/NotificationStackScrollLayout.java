@@ -715,6 +715,7 @@ public class NotificationStackScrollLayout
     }
 
     public float getNotificationSquishinessFraction() {
+        SceneContainerFlag.assertInLegacyMode();
         return mStackScrollAlgorithm.getNotificationSquishinessFraction(mAmbientState);
     }
 
@@ -860,7 +861,7 @@ public class NotificationStackScrollLayout
                     /* label= */ "getHeight() - mKeyguardBottomPadding = " + y);
         }
 
-        y = getHeight() - getEmptyBottomMargin();
+        y = getHeight() - getEmptyBottomMarginInternal();
         drawDebugInfo(canvas, y, Color.GREEN,
                 /* label= */ "getHeight() - getEmptyBottomMargin() = " + y);
 
@@ -1270,7 +1271,7 @@ public class NotificationStackScrollLayout
 
     private void updateAlgorithmLayoutMinHeight() {
         mAmbientState.setLayoutMinHeight(mQsFullScreen || isHeadsUpTransition()
-                ? getLayoutMinHeight() : 0);
+                ? getLayoutMinHeightInternal() : 0);
     }
 
     /**
@@ -1444,7 +1445,7 @@ public class NotificationStackScrollLayout
         } else {
             if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
                 final float endHeight = updateStackEndHeight(
-                        getHeight(), getEmptyBottomMargin(), getTopPadding());
+                        getHeight(), getEmptyBottomMarginInternal(), getTopPadding());
                 updateStackHeight(endHeight, fraction);
             } else {
                 // Always updateStackHeight to prevent jumps in the stack height when this fraction
@@ -1617,7 +1618,7 @@ public class NotificationStackScrollLayout
         float appear;
         float expandAmount;
         if (mKeyguardBypassEnabled && onKeyguard()) {
-            appear = calculateAppearFractionBypass();
+            appear = calculateAppearFractionBypassInternal();
             expandAmount = getPulseHeight();
         } else {
             appear = MathUtils.saturate(calculateAppearFraction(mExpandedHeight));
@@ -1642,6 +1643,7 @@ public class NotificationStackScrollLayout
      * Return the height of the content ignoring the footer.
      */
     public int getIntrinsicContentHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return (int) mIntrinsicContentHeight;
     }
 
@@ -2373,6 +2375,11 @@ public class NotificationStackScrollLayout
      * @return the first child which has visibility unequal to GONE
      */
     public ExpandableView getFirstChildNotGone() {
+        SceneContainerFlag.assertInLegacyMode();
+        return getFirstChildNotGoneInternal();
+    }
+
+    private ExpandableView getFirstChildNotGoneInternal() {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
@@ -2432,6 +2439,7 @@ public class NotificationStackScrollLayout
      * @return the number of children which have visibility unequal to GONE
      */
     public int getNotGoneChildCount() {
+        SceneContainerFlag.assertInLegacyMode();
         int childCount = getChildCount();
         int count = 0;
         for (int i = 0; i < childCount; i++) {
@@ -2642,7 +2650,7 @@ public class NotificationStackScrollLayout
      */
     public void updateTopPadding(float qsHeight, boolean animate) {
         int topPadding = (int) qsHeight;
-        int minStackHeight = getLayoutMinHeight();
+        int minStackHeight = getLayoutMinHeightInternal();
         if (topPadding + minStackHeight > getHeight()) {
             mTopPaddingOverflow = topPadding + minStackHeight - getHeight();
         } else {
@@ -2658,6 +2666,11 @@ public class NotificationStackScrollLayout
     }
 
     public int getLayoutMinHeight() {
+        SceneContainerFlag.assertInLegacyMode();
+        return getLayoutMinHeightInternal();
+    }
+
+    private int getLayoutMinHeightInternal() {
         if (isHeadsUpTransition()) {
             ExpandableNotificationRow trackedHeadsUpRow = mAmbientState.getTrackedHeadsUpRow();
             if (trackedHeadsUpRow.isAboveShelf()) {
@@ -3430,7 +3443,7 @@ public class NotificationStackScrollLayout
      * @return Whether a y coordinate is inside the content.
      */
     public boolean isInContentBounds(float y) {
-        return y < getHeight() - getEmptyBottomMargin();
+        return y < getHeight() - getEmptyBottomMarginInternal();
     }
 
     private float getTouchSlop(MotionEvent event) {
@@ -4063,10 +4076,16 @@ public class NotificationStackScrollLayout
     }
 
     boolean isScrolledToBottom() {
+        SceneContainerFlag.assertInLegacyMode();
         return mScrollAdapter.isScrolledToBottom();
     }
 
     int getEmptyBottomMargin() {
+        SceneContainerFlag.assertInLegacyMode();
+        return getEmptyBottomMarginInternal();
+    }
+
+    private int getEmptyBottomMarginInternal() {
         int contentHeight;
         if (mShouldUseSplitNotificationShade) {
             // When in split shade and there are no notifications, the height can be too low, as
@@ -4249,7 +4268,7 @@ public class NotificationStackScrollLayout
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
         if (view instanceof ExpandableNotificationRow row && !onKeyguard()) {
             // TODO: once we're recycling this will need to check the adapter position of the child
-            if (row.isUserLocked() && row != getFirstChildNotGone()) {
+            if (row.isUserLocked() && row != getFirstChildNotGoneInternal()) {
                 if (row.isSummaryWithChildren()) {
                     return;
                 }
@@ -4536,7 +4555,7 @@ public class NotificationStackScrollLayout
         // clipped when pulsing
         float ownTranslationZ = 0;
         if (mKeyguardBypassEnabled && mAmbientState.isHiddenAtAll()) {
-            ExpandableView firstChildNotGone = getFirstChildNotGone();
+            ExpandableView firstChildNotGone = getFirstChildNotGoneInternal();
             if (firstChildNotGone != null && firstChildNotGone.showingPulsing()) {
                 ownTranslationZ = firstChildNotGone.getTranslationZ();
             }
@@ -4684,10 +4703,12 @@ public class NotificationStackScrollLayout
     }
 
     public int getEmptyShadeViewHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mEmptyShadeView.getHeight();
     }
 
     public float getBottomMostNotificationBottom() {
+        SceneContainerFlag.assertInLegacyMode();
         final int count = getChildCount();
         float max = 0;
         for (int childIdx = 0; childIdx < count; childIdx++) {
@@ -5110,6 +5131,7 @@ public class NotificationStackScrollLayout
     }
 
     public float getOpeningHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         if (mEmptyShadeView.getVisibility() == GONE) {
             return getMinExpansionHeight();
         } else {
@@ -5566,6 +5588,11 @@ public class NotificationStackScrollLayout
     }
 
     public float calculateAppearFractionBypass() {
+        SceneContainerFlag.assertInLegacyMode();
+        return calculateAppearFractionBypassInternal();
+    }
+
+    private float calculateAppearFractionBypassInternal() {
         float pulseHeight = getPulseHeight();
         // The total distance required to fully reveal the header
         float totalDistance = getIntrinsicPadding();
@@ -6435,6 +6462,7 @@ public class NotificationStackScrollLayout
     };
 
     public HeadsUpTouchHelper.Callback getHeadsUpCallback() {
+        SceneContainerFlag.assertInLegacyMode();
         return mHeadsUpCallback;
     }
 

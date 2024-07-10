@@ -1004,6 +1004,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public int getRight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getRight();
     }
 
@@ -1015,6 +1016,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * @return the left of the view.
      */
     public int getLeft() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getLeft();
     }
 
@@ -1022,6 +1024,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * @return the top of the view.
      */
     public int getTop() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getTop();
     }
 
@@ -1029,6 +1032,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * @return the bottom of the view.
      */
     public int getBottom() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getBottom();
     }
 
@@ -1158,6 +1162,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public int getIntrinsicContentHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getIntrinsicContentHeight();
     }
 
@@ -1216,6 +1221,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public float getX() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getX();
     }
 
@@ -1224,14 +1230,17 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public float getWidth() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getWidth();
     }
 
     public float getOpeningHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getOpeningHeight();
     }
 
     public float getBottomMostNotificationBottom() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getBottomMostNotificationBottom();
     }
 
@@ -1266,10 +1275,12 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public float getNotificationSquishinessFraction() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getNotificationSquishinessFraction();
     }
 
     public float calculateAppearFractionBypass() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.calculateAppearFractionBypass();
     }
 
@@ -1279,22 +1290,27 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public boolean isScrolledToBottom() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.isScrolledToBottom();
     }
 
     public int getNotGoneChildCount() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getNotGoneChildCount();
     }
 
     public float getIntrinsicPadding() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getIntrinsicPadding();
     }
 
     public float getLayoutMinHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getLayoutMinHeight();
     }
 
     public int getEmptyBottomMargin() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getEmptyBottomMargin();
     }
 
@@ -1307,6 +1323,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public float getEmptyShadeViewHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getEmptyShadeViewHeight();
     }
 
@@ -1474,6 +1491,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public boolean isShowingEmptyShadeView() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.isEmptyShadeViewVisible();
     }
 
@@ -1602,6 +1620,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public ExpandableView getFirstChildNotGone() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getFirstChildNotGone();
     }
 
@@ -1713,6 +1732,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public boolean isLongPressInProgress() {
+        SceneContainerFlag.assertInLegacyMode();
         return mLongPressedView != null;
     }
 
@@ -1722,6 +1742,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * from the keyguard host to the quick settings one.
      */
     public int getFullShadeTransitionInset() {
+        SceneContainerFlag.assertInLegacyMode();
         MediaContainerView view = mKeyguardMediaController.getSinglePaneContainer();
         if (view == null || view.getHeight() == 0
                 || mStatusBarStateController.getState() != KEYGUARD) {
