@@ -84,6 +84,10 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"버블"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"관리"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"대화창을 닫았습니다."</string>
+    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
+    <skip />
+    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
+    <skip />
     <string name="restart_button_description" msgid="4564728020654658478">"탭하면 앱을 다시 시작하여 보기를 개선합니다."</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"설정에서 앱의 가로세로 비율을 변경합니다."</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"가로세로 비율 변경"</string>

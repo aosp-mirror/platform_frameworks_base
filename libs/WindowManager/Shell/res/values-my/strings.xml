@@ -84,6 +84,10 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ပူဖောင်းဖောက်သံ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"စီမံရန်"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ပူဖောင်းကွက် ဖယ်လိုက်သည်။"</string>
+    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
+    <skip />
+    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
+    <skip />
     <string name="restart_button_description" msgid="4564728020654658478">"ပိုကောင်းသောမြင်ကွင်းအတွက် ဤအက်ပ်ပြန်စရန် တို့ပါ"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"ဆက်တင်များတွင် ဤအက်ပ်၏အချိုးအစားကို ပြောင်းရန်"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"အချိုးစား ပြောင်းရန်"</string>
