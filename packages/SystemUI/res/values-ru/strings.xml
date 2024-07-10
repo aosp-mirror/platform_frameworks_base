@@ -103,8 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Приложение \"<xliff:g id="APPNAME">%1$s</xliff:g>\" обнаружило создание скриншота."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"Приложение \"<xliff:g id="APPNAME">%1$s</xliff:g>\" и другие запущенные продукты обнаружили создание скриншота."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Добавить в заметку"</string>
-    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
-    <skip />
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Добавить ссылку"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Запись видео с экрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обработка записи с экрана…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущее уведомление для записи видео с экрана"</string>
@@ -196,8 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Разблокировано сканированием лица. Нажмите, чтобы продолжить."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Лицо распознано. Нажмите, чтобы продолжить."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лицо распознано. Нажмите на значок разблокировки."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Сканирование лица выполнено. Нажмите, чтобы продолжить."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Аутентификация выполнена"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Отмена распознавания лица"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Ещё"</string>
@@ -478,8 +476,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Добавить виджеты"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Нажмите и удерживайте, чтобы настроить виджеты."</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Настроить виджеты"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Чтобы настроить виджеты, разблокируйте устройство."</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Значок приложения для отключенного виджета"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Значок приложения для устанавливаемого виджета"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Изменить виджет"</string>
@@ -1377,6 +1374,8 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
     <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Чтобы вернуться, проведите тремя пальцами влево или вправо по сенсорной панели."</string>

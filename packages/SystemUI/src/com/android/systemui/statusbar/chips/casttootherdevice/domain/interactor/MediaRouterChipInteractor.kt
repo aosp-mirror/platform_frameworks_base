@@ -49,7 +49,7 @@ constructor(
         activeCastDevice
             .map {
                 if (it != null) {
-                    MediaRouterCastModel.Casting
+                    MediaRouterCastModel.Casting(deviceName = it.name)
                 } else {
                     MediaRouterCastModel.DoingNothing
                 }

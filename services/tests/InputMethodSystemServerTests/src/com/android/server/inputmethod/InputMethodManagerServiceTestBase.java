@@ -49,6 +49,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.view.InputChannel;
 import android.view.inputmethod.EditorInfo;
 import android.window.ImeOnBackInvokedDispatcher;
@@ -134,6 +135,14 @@ public class InputMethodManagerServiceTestBase {
     protected boolean mIsLargeScreen;
     private InputManagerGlobal.TestSession mInputManagerGlobalSession;
 
+    private final ArraySet<Class<?>> mRegisteredLocalServices = new ArraySet<>();
+
+    protected <T> void addLocalServiceMock(Class<T> type, T service) {
+        mRegisteredLocalServices.add(type);
+        LocalServices.removeServiceForTest(type);
+        LocalServices.addService(type, service);
+    }
+
     @BeforeClass
     public static void setupClass() {
         // Make sure DeviceConfig's lazy-initialized ContentProvider gets
@@ -148,7 +157,6 @@ public class InputMethodManagerServiceTestBase {
                 mockitoSession()
                         .initMocks(this)
                         .strictness(Strictness.LENIENT)
-                        .spyStatic(LocalServices.class)
                         .mockStatic(ServiceManager.class)
                         .mockStatic(SystemServerInitThreadPool.class)
                         .startMocking();
@@ -163,18 +171,13 @@ public class InputMethodManagerServiceTestBase {
         mEditorInfo.packageName = TEST_EDITOR_PKG_NAME;
 
         // Injecting and mocking local services.
-        doReturn(mMockWindowManagerInternal)
-                .when(() -> LocalServices.getService(WindowManagerInternal.class));
-        doReturn(mMockActivityManagerInternal)
-                .when(() -> LocalServices.getService(ActivityManagerInternal.class));
-        doReturn(mMockPackageManagerInternal)
-                .when(() -> LocalServices.getService(PackageManagerInternal.class));
-        doReturn(mMockInputManagerInternal)
-                .when(() -> LocalServices.getService(InputManagerInternal.class));
-        doReturn(mMockUserManagerInternal)
-                .when(() -> LocalServices.getService(UserManagerInternal.class));
-        doReturn(mMockImeTargetVisibilityPolicy)
-                .when(() -> LocalServices.getService(ImeTargetVisibilityPolicy.class));
+        addLocalServiceMock(WindowManagerInternal.class, mMockWindowManagerInternal);
+        addLocalServiceMock(ActivityManagerInternal.class, mMockActivityManagerInternal);
+        addLocalServiceMock(PackageManagerInternal.class, mMockPackageManagerInternal);
+        addLocalServiceMock(InputManagerInternal.class, mMockInputManagerInternal);
+        addLocalServiceMock(UserManagerInternal.class, mMockUserManagerInternal);
+        addLocalServiceMock(ImeTargetVisibilityPolicy.class, mMockImeTargetVisibilityPolicy);
+
         doReturn(mMockIInputMethodManager)
                 .when(() -> ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE));
         doReturn(mMockIPlatformCompat)
@@ -289,7 +292,7 @@ public class InputMethodManagerServiceTestBase {
         if (mInputManagerGlobalSession != null) {
             mInputManagerGlobalSession.close();
         }
-        LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
+        mRegisteredLocalServices.forEach(LocalServices::removeServiceForTest);
     }
 
     protected void verifyShowSoftInput(boolean setVisible, boolean showSoftInput)

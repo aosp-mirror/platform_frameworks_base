@@ -75,7 +75,6 @@ public final class AutoBrightnessFallbackStrategy implements DisplayBrightnessSt
         brightnessReason.setReason(BrightnessReason.REASON_SCREEN_OFF_BRIGHTNESS_SENSOR);
         return new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
-                .setSdrBrightness(brightness)
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(getName())
                 .setShouldUpdateScreenBrightnessSetting(brightness

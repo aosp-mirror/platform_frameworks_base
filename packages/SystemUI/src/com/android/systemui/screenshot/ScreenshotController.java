@@ -20,7 +20,6 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
 import static com.android.systemui.Flags.screenshotPrivateProfileAccessibilityAnnouncementFix;
-import static com.android.systemui.Flags.screenshotShelfUi2;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
@@ -407,22 +406,16 @@ public class ScreenshotController implements ScreenshotHandler {
         }
 
         final UUID requestId;
-        if (screenshotShelfUi2()) {
-            requestId = mActionsController.setCurrentScreenshot(screenshot);
-            saveScreenshotInBackground(screenshot, requestId, finisher);
+        requestId = mActionsController.setCurrentScreenshot(screenshot);
+        saveScreenshotInBackground(screenshot, requestId, finisher);
 
-            if (screenshot.getTaskId() >= 0) {
-                mAssistContentRequester.requestAssistContent(
-                        screenshot.getTaskId(),
-                        assistContent ->
-                                mActionsController.onAssistContent(requestId, assistContent));
-            } else {
-                mActionsController.onAssistContent(requestId, null);
-            }
+        if (screenshot.getTaskId() >= 0) {
+            mAssistContentRequester.requestAssistContent(
+                    screenshot.getTaskId(),
+                    assistContent ->
+                            mActionsController.onAssistContent(requestId, assistContent));
         } else {
-            requestId = UUID.randomUUID(); // passed through but unused for legacy UI
-            saveScreenshotInWorkerThread(screenshot.getUserHandle(), finisher,
-                    this::showUiOnActionsReady, this::showUiOnQuickShareActionReady);
+            mActionsController.onAssistContent(requestId, null);
         }
 
         // The window is focusable by default
@@ -458,9 +451,6 @@ public class ScreenshotController implements ScreenshotHandler {
         // ignore system bar insets for the purpose of window layout
         mWindow.getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> WindowInsets.CONSUMED);
-        if (!screenshotShelfUi2()) {
-            mScreenshotHandler.cancelTimeout(); // restarted after animation
-        }
     }
 
     private boolean shouldShowUi() {
@@ -515,11 +505,7 @@ public class ScreenshotController implements ScreenshotHandler {
     }
 
     boolean isPendingSharedTransition() {
-        if (screenshotShelfUi2()) {
-            return mActionExecutor.isPendingSharedTransition();
-        } else {
-            return mViewProxy.isPendingSharedTransition();
-        }
+        return mActionExecutor.isPendingSharedTransition();
     }
 
     // Any cleanup needed when the service is being destroyed.
@@ -603,11 +589,7 @@ public class ScreenshotController implements ScreenshotHandler {
                             if (mConfigChanges.applyNewConfig(mContext.getResources())) {
                                 // Hide the scroll chip until we know it's available in this
                                 // orientation
-                                if (screenshotShelfUi2()) {
-                                    mActionsController.onScrollChipInvalidated();
-                                } else {
-                                    mViewProxy.hideScrollChip();
-                                }
+                                mActionsController.onScrollChipInvalidated();
                                 // Delay scroll capture eval a bit to allow the underlying activity
                                 // to set up in the new orientation.
                                 mScreenshotHandler.postDelayed(
@@ -640,13 +622,8 @@ public class ScreenshotController implements ScreenshotHandler {
                 (response) -> {
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION,
                             0, response.getPackageName());
-                    if (screenshotShelfUi2()) {
-                        mActionsController.onScrollChipReady(requestId,
-                                () -> onScrollButtonClicked(owner, response));
-                    } else {
-                        mViewProxy.showScrollChip(response.getPackageName(),
-                                () -> onScrollButtonClicked(owner, response));
-                    }
+                    mActionsController.onScrollChipReady(requestId,
+                            () -> onScrollButtonClicked(owner, response));
                     return Unit.INSTANCE;
                 }
         );
@@ -715,11 +692,9 @@ public class ScreenshotController implements ScreenshotHandler {
         mWindowManager.addView(decorView, mWindowLayoutParams);
         decorView.requestApplyInsets();
 
-        if (screenshotShelfUi2()) {
-            ViewGroup layout = decorView.requireViewById(android.R.id.content);
-            layout.setClipChildren(false);
-            layout.setClipToPadding(false);
-        }
+        ViewGroup layout = decorView.requireViewById(android.R.id.content);
+        layout.setClipChildren(false);
+        layout.setClipToPadding(false);
     }
 
     void removeWindow() {

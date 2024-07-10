@@ -44,6 +44,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Trace;
 import android.util.Log;
@@ -88,6 +89,7 @@ import java.util.function.Supplier;
  */
 public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLinearLayout> {
     private static final String TAG = "DesktopModeWindowDecoration";
+    private static final int CAPTURED_LINK_TIMEOUT_MS = 7000;
 
     @VisibleForTesting
     static final long CLOSE_MAXIMIZE_MENU_DELAY_MS = 150L;
@@ -124,6 +126,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private Bitmap mResizeVeilBitmap;
 
     private CharSequence mAppName;
+    private CapturedLink mCapturedLink;
+    private OpenInBrowserClickListener mOpenInBrowserClickListener;
 
     private ExclusionRegionListener mExclusionRegionListener;
 
@@ -138,6 +142,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     // being hovered. There's a small delay after stopping the hover, to allow a quick reentry
     // to cancel the close.
     private final Runnable mCloseMaximizeWindowRunnable = this::closeMaximizeMenu;
+    private final Runnable mCapturedLinkExpiredRunnable = this::onCapturedLinkExpired;
 
     DesktopModeWindowDecoration(
             Context context,
@@ -153,8 +158,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 handler, choreographer, syncQueue, rootTaskDisplayAreaOrganizer,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
                 WindowContainerTransaction::new, SurfaceControl::new,
-                new SurfaceControlViewHostFactory() {},
-                DefaultMaximizeMenuFactory.INSTANCE);
+                new SurfaceControlViewHostFactory() {}, DefaultMaximizeMenuFactory.INSTANCE);
     }
 
     DesktopModeWindowDecoration(
@@ -230,6 +234,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     void setDragDetector(DragDetector dragDetector) {
         mDragDetector = dragDetector;
         mDragDetector.setTouchSlop(ViewConfiguration.get(mContext).getScaledTouchSlop());
+    }
+
+    void setOpenInBrowserClickListener(OpenInBrowserClickListener listener) {
+        mOpenInBrowserClickListener = listener;
     }
 
     @Override
@@ -323,6 +331,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
             boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
         Trace.beginSection("DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces");
+
+        if (Flags.enableDesktopWindowingAppToWeb()) {
+            setCapturedLink(taskInfo.capturedLink, taskInfo.capturedLinkTimestamp);
+        }
+
         if (isHandleMenuActive()) {
             mHandleMenu.relayout(startT);
         }
@@ -365,6 +378,28 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         updateDragResizeListener(oldDecorationSurface);
         updateMaximizeMenu(startT);
         Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
+    }
+
+    private void setCapturedLink(Uri capturedLink, long timeStamp) {
+        if (capturedLink == null
+                || (mCapturedLink != null && mCapturedLink.mTimeStamp == timeStamp)) {
+            return;
+        }
+        mCapturedLink = new CapturedLink(capturedLink, timeStamp);
+        mHandler.postDelayed(mCapturedLinkExpiredRunnable, CAPTURED_LINK_TIMEOUT_MS);
+    }
+
+    private void onCapturedLinkExpired() {
+        mHandler.removeCallbacks(mCapturedLinkExpiredRunnable);
+        if (mCapturedLink != null) {
+            mCapturedLink.setExpired();
+        }
+    }
+
+    void onOpenInBrowserClick() {
+        if (mOpenInBrowserClickListener == null || mCapturedLink == null) return;
+        mOpenInBrowserClickListener.onClick(this, mCapturedLink.mUri);
+        onCapturedLinkExpired();
     }
 
     private void updateDragResizeListener(SurfaceControl oldDecorationSurface) {
@@ -827,9 +862,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .setCaptionHeight(mResult.mCaptionHeight)
                 .setDisplayController(mDisplayController)
                 .setSplitScreenController(splitScreenController)
+                .setBrowserLinkAvailable(browserLinkAvailable())
                 .build();
         mWindowDecorViewHolder.onHandleMenuOpened();
         mHandleMenu.show();
+    }
+
+    @VisibleForTesting
+    boolean browserLinkAvailable() {
+        return mCapturedLink != null && !mCapturedLink.mExpired;
     }
 
     /**
@@ -1119,6 +1160,31 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     syncQueue,
                     rootTaskDisplayAreaOrganizer);
         }
+    }
+
+    @VisibleForTesting
+    static class CapturedLink {
+        private final long mTimeStamp;
+        private final Uri mUri;
+        private boolean mExpired;
+
+        CapturedLink(@NonNull Uri uri, long timeStamp) {
+            mUri = uri;
+            mTimeStamp = timeStamp;
+            mExpired = false;
+        }
+
+        void setExpired() {
+            mExpired = true;
+        }
+    }
+
+
+    /** Listener for the handle menu's "Open in browser" button */
+    interface OpenInBrowserClickListener {
+
+        /** Inform the implementing class that the "Open in browser" button has been clicked */
+        void onClick(DesktopModeWindowDecoration decoration, Uri uri);
     }
 
     interface ExclusionRegionListener {

@@ -71,7 +71,7 @@
     <string name="usb_port_enabled" msgid="531823867664717018">"Registrering av ladere og tilbehør er slått på for USB-porten"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Slå på USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Finn ut mer"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"Skjermdump"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Skjermbilde"</string>
     <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Hold ulåst er slått av"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"har sendt et bilde"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Lagrer skjermbildet …"</string>
@@ -103,8 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> har registrert dette skjermbildet."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> og andre åpne apper har registrert dette skjermbildet."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Legg til i notat"</string>
-    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
-    <skip />
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Inkluder linken"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Skjermopptak"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Behandler skjermopptaket"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Vedvarende varsel for et skjermopptak"</string>
@@ -196,8 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Låst opp med ansiktet. Trykk for å fortsette."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Ansiktet er gjenkjent. Trykk for å fortsette."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Ansiktet er gjenkjent. Trykk på lås opp-ikon for å fortsette"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Låst opp med ansiktet. Trykk for å fortsette."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentisert"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Avbryt autentisering"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Flere alternativer"</string>
@@ -478,8 +476,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Legg til flere moduler"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Trykk lenge for å tilpasse modulene"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Tilpass moduler"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Lås opp for å tilpasse moduler"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Appikon for deaktivert modul"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Appikon for en modul som installeres"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Endre modul"</string>
@@ -1377,6 +1374,8 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
     <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Gå tilbake"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"For å gå tilbake, sveip til venstre eller høyre med tre fingre hvor som helst på styreflaten."</string>
