@@ -1134,6 +1134,17 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     @Override
+    public void setIgnoreDisplayTouches(long requestId, int sensorId, boolean shouldIgnore) {
+        mScheduler.getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.w(TAG, "setIgnoreDisplayTouches received during client: " + client);
+                return;
+            }
+            ((Udfps) client).setIgnoreDisplayTouches(shouldIgnore);
+        });
+    }
+
+    @Override
     public void onPowerPressed() {
         Slog.e(TAG, "onPowerPressed not supported for HIDL clients");
     }

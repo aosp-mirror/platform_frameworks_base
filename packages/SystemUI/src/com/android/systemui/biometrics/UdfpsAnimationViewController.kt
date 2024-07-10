@@ -138,7 +138,7 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     override fun onViewDetached() {
         dialogManager.unregisterListener(dialogListener)
         dumpManager.unregisterDumpable(dumpTag)
-        udfpsOverlayInteractor.setHandleTouches(shouldHandle = !shouldPauseAuth())
+        udfpsOverlayInteractor.setHandleTouches(false)
     }
 
     /**

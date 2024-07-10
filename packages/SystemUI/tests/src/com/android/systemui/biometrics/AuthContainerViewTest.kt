@@ -26,6 +26,7 @@ import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
+import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.os.Handler
 import android.os.IBinder
@@ -100,6 +101,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Mock
     lateinit var callback: AuthDialogCallback
     @Mock
+    lateinit var fingerprintManager: FingerprintManager
+    @Mock
     lateinit var userManager: UserManager
     @Mock
     lateinit var lockPatternUtils: LockPatternUtils
@@ -170,6 +173,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
                         context,
                         authController,
                         selectedUserInteractor,
+                        fingerprintManager,
                         testScope.backgroundScope,
                 )
         biometricStatusInteractor =

@@ -726,6 +726,25 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
+     * Set whether the HAL should ignore display touches.
+     * Only applies to sensors where the HAL is reponsible for handling touches.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void setIgnoreDisplayTouches(long requestId, int sensorId, boolean ignoreTouch) {
+        if (mService == null) {
+            Slog.w(TAG, "setIgnoreDisplayTouches: no fingerprint service");
+            return;
+        }
+
+        try {
+            mService.setIgnoreDisplayTouches(requestId, sensorId, ignoreTouch);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Request fingerprint enrollment. This call warms up the fingerprint hardware
      * and starts scanning for fingerprints. Progress will be indicated by callbacks to the
      * {@link EnrollmentCallback} object. It terminates when

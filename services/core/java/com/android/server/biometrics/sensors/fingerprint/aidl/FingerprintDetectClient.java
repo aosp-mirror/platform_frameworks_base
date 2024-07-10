@@ -87,7 +87,6 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
 
     @Override
     protected void stopHalOperation() {
-        resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
         unsubscribeBiometricContext();
 
@@ -103,7 +102,6 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
 
     @Override
     protected void startHalOperation() {
-        resetIgnoreDisplayTouches();
         mSensorOverlays.show(getSensorId(), BiometricRequestConstants.REASON_AUTH_KEYGUARD,
                 this);
 
