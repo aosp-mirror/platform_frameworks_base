@@ -129,18 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Uzoyeka ukurekhoda &lt;b&gt;i-<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Uzoyeka ukwaba &lt;b&gt;i-<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Uzoyeka ukusakaza &lt;b&gt;i-<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -189,6 +192,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Vula ngobuso. Cindezela ukuze uqhubeke."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Ubuso buyaziwa. Cindezela ukuze uqhubeke."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Ubuso buyaziwa. Cindezela isithonjana sokuvula ukuze uqhubeke."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Kuvulwe ngobuso. Thepha ukuze uqhubeke."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Kugunyaziwe"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Khansela Ukuqinisekisa"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Okukhethwayo Okwengeziwe"</string>
@@ -303,10 +307,8 @@
     <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Izakhi ezifana nokuthi Ukwabelana Ngokushesha kanye nokuthi Thola Idivayisi Yami zisebenzisa i-Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"IBluetooth izovuleka kusasa ekuseni"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Yabelana ngomsindo"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Yabelana ngomsindo"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ibhethri"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Umsindo"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Ihedisethi"</string>
@@ -1197,6 +1199,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Thepha ukuze uthole olunye ulwazi"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Akukho alamu esethiwe"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"faka ukukhiya isikrini"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Thinta inzwa yesigxivizo somunwe Inkinobho emfushane ehlangothini lwefoni"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Inzwa yesigxivizo somunwe"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"gunyaza"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"faka idivayisi"</string>

@@ -129,18 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"系統將停止錄製「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」的內容"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"系統將停止分享「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」的內容"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"系統將停止投放「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」的內容"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -189,6 +192,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"裝置已透過你的臉解鎖，按下即可繼續操作。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"臉孔辨識完成，按下即可繼續操作。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"臉孔辨識完成，按下「解鎖」圖示即可繼續操作。"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"裝置已透過你的臉解鎖，輕觸這裡即可繼續。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"已通過驗證"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"取消驗證"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"更多選項"</string>
@@ -303,10 +307,8 @@
     <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"「快速分享」和「尋找我的裝置」等功能都需要使用藍牙技術"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"藍牙會在明天早上開啟"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"分享音訊"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"正在分享音訊"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"音訊"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"耳機"</string>
@@ -382,7 +384,7 @@
     <string name="qs_record_issue_start" msgid="2979831312582567056">"開始"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"停止"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"錯誤報告"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"哪些裝置使用體驗受到影響？"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"哪方面的裝置使用體驗受到影響？"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"選取問題類型"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"螢幕錄影"</string>
     <string name="performance" msgid="6552785217174378320">"效能"</string>
@@ -815,7 +817,7 @@
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"切換到下一個語言"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"切換到上一個語言"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"存取表情符號"</string>
-    <string name="input_access_voice_typing" msgid="7291201476395326141">"存取語音輸入內容"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"使用語音輸入功能"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"應用程式"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Google 助理"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"瀏覽器"</string>
@@ -1197,6 +1199,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"輕觸即可瞭解詳情"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"未設定鬧鐘"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"輸入螢幕鎖定憑證"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"請輕觸指紋感應器，也就是手機側邊較短的按鈕"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"指紋感應器"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"驗證"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"進入裝置"</string>

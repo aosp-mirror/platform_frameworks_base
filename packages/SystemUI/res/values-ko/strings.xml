@@ -129,18 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; 녹화가 중단됩니다."</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; 공유가 중단됩니다."</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; 전송이 중단됩니다."</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -189,6 +192,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"얼굴 인식으로 잠금 해제되었습니다. 계속하려면 누르세요."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"얼굴이 인식되었습니다. 계속하려면 누르세요."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"얼굴이 인식되었습니다. 계속하려면 아이콘을 누르세요."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"얼굴 인식으로 잠금 해제되었습니다. 계속하려면 탭하세요."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"인증됨"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"인증 취소"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"옵션 더보기"</string>
@@ -303,10 +307,8 @@
     <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share, 내 기기 찾기 등의 기능에서 블루투스를 사용합니다."</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"블루투스가 내일 아침에 켜집니다."</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"오디오 공유"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"오디오 공유 중"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"오디오"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"헤드셋"</string>
@@ -1197,6 +1199,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"탭하여 자세한 정보를 확인하세요."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"설정된 알람 없음"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"화면 잠금 입력"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"지문 센서를 터치하세요. 휴대전화 측면에 있는 더 짧은 버튼입니다"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"지문 센서"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"인증"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"기기 입력"</string>

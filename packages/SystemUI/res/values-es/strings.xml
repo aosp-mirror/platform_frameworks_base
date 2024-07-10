@@ -129,18 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Dejarás de grabar &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Dejarás de compartir &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Dejarás de enviar &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -189,6 +192,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Desbloqueado con la cara. Pulsa para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Cara reconocida. Pulsa para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Cara reconocida. Pulsa el icono de desbloquear para continuar."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Desbloqueado con la cara. Toca para continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Se ha autenticado"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Cancelar autenticación"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Más opciones"</string>
@@ -303,10 +307,8 @@
     <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Las funciones como Quick Share y Encontrar mi dispositivo usan Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"El Bluetooth se activará mañana por la mañana"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Compartir audio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Compartiendo audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de batería"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Auriculares"</string>
@@ -387,7 +389,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Grabar pantalla"</string>
     <string name="performance" msgid="6552785217174378320">"Rendimiento"</string>
     <string name="user_interface" msgid="3712869377953950887">"Interfaz de usuario"</string>
-    <string name="thermal" msgid="6758074791325414831">"Térmico"</string>
+    <string name="thermal" msgid="6758074791325414831">"Temperatura"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo Una mano"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Audífonos"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Activos"</string>
@@ -675,7 +677,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Se ha producido un problema al obtener tus tarjetas. Inténtalo de nuevo más tarde."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Ajustes de pantalla de bloqueo"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Escáner de códigos QR"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Escáner QR"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Actualizando"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabajo"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo Avión"</string>
@@ -1041,7 +1043,7 @@
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Quitar"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"activar/desactivar"</string>
     <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"Editar"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Control de dispositivos"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Control disposit."</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Elige una aplicación para añadir controles"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# control añadido.}many{# controles añadidos.}other{# controles añadidos.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Quitado"</string>
@@ -1197,6 +1199,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toca la pantalla para consultar más información"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ninguna puesta"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"Poner bloqueo de pantalla"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Toca el sensor de huellas digitales. Es el botón más pequeño del lateral del teléfono."</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensor de huellas digitales"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autenticarte"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"acceder al dispositivo"</string>

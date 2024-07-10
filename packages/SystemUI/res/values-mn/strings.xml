@@ -129,18 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Та &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-г бичихээ болино"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Та &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-г хуваалцахаа болино"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Та &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-г дамжуулахаа болино"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -189,6 +192,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Царайгаар түгжээг тайлсан. Үргэлжлүүлэхийн тулд дарна уу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Царайг таньсан. Үргэлжлүүлэхийн тулд дарна уу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Царайг таньсан. Үргэлжлүүлэх бол түгжээг тайлах дүрсийг дар."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Царайгаар түгжээг тайлсан. Үргэлжлүүлэхийн тулд товшино уу."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Баталгаажуулагдсан"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Баталгаажуулалтыг цуцлах"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Бусад сонголт"</string>
@@ -303,10 +307,8 @@
     <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Түргэн хуваалцах, Миний төхөөрөмжийг олох зэрэг онцлогууд Bluetooth-г ашигладаг"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth-г маргааш өглөө асаана"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Аудио хуваалцах"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Аудио хуваалцаж байна"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> батарей"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Чихэвч"</string>
@@ -378,7 +380,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Дэлгэцийн үйлдэл бичих"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Эхлүүлэх"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Зогсоох"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Асуудлыг бичих"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Асуудлыг бүртгэх"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Эхлүүлэх"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Зогсоох"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Алдааны мэдээ"</string>
@@ -1197,6 +1199,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Нэмэлт мэдээлэл авахын тулд товшино уу"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Сэрүүлэг тавиагүй"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"дэлгэцийн түгжээ оруулах"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Хурууны хээ мэдрэгчид хүрнэ үү. Энэ нь утасны хажуу талын арай богино товчлуур юм"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Хурууны хээ мэдрэгч"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"баталгаажуулах"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"төхөөрөмж оруулах"</string>

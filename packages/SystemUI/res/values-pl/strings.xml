@@ -129,18 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Przestaniesz nagrywać treści z aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Przestaniesz udostępniać treści z aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Przestaniesz przesyłać treści z aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -189,6 +192,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odblokowano rozpoznawaniem twarzy. Kliknij, aby kontynuować."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Twarz rozpoznana. Kliknij, aby kontynuować."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Twarz rozpoznana. Aby kontynuować, kliknij ikonę odblokowywania."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Odblokowano skanem twarzy. Kliknij, aby kontynuować."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Uwierzytelniono"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Anuluj uwierzytelnianie"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Więcej opcji"</string>
@@ -303,10 +307,8 @@
     <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Bluetootha używają funkcje takie jak szybkie udostępnianie czy Znajdź moje urządzenie"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth włączy się jutro rano"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Udostępnij dźwięk"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Udostępnia dźwięk"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> naładowania baterii"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Dźwięk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Zestaw słuchawkowy"</string>
@@ -390,7 +392,7 @@
     <string name="thermal" msgid="6758074791325414831">"Termografia"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Tryb jednej ręki"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Urządzenia słuchowe"</string>
-    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktywny"</string>
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktywne"</string>
     <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Rozłączono"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Urządzenia słuchowe"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Sparuj nowe urządzenie"</string>
@@ -1197,6 +1199,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Kliknij, aby uzyskać więcej informacji"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nie ustawiono alarmu"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"Wprowadź blokadę ekranu"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Dotknij czytnika linii papilarnych. To ten krótszy przycisk z boku telefonu"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Czytnik linii papilarnych"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"uwierzytelnij"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"otwórz urządzenie"</string>
