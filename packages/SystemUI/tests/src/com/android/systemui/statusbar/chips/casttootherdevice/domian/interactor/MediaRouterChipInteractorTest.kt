@@ -70,7 +70,7 @@ class MediaRouterChipInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun mediaRouterCastingState_connectingDevice_casting() =
+    fun mediaRouterCastingState_connectingDevice_casting_withName() =
         testScope.runTest {
             val latest by collectLastValue(underTest.mediaRouterCastingState)
 
@@ -79,17 +79,18 @@ class MediaRouterChipInteractorTest : SysuiTestCase() {
                     CastDevice(
                         state = CastDevice.CastState.Connecting,
                         id = "id",
-                        name = "name",
+                        name = "My Favorite Device",
                         description = "desc",
                         origin = CastDevice.CastOrigin.MediaRouter,
                     )
                 )
 
-            assertThat(latest).isEqualTo(MediaRouterCastModel.Casting)
+            assertThat(latest)
+                .isEqualTo(MediaRouterCastModel.Casting(deviceName = "My Favorite Device"))
         }
 
     @Test
-    fun mediaRouterCastingState_connectedDevice_casting() =
+    fun mediaRouterCastingState_connectedDevice_casting_withName() =
         testScope.runTest {
             val latest by collectLastValue(underTest.mediaRouterCastingState)
 
@@ -98,13 +99,14 @@ class MediaRouterChipInteractorTest : SysuiTestCase() {
                     CastDevice(
                         state = CastDevice.CastState.Connected,
                         id = "id",
-                        name = "name",
+                        name = "My Second Favorite Device",
                         description = "desc",
                         origin = CastDevice.CastOrigin.MediaRouter,
                     )
                 )
 
-            assertThat(latest).isEqualTo(MediaRouterCastModel.Casting)
+            assertThat(latest)
+                .isEqualTo(MediaRouterCastModel.Casting(deviceName = "My Second Favorite Device"))
         }
 
     @Test

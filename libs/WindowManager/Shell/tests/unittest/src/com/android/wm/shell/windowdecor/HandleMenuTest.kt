@@ -196,9 +196,9 @@ class HandleMenuTest : ShellTestCase() {
             R.layout.desktop_mode_app_header
         }
         val handleMenu = HandleMenu(mockDesktopWindowDecoration, layoutId,
-            onClickListener, onTouchListener, appIcon, appName, displayController,
-            splitScreenController, true /* shouldShowWindowingPill */,
-            50 /* captionHeight */ )
+                onClickListener, onTouchListener, appIcon, appName, displayController,
+                splitScreenController, true /* shouldShowWindowingPill */,
+                true /* shouldShowBrowserPill */, 50 /* captionHeight */)
         handleMenu.show()
         return handleMenu
     }

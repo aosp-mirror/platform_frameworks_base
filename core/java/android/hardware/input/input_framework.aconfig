@@ -61,3 +61,10 @@ flag {
     description: "Allows system to provide keyboard specific key drawables and shortcuts via config files"
     bug: "345440920"
 }
+
+flag {
+    namespace: "input_native"
+    name: "keyboard_a11y_mouse_keys"
+    description: "Controls if the mouse keys accessibility feature for physical keyboard is available to the user"
+    bug: "341799888"
+}

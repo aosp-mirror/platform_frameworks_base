@@ -38,6 +38,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.Intent.ACTION_VIEW;
 import static android.content.pm.PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -121,6 +122,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -142,6 +144,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
+import android.webkit.URLUtil;
 import android.window.ActivityWindowInfo;
 
 import com.android.internal.R;
@@ -158,6 +161,7 @@ import com.android.server.am.UserState;
 import com.android.server.pm.SaferIntentUtils;
 import com.android.server.utils.Slogf;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
+import com.android.window.flags.Flags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -2900,6 +2904,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
         @Override
         public void accept(ActivityRecord r) {
+            if (Flags.enableDesktopWindowingAppToWeb() && mInfo.capturedLink == null) {
+                setCapturedLink(r);
+            }
             if (r.mLaunchCookie != null) {
                 mInfo.addLaunchCookie(r.mLaunchCookie);
             }
@@ -2911,6 +2918,16 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             if (mTopRunning == null) {
                 mTopRunning = r;
             }
+        }
+
+        private void setCapturedLink(ActivityRecord r) {
+            final Uri uri = r.intent.getData();
+            if (uri == null || !ACTION_VIEW.equals(r.intent.getAction())
+                    || !URLUtil.isNetworkUrl(uri.toString())) {
+                return;
+            }
+            mInfo.capturedLink = uri;
+            mInfo.capturedLinkTimestamp = r.lastLaunchTime;
         }
     }
 

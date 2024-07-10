@@ -103,8 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g>, এই স্ক্রিনশট শনাক্ত করেছে।"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> এবং খোলা থাকা অন্য অ্যাপ এই স্ক্রিনশট শনাক্ত করেছে।"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"নোটে যোগ করুন"</string>
-    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
-    <skip />
+    <string name="backlinks_include_link" msgid="4562093591148248158">"লিঙ্ক যোগ করুন"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"স্ক্রিন রেকর্ডার"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"স্ক্রিন রেকর্ডিং প্রসেস হচ্ছে"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"স্ক্রিন রেকর্ডিং সেশন চলার বিজ্ঞপ্তি"</string>
@@ -196,8 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ফেসের সাহায্যে আনলক করা হয়েছে। চালিয়ে যেতে প্রেস করুন।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ফেস শনাক্ত করা হয়েছে। চালিয়ে যেতে প্রেস করুন।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ফেস শনাক্ত করা হয়েছে। চালিয়ে যেতে আনলক আইকন প্রেস করুন।"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"ফেসের সাহায্যে আনলক করা হয়েছে। চালিয়ে যেতে ট্যাপ করুন।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"প্রমাণীকৃত"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"যাচাইকরণ বাতিল করুন"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"আরও বিকল্প"</string>
@@ -478,8 +476,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"আরও উইজেট যোগ করুন"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"উইজেট কাস্টমাইজ করতে বেশিক্ষণ প্রেস করুন"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"উইজেট কাস্টমাইজ করুন"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"উইজেট কাস্টমাইজ করতে আনলক করুন"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"বন্ধ করা উইজেটের জন্য অ্যাপের আইকন"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"ইনস্টল করা হচ্ছে এমন উইজেটের অ্যাপ আইকন"</string>
     <string name="edit_widget" msgid="9030848101135393954">"উইজেট এডিট করুন"</string>
@@ -1377,6 +1374,8 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
     <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ফিরে যান"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"ফিরে যেতে, টাচপ্যাডের যেকোনও জায়গায় তিনটি আঙুল দিয়ে ডান বা বাঁদিকে সোয়াইপ করুন।"</string>

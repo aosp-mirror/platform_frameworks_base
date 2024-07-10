@@ -436,8 +436,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Allar appar kan skrivas till extern lagring, oavsett manifestvärden"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Framtvinga storleksanpassning för aktiviteter"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Gör det möjligt att ändra storleken på alla aktiviteter i flerfönsterläge, oavsett manifestvärden."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Aktivera frihandsfönster"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktivera stöd för experimentella frihandsfönster."</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"Aktivera frihandsfönster (äldre)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Aktivera stöd för äldre experimentella frihandsfönster."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Lösenord för säkerhetskopia av datorn"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"De fullständiga säkerhetskopiorna av datorn är för närvarande inte skyddade"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tryck om du vill ändra eller ta bort lösenordet för fullständig säkerhetskopiering av datorn"</string>

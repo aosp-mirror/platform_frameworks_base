@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"गड़बड़ी की रिपोर्ट"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"सत्र खत्म करें"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"स्क्रीनशॉट"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"गड़बड़ी की रिपोर्ट"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"इससे ईमेल भेजने के लिए, आपके डिवाइस की मौजूदा स्थिति से जुड़ी जानकारी इकट्ठा की जाएगी. गड़बड़ी की रिपोर्ट बनना शुरू होने से लेकर भेजने के लिए तैयार होने तक कुछ समय लगेगा; कृपया इंतज़ार करें."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"सहभागी रिपोर्ट"</string>
@@ -1200,7 +1198,7 @@
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"हो सकता है कुछ सिस्टम फ़ंक्शन काम नहीं करें"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"सिस्टम के लिए ज़रूरी मेमोरी नहीं है. पक्का करें कि आपके पास 250एमबी की खाली जगह है और फिर से शुरू करें."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> चल रहा है"</string>
-    <string name="app_running_notification_text" msgid="5120815883400228566">"ज़्यादा जानकारी के लिए या ऐप्लिकेशन को रोकने के लिए छूएं."</string>
+    <string name="app_running_notification_text" msgid="5120815883400228566">"ऐप्लिकेशन को रोकने या ज़्यादा जानकारी के लिए टैप करें."</string>
     <string name="ok" msgid="2646370155170753815">"ठीक है"</string>
     <string name="cancel" msgid="6908697720451760115">"रद्द करें"</string>
     <string name="yes" msgid="9069828999585032361">"ठीक है"</string>
@@ -1441,8 +1439,8 @@
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"दूसरे ऐप्लिकेशन के ऊपर दिखाए जाने का ऐक्सेस"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> अन्य ऐप्लिकेशन के ऊपर दिखाई दे रहा है"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> अन्य ऐप पर दिखाई दे रहा है"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"अगर आप नहीं चाहते कि <xliff:g id="NAME">%s</xliff:g> इस सुविधा का उपयोग करे, तो सेटिंग खोलने और उसे बंद करने के लिए टैप करें."</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> दूसरे ऐप के ऊपर दिख रहा है"</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"अगर <xliff:g id="NAME">%s</xliff:g> को इस सुविधा का इस्तेमाल करने की अनुमति नहीं देनी है, तो इसे बंद करने के लिए सेटिंग पर जाएं."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"बंद करें"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> ढूंढा जा रहा है…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"मौजूदा सामग्री की जाँच की जा रही है"</string>
@@ -2433,17 +2431,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"यह सेटिंग कैसे काम करती है"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"प्रोसेस जारी है..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"फ़िंगरप्रिंट अनलॉक की सुविधा दोबारा सेट अप करें"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"अब <xliff:g id="FINGERPRINT">%s</xliff:g> की पहचान नहीं की जा सकती."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"अब <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> और <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> की पहचान नहीं की जा सकती."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"अब <xliff:g id="FINGERPRINT">%s</xliff:g> की पहचान नहीं की जा सकती. फ़िंगरप्रिंट अनलॉक की सुविधा दोबारा सेट अप करें."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"अब <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> और <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> की पहचान नहीं की जा सकती. फ़िंगरप्रिंट अनलॉक की सुविधा दोबारा सेट अप करें."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"फ़ेस अनलॉक की सुविधा को दोबारा सेट अप करें"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"अब आपके चेहरे के मॉडल की पहचान नहीं की जा सकती. फ़ेस अनलॉक की सुविधा को दोबारा सेट अप करें."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"सेट अप करें"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"अभी नहीं"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> के लिए अलार्म"</string>

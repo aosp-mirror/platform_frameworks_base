@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Laporan bug"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Akhiri sesi"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Screenshot"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Laporan bug"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Ini akan mengumpulkan informasi status perangkat Anda saat ini, untuk dikirimkan sebagai pesan email. Harap bersabar, mungkin perlu waktu untuk memulai laporan bug hingga siap dikirim."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Laporan interaktif"</string>
@@ -1767,12 +1765,9 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Fitur akan terbuka setelah Anda mengetuk tombol aksesibilitas"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Fitur akan terbuka setelah Anda menggunakan pintasan ini. Geser ke atas dengan 2 jari dari bawah layar, lalu lepaskan dengan cepat."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Fitur akan terbuka setelah Anda menggunakan pintasan ini. Geser ke atas dengan 3 jari dari bawah layar, lalu lepaskan dengan cepat."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Pembesaran"</string>
     <string name="user_switched" msgid="7249833311585228097">"Pengguna saat ini <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Beralih ke <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2436,17 +2431,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cara kerjanya"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Tertunda..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Siapkan Buka dengan Sidik Jari lagi"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak dapat dikenali lagi."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak dapat dikenali lagi."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak dapat dikenali lagi. Siapkan Buka dengan Sidik Jari lagi."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak dapat dikenali lagi. Siapkan Buka dengan Sidik Jari lagi."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Siapkan Buka dengan Wajah lagi"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Model wajah Anda tidak dapat dikenali lagi. Siapkan Buka dengan Wajah lagi."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Penyiapan"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Lain kali"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm untuk <xliff:g id="USER_NAME">%s</xliff:g>"</string>
