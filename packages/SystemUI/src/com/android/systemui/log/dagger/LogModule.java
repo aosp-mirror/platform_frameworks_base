@@ -369,9 +369,9 @@ public class LogModule {
      */
     @Provides
     @SysUISingleton
-    @MediaLog
-    public static LogBuffer providesMediaLogBuffer(LogBufferFactory factory) {
-        return factory.create("MediaLog", 20);
+    @MediaLoadingLog
+    public static LogBuffer providesMediaLoadingLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaLoadingLog", 20);
     }
 
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
