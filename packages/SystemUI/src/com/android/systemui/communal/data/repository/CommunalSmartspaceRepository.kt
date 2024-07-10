@@ -18,11 +18,13 @@ package com.android.systemui.communal.data.repository
 
 import android.app.smartspace.SmartspaceTarget
 import android.os.Parcelable
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import com.android.systemui.communal.smartspace.CommunalSmartspaceController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
+import com.android.systemui.util.time.SystemClock
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -45,28 +47,44 @@ class CommunalSmartspaceRepositoryImpl
 constructor(
     private val communalSmartspaceController: CommunalSmartspaceController,
     @Main private val uiExecutor: Executor,
+    private val systemClock: SystemClock,
 ) : CommunalSmartspaceRepository, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     private val _timers: MutableStateFlow<List<CommunalSmartspaceTimer>> =
         MutableStateFlow(emptyList())
     override val timers: Flow<List<CommunalSmartspaceTimer>> = _timers
 
+    private var targetCreationTimes = emptyMap<String, Long>()
+
     override fun onSmartspaceTargetsUpdated(targetsNullable: MutableList<out Parcelable>?) {
         val targets = targetsNullable?.filterIsInstance<SmartspaceTarget>() ?: emptyList()
-
-        _timers.value =
+        val timerTargets =
             targets
                 .filter { target ->
                     target.featureType == SmartspaceTarget.FEATURE_TIMER &&
                         target.remoteViews != null
                 }
-                .map { target ->
-                    CommunalSmartspaceTimer(
-                        smartspaceTargetId = target.smartspaceTargetId,
-                        createdTimestampMillis = target.creationTimeMillis,
-                        remoteViews = target.remoteViews!!,
-                    )
-                }
+                .associateBy { stableId(it.smartspaceTargetId) }
+
+        // The creation times from smartspace targets are unreliable (b/318535930). Therefore,
+        // SystemUI uses the timestamp of which a timer first appears, and caches these values to
+        // prevent timers from swapping positions in the hub.
+        targetCreationTimes =
+            timerTargets.mapValues { (stableId, _) ->
+                targetCreationTimes[stableId] ?: systemClock.currentTimeMillis()
+            }
+
+        _timers.value =
+            timerTargets.map { (stableId, target) ->
+                CommunalSmartspaceTimer(
+                    // The view layer should have the instance based smartspaceTargetId instead of
+                    // stable id, so that when a new instance of the timer is created, for example,
+                    // when it is paused, the view should re-render its remote views.
+                    smartspaceTargetId = target.smartspaceTargetId,
+                    createdTimestampMillis = targetCreationTimes[stableId]!!,
+                    remoteViews = target.remoteViews!!,
+                )
+            }
     }
 
     override fun startListening() {
@@ -84,6 +102,22 @@ constructor(
             communalSmartspaceController.removeListener(
                 listener = this@CommunalSmartspaceRepositoryImpl
             )
+        }
+    }
+
+    companion object {
+        /**
+         * The smartspace target id is instance-based, meaning a single timer (from the user's
+         * perspective) can have multiple instances. For example, when a timer is paused, a new
+         * instance is created. To address this, SystemUI manually removes the instance id to
+         * maintain a consistent id across sessions.
+         *
+         * It is assumed that timer target ids follow this format: timer-${stableId}-${instanceId}.
+         * This function returns timer-${stableId}, stripping out the instance id.
+         */
+        @VisibleForTesting
+        fun stableId(targetId: String): String {
+            return targetId.split("-").take(2).joinToString("-")
         }
     }
 }
