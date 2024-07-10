@@ -455,8 +455,8 @@ public class KeyguardStatusBarView extends RelativeLayout {
         float luminance = Color.luminance(textColor);
         @ColorInt int iconColor = Utils.getColorStateListDefaultColor(mContext,
                     luminance < 0.5
-                        ? com.android.settingslib.R.color.black
-                        : com.android.settingslib.R.color.white);
+                        ? com.android.settingslib.R.color.dark_mode_icon_color_single_tone
+                        : com.android.settingslib.R.color.light_mode_icon_color_single_tone);
         @ColorInt int contrastColor = luminance < 0.5
                 ? DarkIconDispatcherImpl.DEFAULT_ICON_TINT
                 : DarkIconDispatcherImpl.DEFAULT_INVERSE_ICON_TINT;
@@ -467,7 +467,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         if (userSwitcherName != null) {
             userSwitcherName.setTextColor(Utils.getColorStateListDefaultColor(
                     mContext,
-                    com.android.settingslib.R.color.white));
+                    com.android.settingslib.R.color.light_mode_icon_color_single_tone));
         }
 
         if (iconManager != null) {
