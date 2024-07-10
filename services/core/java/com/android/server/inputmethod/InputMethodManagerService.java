@@ -1017,7 +1017,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final int userId = user.getUserIdentifier();
             SecureSettingsWrapper.onUserStarting(userId);
             synchronized (ImfLock.class) {
-                mService.getUserData(userId);
                 if (mService.mConcurrentMultiUserModeEnabled) {
                     if (mService.mCurrentUserId != userId && mService.mSystemReady) {
                         mService.initializeVisibleBackgroundUserLocked(userId);
@@ -1116,9 +1115,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mUserDataRepository = new UserDataRepository(mHandler, mUserManagerInternal,
                     bindingControllerForTesting != null ? bindingControllerForTesting
                             : bindingControllerFactory);
-            for (int id : mUserManagerInternal.getUserIds()) {
-                getUserData(id);
-            }
 
             mMenuController = new InputMethodMenuController(this);
             mVisibilityStateComputer = new ImeVisibilityStateComputer(this);
