@@ -26,6 +26,7 @@ import static android.provider.Settings.Secure.STYLUS_HANDWRITING_DEFAULT_VALUE;
 import static android.provider.Settings.Secure.STYLUS_HANDWRITING_ENABLED;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BACK_DISPOSITION;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BOUND_TO_METHOD;
+import static android.server.inputmethod.InputMethodManagerServiceProto.CONCURRENT_MULTI_USER_MODE_ENABLED;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_ATTRIBUTE;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_CLIENT;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_FOCUSED_WINDOW_SOFT_INPUT_MODE;
@@ -4558,6 +4559,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             proto.write(BACK_DISPOSITION, bindingController.getBackDisposition());
             proto.write(IME_WINDOW_VISIBILITY, bindingController.getImeWindowVis());
             proto.write(SHOW_IME_WITH_HARD_KEYBOARD, mMenuController.getShowImeWithHardKeyboard());
+            proto.write(CONCURRENT_MULTI_USER_MODE_ENABLED, mConcurrentMultiUserModeEnabled);
             proto.end(token);
         }
     }
@@ -6006,6 +6008,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
             final var userData = getUserData(userId);
             p.println("Current Input Method Manager state:");
+            p.println("  concurrentMultiUserModeEnabled" + mConcurrentMultiUserModeEnabled);
             final List<InputMethodInfo> methodList = settings.getMethodList();
             int numImes = methodList.size();
             p.println("  Input Methods:");
