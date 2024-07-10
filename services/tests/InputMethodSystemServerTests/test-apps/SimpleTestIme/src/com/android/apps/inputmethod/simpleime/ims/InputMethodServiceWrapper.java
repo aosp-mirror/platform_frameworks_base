@@ -53,13 +53,14 @@ public class InputMethodServiceWrapper extends InputMethodService {
 
     @Override
     public void onStartInput(EditorInfo info, boolean restarting) {
-        Log.i(TAG, "onStartInput() editor=" + info + ", restarting=" + restarting);
+        Log.i(TAG, "onStartInput() editor=" + dumpEditorInfo(info) + ", restarting=" + restarting);
         super.onStartInput(info, restarting);
     }
 
     @Override
     public void onStartInputView(EditorInfo info, boolean restarting) {
-        Log.i(TAG, "onStartInputView() editor=" + info + ", restarting=" + restarting);
+        Log.i(TAG, "onStartInputView() editor=" + dumpEditorInfo(info)
+                + ", restarting=" + restarting);
         super.onStartInputView(info, restarting);
         mInputViewStarted = true;
         if (mCountDownLatchForTesting != null) {
@@ -98,5 +99,15 @@ public class InputMethodServiceWrapper extends InputMethodService {
         if (mCountDownLatchForTesting != null) {
             mCountDownLatchForTesting.countDown();
         }
+    }
+
+    private String dumpEditorInfo(EditorInfo info) {
+        var sb = new StringBuilder();
+        sb.append("EditorInfo{packageName=").append(info.packageName);
+        sb.append(" fieldId=").append(info.fieldId);
+        sb.append(" hintText=").append(info.hintText);
+        sb.append(" privateImeOptions=").append(info.privateImeOptions);
+        sb.append("}");
+        return sb.toString();
     }
 }
