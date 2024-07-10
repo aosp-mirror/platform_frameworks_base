@@ -79,3 +79,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_determining_spatial_audio_attributes_by_profile"
+    namespace: "cross_device_experiences"
+    description: "Use bluetooth profile connection policy to determine spatial audio attributes"
+    bug: "341005211"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

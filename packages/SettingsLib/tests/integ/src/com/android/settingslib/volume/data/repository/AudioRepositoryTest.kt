@@ -247,6 +247,19 @@ class AudioRepositoryTest {
         }
     }
 
+    @Test
+    fun getBluetoothAudioDeviceCategory() {
+        testScope.runTest {
+            `when`(audioManager.getBluetoothAudioDeviceCategory("12:34:56:78")).thenReturn(
+                AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES)
+
+            val category = underTest.getBluetoothAudioDeviceCategory("12:34:56:78")
+            runCurrent()
+
+            assertThat(category).isEqualTo(AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES)
+        }
+    }
+
     private fun triggerConnectedDeviceChange(communicationDevice: AudioDeviceInfo?) {
         verify(audioManager)
             .addOnCommunicationDeviceChangedListener(

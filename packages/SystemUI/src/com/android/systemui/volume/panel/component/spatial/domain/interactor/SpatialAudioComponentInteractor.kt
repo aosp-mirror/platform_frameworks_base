@@ -16,15 +16,23 @@
 
 package com.android.systemui.volume.panel.component.spatial.domain.interactor
 
+import android.bluetooth.BluetoothProfile
 import android.media.AudioDeviceAttributes
 import android.media.AudioDeviceInfo
+import android.media.AudioManager
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
+import com.android.settingslib.bluetooth.LocalBluetoothProfile
+import com.android.settingslib.flags.Flags
 import com.android.settingslib.media.domain.interactor.SpatializerInteractor
+import com.android.settingslib.volume.data.repository.AudioRepository
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.volume.domain.interactor.AudioOutputInteractor
 import com.android.systemui.volume.domain.model.AudioOutputDevice
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioAvailabilityModel
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioEnabledModel
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,6 +41,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /**
  * Provides an ability to access and update spatial audio and head tracking state.
@@ -46,6 +55,8 @@ class SpatialAudioComponentInteractor
 constructor(
     audioOutputInteractor: AudioOutputInteractor,
     private val spatializerInteractor: SpatializerInteractor,
+    private val audioRepository: AudioRepository,
+    @Background private val backgroundCoroutineContext: CoroutineContext,
     @VolumePanelScope private val coroutineScope: CoroutineScope,
 ) {
 
@@ -138,41 +149,84 @@ constructor(
     }
 
     private suspend fun AudioOutputDevice.getAudioDeviceAttributes(): AudioDeviceAttributes? {
-        when (this) {
-            is AudioOutputDevice.BuiltIn -> return builtinSpeaker
+        return when (this) {
+            is AudioOutputDevice.BuiltIn -> builtinSpeaker
             is AudioOutputDevice.Bluetooth -> {
-                return listOf(
-                        AudioDeviceAttributes(
-                            AudioDeviceAttributes.ROLE_OUTPUT,
-                            AudioDeviceInfo.TYPE_BLE_HEADSET,
-                            cachedBluetoothDevice.address,
-                        ),
-                        AudioDeviceAttributes(
-                            AudioDeviceAttributes.ROLE_OUTPUT,
-                            AudioDeviceInfo.TYPE_BLE_SPEAKER,
-                            cachedBluetoothDevice.address,
-                        ),
-                        AudioDeviceAttributes(
-                            AudioDeviceAttributes.ROLE_OUTPUT,
-                            AudioDeviceInfo.TYPE_BLE_BROADCAST,
-                            cachedBluetoothDevice.address,
-                        ),
-                        AudioDeviceAttributes(
-                            AudioDeviceAttributes.ROLE_OUTPUT,
-                            AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
-                            cachedBluetoothDevice.address,
-                        ),
-                        AudioDeviceAttributes(
-                            AudioDeviceAttributes.ROLE_OUTPUT,
-                            AudioDeviceInfo.TYPE_HEARING_AID,
-                            cachedBluetoothDevice.address,
+                if (Flags.enableDeterminingSpatialAudioAttributesByProfile()) {
+                    getAudioDeviceAttributesByBluetoothProfile(cachedBluetoothDevice)
+                } else {
+                    listOf(
+                            AudioDeviceAttributes(
+                                AudioDeviceAttributes.ROLE_OUTPUT,
+                                AudioDeviceInfo.TYPE_BLE_HEADSET,
+                                cachedBluetoothDevice.address,
+                            ),
+                            AudioDeviceAttributes(
+                                AudioDeviceAttributes.ROLE_OUTPUT,
+                                AudioDeviceInfo.TYPE_BLE_SPEAKER,
+                                cachedBluetoothDevice.address,
+                            ),
+                            AudioDeviceAttributes(
+                                AudioDeviceAttributes.ROLE_OUTPUT,
+                                AudioDeviceInfo.TYPE_BLE_BROADCAST,
+                                cachedBluetoothDevice.address,
+                            ),
+                            AudioDeviceAttributes(
+                                AudioDeviceAttributes.ROLE_OUTPUT,
+                                AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+                                cachedBluetoothDevice.address,
+                            ),
+                            AudioDeviceAttributes(
+                                AudioDeviceAttributes.ROLE_OUTPUT,
+                                AudioDeviceInfo.TYPE_HEARING_AID,
+                                cachedBluetoothDevice.address,
+                            )
                         )
-                    )
-                    .firstOrNull { spatializerInteractor.isSpatialAudioAvailable(it) }
+                        .firstOrNull { spatializerInteractor.isSpatialAudioAvailable(it) }
+                }
             }
-            else -> return null
+            else -> null
         }
     }
+
+    private suspend fun getAudioDeviceAttributesByBluetoothProfile(
+        cachedBluetoothDevice: CachedBluetoothDevice
+    ): AudioDeviceAttributes? =
+        withContext(backgroundCoroutineContext) {
+            cachedBluetoothDevice.profiles
+                .firstOrNull {
+                    it.profileId in audioProfiles && it.isEnabled(cachedBluetoothDevice.device)
+                }
+                ?.let { profile: LocalBluetoothProfile ->
+                    when (profile.profileId) {
+                        BluetoothProfile.A2DP -> {
+                            AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
+                        }
+                        BluetoothProfile.LE_AUDIO -> {
+                            when (
+                                audioRepository.getBluetoothAudioDeviceCategory(
+                                    cachedBluetoothDevice.address
+                                )
+                            ) {
+                                AudioManager.AUDIO_DEVICE_CATEGORY_SPEAKER ->
+                                    AudioDeviceInfo.TYPE_BLE_SPEAKER
+                                else -> AudioDeviceInfo.TYPE_BLE_HEADSET
+                            }
+                        }
+                        BluetoothProfile.HEARING_AID -> {
+                            AudioDeviceInfo.TYPE_HEARING_AID
+                        }
+                        else -> null
+                    }
+                }
+                ?.let {
+                    AudioDeviceAttributes(
+                        AudioDeviceAttributes.ROLE_OUTPUT,
+                        it,
+                        cachedBluetoothDevice.address,
+                    )
+                }
+        }
 
     private companion object {
         val builtinSpeaker =
@@ -181,5 +235,7 @@ constructor(
                 AudioDeviceInfo.TYPE_BUILTIN_SPEAKER,
                 ""
             )
+        val audioProfiles =
+            setOf(BluetoothProfile.A2DP, BluetoothProfile.LE_AUDIO, BluetoothProfile.HEARING_AID)
     }
 }
