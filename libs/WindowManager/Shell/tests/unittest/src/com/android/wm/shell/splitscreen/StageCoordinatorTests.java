@@ -347,8 +347,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         assertThat(options.getLaunchRootTask()).isEqualTo(mMainStage.mRootTaskInfo.token);
         assertThat(options.getPendingIntentBackgroundActivityStartMode())
-                .isEqualTo(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-        assertThat(options.isPendingIntentBackgroundActivityLaunchAllowedByPermission()).isTrue();
+                .isEqualTo(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
     }
 
     @Test
