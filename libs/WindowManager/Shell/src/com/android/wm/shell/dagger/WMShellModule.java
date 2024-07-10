@@ -66,6 +66,7 @@ import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
+import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.GlobalDragListener;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -627,6 +628,13 @@ public abstract class WMShellModule {
     @Provides
     static DesktopModeEventLogger provideDesktopModeEventLogger() {
         return new DesktopModeEventLogger();
+    }
+
+    @WMSingleton
+    @Provides
+    static AppHandleEducationDatastoreRepository provideAppHandleEducationDatastoreRepository(
+            Context context) {
+        return new AppHandleEducationDatastoreRepository(context);
     }
 
     //
