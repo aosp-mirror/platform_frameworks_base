@@ -17,7 +17,6 @@
 package com.android.systemui.screenshot
 
 import android.animation.Animator
-import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
@@ -33,7 +32,7 @@ interface ScreenshotViewProxy {
     val screenshotPreview: View
 
     var packageName: String
-    var callbacks: ScreenshotView.ScreenshotViewCallback?
+    var callbacks: ScreenshotShelfViewProxy.ScreenshotViewCallback?
     var screenshot: ScreenshotData?
 
     val isAttachedToWindow: Boolean
@@ -41,15 +40,13 @@ interface ScreenshotViewProxy {
     val isPendingSharedTransition: Boolean
 
     fun reset()
+
     fun updateInsets(insets: WindowInsets)
-    fun updateOrientation(insets: WindowInsets)
+
     fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator
-    fun addQuickShareChip(quickShareAction: Notification.Action)
-    fun setChipIntents(imageData: ScreenshotController.SavedImageData)
+
     fun requestDismissal(event: ScreenshotEvent?)
 
-    fun showScrollChip(packageName: String, onClick: Runnable)
-    fun hideScrollChip()
     fun prepareScrollingTransition(
         response: ScrollCaptureResponse,
         screenBitmap: Bitmap,
@@ -57,17 +54,23 @@ interface ScreenshotViewProxy {
         screenshotTakenInPortrait: Boolean,
         onTransitionPrepared: Runnable,
     )
+
     fun startLongScreenshotTransition(
         transitionDestination: Rect,
         onTransitionEnd: Runnable,
         longScreenshot: ScrollCaptureController.LongScreenshot
     )
+
     fun restoreNonScrollingUi()
+
     fun fadeForSharedTransition()
 
     fun stopInputListening()
+
     fun requestFocus()
+
     fun announceForAccessibility(string: String)
+
     fun prepareEntranceAnimation(runnable: Runnable)
 
     interface Factory {

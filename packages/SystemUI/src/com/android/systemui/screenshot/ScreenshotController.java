@@ -477,9 +477,6 @@ public class ScreenshotController implements ScreenshotHandler {
         }
 
         mViewProxy.setPackageName(mPackageName);
-
-        mViewProxy.updateOrientation(
-                mWindowManager.getCurrentWindowMetrics().getWindowInsets());
     }
 
     /**
@@ -528,20 +525,13 @@ public class ScreenshotController implements ScreenshotHandler {
         }
 
         mMessageContainerController.setView(mViewProxy.getView());
-        mViewProxy.setCallbacks(new ScreenshotView.ScreenshotViewCallback() {
+        mViewProxy.setCallbacks(new ScreenshotShelfViewProxy.ScreenshotViewCallback() {
             @Override
             public void onUserInteraction() {
                 if (DEBUG_INPUT) {
                     Log.d(TAG, "onUserInteraction");
                 }
                 mScreenshotHandler.resetTimeout();
-            }
-
-            @Override
-            public void onAction(Intent intent, UserHandle owner, boolean overrideTransition) {
-                Pair<ActivityOptions, ExitTransitionCoordinator> exit = createWindowTransition();
-                mActionIntentExecutor.launchIntentAsync(
-                        intent, owner, overrideTransition, exit.first, exit.second);
             }
 
             @Override
@@ -869,62 +859,6 @@ public class ScreenshotController implements ScreenshotHandler {
                 mScreenshotSmartActions, data,
                 mScreenshotNotificationSmartActionsProvider);
         mSaveInBgTask.execute();
-    }
-
-
-    /**
-     * Sets up the action shade and its entrance animation, once we get the screenshot URI.
-     */
-    private void showUiOnActionsReady(ScreenshotController.SavedImageData imageData) {
-        logSuccessOnActionsReady(imageData);
-        mScreenshotHandler.resetTimeout();
-
-        if (imageData.uri != null) {
-            if (DEBUG_UI) {
-                Log.d(TAG, "Showing UI actions");
-            }
-            if (!imageData.owner.equals(Process.myUserHandle())) {
-                Log.d(TAG, "Screenshot saved to user " + imageData.owner + " as "
-                        + imageData.uri);
-            }
-            mScreenshotHandler.post(() -> {
-                if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
-                    mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            mViewProxy.setChipIntents(imageData);
-                        }
-                    });
-                } else {
-                    mViewProxy.setChipIntents(imageData);
-                }
-            });
-        }
-    }
-
-    /**
-     * Sets up the action shade and its entrance animation, once we get the Quick Share action data.
-     */
-    private void showUiOnQuickShareActionReady(ScreenshotController.QuickShareData quickShareData) {
-        if (DEBUG_UI) {
-            Log.d(TAG, "Showing UI for Quick Share action");
-        }
-        if (quickShareData.quickShareAction != null) {
-            mScreenshotHandler.post(() -> {
-                if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
-                    mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            mViewProxy.addQuickShareChip(quickShareData.quickShareAction);
-                        }
-                    });
-                } else {
-                    mViewProxy.addQuickShareChip(quickShareData.quickShareAction);
-                }
-            });
-        }
     }
 
     /**
