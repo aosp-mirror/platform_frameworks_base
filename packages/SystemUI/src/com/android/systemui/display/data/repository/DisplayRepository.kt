@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -137,6 +138,7 @@ constructor(
     override val displayAdditionEvent: Flow<Display?> =
         allDisplayEvents.filterIsInstance<DisplayEvent.Added>().map { getDisplay(it.displayId) }
 
+    // TODO: b/345472038 - Delete after the flag is ramped up.
     private val oldEnabledDisplays: Flow<Set<Display>> =
         allDisplayEvents
             .map { getDisplays() }
@@ -167,6 +169,9 @@ constructor(
             }
             .debugLog("enabledDisplayIds")
 
+    private val defaultDisplay by lazy {
+        getDisplay(Display.DEFAULT_DISPLAY) ?: error("Unable to get default display.")
+    }
     /**
      * Represents displays that went though the [DisplayListener.onDisplayAdded] callback.
      *
@@ -181,11 +186,7 @@ constructor(
                 .stateIn(
                     bgApplicationScope,
                     started = SharingStarted.WhileSubscribed(),
-                    initialValue =
-                        setOf(
-                            getDisplay(Display.DEFAULT_DISPLAY)
-                                ?: error("Unable to get default display.")
-                        )
+                    initialValue = setOf(defaultDisplay)
                 )
         } else {
             oldEnabledDisplays
@@ -344,9 +345,10 @@ constructor(
             .debugLog("pendingDisplay")
 
     override val defaultDisplayOff: Flow<Boolean> =
-        displays
-            .map { displays -> displays.firstOrNull { it.displayId == Display.DEFAULT_DISPLAY } }
-            .map { it?.state == Display.STATE_OFF }
+        displayChangeEvent
+            .filter { it == Display.DEFAULT_DISPLAY }
+            .map { defaultDisplay.state == Display.STATE_OFF }
+            .distinctUntilChanged()
 
     private fun <T> Flow<T>.debugLog(flowName: String): Flow<T> {
         return if (DEBUG) {
