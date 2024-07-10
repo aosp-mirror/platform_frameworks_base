@@ -1006,6 +1006,16 @@ public class AuthController implements
     }
 
     /**
+     * @return true if ultrasonic udfps HW is supported on this device. Can return true even if
+     * the user has not enrolled udfps. This may be false if called before
+     * onAllAuthenticatorsRegistered.
+     */
+    public boolean isUltrasonicUdfpsSupported() {
+        return getUdfpsProps() != null && !getUdfpsProps().isEmpty() && getUdfpsProps()
+                .get(0).isUltrasonicUdfps();
+    }
+
+    /**
      * @return true if sfps HW is supported on this device. Can return true even if the user has
      * not enrolled sfps. This may be false if called before onAllAuthenticatorsRegistered.
      */

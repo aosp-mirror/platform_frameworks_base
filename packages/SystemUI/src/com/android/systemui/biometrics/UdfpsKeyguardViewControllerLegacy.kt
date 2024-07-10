@@ -458,7 +458,7 @@ open class UdfpsKeyguardViewControllerLegacy(
         ) {
             return false
         }
-        if (launchTransitionFadingAway) {
+        if (launchTransitionFadingAway || isLaunchingActivity) {
             return true
         }
 

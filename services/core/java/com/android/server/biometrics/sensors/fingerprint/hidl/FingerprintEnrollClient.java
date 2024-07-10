@@ -226,4 +226,9 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     public void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event) {
         // Unsupported in HIDL.
     }
+
+    @Override
+    public void setIgnoreDisplayTouches(boolean shouldIgnore) {
+        // Unsupported in HIDL.
+    }
 }
