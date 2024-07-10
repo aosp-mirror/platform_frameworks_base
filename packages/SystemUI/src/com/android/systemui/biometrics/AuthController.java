@@ -22,7 +22,6 @@ import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_REAR
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.BroadcastReceiver;
@@ -187,7 +186,7 @@ public class AuthController implements
     final TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onTaskStackChanged() {
-            if (!isOwnerInForeground()) {
+            if (isOwnerInBackground()) {
                 mHandler.post(AuthController.this::cancelIfOwnerIsNotInForeground);
             }
         }
@@ -227,21 +226,20 @@ public class AuthController implements
         }
     }
 
-    private boolean isOwnerInForeground() {
+    private boolean isOwnerInBackground() {
         if (mCurrentDialog != null) {
             final String clientPackage = mCurrentDialog.getOpPackageName();
-            final List<ActivityManager.RunningTaskInfo> runningTasks =
-                    mActivityTaskManager.getTasks(1);
-            if (!runningTasks.isEmpty()) {
-                final String topPackage = runningTasks.get(0).topActivity.getPackageName();
-                if (!topPackage.contentEquals(clientPackage)
-                        && !Utils.isSystem(mContext, clientPackage)) {
-                    Log.w(TAG, "Evicting client due to: " + topPackage);
-                    return false;
-                }
+            final String clientClassNameIfItIsConfirmDeviceCredentialActivity =
+                    mCurrentDialog.getClassNameIfItIsConfirmDeviceCredentialActivity();
+            final boolean isInBackground = Utils.isSystemAppOrInBackground(mActivityTaskManager,
+                    mContext, clientPackage,
+                    clientClassNameIfItIsConfirmDeviceCredentialActivity);
+            if (isInBackground) {
+                Log.w(TAG, "Evicting client due to top activity is not : " + clientPackage);
             }
+            return isInBackground;
         }
-        return true;
+        return false;
     }
 
     private void cancelIfOwnerIsNotInForeground() {
@@ -1259,9 +1257,9 @@ public class AuthController implements
         }
         mCurrentDialog = newDialog;
 
-        // TODO(b/339532378): We should check whether |allowBackgroundAuthentication| should be
+        // TODO(b/353597496): We should check whether |allowBackgroundAuthentication| should be
         //  removed.
-        if (!promptInfo.isAllowBackgroundAuthentication() && !isOwnerInForeground()) {
+        if (!promptInfo.isAllowBackgroundAuthentication() && isOwnerInBackground()) {
             cancelIfOwnerIsNotInForeground();
         } else {
             mCurrentDialog.show(mWindowManager);
