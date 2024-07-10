@@ -51,33 +51,34 @@ class EndCastScreenToOtherDeviceDialogDelegate(
     }
 
     private fun getMessage(): String {
+        val hostDeviceName = state.projectionState.hostDeviceName
         return if (state.projectionState is MediaProjectionState.Projecting.SingleTask) {
             val appBeingSharedName =
                 endMediaProjectionDialogHelper.getAppName(state.projectionState)
-            if (appBeingSharedName != null && state.deviceName != null) {
+            if (appBeingSharedName != null && hostDeviceName != null) {
                 context.getString(
                     R.string.cast_to_other_device_stop_dialog_message_specific_app_with_device,
                     appBeingSharedName,
-                    state.deviceName,
+                    hostDeviceName,
                 )
             } else if (appBeingSharedName != null) {
                 context.getString(
                     R.string.cast_to_other_device_stop_dialog_message_specific_app,
                     appBeingSharedName,
                 )
-            } else if (state.deviceName != null) {
+            } else if (hostDeviceName != null) {
                 context.getString(
                     R.string.cast_to_other_device_stop_dialog_message_generic_with_device,
-                    state.deviceName
+                    hostDeviceName,
                 )
             } else {
                 context.getString(R.string.cast_to_other_device_stop_dialog_message_generic)
             }
         } else {
-            if (state.deviceName != null) {
+            if (hostDeviceName != null) {
                 context.getString(
                     R.string.cast_to_other_device_stop_dialog_message_entire_screen_with_device,
-                    state.deviceName
+                    hostDeviceName,
                 )
             } else {
                 context.getString(

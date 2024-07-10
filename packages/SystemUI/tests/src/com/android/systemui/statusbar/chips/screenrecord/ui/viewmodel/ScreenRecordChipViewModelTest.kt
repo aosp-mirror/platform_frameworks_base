@@ -211,6 +211,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     "host.package",
+                    hostDeviceName = null,
                     FakeActivityTaskManager.createTask(taskId = 1)
                 )
 
