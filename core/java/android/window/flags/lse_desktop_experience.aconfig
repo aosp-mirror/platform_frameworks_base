@@ -155,3 +155,10 @@ flag {
     description: "Whether to enable multi-instance support in desktop windowing."
     bug: "336289597"
 }
+
+flag {
+    name: "enable_desktop_windowing_back_navigation"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable back navigation treatment in desktop windowing."
+    bug: "350421096"
+}
