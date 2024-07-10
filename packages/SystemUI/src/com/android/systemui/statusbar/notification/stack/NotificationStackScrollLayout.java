@@ -6462,7 +6462,6 @@ public class NotificationStackScrollLayout
     };
 
     public HeadsUpTouchHelper.Callback getHeadsUpCallback() {
-        SceneContainerFlag.assertInLegacyMode();
         return mHeadsUpCallback;
     }
 
