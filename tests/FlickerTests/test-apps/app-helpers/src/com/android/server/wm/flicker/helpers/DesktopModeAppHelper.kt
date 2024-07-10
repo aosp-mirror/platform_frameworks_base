@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.helpers
 
 import android.graphics.Rect
+import android.platform.uiautomator_helpers.DeviceHelpers
 import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.parsers.WindowManagerStateHelper
@@ -26,6 +27,7 @@ import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
+import java.time.Duration
 
 /**
  * Wrapper class around App helper classes. This class adds functionality to the apps that the
@@ -40,16 +42,6 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         LEFT_BOTTOM,
         RIGHT_BOTTOM
     }
-
-    private val TIMEOUT_MS = 3_000L
-    private val CAPTION = "desktop_mode_caption"
-    private val CAPTION_HANDLE = "caption_handle"
-    private val MAXIMIZE_BUTTON = "maximize_window"
-    private val MAXIMIZE_BUTTON_VIEW = "maximize_button_view"
-    private val CLOSE_BUTTON = "close_window"
-
-    private val caption: BySelector
-        get() = By.res(SYSTEMUI_PACKAGE, CAPTION)
 
     /** Wait for an app moved to desktop to finish its transition. */
     private fun waitForAppToMoveToDesktop(wmHelper: WindowManagerStateHelper) {
@@ -123,7 +115,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         )
             error("expected a freeform window with caption but window is not in freeform mode")
         val captions =
-            device.wait(Until.findObjects(caption), TIMEOUT_MS)
+            device.wait(Until.findObjects(caption), TIMEOUT.toMillis())
                 ?: error("Unable to find view $caption\n")
 
         return captions.find {
@@ -190,6 +182,33 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         device.drag(startX, startY, endX, endY, 100)
     }
 
+    fun enterDesktopModeFromAppHandleMenu(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice) {
+        val windowRect = wmHelper.getWindowRegion(innerHelper).bounds
+        val startX = windowRect.centerX()
+        // Click a little under the top to prevent opening the notification shade.
+        val startY = 10
+
+        // Click on the app handle coordinates.
+        device.click(startX, startY)
+        wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
+
+        val pill = getAppHandlePillForWindow()
+        val desktopModeButton =
+            pill
+                ?.children
+                ?.find { it.resourceName.endsWith(DESKTOP_MODE_BUTTON) }
+
+        desktopModeButton?.click()
+        wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
+    }
+
+    private fun getAppHandlePillForWindow(): UiObject2? {
+        val pillContainer: BySelector = By.res(SYSTEMUI_PACKAGE, PILL_CONTAINER)
+        return DeviceHelpers.waitForObj(pillContainer, TIMEOUT)
+    }
+
     /** Wait for transition to full screen to finish. */
     private fun waitForTransitionToFullscreen(wmHelper: WindowManagerStateHelper) {
         wmHelper
@@ -197,5 +216,16 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             .withFullScreenApp(innerHelper)
             .withAppTransitionIdle()
             .waitForAndVerify()
+    }
+
+    private companion object {
+        val TIMEOUT = Duration.ofSeconds(3)
+        val CAPTION = "desktop_mode_caption"
+        val MAXIMIZE_BUTTON_VIEW = "maximize_button_view"
+        val CLOSE_BUTTON = "close_window"
+        val PILL_CONTAINER = "windowing_pill"
+        val DESKTOP_MODE_BUTTON = "desktop_button"
+        val caption: BySelector
+            get() = By.res(SYSTEMUI_PACKAGE, CAPTION)
     }
 }
