@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -76,14 +77,18 @@ constructor(
         onRemoveTile: (TileSpec) -> Unit,
     ) {
         val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
+        val isIcon: (TileSpec) -> Boolean by rememberUpdatedState { tileSpec ->
+            iconTilesViewModel.isIconTile(tileSpec)
+        }
 
         DefaultEditTileGrid(
             tiles = tiles,
-            isIconOnly = iconTilesViewModel::isIconTile,
+            isIconOnly = isIcon,
             columns = GridCells.Fixed(columns),
             modifier = modifier,
             onAddTile = onAddTile,
             onRemoveTile = onRemoveTile,
+            onResize = iconTilesViewModel::resize,
         )
     }
 

@@ -18,7 +18,4 @@ package com.android.systemui.qs.panels.shared.model
 
 import javax.inject.Qualifier
 
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class GridConsistencyLog()
+@Qualifier @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) annotation class PanelsLog()
