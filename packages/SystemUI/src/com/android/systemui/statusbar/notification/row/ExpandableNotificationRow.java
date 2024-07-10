@@ -371,12 +371,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 setUserExpanded(nowExpanded);
             }
 
-            if (ExpandHeadsUpOnInlineReply.isEnabled() && mExpandable) {
-                // it is triggered by the user.
-                // So, mHasUserChangedExpansion should be marked true.
-                mHasUserChangedExpansion = true;
-            }
-
             notifyHeightChanged(/* needsAnimation= */ true);
             mOnExpandClickListener.onExpandClicked(mEntry, v, nowExpanded);
             if (shouldLogExpandClickMetric) {
