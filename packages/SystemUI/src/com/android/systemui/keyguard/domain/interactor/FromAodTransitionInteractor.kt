@@ -53,7 +53,6 @@ constructor(
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     val deviceEntryRepository: DeviceEntryRepository,
-    private val wakeToGoneInteractor: KeyguardWakeDirectlyToGoneInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.AOD,
@@ -99,7 +98,6 @@ constructor(
                     keyguardInteractor.primaryBouncerShowing,
                     keyguardInteractor.isKeyguardOccluded,
                     canDismissLockscreen,
-                    wakeToGoneInteractor.canWakeDirectlyToGone,
                 )
                 .collect {
                     (
@@ -109,7 +107,6 @@ constructor(
                         primaryBouncerShowing,
                         isKeyguardOccludedLegacy,
                         canDismissLockscreen,
-                        canWakeDirectlyToGone,
                     ) ->
                     if (!maybeHandleInsecurePowerGesture()) {
                         val shouldTransitionToLockscreen =
@@ -134,7 +131,8 @@ constructor(
 
                         val shouldTransitionToGone =
                             (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen) ||
-                                (KeyguardWmStateRefactor.isEnabled && canWakeDirectlyToGone)
+                                (KeyguardWmStateRefactor.isEnabled &&
+                                    !deviceEntryRepository.isLockscreenEnabled())
 
                         if (shouldTransitionToGone) {
                             // TODO(b/336576536): Check if adaptation for scene framework is needed
