@@ -32,7 +32,6 @@ import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERR
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE;
 
-import static com.android.server.wm.ActivityRecord.computeAspectRatio;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_POSITION_MULTIPLIER_CENTER;
@@ -174,6 +173,11 @@ class AppCompatAspectRatioOverrides {
                 && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest();
     }
 
+    boolean hasFullscreenOverride() {
+        // `mUserAspectRatio` is always initialized first in `shouldApplyUserFullscreenOverride()`.
+        return shouldApplyUserFullscreenOverride() || isSystemOverrideToFullscreenEnabled();
+    }
+
     float getUserMinAspectRatio() {
         switch (mUserAspectRatioState.mUserAspectRatio) {
             case USER_MIN_ASPECT_RATIO_DISPLAY_SIZE:
@@ -211,7 +215,7 @@ class AppCompatAspectRatioOverrides {
             bounds.inset(/* dx */ 0, /* dy */ dividerSize / 2);
             bounds.bottom = bounds.centerY();
         }
-        return computeAspectRatio(bounds);
+        return AppCompatUtils.computeAspectRatio(bounds);
     }
 
     float getFixedOrientationLetterboxAspectRatio(@NonNull Configuration parentConfiguration) {
@@ -228,7 +232,7 @@ class AppCompatAspectRatioOverrides {
             return mActivityRecord.info.getMinAspectRatio();
         }
         final Rect bounds = new Rect(displayArea.getWindowConfiguration().getAppBounds());
-        return computeAspectRatio(bounds);
+        return AppCompatUtils.computeAspectRatio(bounds);
     }
 
     private boolean shouldUseSplitScreenAspectRatio(@NonNull Configuration parentConfiguration) {
