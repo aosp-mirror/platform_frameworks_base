@@ -20,6 +20,7 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
 import android.content.IntentFilter
 import android.content.pm.UserInfo
+import android.os.UserHandle
 import android.provider.Settings
 import com.android.systemui.Flags.communalHub
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -102,7 +103,10 @@ constructor(
             .broadcastFlow(
                 filter =
                     IntentFilter(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                user = user.userHandle
+                // In COPE management mode, the restriction from the managed profile may
+                // propagate to the main profile. Therefore listen to this broadcast across
+                // all users and update the state each time it changes.
+                user = UserHandle.ALL,
             )
             .emitOnStart()
             .map { devicePolicyManager.areKeyguardWidgetsAllowed(user.id) }
