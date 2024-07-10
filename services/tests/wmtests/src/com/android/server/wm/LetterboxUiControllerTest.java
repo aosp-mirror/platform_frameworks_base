@@ -293,6 +293,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mainWindow.mInvGlobalScale = 1f;
         spyOn(resources);
         spyOn(mActivity);
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy());
 
         if (taskbar != null) {
             taskbar.setVisible(true);
@@ -301,7 +302,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(mLetterboxedPortraitTaskBounds).when(mActivity).getBounds();
         doReturn(false).when(mActivity).isInLetterboxAnimation();
         doReturn(true).when(mActivity).isVisible();
-        doReturn(true).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+        doReturn(true).when(mActivity.mAppCompatController
+                .getAppCompatAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
         doReturn(insets).when(mainWindow).getInsetsState();
         doReturn(attrs).when(mainWindow).getAttrs();
         doReturn(true).when(mainWindow).isDrawn();

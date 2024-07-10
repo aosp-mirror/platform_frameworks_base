@@ -143,8 +143,8 @@ class AppCompatActivityRobot {
     }
 
     void setLetterboxedForFixedOrientationAndAspectRatio(boolean enabled) {
-        doReturn(enabled).when(mActivityStack.top())
-                .isLetterboxedForFixedOrientationAndAspectRatio();
+        doReturn(enabled).when(mActivityStack.top().mAppCompatController
+                .getAppCompatAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
     }
 
     void enableTreatmentForTopActivity(boolean enabled) {
@@ -403,6 +403,7 @@ class AppCompatActivityRobot {
         spyOn(activity);
         spyOn(activity.mAppCompatController.getTransparentPolicy());
         spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
         spyOn(activity.mLetterboxUiController);
     }
 

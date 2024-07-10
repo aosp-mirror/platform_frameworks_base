@@ -956,13 +956,15 @@ final class LetterboxUiController {
         if (mActivityRecord.inSizeCompatMode()) {
             return "SIZE_COMPAT_MODE";
         }
-        if (mActivityRecord.isLetterboxedForFixedOrientationAndAspectRatio()) {
+        if (mActivityRecord.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio()) {
             return "FIXED_ORIENTATION";
         }
         if (mainWin.isLetterboxedForDisplayCutout()) {
             return "DISPLAY_CUTOUT";
         }
-        if (mActivityRecord.isLetterboxedForAspectRatioOnly()) {
+        if (mActivityRecord.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForAspectRatioOnly()) {
             return "ASPECT_RATIO";
         }
         return "UNKNOWN_REASON";
