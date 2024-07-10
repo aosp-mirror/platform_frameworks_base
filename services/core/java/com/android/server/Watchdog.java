@@ -1010,6 +1010,7 @@ public class Watchdog implements Dumpable {
             // Trigger the kernel to dump all blocked threads, and backtraces on all CPUs to the
             // kernel log
             doSysRq('w');
+            doSysRq('m');
             doSysRq('l');
         }
 
