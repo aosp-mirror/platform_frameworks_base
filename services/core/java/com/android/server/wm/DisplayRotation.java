@@ -627,6 +627,7 @@ public class DisplayRotation {
 
         mRotation = rotation;
 
+        mDisplayContent.applyFixedRotationForNonTopVisibleActivityIfNeeded();
         mDisplayContent.setLayoutNeeded();
         mDisplayContent.mWaitingForConfig = true;
 

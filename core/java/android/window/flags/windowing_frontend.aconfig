@@ -141,6 +141,13 @@ flag {
 }
 
 flag {
+  name: "respect_non_top_visible_fixed_orientation"
+  namespace: "windowing_frontend"
+  description: "If top activity is not opaque, respect the fixed orientation of activity behind it"
+  bug: "283514860"
+}
+
+flag {
   name: "insets_decoupled_configuration"
   namespace: "windowing_frontend"
   description: "Configuration decoupled from insets"
