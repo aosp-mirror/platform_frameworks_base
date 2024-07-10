@@ -48,6 +48,9 @@ import static android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID;
 import static android.util.MathUtils.constrain;
 import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
+import static com.android.internal.os.ProcfsMemoryUtil.getProcessCmdlines;
+import static com.android.internal.os.ProcfsMemoryUtil.readCmdlineFromProcfs;
+import static com.android.internal.os.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__GESTURE_SHORTCUT_TYPE__TRIPLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__HARDWARE_SHORTCUT_TYPE__VOLUME_KEY;
@@ -68,9 +71,6 @@ import static com.android.server.stats.Flags.addMobileBytesTransferByProcStatePu
 import static com.android.server.stats.Flags.applyNetworkStatsPollRateLimit;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
-import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
-import static com.android.server.stats.pull.ProcfsMemoryUtil.readCmdlineFromProcfs;
-import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 import static com.android.server.stats.pull.netstats.NetworkStatsUtils.fromPublicNetworkStats;
 import static com.android.server.stats.pull.netstats.NetworkStatsUtils.isAddEntriesSupported;
 
@@ -209,6 +209,8 @@ import com.android.internal.os.KernelSingleProcessCpuThreadReader.ProcessCpuUsag
 import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.ProcessCpuTracker;
+import com.android.internal.os.ProcfsMemoryUtil;
+import com.android.internal.os.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.internal.os.SelectedProcessCpuThreadReader;
 import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.CollectionUtils;
@@ -229,7 +231,6 @@ import com.android.server.power.stats.KernelWakelockReader;
 import com.android.server.power.stats.KernelWakelockStats;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
-import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.stats.pull.netstats.NetworkStatsAccumulator;
 import com.android.server.stats.pull.netstats.NetworkStatsExt;
 import com.android.server.stats.pull.netstats.SubInfo;
