@@ -125,6 +125,9 @@ static unique_fd openUinput(const char* readableName, jint vendorId, jint produc
         case DeviceType::ROTARY_ENCODER:
             ioctl(fd, UI_SET_EVBIT, EV_REL);
             ioctl(fd, UI_SET_RELBIT, REL_WHEEL);
+            if (vd_flags::high_resolution_scroll()) {
+                ioctl(fd, UI_SET_RELBIT, REL_WHEEL_HI_RES);
+            }
             break;
         default:
             ALOGE("Invalid input device type %d", static_cast<int32_t>(deviceType));
