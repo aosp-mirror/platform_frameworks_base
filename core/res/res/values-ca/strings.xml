@@ -157,7 +157,7 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Seguretat de xarxes mòbils"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Encriptació, notificacions de xarxes sense encriptació"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"S\'ha accedit a l\'identificador de dispositiu"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'identificador únic del teu dispositiu (IMSI or IMEI) mentre s\'utilitzava la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'ID únic del dispositiu (IMSI or IMEI) amb la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'identificador únic del teu dispositiu (IMSI or IMEI) mentre s\'utilitzava la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nAixò vol dir que s\'han registrat la teva ubicació, activitat o identitat. Tot i ser una pràctica habitual, pot suposar un problema per a aquelles persones preocupades per la privadesa."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"T\'has connectat a la xarxa encriptada <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"La connexió SIM de <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ara és més segura"</string>
@@ -2412,7 +2412,7 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Espai privat"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"S\'ha amagat contingut sensible de les notificacions"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per motius de seguretat"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per seguretat"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"S\'ha connectat automàticament a un satèl·lit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Pots enviar i rebre missatges sense una xarxa mòbil o Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Obre Missatges"</string>

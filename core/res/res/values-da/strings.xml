@@ -2140,7 +2140,7 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Denne notifikation blev placeret højere. Tryk for at give feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Denne notifikation blev placeret lavere. Tryk for at give feedback."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Forbedrede notifikationer"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Foreslåede handlinger og svar leveres nu via forbedrede notifikationer. Tilpassede Android-notifikationer understøttes ikke længere."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Foreslåede handlinger og svar leveres nu via forbedrede notifikationer. Adaptive Android-notifikationer understøttes ikke længere."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Deaktiver"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Få flere oplysninger"</string>

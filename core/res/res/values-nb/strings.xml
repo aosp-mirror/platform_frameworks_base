@@ -264,16 +264,16 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"Nødssituasjon"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Feilrapport"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Avslutt økten"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"Skjermdump"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"Skjermbilde"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Feilrapport"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Informasjon om tilstanden til enheten din samles inn og sendes som en e-post. Det tar litt tid fra du starter feilrapporten til e-posten er klar, så vær tålmodig."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktiv rapport"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Bruk dette alternativet i de fleste tilfeller. Da kan du spore fremgangen for rapporten, skrive inn flere detaljer om problemet samt ta skjermdumper. Noen deler som tar lang tid å behandle, blir kanskje utelatt."</string>
+    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Bruk dette alternativet i de fleste tilfeller. Da kan du spore fremgangen for rapporten, skrive inn flere detaljer om problemet samt ta skjermbilder. Noen deler som tar lang tid å behandle, blir kanskje utelatt."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Fullstendig rapport"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Bruk dette alternativet for minst mulig forstyrrelse på systemet når enheten din er treg eller ikke svarer, eller når du trenger alle rapportdelene. Det tas ikke noen skjermdump, og du kan ikke legge til flere detaljer."</string>
-    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Tar skjermdump for feilrapporten om # sekund.}other{Tar skjermdump for feilrapporten om # sekunder.}}"</string>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"En skjermdump er tatt med feilrapporten"</string>
-    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Kunne ikke ta skjermdump med feilrapporten"</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Bruk dette alternativet for minst mulig forstyrrelse på systemet når enheten din er treg eller ikke svarer, eller når du trenger alle rapportdelene. Det tas ikke noen skjermbilde, og du kan ikke legge til flere detaljer."</string>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Tar skjermbilde for feilrapporten om # sekund.}other{Tar skjermbilde for feilrapporten om # sekunder.}}"</string>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"En skjermbilde er tatt med feilrapporten"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Kunne ikke ta skjermbilde med feilrapporten"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Stillemodus"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Lyden er av"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Lyden er på"</string>
@@ -359,8 +359,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Kan trykke, sveipe, klype og gjøre andre bevegelser."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Bevegelser på fingeravtrykkssensor"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan fange inn bevegelser som utføres på enhetens fingeravtrykkssensor."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skjermdump"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan ikke ta en skjermdump av skjermen."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skjermbilde"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan ikke ta et skjermbilde av skjermen."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Forhåndsvisning, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="dream_accessibility_action_click" msgid="7392398629967797805">"lukk"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"deaktivere eller endre statusfeltet"</string>
@@ -509,8 +509,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Denne appen kan ta opp lyd med mikrofonen mens den er i bruk."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ta opp lyd i bakgrunnen"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Denne appen kan når som helst ta opp lyd med mikrofonen."</string>
-    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"registrere skjermdumper av appvinduer"</string>
-    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Denne appen varsles hvis det tas skjermdumper mens appen er i bruk."</string>
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"registrere skjermbilder av appvinduer"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Denne appen varsles hvis det tas skjermbilder mens appen er i bruk."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"sende kommandoer til SIM-kortet"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Lar appen sende kommandoer til SIM-kortet. Dette er veldig farlig."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"gjenkjenn fysisk aktivitet"</string>
@@ -2186,7 +2186,7 @@
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Hurtiginnstillinger"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialogboks for å slå av/på"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Låseskjerm"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skjermdump"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skjermbilde"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Hook for hodetelefoner"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Tilgjengelighetssnarvei på skjermen"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Velger for tilgjengelighetssnarvei på skjermen"</string>

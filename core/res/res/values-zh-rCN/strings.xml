@@ -2411,7 +2411,7 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"私密空间"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"已隐藏敏感通知内容"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"为安全起见而在屏幕共享画面中处于隐藏状态的应用内容"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"为安全起见，屏幕共享画面已隐藏此应用的内容"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"自动连接到卫星"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"您无需使用移动网络或 WLAN 网络便能收发消息"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"打开“信息”应用"</string>

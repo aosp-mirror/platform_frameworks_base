@@ -156,8 +156,8 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"モバイル ネットワーク セキュリティ"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"暗号化、暗号化されていないネットワークに関する通知"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"デバイス ID へのアクセスが発生しました"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に付近のネットワークでお使いのデバイスの一意の ID（IMSI または IMEI）が記録されました"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に付近のネットワークでお使いのデバイスの一意の ID（IMSI または IMEI）が記録されました。\n\nつまり、あなたの位置情報、アクティビティ、身元などが記録されことになります。これはよくある事象ですが、プライバシーに不安を持たれている人にとっては問題になる可能性があります。"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に、お使いのデバイスの一意の ID（IMSI または IMEI）が付近のネットワークで記録されました。"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>、<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> の SIM の使用中に、お使いのデバイスの一意の ID（IMSI または IMEI）が付近のネットワークで記録されました。\n\nつまり、あなたの位置情報、アクティビティ、身元などが記録されたことになります。これはよくある事象ですが、プライバシーを保護したいユーザーにとっては問題となる可能性があります。"</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"暗号化されたネットワーク（<xliff:g id="NETWORK_NAME">%1$s</xliff:g>）に接続しました"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> の SIM 接続のセキュリティが強化されました"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"接続先のネットワークが暗号化されていません"</string>
