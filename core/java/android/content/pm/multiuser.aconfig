@@ -307,3 +307,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "modify_private_space_secondary_unlock_setup_flow"
+  namespace: "profile_experiences"
+  description: "Updates to setting up secondary unlock factor from Settings for the first time"
+  bug: "332850595"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
