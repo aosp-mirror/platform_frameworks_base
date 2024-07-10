@@ -2536,6 +2536,21 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return mTaskContainers.get(taskId);
     }
 
+    @NonNull
+    @GuardedBy("mLock")
+    List<TaskContainer> getTaskContainers() {
+        final ArrayList<TaskContainer> taskContainers = new ArrayList<>();
+        for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+            taskContainers.add(mTaskContainers.valueAt(i));
+        }
+        return taskContainers;
+    }
+
+    @GuardedBy("mLock")
+    void setSavedState(@NonNull Bundle savedState) {
+        mPresenter.setSavedState(savedState);
+    }
+
     @GuardedBy("mLock")
     void addTaskContainer(int taskId, TaskContainer taskContainer) {
         mTaskContainers.put(taskId, taskContainer);
@@ -2827,6 +2842,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return false;
         }
         return getActiveSplitForContainer(container) != null;
+    }
+
+    void scheduleBackup() {
+        synchronized (mLock) {
+            mPresenter.scheduleBackup();
+        }
     }
 
     private final class LifecycleCallbacks extends EmptyLifecycleCallbacksAdapter {
