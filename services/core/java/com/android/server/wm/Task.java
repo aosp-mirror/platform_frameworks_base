@@ -809,42 +809,30 @@ class Task extends TaskFragment {
         }
     }
 
-    /** Convenience method to reparent a task to the top or bottom position of the root task. */
-    boolean reparent(Task preferredRootTask, boolean toTop,
-            @ReparentMoveRootTaskMode int moveRootTaskMode, boolean animate, boolean deferResume,
-            String reason) {
-        return reparent(preferredRootTask, toTop ? MAX_VALUE : 0, moveRootTaskMode, animate,
-                deferResume, true /* schedulePictureInPictureModeChange */, reason);
-    }
-
     /**
      * Reparents the task into a preferred root task, creating it if necessary.
      *
      * @param preferredRootTask the target root task to move this task
-     * @param position the position to place this task in the new root task
+     * @param toTop top or bottom position to place this task in the target task
      * @param animate whether or not we should wait for the new window created as a part of the
      *            reparenting to be drawn and animated in
      * @param moveRootTaskMode whether or not to move the root task to the front always, only if
      *            it was previously focused & in front, or never
      * @param deferResume whether or not to update the visibility of other tasks and root tasks
      *            that may have changed as a result of this reparenting
-     * @param schedulePictureInPictureModeChange specifies whether or not to schedule the PiP mode
-     *            change. Callers may set this to false if they are explicitly scheduling PiP mode
-     *            changes themselves, like during the PiP animation
      * @param reason the caller of this reparenting
      * @return whether the task was reparented
      */
     // TODO: Inspect all call sites and change to just changing windowing mode of the root task vs.
     // re-parenting the task. Can only be done when we are no longer using static root task Ids.
-    boolean reparent(Task preferredRootTask, int position,
+    boolean reparent(Task preferredRootTask, boolean toTop,
             @ReparentMoveRootTaskMode int moveRootTaskMode, boolean animate, boolean deferResume,
-            boolean schedulePictureInPictureModeChange, String reason) {
+            String reason) {
         final ActivityTaskSupervisor supervisor = mTaskSupervisor;
         final RootWindowContainer root = mRootWindowContainer;
-        final WindowManagerService windowManager = mAtmService.mWindowManager;
         final Task sourceRootTask = getRootTask();
         final Task toRootTask = supervisor.getReparentTargetRootTask(this, preferredRootTask,
-                position == MAX_VALUE);
+                toTop);
         if (toRootTask == sourceRootTask) {
             return false;
         }
@@ -855,7 +843,6 @@ class Task extends TaskFragment {
         final ActivityRecord topActivity = getTopNonFinishingActivity();
 
         mAtmService.deferWindowLayout();
-        boolean kept = true;
         try {
             final ActivityRecord r = topRunningActivityLocked();
             final boolean wasFocused = r != null && root.isTopDisplayFocusedRootTask(sourceRootTask)
@@ -871,12 +858,7 @@ class Task extends TaskFragment {
                     || (moveRootTaskMode == REPARENT_KEEP_ROOT_TASK_AT_FRONT
                             && (wasFocused || wasFront));
 
-            reparent(toRootTask, position, moveRootTaskToFront, reason);
-
-            if (schedulePictureInPictureModeChange) {
-                // Notify of picture-in-picture mode changes
-                supervisor.scheduleUpdatePictureInPictureModeIfNeeded(this, sourceRootTask);
-            }
+            reparent(toRootTask, toTop ? MAX_VALUE : 0, moveRootTaskToFront, reason);
 
             // If the task had focus before (or we're requested to move focus), move focus to the
             // new root task by moving the root task to the front.
