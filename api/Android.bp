@@ -365,8 +365,6 @@ stubs_defaults {
         "--hide CallbackInterface",
         // Disable HiddenSuperclass, as Metalava handles this fine (it should be hidden by default)
         "--hide HiddenSuperclass",
-        "--hide-package android.audio.policy.configuration.V7_0",
-        "--hide-package com.android.server",
         "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",
     ],
     filter_packages: packages_to_document,
