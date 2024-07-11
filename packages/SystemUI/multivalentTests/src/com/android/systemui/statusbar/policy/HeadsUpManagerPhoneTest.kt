@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -221,6 +222,11 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
     companion object {
         @get:Parameters(name = "{0}")
         val flags: List<FlagsParameterization>
-            get() = FlagsParameterization.allCombinationsOf(NotificationThrottleHun.FLAG_NAME)
+            get() = buildList {
+                addAll(FlagsParameterization.allCombinationsOf(NotificationThrottleHun.FLAG_NAME))
+                addAll(
+                    FlagsParameterization.allCombinationsOf(NotificationsHeadsUpRefactor.FLAG_NAME)
+                )
+            }
     }
 }
