@@ -401,7 +401,9 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             Log.e(LOG_TAG, "Failed to wait for tracing to finish", e);
         }
 
-        dumpViewerConfig();
+        if (!android.tracing.Flags.clientSideProtoLogging()) {
+            dumpViewerConfig();
+        }
 
         Log.d(LOG_TAG, "Finished onTracingFlush");
     }
