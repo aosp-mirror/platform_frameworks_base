@@ -77,6 +77,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A proxy that processes all {@link IInputMethodManager} calls asynchronously.
@@ -175,19 +176,45 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
     public boolean showSoftInput(IInputMethodClient client, IBinder windowToken,
             @Nullable ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
             @MotionEvent.ToolType int lastClickToolType, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
-        offload(() -> mInner.showSoftInput(
-                client, windowToken, statsToken, flags, lastClickToolType, resultReceiver, reason));
-        return true;
+            @SoftInputShowHideReason int reason, boolean async) {
+
+        if (async) {
+            offload(() -> mInner.showSoftInput(
+                    client, windowToken, statsToken, flags, lastClickToolType, resultReceiver,
+                    reason, async));
+            return true;
+        } else {
+            final var future = CompletableFuture.supplyAsync(
+                    () -> mInner.showSoftInput(
+                            client,
+                            windowToken,
+                            statsToken,
+                            flags,
+                            lastClickToolType,
+                            resultReceiver,
+                            reason,
+                            async),
+                    this::offload);
+            return future.completeOnTimeout(false, 1, TimeUnit.SECONDS).join();
+        }
     }
 
     @Override
     public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
             @Nullable ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
-        offload(() -> mInner.hideSoftInput(
-                client, windowToken, statsToken, flags, resultReceiver, reason));
-        return true;
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason, boolean async) {
+
+        if (async) {
+            offload(() -> mInner.hideSoftInput(
+                    client, windowToken, statsToken, flags, resultReceiver, reason, async));
+            return true;
+        } else {
+            final var future = CompletableFuture.supplyAsync(
+                    () -> mInner.hideSoftInput(
+                            client, windowToken, statsToken, flags, resultReceiver, reason, async),
+                    this::offload);
+            return future.completeOnTimeout(false, 1, TimeUnit.SECONDS).join();
+        }
     }
 
     @Override
@@ -207,7 +234,8 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
             IRemoteInputConnection inputConnection,
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq) {
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq,
+            boolean useAsyncShowHideMethod) {
         offload(() -> {
             InputBindResult result = mInner.startInputOrWindowGainedFocus(startInputReason, client,
                     windowToken, startInputFlags, softInputMode, windowFlags,

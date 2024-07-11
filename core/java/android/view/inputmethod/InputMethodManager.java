@@ -56,6 +56,7 @@ import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.app.PropertyInvalidatedCache;
+import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -439,6 +440,36 @@ public final class InputMethodManager {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long CLEAR_SHOW_FORCED_FLAG_WHEN_LEAVING = 214016041L; // This is a bug id.
+
+    /**
+     * Use async method for {@link InputMethodManager#showSoftInput(View, int, ResultReceiver)},
+     * {@link InputMethodManager#showSoftInput(View, int)} and
+     * {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int, ResultReceiver)},
+     * {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)} for apps targeting V+.
+     * <p>
+     * Apps can incorrectly rely on {@link InputMethodManager#showSoftInput(View, int)} and
+     * {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)} method return type
+     * to interpret result of a request rather than relying on {@link ResultReceiver}. The return
+     * type of the method was never documented to have accurate info of visibility but few apps
+     * incorrectly rely on it.
+     * <p>
+     * Starting Android V, we use async calls into system_server which returns {@code true} if
+     * method call was made but return type doesn't guarantee execution.
+     * Apps targeting older versions will fallback to existing behavior of calling synchronous
+     * methods which had undocumented result in return type.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    private static final long USE_ASYNC_SHOW_HIDE_METHOD = 352594277L; // This is a bug id.
+
+    /**
+     * Version-gating is guarded by bug-fix flag.
+     */
+    private static final boolean ASYNC_SHOW_HIDE_METHOD_ENABLED =
+            !Flags.compatchangeForZerojankproxy()
+                || CompatChanges.isChangeEnabled(USE_ASYNC_SHOW_HIDE_METHOD);
 
     /**
      * If {@code true}, avoid calling the
@@ -2246,6 +2277,8 @@ public final class InputMethodManager {
      *             {@link View#isFocused view focus}, and its containing window has
      *             {@link View#hasWindowFocus window focus}. Otherwise the call fails and
      *             returns {@code false}.
+     * @return {@code true} if a request was sent to system_server, {@code false} otherwise. Note:
+     * this does not return result of the request. For result use {@param resultReceiver} instead.
      */
     public boolean showSoftInput(View view, @ShowFlags int flags) {
         // Re-dispatch if there is a context mismatch.
@@ -2315,6 +2348,8 @@ public final class InputMethodManager {
      * code you receive may be either {@link #RESULT_UNCHANGED_SHOWN},
      * {@link #RESULT_UNCHANGED_HIDDEN}, {@link #RESULT_SHOWN}, or
      * {@link #RESULT_HIDDEN}.
+     * @return {@code true} if a request was sent to system_server, {@code false} otherwise. Note:
+     * this does not return result of the request. For result use {@param resultReceiver} instead.
      */
     public boolean showSoftInput(View view, @ShowFlags int flags, ResultReceiver resultReceiver) {
         return showSoftInput(view, flags, resultReceiver, SoftInputShowHideReason.SHOW_SOFT_INPUT);
@@ -2383,7 +2418,8 @@ public final class InputMethodManager {
                         flags,
                         mCurRootView.getLastClickToolType(),
                         resultReceiver,
-                        reason);
+                        reason,
+                        ASYNC_SHOW_HIDE_METHOD_ENABLED);
             }
         }
     }
@@ -2426,7 +2462,8 @@ public final class InputMethodManager {
                     flags,
                     mCurRootView.getLastClickToolType(),
                     resultReceiver,
-                    reason);
+                    reason,
+                    ASYNC_SHOW_HIDE_METHOD_ENABLED);
         }
     }
 
@@ -2459,6 +2496,9 @@ public final class InputMethodManager {
      *
      * @param windowToken The token of the window that is making the request,
      * as returned by {@link View#getWindowToken() View.getWindowToken()}.
+     * @return {@code true} if a request was sent to system_server, {@code false} otherwise. Note:
+     * this does not return result of the request. For result use {@link ResultReceiver} in
+     * {@link #hideSoftInputFromWindow(IBinder, int, ResultReceiver)} instead.
      */
     public boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags) {
         return hideSoftInputFromWindow(windowToken, flags, null);
@@ -2487,6 +2527,8 @@ public final class InputMethodManager {
      * code you receive may be either {@link #RESULT_UNCHANGED_SHOWN},
      * {@link #RESULT_UNCHANGED_HIDDEN}, {@link #RESULT_SHOWN}, or
      * {@link #RESULT_HIDDEN}.
+     * @return {@code true} if a request was sent to system_server, {@code false} otherwise. Note:
+     * this does not return result of the request. For result use {@param resultReceiver} instead.
      */
     public boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags,
             ResultReceiver resultReceiver) {
@@ -2530,7 +2572,7 @@ public final class InputMethodManager {
                 return true;
             } else {
                 return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken,
-                        statsToken, flags, resultReceiver, reason);
+                        statsToken, flags, resultReceiver, reason, ASYNC_SHOW_HIDE_METHOD_ENABLED);
             }
         }
     }
@@ -2573,7 +2615,7 @@ public final class InputMethodManager {
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, view.getWindowToken(),
-                    statsToken, flags, null, reason);
+                    statsToken, flags, null, reason, ASYNC_SHOW_HIDE_METHOD_ENABLED);
         }
     }
 
@@ -3350,7 +3392,7 @@ public final class InputMethodManager {
                         servedInputConnection == null ? null
                                 : servedInputConnection.asIRemoteAccessibilityInputConnection(),
                         view.getContext().getApplicationInfo().targetSdkVersion, targetUserId,
-                        mImeDispatcher);
+                        mImeDispatcher, ASYNC_SHOW_HIDE_METHOD_ENABLED);
             } else {
                 res = IInputMethodManagerGlobalInvoker.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,
@@ -3653,7 +3695,8 @@ public final class InputMethodManager {
                     statsToken,
                     HIDE_NOT_ALWAYS,
                     null,
-                    reason);
+                    reason,
+                    true /*async */);
         }
     }
 
@@ -3745,7 +3788,7 @@ public final class InputMethodManager {
 
             IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
                     0 /* flags */, null /* resultReceiver */,
-                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
+                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API, true /* async */);
         }
     }
 
