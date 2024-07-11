@@ -98,6 +98,7 @@ aconfig_declarations_group {
         "framework-jobscheduler-job.flags-aconfig-java",
         "framework_graphics_flags_java_lib",
         "hwui_flags_java_lib",
+        "libcore_exported_aconfig_flags_lib",
         "power_flags_lib",
         "sdk_sandbox_flags_lib",
         "surfaceflinger_flags_java_lib",
@@ -137,6 +138,14 @@ java_defaults {
 java_aconfig_library {
     name: "camera_platform_flags_core_java_lib",
     aconfig_declarations: "camera_platform_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Core Libraries / libcore
+java_aconfig_library {
+    name: "libcore_exported_aconfig_flags_lib",
+    aconfig_declarations: "libcore-aconfig-flags",
+    mode: "exported",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
