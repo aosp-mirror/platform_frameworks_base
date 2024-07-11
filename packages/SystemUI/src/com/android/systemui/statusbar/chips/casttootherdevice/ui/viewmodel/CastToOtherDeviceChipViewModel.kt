@@ -22,7 +22,10 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.casttootherdevice.domain.interactor.MediaRouterChipInteractor
 import com.android.systemui.statusbar.chips.casttootherdevice.domain.model.MediaRouterCastModel
 import com.android.systemui.statusbar.chips.casttootherdevice.ui.view.EndCastScreenToOtherDeviceDialogDelegate
@@ -58,6 +61,7 @@ constructor(
     private val mediaRouterChipInteractor: MediaRouterChipInteractor,
     private val systemClock: SystemClock,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
+    @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
     /**
      * The cast chip to show, based only on MediaProjection API events.
@@ -123,6 +127,16 @@ constructor(
 
     override val chip: StateFlow<OngoingActivityChipModel> =
         combine(projectionChip, routerChip) { projection, router ->
+                logger.log(
+                    TAG,
+                    LogLevel.INFO,
+                    {
+                        str1 = projection.logName
+                        str2 = router.logName
+                    },
+                    { "projectionChip=$str1 > routerChip=$str2" }
+                )
+
                 // A consequence of b/269975671 is that MediaRouter and MediaProjection APIs fire at
                 // different times when *screen* casting:
                 //
@@ -212,5 +226,6 @@ constructor(
 
     companion object {
         @DrawableRes val CAST_TO_OTHER_DEVICE_ICON = R.drawable.ic_cast_connected
+        private const val TAG = "CastToOtherVM"
     }
 }
