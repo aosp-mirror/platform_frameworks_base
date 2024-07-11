@@ -18,11 +18,15 @@ package com.android.wm.shell.dagger.pip;
 
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip2.phone.PipController;
 import com.android.wm.shell.pip2.phone.PipTransition;
 
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Optional;
 
 /**
  * Provides dependencies for external components / modules reference PiP and extracts away the
@@ -42,6 +46,19 @@ public abstract class PipModule {
             return newPipTransition;
         } else {
             return legacyPipTransition;
+        }
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<Pip> providePip(
+            Optional<com.android.wm.shell.pip.phone.PipController.PipImpl> pip1,
+            Optional<PipController.PipImpl> pip2) {
+        if (PipUtils.isPip2ExperimentEnabled()) {
+            return Optional.ofNullable(pip2.orElse(null));
+
+        } else {
+            return Optional.ofNullable(pip1.orElse(null));
         }
     }
 }
