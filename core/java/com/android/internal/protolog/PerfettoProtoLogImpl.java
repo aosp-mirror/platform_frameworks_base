@@ -242,6 +242,15 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         for (IProtoLogGroup protoLogGroup : protoLogGroups) {
             mLogGroups.put(protoLogGroup.name(), protoLogGroup);
         }
+
+        final String[] groupsLoggingToLogcat = Arrays.stream(protoLogGroups)
+                .filter(IProtoLogGroup::isLogToLogcat)
+                .map(IProtoLogGroup::name)
+                .toArray(String[]::new);
+
+        if (mViewerConfigReader != null) {
+            mViewerConfigReader.loadViewerConfig(groupsLoggingToLogcat);
+        }
     }
 
     /**
