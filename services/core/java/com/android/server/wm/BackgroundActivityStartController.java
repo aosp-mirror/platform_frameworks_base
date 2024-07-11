@@ -142,7 +142,7 @@ public class BackgroundActivityStartController {
     })
     public @interface BalCode {}
 
-    static final int BAL_BLOCK = 0;
+    static final int BAL_BLOCK = FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_BLOCKED;
 
     static final int BAL_ALLOW_DEFAULT =
             FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_DEFAULT;
