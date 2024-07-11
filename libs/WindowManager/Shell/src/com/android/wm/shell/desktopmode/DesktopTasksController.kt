@@ -1048,14 +1048,12 @@ class DesktopTasksController(
 
     /** Handle task closing by removing wallpaper activity if it's the last active task */
     private fun handleTaskClosing(task: RunningTaskInfo): WindowContainerTransaction? {
-        val wct = if (
-            desktopModeTaskRepository.isOnlyVisibleNonClosingTask(task.taskId) &&
-                desktopModeTaskRepository.wallpaperActivityToken != null
-        ) {
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: handleTaskClosing")
+        val wct = WindowContainerTransaction()
+        if (desktopModeTaskRepository.isOnlyVisibleNonClosingTask(task.taskId)
+            && desktopModeTaskRepository.wallpaperActivityToken != null) {
             // Remove wallpaper activity when the last active task is removed
-            WindowContainerTransaction().also { wct -> removeWallpaperActivity(wct) }
-        } else {
-            null
+            removeWallpaperActivity(wct)
         }
         if (!desktopModeTaskRepository.addClosingTask(task.displayId, task.taskId)) {
             // Could happen if the task hasn't been removed from closing list after it disappeared
@@ -1065,7 +1063,12 @@ class DesktopTasksController(
                 task.taskId
             )
         }
-        return wct
+        // If a CLOSE or TO_BACK is triggered on a desktop task, remove the task.
+        if (Flags.enableDesktopWindowingBackNavigation() &&
+            desktopModeTaskRepository.isVisibleTask(task.taskId)) {
+            wct.removeTask(task.token)
+        }
+        return if (wct.isEmpty) null else wct
     }
 
     private fun addMoveToDesktopChanges(

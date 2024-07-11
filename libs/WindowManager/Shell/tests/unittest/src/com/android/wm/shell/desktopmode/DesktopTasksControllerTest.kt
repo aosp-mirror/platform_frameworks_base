@@ -20,7 +20,6 @@ import android.app.ActivityManager.RecentTaskInfo
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.KeyguardManager
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
-import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
@@ -68,6 +67,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.ExtendedMockito.never
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.window.flags.Flags
+import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import com.android.wm.shell.MockToken
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
@@ -125,11 +125,11 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.capture
 import org.mockito.quality.Strictness
+import org.mockito.Mockito.`when` as whenever
 
 /**
  * Test class for {@link DesktopTasksController}
@@ -1348,7 +1348,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             .setActivityType(ACTIVITY_TYPE_STANDARD)
             .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
             .build()
-    val transition = createTransition(task = task, type = WindowManager.TRANSIT_CLOSE)
+    val transition = createTransition(task = task, type = TRANSIT_CLOSE)
     val result = controller.handleRequest(Binder(), transition)
     assertThat(result).isNull()
   }
@@ -1442,18 +1442,35 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_backTransition_singleActiveTaskNoTokenFlagDisabled_doesNotHandle() {
+  @DisableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION,
+  )
+  fun handleRequest_backTransition_singleActiveTaskNoToken_wallpaperDisabled_backNavDisabled_doesNotHandle() {
     val task = setUpFreeformTask()
 
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
 
     assertNull(result, "Should not handle request")
+  }
+
+  @Test
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_backTransition_singleActiveTaskNoToken_wallpaperEnabled_backNavEnabled_removesTask() {
+    val task = setUpFreeformTask()
+
+    val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
+
+    assertNotNull(result, "Should handle request").assertRemoveAt(0, task.token)
   }
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_backTransition_singleActiveTaskNoTokenFlagEnabled_doesNotHandle() {
+  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun handleRequest_backTransition_singleActiveTaskNoToken_backNavigationDisabled_doesNotHandle() {
     val task = setUpFreeformTask()
 
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
@@ -1462,8 +1479,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_backTransition_singleActiveTaskWithTokenFlagDisabled_doesNotHandle() {
+  @DisableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_backTransition_singleActiveTaskWithToken_wallpaperDisabled_backNavDisabled_doesNotHandle() {
     val task = setUpFreeformTask()
 
     desktopModeTaskRepository.wallpaperActivityToken = MockToken().token()
@@ -1473,22 +1493,42 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_backTransition_singleActiveTaskWithTokenFlagEnabled_handlesRequest() {
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_backTransition_singleActiveTaskWithToken_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
     val task = setUpFreeformTask()
     val wallpaperToken = MockToken().token()
 
     desktopModeTaskRepository.wallpaperActivityToken = wallpaperToken
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
 
-    assertNotNull(result, "Should handle request")
-      // Should create remove wallpaper transaction
-      .assertRemoveAt(index = 0, wallpaperToken)
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+    result.assertRemoveAt(index = 1, task.token)
   }
 
   @Test
-  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_backTransition_multipleActiveTasksFlagDisabled_doesNotHandle() {
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun handleRequest_backTransition_singleActiveTaskWithToken_backNavigationDisabled_removesWallpaper() {
+    val task = setUpFreeformTask()
+    val wallpaperToken = MockToken().token()
+
+    desktopModeTaskRepository.wallpaperActivityToken = wallpaperToken
+    val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
+
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+  }
+
+  @Test
+  @DisableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_backTransition_multipleTasks_wallpaperDisabled_backNavDisabled_doesNotHandle() {
     val task1 = setUpFreeformTask()
     setUpFreeformTask()
 
@@ -1499,8 +1539,24 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_backTransition_multipleTasks_wallpaperEnabled_backNavEnabled_removesTask() {
+    val task1 = setUpFreeformTask()
+    setUpFreeformTask()
+
+    desktopModeTaskRepository.wallpaperActivityToken = MockToken().token()
+    val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_TO_BACK))
+
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, task1.token)
+  }
+
+  @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_backTransition_multipleActiveTasksFlagEnabled_doesNotHandle() {
+  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun handleRequest_backTransition_multipleTasks_backNavigationDisabled_doesNotHandle() {
     val task1 = setUpFreeformTask()
     setUpFreeformTask()
 
@@ -1511,8 +1567,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_backTransition_multipleActiveTasksSingleNonClosing_handlesRequest() {
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_backTransition_multipleTasksSingleNonClosing_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1521,14 +1580,33 @@ class DesktopTasksControllerTest : ShellTestCase() {
     desktopModeTaskRepository.addClosingTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
     val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_TO_BACK))
 
-    assertNotNull(result, "Should handle request")
-      // Should create remove wallpaper transaction
-      .assertRemoveAt(index = 0, wallpaperToken)
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+    result.assertRemoveAt(index = 1, task1.token)
   }
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_backTransition_multipleActiveTasksSingleNonMinimized_handlesRequest() {
+  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun handleRequest_backTransition_multipleTasksSingleNonClosing_backNavigationDisabled_removesWallpaper() {
+    val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val wallpaperToken = MockToken().token()
+
+    desktopModeTaskRepository.wallpaperActivityToken = wallpaperToken
+    desktopModeTaskRepository.addClosingTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
+    val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_TO_BACK))
+
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+  }
+
+  @Test
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_backTransition_multipleTasksSingleNonMinimized_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1537,24 +1615,53 @@ class DesktopTasksControllerTest : ShellTestCase() {
     desktopModeTaskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
     val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_TO_BACK))
 
-    assertNotNull(result, "Should handle request")
-      // Should create remove wallpaper transaction
-      .assertRemoveAt(index = 0, wallpaperToken)
-  }
-
-  @Test
-  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_closeTransition_singleActiveTaskNoTokenFlagDisabled_doesNotHandle() {
-    val task = setUpFreeformTask()
-
-    val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
-
-    assertNull(result, "Should not handle request")
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+    result.assertRemoveAt(index = 1, task1.token)
   }
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_closeTransition_singleActiveTaskNoTokenFlagEnabled_doesNotHandle() {
+  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun handleRequest_backTransition_multipleTasksSingleNonMinimized_backNavigationDisabled_removesWallpaper() {
+    val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val wallpaperToken = MockToken().token()
+
+    desktopModeTaskRepository.wallpaperActivityToken = wallpaperToken
+    desktopModeTaskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
+    val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_TO_BACK))
+
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+  }
+
+  @Test
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_backTransition_nonMinimizadTask_wallpaperEnabled_backNavEnabled_removesWallpaper() {
+    val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val wallpaperToken = MockToken().token()
+
+    desktopModeTaskRepository.wallpaperActivityToken = wallpaperToken
+    desktopModeTaskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
+    // Task is being minimized so mark it as not visible.
+    desktopModeTaskRepository
+      .updateVisibleFreeformTasks(displayId = DEFAULT_DISPLAY, task2.taskId, false)
+    val result = controller.handleRequest(Binder(), createTransition(task2, type = TRANSIT_TO_BACK))
+
+    assertNull(result, "Should not handle request")
+  }
+
+  @Test
+  @DisableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_closeTransition_singleActiveTaskNoToken_wallpaperDisabled_backNavDisabled_doesNotHandle() {
     val task = setUpFreeformTask()
 
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
@@ -1563,8 +1670,35 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_closeTransition_singleActiveTaskWithTokenFlagDisabled_doesNotHandle() {
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_closeTransition_singleActiveTaskNoToken_wallpaperEnabled_backNavEnabled_removesTask() {
+    val task = setUpFreeformTask()
+
+    val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
+
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, task.token)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun handleRequest_closeTransition_singleActiveTaskNoToken_backNavigationDisabled_doesNotHandle() {
+    val task = setUpFreeformTask()
+
+    val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
+
+    assertNull(result, "Should not handle request")
+  }
+
+  @Test
+  @DisableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_closeTransition_singleActiveTaskWithToken_wallpaperDisabled_backNavDisabled_doesNotHandle() {
     val task = setUpFreeformTask()
 
     desktopModeTaskRepository.wallpaperActivityToken = MockToken().token()
@@ -1574,22 +1708,71 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_closeTransition_singleActiveTaskWithTokenFlagEnabled_handlesRequest() {
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_closeTransition_singleActiveTaskWithToken_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
     val task = setUpFreeformTask()
     val wallpaperToken = MockToken().token()
 
     desktopModeTaskRepository.wallpaperActivityToken = wallpaperToken
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
 
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+    result.assertRemoveAt(index = 1, task.token)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun handleRequest_closeTransition_singleActiveTaskWithToken_backNavigationDisabled_removesWallpaper() {
+    val task = setUpFreeformTask()
+    val wallpaperToken = MockToken().token()
+
+    desktopModeTaskRepository.wallpaperActivityToken = wallpaperToken
+    val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
+
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+  }
+
+  @Test
+  @DisableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_closeTransition_multipleTasks_wallpaperDisabled_backNavDisabled_doesNotHandle() {
+    val task1 = setUpFreeformTask()
+    setUpFreeformTask()
+
+    desktopModeTaskRepository.wallpaperActivityToken = MockToken().token()
+    val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_CLOSE))
+
+    assertNull(result, "Should not handle request")
+  }
+
+  @Test
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_closeTransition_multipleTasks_wallpaperEnabled_backNavEnabled_removesTask() {
+    val task1 = setUpFreeformTask()
+    setUpFreeformTask()
+
+    desktopModeTaskRepository.wallpaperActivityToken = MockToken().token()
+    val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_CLOSE))
+
     assertNotNull(result, "Should handle request")
-      // Should create remove wallpaper transaction
-      .assertRemoveAt(index = 0, wallpaperToken)
+    result.assertRemoveAt(index = 0, task1.token)
   }
 
   @Test
-  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_closeTransition_multipleActiveTasksFlagDisabled_doesNotHandle() {
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun handleRequest_closeTransition_multipleTasksFlagEnabled_backNavigationDisabled_doesNotHandle() {
     val task1 = setUpFreeformTask()
     setUpFreeformTask()
 
@@ -1600,20 +1783,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_closeTransition_multipleActiveTasksFlagEnabled_doesNotHandle() {
-    val task1 = setUpFreeformTask()
-    setUpFreeformTask()
-
-    desktopModeTaskRepository.wallpaperActivityToken = MockToken().token()
-    val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_CLOSE))
-
-    assertNull(result, "Should not handle request")
-  }
-
-  @Test
-  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_closeTransition_multipleActiveTasksSingleNonClosing_handlesRequest() {
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_closeTransition_multipleTasksSingleNonClosing_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1622,14 +1796,33 @@ class DesktopTasksControllerTest : ShellTestCase() {
     desktopModeTaskRepository.addClosingTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
     val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_CLOSE))
 
-    assertNotNull(result, "Should handle request")
-      // Should create remove wallpaper transaction
-      .assertRemoveAt(index = 0, wallpaperToken)
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+    result.assertRemoveAt(index = 1, task1.token)
   }
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-  fun handleRequest_closeTransition_multipleActiveTasksSingleNonMinimized_handlesRequest() {
+  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun handleRequest_closeTransition_multipleTasksSingleNonClosing_backNavigationDisabled_removesWallpaper() {
+    val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val wallpaperToken = MockToken().token()
+
+    desktopModeTaskRepository.wallpaperActivityToken = wallpaperToken
+    desktopModeTaskRepository.addClosingTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
+    val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_CLOSE))
+
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+  }
+
+  @Test
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_closeTransition_multipleTasksOneNonMinimized_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1638,9 +1831,45 @@ class DesktopTasksControllerTest : ShellTestCase() {
     desktopModeTaskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
     val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_CLOSE))
 
-    assertNotNull(result, "Should handle request")
-      // Should create remove wallpaper transaction
-      .assertRemoveAt(index = 0, wallpaperToken)
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+    result.assertRemoveAt(index = 1, task1.token)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun handleRequest_closeTransition_multipleTasksSingleNonMinimized_backNavigationDisabled_removesWallpaper() {
+    val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val wallpaperToken = MockToken().token()
+
+    desktopModeTaskRepository.wallpaperActivityToken = wallpaperToken
+    desktopModeTaskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
+    val result = controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_CLOSE))
+
+    // Should create remove wallpaper transaction
+    assertNotNull(result, "Should handle request").assertRemoveAt(index = 0, wallpaperToken)
+  }
+
+  @Test
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
+  )
+  fun handleRequest_closeTransition_minimizadTask_wallpaperEnabled_backNavEnabled_removesWallpaper() {
+    val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val wallpaperToken = MockToken().token()
+
+    desktopModeTaskRepository.wallpaperActivityToken = wallpaperToken
+    desktopModeTaskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
+    // Task is being minimized so mark it as not visible.
+    desktopModeTaskRepository
+      .updateVisibleFreeformTasks(displayId = DEFAULT_DISPLAY, task2.taskId, false)
+    val result = controller.handleRequest(Binder(), createTransition(task2, type = TRANSIT_TO_BACK))
+
+    assertNull(result, "Should not handle request")
   }
 
   @Test
