@@ -16,7 +16,10 @@
 
 package com.android.systemui.keyboard.shortcut.ui.composable
 
+import android.content.Context
+import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.drawable.Icon
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -55,6 +58,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItemColors
 import androidx.compose.material3.NavigationDrawerItemDefaults
@@ -76,7 +80,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
@@ -99,8 +102,10 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutIcon
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
+import com.android.systemui.keyboard.shortcut.ui.model.IconSource
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.phone.CentralSurfaces
 
 @Composable
 fun ShortcutHelper(
@@ -210,9 +215,9 @@ private fun CategoryItemSinglePane(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 88.dp).padding(horizontal = 16.dp)
             ) {
-                Icon(category.icon, contentDescription = null)
+                ShortcutCategoryIcon(category.icon)
                 Spacer(modifier = Modifier.width(16.dp))
-                Text(stringResource(category.labelResId))
+                Text(category.label(LocalContext.current))
                 Spacer(modifier = Modifier.weight(1f))
                 RotatingExpandCollapseIcon(isExpanded)
             }
@@ -221,23 +226,67 @@ private fun CategoryItemSinglePane(
     }
 }
 
-private val ShortcutCategory.icon: ImageVector
+private val ShortcutCategory.icon: IconSource
+    @Composable
     get() =
         when (type) {
-            ShortcutCategoryType.SYSTEM -> Icons.Default.Tv
-            ShortcutCategoryType.MULTI_TASKING -> Icons.Default.VerticalSplit
-            ShortcutCategoryType.IME -> Icons.Default.Keyboard
-            ShortcutCategoryType.APP_CATEGORIES -> Icons.Default.Apps
+            ShortcutCategoryType.System -> IconSource(imageVector = Icons.Default.Tv)
+            ShortcutCategoryType.MultiTasking ->
+                IconSource(imageVector = Icons.Default.VerticalSplit)
+            ShortcutCategoryType.InputMethodEditor ->
+                IconSource(imageVector = Icons.Default.Keyboard)
+            ShortcutCategoryType.AppCategories -> IconSource(imageVector = Icons.Default.Apps)
+            is ShortcutCategoryType.CurrentApp -> {
+                val context = LocalContext.current
+                val iconDrawable = context.packageManager.getApplicationIcon(type.packageName)
+                IconSource(painter = rememberDrawablePainter(drawable = iconDrawable))
+            }
         }
 
-private val ShortcutCategory.labelResId: Int
-    get() =
-        when (type) {
-            ShortcutCategoryType.SYSTEM -> R.string.shortcut_helper_category_system
-            ShortcutCategoryType.MULTI_TASKING -> R.string.shortcut_helper_category_multitasking
-            ShortcutCategoryType.IME -> R.string.shortcut_helper_category_input
-            ShortcutCategoryType.APP_CATEGORIES -> R.string.shortcut_helper_category_app_shortcuts
-        }
+@Composable
+fun ShortcutCategoryIcon(
+    source: IconSource,
+    contentDescription: String? = null,
+    modifier: Modifier = Modifier,
+    tint: Color = LocalContentColor.current
+) {
+    if (source.imageVector != null) {
+        Icon(source.imageVector, contentDescription, modifier, tint)
+    } else if (source.painter != null) {
+        Image(source.painter, contentDescription, modifier)
+    }
+}
+
+private fun ShortcutCategory.label(context: Context): String =
+    when (type) {
+        ShortcutCategoryType.System -> context.getString(R.string.shortcut_helper_category_system)
+        ShortcutCategoryType.MultiTasking ->
+            context.getString(R.string.shortcut_helper_category_multitasking)
+        ShortcutCategoryType.InputMethodEditor ->
+            context.getString(R.string.shortcut_helper_category_input)
+        ShortcutCategoryType.AppCategories ->
+            context.getString(R.string.shortcut_helper_category_app_shortcuts)
+        is ShortcutCategoryType.CurrentApp -> getApplicationLabelForCurrentApp(type, context)
+    }
+
+private fun getApplicationLabelForCurrentApp(
+    type: ShortcutCategoryType.CurrentApp,
+    context: Context
+): String {
+    val packageManagerForUser = CentralSurfaces.getPackageManagerForUser(context, context.userId)
+    return try {
+        val currentAppInfo =
+            packageManagerForUser.getApplicationInfoAsUser(
+                type.packageName,
+                /* flags = */ 0,
+                context.userId
+            )
+        packageManagerForUser.getApplicationLabel(currentAppInfo).toString()
+    } catch (e: NameNotFoundException) {
+        Log.wtf(ShortcutHelper.TAG, "Couldn't find app info by package name ${type.packageName}")
+        context.getString(R.string.shortcut_helper_category_current_app_shortcuts)
+    }
+}
 
 @Composable
 private fun RotatingExpandCollapseIcon(isExpanded: Boolean) {
@@ -525,8 +574,8 @@ private fun CategoriesPanelTwoPane(
     Column {
         categories.fastForEach {
             CategoryItemTwoPane(
-                label = stringResource(it.labelResId),
-                icon = it.icon,
+                label = it.label(LocalContext.current),
+                iconSource = it.icon,
                 selected = selectedCategory == it.type,
                 onClick = { onCategoryClicked(it) }
             )
@@ -537,7 +586,7 @@ private fun CategoriesPanelTwoPane(
 @Composable
 private fun CategoryItemTwoPane(
     label: String,
-    icon: ImageVector,
+    iconSource: IconSource,
     selected: Boolean,
     onClick: () -> Unit,
     colors: NavigationDrawerItemColors =
@@ -551,9 +600,9 @@ private fun CategoryItemTwoPane(
         color = colors.containerColor(selected).value,
     ) {
         Row(Modifier.padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(
+            ShortcutCategoryIcon(
                 modifier = Modifier.size(24.dp),
-                imageVector = icon,
+                source = iconSource,
                 contentDescription = null,
                 tint = colors.iconColor(selected).value
             )
@@ -649,4 +698,6 @@ object ShortcutHelper {
     object Dimensions {
         val SinglePaneCategoryCornerRadius = 28.dp
     }
+
+    internal const val TAG = "ShortcutHelperUI"
 }
