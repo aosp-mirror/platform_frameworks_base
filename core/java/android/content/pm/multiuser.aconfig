@@ -161,6 +161,16 @@ flag {
 }
 
 flag {
+    name: "cache_profile_parent"
+    namespace: "multiuser"
+    description: "Cache getProfileParent to avoid unnecessary binder calls"
+    bug: "350417399"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "cache_quiet_mode_state"
     namespace: "multiuser"
     description: "Optimise quiet mode state retrieval"
