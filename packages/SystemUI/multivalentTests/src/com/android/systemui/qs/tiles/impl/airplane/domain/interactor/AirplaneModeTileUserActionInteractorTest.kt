@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.impl.airplate.domain.interactor
+package com.android.systemui.qs.tiles.impl.airplane.domain.interactor
 
 import android.platform.test.annotations.EnabledOnRavenwood
 import android.provider.Settings
@@ -26,7 +26,6 @@ import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandl
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandlerSubject.Companion.assertThat
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx.click
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx.longClick
-import com.android.systemui.qs.tiles.impl.airplane.domain.interactor.AirplaneModeTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.airplane.domain.model.AirplaneModeTileModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -54,7 +53,7 @@ class AirplaneModeTileUserActionInteractorTest : SysuiTestCase() {
                 connectivityRepository,
                 mobileConnectionsRepository,
             ),
-            inputHandler
+            inputHandler,
         )
 
     @Test
