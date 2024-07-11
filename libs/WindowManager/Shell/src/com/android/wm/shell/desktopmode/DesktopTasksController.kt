@@ -159,18 +159,6 @@ class DesktopTasksController(
             }
         }
 
-    private val transitionAreaHeight
-        get() =
-            context.resources.getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height
-            )
-
-    private val transitionAreaWidth
-        get() =
-            context.resources.getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_transition_area_width
-            )
-
     /** Task id of the task currently being dragged from fullscreen/split. */
     val draggingTaskId
         get() = dragToDesktopTransitionHandler.draggingTaskId
