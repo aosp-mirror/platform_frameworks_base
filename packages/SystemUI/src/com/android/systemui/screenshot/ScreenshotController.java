@@ -191,7 +191,7 @@ public class ScreenshotController implements ScreenshotHandler {
 
     private final WindowContext mContext;
     private final FeatureFlags mFlags;
-    private final ScreenshotViewProxy mViewProxy;
+    private final ScreenshotShelfViewProxy mViewProxy;
     private final ScreenshotNotificationsController mNotificationsController;
     private final ScreenshotSmartActions mScreenshotSmartActions;
     private final UiEventLogger mUiEventLogger;
@@ -246,7 +246,7 @@ public class ScreenshotController implements ScreenshotHandler {
             Context context,
             WindowManager windowManager,
             FeatureFlags flags,
-            ScreenshotViewProxy.Factory viewProxyFactory,
+            ScreenshotShelfViewProxy.Factory viewProxyFactory,
             ScreenshotSmartActions screenshotSmartActions,
             ScreenshotNotificationsController.Factory screenshotNotificationsControllerFactory,
             UiEventLogger uiEventLogger,
