@@ -1901,6 +1901,7 @@ public class UserManagerService extends IUserManager.Stub {
                 Slog.i(LOG_TAG, "Quiet mode is already " + enableQuietMode);
                 return;
             }
+            UserManager.invalidateQuietModeEnabledCache();
             profile.flags ^= UserInfo.FLAG_QUIET_MODE;
             profileUserData = getUserDataLU(profile.id);
         }
