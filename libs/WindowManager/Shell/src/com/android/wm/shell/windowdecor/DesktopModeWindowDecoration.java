@@ -852,18 +852,19 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void createHandleMenu(SplitScreenController splitScreenController) {
         loadAppInfoIfNeeded();
-        mHandleMenu = new HandleMenu.Builder(this)
-                .setAppIcon(mAppIconBitmap)
-                .setAppName(mAppName)
-                .setOnClickListener(mOnCaptionButtonClickListener)
-                .setOnTouchListener(mOnCaptionTouchListener)
-                .setLayoutId(mRelayoutParams.mLayoutResId)
-                .setWindowingButtonsVisible(DesktopModeStatus.canEnterDesktopMode(mContext))
-                .setCaptionHeight(mResult.mCaptionHeight)
-                .setDisplayController(mDisplayController)
-                .setSplitScreenController(splitScreenController)
-                .setBrowserLinkAvailable(browserLinkAvailable())
-                .build();
+        mHandleMenu = new HandleMenu(
+                this,
+                mRelayoutParams.mLayoutResId,
+                mOnCaptionButtonClickListener,
+                mOnCaptionTouchListener,
+                mAppIconBitmap,
+                mAppName,
+                mDisplayController,
+                splitScreenController,
+                DesktopModeStatus.canEnterDesktopMode(mContext),
+                browserLinkAvailable(),
+                mResult.mCaptionHeight
+        );
         mWindowDecorViewHolder.onHandleMenuOpened();
         mHandleMenu.show();
     }
