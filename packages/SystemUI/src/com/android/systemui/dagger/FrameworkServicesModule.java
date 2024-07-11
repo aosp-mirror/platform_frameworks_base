@@ -16,6 +16,9 @@
 
 package com.android.systemui.dagger;
 
+import static com.android.systemui.Flags.enableViewCaptureTracing;
+import static com.android.systemui.util.ConvenienceExtensionsKt.toKotlinLazy;
+
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -111,6 +114,9 @@ import android.view.textclassifier.TextClassificationManager;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
+import com.android.app.viewcapture.ViewCaptureFactory;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -125,6 +131,7 @@ import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.user.utils.UserScopedService;
 import com.android.systemui.user.utils.UserScopedServiceImpl;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -680,6 +687,15 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static ViewCaptureAwareWindowManager provideViewCaptureAwareWindowManager(
+            WindowManager windowManager, Lazy<ViewCapture> daggerLazyViewCapture) {
+        return new ViewCaptureAwareWindowManager(windowManager,
+                /* lazyViewCapture= */ toKotlinLazy(daggerLazyViewCapture),
+                /* isViewCaptureEnabled= */ enableViewCaptureTracing());
+    }
+
+    @Provides
+    @Singleton
     static PermissionManager providePermissionManager(Context context) {
         PermissionManager pm = context.getSystemService(PermissionManager.class);
         if (pm != null) {
@@ -763,5 +779,11 @@ public class FrameworkServicesModule {
     static IDeviceIdleController provideDeviceIdleController() {
         return IDeviceIdleController.Stub.asInterface(
                 ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+    }
+
+    @Provides
+    @Singleton
+    static ViewCapture provideViewCapture(Context context) {
+        return ViewCaptureFactory.getInstance(context);
     }
 }

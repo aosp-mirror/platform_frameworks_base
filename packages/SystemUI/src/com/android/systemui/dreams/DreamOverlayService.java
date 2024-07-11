@@ -45,6 +45,7 @@ import androidx.lifecycle.LifecycleService;
 import androidx.lifecycle.ServiceLifecycleDispatcher;
 import androidx.lifecycle.ViewModelStore;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -97,7 +98,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     @Nullable
     private final ComponentName mHomeControlPanelDreamComponent;
     private final UiEventLogger mUiEventLogger;
-    private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mWindowManager;
     private final String mWindowTitle;
 
     // A reference to the {@link Window} used to hold the dream overlay.
@@ -244,7 +245,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             Context context,
             DreamOverlayLifecycleOwner lifecycleOwner,
             @Main DelayableExecutor executor,
-            WindowManager windowManager,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             ComplicationComponent.Factory complicationComponentFactory,
             com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
                     dreamComplicationComponentFactory,
@@ -267,7 +268,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         super(executor);
         mContext = context;
         mExecutor = executor;
-        mWindowManager = windowManager;
+        mWindowManager = viewCaptureAwareWindowManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mScrimManager = scrimManager;
         mLowLightDreamComponent = lowLightDreamComponent;
