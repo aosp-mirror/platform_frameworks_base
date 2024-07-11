@@ -32,3 +32,14 @@ flag {
   description: "Provides additional callbacks with information about user actions in ChooserResult"
   bug: "263474465"
 }
+
+flag {
+  name: "fix_resolver_memory_leak"
+  is_exported: true
+  namespace: "intentresolver"
+  description: "ResolverActivity memory leak (through the AppPredictor callback) fix"
+  bug: "346671041"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
