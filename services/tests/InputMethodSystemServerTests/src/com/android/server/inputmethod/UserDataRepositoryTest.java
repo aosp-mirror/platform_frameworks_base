@@ -115,10 +115,8 @@ public final class UserDataRepositoryTest {
         final var listener = captor.getValue();
 
         // Add one UserData ...
-        synchronized (ImfLock.class) {
-            final var userData = repository.getOrCreate(ANY_USER_ID);
-            assertThat(userData.mUserId).isEqualTo(ANY_USER_ID);
-        }
+        final var userData = repository.getOrCreate(ANY_USER_ID);
+        assertThat(userData.mUserId).isEqualTo(ANY_USER_ID);
 
         // ... and then call onUserRemoved
         assertThat(collectUserData(repository)).hasSize(1);
@@ -136,10 +134,8 @@ public final class UserDataRepositoryTest {
         final var repository = new UserDataRepository(mHandler,
                 mMockUserManagerInternal, mBindingControllerFactory);
 
-        synchronized (ImfLock.class) {
-            final var userData = repository.getOrCreate(ANY_USER_ID);
-            assertThat(userData.mUserId).isEqualTo(ANY_USER_ID);
-        }
+        final var userData = repository.getOrCreate(ANY_USER_ID);
+        assertThat(userData.mUserId).isEqualTo(ANY_USER_ID);
 
         final var allUserData = collectUserData(repository);
         assertThat(allUserData).hasSize(1);
@@ -151,9 +147,7 @@ public final class UserDataRepositoryTest {
 
     private List<UserDataRepository.UserData> collectUserData(UserDataRepository repository) {
         final var collected = new ArrayList<UserDataRepository.UserData>();
-        synchronized (ImfLock.class) {
-            repository.forAllUserData(userData -> collected.add(userData));
-        }
+        repository.forAllUserData(userData -> collected.add(userData));
         return collected;
     }
 

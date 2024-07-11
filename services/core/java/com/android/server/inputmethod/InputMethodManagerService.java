@@ -345,8 +345,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private int mCurrentUserId;
 
     /** Holds all user related data */
-    @GuardedBy("ImfLock.class")
-    private UserDataRepository mUserDataRepository;
+    @SharedByAllUsersField
+    private final UserDataRepository mUserDataRepository;
 
     final WindowManagerInternal mWindowManagerInternal;
     private final ActivityManagerInternal mActivityManagerInternal;
