@@ -23,6 +23,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.CurrentApp
 import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperInputShortcutsSource
@@ -52,6 +53,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
 
     private val fakeSystemSource = FakeKeyboardShortcutGroupsSource()
     private val fakeMultiTaskingSource = FakeKeyboardShortcutGroupsSource()
+    private val fakeCurrentAppsSource = FakeKeyboardShortcutGroupsSource()
 
     private val kosmos =
         Kosmos().also {
@@ -61,7 +63,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             it.shortcutHelperMultiTaskingShortcutsSource = fakeMultiTaskingSource
             it.shortcutHelperAppCategoriesShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperInputShortcutsSource = FakeKeyboardShortcutGroupsSource()
-            it.shortcutHelperCurrentAppShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.shortcutHelperCurrentAppShortcutsSource = fakeCurrentAppsSource
         }
 
     private val testScope = kosmos.testScope
@@ -215,5 +217,18 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             val activeUiState = uiState as ShortcutsUiState.Active
             assertThat(activeUiState.defaultSelectedCategory)
                 .isEqualTo(activeUiState.shortcutCategories.first().type)
+        }
+
+    @Test
+    fun shortcutsUiState_featureActive_emitsActiveWithCurrentAppsCategorySelectedWhenPresent() =
+        testScope.runTest {
+            fakeCurrentAppsSource.setGroups(TestShortcuts.currentAppGroups)
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+
+            val activeUiState = uiState as ShortcutsUiState.Active
+            assertThat(activeUiState.defaultSelectedCategory)
+                .isEqualTo(CurrentApp(TestShortcuts.currentAppPackageName))
         }
 }

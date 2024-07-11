@@ -19,6 +19,9 @@ package com.android.systemui.keyboard.shortcut.ui.viewmodel
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperStateInteractor
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.CurrentApp
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -52,7 +55,7 @@ constructor(
                 } else {
                     ShortcutsUiState.Active(
                         shortcutCategories = it,
-                        defaultSelectedCategory = it.first().type,
+                        defaultSelectedCategory = getDefaultSelectedCategory(it),
                     )
                 }
             }
@@ -61,6 +64,13 @@ constructor(
                 started = SharingStarted.Lazily,
                 initialValue = ShortcutsUiState.Inactive
             )
+
+    private fun getDefaultSelectedCategory(
+        categories: List<ShortcutCategory>
+    ): ShortcutCategoryType {
+        val currentAppShortcuts = categories.firstOrNull { it.type is CurrentApp }
+        return currentAppShortcuts?.type ?: categories.first().type
+    }
 
     fun onViewClosed() {
         stateInteractor.onViewClosed()
