@@ -70,7 +70,7 @@ public class InputMethodInfoTest {
         assertThat(imi.supportsInlineSuggestionsWithTouchExploration(), is(false));
         assertThat(imi.supportsStylusHandwriting(), is(false));
         assertThat(imi.createStylusHandwritingSettingsActivityIntent(), equalTo(null));
-        if (Flags.imeSwitcherRevamp()) {
+        if (Flags.imeSwitcherRevampApi()) {
             assertThat(imi.createImeLanguageSettingsActivityIntent(), equalTo(null));
         }
     }
