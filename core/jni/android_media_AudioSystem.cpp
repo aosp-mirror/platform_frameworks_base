@@ -2703,12 +2703,11 @@ static jint android_media_AudioSystem_getMaxChannelCount(JNIEnv *env, jobject th
 }
 
 static jint android_media_AudioSystem_getMaxSampleRate(JNIEnv *env, jobject thiz) {
-    // see frameworks/av/services/audiopolicy/common/include/policy.h
-    return 192000; // SAMPLE_RATE_HZ_MAX (for API)
+    return SAMPLE_RATE_HZ_MAX;
 }
 
 static jint android_media_AudioSystem_getMinSampleRate(JNIEnv *env, jobject thiz) {
-    return 4000; // SAMPLE_RATE_HZ_MIN  (for API)
+    return SAMPLE_RATE_HZ_MIN;
 }
 
 static std::vector<uid_t> convertJIntArrayToUidVector(JNIEnv *env, jintArray jArray) {
