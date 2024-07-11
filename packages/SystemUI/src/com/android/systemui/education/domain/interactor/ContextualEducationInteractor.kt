@@ -19,12 +19,17 @@ package com.android.systemui.education.domain.interactor
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.education.data.repository.ContextualEducationRepository
 import com.android.systemui.shared.education.GestureType
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 /**
@@ -36,14 +41,26 @@ class ContextualEducationInteractor
 @Inject
 constructor(
     @Background private val backgroundScope: CoroutineScope,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val selectedUserInteractor: SelectedUserInteractor,
     private val repository: ContextualEducationRepository,
 ) : CoreStartable {
+
+    val backGestureModelFlow = readEduModelsOnSignalCountChanged(GestureType.BACK_GESTURE)
 
     override fun start() {
         backgroundScope.launch {
             selectedUserInteractor.selectedUser.collectLatest { repository.setUser(it) }
         }
+    }
+
+    private fun readEduModelsOnSignalCountChanged(gestureType: GestureType): Flow<GestureEduModel> {
+        return repository
+            .readGestureEduModelFlow(gestureType)
+            .distinctUntilChanged(
+                areEquivalent = { old, new -> old.signalCount == new.signalCount }
+            )
+            .flowOn(backgroundDispatcher)
     }
 
     suspend fun incrementSignalCount(gestureType: GestureType) =

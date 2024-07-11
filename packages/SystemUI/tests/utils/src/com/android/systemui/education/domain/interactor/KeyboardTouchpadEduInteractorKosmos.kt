@@ -19,6 +19,14 @@ package com.android.systemui.education.domain.interactor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 
+var Kosmos.keyboardTouchpadEduInteractor by
+    Kosmos.Fixture {
+        KeyboardTouchpadEduInteractor(
+            backgroundScope = testScope.backgroundScope,
+            contextualEducationInteractor = contextualEducationInteractor
+        )
+    }
+
 var Kosmos.keyboardTouchpadEduStatsInteractor by
     Kosmos.Fixture {
         KeyboardTouchpadEduStatsInteractorImpl(
