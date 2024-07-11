@@ -27,6 +27,9 @@ import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dock.dockManager
 import com.android.systemui.dock.fakeDockManager
+import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -66,6 +69,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     fun setUp() {
         with(kosmos) {
             fakeSettings.putInt(Settings.System.SCREEN_OFF_TIMEOUT, SCREEN_TIMEOUT)
+            kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
 
             underTest =
                 CommunalSceneStartable(
@@ -76,6 +80,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                         keyguardInteractor = keyguardInteractor,
                         systemSettings = fakeSettings,
                         notificationShadeWindowController = notificationShadeWindowController,
+                        featureFlagsClassic = kosmos.fakeFeatureFlagsClassic,
                         applicationScope = applicationCoroutineScope,
                         bgScope = applicationCoroutineScope,
                         mainDispatcher = testDispatcher,
@@ -448,6 +453,24 @@ class CommunalSceneStartableTest : SysuiTestCase() {
 
                 advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
                 assertThat(scene).isEqualTo(CommunalScenes.Blank)
+            }
+        }
+
+    @Test
+    fun transitionFromDozingToGlanceableHub_forcesCommunal() =
+        with(kosmos) {
+            testScope.runTest {
+                val scene by collectLastValue(communalSceneInteractor.currentScene)
+                communalSceneInteractor.changeScene(CommunalScenes.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
+
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.DOZING,
+                    to = KeyguardState.GLANCEABLE_HUB,
+                    testScope = this
+                )
+
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
             }
         }
 
