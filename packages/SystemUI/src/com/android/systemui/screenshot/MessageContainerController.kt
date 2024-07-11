@@ -137,7 +137,7 @@ constructor(
         val offset = container.height + params.topMargin + params.bottomMargin
         val anim = if (animateIn) ValueAnimator.ofFloat(0f, 1f) else ValueAnimator.ofFloat(1f, 0f)
         with(anim) {
-            duration = ScreenshotView.SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS
+            duration = MESSAGE_EXPANSION_DURATION_MS
             interpolator = AccelerateDecelerateInterpolator()
             addUpdateListener { valueAnimator: ValueAnimator ->
                 val interpolation = valueAnimator.animatedValue as Float
@@ -146,5 +146,9 @@ constructor(
             }
         }
         return anim
+    }
+
+    companion object {
+        const val MESSAGE_EXPANSION_DURATION_MS: Long = 400
     }
 }

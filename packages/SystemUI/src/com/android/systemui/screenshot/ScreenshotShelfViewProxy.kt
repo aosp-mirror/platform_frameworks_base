@@ -18,7 +18,6 @@ package com.android.systemui.screenshot
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
@@ -45,7 +44,6 @@ import com.android.systemui.res.R
 import com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS
 import com.android.systemui.screenshot.LogConfig.DEBUG_INPUT
 import com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW
-import com.android.systemui.screenshot.ScreenshotController.SavedImageData
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER
 import com.android.systemui.screenshot.scroll.ScrollCaptureController
 import com.android.systemui.screenshot.ui.ScreenshotAnimationController
@@ -71,11 +69,21 @@ constructor(
     @Assisted private val context: Context,
     @Assisted private val displayId: Int
 ) : ScreenshotViewProxy {
+
+    interface ScreenshotViewCallback {
+        fun onUserInteraction()
+
+        fun onDismiss()
+
+        /** DOWN motion event was observed outside of the touchable areas of this view. */
+        fun onTouchOutside()
+    }
+
     override val view: ScreenshotShelfView =
         LayoutInflater.from(context).inflate(R.layout.screenshot_shelf, null) as ScreenshotShelfView
     override val screenshotPreview: View
     override var packageName: String = ""
-    override var callbacks: ScreenshotView.ScreenshotViewCallback? = null
+    override var callbacks: ScreenshotViewCallback? = null
     override var screenshot: ScreenshotData? = null
         set(value) {
             value?.let {
@@ -94,6 +102,7 @@ constructor(
 
     override val isAttachedToWindow
         get() = view.isAttachedToWindow
+
     override var isDismissing = false
     override var isPendingSharedTransition = false
 
@@ -141,10 +150,10 @@ constructor(
         isPendingSharedTransition = false
         viewModel.reset()
     }
+
     override fun updateInsets(insets: WindowInsets) {
         view.updateInsets(insets)
     }
-    override fun updateOrientation(insets: WindowInsets) {}
 
     override fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
         val entrance =
@@ -163,10 +172,6 @@ constructor(
         }
         return entrance
     }
-
-    override fun addQuickShareChip(quickShareAction: Notification.Action) {}
-
-    override fun setChipIntents(imageData: SavedImageData) {}
 
     override fun requestDismissal(event: ScreenshotEvent?) {
         requestDismissal(event, null)
@@ -187,6 +192,7 @@ constructor(
                 override fun onAnimationStart(animator: Animator) {
                     isDismissing = true
                 }
+
                 override fun onAnimationEnd(animator: Animator) {
                     isDismissing = false
                     callbacks?.onDismiss()
@@ -195,10 +201,6 @@ constructor(
         )
         animator.start()
     }
-
-    override fun showScrollChip(packageName: String, onClick: Runnable) {}
-
-    override fun hideScrollChip() {}
 
     override fun prepareScrollingTransition(
         response: ScrollCaptureResponse,
