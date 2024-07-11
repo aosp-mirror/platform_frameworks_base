@@ -31,7 +31,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
@@ -172,10 +171,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
                 updateResources();
             }
         });
-        if (!NotificationsHeadsUpRefactor.isEnabled()) {
-            javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(),
+        javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(),
                     this::onShadeOrQsExpanded);
-        }
     }
 
     public void setAnimationStateHandler(AnimationStateHandler handler) {
@@ -270,10 +267,9 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     }
 
     private void onShadeOrQsExpanded(Boolean isExpanded) {
-        NotificationsHeadsUpRefactor.assertInLegacyMode();
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
-            if (isExpanded) {
+            if (!NotificationsHeadsUpRefactor.isEnabled() && isExpanded) {
                 mHeadsUpAnimatingAway.setValue(false);
             }
         }
