@@ -185,6 +185,21 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun longPressed_isA11yAction_doesNotShowMenu_opensSettings() =
+        testScope.runTest {
+            createUnderTest(isOpenWppDirectlyEnabled = true)
+            val isMenuVisible by collectLastValue(underTest.isMenuVisible)
+            val shouldOpenSettings by collectLastValue(underTest.shouldOpenSettings)
+            val isA11yAction = true
+            runCurrent()
+
+            underTest.onLongPress(isA11yAction)
+
+            assertThat(isMenuVisible).isFalse()
+            assertThat(shouldOpenSettings).isTrue()
+        }
+
+    @Test
     fun longPressed_closeDialogsBroadcastReceived_popupDismissed() =
         testScope.runTest {
             val isMenuVisible by collectLastValue(underTest.isMenuVisible)
