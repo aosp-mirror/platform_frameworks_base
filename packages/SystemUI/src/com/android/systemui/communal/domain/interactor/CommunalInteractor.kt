@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.domain.interactor
 
-import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentFilter
@@ -29,6 +28,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
+import com.android.systemui.communal.data.repository.CommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
@@ -60,7 +60,6 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.emitOnStart
@@ -82,7 +81,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -101,7 +99,7 @@ constructor(
     private val widgetRepository: CommunalWidgetRepository,
     private val communalPrefsInteractor: CommunalPrefsInteractor,
     private val mediaRepository: CommunalMediaRepository,
-    smartspaceRepository: SmartspaceRepository,
+    private val smartspaceRepository: CommunalSmartspaceRepository,
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     communalSettingsInteractor: CommunalSettingsInteractor,
@@ -435,19 +433,6 @@ constructor(
             }
         }
 
-    /** A flow of available smartspace targets. Currently only showing timers. */
-    private val smartspaceTargets: Flow<List<SmartspaceTarget>> =
-        if (!smartspaceRepository.isSmartspaceRemoteViewsEnabled) {
-            flowOf(emptyList())
-        } else {
-            smartspaceRepository.communalSmartspaceTargets.map { targets ->
-                targets.filter { target ->
-                    target.featureType == SmartspaceTarget.FEATURE_TIMER &&
-                        target.remoteViews != null
-                }
-            }
-        }
-
     /** CTA tile to be displayed in the glanceable hub (view mode). */
     val ctaTileContent: Flow<List<CommunalContentModel.CtaTileInViewMode>> =
         communalPrefsInteractor.isCtaDismissed.map { isDismissed ->
@@ -472,16 +457,16 @@ constructor(
      * sized dynamically.
      */
     fun getOngoingContent(mediaHostVisible: Boolean): Flow<List<CommunalContentModel.Ongoing>> =
-        combine(smartspaceTargets, mediaRepository.mediaModel) { smartspace, media ->
+        combine(smartspaceRepository.timers, mediaRepository.mediaModel) { timers, media ->
                 val ongoingContent = mutableListOf<CommunalContentModel.Ongoing>()
 
-                // Add smartspace
+                // Add smartspace timers
                 ongoingContent.addAll(
-                    smartspace.map { target ->
+                    timers.map { timer ->
                         CommunalContentModel.Smartspace(
-                            smartspaceTargetId = target.smartspaceTargetId,
-                            remoteViews = target.remoteViews!!,
-                            createdTimestampMillis = target.creationTimeMillis,
+                            smartspaceTargetId = timer.smartspaceTargetId,
+                            remoteViews = timer.remoteViews,
+                            createdTimestampMillis = timer.createdTimestampMillis,
                         )
                     }
                 )

@@ -1176,6 +1176,30 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    /** Marks the user as slated for deletion during boot if necessary. **/
+    @GuardedBy("mUsersLock")
+    private void markUserForRemovalIfNecessaryLU(UserInfo ui) {
+        if (!ui.isEphemeral()) {
+            // User should be ephemeral to be marked for removal.
+            return;
+        }
+        if (ui.preCreated) {
+            // Avoid marking pre-created users for removal.
+            return;
+        }
+        if (ui.lastLoggedInTime == 0 && ui.isGuest() && Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_guestUserAutoCreated)) {
+            // Avoid marking auto-created but not-yet-logged-in guest user for removal. Because a
+            // new one will be created anyway, and this one doesn't have any personal data in it yet
+            // due to not being logged in.
+            return;
+        }
+        // Mark the user for removal.
+        addRemovingUserIdLocked(ui.id);
+        ui.partial = true;
+        ui.flags |= UserInfo.FLAG_DISABLED;
+    }
+
     /* Prunes out any partially created or partially removed users. */
     private void cleanupPartialUsers() {
         ArrayList<UserInfo> partials = new ArrayList<>();
@@ -1901,6 +1925,7 @@ public class UserManagerService extends IUserManager.Stub {
                 Slog.i(LOG_TAG, "Quiet mode is already " + enableQuietMode);
                 return;
             }
+            UserManager.invalidateQuietModeEnabledCache();
             profile.flags ^= UserInfo.FLAG_QUIET_MODE;
             profileUserData = getUserDataLU(profile.id);
         }
@@ -4340,13 +4365,7 @@ public class UserManagerService extends IUserManager.Stub {
                                             || mNextSerialNumber <= userData.info.id) {
                                         mNextSerialNumber = userData.info.id + 1;
                                     }
-                                    if (userData.info.isEphemeral() && !userData.info.preCreated
-                                            && userData.info.id != UserHandle.USER_SYSTEM) {
-                                        // Mark ephemeral user as slated for deletion.
-                                        addRemovingUserIdLocked(userData.info.id);
-                                        userData.info.partial = true;
-                                        userData.info.flags |= UserInfo.FLAG_DISABLED;
-                                    }
+                                    markUserForRemovalIfNecessaryLU(userData.info);
                                 }
                             }
                         } else if (name.equals(TAG_GUEST_RESTRICTIONS)) {

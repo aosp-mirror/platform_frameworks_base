@@ -19,6 +19,7 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.display.ColorDisplayManager;
 import android.net.Uri;
@@ -28,6 +29,7 @@ import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 
+import com.android.server.display.feature.flags.Flags;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.UserTracker;
@@ -47,6 +49,7 @@ public class ReduceBrightColorsControllerImpl implements
     private final ContentObserver mContentObserver;
     private final SecureSettings mSecureSettings;
     private final ArrayList<ReduceBrightColorsController.Listener> mListeners = new ArrayList<>();
+    private boolean mAvailable = true;
 
     @Inject
     public ReduceBrightColorsControllerImpl(UserTracker userTracker,
@@ -75,6 +78,7 @@ public class ReduceBrightColorsControllerImpl implements
         mCurrentUserTrackerCallback = new UserTracker.Callback() {
             @Override
             public void onUserChanged(int newUser, Context userContext) {
+                mAvailable = true;
                 synchronized (mListeners) {
                     if (mListeners.size() > 0) {
                         mSecureSettings.unregisterContentObserverSync(mContentObserver);
@@ -121,10 +125,35 @@ public class ReduceBrightColorsControllerImpl implements
         mManager.setReduceBrightColorsActivated(activated);
     }
 
+    @Override
+    public void setReduceBrightColorsFeatureAvailable(boolean enabled) {
+        mAvailable = enabled;
+        dispatchOnEnabledChanged(enabled);
+        mAvailable = true;
+    }
+
+    @Override
+    public boolean isReduceBrightColorsFeatureAvailable() {
+        return mAvailable;
+    }
+
+    @Override
+    public boolean isInUpgradeMode(Resources resources) {
+        return Flags.evenDimmer() && resources.getBoolean(
+                com.android.internal.R.bool.config_evenDimmerEnabled);
+    }
+
     private void dispatchOnActivated(boolean activated) {
         ArrayList<Listener> copy = new ArrayList<>(mListeners);
         for (Listener l : copy) {
             l.onActivated(activated);
+        }
+    }
+
+    private void dispatchOnEnabledChanged(boolean enabled) {
+        ArrayList<Listener> copy = new ArrayList<>(mListeners);
+        for (Listener l : copy) {
+            l.onFeatureEnabledChanged(enabled);
         }
     }
 }

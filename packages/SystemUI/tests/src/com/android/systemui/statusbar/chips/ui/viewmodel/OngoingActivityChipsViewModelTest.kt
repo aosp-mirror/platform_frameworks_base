@@ -155,6 +155,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     NORMAL_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 

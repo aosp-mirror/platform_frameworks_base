@@ -23,9 +23,9 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.IME
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MULTI_TASKING
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.SYSTEM
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.InputMethodEditor
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
 import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.shortcutHelperMultiTaskingShortcutsSource
@@ -117,7 +117,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                     TestShortcuts.systemCategory,
                     TestShortcuts.multitaskingCategory,
                     ShortcutCategory(
-                        type = IME,
+                        type = InputMethodEditor,
                         subCategories =
                             TestShortcuts.imeSubCategoriesWithGroupedDuplicatedShortcutLabels
                     ),
@@ -137,7 +137,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
             assertThat(categories)
                 .containsExactly(
                     ShortcutCategory(
-                        type = SYSTEM,
+                        type = System,
                         subCategories =
                             TestShortcuts.subCategoriesWithGroupedDuplicatedShortcutLabels
                     ),
@@ -160,7 +160,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                 .containsExactly(
                     TestShortcuts.systemCategory,
                     ShortcutCategory(
-                        type = MULTI_TASKING,
+                        type = MultiTasking,
                         subCategories =
                             TestShortcuts.subCategoriesWithGroupedDuplicatedShortcutLabels
                     ),
@@ -182,7 +182,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                     TestShortcuts.systemCategory,
                     TestShortcuts.multitaskingCategory,
                     ShortcutCategory(
-                        type = IME,
+                        type = InputMethodEditor,
                         subCategories =
                             TestShortcuts.imeSubCategoriesWithUnsupportedModifiersRemoved
                     ),
@@ -201,7 +201,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
             assertThat(categories)
                 .containsExactly(
                     ShortcutCategory(
-                        type = SYSTEM,
+                        type = System,
                         subCategories = TestShortcuts.subCategoriesWithUnsupportedModifiersRemoved
                     ),
                     TestShortcuts.multitaskingCategory,
@@ -222,7 +222,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                 .containsExactly(
                     TestShortcuts.systemCategory,
                     ShortcutCategory(
-                        type = MULTI_TASKING,
+                        type = MultiTasking,
                         subCategories = TestShortcuts.subCategoriesWithUnsupportedModifiersRemoved
                     ),
                     TestShortcuts.imeCategory,

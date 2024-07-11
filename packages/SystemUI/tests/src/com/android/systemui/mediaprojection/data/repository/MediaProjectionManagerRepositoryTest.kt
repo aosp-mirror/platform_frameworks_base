@@ -16,10 +16,12 @@
 
 package com.android.systemui.mediaprojection.data.repository
 
+import android.hardware.display.displayManager
 import android.media.projection.MediaProjectionInfo
 import android.os.Binder
 import android.os.UserHandle
 import android.view.ContentRecordingSession
+import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -36,7 +38,9 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -47,6 +51,7 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
 
     private val fakeMediaProjectionManager = kosmos.fakeMediaProjectionManager
     private val fakeActivityTaskManager = kosmos.fakeActivityTaskManager
+    private val displayManager = kosmos.displayManager
 
     private val repo = kosmos.realMediaProjectionRepository
 
@@ -139,6 +144,37 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun mediaProjectionState_entireScreen_validVirtualDisplayId_hasHostDeviceName() =
+        testScope.runTest {
+            val state by collectLastValue(repo.mediaProjectionState)
+
+            val session = ContentRecordingSession.createDisplaySession(/* displayToMirror= */ 123)
+            session.virtualDisplayId = 45
+            val displayInfo = mock<Display>().apply { whenever(this.name).thenReturn("Test Name") }
+            whenever(displayManager.getDisplay(45)).thenReturn(displayInfo)
+
+            fakeMediaProjectionManager.dispatchOnSessionSet(session = session)
+
+            assertThat((state as MediaProjectionState.Projecting.EntireScreen).hostDeviceName)
+                .isEqualTo("Test Name")
+        }
+
+    @Test
+    fun mediaProjectionState_entireScreen_invalidVirtualDisplayId_nullHostDeviceName() =
+        testScope.runTest {
+            val state by collectLastValue(repo.mediaProjectionState)
+
+            val session = ContentRecordingSession.createDisplaySession(/* displayToMirror= */ 123)
+            session.virtualDisplayId = 45
+            whenever(displayManager.getDisplay(45)).thenReturn(null)
+
+            fakeMediaProjectionManager.dispatchOnSessionSet(session = session)
+
+            assertThat((state as MediaProjectionState.Projecting.EntireScreen).hostDeviceName)
+                .isNull()
+        }
+
+    @Test
     fun mediaProjectionState_sessionSet_taskWithToken_matchingRunningTask_emitsSingleTask() =
         testScope.runTest {
             val token = createToken()
@@ -176,6 +212,45 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
 
             assertThat((state as MediaProjectionState.Projecting.SingleTask).hostPackage)
                 .isEqualTo("com.media.projection.repository.test")
+        }
+
+    @Test
+    fun mediaProjectionState_singleTask_validVirtualDisplayId_hasHostDeviceName() =
+        testScope.runTest {
+            val state by collectLastValue(repo.mediaProjectionState)
+
+            val token = createToken()
+            val task = createTask(taskId = 1, token = token)
+            fakeActivityTaskManager.addRunningTasks(task)
+
+            val session = ContentRecordingSession.createTaskSession(token.asBinder())
+            session.virtualDisplayId = 45
+            val displayInfo = mock<Display>().apply { whenever(this.name).thenReturn("Test Name") }
+            whenever(displayManager.getDisplay(45)).thenReturn(displayInfo)
+
+            fakeMediaProjectionManager.dispatchOnSessionSet(session = session)
+
+            assertThat((state as MediaProjectionState.Projecting.SingleTask).hostDeviceName)
+                .isEqualTo("Test Name")
+        }
+
+    @Test
+    fun mediaProjectionState_singleTask_invalidVirtualDisplayId_nullHostDeviceName() =
+        testScope.runTest {
+            val state by collectLastValue(repo.mediaProjectionState)
+
+            val token = createToken()
+            val task = createTask(taskId = 1, token = token)
+            fakeActivityTaskManager.addRunningTasks(task)
+
+            val session = ContentRecordingSession.createTaskSession(token.asBinder())
+            session.virtualDisplayId = 45
+            whenever(displayManager.getDisplay(45)).thenReturn(null)
+
+            fakeMediaProjectionManager.dispatchOnSessionSet(session = session)
+
+            assertThat((state as MediaProjectionState.Projecting.SingleTask).hostDeviceName)
+                .isNull()
         }
 
     @Test

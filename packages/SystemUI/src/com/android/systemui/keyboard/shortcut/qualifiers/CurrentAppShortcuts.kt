@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.smartspace.data.repository
+package com.android.systemui.keyboard.shortcut.qualifiers
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
+import javax.inject.Qualifier
 
-val Kosmos.fakeSmartspaceRepository by Fixture { FakeSmartspaceRepository() }
-
-val Kosmos.smartspaceRepository by Fixture<SmartspaceRepository> { fakeSmartspaceRepository }
+@Qualifier annotation class CurrentAppShortcuts
