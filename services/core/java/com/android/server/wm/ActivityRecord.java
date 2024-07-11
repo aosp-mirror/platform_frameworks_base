@@ -892,8 +892,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /** The last set {@link DropInputMode} for this activity surface. */
     @DropInputMode
     private int mLastDropInputMode = DropInputMode.NONE;
-    /** Whether the input to this activity will be dropped during the current playing animation. */
-    private boolean mIsInputDroppedForAnimation;
 
     /**
      * Whether the application has desk mode resources. Calculated and cached when
@@ -1733,15 +1731,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    /** Sets if all input will be dropped as a protection during the client-driven animation. */
-    void setDropInputForAnimation(boolean isInputDroppedForAnimation) {
-        if (mIsInputDroppedForAnimation == isInputDroppedForAnimation) {
-            return;
-        }
-        mIsInputDroppedForAnimation = isInputDroppedForAnimation;
-        updateUntrustedEmbeddingInputProtection();
-    }
-
     /**
      * Sets to drop input when obscured to activity if it is embedded in untrusted mode.
      *
@@ -1754,10 +1743,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (getSurfaceControl() == null) {
             return;
         }
-        if (mIsInputDroppedForAnimation) {
-            // Disable all input during the animation.
-            setDropInputMode(DropInputMode.ALL);
-        } else if (isEmbeddedInUntrustedMode()) {
+        if (isEmbeddedInUntrustedMode()) {
             // Set drop input to OBSCURED when untrusted embedded.
             setDropInputMode(DropInputMode.OBSCURED);
         } else {
