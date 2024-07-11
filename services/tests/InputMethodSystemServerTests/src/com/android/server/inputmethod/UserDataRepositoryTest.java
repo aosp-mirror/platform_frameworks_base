@@ -99,14 +99,8 @@ public final class UserDataRepositoryTest {
         listener.onUserCreated(userInfo, /* unused token */ new Object());
         waitForIdle();
 
-        // Assert UserDataRepository contains the expected UserData
-        final var allUserData = collectUserData(repository);
-        assertThat(allUserData).hasSize(1);
-        assertThat(allUserData.get(0).mUserId).isEqualTo(ANY_USER_ID);
-
-        // Assert UserDataRepository called the InputMethodBindingController creator function.
-        verify(bindingControllerFactorySpy).apply(ANY_USER_ID);
-        assertThat(allUserData.get(0).mBindingController.getUserId()).isEqualTo(ANY_USER_ID);
+        // Assert UserDataRepository remains to be empty.
+        assertThat(collectUserData(repository)).isEmpty();
     }
 
     @Test
@@ -121,12 +115,15 @@ public final class UserDataRepositoryTest {
         final var listener = captor.getValue();
 
         // Add one UserData ...
-        final var userInfo = new UserInfo();
-        userInfo.id = ANY_USER_ID;
-        listener.onUserCreated(userInfo, /* unused token */ new Object());
-        waitForIdle();
+        synchronized (ImfLock.class) {
+            final var userData = repository.getOrCreate(ANY_USER_ID);
+            assertThat(userData.mUserId).isEqualTo(ANY_USER_ID);
+        }
+
         // ... and then call onUserRemoved
         assertThat(collectUserData(repository)).hasSize(1);
+        final var userInfo = new UserInfo();
+        userInfo.id = ANY_USER_ID;
         listener.onUserRemoved(userInfo);
         waitForIdle();
 

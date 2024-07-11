@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.shared.model
+package com.android.systemui.qs.panels.data.repository
 
-import javax.inject.Qualifier
+import com.android.systemui.kosmos.Kosmos
 
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class IconLabelVisibilityLog()
+var Kosmos.defaultLargeTilesRepository: DefaultLargeTilesRepository by
+    Kosmos.Fixture { DefaultLargeTilesRepositoryImpl() }

@@ -20,9 +20,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.qs.panels.data.repository.IconTilesRepository
+import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
+import com.android.systemui.qs.panels.data.repository.defaultLargeTilesRepository
 import com.android.systemui.qs.panels.data.repository.gridLayoutTypeRepository
-import com.android.systemui.qs.panels.data.repository.iconTilesRepository
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import com.android.systemui.qs.panels.shared.model.PartitionedGridLayoutType
 import com.android.systemui.qs.pipeline.data.repository.tileSpecRepository
@@ -42,22 +42,17 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GridConsistencyInteractorTest : SysuiTestCase() {
 
-    private val iconOnlyTiles =
-        setOf(
-            TileSpec.create("smallA"),
-            TileSpec.create("smallB"),
-            TileSpec.create("smallC"),
-            TileSpec.create("smallD"),
-            TileSpec.create("smallE"),
-        )
-
     private val kosmos =
         testKosmos().apply {
-            iconTilesRepository =
-                object : IconTilesRepository {
-                    override fun isIconTile(spec: TileSpec): Boolean {
-                        return iconOnlyTiles.contains(spec)
-                    }
+            defaultLargeTilesRepository =
+                object : DefaultLargeTilesRepository {
+                    override val defaultLargeTiles =
+                        setOf(
+                            TileSpec.create("largeA"),
+                            TileSpec.create("largeB"),
+                            TileSpec.create("largeC"),
+                            TileSpec.create("largeD"),
+                        )
                 }
         }
 

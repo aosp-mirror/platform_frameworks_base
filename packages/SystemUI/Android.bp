@@ -789,7 +789,11 @@ android_library {
         "android.test.mock",
         "keepanno-annotations",
     ],
-    kotlincflags: ["-Xjvm-default=all"],
+    kotlincflags: [
+        "-Xjvm-default=all",
+        // TODO(b/352363800): Why do we need this?
+        "-J-Xmx8192M",
+    ],
     aaptflags: [
         "--extra-packages",
         "com.android.systemui",

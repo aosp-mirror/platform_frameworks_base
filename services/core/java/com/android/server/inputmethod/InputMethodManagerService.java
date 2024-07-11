@@ -88,6 +88,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -334,6 +335,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     final Resources mRes;
     private final Handler mHandler;
 
+    private final InputMethodManagerInternal mInputMethodManagerInternal;
     @NonNull
     private final Handler mIoHandler;
 
@@ -648,7 +650,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * Handles {@link Intent#ACTION_LOCALE_CHANGED}.
      *
      * <p>Note: For historical reasons, {@link Intent#ACTION_LOCALE_CHANGED} has been sent to all
-     * the users. We should ignore this event if this is about any background user's locale.</p>
+     * the users.</p>
      */
     void onActionLocaleChanged(@NonNull LocaleList prevLocales, @NonNull LocaleList newLocales) {
         if (DEBUG) {
@@ -665,13 +667,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         AdditionalSubtypeMapRepository.get(userId),
                         DirectBootAwareness.AUTO);
                 InputMethodSettingsRepository.put(userId, settings);
+
+                if (mConcurrentMultiUserModeEnabled || userId == mCurrentUserId) {
+                    postInputMethodSettingUpdatedLocked(true /* resetDefaultEnabledIme */, userId);
+                    // If the locale is changed, needs to reset the default ime
+                    resetDefaultImeLocked(mContext, userId);
+                    updateFromSettingsLocked(true, userId);
+                }
             }
-            // TODO(b/305849394): Dispatch this to non-current users.
-            final int userId = mCurrentUserId;
-            postInputMethodSettingUpdatedLocked(true /* resetDefaultEnabledIme */, userId);
-            // If the locale is changed, needs to reset the default ime
-            resetDefaultImeLocked(mContext, userId);
-            updateFromSettingsLocked(true, userId);
         }
     }
 
@@ -922,16 +925,43 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     public static final class Lifecycle extends SystemService {
         private final InputMethodManagerService mService;
 
-
         public Lifecycle(Context context) {
-            this(context, new InputMethodManagerService(context,
-                            shouldEnableConcurrentMultiUserMode(context)));
+            this(context, createServiceForProduction(context));
         }
 
-        public Lifecycle(
-                Context context, @NonNull InputMethodManagerService inputMethodManagerService) {
+        @VisibleForTesting
+        Lifecycle(Context context, @NonNull InputMethodManagerService inputMethodManagerService) {
             super(context);
             mService = inputMethodManagerService;
+        }
+
+        /**
+         * Does initialization then instantiate {@link InputMethodManagerService} for production
+         * configurations.
+         *
+         * <p>We have this abstraction just because several unit tests directly initialize
+         * {@link InputMethodManagerService} with some mocked/emulated dependencies.</p>
+         *
+         * @param context {@link Context} to be used to set up
+         * @return {@link InputMethodManagerService} object to be used
+         */
+        @NonNull
+        private static InputMethodManagerService createServiceForProduction(
+                @NonNull Context context) {
+            // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
+            // additional subtypes in switchUserOnHandlerLocked().
+            final ServiceThread thread = new ServiceThread(HANDLER_THREAD_NAME,
+                    Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
+            thread.start();
+
+            final ServiceThread ioThread = new ServiceThread(PACKAGE_MONITOR_THREAD_NAME,
+                    Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
+            ioThread.start();
+
+            return new InputMethodManagerService(context,
+                    shouldEnableConcurrentMultiUserMode(context), thread.getLooper(),
+                    Handler.createAsync(ioThread.getLooper()),
+                    null /* bindingControllerForTesting */);
         }
 
         @Override
@@ -988,7 +1018,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final int userId = user.getUserIdentifier();
             SecureSettingsWrapper.onUserStarting(userId);
             synchronized (ImfLock.class) {
-                mService.getUserData(userId);
                 if (mService.mConcurrentMultiUserModeEnabled) {
                     if (mService.mCurrentUserId != userId && mService.mSystemReady) {
                         mService.initializeVisibleBackgroundUserLocked(userId);
@@ -1041,17 +1070,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         mHandler.post(task);
     }
 
-    public InputMethodManagerService(Context context,
-            boolean concurrentMultiUserModeEnabled) {
-        this(context, concurrentMultiUserModeEnabled, null, null, null);
-    }
-
     @VisibleForTesting
     InputMethodManagerService(
             Context context,
             boolean concurrentMultiUserModeEnabled,
-            @Nullable ServiceThread serviceThreadForTesting,
-            @Nullable ServiceThread ioThreadForTesting,
+            @NonNull Looper uiLooper,
+            @NonNull Handler ioHandler,
             @Nullable IntFunction<InputMethodBindingController> bindingControllerForTesting) {
         synchronized (ImfLock.class) {
             mConcurrentMultiUserModeEnabled = concurrentMultiUserModeEnabled;
@@ -1059,28 +1083,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mRes = context.getResources();
             SecureSettingsWrapper.onStart(mContext);
 
-            // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
-            // additional subtypes in switchUserOnHandlerLocked().
-            final ServiceThread thread =
-                    serviceThreadForTesting != null
-                            ? serviceThreadForTesting
-                            : new ServiceThread(
-                                    HANDLER_THREAD_NAME,
-                                    Process.THREAD_PRIORITY_FOREGROUND,
-                                    true /* allowIo */);
-            thread.start();
-            mHandler = Handler.createAsync(thread.getLooper(), this);
-            {
-                final ServiceThread ioThread =
-                        ioThreadForTesting != null
-                                ? ioThreadForTesting
-                                : new ServiceThread(
-                                        PACKAGE_MONITOR_THREAD_NAME,
-                                        Process.THREAD_PRIORITY_FOREGROUND,
-                                        true /* allowIo */);
-                ioThread.start();
-                mIoHandler = Handler.createAsync(ioThread.getLooper());
-            }
+            mHandler = Handler.createAsync(uiLooper, this);
+            mIoHandler = ioHandler;
             SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mHandler);
             mImeTrackerService = new ImeTrackerService(mHandler);
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
@@ -1112,9 +1116,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mUserDataRepository = new UserDataRepository(mHandler, mUserManagerInternal,
                     bindingControllerForTesting != null ? bindingControllerForTesting
                             : bindingControllerFactory);
-            for (int id : mUserManagerInternal.getUserIds()) {
-                getUserData(id);
-            }
 
             mMenuController = new InputMethodMenuController(this);
             mVisibilityStateComputer = new ImeVisibilityStateComputer(this);
@@ -1128,9 +1129,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mNonPreemptibleInputMethods = mRes.getStringArray(
                     com.android.internal.R.array.config_nonPreemptibleInputMethods);
             Runnable discardDelegationTextRunnable = () -> discardHandwritingDelegationText();
-            mHwController = new HandwritingModeController(mContext, thread.getLooper(),
+            mHwController = new HandwritingModeController(mContext, uiLooper,
                     new InkWindowInitializer(), discardDelegationTextRunnable);
             registerDeviceListenerAndCheckStylusSupport();
+            mInputMethodManagerInternal = new LocalServiceImpl();
         }
     }
 
@@ -5585,7 +5587,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     private void publishLocalService() {
-        LocalServices.addService(InputMethodManagerInternal.class, new LocalServiceImpl());
+        LocalServices.addService(InputMethodManagerInternal.class, mInputMethodManagerInternal);
+    }
+
+    // TODO(b/352228316): Remove it once IMMIProxy is removed.
+    InputMethodManagerInternal getLocalService(){
+        return mInputMethodManagerInternal;
     }
 
     private final class LocalServiceImpl extends InputMethodManagerInternal {

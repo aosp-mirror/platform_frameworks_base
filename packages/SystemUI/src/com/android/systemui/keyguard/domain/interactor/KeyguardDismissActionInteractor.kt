@@ -25,9 +25,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +34,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.map
@@ -51,7 +51,6 @@ constructor(
     transitionInteractor: KeyguardTransitionInteractor,
     val dismissInteractor: KeyguardDismissInteractor,
     @Application private val applicationScope: CoroutineScope,
-    sceneInteractor: SceneInteractor,
 ) {
     val dismissAction: Flow<DismissAction> = repository.dismissAction
 
@@ -76,11 +75,10 @@ constructor(
             )
 
     private val finishedTransitionToGone: Flow<Unit> =
-        if (SceneContainerFlag.isEnabled) {
-            sceneInteractor.transitionState.filter { it.isIdle(Scenes.Gone) }.map {}
-        } else {
-            transitionInteractor.finishedKeyguardState.filter { it == GONE }.map {}
-        }
+        transitionInteractor
+            .isFinishedIn(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
+            .filter { it }
+            .map {}
 
     val executeDismissAction: Flow<() -> KeyguardDone> =
         merge(
@@ -90,12 +88,24 @@ constructor(
             .sample(dismissAction)
             .filterNot { it is DismissAction.None }
             .map { it.onDismissAction }
+
     val resetDismissAction: Flow<Unit> =
-        transitionInteractor.finishedKeyguardTransitionStep
-            .filter { it.to != ALTERNATE_BOUNCER && it.to != PRIMARY_BOUNCER && it.to != GONE }
-            .sample(dismissAction)
-            .filterNot { it is DismissAction.None }
-            .map {} // map to Unit
+        combine(
+                transitionInteractor.isFinishedIn(
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = GONE
+                ),
+                transitionInteractor.isFinishedIn(
+                    scene = Scenes.Bouncer,
+                    stateWithoutSceneContainer = PRIMARY_BOUNCER
+                ),
+                transitionInteractor.isFinishedIn(state = ALTERNATE_BOUNCER)
+            ) { isOnGone, isOnBouncer, isOnAltBouncer ->
+                !isOnGone && !isOnBouncer && !isOnAltBouncer
+            }
+            .filter { it }
+            .sampleFilter(dismissAction) { it !is DismissAction.None }
+            .map {}
 
     fun runDismissAnimationOnKeyguard(): Boolean {
         return willAnimateDismissActionOnLockscreen.value

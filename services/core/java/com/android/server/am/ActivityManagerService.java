@@ -72,6 +72,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.SIGNATURE_NO_MATCH;
+import static android.crashrecovery.flags.Flags.refactorCrashrecovery;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
@@ -2322,7 +2323,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if (phase == PHASE_ACTIVITY_MANAGER_READY) {
                 mService.startBroadcastObservers();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-                mService.mPackageWatchdog.onPackagesReady();
+                if (!refactorCrashrecovery()) {
+                    mService.mPackageWatchdog.onPackagesReady();
+                }
                 mService.scheduleHomeTimeout();
             }
         }

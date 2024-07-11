@@ -342,8 +342,8 @@ public class SuspendedAppActivity extends AlertActivity
                                                             .MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
                                             .toBundle();
                             try {
-                                mOnUnsuspend.sendIntent(this, 0, null, null, null, null,
-                                        activityOptions);
+                                mOnUnsuspend.sendIntent(this, 0, null, null, activityOptions,
+                                        null, null);
                             } catch (IntentSender.SendIntentException e) {
                                 Slog.e(TAG, "Error while starting intent " + mOnUnsuspend, e);
                             }

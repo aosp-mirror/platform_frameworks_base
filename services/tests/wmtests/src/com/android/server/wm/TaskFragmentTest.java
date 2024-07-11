@@ -759,20 +759,24 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Assert fixed orientation request is ignored for activity in ActivityEmbedding split.
         activity0.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
-        assertFalse(activity0.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity0.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
 
         activity1.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertFalse(activity1.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity1.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
 
         // Also verify the behavior on device that ignore orientation request.
         mDisplayContent.setIgnoreOrientationRequest(true);
         task.onConfigurationChanged(task.getParent().getConfiguration());
 
-        assertFalse(activity0.isLetterboxedForFixedOrientationAndAspectRatio());
-        assertFalse(activity1.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity0.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity1.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
 
         tf0.setResumedActivity(activity0, "test");

@@ -1060,6 +1060,23 @@ public final class UserManagerTest {
         assertThrows(SecurityException.class, userProps::getAlwaysVisible);
     }
 
+    /**
+     * Test that UserManager.getUserProperties throws the IllegalArgumentException for unsupported
+     * arguments such as UserHandle.NULL, UserHandle.CURRENT or UserHandle.ALL.
+     **/
+    @MediumTest
+    @Test
+    public void testThrowUserPropertiesForUnsupportedUserHandles() throws Exception {
+        assertThrows(IllegalArgumentException.class, () ->
+            mUserManager.getUserProperties(UserHandle.of(UserHandle.USER_NULL)));
+        assertThrows(IllegalArgumentException.class, () ->
+            mUserManager.getUserProperties(UserHandle.CURRENT));
+        assertThrows(IllegalArgumentException.class, () ->
+            mUserManager.getUserProperties(UserHandle.CURRENT_OR_SELF));
+        assertThrows(IllegalArgumentException.class, () ->
+            mUserManager.getUserProperties(UserHandle.ALL));
+    }
+
     // Make sure only max managed profiles can be created
     @MediumTest
     @Test

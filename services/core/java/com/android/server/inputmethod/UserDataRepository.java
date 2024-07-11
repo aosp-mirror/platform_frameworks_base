@@ -74,16 +74,6 @@ final class UserDataRepository {
                             }
                         });
                     }
-
-                    @Override
-                    public void onUserCreated(UserInfo user, Object unusedToken) {
-                        final int userId = user.id;
-                        handler.post(() -> {
-                            synchronized (ImfLock.class) {
-                                getOrCreate(userId);
-                            }
-                        });
-                    }
                 });
     }
 

@@ -428,7 +428,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final Rect bounds = new Rect(task.getBounds());
         bounds.scale(0.5f);
         task.setBounds(bounds);
-        assertFalse(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
         assertThat(task.autoRemoveRecents).isFalse();
     }
 

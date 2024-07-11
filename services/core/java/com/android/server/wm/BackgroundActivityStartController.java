@@ -1659,6 +1659,8 @@ public class BackgroundActivityStartController {
                     activityName = "";
                 }
                 writeBalAllowedLog(activityName, finalVerdict.getCode(), state);
+            } else {
+                writeBalAllowedLogMinimal(state);
             }
         } else {
             @BalCode int code = finalVerdict.getCode();
@@ -1711,6 +1713,24 @@ public class BackgroundActivityStartController {
                 code,
                 state.mCallingUid,
                 state.mRealCallingUid,
+                state.mResultForCaller == null ? BAL_BLOCK : state.mResultForCaller.getRawCode(),
+                state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts(),
+                state.callerExplicitOptInOrOut(),
+                state.mResultForRealCaller == null ? BAL_BLOCK
+                        : state.mResultForRealCaller.getRawCode(),
+                state.mBalAllowedByPiSender.allowsBackgroundActivityStarts(),
+                state.realCallerExplicitOptInOrOut(),
+                getTargetSdk(state.mCallingPackage),
+                getTargetSdk(state.mRealCallingPackage)
+        );
+    }
+
+    @VisibleForTesting void writeBalAllowedLogMinimal(BalState state) {
+        FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
+                "",
+                BAL_ALLOW_DEFAULT,
+                NO_PROCESS_UID,
+                NO_PROCESS_UID,
                 state.mResultForCaller == null ? BAL_BLOCK : state.mResultForCaller.getRawCode(),
                 state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts(),
                 state.callerExplicitOptInOrOut(),
