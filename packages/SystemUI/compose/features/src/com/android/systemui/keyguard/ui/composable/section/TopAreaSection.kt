@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.modifiers.thenIf
@@ -78,13 +80,22 @@ constructor(
                     WeatherClockScenes.splitShadeLargeClockScene
             }
 
-        SceneTransitionLayout(
-            modifier = modifier,
-            currentScene = currentScene,
-            onChangeScene = {},
-            transitions = ClockTransition.defaultClockTransitions,
-            enableInterruptions = false,
-        ) {
+        val state = remember {
+            MutableSceneTransitionLayoutState(
+                currentScene,
+                ClockTransition.defaultClockTransitions,
+                enableInterruptions = false,
+            )
+        }
+
+        // Update state whenever currentSceneKey has changed.
+        LaunchedEffect(state, currentScene) {
+            if (currentScene != state.transitionState.currentScene) {
+                state.setTargetScene(currentScene, coroutineScope = this)
+            }
+        }
+
+        SceneTransitionLayout(state, modifier) {
             scene(splitShadeLargeClockScene) {
                 LargeClockWithSmartSpace(
                     shouldOffSetClockToOneHalf = !hasCustomPositionUpdatedAnimation
