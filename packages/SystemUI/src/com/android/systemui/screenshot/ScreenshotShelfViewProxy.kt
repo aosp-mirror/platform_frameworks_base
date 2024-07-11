@@ -68,7 +68,7 @@ constructor(
     private val thumbnailObserver: ThumbnailObserver,
     @Assisted private val context: Context,
     @Assisted private val displayId: Int
-) : ScreenshotViewProxy {
+) {
 
     interface ScreenshotViewCallback {
         fun onUserInteraction()
@@ -79,12 +79,12 @@ constructor(
         fun onTouchOutside()
     }
 
-    override val view: ScreenshotShelfView =
+    val view: ScreenshotShelfView =
         LayoutInflater.from(context).inflate(R.layout.screenshot_shelf, null) as ScreenshotShelfView
-    override val screenshotPreview: View
-    override var packageName: String = ""
-    override var callbacks: ScreenshotViewCallback? = null
-    override var screenshot: ScreenshotData? = null
+    val screenshotPreview: View
+    var packageName: String = ""
+    var callbacks: ScreenshotViewCallback? = null
+    var screenshot: ScreenshotData? = null
         set(value) {
             value?.let {
                 viewModel.setScreenshotBitmap(it.bitmap)
@@ -100,11 +100,11 @@ constructor(
             field = value
         }
 
-    override val isAttachedToWindow
+    val isAttachedToWindow
         get() = view.isAttachedToWindow
 
-    override var isDismissing = false
-    override var isPendingSharedTransition = false
+    var isDismissing = false
+    var isPendingSharedTransition = false
 
     private val animationController = ScreenshotAnimationController(view, viewModel)
     private var inputMonitor: InputMonitorCompat? = null
@@ -145,17 +145,17 @@ constructor(
         )
     }
 
-    override fun reset() {
+    fun reset() {
         animationController.cancel()
         isPendingSharedTransition = false
         viewModel.reset()
     }
 
-    override fun updateInsets(insets: WindowInsets) {
+    fun updateInsets(insets: WindowInsets) {
         view.updateInsets(insets)
     }
 
-    override fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
+    fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
         val entrance =
             animationController.getEntranceAnimation(screenRect, showFlash) {
                 viewModel.setAnimationState(AnimationState.ENTRANCE_REVEAL)
@@ -173,7 +173,7 @@ constructor(
         return entrance
     }
 
-    override fun requestDismissal(event: ScreenshotEvent?) {
+    fun requestDismissal(event: ScreenshotEvent?) {
         requestDismissal(event, null)
     }
 
@@ -202,7 +202,7 @@ constructor(
         animator.start()
     }
 
-    override fun prepareScrollingTransition(
+    fun prepareScrollingTransition(
         response: ScrollCaptureResponse,
         screenBitmap: Bitmap, // unused
         newScreenshot: Bitmap,
@@ -230,7 +230,7 @@ constructor(
         return r
     }
 
-    override fun startLongScreenshotTransition(
+    fun startLongScreenshotTransition(
         transitionDestination: Rect,
         onTransitionEnd: Runnable,
         longScreenshot: ScrollCaptureController.LongScreenshot,
@@ -245,27 +245,27 @@ constructor(
         transitionAnimation.start()
     }
 
-    override fun restoreNonScrollingUi() {
+    fun restoreNonScrollingUi() {
         viewModel.setScrollableRect(null)
         viewModel.setScrollingScrimBitmap(null)
         animationController.restoreUI()
         callbacks?.onUserInteraction() // reset the timeout
     }
 
-    override fun stopInputListening() {
+    fun stopInputListening() {
         inputMonitor?.dispose()
         inputMonitor = null
         inputEventReceiver?.dispose()
         inputEventReceiver = null
     }
 
-    override fun requestFocus() {
+    fun requestFocus() {
         view.requestFocus()
     }
 
-    override fun announceForAccessibility(string: String) = view.announceForAccessibility(string)
+    fun announceForAccessibility(string: String) = view.announceForAccessibility(string)
 
-    override fun prepareEntranceAnimation(runnable: Runnable) {
+    fun prepareEntranceAnimation(runnable: Runnable) {
         view.viewTreeObserver.addOnPreDrawListener(
             object : ViewTreeObserver.OnPreDrawListener {
                 override fun onPreDraw(): Boolean {
@@ -278,7 +278,7 @@ constructor(
         )
     }
 
-    override fun fadeForSharedTransition() {
+    fun fadeForSharedTransition() {
         animationController.fadeForSharedTransition()
     }
 
@@ -351,7 +351,7 @@ constructor(
     }
 
     @AssistedFactory
-    interface Factory : ScreenshotViewProxy.Factory {
-        override fun getProxy(context: Context, displayId: Int): ScreenshotShelfViewProxy
+    interface Factory {
+        fun getProxy(context: Context, displayId: Int): ScreenshotShelfViewProxy
     }
 }
