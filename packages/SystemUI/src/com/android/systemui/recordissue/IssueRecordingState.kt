@@ -57,6 +57,11 @@ constructor(
     val traceConfig: TraceConfig
         get() = ALL_ISSUE_TYPES[issueTypeRes] ?: PresetTraceConfigs.getDefaultConfig()
 
+    // The 1st part of the title before the ": " is the tag, and the 2nd part is the description
+    var tagTitles: Set<String>
+        get() = prefs.getStringSet(KEY_TAG_TITLES, emptySet()) ?: emptySet()
+        set(value) = prefs.edit().putStringSet(KEY_TAG_TITLES, value).apply()
+
     private val listeners = CopyOnWriteArrayList<Runnable>()
 
     var isRecording = false
@@ -81,8 +86,10 @@ constructor(
         private const val KEY_TAKE_BUG_REPORT = "key_takeBugReport"
         private const val HAS_APPROVED_SCREEN_RECORDING = "HasApprovedScreenRecord"
         private const val KEY_RECORD_SCREEN = "key_recordScreen"
+        private const val KEY_TAG_TITLES = "key_tagTitles"
         const val KEY_ISSUE_TYPE_RES = "key_issueTypeRes"
         const val ISSUE_TYPE_NOT_SET = -1
+        const val TAG_TITLE_DELIMITER = ": "
 
         val ALL_ISSUE_TYPES: Map<Int, TraceConfig?> =
             hashMapOf(
@@ -90,6 +97,7 @@ constructor(
                 Pair(R.string.user_interface, PresetTraceConfigs.getUiConfig()),
                 Pair(R.string.battery, PresetTraceConfigs.getBatteryConfig()),
                 Pair(R.string.thermal, PresetTraceConfigs.getThermalConfig()),
+                Pair(R.string.custom, null),
             )
     }
 }

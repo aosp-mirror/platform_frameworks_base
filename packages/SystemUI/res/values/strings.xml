@@ -946,6 +946,10 @@
     <string name="performance">Performance</string>
     <string name="user_interface">User Interface</string>
     <string name="thermal">Thermal</string>
+    <string name="custom">Custom</string>
+
+    <string name="custom_trace_settings_dialog_title">Custom Trace Settings</string>
+    <string name="restore_default">Restore Default</string>
 
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>

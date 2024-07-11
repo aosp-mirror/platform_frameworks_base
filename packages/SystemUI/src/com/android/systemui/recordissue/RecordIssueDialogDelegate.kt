@@ -88,7 +88,7 @@ constructor(
             setPositiveButton(R.string.qs_record_issue_start) { _, _ -> onStarted.run() }
         }
         bgExecutor.execute {
-            traceurMessageSender.onBoundToTraceur.add { traceurMessageSender.getTags() }
+            traceurMessageSender.onBoundToTraceur.add { traceurMessageSender.getTags(state) }
             traceurMessageSender.bindToTraceur(dialog.context)
         }
     }
@@ -170,18 +170,8 @@ constructor(
     @MainThread
     private fun onIssueTypeClicked(context: Context, onIssueTypeSelected: Runnable) {
         val popupMenu = PopupMenu(context, issueTypeButton)
-
-        ALL_ISSUE_TYPES.keys.forEach {
-            popupMenu.menu.add(it).apply {
-                setIcon(R.drawable.arrow_pointing_down)
-                if (it != state.issueTypeRes) {
-                    iconTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-                }
-                intent = Intent().putExtra(KEY_ISSUE_TYPE_RES, it)
-            }
-        }
-        popupMenu.apply {
-            setOnMenuItemClickListener {
+        val onMenuItemClickListener =
+            PopupMenu.OnMenuItemClickListener {
                 issueTypeButton.text = it.title
                 state.issueTypeRes =
                     it.intent?.getIntExtra(KEY_ISSUE_TYPE_RES, ISSUE_TYPE_NOT_SET)
@@ -189,6 +179,28 @@ constructor(
                 onIssueTypeSelected.run()
                 true
             }
+        ALL_ISSUE_TYPES.keys.forEach {
+            popupMenu.menu.add(it).apply {
+                setIcon(R.drawable.arrow_pointing_down)
+                if (it != state.issueTypeRes) {
+                    iconTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+                }
+                intent = Intent().putExtra(KEY_ISSUE_TYPE_RES, it)
+
+                if (it == R.string.custom) {
+                    setOnMenuItemClickListener {
+                        CustomTraceSettingsDialogDelegate(factory, state) {
+                                onMenuItemClickListener.onMenuItemClick(it)
+                            }
+                            .createDialog()
+                            .show()
+                        true
+                    }
+                }
+            }
+        }
+        popupMenu.apply {
+            setOnMenuItemClickListener(onMenuItemClickListener)
             setForceShowIcon(true)
             show()
         }
