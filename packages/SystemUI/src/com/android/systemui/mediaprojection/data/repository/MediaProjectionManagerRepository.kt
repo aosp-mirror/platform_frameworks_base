@@ -17,6 +17,7 @@
 package com.android.systemui.mediaprojection.data.repository
 
 import android.app.ActivityManager.RunningTaskInfo
+import android.hardware.display.DisplayManager
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
 import android.os.Handler
@@ -47,6 +48,7 @@ class MediaProjectionManagerRepository
 @Inject
 constructor(
     private val mediaProjectionManager: MediaProjectionManager,
+    private val displayManager: DisplayManager,
     @Main private val handler: Handler,
     @Application private val applicationScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
@@ -110,14 +112,21 @@ constructor(
         }
 
         val hostPackage = info.packageName
+        val hostDeviceName =
+            withContext(backgroundDispatcher) {
+                // If the projection is to a different device, then the session's display ID should
+                // identify the display associated with that different device.
+                displayManager.getDisplay(session.virtualDisplayId)?.name
+            }
+
         if (session.contentToRecord == RECORD_CONTENT_DISPLAY || session.tokenToRecord == null) {
-            return MediaProjectionState.Projecting.EntireScreen(hostPackage)
+            return MediaProjectionState.Projecting.EntireScreen(hostPackage, hostDeviceName)
         }
         val matchingTask =
             tasksRepository.findRunningTaskFromWindowContainerToken(
                 checkNotNull(session.tokenToRecord)
-            ) ?: return MediaProjectionState.Projecting.EntireScreen(hostPackage)
-        return MediaProjectionState.Projecting.SingleTask(hostPackage, matchingTask)
+            ) ?: return MediaProjectionState.Projecting.EntireScreen(hostPackage, hostDeviceName)
+        return MediaProjectionState.Projecting.SingleTask(hostPackage, hostDeviceName, matchingTask)
     }
 
     companion object {

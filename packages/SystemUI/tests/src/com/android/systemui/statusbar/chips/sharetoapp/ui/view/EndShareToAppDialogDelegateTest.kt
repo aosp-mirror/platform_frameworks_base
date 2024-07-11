@@ -116,6 +116,7 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
         createAndSetDelegate(
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
+                hostDeviceName = null,
                 createTask(taskId = 1, baseIntent = baseIntent)
             )
         )
@@ -140,6 +141,7 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
         createAndSetDelegate(
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
+                hostDeviceName = null,
                 createTask(taskId = 1, baseIntent = baseIntent)
             )
         )
@@ -200,7 +202,6 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
                 ProjectionChipModel.Projecting(
                     ProjectionChipModel.Type.SHARE_TO_APP,
                     state,
-                    deviceName = null,
                 ),
             )
     }
@@ -209,6 +210,10 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
         private const val HOST_PACKAGE = "fake.host.package"
         private val ENTIRE_SCREEN = MediaProjectionState.Projecting.EntireScreen(HOST_PACKAGE)
         private val SINGLE_TASK =
-            MediaProjectionState.Projecting.SingleTask(HOST_PACKAGE, createTask(taskId = 1))
+            MediaProjectionState.Projecting.SingleTask(
+                HOST_PACKAGE,
+                hostDeviceName = null,
+                createTask(taskId = 1)
+            )
     }
 }

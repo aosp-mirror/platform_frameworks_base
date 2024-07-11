@@ -83,6 +83,7 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
@@ -108,6 +109,7 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     NORMAL_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
@@ -161,6 +163,7 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     NORMAL_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
@@ -189,6 +192,7 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     NORMAL_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 

@@ -101,6 +101,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
@@ -208,7 +209,11 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.chip)
 
             mediaProjectionRepo.mediaProjectionState.value =
-                MediaProjectionState.Projecting.SingleTask(NORMAL_PACKAGE, createTask(taskId = 1))
+                MediaProjectionState.Projecting.SingleTask(
+                    NORMAL_PACKAGE,
+                    hostDeviceName = null,
+                    createTask(taskId = 1),
+                )
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
@@ -243,6 +248,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
@@ -303,6 +309,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
