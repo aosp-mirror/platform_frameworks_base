@@ -859,8 +859,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    public void setHeadsUpIsVisible() {
-        super.setHeadsUpIsVisible();
+    public void markHeadsUpSeen() {
+        super.markHeadsUpSeen();
         mMustStayOnScreen = false;
     }
 
