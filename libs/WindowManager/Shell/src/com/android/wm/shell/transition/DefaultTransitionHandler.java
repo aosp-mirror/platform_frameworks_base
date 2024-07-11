@@ -41,6 +41,7 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECI
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_OWNER_THUMBNAIL;
 import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_WORK_THUMBNAIL;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
@@ -63,6 +64,7 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionTypeFromInfo;
+import static com.android.wm.shell.transition.TransitionAnimationHelper.isCoveredByOpaqueFullscreenChange;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
 
 import android.animation.Animator;
@@ -353,6 +355,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 continue;
             }
             final boolean isTask = change.getTaskInfo() != null;
+            final boolean isFreeform = isTask && change.getTaskInfo().isFreeform();
             final int mode = change.getMode();
             boolean isSeamlessDisplayChange = false;
 
@@ -459,6 +462,16 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             final int layer = zSplitLine + numChanges - i;
                             startTransaction.setLayer(change.getLeash(), layer);
                         }
+                    } else if (!isCoveredByOpaqueFullscreenChange(info, change)
+                            && isFreeform
+                            && TransitionUtil.isOpeningMode(type)
+                            && change.getMode() == TRANSIT_TO_BACK) {
+                        // Reparent the minimize-change to the root task so the minimizing Task
+                        // isn't shown in front of other Tasks.
+                        mRootTDAOrganizer.reparentToDisplayArea(
+                                change.getTaskInfo().displayId,
+                                change.getLeash(),
+                                startTransaction);
                     } else if (isOnlyTranslucent && TransitionUtil.isOpeningType(info.getType())
                                 && TransitionUtil.isClosingType(mode)) {
                         // If there is a closing translucent task in an OPENING transition, we will
