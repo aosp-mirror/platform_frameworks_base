@@ -323,6 +323,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "android.os.flags-aconfig",
     package: "android.os",
+    exportable: true,
     container: "system",
     srcs: ["core/java/android/os/*.aconfig"],
 }
@@ -338,6 +339,13 @@ java_aconfig_library {
     aconfig_declarations: "android.os.flags-aconfig",
     host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.os.flags-aconfig-java-export",
+    aconfig_declarations: "android.os.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    mode: "exported",
 }
 
 // VirtualDeviceManager
