@@ -22,7 +22,6 @@ import android.graphics.drawable.Animatable
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.service.quicksettings.Tile.STATE_INACTIVE
 import android.text.TextUtils
-import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
@@ -465,7 +464,6 @@ private fun TileIcon(
     animateToEnd: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    Log.d("Fabian", "Recomposing tile icon")
     val iconModifier = modifier.size(dimensionResource(id = R.dimen.qs_icon_size))
     val context = LocalContext.current
     val loadedDrawable =
