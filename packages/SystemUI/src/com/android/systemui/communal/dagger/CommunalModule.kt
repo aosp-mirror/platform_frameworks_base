@@ -23,6 +23,7 @@ import com.android.systemui.communal.data.repository.CommunalMediaRepositoryModu
 import com.android.systemui.communal.data.repository.CommunalPrefsRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryModule
+import com.android.systemui.communal.data.repository.CommunalSmartspaceRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalTutorialRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -52,6 +53,8 @@ import kotlinx.coroutines.CoroutineScope
             CommunalWidgetModule::class,
             CommunalPrefsRepositoryModule::class,
             CommunalSettingsRepositoryModule::class,
+            CommunalSmartspaceRepositoryModule::class,
+            CommunalStartableModule::class,
         ]
 )
 interface CommunalModule {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,17 @@
 
 package com.android.systemui.communal.data.repository
 
-import com.android.systemui.communal.data.model.CommunalMediaModel
+import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeCommunalMediaRepository : CommunalMediaRepository {
-    private val _mediaModel = MutableStateFlow(CommunalMediaModel.INACTIVE)
+class FakeCommunalSmartspaceRepository : CommunalSmartspaceRepository {
 
-    override val mediaModel: Flow<CommunalMediaModel> = _mediaModel
+    private val _timers = MutableStateFlow<List<CommunalSmartspaceTimer>>(emptyList())
+    override val timers: Flow<List<CommunalSmartspaceTimer>> = _timers
 
-    fun mediaActive(timestamp: Long = 0L) {
-        _mediaModel.value =
-            CommunalMediaModel(
-                hasActiveMediaOrRecommendation = true,
-                createdTimestampMillis = timestamp,
-            )
-    }
-
-    fun mediaInactive() {
-        _mediaModel.value = CommunalMediaModel.INACTIVE
+    fun setTimers(timers: List<CommunalSmartspaceTimer>) {
+        _timers.value = timers
     }
 
     private var isListening = false
