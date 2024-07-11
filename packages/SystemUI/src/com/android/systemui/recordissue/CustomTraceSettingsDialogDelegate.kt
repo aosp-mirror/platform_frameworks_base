@@ -29,14 +29,16 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.traceur.PresetTraceConfigs
 import com.android.traceur.TraceConfig
 import com.android.traceur.res.R as T
+import java.util.function.Consumer
 
 class CustomTraceSettingsDialogDelegate(
     private val factory: SystemUIDialog.Factory,
-    private val state: IssueRecordingState,
+    private val customTraceState: CustomTraceState,
+    private val tagTitles: Set<String>,
     private val onSave: Runnable,
 ) : SystemUIDialog.Delegate {
 
-    private val builder = TraceConfig.Builder(PresetTraceConfigs.getDefaultConfig())
+    private val builder = TraceConfig.Builder(customTraceState.traceConfig)
 
     override fun createDialog(): SystemUIDialog = factory.create(this)
 
@@ -48,7 +50,10 @@ class CustomTraceSettingsDialogDelegate(
             setView(
                 LayoutInflater.from(context).inflate(R.layout.custom_trace_settings_dialog, null)
             )
-            setPositiveButton(R.string.save) { _, _ -> onSave.run() }
+            setPositiveButton(R.string.save) { _, _ ->
+                onSave.run()
+                customTraceState.traceConfig = builder.build()
+            }
             setNegativeButton(R.string.cancel) { _, _ -> }
         }
     }
@@ -62,35 +67,50 @@ class CustomTraceSettingsDialogDelegate(
                 text =
                     context.getString(T.string.categories) +
                         "\n" +
-                        context.getString(R.string.notification_alert_title)
+                        if (
+                            builder.tags == null ||
+                                builder.tags!! == PresetTraceConfigs.getDefaultConfig().tags
+                        ) {
+                            context.getString(R.string.notification_alert_title)
+                        } else {
+                            tagTitles
+                                .filter {
+                                    builder.tags!!.contains(it.substringBefore(TAG_TITLE_DELIMITER))
+                                }
+                                .joinToString()
+                        }
                 setOnClickListener { showCategorySelector(this) }
             }
             requireViewById<Switch>(R.id.attach_to_bugreport_switch).apply {
                 isChecked = builder.attachToBugreport
+                setOnCheckedChangeListener { _, isChecked -> builder.attachToBugreport = isChecked }
             }
-            requireViewById<TextView>(R.id.cpu_buffer_size)
-                .setupSingleChoiceText(
-                    T.array.buffer_size_values,
-                    T.array.buffer_size_names,
-                    builder.bufferSizeKb,
-                    T.string.buffer_size,
-                )
+            requireViewById<TextView>(R.id.cpu_buffer_size).setupSingleChoiceText(
+                T.array.buffer_size_values,
+                T.array.buffer_size_names,
+                builder.bufferSizeKb,
+                T.string.buffer_size,
+            ) {
+                builder.bufferSizeKb = it
+            }
             val longTraceSizeText: TextView =
-                requireViewById<TextView>(R.id.long_trace_size)
-                    .setupSingleChoiceText(
-                        T.array.long_trace_size_values,
-                        T.array.long_trace_size_names,
-                        builder.maxLongTraceSizeMb,
-                        T.string.max_long_trace_size,
-                    )
+                requireViewById<TextView>(R.id.long_trace_size).setupSingleChoiceText(
+                    T.array.long_trace_size_values,
+                    T.array.long_trace_size_names,
+                    builder.maxLongTraceSizeMb,
+                    T.string.max_long_trace_size,
+                ) {
+                    builder.maxLongTraceSizeMb = it
+                }
             val longTraceDurationText: TextView =
-                requireViewById<TextView>(R.id.long_trace_duration)
-                    .setupSingleChoiceText(
-                        T.array.long_trace_duration_values,
-                        T.array.long_trace_duration_names,
-                        builder.maxLongTraceDurationMinutes,
-                        T.string.max_long_trace_duration,
-                    )
+                requireViewById<TextView>(R.id.long_trace_duration).setupSingleChoiceText(
+                    T.array.long_trace_duration_values,
+                    T.array.long_trace_duration_names,
+                    builder.maxLongTraceDurationMinutes,
+                    T.string.max_long_trace_duration,
+                ) {
+                    builder.maxLongTraceDurationMinutes = it
+                }
             requireViewById<Switch>(R.id.long_traces_switch).apply {
                 isChecked = builder.longTrace
                 val disabledAlpha by lazy { getDisabledAlpha(context) }
@@ -99,6 +119,7 @@ class CustomTraceSettingsDialogDelegate(
                 longTraceSizeText.alpha = alpha
 
                 setOnCheckedChangeListener { _, isChecked ->
+                    builder.longTrace = isChecked
                     longTraceDurationText.isEnabled = isChecked
                     longTraceSizeText.isEnabled = isChecked
 
@@ -107,9 +128,13 @@ class CustomTraceSettingsDialogDelegate(
                     longTraceSizeText.alpha = newAlpha
                 }
             }
-            requireViewById<Switch>(R.id.winscope_switch).apply { isChecked = builder.winscope }
+            requireViewById<Switch>(R.id.winscope_switch).apply {
+                isChecked = builder.winscope
+                setOnCheckedChangeListener { _, isChecked -> builder.winscope = isChecked }
+            }
             requireViewById<Switch>(R.id.trace_debuggable_apps_switch).apply {
                 isChecked = builder.apps
+                setOnCheckedChangeListener { _, isChecked -> builder.apps = isChecked }
             }
             requireViewById<TextView>(R.id.long_traces_switch_label).text =
                 context.getString(T.string.long_traces)
@@ -125,10 +150,11 @@ class CustomTraceSettingsDialogDelegate(
     @SuppressLint("SetTextI18n")
     private fun showCategorySelector(root: TextView) {
         showDialog(root.context) {
+            val tags = builder.tags ?: PresetTraceConfigs.getDefaultConfig().tags
             val titlesToCheckmarks =
-                state.tagTitles.associateBy(
+                tagTitles.associateBy(
                     { it },
-                    { builder.tags.contains(it.substringBefore(TAG_TITLE_DELIMITER)) }
+                    { tags.contains(it.substringBefore(TAG_TITLE_DELIMITER)) }
                 )
             val titles = titlesToCheckmarks.keys.toTypedArray()
             val checkmarks = titlesToCheckmarks.values.toBooleanArray()
@@ -138,7 +164,7 @@ class CustomTraceSettingsDialogDelegate(
                     .map { it.key.substringAfter(TAG_TITLE_DELIMITER) }
                     .toMutableSet()
 
-            val newTags = builder.tags.toMutableSet()
+            val newTags = tags.toMutableSet()
             setMultiChoiceItems(titles, checkmarks) { _, i, isChecked ->
                 val tag = titles[i].substringBefore(TAG_TITLE_DELIMITER)
                 val titleSuffix = titles[i].substringAfter(TAG_TITLE_DELIMITER)
@@ -154,13 +180,15 @@ class CustomTraceSettingsDialogDelegate(
                 root.text =
                     root.context.resources.getString(T.string.categories) +
                         "\n" +
-                        checkedTitleSuffixes.fold("") { acc, s -> "$acc, $s" }.substringAfter(", ")
+                        checkedTitleSuffixes.joinToString()
+                builder.tags = newTags
             }
             setNeutralButton(R.string.restore_default) { _, _ ->
                 root.text =
                     context.getString(T.string.categories) +
                         "\n" +
                         context.getString(R.string.notification_alert_title)
+                builder.tags = null
             }
             setNegativeButton(R.string.cancel) { _, _ -> }
         }
@@ -172,6 +200,7 @@ class CustomTraceSettingsDialogDelegate(
         resNames: Int,
         startingValue: Int,
         alertTitleRes: Int,
+        onChosen: Consumer<Int>,
     ): TextView {
         val values = resources.getStringArray(resValues).map { Integer.parseInt(it) }
         val names = resources.getStringArray(resNames)
@@ -183,6 +212,7 @@ class CustomTraceSettingsDialogDelegate(
                 setTitle(alertTitleRes)
                 setSingleChoiceItems(names, startingIndex) { d, i ->
                     text = resources.getString(alertTitleRes) + "\n${names[i]}"
+                    onChosen.accept(values[i])
                     d.dismiss()
                 }
             }

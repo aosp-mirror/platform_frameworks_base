@@ -189,7 +189,11 @@ constructor(
 
                 if (it == R.string.custom) {
                     setOnMenuItemClickListener {
-                        CustomTraceSettingsDialogDelegate(factory, state) {
+                        CustomTraceSettingsDialogDelegate(
+                                factory,
+                                state.customTraceState,
+                                state.tagTitles
+                            ) {
                                 onMenuItemClickListener.onMenuItemClick(it)
                             }
                             .createDialog()

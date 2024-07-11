@@ -38,6 +38,8 @@ constructor(
     private val prefs =
         userFileManager.getSharedPreferences(TILE_SPEC, Context.MODE_PRIVATE, userTracker.userId)
 
+    val customTraceState = CustomTraceState(prefs)
+
     var takeBugreport
         get() = prefs.getBoolean(KEY_TAKE_BUG_REPORT, false)
         set(value) = prefs.edit().putBoolean(KEY_TAKE_BUG_REPORT, value).apply()
@@ -55,7 +57,7 @@ constructor(
         set(value) = prefs.edit().putInt(KEY_ISSUE_TYPE_RES, value).apply()
 
     val traceConfig: TraceConfig
-        get() = ALL_ISSUE_TYPES[issueTypeRes] ?: PresetTraceConfigs.getDefaultConfig()
+        get() = ALL_ISSUE_TYPES[issueTypeRes] ?: customTraceState.traceConfig
 
     // The 1st part of the title before the ": " is the tag, and the 2nd part is the description
     var tagTitles: Set<String>
