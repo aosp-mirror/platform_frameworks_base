@@ -90,8 +90,8 @@ constructor(
      */
     @Composable
     fun SceneScope.Notifications(burnInParams: BurnInParameters?, modifier: Modifier = Modifier) {
-        val shouldUseSplitNotificationShade by
-            lockscreenContentViewModel.shouldUseSplitNotificationShade.collectAsStateWithLifecycle()
+        val isShadeLayoutWide by
+            lockscreenContentViewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val areNotificationsVisible by
             lockscreenContentViewModel.areNotificationsVisible.collectAsStateWithLifecycle()
         val splitShadeTopMargin: Dp =
@@ -111,9 +111,7 @@ constructor(
             modifier =
                 modifier
                     .fillMaxWidth()
-                    .thenIf(shouldUseSplitNotificationShade) {
-                        Modifier.padding(top = splitShadeTopMargin)
-                    }
+                    .thenIf(isShadeLayoutWide) { Modifier.padding(top = splitShadeTopMargin) }
                     .let {
                         if (burnInParams == null) {
                             it

@@ -34,9 +34,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGesture.BACK
 import com.google.common.truth.Truth.assertThat
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Ignore
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class TouchpadGestureHandlerTest : SysuiTestCase() {

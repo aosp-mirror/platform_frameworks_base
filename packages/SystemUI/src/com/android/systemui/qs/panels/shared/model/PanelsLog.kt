@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package android.app.admin
+package com.android.systemui.qs.panels.shared.model
 
-import android.app.AlarmManager
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
+import javax.inject.Qualifier
 
-var Kosmos.alarmManager by Kosmos.Fixture { mock<AlarmManager>() }
+@Qualifier @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) annotation class PanelsLog()

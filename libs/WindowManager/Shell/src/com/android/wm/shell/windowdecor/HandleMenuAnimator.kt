@@ -108,7 +108,7 @@ class HandleMenuAnimator(
      *
      * @param after runs after the animation finishes.
      */
-    fun animateCollapseIntoHandleClose(after: Runnable) {
+    fun animateCollapseIntoHandleClose(after: () -> Unit) {
         appInfoCollapseToHandle()
         animateAppInfoPillFadeOut()
         windowingPillClose()
@@ -125,7 +125,7 @@ class HandleMenuAnimator(
      * @param after runs after animation finishes.
      *
      */
-    fun animateClose(after: Runnable) {
+    fun animateClose(after: () -> Unit) {
         appInfoPillCollapse()
         animateAppInfoPillFadeOut()
         windowingPillClose()
@@ -463,9 +463,9 @@ class HandleMenuAnimator(
      *
      * @param after runs after animation finishes.
      */
-    private fun runAnimations(after: Runnable? = null) {
+    private fun runAnimations(after: (() -> Unit)? = null) {
         runningAnimation?.apply {
-            // Remove all listeners, so that after runnable isn't triggered upon cancel.
+            // Remove all listeners, so that the after function isn't triggered upon cancel.
             removeAllListeners()
             // If an animation runs while running animation is triggered, gracefully cancel.
             cancel()
@@ -475,7 +475,7 @@ class HandleMenuAnimator(
             playTogether(animators)
             animators.clear()
             doOnEnd {
-                after?.run()
+                after?.invoke()
                 runningAnimation = null
             }
             start()

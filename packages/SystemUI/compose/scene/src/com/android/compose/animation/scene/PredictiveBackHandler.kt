@@ -56,13 +56,7 @@ internal fun PredictiveBackHandler(
             progress.collect { backEvent -> transition.dragProgress = backEvent.progress }
 
             // Back gesture successful.
-            transition.animateTo(
-                if (state.canChangeScene(targetSceneForBack)) {
-                    targetSceneForBack
-                } else {
-                    fromScene
-                }
-            )
+            transition.animateTo(targetSceneForBack)
         } catch (e: CancellationException) {
             // Back gesture cancelled.
             transition.animateTo(fromScene)
@@ -105,12 +99,15 @@ private class PredictiveBackTransition(
             return it
         }
 
-        currentScene = scene
+        if (scene != currentScene && state.transitionState == this && state.canChangeScene(scene)) {
+            currentScene = scene
+        }
+
         val targetProgress =
-            when (scene) {
+            when (currentScene) {
                 fromScene -> 0f
                 toScene -> 1f
-                else -> error("scene $scene should be either $fromScene or $toScene")
+                else -> error("scene $currentScene should be either $fromScene or $toScene")
             }
 
         val animatable = Animatable(dragProgress).also { progressAnimatable = it }

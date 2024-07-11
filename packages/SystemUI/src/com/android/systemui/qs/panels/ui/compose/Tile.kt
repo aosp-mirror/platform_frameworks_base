@@ -274,6 +274,7 @@ fun DefaultEditTileGrid(
     modifier: Modifier,
     onAddTile: (TileSpec, Int) -> Unit,
     onRemoveTile: (TileSpec) -> Unit,
+    onResize: (TileSpec, Boolean) -> Unit,
 ) {
     val currentListState = rememberEditListState(tiles)
     val dragAndDropState = rememberDragAndDropState(currentListState)
@@ -293,6 +294,9 @@ fun DefaultEditTileGrid(
     val onDropRemove: (TileSpec, Int) -> Unit by rememberUpdatedState { tileSpec, _ ->
         onRemoveTile(tileSpec)
     }
+    val onDoubleTap: (TileSpec) -> Unit by rememberUpdatedState { tileSpec ->
+        onResize(tileSpec, !isIconOnly(tileSpec))
+    }
 
     TileLazyGrid(
         modifier = modifier.dragAndDropTileList(dragAndDropState, { true }, onDropAdd),
@@ -305,6 +309,7 @@ fun DefaultEditTileGrid(
             currentTiles,
             ClickAction.REMOVE,
             onRemoveTile,
+            onDoubleTap,
             isIconOnly,
             indicatePosition = true,
             dragAndDropState = dragAndDropState,
@@ -318,6 +323,7 @@ fun DefaultEditTileGrid(
             otherTilesStock,
             ClickAction.ADD,
             addTileToEnd,
+            onDoubleTap,
             isIconOnly,
             dragAndDropState = dragAndDropState,
             acceptDrops = { true },
@@ -332,6 +338,7 @@ fun DefaultEditTileGrid(
             otherTilesCustom,
             ClickAction.ADD,
             addTileToEnd,
+            onDoubleTap,
             isIconOnly,
             dragAndDropState = dragAndDropState,
             acceptDrops = { true },
@@ -344,6 +351,7 @@ fun LazyGridScope.editTiles(
     tiles: List<EditTileViewModel>,
     clickAction: ClickAction,
     onClick: (TileSpec) -> Unit,
+    onDoubleTap: (TileSpec) -> Unit,
     isIconOnly: (TileSpec) -> Boolean,
     dragAndDropState: DragAndDropState,
     acceptDrops: (TileSpec) -> Boolean,
@@ -390,6 +398,7 @@ fun LazyGridScope.editTiles(
                         .dragAndDropTileSource(
                             viewModel.tileSpec,
                             onClick,
+                            onDoubleTap,
                             dragAndDropState,
                         )
             )

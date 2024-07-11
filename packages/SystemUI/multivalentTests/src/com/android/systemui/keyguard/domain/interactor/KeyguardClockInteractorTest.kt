@@ -37,7 +37,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
@@ -81,10 +80,10 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val value by collectLastValue(underTest.clockShouldBeCentered)
             kosmos.keyguardInteractor.setClockShouldBeCentered(true)
-            assertThat(value).isEqualTo(true)
+            assertThat(value).isTrue()
 
             kosmos.keyguardInteractor.setClockShouldBeCentered(false)
-            assertThat(value).isEqualTo(false)
+            assertThat(value).isFalse()
         }
 
     @Test
@@ -103,7 +102,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
     fun clockSize_SceneContainerFlagOn_shadeModeSingle_hasNotifs_SMALL() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockSize)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
+            kosmos.shadeRepository.setShadeLayoutWide(false)
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
             assertThat(value).isEqualTo(ClockSize.SMALL)
         }
@@ -113,7 +112,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
     fun clockSize_SceneContainerFlagOn_shadeModeSingle_hasMedia_SMALL() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockSize)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
+            kosmos.shadeRepository.setShadeLayoutWide(false)
             val userMedia = MediaData().copy(active = true)
             kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
             assertThat(value).isEqualTo(ClockSize.SMALL)
@@ -125,7 +124,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val value by collectLastValue(underTest.clockSize)
             val userMedia = MediaData().copy(active = true)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
             kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
             kosmos.keyguardRepository.setIsDozing(false)
             assertThat(value).isEqualTo(ClockSize.SMALL)
@@ -136,7 +135,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
     fun clockSize_SceneContainerFlagOn_shadeModeSplit_noMedia_LARGE() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockSize)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
             kosmos.keyguardRepository.setIsDozing(false)
             assertThat(value).isEqualTo(ClockSize.LARGE)
         }
@@ -147,7 +146,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val value by collectLastValue(underTest.clockSize)
             val userMedia = MediaData().copy(active = true)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
             kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
             kosmos.keyguardRepository.setIsDozing(true)
             assertThat(value).isEqualTo(ClockSize.LARGE)
@@ -158,8 +157,8 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
     fun clockShouldBeCentered_sceneContainerFlagOn_notSplitMode_true() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockShouldBeCentered)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
-            assertThat(value).isEqualTo(true)
+            kosmos.shadeRepository.setShadeLayoutWide(false)
+            assertThat(value).isTrue()
         }
 
     @Test
@@ -167,9 +166,9 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
     fun clockShouldBeCentered_sceneContainerFlagOn_splitMode_noActiveNotifications_true() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockShouldBeCentered)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
             kosmos.activeNotificationListRepository.setActiveNotifs(0)
-            assertThat(value).isEqualTo(true)
+            assertThat(value).isTrue()
         }
 
     @Test
@@ -177,10 +176,10 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
     fun clockShouldBeCentered_sceneContainerFlagOn_splitMode_isActiveDreamLockscreenHosted_true() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockShouldBeCentered)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
             kosmos.keyguardRepository.setIsActiveDreamLockscreenHosted(true)
-            assertThat(value).isEqualTo(true)
+            assertThat(value).isTrue()
         }
 
     @Test
@@ -188,11 +187,11 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
     fun clockShouldBeCentered_sceneContainerFlagOn_splitMode_hasPulsingNotifications_false() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockShouldBeCentered)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
             kosmos.headsUpNotificationRepository.isHeadsUpAnimatingAway.value = true
             kosmos.keyguardRepository.setIsDozing(true)
-            assertThat(value).isEqualTo(false)
+            assertThat(value).isFalse()
         }
 
     @Test
@@ -200,10 +199,10 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
     fun clockShouldBeCentered_sceneContainerFlagOn_splitMode_onAod_true() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockShouldBeCentered)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
             transitionTo(KeyguardState.LOCKSCREEN, KeyguardState.AOD)
-            assertThat(value).isEqualTo(true)
+            assertThat(value).isTrue()
         }
 
     @Test
@@ -211,10 +210,10 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
     fun clockShouldBeCentered_sceneContainerFlagOn_splitMode_offAod_false() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockShouldBeCentered)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
             transitionTo(KeyguardState.AOD, KeyguardState.LOCKSCREEN)
-            assertThat(value).isEqualTo(false)
+            assertThat(value).isFalse()
         }
 
     private suspend fun transitionTo(from: KeyguardState, to: KeyguardState) {

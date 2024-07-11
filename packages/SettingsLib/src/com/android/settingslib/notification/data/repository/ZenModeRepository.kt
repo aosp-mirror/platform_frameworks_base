@@ -56,7 +56,7 @@ class ZenModeRepositoryImpl(
     val backgroundHandler: Handler?,
 ) : ZenModeRepository {
 
-    private val notificationBroadcasts =
+    private val notificationBroadcasts by lazy {
         callbackFlow {
                 val receiver =
                     object : BroadcastReceiver() {
@@ -95,8 +95,9 @@ class ZenModeRepositoryImpl(
                     )
                 }
             }
+    }
 
-    override val consolidatedNotificationPolicy: StateFlow<NotificationManager.Policy?> =
+    override val consolidatedNotificationPolicy: StateFlow<NotificationManager.Policy?> by lazy {
         if (Flags.volumePanelBroadcastFix() && android.app.Flags.modesApi())
             flowFromBroadcast(NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED) {
                 notificationManager.consolidatedNotificationPolicy
@@ -105,11 +106,13 @@ class ZenModeRepositoryImpl(
             flowFromBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED) {
                 notificationManager.consolidatedNotificationPolicy
             }
+    }
 
-    override val globalZenMode: StateFlow<Int?> =
+    override val globalZenMode: StateFlow<Int?> by lazy {
         flowFromBroadcast(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED) {
             notificationManager.zenMode
         }
+    }
 
     private fun <T> flowFromBroadcast(intentAction: String, mapper: () -> T) =
         notificationBroadcasts

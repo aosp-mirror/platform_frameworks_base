@@ -37,7 +37,6 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
 import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.whenever
@@ -76,7 +75,7 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
     fun setup() {
         with(kosmos) {
             fakeFeatureFlagsClassic.set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, true)
-            shadeRepository.setShadeMode(ShadeMode.Single)
+            shadeRepository.setShadeLayoutWide(false)
             underTest = lockscreenContentViewModel
         }
     }
@@ -126,7 +125,7 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
         with(kosmos) {
             testScope.runTest {
                 val areNotificationsVisible by collectLastValue(underTest.areNotificationsVisible)
-                shadeRepository.setShadeMode(ShadeMode.Split)
+                shadeRepository.setShadeLayoutWide(true)
                 fakeKeyguardClockRepository.setClockSize(ClockSize.LARGE)
 
                 assertThat(areNotificationsVisible).isTrue()
@@ -156,24 +155,24 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
         }
 
     @Test
-    fun shouldUseSplitNotificationShade_withConfigTrue_true() =
+    fun isShadeLayoutWide_withConfigTrue_true() =
         with(kosmos) {
             testScope.runTest {
-                val shouldUseSplitNotificationShade by
-                    collectLastValue(underTest.shouldUseSplitNotificationShade)
-                shadeRepository.setShadeMode(ShadeMode.Split)
-                assertThat(shouldUseSplitNotificationShade).isTrue()
+                val isShadeLayoutWide by collectLastValue(underTest.isShadeLayoutWide)
+                shadeRepository.setShadeLayoutWide(true)
+
+                assertThat(isShadeLayoutWide).isTrue()
             }
         }
 
     @Test
-    fun shouldUseSplitNotificationShade_withConfigFalse_false() =
+    fun isShadeLayoutWide_withConfigFalse_false() =
         with(kosmos) {
             testScope.runTest {
-                val shouldUseSplitNotificationShade by
-                    collectLastValue(underTest.shouldUseSplitNotificationShade)
-                shadeRepository.setShadeMode(ShadeMode.Single)
-                assertThat(shouldUseSplitNotificationShade).isFalse()
+                val isShadeLayoutWide by collectLastValue(underTest.isShadeLayoutWide)
+                shadeRepository.setShadeLayoutWide(false)
+
+                assertThat(isShadeLayoutWide).isFalse()
             }
         }
 

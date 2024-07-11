@@ -37,6 +37,5 @@ val Kosmos.fromAodTransitionInteractor by
             powerInteractor = powerInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
             deviceEntryRepository = deviceEntryRepository,
-            wakeToGoneInteractor = keyguardWakeDirectlyToGoneInteractor,
         )
     }

@@ -81,7 +81,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardWakeDirectlyToGoneInteractor;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindViewBinder;
 import com.android.systemui.keyguard.ui.binder.WindowManagerLockscreenVisibilityViewBinder;
@@ -318,7 +317,7 @@ public class KeyguardService extends Service {
 
     private final WindowManagerOcclusionManager mWmOcclusionManager;
     private final KeyguardEnabledInteractor mKeyguardEnabledInteractor;
-    private final KeyguardWakeDirectlyToGoneInteractor mKeyguardWakeDirectlyToGoneInteractor;
+
     private final Lazy<FoldGracePeriodProvider> mFoldGracePeriodProvider = new Lazy<>() {
         @Override
         public FoldGracePeriodProvider get() {
@@ -345,8 +344,7 @@ public class KeyguardService extends Service {
             @Main Executor mainExecutor,
             KeyguardInteractor keyguardInteractor,
             KeyguardEnabledInteractor keyguardEnabledInteractor,
-            Lazy<KeyguardStateCallbackStartable> keyguardStateCallbackStartableLazy,
-            KeyguardWakeDirectlyToGoneInteractor keyguardWakeDirectlyToGoneInteractor) {
+            Lazy<KeyguardStateCallbackStartable> keyguardStateCallbackStartableLazy) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -374,7 +372,6 @@ public class KeyguardService extends Service {
 
         mWmOcclusionManager = windowManagerOcclusionManager;
         mKeyguardEnabledInteractor = keyguardEnabledInteractor;
-        mKeyguardWakeDirectlyToGoneInteractor = keyguardWakeDirectlyToGoneInteractor;
     }
 
     @Override
@@ -489,7 +486,6 @@ public class KeyguardService extends Service {
         public void onDreamingStarted() {
             trace("onDreamingStarted");
             checkPermission();
-            mKeyguardWakeDirectlyToGoneInteractor.onDreamingStarted();
             mKeyguardInteractor.setDreaming(true);
             mKeyguardViewMediator.onDreamingStarted();
         }
@@ -498,7 +494,6 @@ public class KeyguardService extends Service {
         public void onDreamingStopped() {
             trace("onDreamingStopped");
             checkPermission();
-            mKeyguardWakeDirectlyToGoneInteractor.onDreamingStopped();
             mKeyguardInteractor.setDreaming(false);
             mKeyguardViewMediator.onDreamingStopped();
         }

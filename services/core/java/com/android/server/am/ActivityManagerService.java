@@ -72,6 +72,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.SIGNATURE_NO_MATCH;
+import static android.crashrecovery.flags.Flags.refactorCrashrecovery;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
@@ -2322,7 +2323,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if (phase == PHASE_ACTIVITY_MANAGER_READY) {
                 mService.startBroadcastObservers();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-                mService.mPackageWatchdog.onPackagesReady();
+                if (!refactorCrashrecovery()) {
+                    mService.mPackageWatchdog.onPackagesReady();
+                }
                 mService.scheduleHomeTimeout();
             }
         }
@@ -18368,55 +18371,43 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         boolean closeFd = true;
         try {
-            Objects.requireNonNull(fd);
-
-            record ProcessToDump(String processName, IApplicationThread thread) { }
-
-            PrintWriter pw = new FastPrintWriter(new FileOutputStream(fd.getFileDescriptor()));
-            pw.println("Binder transaction traces for all processes.\n");
-            final ArrayList<ProcessToDump> processes = new ArrayList<>();
             synchronized (mProcLock) {
-                // Since dumping binder transactions is a long-running operation, we can't do it
-                // with mProcLock held. Do the initial verification here, and save the processes
-                // to dump later outside the lock.
-                final ArrayList<ProcessRecord> unverifiedProcesses =
-                        new ArrayList<>(mProcessList.getLruProcessesLOSP());
-                for (int i = 0, size = unverifiedProcesses.size(); i < size; i++) {
-                    ProcessRecord process = unverifiedProcesses.get(i);
-                    final IApplicationThread thread = process.getThread();
-                    if (!processSanityChecksLPr(process, thread)) {
-                        continue;
-                    }
-                    processes.add(new ProcessToDump(process.processName, process.getThread()));
+                if (fd == null) {
+                    throw new IllegalArgumentException("null fd");
                 }
                 mBinderTransactionTrackingEnabled = false;
-            }
-            for (int i = 0, size = processes.size(); i < size; i++) {
-                final String processName = processes.get(i).processName();
-                final IApplicationThread thread = processes.get(i).thread();
 
-                pw.println("Traces for process: " + processName);
-                pw.flush();
-                try {
-                    TransferPipe tp = new TransferPipe();
-                    try {
-                        thread.stopBinderTrackingAndDump(tp.getWriteFd());
-                        tp.go(fd.getFileDescriptor());
-                    } finally {
-                        tp.kill();
+                PrintWriter pw = new FastPrintWriter(new FileOutputStream(fd.getFileDescriptor()));
+                pw.println("Binder transaction traces for all processes.\n");
+                mProcessList.forEachLruProcessesLOSP(true, process -> {
+                    final IApplicationThread thread = process.getThread();
+                    if (!processSanityChecksLPr(process, thread)) {
+                        return;
                     }
-                } catch (IOException e) {
-                    pw.println("Failure while dumping IPC traces from " + processName +
-                            ".  Exception: " + e);
+
+                    pw.println("Traces for process: " + process.processName);
                     pw.flush();
-                } catch (RemoteException e) {
-                    pw.println("Got a RemoteException while dumping IPC traces from " +
-                            processName + ".  Exception: " + e);
-                    pw.flush();
-                }
+                    try {
+                        TransferPipe tp = new TransferPipe();
+                        try {
+                            thread.stopBinderTrackingAndDump(tp.getWriteFd());
+                            tp.go(fd.getFileDescriptor());
+                        } finally {
+                            tp.kill();
+                        }
+                    } catch (IOException e) {
+                        pw.println("Failure while dumping IPC traces from " + process +
+                                ".  Exception: " + e);
+                        pw.flush();
+                    } catch (RemoteException e) {
+                        pw.println("Got a RemoteException while dumping IPC traces from " +
+                                process + ".  Exception: " + e);
+                        pw.flush();
+                    }
+                });
+                closeFd = false;
+                return true;
             }
-            closeFd = false;
-            return true;
         } finally {
             if (fd != null && closeFd) {
                 try {

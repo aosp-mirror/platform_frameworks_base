@@ -114,15 +114,11 @@ cc_defaults {
         "libbase",
         "libharfbuzz_ng",
         "libminikin",
-        "server_configurable_flags",
-        "libaconfig_storage_read_api_cc"
     ],
 
     static_libs: [
         "libui-types",
     ],
-
-    whole_static_libs: ["hwui_flags_cc_lib"],
 
     target: {
         android: {
@@ -145,6 +141,8 @@ cc_defaults {
                 "libsync",
                 "libui",
                 "aconfig_text_flags_c_lib",
+                "server_configurable_flags",
+                "libaconfig_storage_read_api_cc",
             ],
             static_libs: [
                 "libEGL_blobCache",
@@ -155,6 +153,7 @@ cc_defaults {
                 "libstatssocket_lazy",
                 "libtonemap",
             ],
+            whole_static_libs: ["hwui_flags_cc_lib"],
         },
         host: {
             static_libs: [
@@ -419,7 +418,6 @@ cc_defaults {
     ],
 
     static_libs: [
-        "libnativehelper_lazy",
         "libziparchive_for_incfs",
     ],
 
@@ -446,6 +444,7 @@ cc_defaults {
             ],
             static_libs: [
                 "libgif",
+                "libnativehelper_lazy",
                 "libstatslog_hwui",
                 "libstatspull_lazy",
                 "libstatssocket_lazy",
@@ -464,6 +463,7 @@ cc_defaults {
             ],
             static_libs: [
                 "libandroidfw",
+                "libnativehelper_jvm",
             ],
         },
     },
