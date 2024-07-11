@@ -4709,6 +4709,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // Update stored global config and notify everyone about the change.
         mRootWindowContainer.onConfigurationChanged(mTempConfig);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        if ((changes & ActivityInfo.CONFIG_ORIENTATION) != 0) {
+            FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_ORIENTATION_CHANGED,
+                    values.orientation);
+        }
 
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         return changes;
