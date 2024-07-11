@@ -97,8 +97,8 @@ constructor(
                 powerInteractor.detailedWakefulness
                     .sample(
                         transitionInteractor.isFinishedIn(
-                            Scenes.Gone,
-                            stateWithoutSceneContainer = KeyguardState.GONE
+                            scene = Scenes.Gone,
+                            stateWithoutSceneContainer = KeyguardState.GONE,
                         ),
                         ::Pair
                     )

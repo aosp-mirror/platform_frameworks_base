@@ -31,6 +31,7 @@ import static android.view.WindowManager.fixScale;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAGS_IS_NON_APP_WINDOW;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
@@ -806,14 +807,16 @@ public class Transitions implements RemoteCallable<Transitions>,
         final int changeSize = info.getChanges().size();
         boolean taskChange = false;
         boolean transferStartingWindow = false;
-        int noAnimationBehindStartingWindow = 0;
+        int animBehindStartingWindow = 0;
         boolean allOccluded = changeSize > 0;
         for (int i = changeSize - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             taskChange |= change.getTaskInfo() != null;
             transferStartingWindow |= change.hasFlags(FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT);
-            if (change.hasAllFlags(FLAG_IS_BEHIND_STARTING_WINDOW | FLAG_NO_ANIMATION)) {
-                noAnimationBehindStartingWindow++;
+            if (change.hasAllFlags(FLAG_IS_BEHIND_STARTING_WINDOW | FLAG_NO_ANIMATION)
+                    || change.hasAllFlags(
+                            FLAG_IS_BEHIND_STARTING_WINDOW | FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
+                animBehindStartingWindow++;
             }
             if (!change.hasFlags(FLAG_IS_OCCLUDED)) {
                 allOccluded = false;
@@ -831,11 +834,11 @@ public class Transitions implements RemoteCallable<Transitions>,
         // There does not need animation when:
         // A. Transfer starting window. Apply transfer starting window directly if there is no other
         // task change. Since this is an activity->activity situation, we can detect it by selecting
-        // transitions with only 2 changes where
-        // 1. neither are tasks, and
+        // transitions with changes where
+        // 1. none are tasks, and
         // 2. one is a starting-window recipient, or all change is behind starting window.
-        if (!taskChange && (transferStartingWindow || noAnimationBehindStartingWindow == changeSize)
-                && changeSize == 2
+        if (!taskChange && (transferStartingWindow || animBehindStartingWindow == changeSize)
+                && changeSize >= 1
                 // B. It's visibility change if the TRANSIT_TO_BACK/TO_FRONT happened when all
                 // changes are underneath another change.
                 || ((info.getType() == TRANSIT_TO_BACK || info.getType() == TRANSIT_TO_FRONT)

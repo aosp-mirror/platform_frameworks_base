@@ -184,6 +184,11 @@ public class DisplayManagerFlags {
                     Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON,
                     Flags::offloadSessionCancelBlockScreenOn);
 
+    private final FlagState mNewHdrBrightnessModifier =
+            new FlagState(
+                    Flags.FLAG_NEW_HDR_BRIGHTNESS_MODIFIER,
+                    Flags::newHdrBrightnessModifier);
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -373,6 +378,13 @@ public class DisplayManagerFlags {
     }
 
     /**
+     * @return Whether to use new HDR brightness modifier or not
+     */
+    public boolean useNewHdrBrightnessModifier() {
+        return mNewHdrBrightnessModifier.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -409,6 +421,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mSynthetic60hzModes);
         pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
         pw.println(" " + mOffloadSessionCancelBlockScreenOn);
+        pw.println(" " + mNewHdrBrightnessModifier);
     }
 
     private static class FlagState {

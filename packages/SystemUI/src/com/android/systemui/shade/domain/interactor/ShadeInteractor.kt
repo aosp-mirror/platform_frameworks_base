@@ -52,8 +52,20 @@ interface ShadeInteractor : BaseShadeInteractor {
     /** Are touches allowed on the notification panel? */
     val isShadeTouchable: Flow<Boolean>
 
-    /** Emits true if the shade can be expanded from QQS to QS and false otherwise. */
+    /** Whether the shade can be expanded from QQS to QS. */
     val isExpandToQsEnabled: Flow<Boolean>
+
+    /** The version of the shade layout to use. */
+    val shadeMode: StateFlow<ShadeMode>
+
+    /**
+     * Whether the shade layout should be wide (true) or narrow (false).
+     *
+     * In a wide layout, notifications and quick settings each take up only half the screen width
+     * (whether they are shown at the same time or not). In a narrow layout, they can each be as
+     * wide as the entire screen.
+     */
+    val isShadeLayoutWide: StateFlow<Boolean>
 
     /** How to align the shade content. */
     val shadeAlignment: ShadeAlignment
@@ -113,8 +125,6 @@ interface BaseShadeInteractor {
      * animating.
      */
     val isUserInteractingWithQs: Flow<Boolean>
-
-    val shadeMode: StateFlow<ShadeMode>
 }
 
 fun createAnyExpansionFlow(

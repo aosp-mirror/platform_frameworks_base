@@ -135,6 +135,8 @@ constructor(
                                     !deviceEntryRepository.isLockscreenEnabled())
 
                         if (shouldTransitionToGone) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                            if (SceneContainerFlag.isEnabled) return@collect
                             startTransitionTo(
                                 toState = KeyguardState.GONE,
                             )
@@ -195,6 +197,7 @@ constructor(
      * PRIMARY_BOUNCER.
      */
     private fun listenForAodToPrimaryBouncer() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch("$TAG#listenForAodToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing

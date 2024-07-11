@@ -304,6 +304,9 @@ public class BrightnessClamperController {
                 modifiers.add(new BrightnessLowLuxModifier(handler, listener, context,
                         displayDeviceConfig));
             }
+            if (flags.useNewHdrBrightnessModifier()) {
+                modifiers.add(new HdrBrightnessModifier());
+            }
             return modifiers;
         }
 

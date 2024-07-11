@@ -103,8 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> detectó que tomaste una captura de pantalla."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> y otras apps en ejecución detectaron que tomaste una captura de pantalla."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Agregar a la nota"</string>
-    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
-    <skip />
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Incluir vínculo"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Grabadora de pantalla"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Procesando grabación pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación constante para una sesión de grabación de pantalla"</string>
@@ -134,8 +133,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Dejarás de grabar contenido de &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
-    <!-- no translation found for share_to_app_chip_accessibility_label (4210256229976947065) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Compartiendo pantalla"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -143,8 +141,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Dejarás de compartir contenido de &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
-    <!-- no translation found for cast_to_other_device_chip_accessibility_label (1680650146639059938) -->
-    <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"Transmitiendo pantalla"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -198,8 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Desbloqueo con rostro. Presiona para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Rostro reconocido. Presiona para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Rostro reconocido. Presiona el desbloqueo para continuar."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Se desbloqueó con el rostro. Presiona para continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Cancelar autenticación"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Más opciones"</string>
@@ -480,8 +476,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Agregar más widgets"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Mantén presionado para personalizar los widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personalizar widgets"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Desbloquea para personalizar los widgets"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ícono de la app de widget inhabilitado"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Ícono de la app para un widget que se está instalando"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Modificar widget"</string>
@@ -1359,15 +1354,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"En uso por <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Uso reciente en <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Sistema"</string>
-    <!-- no translation found for shortcut_helper_category_system_controls (3153344561395751020) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_system_apps (6001757545472556810) -->
-    <skip />
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Controles del sistema"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Apps del sistema"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Tareas múltiples"</string>
-    <!-- no translation found for shortcutHelper_category_recent_apps (7918731953612377145) -->
-    <skip />
-    <!-- no translation found for shortcutHelper_category_split_screen (1159669813444812244) -->
-    <skip />
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Apps recientes"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Pantalla dividida"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Entrada"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Accesos directos a aplicaciones"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accesibilidad"</string>
@@ -1383,6 +1374,8 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
     <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Atrás"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Para volver, desliza tres dedos hacia la derecha o izquierda en cualquier lugar del panel táctil."</string>

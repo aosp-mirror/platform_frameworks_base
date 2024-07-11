@@ -30,6 +30,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
@@ -75,10 +76,12 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.Rational;
 import android.view.Display;
+import android.view.InsetsSource;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.window.ITaskFragmentOrganizer;
@@ -904,7 +907,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 0 /* index */,
                 WindowInsets.Type.systemOverlays(),
                 new Rect(0, 0, 1080, 200),
-                null /* boundingRects */);
+                null /* boundingRects */,
+                0 /* flags */);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
         assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSources
@@ -930,11 +934,36 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 0 /* index */,
                 WindowInsets.Type.systemOverlays(),
                 new Rect(0, 0, 1080, 200),
-                boundingRects);
+                boundingRects,
+                0 /* flags */);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
         assertArrayEquals(boundingRects, navigationBarInsetsReceiverTask.mLocalInsetsSources
                 .valueAt(0).getBoundingRects());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION)
+    public void testAddInsetsSource_withFlags() {
+        final Task rootTask = createTask(mDisplayContent);
+
+        final Task insetsReceiverTask = createTaskInRootTask(rootTask, 0);
+        insetsReceiverTask.getConfiguration().windowConfiguration
+                .setBounds(new Rect(0, 200, 1080, 700));
+
+        final @InsetsSource.Flags int flags = FLAG_FORCE_CONSUMING;
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.addInsetsSource(
+                insetsReceiverTask.mRemoteToken.toWindowContainerToken(),
+                new Binder(),
+                0 /* index */,
+                WindowInsets.Type.systemOverlays(),
+                new Rect(0, 0, 1080, 200),
+                null /* boundingRects */,
+                flags);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+
+        assertEquals(flags, insetsReceiverTask.mLocalInsetsSources.valueAt(0).getFlags());
     }
 
     @Test
@@ -952,7 +981,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 0 /* index */,
                 WindowInsets.Type.systemOverlays(),
                 new Rect(0, 0, 1080, 200),
-                null /* boundingRects */);
+                null /* boundingRects */,
+                0 /* flags */);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
         final WindowContainerTransaction wct2 = new WindowContainerTransaction();

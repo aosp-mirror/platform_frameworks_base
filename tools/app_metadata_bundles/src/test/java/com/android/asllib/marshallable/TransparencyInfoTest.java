@@ -22,9 +22,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.w3c.dom.Element;
+
+import java.nio.file.Paths;
 
 @RunWith(JUnit4.class)
 public class TransparencyInfoTest {
+    private static final long DEFAULT_VERSION = 2L;
+
     private static final String TRANSPARENCY_INFO_HR_PATH =
             "com/android/asllib/transparencyinfo/hr";
     private static final String TRANSPARENCY_INFO_OD_PATH =
@@ -45,20 +50,28 @@ public class TransparencyInfoTest {
     }
 
     private void testHrToOdTransparencyInfo(String fileName) throws Exception {
-        TestUtils.testHrToOd(
-                TestUtils.document(),
-                new TransparencyInfoFactory(),
-                TRANSPARENCY_INFO_HR_PATH,
-                TRANSPARENCY_INFO_OD_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        TransparencyInfo transparencyInfo =
+                new TransparencyInfoFactory()
+                        .createFromHrElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(TRANSPARENCY_INFO_HR_PATH, fileName)),
+                                DEFAULT_VERSION);
+        Element resultingEle = transparencyInfo.toOdDomElement(doc);
+        doc.appendChild(resultingEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(TRANSPARENCY_INFO_OD_PATH, fileName));
     }
 
     private void testOdToHrTransparencyInfo(String fileName) throws Exception {
-        TestUtils.testOdToHr(
-                TestUtils.document(),
-                new TransparencyInfoFactory(),
-                TRANSPARENCY_INFO_OD_PATH,
-                TRANSPARENCY_INFO_HR_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        TransparencyInfo transparencyInfo =
+                new TransparencyInfoFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(TRANSPARENCY_INFO_OD_PATH, fileName)),
+                                DEFAULT_VERSION);
+        Element resultingEle = transparencyInfo.toHrDomElement(doc);
+        doc.appendChild(resultingEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(TRANSPARENCY_INFO_HR_PATH, fileName));
     }
 }

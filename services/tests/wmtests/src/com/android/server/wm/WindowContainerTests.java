@@ -22,6 +22,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.WindowInsets.Type.systemOverlays;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -77,6 +78,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
@@ -90,6 +92,8 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.window.flags.Flags;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -958,6 +962,25 @@ public class WindowContainerTests extends WindowTestsBase {
 
         Mockito.doReturn(true).when(root).handlesOrientationChangeFromDescendant(anyInt());
         assertTrue(child.handlesOrientationChangeFromDescendant(orientation));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION)
+    public void testAddLocalInsets_addsFlagsFromProvider() {
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+
+        final Binder owner = new Binder();
+        Rect insetsRect = new Rect(0, 200, 1080, 700);
+        final int flags = FLAG_FORCE_CONSUMING;
+        final InsetsFrameProvider provider =
+                new InsetsFrameProvider(owner, 1, WindowInsets.Type.captionBar())
+                        .setArbitraryRectangle(insetsRect)
+                        .setFlags(flags);
+        task.addLocalInsetsFrameProvider(provider, owner);
+
+        final int sourceFlags = task.mLocalInsetsSources.get(provider.getId()).getFlags();
+        assertEquals(flags, sourceFlags);
     }
 
     private static void addLocalInsets(WindowContainer wc) {

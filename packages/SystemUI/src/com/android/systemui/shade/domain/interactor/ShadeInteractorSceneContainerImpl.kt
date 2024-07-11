@@ -22,8 +22,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
-import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
@@ -45,10 +43,7 @@ constructor(
     @Application scope: CoroutineScope,
     sceneInteractor: SceneInteractor,
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
-    shadeRepository: ShadeRepository,
 ) : BaseShadeInteractor {
-    override val shadeMode: StateFlow<ShadeMode> = shadeRepository.shadeMode
-
     override val shadeExpansion: StateFlow<Float> =
         sceneBasedExpansion(sceneInteractor, SceneFamilies.NotifShade)
             .stateIn(scope, SharingStarted.Eagerly, 0f)

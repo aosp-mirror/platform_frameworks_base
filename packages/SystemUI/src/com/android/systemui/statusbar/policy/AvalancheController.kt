@@ -44,7 +44,6 @@ constructor(dumpManager: DumpManager,
 
     private val tag = "AvalancheController"
     private val debug = Compile.IS_DEBUG && Log.isLoggable(tag, Log.DEBUG)
-    var enableAtRuntime = true
 
     // HUN showing right now, in the floating state where full shade is hidden, on launcher or AOD
     @VisibleForTesting var headsUpEntryShowing: HeadsUpEntry? = null
@@ -87,17 +86,13 @@ constructor(dumpManager: DumpManager,
         dumpManager.registerNormalDumpable(tag, /* module */ this)
     }
 
-    fun isEnabled() : Boolean {
-        return NotificationThrottleHun.isEnabled && enableAtRuntime
-    }
-
     fun getShowingHunKey(): String {
         return getKey(headsUpEntryShowing)
     }
 
     /** Run or delay Runnable for given HeadsUpEntry */
     fun update(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
-        if (!isEnabled()) {
+        if (!NotificationThrottleHun.isEnabled) {
             runnable.run()
             return
         }
@@ -153,7 +148,7 @@ constructor(dumpManager: DumpManager,
      * all Runnables associated with that entry.
      */
     fun delete(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
-        if (!isEnabled()) {
+        if (!NotificationThrottleHun.isEnabled) {
             runnable.run()
             return
         }
@@ -194,7 +189,7 @@ constructor(dumpManager: DumpManager,
      *    BaseHeadsUpManager.HeadsUpEntry.calculateFinishTime to shorten display duration.
      */
     fun getDurationMs(entry: HeadsUpEntry, autoDismissMs: Int): Int {
-        if (!isEnabled()) {
+        if (!NotificationThrottleHun.isEnabled) {
             // Use default duration, like we did before AvalancheController existed
             return autoDismissMs
         }
@@ -243,7 +238,7 @@ constructor(dumpManager: DumpManager,
 
     /** Return true if entry is waiting to show. */
     fun isWaiting(key: String): Boolean {
-        if (!isEnabled()) {
+        if (!NotificationThrottleHun.isEnabled) {
             return false
         }
         for (entry in nextMap.keys) {
@@ -256,7 +251,7 @@ constructor(dumpManager: DumpManager,
 
     /** Return list of keys for huns waiting */
     fun getWaitingKeys(): MutableList<String> {
-        if (!isEnabled()) {
+        if (!NotificationThrottleHun.isEnabled) {
             return mutableListOf()
         }
         val keyList = mutableListOf<String>()
@@ -267,7 +262,7 @@ constructor(dumpManager: DumpManager,
     }
 
     fun getWaitingEntry(key: String): HeadsUpEntry? {
-        if (!isEnabled()) {
+        if (!NotificationThrottleHun.isEnabled) {
             return null
         }
         for (headsUpEntry in nextMap.keys) {
@@ -279,7 +274,7 @@ constructor(dumpManager: DumpManager,
     }
 
     fun getWaitingEntryList(): List<HeadsUpEntry> {
-        if (!isEnabled()) {
+        if (!NotificationThrottleHun.isEnabled) {
             return mutableListOf()
         }
         return nextMap.keys.toList()

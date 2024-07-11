@@ -21,40 +21,50 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
-
 /** Safety Label representation containing zero or more {@link DataCategory} for data shared */
 public class SafetyLabels implements AslMarshallable {
     private final DataLabels mDataLabels;
+    private final SecurityLabels mSecurityLabels;
+    private final ThirdPartyVerification mThirdPartyVerification;
 
-    public SafetyLabels(DataLabels dataLabels) {
+    public SafetyLabels(
+            DataLabels dataLabels,
+            SecurityLabels securityLabels,
+            ThirdPartyVerification thirdPartyVerification) {
         this.mDataLabels = dataLabels;
-    }
-
-    /** Returns the data label for the safety label */
-    public DataLabels getDataLabel() {
-        return mDataLabels;
+        this.mSecurityLabels = securityLabels;
+        this.mThirdPartyVerification = thirdPartyVerification;
     }
 
     /** Creates an on-device DOM element from the {@link SafetyLabels}. */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element safetyLabelsEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_SAFETY_LABELS);
         if (mDataLabels != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mDataLabels.toOdDomElements(doc));
+            safetyLabelsEle.appendChild(mDataLabels.toOdDomElement(doc));
         }
-        return XmlUtils.listOf(safetyLabelsEle);
+        if (mSecurityLabels != null) {
+            safetyLabelsEle.appendChild(mSecurityLabels.toOdDomElement(doc));
+        }
+        if (mThirdPartyVerification != null) {
+            safetyLabelsEle.appendChild(mThirdPartyVerification.toOdDomElement(doc));
+        }
+        return safetyLabelsEle;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public Element toHrDomElement(Document doc) {
         Element safetyLabelsEle = doc.createElement(XmlUtils.HR_TAG_SAFETY_LABELS);
 
         if (mDataLabels != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mDataLabels.toHrDomElements(doc));
+            safetyLabelsEle.appendChild(mDataLabels.toHrDomElement(doc));
         }
-        return XmlUtils.listOf(safetyLabelsEle);
+        if (mSecurityLabels != null) {
+            safetyLabelsEle.appendChild(mSecurityLabels.toHrDomElement(doc));
+        }
+        if (mThirdPartyVerification != null) {
+            safetyLabelsEle.appendChild(mThirdPartyVerification.toHrDomElement(doc));
+        }
+        return safetyLabelsEle;
     }
 }

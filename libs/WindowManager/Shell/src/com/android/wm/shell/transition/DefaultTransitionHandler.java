@@ -19,6 +19,7 @@ package com.android.wm.shell.transition;
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
 import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_NONE;
+import static android.app.ActivityOptions.ANIM_FROM_STYLE;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
@@ -985,7 +986,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final int animType = options.getType();
         return animType == ANIM_CUSTOM || animType == ANIM_SCALE_UP
                 || animType == ANIM_THUMBNAIL_SCALE_UP || animType == ANIM_THUMBNAIL_SCALE_DOWN
-                || animType == ANIM_CLIP_REVEAL || animType == ANIM_OPEN_CROSS_PROFILE_APPS;
+                || animType == ANIM_CLIP_REVEAL || animType == ANIM_OPEN_CROSS_PROFILE_APPS
+                || animType == ANIM_FROM_STYLE;
     }
 
     private static void applyTransformation(long time, SurfaceControl.Transaction t,

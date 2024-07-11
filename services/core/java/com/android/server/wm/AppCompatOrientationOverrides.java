@@ -50,7 +50,6 @@ class AppCompatOrientationOverrides {
     private final ActivityRecord mActivityRecord;
     @NonNull
     private final AppCompatCameraOverrides mAppCompatCameraOverrides;
-
     @NonNull
     private final OptPropFactory.OptProp mIgnoreRequestedOrientationOptProp;
     @NonNull
@@ -109,7 +108,8 @@ class AppCompatOrientationOverrides {
         mOrientationOverridesState.updateOrientationRequestLoopState();
 
         return mOrientationOverridesState.shouldIgnoreRequestInLoop()
-                && !mActivityRecord.isLetterboxedForFixedOrientationAndAspectRatio();
+                && !mActivityRecord.mAppCompatController.getAppCompatAspectRatioPolicy()
+                    .isLetterboxedForFixedOrientationAndAspectRatio();
     }
 
     /**

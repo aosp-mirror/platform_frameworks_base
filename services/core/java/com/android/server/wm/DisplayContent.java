@@ -1754,6 +1754,82 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mDisplayRotation.updateOrientation(orientation, forceUpdate);
     }
 
+    @Nullable
+    private ActivityRecord getLastOrientationSourceApp() {
+        final WindowContainer<?> orientationSrc = getLastOrientationSource();
+        return orientationSrc != null ? orientationSrc.asActivityRecord() : null;
+    }
+
+    /**
+     * This is called when the display rotation is changed. If the current top activity which
+     * decides the display orientation is not opaque, all non-top visible activities with
+     * different fixed orientations will still keep their original appearances.
+     */
+    void applyFixedRotationForNonTopVisibleActivityIfNeeded() {
+        if (!mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
+            return;
+        }
+        final ActivityRecord orientationSrcApp = getLastOrientationSourceApp();
+        if (orientationSrcApp == null || orientationSrcApp.fillsParent()) {
+            return;
+        }
+        final int topOrientation = orientationSrcApp.getRequestedOrientation();
+        if (topOrientation == SCREEN_ORIENTATION_UNSPECIFIED) {
+            return;
+        }
+        forAllActivities(ar -> {
+            if (!ar.isVisibleRequested()) {
+                return true;
+            }
+            applyFixedRotationForNonTopVisibleActivityIfNeeded(ar, topOrientation);
+            return false;
+        }, true /* traverseTopToBottom */);
+    }
+
+    /**
+     * This is called when a non-top activity becomes visible. Such when moving a task which
+     * contains 2 activities with different fixed orientations, and if the top one is translucent,
+     * then the bottom one will apply the fixed rotation transform for its orientation.
+     */
+    void applyFixedRotationForNonTopVisibleActivityIfNeeded(@NonNull ActivityRecord ar) {
+        if (!mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
+            return;
+        }
+        final ActivityRecord orientationSrcApp = getLastOrientationSourceApp();
+        if (orientationSrcApp != null) {
+            applyFixedRotationForNonTopVisibleActivityIfNeeded(ar,
+                    orientationSrcApp.getRequestedOrientation());
+        }
+    }
+
+    /**
+     * If the given visible activity uses a different fixed orientation than the current top, the
+     * fixed rotation transform will be applied to respect its requested appearance.
+     */
+    private void applyFixedRotationForNonTopVisibleActivityIfNeeded(@NonNull ActivityRecord ar,
+            @ActivityInfo.ScreenOrientation int topOrientation) {
+        final int orientation = ar.getRequestedOrientation();
+        if (orientation == topOrientation || ar.inMultiWindowMode()
+                || ar.getRequestedConfigurationOrientation() == ORIENTATION_UNDEFINED) {
+            return;
+        }
+        final int displayRotation = getRotation();
+        final int rotation = ar.isVisible()
+                ? ar.getWindowConfiguration().getDisplayRotation()
+                : mDisplayRotation.rotationForOrientation(orientation, displayRotation);
+        if (rotation == displayRotation) {
+            return;
+        }
+        startFixedRotationTransform(ar, rotation);
+        final WindowState wallpaperTarget = mWallpaperController.getWallpaperTarget();
+        if (wallpaperTarget != null && wallpaperTarget.mActivityRecord == ar) {
+            final WindowState wp = mWallpaperController.getTopVisibleWallpaper();
+            if (wp != null) {
+                wp.mToken.linkFixedRotationTransform(ar);
+            }
+        }
+    }
+
     @Override
     boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
         // Do not consider children because if they are requested to be synced, they should be
@@ -1822,10 +1898,23 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return false;
         }
         if (r.hasFixedRotationTransform()) {
+            if (mWmService.mFlags.mRespectNonTopVisibleFixedOrientation
+                    && mFixedRotationLaunchingApp == null) {
+                // It could be finishing the previous top translucent activity, and the next fixed
+                // orientation activity becomes the current top.
+                setFixedRotationLaunchingAppUnchecked(r,
+                        r.getWindowConfiguration().getDisplayRotation());
+            }
             // It has been set and not yet finished.
             return true;
         }
-        if (!r.occludesParent() || r.isReportedDrawn()) {
+        if (mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
+            if (r.isReportedDrawn()) {
+                // It is late for a drawn app. Either this is already a stable state or it needs
+                // a rotation animation to handle the change.
+                return false;
+            }
+        } else if (!r.occludesParent() || r.isReportedDrawn()) {
             // While entering or leaving a translucent or floating activity (e.g. dialog style),
             // there is a visible activity in the background. Then it still needs rotation animation
             // to cover the activity configuration change.
@@ -6923,7 +7012,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // In most cases this is a no-op if the activity doesn't have fixed rotation.
                 // Otherwise it could be from finishing recents animation while the display has
                 // different orientation.
-                r.finishFixedRotationTransform();
+                if (!mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
+                    r.finishFixedRotationTransform();
+                } else if (!r.isVisible()) {
+                    r.finishFixedRotationTransform();
+                }
                 return;
             }
             if (mFixedRotationLaunchingApp.hasFixedRotationTransform(r)) {
@@ -6938,7 +7031,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // E.g. activity A transferred starting window to B, only A will receive transition
                 // finished event. A doesn't have fixed rotation but B is the rotated launching app.
                 final Task task = r.getTask();
-                if (task == null || task != mFixedRotationLaunchingApp.getTask()) {
+                if (task != mFixedRotationLaunchingApp.getTask()
+                        // When closing a translucent task A (r.fillsParent() is false) to a
+                        // visible task B, because only A has visibility change, there is only A's
+                        // transition callback. Then it still needs to update orientation for B.
+                        && (!mWmService.mFlags.mRespectNonTopVisibleFixedOrientation
+                                || r.fillsParent())) {
                     // Different tasks won't be in one activity transition animation.
                     return;
                 }

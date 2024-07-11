@@ -662,13 +662,9 @@ constructor(
     @VisibleForTesting
     internal fun listenForAnyStateToGoneKeyguardTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            if (SceneContainerFlag.isEnabled) {
-                    sceneInteractor.transitionState.filter { it.isIdle(Scenes.Gone) }
-                } else {
-                    keyguardTransitionInteractor.transition(Edge.create(to = GONE)).filter {
-                        it.transitionState == TransitionState.FINISHED
-                    }
-                }
+            keyguardTransitionInteractor
+                .isFinishedIn(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
+                .filter { it }
                 .collect {
                     showMediaCarousel()
                     updateHostVisibility()

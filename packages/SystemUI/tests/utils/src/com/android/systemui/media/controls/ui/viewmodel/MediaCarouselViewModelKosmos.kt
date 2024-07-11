@@ -23,6 +23,7 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.media.controls.domain.pipeline.interactor.factory.mediaControlInteractorFactory
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
+import com.android.systemui.media.controls.shared.mediaLogger
 import com.android.systemui.media.controls.util.mediaFlags
 import com.android.systemui.media.controls.util.mediaUiEventLogger
 import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
@@ -40,5 +41,6 @@ val Kosmos.mediaCarouselViewModel by
             recommendationsViewModel = mediaRecommendationsViewModel,
             logger = mediaUiEventLogger,
             mediaFlags = mediaFlags,
+            mediaLogger = mediaLogger,
         )
     }

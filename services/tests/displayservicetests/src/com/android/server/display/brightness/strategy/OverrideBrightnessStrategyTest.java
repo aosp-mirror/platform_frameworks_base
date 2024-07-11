@@ -55,7 +55,6 @@ public class OverrideBrightnessStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(overrideBrightness)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(overrideBrightness)
                         .setDisplayBrightnessStrategyName(mOverrideBrightnessStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =

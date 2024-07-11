@@ -8658,8 +8658,7 @@ public class NotificationManagerService extends SystemService {
                     mAttentionHelper.updateLightsLocked();
                     if (mShortcutHelper != null) {
                         mShortcutHelper.maybeListenForShortcutChangesForBubbles(r,
-                                true /* isRemoved */,
-                                mHandler);
+                                true /* isRemoved */);
                     }
                 } else {
                     if (notificationForceGrouping()) {
@@ -9116,8 +9115,7 @@ public class NotificationManagerService extends SystemService {
 
                     if (mShortcutHelper != null) {
                         mShortcutHelper.maybeListenForShortcutChangesForBubbles(r,
-                                false /* isRemoved */,
-                                mHandler);
+                                false /* isRemoved */);
                     }
 
                     maybeRecordInterruptionLocked(r);

@@ -801,8 +801,9 @@ final class InstallPackageHelper {
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityLaunchAllowed(false);
-            target.sendIntent(context, 0, fillIn, null /* onFinished*/, null /* handler */,
-                    null /* requiredPermission */, options.toBundle());
+            target.sendIntent(context, 0, fillIn,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }

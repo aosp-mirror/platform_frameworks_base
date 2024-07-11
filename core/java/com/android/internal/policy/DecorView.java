@@ -109,6 +109,7 @@ import com.android.internal.view.menu.MenuHelper;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.BackgroundFallback;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
+import com.android.window.flags.Flags;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -1193,7 +1194,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         // If we should always consume system bars, only consume that if the app wanted to go to
         // fullscreen, as otherwise we can expect the app to handle it.
         boolean fullscreen = (sysUiVisibility & SYSTEM_UI_FLAG_FULLSCREEN) != 0
-                || (attrs.flags & FLAG_FULLSCREEN) != 0
+                || (attrs.flags & FLAG_FULLSCREEN) != 0;
+        final boolean hideStatusBar = fullscreen
                 || (requestedVisibleTypes & WindowInsets.Type.statusBars()) == 0;
         boolean consumingStatusBar =
                 ((sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) == 0
@@ -1203,9 +1205,20 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                         && mForceWindowDrawsBarBackgrounds
                         && mLastTopInset != 0)
                 || ((mLastForceConsumingTypes & WindowInsets.Type.statusBars()) != 0
-                        && fullscreen);
+                        && hideStatusBar);
 
-        int consumedTop = consumingStatusBar ? mLastTopInset : 0;
+        final boolean hideCaptionBar = fullscreen
+                || (requestedVisibleTypes & WindowInsets.Type.captionBar()) == 0;
+        final boolean consumingCaptionBar =
+                ((mLastForceConsumingTypes & WindowInsets.Type.captionBar()) != 0
+                        && hideCaptionBar);
+
+        final int consumedTop;
+        if (Flags.enableCaptionCompatInsetForceConsumption()) {
+            consumedTop = (consumingStatusBar || consumingCaptionBar) ? mLastTopInset : 0;
+        } else {
+            consumedTop = consumingStatusBar ? mLastTopInset : 0;
+        }
         int consumedRight = consumingNavBar ? mLastRightInset : 0;
         int consumedBottom = consumingNavBar ? mLastBottomInset : 0;
         int consumedLeft = consumingNavBar ? mLastLeftInset : 0;

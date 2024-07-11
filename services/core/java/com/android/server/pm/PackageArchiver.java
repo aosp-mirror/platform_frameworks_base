@@ -1194,8 +1194,9 @@ public class PackageArchiver {
                 MODE_BACKGROUND_ACTIVITY_START_DENIED);
         for (IntentSender intentSender : unarchiveIntentSenders) {
             try {
-                intentSender.sendIntent(mContext, 0, broadcastIntent, /* onFinished= */ null,
-                        /* handler= */ null, /* requiredPermission= */ null, options.toBundle());
+                intentSender.sendIntent(mContext, 0, broadcastIntent,
+                        /* requiredPermission */ null, options.toBundle(),
+                        /* executor */ null, /* onFinished */ null);
             } catch (IntentSender.SendIntentException e) {
                 Slog.e(TAG, TextUtils.formatSimple("Failed to send unarchive intent"), e);
             } finally {
@@ -1328,8 +1329,9 @@ public class PackageArchiver {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityStartMode(
                     MODE_BACKGROUND_ACTIVITY_START_DENIED);
-            statusReceiver.sendIntent(mContext, 0, intent, /* onFinished= */ null,
-                    /* handler= */ null, /* requiredPermission= */ null, options.toBundle());
+            statusReceiver.sendIntent(mContext, 0, intent,
+                    /* requiredPermission */ null, options.toBundle(),
+                    /* executor */ null, /* onFinished */ null);
         } catch (IntentSender.SendIntentException e) {
             Slog.e(
                     TAG,

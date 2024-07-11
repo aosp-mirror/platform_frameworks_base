@@ -436,8 +436,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Κάνει κάθε εφαρμογή κατάλληλη για εγγραφή σε εξωτερικό αποθηκευτικό χώρο, ανεξάρτητα από τις τιμές του μανιφέστου"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Αναγκαστική δυνατότητα αλλαγής μεγέθους δραστηριοτήτων"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Να έχουν όλες οι δραστηριότητες δυνατότητα αλλαγής μεγέθους για την προβολή πολλαπλών παραθύρων, ανεξάρτητα από τις τιμές του μανιφέστου."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Ενεργοποίηση παραθύρων ελεύθερης μορφής"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Ενεργοποίηση υποστήριξης για πειραματικά παράθυρα ελεύθερης μορφής."</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"Ενεργ. παραθύρων ελεύθερης μορφής (παλαιού τύπου)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Ενεργοποίηση υποστήριξης για πειραματικά παράθυρα ελεύθερης μορφής παλαιού τύπου."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Εφ/κός κωδικός desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Τα πλήρη αντίγραφα ασφαλείας επιφάνειας εργασίας δεν προστατεύονται αυτή τη στιγμή"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Πατήστε για αλλαγή ή κατάργηση του κωδικού πρόσβασης για τα πλήρη αντίγραφα ασφαλείας επιφάνειας εργασίας"</string>

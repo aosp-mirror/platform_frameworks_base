@@ -1003,21 +1003,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         // THEN
         assertThat(row.isExpanded()).isFalse();
     }
-
-    @Test
-    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
-    public void hasUserChangedExpansion_expandPinned_returnTrue() throws Exception {
-        // GIVEN
-        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
-        row.setPinned(true);
-
-        // WHEN
-        row.expandNotification();
-
-        // THEN
-        assertThat(row.hasUserChangedExpansion()).isTrue();
-    }
-
     @Test
     public void onDisappearAnimationFinished_shouldSetFalse_headsUpAnimatingAway()
             throws Exception {

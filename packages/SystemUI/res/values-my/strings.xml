@@ -476,8 +476,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"နောက်ထပ်ဝိဂျက်များ ထည့်ရန်"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ဝိဂျက်များ စိတ်ကြိုက်လုပ်ရန် ကြာကြာနှိပ်ထားပါ"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ဝိဂျက်များကို စိတ်ကြိုက်လုပ်ရန်"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"ဝိဂျက်များ စိတ်ကြိုက်လုပ်ရန် ဖွင့်နိုင်သည်"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"ပိတ်ထားသော ဝိဂျက်အတွက် အက်ပ်သင်္ကေတ"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"ထည့်သွင်းနေသော ဝိဂျက်အတွက် အက်ပ်သင်္ကေတ"</string>
     <string name="edit_widget" msgid="9030848101135393954">"ဝိဂျက်ပြင်ရန်"</string>
@@ -1375,6 +1374,8 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
     <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ပြန်သွားရန်"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"ပြန်သွားရန်အတွက် တာ့ချ်ပက်တွင် မည်သည့်နေရာ၌မဆို လက်သုံးချောင်းသုံး၍ ဘယ် (သို့) ညာသို့ ပွတ်ဆွဲပါ။"</string>
