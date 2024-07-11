@@ -734,19 +734,6 @@ public final class ActivityThread extends ClientTransactionHandler
                             activityWindowInfo,
                             false /* alwaysReportChange */);
                 }
-
-                @Override
-                public void requestCompatCameraControl(boolean showControl,
-                        boolean transformationApplied, ICompatCameraControlCallback callback) {
-                    if (activity == null) {
-                        throw new IllegalStateException(
-                                "Received camera compat control update for non-existing activity");
-                    }
-                    ActivityClient.getInstance().requestCompatCameraControl(
-                            activity.getResources(), token, showControl, transformationApplied,
-                            callback);
-                }
-
             };
         }
 

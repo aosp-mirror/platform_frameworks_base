@@ -136,8 +136,7 @@ public class AppCompatTaskInfo implements Parcelable {
      * @return {@value true} if the task has some compat ui.
      */
     public boolean hasCompatUI() {
-        return cameraCompatTaskInfo.hasCameraCompatUI() || topActivityInSizeCompat
-                || topActivityEligibleForLetterboxEducation
+        return topActivityInSizeCompat || topActivityEligibleForLetterboxEducation
                 || isLetterboxDoubleTapEnabled
                 || topActivityEligibleForUserAspectRatioButton;
     }

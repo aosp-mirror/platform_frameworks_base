@@ -296,9 +296,6 @@
     <!-- The width of the compat hint. -->
     <dimen name="compat_hint_width">188dp</dimen>
 
-    <!-- The width of the camera compat hint. -->
-    <dimen name="camera_compat_hint_width">143dp</dimen>
-
     <!-- The corner radius of the letterbox education dialog. -->
     <dimen name="letterbox_education_dialog_corner_radius">28dp</dimen>
 
