@@ -382,6 +382,7 @@ public:
             PointerControllerInterface::ControllerType type) override;
     void notifyPointerDisplayIdChanged(ui::LogicalDisplayId displayId,
                                        const FloatPoint& position) override;
+    void notifyMouseCursorFadedOnTyping() override;
 
     /* --- InputFilterPolicyInterface implementation --- */
     void notifyStickyModifierStateChanged(uint32_t modifierState,
@@ -786,6 +787,10 @@ void NativeInputManager::notifyPointerDisplayIdChanged(ui::LogicalDisplayId poin
     } // release lock
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::Change::DISPLAY_INFO);
+}
+
+void NativeInputManager::notifyMouseCursorFadedOnTyping() {
+    mInputManager->getReader().notifyMouseCursorFadedOnTyping();
 }
 
 void NativeInputManager::notifyStickyModifierStateChanged(uint32_t modifierState,
