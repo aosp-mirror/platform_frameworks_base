@@ -44,7 +44,6 @@ flag {
     namespace: "profile_experiences"
     description: "Guards a new Private Profile type in UserManager - everything from its setup to config to deletion."
     bug: "299069460"
-    is_exported: true
 }
 
 flag {
