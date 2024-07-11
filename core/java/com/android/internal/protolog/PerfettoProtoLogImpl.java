@@ -205,10 +205,11 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
 
     @Override
     public void toggleLogcat(boolean enabled, String[] groups) {
+        final ILogger logger = (message) -> Log.d(LOG_TAG, message);
         if (enabled) {
-            startLoggingToLogcat(groups, null);
+            startLoggingToLogcat(groups, logger);
         } else {
-            stopLoggingToLogcat(groups, null);
+            stopLoggingToLogcat(groups, logger);
         }
     }
 
@@ -218,7 +219,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
      * @param logger A logger to write status updates to
      * @return status code
      */
-    public int startLoggingToLogcat(String[] groups, ILogger logger) {
+    public int startLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
         if (mViewerConfigReader != null) {
             mViewerConfigReader.loadViewerConfig(groups, logger);
         }
@@ -231,7 +232,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
      * @param logger A logger to write status updates to
      * @return status code
      */
-    public int stopLoggingToLogcat(String[] groups, ILogger logger) {
+    public int stopLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
         if (mViewerConfigReader != null) {
             mViewerConfigReader.unloadViewerConfig(groups, logger);
         }
