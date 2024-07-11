@@ -18,6 +18,8 @@ package com.android.wm.shell.windowdecor;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.statusBars;
@@ -54,6 +56,8 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
 import android.view.AttachedSurfaceControl;
@@ -71,6 +75,7 @@ import android.window.WindowContainerTransaction;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
@@ -80,6 +85,7 @@ import com.android.wm.shell.tests.R;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -104,6 +110,9 @@ public class WindowDecorationTests extends ShellTestCase {
     private static final Point TASK_POSITION_IN_PARENT = new Point(40, 60);
     private static final int CORNER_RADIUS = 20;
     private static final int STATUS_BAR_INSET_SOURCE_ID = 0;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     private final WindowDecoration.RelayoutResult<TestView> mRelayoutResult =
             new WindowDecoration.RelayoutResult<>();
@@ -260,7 +269,8 @@ public class WindowDecorationTests extends ShellTestCase {
                 eq(0 /* index */),
                 eq(WindowInsets.Type.captionBar()),
                 eq(new Rect(100, 300, 400, 364)),
-                any());
+                any(),
+                anyInt());
 
         verify(mMockSurfaceControlStartT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
         verify(mMockSurfaceControlFinishT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
@@ -565,9 +575,9 @@ public class WindowDecorationTests extends ShellTestCase {
         windowDecor.relayout(taskInfo);
 
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(captionBar()), any(), any());
+                eq(0) /* index */, eq(captionBar()), any(), any(), anyInt());
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any());
+                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any(), anyInt());
     }
 
     @Test
@@ -654,9 +664,9 @@ public class WindowDecorationTests extends ShellTestCase {
 
         // Never added.
         verify(mMockWindowContainerTransaction, never()).addInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(captionBar()), any(), any());
+                eq(0) /* index */, eq(captionBar()), any(), any(), anyInt());
         verify(mMockWindowContainerTransaction, never()).addInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any());
+                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any(), anyInt());
         // No need to remove them if they were never added.
         verify(mMockWindowContainerTransaction, never()).removeInsetsSource(eq(taskInfo.token),
                 any(), eq(0) /* index */, eq(captionBar()));
@@ -681,9 +691,9 @@ public class WindowDecorationTests extends ShellTestCase {
         mInsetsState.getOrCreateSource(STATUS_BAR_INSET_SOURCE_ID, captionBar()).setVisible(true);
         windowDecor.relayout(taskInfo);
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(captionBar()), any(), any());
+                eq(0) /* index */, eq(captionBar()), any(), any(), anyInt());
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any());
+                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any(), anyInt());
 
         windowDecor.close();
 
@@ -738,9 +748,9 @@ public class WindowDecorationTests extends ShellTestCase {
 
         // Insets should be applied twice.
         verify(mMockWindowContainerTransaction, times(2)).addInsetsSource(eq(token), any(),
-                eq(0) /* index */, eq(captionBar()), any(), any());
+                eq(0) /* index */, eq(captionBar()), any(), any(), anyInt());
         verify(mMockWindowContainerTransaction, times(2)).addInsetsSource(eq(token), any(),
-                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any());
+                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any(), anyInt());
     }
 
     @Test
@@ -765,9 +775,30 @@ public class WindowDecorationTests extends ShellTestCase {
 
         // Insets should only need to be applied once.
         verify(mMockWindowContainerTransaction, times(1)).addInsetsSource(eq(token), any(),
-                eq(0) /* index */, eq(captionBar()), any(), any());
+                eq(0) /* index */, eq(captionBar()), any(), any(), anyInt());
         verify(mMockWindowContainerTransaction, times(1)).addInsetsSource(eq(token), any(),
-                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any());
+                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION)
+    public void testRelayout_captionInsetForceConsume() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController)
+                .getDisplay(Display.DEFAULT_DISPLAY);
+        final WindowContainerToken token = TestRunningTaskInfoBuilder.createMockWCToken();
+        final TestRunningTaskInfoBuilder builder = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setVisible(true);
+
+        final ActivityManager.RunningTaskInfo taskInfo =
+                builder.setToken(token).setBounds(new Rect(0, 0, 1000, 1000)).build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+        windowDecor.relayout(taskInfo);
+
+        // Caption inset source should be force-consuming.
+        verify(mMockWindowContainerTransaction).addInsetsSource(eq(token), any(),
+                eq(0) /* index */, eq(captionBar()), any(), any(), eq(FLAG_FORCE_CONSUMING));
     }
 
     @Test

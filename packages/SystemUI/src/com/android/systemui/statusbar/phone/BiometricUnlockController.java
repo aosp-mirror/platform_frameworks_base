@@ -53,11 +53,14 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.BiometricUnlockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource;
+import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
+import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -327,14 +330,17 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mSelectedUserInteractor = selectedUserInteractor;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         javaAdapter.alwaysCollectFlow(
-                keyguardTransitionInteractor.getStartedKeyguardTransitionStep(),
-                this::consumeTransitionStepOnStartedKeyguardState);
+                keyguardTransitionInteractor.transition(
+                        /* edge */ Edge.create(Scenes.Gone, null),
+                        /* edgeWithoutSceneContainer */ Edge.create(
+                                KeyguardState.GONE, (KeyguardState) null)),
+                this::consumeFromGoneTransitions);
         dumpManager.registerDumpable(this);
     }
 
     @VisibleForTesting
-    protected void consumeTransitionStepOnStartedKeyguardState(TransitionStep transitionStep) {
-        if (transitionStep.getFrom() == KeyguardState.GONE) {
+    protected void consumeFromGoneTransitions(TransitionStep transitionStep) {
+        if (transitionStep.getTransitionState() == TransitionState.STARTED) {
             mBiometricUnlockInteractor.setBiometricUnlockState(MODE_NONE, null);
         }
     }

@@ -613,11 +613,12 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord root = task.getTopNonFinishingActivity();
         spyOn(mWm.mLetterboxConfiguration);
         spyOn(root);
-        spyOn(root.mLetterboxUiController);
+        spyOn(root.mAppCompatController.getAppCompatAspectRatioOverrides());
 
         doReturn(true).when(root).fillsParent();
-        doReturn(true).when(root.mLetterboxUiController)
-                .shouldEnableUserAspectRatioSettings();
+        doReturn(true).when(
+                root.mAppCompatController.getAppCompatAspectRatioOverrides())
+                    .shouldEnableUserAspectRatioSettings();
         doReturn(false).when(root).inSizeCompatMode();
         doReturn(task).when(root).getOrganizedTask();
 
@@ -626,12 +627,13 @@ public class TaskTests extends WindowTestsBase {
                 .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
 
         // When shouldApplyUserMinAspectRatioOverride is disable the button is not enabled
-        doReturn(false).when(root.mLetterboxUiController)
-                .shouldEnableUserAspectRatioSettings();
+        doReturn(false).when(
+                root.mAppCompatController.getAppCompatAspectRatioOverrides())
+                    .shouldEnableUserAspectRatioSettings();
         assertFalse(task.getTaskInfo()
                 .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
-        doReturn(true).when(root.mLetterboxUiController)
-                .shouldEnableUserAspectRatioSettings();
+        doReturn(true).when(root.mAppCompatController
+                .getAppCompatAspectRatioOverrides()).shouldEnableUserAspectRatioSettings();
 
         // When in size compat mode the button is not enabled
         doReturn(true).when(root).inSizeCompatMode();

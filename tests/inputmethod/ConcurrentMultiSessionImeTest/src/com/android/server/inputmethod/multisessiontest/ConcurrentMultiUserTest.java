@@ -23,10 +23,15 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.compatibility.common.util.concurrentuser.ConcurrentUserActivityUtils.getResponderUserId;
 import static com.android.compatibility.common.util.concurrentuser.ConcurrentUserActivityUtils.launchActivityAsUserSync;
 import static com.android.compatibility.common.util.concurrentuser.ConcurrentUserActivityUtils.sendBundleAndWaitForReply;
+import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.KEY_DISPLAY_ID;
+import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.KEY_EDITTEXT_CENTER;
+import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.KEY_IME_SHOWN;
 import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.KEY_REQUEST_CODE;
-import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.KEY_RESULT_CODE;
-import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.REPLY_IME_HIDDEN;
+import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.REQUEST_DISPLAY_ID;
+import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.REQUEST_EDITTEXT_POSITION;
+import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.REQUEST_HIDE_IME;
 import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.REQUEST_IME_STATUS;
+import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.REQUEST_SHOW_IME;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -66,6 +71,7 @@ public final class ConcurrentMultiUserTest {
     private static final ComponentName TEST_ACTIVITY = new ComponentName(
             getInstrumentation().getTargetContext().getPackageName(),
             MainActivity.class.getName());
+    private static final long WAIT_TIME_MS = 3000L;
     private final Context mContext = getInstrumentation().getTargetContext();
     private final InputMethodManager mInputMethodManager =
             mContext.getSystemService(InputMethodManager.class);
@@ -96,12 +102,39 @@ public final class ConcurrentMultiUserTest {
     }
 
     @Test
-    public void driverShowImeNotAffectPassenger() {
+    public void driverShowImeNotAffectPassenger() throws Exception {
         assertDriverImeHidden();
         assertPassengerImeHidden();
 
         showDriverImeAndAssert();
         assertPassengerImeHidden();
+    }
+
+    @Test
+    public void passengerShowImeNotAffectDriver() throws Exception {
+        assertDriverImeHidden();
+        assertPassengerImeHidden();
+
+        showPassengerImeAndAssert();
+        assertDriverImeHidden();
+    }
+
+    @Test
+    public void driverHideImeNotAffectPassenger() throws Exception {
+        showDriverImeAndAssert();
+        showPassengerImeAndAssert();
+
+        hideDriverImeAndAssert();
+        assertPassengerImeShown();
+    }
+
+    @Test
+    public void passengerHideImeNotAffectDriver() throws Exception {
+        showDriverImeAndAssert();
+        showPassengerImeAndAssert();
+
+        hidePassengerImeAndAssert();
+        assertDriverImeShown();
     }
 
     @Test
@@ -156,6 +189,11 @@ public final class ConcurrentMultiUserTest {
         setImeForUser(passenger, driver);
     }
 
+    private void assertDriverImeShown() {
+        assertWithMessage("Driver IME should be shown")
+                .that(mActivity.isMyImeVisible()).isTrue();
+    }
+
     private void assertDriverImeHidden() {
         assertWithMessage("Driver IME should be hidden")
                 .that(mActivity.isMyImeVisible()).isFalse();
@@ -167,11 +205,77 @@ public final class ConcurrentMultiUserTest {
         Bundle receivedBundle = sendBundleAndWaitForReply(TEST_ACTIVITY.getPackageName(),
                 mPeerUserId, bundleToSend);
         assertWithMessage("Passenger IME should be hidden")
-                .that(receivedBundle.getInt(KEY_RESULT_CODE)).isEqualTo(REPLY_IME_HIDDEN);
+                .that(receivedBundle.getBoolean(KEY_IME_SHOWN, /* defaultValue= */ true)).isFalse();
     }
 
-    private void showDriverImeAndAssert() {
+    private void assertPassengerImeShown() {
+        final Bundle bundleToSend = new Bundle();
+        bundleToSend.putInt(KEY_REQUEST_CODE, REQUEST_IME_STATUS);
+        Bundle receivedBundle = sendBundleAndWaitForReply(TEST_ACTIVITY.getPackageName(),
+                mPeerUserId, bundleToSend);
+        assertWithMessage("Passenger IME should be shown")
+                .that(receivedBundle.getBoolean(KEY_IME_SHOWN)).isTrue();
+    }
+
+    private void showDriverImeAndAssert() throws Exception {
+        //  WindowManagerInternal only allows the top focused display to show IME, so this method
+        //  taps the driver display in case it is not the top focused display.
+        moveDriverDisplayToTop();
+
         mActivity.showMyImeAndWait();
+    }
+
+    private void hideDriverImeAndAssert() {
+        mActivity.hideMyImeAndWait();
+    }
+
+    private void showPassengerImeAndAssert() throws Exception {
+        // WindowManagerInternal only allows the top focused display to show IME, so this method
+        // taps the passenger display in case it is not the top focused display.
+        movePassengerDisplayToTop();
+
+        Bundle bundleToSend = new Bundle();
+        bundleToSend.putInt(KEY_REQUEST_CODE, REQUEST_SHOW_IME);
+        Bundle receivedBundle = sendBundleAndWaitForReply(TEST_ACTIVITY.getPackageName(),
+                mPeerUserId, bundleToSend);
+
+        assertWithMessage("Passenger IME should be shown")
+                .that(receivedBundle.getBoolean(KEY_IME_SHOWN)).isTrue();
+    }
+
+    private void hidePassengerImeAndAssert() {
+        Bundle bundleToSend = new Bundle();
+        bundleToSend.putInt(KEY_REQUEST_CODE, REQUEST_HIDE_IME);
+        Bundle receivedBundle = sendBundleAndWaitForReply(TEST_ACTIVITY.getPackageName(),
+                mPeerUserId, bundleToSend);
+
+        assertWithMessage("Passenger IME should be hidden")
+                .that(receivedBundle.getBoolean(KEY_IME_SHOWN, /* defaultValue= */ true)).isFalse();
+    }
+
+    private void moveDriverDisplayToTop() throws Exception {
+        float[] driverEditTextCenter = mActivity.getEditTextCenter();
+        SystemUtil.runShellCommand(mUiAutomation, String.format("input tap %f %f",
+                driverEditTextCenter[0], driverEditTextCenter[1]));
+        // TODO(b/350562427): get rid of Thread.sleep().
+        Thread.sleep(WAIT_TIME_MS);
+    }
+
+    private void movePassengerDisplayToTop() throws Exception {
+        final Bundle bundleToSend = new Bundle();
+        bundleToSend.putInt(KEY_REQUEST_CODE, REQUEST_EDITTEXT_POSITION);
+        Bundle receivedBundle = sendBundleAndWaitForReply(TEST_ACTIVITY.getPackageName(),
+                mPeerUserId, bundleToSend);
+        final float[] passengerEditTextCenter = receivedBundle.getFloatArray(KEY_EDITTEXT_CENTER);
+
+        bundleToSend.putInt(KEY_REQUEST_CODE, REQUEST_DISPLAY_ID);
+        receivedBundle = sendBundleAndWaitForReply(TEST_ACTIVITY.getPackageName(),
+                mPeerUserId, bundleToSend);
+        final int passengerDisplayId = receivedBundle.getInt(KEY_DISPLAY_ID);
+        SystemUtil.runShellCommand(mUiAutomation, String.format("input -d %d tap %f %f",
+                passengerDisplayId, passengerEditTextCenter[0], passengerEditTextCenter[1]));
+        // TODO(b/350562427): get rid of Thread.sleep().
+        Thread.sleep(WAIT_TIME_MS);
     }
 
     /**

@@ -684,7 +684,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Asserts fixed orientation request is not ignored, and the orientation is changed.
         assertNotEquals(activityCurOrientation, activity.getConfiguration().orientation);
-        assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertTrue(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
     @Test
@@ -717,7 +718,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Relaunching the app should still respect the orientation request.
         assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
-        assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertTrue(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
     @Test

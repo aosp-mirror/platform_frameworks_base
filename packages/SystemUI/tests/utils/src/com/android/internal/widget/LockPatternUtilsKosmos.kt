@@ -16,14 +16,7 @@
 
 package com.android.internal.widget
 
-import android.app.admin.devicePolicyManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 
-var Kosmos.lockPatternUtils by
-    Kosmos.Fixture {
-        mock<LockPatternUtils>().apply {
-            whenever(this.devicePolicyManager).thenReturn(this@Fixture.devicePolicyManager)
-        }
-    }
+var Kosmos.lockPatternUtils by Kosmos.Fixture { mock<LockPatternUtils>() }

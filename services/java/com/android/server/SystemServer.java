@@ -381,6 +381,9 @@ public final class SystemServer implements Dumpable {
                     + "OnDevicePersonalizationSystemService$Lifecycle";
     private static final String UPDATABLE_DEVICE_CONFIG_SERVICE_CLASS =
             "com.android.server.deviceconfig.DeviceConfigInit$Lifecycle";
+    private static final String CRASHRECOVERY_MODULE_LIFECYCLE_CLASS =
+            "com.android.server.crashrecovery.CrashRecoveryModule$Lifecycle";
+
 
     /*
      * Implementation class names and jar locations for services in
@@ -1196,14 +1199,17 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(RecoverySystemService.Lifecycle.class);
         t.traceEnd();
 
-        // Initialize RescueParty.
-        RescueParty.registerHealthObserver(mSystemContext);
-        if (!Flags.recoverabilityDetection()) {
-            // Now that we have the bare essentials of the OS up and running, take
-            // note that we just booted, which might send out a rescue party if
-            // we're stuck in a runtime restart loop.
-            PackageWatchdog.getInstance(mSystemContext).noteBoot();
+        if (!Flags.refactorCrashrecovery()) {
+            // Initialize RescueParty.
+            RescueParty.registerHealthObserver(mSystemContext);
+            if (!Flags.recoverabilityDetection()) {
+                // Now that we have the bare essentials of the OS up and running, take
+                // note that we just booted, which might send out a rescue party if
+                // we're stuck in a runtime restart loop.
+                PackageWatchdog.getInstance(mSystemContext).noteBoot();
+            }
         }
+
 
         // Manages LEDs and display backlight so we need it to bring up the display.
         t.traceBegin("StartLightsService");
@@ -2931,12 +2937,18 @@ public final class SystemServer implements Dumpable {
         mPackageManagerService.systemReady();
         t.traceEnd();
 
-        if (Flags.recoverabilityDetection()) {
-            // Now that we have the essential services needed for mitigations, register the boot
-            // with package watchdog.
-            // Note that we just booted, which might send out a rescue party if we're stuck in a
-            // runtime restart loop.
-            PackageWatchdog.getInstance(mSystemContext).noteBoot();
+        if (Flags.refactorCrashrecovery()) {
+            t.traceBegin("StartCrashRecoveryModule");
+            mSystemServiceManager.startService(CRASHRECOVERY_MODULE_LIFECYCLE_CLASS);
+            t.traceEnd();
+        } else {
+            if (Flags.recoverabilityDetection()) {
+                // Now that we have the essential services needed for mitigations, register the boot
+                // with package watchdog.
+                // Note that we just booted, which might send out a rescue party if we're stuck in a
+                // runtime restart loop.
+                PackageWatchdog.getInstance(mSystemContext).noteBoot();
+            }
         }
 
         t.traceBegin("MakeDisplayManagerServiceReady");

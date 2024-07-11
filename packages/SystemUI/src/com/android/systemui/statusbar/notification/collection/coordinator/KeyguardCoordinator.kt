@@ -125,7 +125,10 @@ constructor(
         // Whether or not keyguard is visible (or occluded).
         val isKeyguardPresent: Flow<Boolean> =
             keyguardTransitionInteractor
-                .transitionValue(Scenes.Gone, stateWithoutSceneContainer = KeyguardState.GONE)
+                .transitionValue(
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = KeyguardState.GONE,
+                )
                 .map { it == 0f }
                 .distinctUntilChanged()
                 .onEach { trackingUnseen -> logger.logTrackingUnseen(trackingUnseen) }

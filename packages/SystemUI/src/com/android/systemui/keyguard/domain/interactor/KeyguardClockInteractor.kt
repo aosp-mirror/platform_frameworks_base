@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 private val TAG = KeyguardClockInteractor::class.simpleName
+
 /** Manages and encapsulates the clock components of the lockscreen root view. */
 @SysUISingleton
 class KeyguardClockInteractor
@@ -77,16 +78,16 @@ constructor(
     val clockSize: StateFlow<ClockSize> =
         if (SceneContainerFlag.isEnabled) {
             combine(
-                    shadeInteractor.shadeMode,
+                    shadeInteractor.isShadeLayoutWide,
                     activeNotificationsInteractor.areAnyNotificationsPresent,
                     mediaCarouselInteractor.hasActiveMediaOrRecommendation,
                     keyguardInteractor.isDozing,
                     isOnAod,
-                ) { shadeMode, hasNotifs, hasMedia, isDozing, isOnAod ->
+                ) { isShadeLayoutWide, hasNotifs, hasMedia, isDozing, isOnAod ->
                     return@combine when {
                         keyguardClockRepository.shouldForceSmallClock && !isOnAod -> ClockSize.SMALL
-                        shadeMode == ShadeMode.Single && (hasNotifs || hasMedia) -> ClockSize.SMALL
-                        shadeMode == ShadeMode.Single -> ClockSize.LARGE
+                        !isShadeLayoutWide && (hasNotifs || hasMedia) -> ClockSize.SMALL
+                        !isShadeLayoutWide -> ClockSize.LARGE
                         hasMedia && !isDozing -> ClockSize.SMALL
                         else -> ClockSize.LARGE
                     }

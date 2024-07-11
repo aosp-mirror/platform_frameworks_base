@@ -293,6 +293,8 @@ public class DragLayout extends LinearLayout
                     int bgColor1 = getResizingBackgroundColor(taskInfo1).toArgb();
                     mDropZoneView1.setAppInfo(bgColor1, icon1);
                     mDropZoneView2.setAppInfo(bgColor1, icon1);
+                    mDropZoneView1.setForceIgnoreBottomMargin(false);
+                    mDropZoneView2.setForceIgnoreBottomMargin(false);
                     updateDropZoneSizes(null, null); // passing null splits the views evenly
                 } else {
                     // We use the first drop zone to show the fullscreen highlight, and don't need

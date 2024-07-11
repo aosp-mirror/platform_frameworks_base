@@ -168,6 +168,112 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         log(logLevel, group, new Message(messageString), args);
     }
 
+    /**
+     * SLog wrapper.
+     */
+    @VisibleForTesting
+    public void passToLogcat(String tag, LogLevel level, String message) {
+        switch (level) {
+            case DEBUG:
+                Slog.d(tag, message);
+                break;
+            case VERBOSE:
+                Slog.v(tag, message);
+                break;
+            case INFO:
+                Slog.i(tag, message);
+                break;
+            case WARN:
+                Slog.w(tag, message);
+                break;
+            case ERROR:
+                Slog.e(tag, message);
+                break;
+            case WTF:
+                Slog.wtf(tag, message);
+                break;
+        }
+    }
+
+    /**
+     * Returns {@code true} iff logging to proto is enabled.
+     */
+    public boolean isProtoEnabled() {
+        return mTracingInstances.get() > 0;
+    }
+
+    /**
+     * Start text logging
+     * @param groups Groups to start text logging for
+     * @param logger A logger to write status updates to
+     * @return status code
+     */
+    public int startLoggingToLogcat(String[] groups, ILogger logger) {
+        mViewerConfigReader.loadViewerConfig(logger);
+        return setTextLogging(true, logger, groups);
+    }
+
+    /**
+     * Stop text logging
+     * @param groups Groups to start text logging for
+     * @param logger A logger to write status updates to
+     * @return status code
+     */
+    public int stopLoggingToLogcat(String[] groups, ILogger logger) {
+        mViewerConfigReader.unloadViewerConfig();
+        return setTextLogging(false, logger, groups);
+    }
+
+    @Override
+    public boolean isEnabled(IProtoLogGroup group, LogLevel level) {
+        final int[] groupLevelCount = mLogLevelCounts.get(group);
+        return (groupLevelCount == null && mDefaultLogLevelCounts[level.ordinal()] > 0)
+                || (groupLevelCount != null && groupLevelCount[level.ordinal()] > 0)
+                || group.isLogToLogcat();
+    }
+
+    @Override
+    public void registerGroups(IProtoLogGroup... protoLogGroups) {
+        for (IProtoLogGroup protoLogGroup : protoLogGroups) {
+            mLogGroups.put(protoLogGroup.name(), protoLogGroup);
+        }
+    }
+
+    /**
+     * Responds to a shell command.
+     */
+    public int onShellCommand(ShellCommand shell) {
+        PrintWriter pw = shell.getOutPrintWriter();
+        String cmd = shell.getNextArg();
+        if (cmd == null) {
+            return unknownCommand(pw);
+        }
+        ArrayList<String> args = new ArrayList<>();
+        String arg;
+        while ((arg = shell.getNextArg()) != null) {
+            args.add(arg);
+        }
+        final ILogger logger = (msg) -> logAndPrintln(pw, msg);
+        String[] groups = args.toArray(new String[0]);
+        switch (cmd) {
+            case "start", "stop" -> {
+                pw.println("Command not supported. "
+                        + "Please start and stop ProtoLog tracing with Perfetto.");
+                return -1;
+            }
+            case "enable-text" -> {
+                mViewerConfigReader.loadViewerConfig(logger);
+                return setTextLogging(true, logger, groups);
+            }
+            case "disable-text" -> {
+                return setTextLogging(false, logger, groups);
+            }
+            default -> {
+                return unknownCommand(pw);
+            }
+        }
+    }
+
     private void log(LogLevel logLevel, IProtoLogGroup group, Message message,
             @Nullable Object[] args) {
         if (isProtoEnabled()) {
@@ -346,39 +452,12 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             } catch (IllegalArgumentException e) {
                 message = "FORMAT_ERROR \"" + messageString + "\", args=("
                         + String.join(
-                                ", ", Arrays.stream(args).map(Object::toString).toList()) + ")";
+                        ", ", Arrays.stream(args).map(Object::toString).toList()) + ")";
             }
         } else {
             message = messageString;
         }
         passToLogcat(tag, level, message);
-    }
-
-    /**
-     * SLog wrapper.
-     */
-    @VisibleForTesting
-    public void passToLogcat(String tag, LogLevel level, String message) {
-        switch (level) {
-            case DEBUG:
-                Slog.d(tag, message);
-                break;
-            case VERBOSE:
-                Slog.v(tag, message);
-                break;
-            case INFO:
-                Slog.i(tag, message);
-                break;
-            case WARN:
-                Slog.w(tag, message);
-                break;
-            case ERROR:
-                Slog.e(tag, message);
-                break;
-            case WTF:
-                Slog.wtf(tag, message);
-                break;
-        }
     }
 
     private void logToProto(LogLevel level, IProtoLogGroup logGroup, Message message, Object[] args,
@@ -627,66 +706,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return internMap.get(string);
     }
 
-    /**
-     * Returns {@code true} iff logging to proto is enabled.
-     */
-    public boolean isProtoEnabled() {
-        return mTracingInstances.get() > 0;
-    }
-
-    /**
-     * Start text logging
-     * @param groups Groups to start text logging for
-     * @param logger A logger to write status updates to
-     * @return status code
-     */
-    public int startLoggingToLogcat(String[] groups, ILogger logger) {
-        mViewerConfigReader.loadViewerConfig(logger);
-        return setTextLogging(true, logger, groups);
-    }
-
-    /**
-     * Stop text logging
-     * @param groups Groups to start text logging for
-     * @param logger A logger to write status updates to
-     * @return status code
-     */
-    public int stopLoggingToLogcat(String[] groups, ILogger logger) {
-        mViewerConfigReader.unloadViewerConfig();
-        return setTextLogging(false, logger, groups);
-    }
-
-    @Override
-    public boolean isEnabled(IProtoLogGroup group, LogLevel level) {
-        final int[] groupLevelCount = mLogLevelCounts.get(group);
-        return (groupLevelCount == null && mDefaultLogLevelCounts[level.ordinal()] > 0)
-                || (groupLevelCount != null && groupLevelCount[level.ordinal()] > 0)
-                || group.isLogToLogcat();
-    }
-
-    @Override
-    public void registerGroups(IProtoLogGroup... protoLogGroups) {
-        for (IProtoLogGroup protoLogGroup : protoLogGroups) {
-            mLogGroups.put(protoLogGroup.name(), protoLogGroup);
-        }
-    }
-
-    /**
-     * Start logging the stack trace of the when the log message happened for target groups
-     * @return status code
-     */
-    public int startLoggingStackTrace(String[] groups, ILogger logger) {
-        return -1;
-    }
-
-    /**
-     * Stop logging the stack trace of the when the log message happened for target groups
-     * @return status code
-     */
-    public int stopLoggingStackTrace() {
-        return -1;
-    }
-
     private int setTextLogging(boolean value, ILogger logger, String... groups) {
         for (int i = 0; i < groups.length; i++) {
             String group = groups[i];
@@ -701,41 +720,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
         mCacheUpdater.run();
         return 0;
-    }
-
-    /**
-     * Responds to a shell command.
-     */
-    public int onShellCommand(ShellCommand shell) {
-        PrintWriter pw = shell.getOutPrintWriter();
-        String cmd = shell.getNextArg();
-        if (cmd == null) {
-            return unknownCommand(pw);
-        }
-        ArrayList<String> args = new ArrayList<>();
-        String arg;
-        while ((arg = shell.getNextArg()) != null) {
-            args.add(arg);
-        }
-        final ILogger logger = (msg) -> logAndPrintln(pw, msg);
-        String[] groups = args.toArray(new String[0]);
-        switch (cmd) {
-            case "start", "stop" -> {
-                pw.println("Command not supported. "
-                        + "Please start and stop ProtoLog tracing with Perfetto.");
-                return -1;
-            }
-            case "enable-text" -> {
-                mViewerConfigReader.loadViewerConfig(logger);
-                return setTextLogging(true, logger, groups);
-            }
-            case "disable-text" -> {
-                return setTextLogging(false, logger, groups);
-            }
-            default -> {
-                return unknownCommand(pw);
-            }
-        }
     }
 
     private int unknownCommand(PrintWriter pw) {
@@ -822,7 +806,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         mCacheUpdater.run();
     }
 
-    static void logAndPrintln(@Nullable PrintWriter pw, String msg) {
+    private static void logAndPrintln(@Nullable PrintWriter pw, String msg) {
         Slog.i(LOG_TAG, msg);
         if (pw != null) {
             pw.println(msg);

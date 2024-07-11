@@ -16,8 +16,8 @@
 
 package android.inputmethodservice.navigationbar;
 
-import static android.inputmethodservice.navigationbar.NavigationBarConstants.BLACK;
-import static android.inputmethodservice.navigationbar.NavigationBarConstants.WHITE;
+import static android.inputmethodservice.navigationbar.NavigationBarConstants.DARK_MODE_ICON_COLOR_SINGLE_TONE;
+import static android.inputmethodservice.navigationbar.NavigationBarConstants.LIGHT_MODE_ICON_COLOR_SINGLE_TONE;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.NAVBAR_BACK_BUTTON_IME_OFFSET;
 import static android.inputmethodservice.navigationbar.NavigationBarUtils.dpToPx;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
@@ -83,8 +83,8 @@ public final class NavigationBarView extends FrameLayout {
         super(context, attrs);
 
         mLightContext = context;
-        mLightIconColor = WHITE;
-        mDarkIconColor = BLACK;
+        mLightIconColor = LIGHT_MODE_ICON_COLOR_SINGLE_TONE;
+        mDarkIconColor = DARK_MODE_ICON_COLOR_SINGLE_TONE;
 
         mConfiguration = new Configuration();
         mTmpLastConfiguration = new Configuration();

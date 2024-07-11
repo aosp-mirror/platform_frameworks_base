@@ -5034,8 +5034,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         final BroadcastOptions options = BroadcastOptions.makeBasic();
                         options.setPendingIntentBackgroundActivityLaunchAllowed(false);
                         pi.sendIntent(null, success ? 1 : 0, null /* intent */,
-                                null /* onFinished*/, null /* handler */,
-                                null /* requiredPermission */, options.toBundle());
+                                null /* requiredPermission */, options.toBundle(),
+                                null /* executor */, null /* onFinished*/);
                     } catch (SendIntentException e) {
                         Slog.w(TAG, e);
                     }

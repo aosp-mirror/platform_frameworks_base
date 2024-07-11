@@ -3927,7 +3927,12 @@ public class UserManager {
             android.Manifest.permission.QUERY_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public @NonNull UserProperties getUserProperties(@NonNull UserHandle userHandle) {
-        return mUserPropertiesCache.query(userHandle.getIdentifier());
+        final int userId = userHandle.getIdentifier();
+        // Avoid calling into system server for invalid user ids.
+        if (android.multiuser.Flags.fixGetUserPropertyCache() && userId < 0) {
+            throw new IllegalArgumentException("Cannot access properties for user " + userId);
+        }
+        return mUserPropertiesCache.query(userId);
     }
 
     /**

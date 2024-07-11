@@ -104,6 +104,7 @@ constructor(
             modifier = modifier,
             onAddTile = onAddTile,
             onRemoveTile = onRemoveTile,
+            onResize = iconTilesViewModel::resize,
         )
     }
 

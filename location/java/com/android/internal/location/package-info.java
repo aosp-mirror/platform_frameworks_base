@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.shared.model
-
-import javax.inject.Qualifier
-
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class GridConsistencyLog()
+/**
+ * Exclude from API surfaces
+ *
+ * @hide
+ */
+package com.android.internal.location;
