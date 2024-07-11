@@ -216,3 +216,12 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+flag {
+  name: "custom_animations_behind_translucent"
+  namespace: "windowing_frontend"
+  description: "A change can use its own layer parameters to animate behind a translucent activity"
+  bug: "327332488"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
