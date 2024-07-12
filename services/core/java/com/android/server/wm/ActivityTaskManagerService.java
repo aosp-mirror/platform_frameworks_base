@@ -4605,7 +4605,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return kept;
     }
 
-    /** Update default (global) configuration and notify listeners about changes. */
+    /**
+     * Updates default (global) configuration and notifies listeners about changes.
+     *
+     * @param values The new configuration. It must always be a new instance from the caller, and
+     *               it won't be modified after calling this method.
+     */
     int updateGlobalConfigurationLocked(@NonNull Configuration values, boolean initLocale,
             boolean persistent, int userId) {
 
@@ -4619,24 +4624,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         ProtoLog.i(WM_DEBUG_CONFIGURATION, "Updating global configuration "
                 + "to: %s", values);
         writeConfigurationChanged(changes);
-        FrameworkStatsLog.write(FrameworkStatsLog.RESOURCE_CONFIGURATION_CHANGED,
-                values.colorMode,
-                values.densityDpi,
-                values.fontScale,
-                values.hardKeyboardHidden,
-                values.keyboard,
-                values.keyboardHidden,
-                values.mcc,
-                values.mnc,
-                values.navigation,
-                values.navigationHidden,
-                values.orientation,
-                values.screenHeightDp,
-                values.screenLayout,
-                values.screenWidthDp,
-                values.smallestScreenWidthDp,
-                values.touchscreen,
-                values.uiMode);
 
         // Note: certain tests currently run as platform_app which is not allowed
         // to set debug system properties. To ensure that system properties are set
@@ -4684,13 +4671,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // resources have that config before following boot code is executed.
         mSystemThread.applyConfigurationToResources(mTempConfig);
 
-        if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
-            final Message msg = PooledLambda.obtainMessage(
-                    ActivityTaskManagerService::sendPutConfigurationForUserMsg,
-                    this, userId, new Configuration(mTempConfig));
-            mH.sendMessage(msg);
-        }
-
         SparseArray<WindowProcessController> pidMap = mProcessMap.getPidMap();
         for (int i = pidMap.size() - 1; i >= 0; i--) {
             final int pid = pidMap.keyAt(i);
@@ -4700,19 +4680,32 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             app.onConfigurationChanged(mTempConfig);
         }
 
-        final Message msg = PooledLambda.obtainMessage(
-                ActivityManagerInternal::broadcastGlobalConfigurationChanged,
-                mAmInternal, changes, initLocale);
-        mH.sendMessage(msg);
+        final Configuration configurationForSettings =
+                persistent && Settings.System.hasInterestingConfigurationChanges(changes)
+                        ? new Configuration(mTempConfig) : null;
+        mH.post(() -> {
+            FrameworkStatsLog.write(FrameworkStatsLog.RESOURCE_CONFIGURATION_CHANGED,
+                    values.colorMode, values.densityDpi, values.fontScale,
+                    values.hardKeyboardHidden, values.keyboard, values.keyboardHidden,
+                    values.mcc, values.mnc, values.navigation, values.navigationHidden,
+                    values.orientation, values.screenHeightDp, values.screenLayout,
+                    values.screenWidthDp, values.smallestScreenWidthDp, values.touchscreen,
+                    values.uiMode);
+            if ((changes & ActivityInfo.CONFIG_ORIENTATION) != 0) {
+                FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_ORIENTATION_CHANGED,
+                        values.orientation);
+            }
+            if (configurationForSettings != null) {
+                Settings.System.putConfigurationForUser(mContext.getContentResolver(),
+                        configurationForSettings, userId);
+            }
+            mAmInternal.broadcastGlobalConfigurationChanged(changes, initLocale);
+        });
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "RootConfigChange");
         // Update stored global config and notify everyone about the change.
         mRootWindowContainer.onConfigurationChanged(mTempConfig);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        if ((changes & ActivityInfo.CONFIG_ORIENTATION) != 0) {
-            FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_ORIENTATION_CHANGED,
-                    values.orientation);
-        }
 
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         return changes;
@@ -4860,11 +4853,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private void updateEventDispatchingLocked(boolean booted) {
         mWindowManager.setEventDispatching(booted && !mShuttingDown);
-    }
-
-    private void sendPutConfigurationForUserMsg(int userId, Configuration config) {
-        final ContentResolver resolver = mContext.getContentResolver();
-        Settings.System.putConfigurationForUser(resolver, config, userId);
     }
 
     boolean isActivityStartsLoggingEnabled() {
