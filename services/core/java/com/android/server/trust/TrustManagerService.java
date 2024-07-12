@@ -16,6 +16,7 @@
 
 package com.android.server.trust;
 
+import static android.security.Flags.shouldTrustManagerListenForPrimaryAuth;
 import static android.service.trust.GrantTrustResult.STATUS_UNLOCKED_BY_GRANT;
 import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE;
 
@@ -82,6 +83,9 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockSettingsInternal;
+import com.android.internal.widget.LockSettingsStateListener;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -154,6 +158,7 @@ public class TrustManagerService extends SystemService {
 
     /* package */ final TrustArchive mArchive = new TrustArchive();
     private final Context mContext;
+    private final LockSettingsInternal mLockSettings;
     private final LockPatternUtils mLockPatternUtils;
     private final KeyStoreAuthorization mKeyStoreAuthorization;
     private final UserManager mUserManager;
@@ -245,6 +250,20 @@ public class TrustManagerService extends SystemService {
 
     private final StrongAuthTracker mStrongAuthTracker;
 
+    // Used to subscribe to device credential auth attempts.
+    private final LockSettingsStateListener mLockSettingsStateListener =
+            new LockSettingsStateListener() {
+                @Override
+                public void onAuthenticationSucceeded(int userId) {
+                    mHandler.obtainMessage(MSG_DISPATCH_UNLOCK_ATTEMPT, 1, userId).sendToTarget();
+                }
+
+                @Override
+                public void onAuthenticationFailed(int userId) {
+                    mHandler.obtainMessage(MSG_DISPATCH_UNLOCK_ATTEMPT, 0, userId).sendToTarget();
+                }
+            };
+
     private boolean mTrustAgentsCanRun = false;
     private int mCurrentUser = UserHandle.USER_SYSTEM;
 
@@ -286,6 +305,7 @@ public class TrustManagerService extends SystemService {
         mHandler = createHandler(injector.getLooper());
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        mLockSettings = LocalServices.getService(LockSettingsInternal.class);
         mLockPatternUtils = injector.getLockPatternUtils();
         mKeyStoreAuthorization = injector.getKeyStoreAuthorization();
         mStrongAuthTracker = new StrongAuthTracker(context, injector.getLooper());
@@ -307,6 +327,9 @@ public class TrustManagerService extends SystemService {
             checkNewAgents();
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
             mReceiver.register(mContext);
+            if (shouldTrustManagerListenForPrimaryAuth()) {
+                mLockSettings.registerLockSettingsStateListener(mLockSettingsStateListener);
+            }
             mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
             mFingerprintManager = mContext.getSystemService(FingerprintManager.class);
             mFaceManager = mContext.getSystemService(FaceManager.class);
