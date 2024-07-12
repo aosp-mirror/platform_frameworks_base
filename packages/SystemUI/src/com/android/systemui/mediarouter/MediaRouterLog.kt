@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.casttootherdevice.domain.interactor
+package com.android.systemui.mediarouter
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.mediarouter.data.repository.fakeMediaRouterRepository
-import com.android.systemui.statusbar.chips.statusBarChipsLogger
+import javax.inject.Qualifier
 
-val Kosmos.mediaRouterChipInteractor by
-    Kosmos.Fixture {
-        MediaRouterChipInteractor(
-            scope = applicationCoroutineScope,
-            mediaRouterRepository = fakeMediaRouterRepository,
-            logger = statusBarChipsLogger,
-        )
-    }
+/** Logs for events related to MediaRouter APIs. */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class MediaRouterLog
