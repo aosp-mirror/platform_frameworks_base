@@ -64,6 +64,7 @@ import static android.content.Intent.CATEGORY_SECONDARY_HOME;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
+import static android.content.pm.ActivityInfo.CONFIG_RESOURCES_UNUSED;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
@@ -9839,6 +9840,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean shouldRelaunchLocked(int changes, Configuration changesConfig) {
         int configChanged = info.getRealConfigChanged();
+        if (android.content.res.Flags.handleAllConfigChanges()) {
+            if ((configChanged & CONFIG_RESOURCES_UNUSED) != 0) {
+                // Don't relaunch any activities that claim they do not use resources at all.
+                // If they still do, the onConfigurationChanged() callback will get called to
+                // let them know anyway.
+                return false;
+            }
+        }
+
         boolean onlyVrUiModeChanged = onlyVrUiModeChanged(changes, changesConfig);
 
         // Override for apps targeting pre-O sdks
