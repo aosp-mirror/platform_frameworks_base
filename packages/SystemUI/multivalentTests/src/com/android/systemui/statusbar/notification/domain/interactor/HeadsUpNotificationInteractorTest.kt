@@ -23,7 +23,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -277,64 +276,6 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             rows[0].isPinned.value = true
             runCurrent()
             assertThat(pinnedHeadsUpRows).containsExactly(rows[0])
-        }
-
-    @Test
-    fun isHeadsUpOrAnimatingAway_falseOnStart() =
-        testScope.runTest {
-            val isHeadsUpOrAnimatingAway by collectLastValue(underTest.isHeadsUpOrAnimatingAway)
-
-            runCurrent()
-
-            assertThat(isHeadsUpOrAnimatingAway).isFalse()
-        }
-
-    @Test
-    fun isHeadsUpOrAnimatingAway_hasPinnedRows() =
-        testScope.runTest {
-            val isHeadsUpOrAnimatingAway by collectLastValue(underTest.isHeadsUpOrAnimatingAway)
-
-            // WHEN a row is pinned
-            headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
-            runCurrent()
-
-            assertThat(isHeadsUpOrAnimatingAway).isTrue()
-        }
-
-    @Test
-    fun isHeadsUpOrAnimatingAway_headsUpAnimatingAway() =
-        testScope.runTest {
-            val isHeadsUpOrAnimatingAway by collectLastValue(underTest.isHeadsUpOrAnimatingAway)
-
-            // WHEN the last row is animating away
-            headsUpRepository.setHeadsUpAnimatingAway(true)
-            runCurrent()
-
-            assertThat(isHeadsUpOrAnimatingAway).isTrue()
-        }
-
-    @Test
-    fun isHeadsUpOrAnimatingAway_headsUpAnimatingAwayDebounced() =
-        testScope.runTest {
-            val values by collectValues(underTest.isHeadsUpOrAnimatingAway)
-
-            // GIVEN a row is pinned
-            headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
-            runCurrent()
-            assertThat(values.size).isEqualTo(2)
-            assertThat(values.first()).isFalse() // initial value
-            assertThat(values.last()).isTrue()
-
-            // WHEN the last row is removed
-            headsUpRepository.setNotifications(emptyList())
-            runCurrent()
-            // AND starts to animate away
-            headsUpRepository.setHeadsUpAnimatingAway(true)
-            runCurrent()
-
-            // THEN isHeadsUpOrAnimatingAway remained true
-            assertThat(values.size).isEqualTo(2)
-            assertThat(values.last()).isTrue()
         }
 
     @Test
