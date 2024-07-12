@@ -185,6 +185,12 @@ public class AccountManagerService
 
     final Context mContext;
 
+    private static final int[] INTERESTING_APP_OPS = new int[] {
+        AppOpsManager.OP_GET_ACCOUNTS,
+        AppOpsManager.OP_READ_CONTACTS,
+        AppOpsManager.OP_WRITE_CONTACTS,
+    };
+
     private final PackageManager mPackageManager;
     private final AppOpsManager mAppOpsManager;
     private UserManager mUserManager;
@@ -388,74 +394,47 @@ public class AccountManagerService
         }.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
 
         // Cancel account request notification if an app op was preventing the account access
-        mAppOpsManager.startWatchingMode(AppOpsManager.OP_GET_ACCOUNTS, null,
-                new AppOpsManager.OnOpChangedInternalListener() {
-            @Override
-            public void onOpChanged(int op, String packageName) {
-                try {
-                    final int userId = ActivityManager.getCurrentUser();
-                    final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
-                    final int mode = mAppOpsManager.checkOpNoThrow(
-                            AppOpsManager.OP_GET_ACCOUNTS, uid, packageName);
-                    if (mode == AppOpsManager.MODE_ALLOWED) {
-                        final long identity = Binder.clearCallingIdentity();
-                        try {
-                            UserAccounts accounts = getUserAccounts(userId);
-                            cancelAccountAccessRequestNotificationIfNeeded(
-                                    packageName, uid, true, accounts);
-                        } finally {
-                            Binder.restoreCallingIdentity(identity);
-                        }
-                    }
-                } catch (NameNotFoundException e) {
-                    /* ignore */
-                } catch (SQLiteCantOpenDatabaseException e) {
-                    Log.w(TAG, "Can't read accounts database", e);
-                    return;
-                }
-            }
-        });
+        for (int i = 0; i < INTERESTING_APP_OPS.length; ++i) {
+            mAppOpsManager.startWatchingMode(INTERESTING_APP_OPS[i], null,
+                    new OnInterestingAppOpChangedListener());
+        }
 
-        // Cancel account request notification if a permission was preventing the account access
-        mPackageManager.addOnPermissionsChangeListener(
-                (int uid) -> {
-            // Permission changes cause requires updating accounts cache.
+        // Clear the accounts cache on permission changes.
+        // The specific permissions we care about are backed by AppOps, so just
+        // let the change events on those handle clearing any notifications.
+        mPackageManager.addOnPermissionsChangeListener((int uid) -> {
             AccountManager.invalidateLocalAccountsDataCaches();
-
-            Account[] accounts = null;
-            String[] packageNames = mPackageManager.getPackagesForUid(uid);
-            if (packageNames != null) {
-                final int userId = UserHandle.getUserId(uid);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    for (String packageName : packageNames) {
-                                // if app asked for permission we need to cancel notification even
-                                // for O+ applications.
-                                if (mPackageManager.checkPermission(
-                                        Manifest.permission.GET_ACCOUNTS,
-                                        packageName) != PackageManager.PERMISSION_GRANTED) {
-                                    continue;
-                                }
-
-                        if (accounts == null) {
-                            accounts = getAccountsOrEmptyArray(null, userId, "android");
-                            if (ArrayUtils.isEmpty(accounts)) {
-                                return;
-                            }
-                        }
-                        UserAccounts userAccounts = getUserAccounts(UserHandle.getUserId(uid));
-                        for (Account account : accounts) {
-                            cancelAccountAccessRequestNotificationIfNeeded(
-                                    account, uid, packageName, true, userAccounts);
-                        }
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
         });
     }
 
+    private class OnInterestingAppOpChangedListener implements AppOpsManager.OnOpChangedListener {
+        @Override
+        public void onOpChanged(String op, String packageName) {
+            final int userId = ActivityManager.getCurrentUser();
+            final int packageUid;
+            try {
+                packageUid = mPackageManager.getPackageUidAsUser(packageName, userId);
+            } catch (NameNotFoundException e) {
+                /* ignore */
+                return;
+            }
+
+            final int mode = mAppOpsManager.checkOpNoThrow(op, packageUid, packageName);
+            if (mode != AppOpsManager.MODE_ALLOWED) {
+                return;
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                cancelAccountAccessRequestNotificationIfNeeded(
+                        packageName, packageUid, true, getUserAccounts(userId));
+            } catch (SQLiteCantOpenDatabaseException e) {
+                Log.w(TAG, "Can't read accounts database", e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
 
     boolean getBindInstantServiceAllowed(int userId) {
         return  mAuthenticatorCache.getBindInstantServiceAllowed(userId);
