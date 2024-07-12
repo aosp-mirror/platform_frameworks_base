@@ -964,6 +964,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
             ioThread.start();
 
+            SecureSettingsWrapper.setContentResolver(context.getContentResolver());
+
             return new InputMethodManagerService(context,
                     shouldEnableConcurrentMultiUserMode(context), thread.getLooper(),
                     Handler.createAsync(ioThread.getLooper()),
@@ -1019,6 +1021,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void onUserRemoved(UserInfo user) {
             // Called directly from UserManagerService. Do not block the calling thread.
             final int userId = user.id;
+            SecureSettingsWrapper.onUserRemoved(userId);
             mService.mUserDataRepository.remove(userId);
         }
 
@@ -1099,7 +1102,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mConcurrentMultiUserModeEnabled = concurrentMultiUserModeEnabled;
             mContext = context;
             mRes = context.getResources();
-            SecureSettingsWrapper.onStart(mContext);
 
             mHandler = Handler.createAsync(uiLooper, this);
             mIoHandler = ioHandler;
