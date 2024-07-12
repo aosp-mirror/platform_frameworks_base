@@ -25,6 +25,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -38,6 +39,7 @@ import android.app.ActivityManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.hardware.input.IInputManager;
@@ -157,6 +159,7 @@ public class InputMethodManagerServiceTestBase {
                 mockitoSession()
                         .initMocks(this)
                         .strictness(Strictness.LENIENT)
+                        .spyStatic(InputMethodUtils.class)
                         .mockStatic(ServiceManager.class)
                         .mockStatic(SystemServerInitThreadPool.class)
                         .startMocking();
@@ -226,6 +229,10 @@ public class InputMethodManagerServiceTestBase {
         when(mMockWindowManagerInternal.onToggleImeRequested(anyBoolean(), any(), any(), anyInt()))
                 .thenReturn(TEST_IME_TARGET_INFO);
         when(mMockInputMethodClient.asBinder()).thenReturn(mMockInputMethodBinder);
+
+        // This changes the real IME component state. Not appropriate to do in tests.
+        doNothing().when(() -> InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
+                        any(PackageManager.class), anyList()));
 
         // Used by lazy initializing draw IMS nav bar at InputMethodManagerService#systemRunning(),
         // which is ok to be mocked out for now.
