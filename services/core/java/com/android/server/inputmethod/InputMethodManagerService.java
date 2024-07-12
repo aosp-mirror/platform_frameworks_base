@@ -79,6 +79,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
@@ -923,11 +924,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * {@link SystemService} used to publish and manage the lifecycle of
      * {@link InputMethodManagerService}.
      */
-    public static final class Lifecycle extends SystemService {
+    public static final class Lifecycle extends SystemService
+            implements UserManagerInternal.UserLifecycleListener {
         private final InputMethodManagerService mService;
 
         public Lifecycle(Context context) {
             this(context, createServiceForProduction(context));
+
+            // For production code, hook up user lifecycle
+            mService.mUserManagerInternal.addUserLifecycleListener(this);
         }
 
         @VisibleForTesting
@@ -1003,6 +1008,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 mService.systemRunning();
             }
+        }
+
+        @Override
+        public void onUserCreated(UserInfo user, @Nullable Object token) {
+            // Called directly from UserManagerService. Do not block the calling thread.
+        }
+
+        @Override
+        public void onUserRemoved(UserInfo user) {
+            // Called directly from UserManagerService. Do not block the calling thread.
+            final int userId = user.id;
+            mService.mUserDataRepository.remove(userId);
         }
 
         @Override
@@ -1114,7 +1131,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @SuppressWarnings("GuardedBy") final IntFunction<InputMethodBindingController>
                     bindingControllerFactory = userId -> new InputMethodBindingController(userId,
                     InputMethodManagerService.this);
-            mUserDataRepository = new UserDataRepository(mHandler, mUserManagerInternal,
+            mUserDataRepository = new UserDataRepository(
                     bindingControllerForTesting != null ? bindingControllerForTesting
                             : bindingControllerFactory);
 
