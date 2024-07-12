@@ -266,8 +266,15 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     /**
      * Responds to a shell command.
      */
+    @Deprecated
     public int onShellCommand(ShellCommand shell) {
         PrintWriter pw = shell.getOutPrintWriter();
+
+        if (android.tracing.Flags.clientSideProtoLogging()) {
+            pw.println("Command deprecated. Please use 'cmd protolog' instead.");
+            return -1;
+        }
+
         String cmd = shell.getNextArg();
         if (cmd == null) {
             return unknownCommand(pw);
