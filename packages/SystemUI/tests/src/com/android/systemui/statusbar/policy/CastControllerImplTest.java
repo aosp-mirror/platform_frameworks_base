@@ -1,6 +1,8 @@
 package com.android.systemui.statusbar.policy;
 
 
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -58,7 +60,8 @@ public class CastControllerImplTest extends SysuiTestCase {
         mController = new CastControllerImpl(
                 mContext,
                 mock(PackageManager.class),
-                mock(DumpManager.class));
+                mock(DumpManager.class),
+                new CastControllerLogger(logcatLogBuffer("CastControllerImplTest")));
     }
 
     @Test
