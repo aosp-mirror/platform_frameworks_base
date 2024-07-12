@@ -5561,4 +5561,15 @@
   <java-symbol type="string" name="bg_user_sound_notification_button_switch_user" />
   <java-symbol type="string" name="bg_user_sound_notification_button_mute" />
   <java-symbol type="string" name="bg_user_sound_notification_message" />
+
+  <!-- Keyboard Shortcut default category names. -->
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_browser" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_calculator" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_calendar" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_contacts" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_email" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_maps" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_music" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_sms" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications" />
 </resources>
