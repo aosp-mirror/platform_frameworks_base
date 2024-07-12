@@ -382,6 +382,7 @@ public:
             PointerControllerInterface::ControllerType type) override;
     void notifyPointerDisplayIdChanged(ui::LogicalDisplayId displayId,
                                        const FloatPoint& position) override;
+    void notifyMouseCursorFadedOnTyping() override;
 
     /* --- InputFilterPolicyInterface implementation --- */
     void notifyStickyModifierStateChanged(uint32_t modifierState,
@@ -786,6 +787,10 @@ void NativeInputManager::notifyPointerDisplayIdChanged(ui::LogicalDisplayId poin
     } // release lock
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::Change::DISPLAY_INFO);
+}
+
+void NativeInputManager::notifyMouseCursorFadedOnTyping() {
+    mInputManager->getReader().notifyMouseCursorFadedOnTyping();
 }
 
 void NativeInputManager::notifyStickyModifierStateChanged(uint32_t modifierState,
@@ -1847,10 +1852,6 @@ static void handleInputChannelDisposed(JNIEnv* env, jobject /* inputChannelObj *
                                        const std::shared_ptr<InputChannel>& inputChannel,
                                        void* data) {
     NativeInputManager* im = static_cast<NativeInputManager*>(data);
-
-    ALOGW("Input channel object '%s' was disposed without first being removed with "
-          "the input manager!",
-          inputChannel->getName().c_str());
     im->removeInputChannel(inputChannel->getConnectionToken());
 }
 

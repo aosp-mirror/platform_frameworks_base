@@ -2757,11 +2757,18 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             return out;
         }
 
+        // Get the animation theme from the top-most application window
+        // when Flags.customAnimationsBehindTranslucent() is false.
         final AnimationOptions animOptionsForActivityTransition =
                 calculateAnimationOptionsForActivityTransition(type, sortedTargets);
+
         if (!Flags.moveAnimationOptionsToChange() && animOptionsForActivityTransition != null) {
             out.setAnimationOptions(animOptionsForActivityTransition);
         }
+
+        // Store the animation options of the topmost non-translucent change
+        // (Used when Flags.customAnimationsBehindTranslucent() is true)
+        AnimationOptions activityAboveAnimationOptions = null;
 
         final ArraySet<WindowContainer> occludedAtEndContainers = new ArraySet<>();
         // Convert all the resolved ChangeInfos into TransactionInfo.Change objects in order.
@@ -2881,9 +2888,26 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 change.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor, 255));
             }
 
-            AnimationOptions animOptions = null;
+            // Calculate the animation options for this change
             if (Flags.moveAnimationOptionsToChange()) {
-                if (activityRecord != null && animOptionsForActivityTransition != null) {
+                AnimationOptions animOptions = null;
+                if (Flags.customAnimationsBehindTranslucent() && activityRecord != null) {
+                    if (activityAboveAnimationOptions != null) {
+                        // Inherit the options from one of the changes on top of this
+                        animOptions = activityAboveAnimationOptions;
+                    } else {
+                        // Create the options based on this change's custom animations and layout
+                        // parameters
+                        animOptions = getOptions(activityRecord /* customAnimActivity */,
+                                                 activityRecord /* animLpActivity */);
+                        if (!change.hasFlags(FLAG_TRANSLUCENT)) {
+                            // If this change is not translucent, its options are going to be
+                            // inherited by the changes below
+                            activityAboveAnimationOptions = animOptions;
+                        }
+                    }
+                } else if (activityRecord != null && animOptionsForActivityTransition != null) {
+                    // Use the same options from the top activity for all the activities
                     animOptions = animOptionsForActivityTransition;
                 } else if (Flags.activityEmbeddingOverlayPresentationFlag()
                         && isEmbeddedTaskFragment) {
@@ -2931,25 +2955,42 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     @Nullable
     private static AnimationOptions calculateAnimationOptionsForActivityTransition(
             @TransitionType int type, @NonNull ArrayList<ChangeInfo> sortedTargets) {
-        TransitionInfo.AnimationOptions animOptions = null;
-
-        // Check if the top-most app is an activity (ie. activity->activity). If so, make sure
-        // to honor its custom transition options.
         WindowContainer<?> topApp = null;
         for (int i = 0; i < sortedTargets.size(); i++) {
-            if (isWallpaper(sortedTargets.get(i).mContainer)) continue;
-            topApp = sortedTargets.get(i).mContainer;
-            break;
+            if (!isWallpaper(sortedTargets.get(i).mContainer)) {
+                topApp = sortedTargets.get(i).mContainer;
+                break;
+            }
         }
-        if (topApp.asActivityRecord() != null) {
-            final ActivityRecord topActivity = topApp.asActivityRecord();
-            animOptions = addCustomActivityTransition(topActivity, true/* open */,
-                    null /* animOptions */);
-            animOptions = addCustomActivityTransition(topActivity, false/* open */,
+        ActivityRecord animLpActivity = findAnimLayoutParamsActivityRecord(type, sortedTargets);
+        return getOptions(topApp.asActivityRecord() /* customAnimActivity */,
+                animLpActivity /* animLpActivity */);
+    }
+
+    /**
+     * Updates and returns animOptions with the layout parameters of animLpActivity
+     * @param customAnimActivity the activity that drives the custom animation options
+     * @param animLpActivity the activity that drives the animation options with its layout
+     *                       parameters
+     * @return the options extracted from the provided activities
+     */
+    @Nullable
+    private static AnimationOptions getOptions(@Nullable ActivityRecord customAnimActivity,
+            @Nullable ActivityRecord animLpActivity) {
+        AnimationOptions animOptions = null;
+        // Custom
+        if (customAnimActivity != null) {
+            animOptions = addCustomActivityTransition(customAnimActivity, true /* open */,
+                    animOptions);
+            animOptions = addCustomActivityTransition(customAnimActivity, false /* open */,
                     animOptions);
         }
-        final WindowManager.LayoutParams animLp =
-                getLayoutParamsForAnimationsStyle(type, sortedTargets);
+
+        // Layout parameters
+        final WindowState mainWindow = animLpActivity != null
+                ? animLpActivity.findMainWindow() : null;
+        final WindowManager.LayoutParams animLp = mainWindow != null ? mainWindow.mAttrs : null;
+
         if (animLp != null && animLp.type != TYPE_APPLICATION_STARTING
                 && animLp.windowAnimations != 0) {
             // Don't send animation options if no windowAnimations have been set or if the we
@@ -3087,10 +3128,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return ancestor;
     }
 
-    private static WindowManager.LayoutParams getLayoutParamsForAnimationsStyle(int type,
-            ArrayList<ChangeInfo> sortedTargets) {
-        // Find the layout params of the top-most application window that is part of the
-        // transition, which is what will control the animation theme.
+    @Nullable
+    private static ActivityRecord findAnimLayoutParamsActivityRecord(
+            @TransitionType int transit, @NonNull List<ChangeInfo> sortedTargets) {
         final ArraySet<Integer> activityTypes = new ArraySet<>();
         final int targetCount = sortedTargets.size();
         for (int i = 0; i < targetCount; ++i) {
@@ -3110,16 +3150,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // activity through the layout parameter animation style.
             return null;
         }
-        final ActivityRecord animLpActivity =
-                findAnimLayoutParamsActivityRecord(sortedTargets, type, activityTypes);
-        final WindowState mainWindow = animLpActivity != null
-                ? animLpActivity.findMainWindow() : null;
-        return mainWindow != null ? mainWindow.mAttrs : null;
-    }
 
-    private static ActivityRecord findAnimLayoutParamsActivityRecord(
-            List<ChangeInfo> sortedTargets,
-            @TransitionType int transit, ArraySet<Integer> activityTypes) {
         // Remote animations always win, but fullscreen windows override non-fullscreen windows.
         ActivityRecord result = lookForTopWindowWithFilter(sortedTargets,
                 w -> w.getRemoteAnimationDefinition() != null

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
@@ -38,7 +37,6 @@ import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.Me
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.statusbar.policy.CastDevice
@@ -47,9 +45,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.mockito.ArgumentMatchers
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -64,17 +60,6 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
     private val mockScreenCastDialog = mock<SystemUIDialog>()
     private val mockGenericCastDialog = mock<SystemUIDialog>()
-
-    private val chipBackgroundView = mock<ChipBackgroundContainer>()
-    private val chipView =
-        mock<View>().apply {
-            whenever(
-                    this.requireViewById<ChipBackgroundContainer>(
-                        R.id.ongoing_activity_chip_background
-                    )
-                )
-                .thenReturn(chipBackgroundView)
-        }
 
     private val underTest = kosmos.castToOtherDeviceChipViewModel
 
@@ -116,6 +101,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
@@ -223,7 +209,11 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.chip)
 
             mediaProjectionRepo.mediaProjectionState.value =
-                MediaProjectionState.Projecting.SingleTask(NORMAL_PACKAGE, createTask(taskId = 1))
+                MediaProjectionState.Projecting.SingleTask(
+                    NORMAL_PACKAGE,
+                    hostDeviceName = null,
+                    createTask(taskId = 1),
+                )
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
@@ -258,6 +248,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
@@ -306,14 +297,8 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
             assertThat(clickListener).isNotNull()
 
-            clickListener!!.onClick(chipView)
-            verify(kosmos.mockDialogTransitionAnimator)
-                .showFromView(
-                    eq(mockScreenCastDialog),
-                    eq(chipBackgroundView),
-                    eq(null),
-                    ArgumentMatchers.anyBoolean(),
-                )
+            clickListener!!.onClick(mock<View>())
+            verify(mockScreenCastDialog).show()
         }
 
     @Test
@@ -324,20 +309,15 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
             assertThat(clickListener).isNotNull()
 
-            clickListener!!.onClick(chipView)
-            verify(kosmos.mockDialogTransitionAnimator)
-                .showFromView(
-                    eq(mockScreenCastDialog),
-                    eq(chipBackgroundView),
-                    eq(null),
-                    ArgumentMatchers.anyBoolean(),
-                )
+            clickListener!!.onClick(mock<View>())
+            verify(mockScreenCastDialog).show()
         }
 
     @Test
@@ -359,13 +339,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
             assertThat(clickListener).isNotNull()
 
-            clickListener!!.onClick(chipView)
-            verify(kosmos.mockDialogTransitionAnimator)
-                .showFromView(
-                    eq(mockGenericCastDialog),
-                    eq(chipBackgroundView),
-                    eq(null),
-                    ArgumentMatchers.anyBoolean(),
-                )
+            clickListener!!.onClick(mock<View>())
+            verify(mockGenericCastDialog).show()
         }
 }

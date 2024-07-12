@@ -1040,7 +1040,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private void createInputChannel(int displayId) {
         final InputManager inputManager = mContext.getSystemService(InputManager.class);
         final InputMonitor inputMonitor =
-                mInputMonitorFactory.create(inputManager, mContext);
+                mInputMonitorFactory.create(inputManager, displayId);
         final EventReceiver eventReceiver = new EventReceiver(inputMonitor,
                 inputMonitor.getInputChannel(), Looper.myLooper());
         mEventReceiversByDisplay.put(displayId, eventReceiver);
@@ -1194,8 +1194,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     static class InputMonitorFactory {
-        InputMonitor create(InputManager inputManager, Context context) {
-            return inputManager.monitorGestureInput("caption-touch", context.getDisplayId());
+        InputMonitor create(InputManager inputManager, int displayId) {
+            return inputManager.monitorGestureInput("caption-touch", displayId);
         }
     }
 

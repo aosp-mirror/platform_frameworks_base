@@ -48,7 +48,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 @SmallTest
 class ZenModeRepositoryTest {
-
     @Mock private lateinit var context: Context
 
     @Mock private lateinit var notificationManager: NotificationManager
@@ -73,7 +72,7 @@ class ZenModeRepositoryTest {
             )
     }
 
-    @DisableFlags(android.app.Flags.FLAG_MODES_API, Flags.FLAG_VOLUME_PANEL_BROADCAST_FIX)
+    @DisableFlags(Flags.FLAG_VOLUME_PANEL_BROADCAST_FIX)
     @Test
     fun consolidatedPolicyChanges_repositoryEmits_flagsOff() {
         testScope.runTest {
@@ -88,9 +87,7 @@ class ZenModeRepositoryTest {
             triggerIntent(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED)
             runCurrent()
 
-            assertThat(values)
-                .containsExactlyElementsIn(listOf(null, testPolicy1, testPolicy2))
-                .inOrder()
+            assertThat(values).containsExactly(null, testPolicy1, testPolicy2).inOrder()
         }
     }
 
@@ -109,9 +106,7 @@ class ZenModeRepositoryTest {
             triggerIntent(NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED)
             runCurrent()
 
-            assertThat(values)
-                .containsExactlyElementsIn(listOf(null, testPolicy1, testPolicy2))
-                .inOrder()
+            assertThat(values).containsExactly(null, testPolicy1, testPolicy2).inOrder()
         }
     }
 
@@ -128,14 +123,13 @@ class ZenModeRepositoryTest {
             runCurrent()
 
             assertThat(values)
-                .containsExactlyElementsIn(
-                    listOf(null, Global.ZEN_MODE_OFF, Global.ZEN_MODE_ALARMS))
+                .containsExactly(null, Global.ZEN_MODE_OFF, Global.ZEN_MODE_ALARMS)
                 .inOrder()
         }
     }
 
     private fun triggerIntent(action: String) {
-        verify(context).registerReceiver(receiverCaptor.capture(), any())
+        verify(context).registerReceiver(receiverCaptor.capture(), any(), any(), any())
         receiverCaptor.value.onReceive(context, Intent(action))
     }
 

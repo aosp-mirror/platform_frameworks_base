@@ -203,26 +203,28 @@ class ElementTest {
         val elementSize = 50.dp
         val elementOffset = 20.dp
 
-        lateinit var changeScene: (SceneKey) -> Unit
-
-        rule.testTransition(
-            from = SceneA,
-            to = SceneB,
-            transitionLayout = { currentScene, onChangeScene ->
-                changeScene = onChangeScene
-
-                SceneTransitionLayout(
-                    currentScene,
-                    onChangeScene,
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    SceneA,
                     transitions {
                         from(SceneA, to = SceneB) { spec = tween }
                         from(SceneB, to = SceneC) { spec = tween }
                     },
 
-                    // Disable interruptions so that the current transition is directly removed when
-                    // starting a new one.
+                    // Disable interruptions so that the current transition is directly removed
+                    // when starting a new one.
                     enableInterruptions = false,
-                ) {
+                )
+            }
+
+        lateinit var coroutineScope: CoroutineScope
+        rule.testTransition(
+            state = state,
+            to = SceneB,
+            transitionLayout = { state ->
+                coroutineScope = rememberCoroutineScope()
+                SceneTransitionLayout(state) {
                     scene(SceneA) {
                         Box(Modifier.size(layoutSize)) {
                             // Transformed element
@@ -243,7 +245,7 @@ class ElementTest {
                 onElement(TestElements.Bar).assertExists()
 
                 // Start transition from SceneB to SceneC
-                changeScene(SceneC)
+                rule.runOnUiThread { state.setTargetScene(SceneC, coroutineScope) }
             }
 
             at(3 * frameDuration) { onElement(TestElements.Bar).assertIsNotDisplayed() }
@@ -340,18 +342,16 @@ class ElementTest {
 
     @Test
     fun elementIsReusedBetweenScenes() {
-        var currentScene by mutableStateOf(SceneA)
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
         var sceneCState by mutableStateOf(0)
         val key = TestElements.Foo
         var nullableLayoutImpl: SceneTransitionLayoutImpl? = null
 
+        lateinit var coroutineScope: CoroutineScope
         rule.setContent {
+            coroutineScope = rememberCoroutineScope()
             SceneTransitionLayoutForTesting(
-                state =
-                    updateSceneTransitionLayoutState(
-                        currentScene = currentScene,
-                        onChangeScene = { currentScene = it }
-                    ),
+                state = state,
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(SceneA) { /* Nothing */ }
@@ -375,7 +375,7 @@ class ElementTest {
         assertThat(layoutImpl.elements).isEmpty()
 
         // Scene B: element is in the map.
-        currentScene = SceneB
+        rule.runOnUiThread { state.setTargetScene(SceneB, coroutineScope) }
         rule.waitForIdle()
 
         assertThat(layoutImpl.elements.keys).containsExactly(key)
@@ -383,7 +383,7 @@ class ElementTest {
         assertThat(element.sceneStates.keys).containsExactly(SceneB)
 
         // Scene C, state 0: the same element is reused.
-        currentScene = SceneC
+        rule.runOnUiThread { state.setTargetScene(SceneC, coroutineScope) }
         sceneCState = 0
         rule.waitForIdle()
 
@@ -472,12 +472,13 @@ class ElementTest {
 
     @Test
     fun elementModifierSupportsUpdates() {
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
         var key by mutableStateOf(TestElements.Foo)
         var nullableLayoutImpl: SceneTransitionLayoutImpl? = null
 
         rule.setContent {
             SceneTransitionLayoutForTesting(
-                state = updateSceneTransitionLayoutState(currentScene = SceneA, onChangeScene = {}),
+                state = state,
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(SceneA) { Box(Modifier.element(key)) }
@@ -521,11 +522,12 @@ class ElementTest {
             rule.waitUntil(timeoutMillis = 10_000) { animationFinished }
         }
 
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
         rule.setContent {
             scrollScope = rememberCoroutineScope()
 
             SceneTransitionLayoutForTesting(
-                state = updateSceneTransitionLayoutState(currentScene = SceneA, onChangeScene = {}),
+                state = state,
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(SceneA) {

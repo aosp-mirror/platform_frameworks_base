@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 
 import android.content.Context
 import androidx.annotation.DrawableRes
-import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
@@ -58,7 +57,6 @@ constructor(
     private val mediaProjectionChipInteractor: MediaProjectionChipInteractor,
     private val mediaRouterChipInteractor: MediaRouterChipInteractor,
     private val systemClock: SystemClock,
-    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
 ) : OngoingActivityChipViewModel {
     /**
@@ -175,7 +173,6 @@ constructor(
             startTimeMs = systemClock.elapsedRealtime(),
             createDialogLaunchOnClickListener(
                 createCastScreenToOtherDeviceDialogDelegate(state),
-                dialogTransitionAnimator,
             ),
         )
     }
@@ -191,7 +188,6 @@ constructor(
             colors = ColorsModel.Red,
             createDialogLaunchOnClickListener(
                 createGenericCastToOtherDeviceDialogDelegate(deviceName),
-                dialogTransitionAnimator,
             ),
         )
     }

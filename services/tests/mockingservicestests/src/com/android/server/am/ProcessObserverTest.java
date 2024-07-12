@@ -193,7 +193,7 @@ public class ProcessObserverTest {
 
     private ProcessRecord makeActiveProcessRecord(ApplicationInfo ai)
             throws Exception {
-        final IApplicationThread thread = mock(IApplicationThread.class);
+        final ApplicationThreadDeferred thread = mock(ApplicationThreadDeferred.class);
         final IBinder threadBinder = new Binder();
         doReturn(threadBinder).when(thread).asBinder();
         doAnswer((invocation) -> {

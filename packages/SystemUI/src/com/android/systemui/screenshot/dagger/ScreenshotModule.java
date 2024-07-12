@@ -24,12 +24,10 @@ import com.android.systemui.screenshot.ImageCapture;
 import com.android.systemui.screenshot.ImageCaptureImpl;
 import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
-import com.android.systemui.screenshot.ScreenshotShelfViewProxy;
 import com.android.systemui.screenshot.ScreenshotSoundController;
 import com.android.systemui.screenshot.ScreenshotSoundControllerImpl;
 import com.android.systemui.screenshot.ScreenshotSoundProvider;
 import com.android.systemui.screenshot.ScreenshotSoundProviderImpl;
-import com.android.systemui.screenshot.ScreenshotViewProxy;
 import com.android.systemui.screenshot.TakeScreenshotExecutor;
 import com.android.systemui.screenshot.TakeScreenshotExecutorImpl;
 import com.android.systemui.screenshot.TakeScreenshotService;
@@ -92,8 +90,4 @@ public abstract class ScreenshotModule {
             AccessibilityManager accessibilityManager) {
         return new ScreenshotViewModel(accessibilityManager);
     }
-
-    @Binds
-    abstract ScreenshotViewProxy.Factory bindScreenshotViewProxyFactory(
-            ScreenshotShelfViewProxy.Factory shelfScreenshotViewProxyFactory);
 }

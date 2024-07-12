@@ -176,3 +176,11 @@ flag {
     bug: "330682397"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "defer_binders_when_paused"
+    namespace: "system_performance"
+    is_fixed_read_only: true
+    description: "Defer submitting binder calls to paused processes."
+    bug: "327038797"
+}

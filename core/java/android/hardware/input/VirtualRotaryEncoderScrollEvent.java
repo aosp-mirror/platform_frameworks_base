@@ -107,7 +107,8 @@ public final class VirtualRotaryEncoderScrollEvent implements Parcelable {
         }
 
         /**
-         * Sets the scroll amount, normalized from -1.0 to 1.0, inclusive.
+         * Sets the scroll amount, normalized from -1.0 to 1.0, inclusive. By default, the scroll
+         * amount is 0, which results in no scroll.
          * <p>
          * Positive values indicate scrolling forward (e.g. down in a vertical list); negative
          * values, backward.

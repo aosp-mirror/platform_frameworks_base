@@ -386,6 +386,7 @@ constructor(
             // The launch animation of a long-press effect did not reset the long-press effect so
             // we must do it here
             resetLongPressEffectProperties()
+            longPressEffect.resetState()
         }
         val actualHeight =
             if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
@@ -771,11 +772,14 @@ constructor(
         lastIconTint = icon.getColor(state)
 
         // Long-press effects
+        longPressEffect?.qsTile?.state?.handlesLongClick = state.handlesLongClick
         if (
             state.handlesLongClick &&
                 longPressEffect?.initializeEffect(longPressEffectDuration) == true
         ) {
             showRippleEffect = false
+            longPressEffect.qsTile?.state?.state = lastState // Store the tile's state
+            longPressEffect.resetState()
             initializeLongPressProperties(measuredHeight, measuredWidth)
         } else {
             // Long-press effects might have been enabled before but the new state does not
@@ -906,6 +910,7 @@ constructor(
     }
 
     override fun onActivityLaunchAnimationEnd() {
+        longPressEffect?.resetState()
         if (longPressEffect != null && !haveLongPressPropertiesBeenReset) {
             resetLongPressEffectProperties()
         }

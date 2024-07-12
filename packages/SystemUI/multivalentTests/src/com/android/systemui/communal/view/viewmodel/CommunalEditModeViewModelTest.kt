@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.view.viewmodel
 
-import android.app.smartspace.SmartspaceTarget
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -32,10 +31,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.FakeCommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -57,8 +59,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.settings.fakeUserTracker
-import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
-import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
@@ -91,7 +91,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
 
     private lateinit var tutorialRepository: FakeCommunalTutorialRepository
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
-    private lateinit var smartspaceRepository: FakeSmartspaceRepository
+    private lateinit var smartspaceRepository: FakeCommunalSmartspaceRepository
     private lateinit var mediaRepository: FakeCommunalMediaRepository
     private lateinit var communalSceneInteractor: CommunalSceneInteractor
 
@@ -105,7 +105,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
 
         tutorialRepository = kosmos.fakeCommunalTutorialRepository
         widgetRepository = kosmos.fakeCommunalWidgetRepository
-        smartspaceRepository = kosmos.fakeSmartspaceRepository
+        smartspaceRepository = kosmos.fakeCommunalSmartspaceRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
         communalSceneInteractor = kosmos.communalSceneInteractor
         kosmos.fakeUserRepository.setUserInfos(listOf(MAIN_USER_INFO))
@@ -152,11 +152,15 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             widgetRepository.setCommunalWidgets(widgets)
 
             // Smartspace available.
-            val target = Mockito.mock(SmartspaceTarget::class.java)
-            whenever(target.smartspaceTargetId).thenReturn("target")
-            whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
-            whenever(target.remoteViews).thenReturn(Mockito.mock(RemoteViews::class.java))
-            smartspaceRepository.setCommunalSmartspaceTargets(listOf(target))
+            smartspaceRepository.setTimers(
+                listOf(
+                    CommunalSmartspaceTimer(
+                        smartspaceTargetId = "target",
+                        createdTimestampMillis = 0L,
+                        remoteViews = Mockito.mock(RemoteViews::class.java),
+                    )
+                )
+            )
 
             // Media playing.
             mediaRepository.mediaActive()

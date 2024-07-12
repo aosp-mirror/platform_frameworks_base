@@ -276,8 +276,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mLauncherApps = mock(LauncherApps.class);
-        mManager = new PeopleSpaceWidgetManager(mContext, mAppWidgetManager, mIPeopleManager,
-                mPeopleManager, mLauncherApps, mNotifCollection, mPackageManager,
+        mManager = new PeopleSpaceWidgetManager(mContext, Optional.of(mAppWidgetManager),
+                mIPeopleManager, mPeopleManager, mLauncherApps, mNotifCollection, mPackageManager,
                 Optional.of(mBubbles), mUserManager, mBackupManager, mINotificationManager,
                 mNotificationManager, mFakeExecutor, mUserTracker);
         mManager.attach(mListenerService);

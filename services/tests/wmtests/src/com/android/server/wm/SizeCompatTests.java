@@ -104,6 +104,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
@@ -495,7 +496,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Activity is sandboxed; it is in size compat mode since it is not resizable and has a
         // max aspect ratio.
         assertActivityMaxBoundsSandboxed();
-        assertScaled();
+        assertDownScaled();
     }
 
     @Test
@@ -515,7 +516,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // The bounds should be [100, 0 - 1100, 2500].
         assertEquals(origBounds.width(), currentBounds.width());
         assertEquals(origBounds.height(), currentBounds.height());
-        assertScaled();
+        assertDownScaled();
 
         // The scale is 2000/2500=0.8. The horizontal centered offset is (1000-(1000*0.8))/2=100.
         final float scale = (float) display.mBaseDisplayHeight / currentBounds.height();
@@ -555,7 +556,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(origBounds.width(), currentBounds.width());
         assertEquals(origBounds.height(), currentBounds.height());
         assertEquals(offsetX, mActivity.getBounds().left);
-        assertScaled();
+        assertDownScaled();
         // Activity is sandboxed due to size compat mode.
         assertActivityMaxBoundsSandboxed();
 
@@ -693,7 +694,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // The configuration bounds [820, 0 - 1820, 2500] should keep the same.
         assertEquals(originalBounds.width(), currentBounds.width());
         assertEquals(originalBounds.height(), currentBounds.height());
-        assertScaled();
+        assertDownScaled();
         // Activity max bounds are sandboxed due to size compat mode on the new display.
         assertActivityMaxBoundsSandboxed();
 
@@ -752,7 +753,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(origAppBounds.width(), appBounds.width());
         assertEquals(origAppBounds.height(), appBounds.height());
         // The activity is 1000x1400 and the display is 2500x1000.
-        assertScaled();
+        assertDownScaled();
         final float scale = mActivity.getCompatScale();
         // The position in configuration should be in app coordinates.
         final Rect screenBounds = mActivity.getBounds();
@@ -849,7 +850,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Size compatibility mode is able to handle orientation change so the process shouldn't be
         // restarted and the override configuration won't be cleared.
         verify(mActivity, never()).restartProcessIfVisible();
-        assertScaled();
+        assertDownScaled();
         // Activity max bounds are sandboxed due to size compat mode, even if is not visible.
         assertActivityMaxBoundsSandboxed();
 
@@ -1624,6 +1625,85 @@ public class SizeCompatTests extends WindowTestsBase {
                 activity.getBounds().width(), 0.5);
     }
 
+
+    /**
+     * Test that a freeform unresizeable activity can be down-scaled to fill its smaller parent
+     * bounds.
+     */
+    @Test
+    public void testCompatScaling_freeformUnresizeableApp_largerThanParent_downScaled() {
+        final int dw = 600;
+        final int dh = 800;
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, dw, dh)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .build();
+        setUpApp(display);
+        prepareUnresizable(mActivity, /* maxAspect */ 0f, SCREEN_ORIENTATION_PORTRAIT);
+        mActivity.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertFalse(mActivity.inSizeCompatMode());
+
+        // Resize app to make original app bounds larger than parent bounds.
+        mTask.getWindowConfiguration().setAppBounds(
+                new Rect(0, 0, dw - 300, dh - 400));
+        mActivity.onConfigurationChanged(mTask.getConfiguration());
+        // App should enter size compat mode and be down-scaled to fill new parent bounds.
+        assertDownScaled();
+    }
+
+    /**
+     * Test that when desktop mode is enabled, a freeform unresizeable activity can be up-scaled to
+     * fill its larger parent bounds.
+     */
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    public void testCompatScaling_freeformUnresizeableApp_smallerThanParent_upScaled() {
+        doReturn(true).when(() ->
+                DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
+        final int dw = 600;
+        final int dh = 800;
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, dw, dh)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .build();
+        setUpApp(display);
+        prepareUnresizable(mActivity, /* maxAspect */ 0f, SCREEN_ORIENTATION_PORTRAIT);
+        mActivity.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertFalse(mActivity.inSizeCompatMode());
+
+        // Resize app to make original app bounds smaller than parent bounds.
+        mTask.getWindowConfiguration().setAppBounds(
+                new Rect(0, 0, dw + 300, dh + 400));
+        mActivity.onConfigurationChanged(mTask.getConfiguration());
+        // App should enter size compat mode and be up-scaled to fill parent bounds.
+        assertUpScaled();
+    }
+
+    /**
+     * Test that when desktop mode is disabled, a freeform unresizeable activity cannot be up-scaled
+     * despite its larger parent bounds.
+     */
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    public void testSizeCompatScaling_freeformUnresizeableApp_smallerThanParent_notScaled() {
+        final int dw = 600;
+        final int dh = 800;
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, dw, dh)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .build();
+        setUpApp(display);
+        prepareUnresizable(mActivity, /* maxAspect */ 0f, SCREEN_ORIENTATION_PORTRAIT);
+        mActivity.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertFalse(mActivity.inSizeCompatMode());
+        final Rect originalAppBounds = mActivity.getBounds();
+
+        // Resize app to make original app bounds smaller than parent bounds.
+        mTask.getWindowConfiguration().setAppBounds(
+                new Rect(0, 0, dw + 300, dh + 400));
+        mActivity.onConfigurationChanged(mTask.getConfiguration());
+        // App should enter size compat mode but remain its original size.
+        assertTrue(mActivity.inSizeCompatMode());
+        assertEquals(originalAppBounds, mActivity.getBounds());
+    }
+
     @Test
     public void testGetLetterboxInnerBounds_noScalingApplied() {
         // Set up a display in portrait and ignoring orientation request.
@@ -1659,7 +1739,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // App should be in size compat.
         assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
-        assertScaled();
+        assertDownScaled();
         assertThat(mActivity.inSizeCompatMode()).isTrue();
         assertActivityMaxBoundsSandboxed();
 
@@ -2000,7 +2080,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // After we rotate, the activity should go in the size-compat mode and report the same
         // configuration values.
-        assertScaled();
+        assertDownScaled();
         assertEquals(originalScreenWidthDp, mActivity.getConfiguration().smallestScreenWidthDp);
         assertEquals(originalScreenWidthDp, mActivity.getConfiguration().screenWidthDp);
         assertEquals(originalScreenHeighthDp, mActivity.getConfiguration().screenHeightDp);
@@ -2775,7 +2855,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // App should be in size compat.
         assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
-        assertScaled();
+        assertDownScaled();
         assertEquals(activityBounds.width(), newActivityBounds.width());
         assertEquals(activityBounds.height(), newActivityBounds.height());
         assertActivityMaxBoundsSandboxed();
@@ -2807,7 +2887,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // App should be in size compat.
         assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
-        assertScaled();
+        assertDownScaled();
         assertThat(mActivity.inSizeCompatMode()).isTrue();
         assertActivityMaxBoundsSandboxed();
 
@@ -2955,7 +3035,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // App should be in size compat.
         assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
-        assertScaled();
+        assertDownScaled();
         assertThat(mActivity.inSizeCompatMode()).isTrue();
         // Activity max bounds are sandboxed due to size compat mode.
         assertActivityMaxBoundsSandboxed();
@@ -2967,7 +3047,7 @@ public class SizeCompatTests extends WindowTestsBase {
         verify(mActivity, never()).clearSizeCompatMode();
         assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
-        assertScaled();
+        assertDownScaled();
         assertEquals(activityBounds, mActivity.getBounds());
         // Activity max bounds are sandboxed due to size compat.
         assertActivityMaxBoundsSandboxed();
@@ -2995,7 +3075,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // App should be in size compat.
         assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
-        assertScaled();
+        assertDownScaled();
         assertActivityMaxBoundsSandboxed();
 
         // Rotate display to landscape.
@@ -3032,7 +3112,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // App should be in size compat.
         assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
-        assertScaled();
+        assertDownScaled();
         assertActivityMaxBoundsSandboxed();
 
         // Rotate display to portrait.
@@ -3224,7 +3304,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
 
         // Non-resizable activity in size compat mode
-        assertScaled();
+        assertDownScaled();
         final Rect newBounds = new Rect(mActivity.getWindowConfiguration().getBounds());
         assertEquals(originalBounds.width(), newBounds.width());
         assertEquals(originalBounds.height(), newBounds.height());
@@ -3288,7 +3368,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
 
         // Non-resizable activity in size compat mode
-        assertScaled();
+        assertDownScaled();
         final Rect newBounds = new Rect(mActivity.getWindowConfiguration().getBounds());
         assertEquals(originalBounds.width(), newBounds.width());
         assertEquals(originalBounds.height(), newBounds.height());
@@ -3329,7 +3409,7 @@ public class SizeCompatTests extends WindowTestsBase {
         organizer.mPrimary.setBounds(0, 0, 1000, 800);
 
         // Non-resizable activity should be in size compat mode.
-        assertScaled();
+        assertDownScaled();
         assertEquals(mActivity.getBounds(), new Rect(60, 0, 940, 800));
 
         recomputeNaturalConfigurationOfUnresizableActivity();
@@ -3906,7 +3986,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Force activity to scaled down for size compat mode.
         resizeDisplay(mTask.mDisplayContent, 700, 1400);
         assertTrue(mActivity.inSizeCompatMode());
-        assertScaled();
+        assertDownScaled();
         assertEquals(sizeCompatScaled, mActivity.getBounds());
     }
 
@@ -4406,7 +4486,7 @@ public class SizeCompatTests extends WindowTestsBase {
         resizeDisplay(mTask.mDisplayContent, 1400, 700);
 
         assertTrue(mActivity.inSizeCompatMode());
-        assertScaled();
+        assertDownScaled();
         assertEquals(sizeCompatScaled, mActivity.getBounds());
     }
 
@@ -4672,7 +4752,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Target min aspect ratio must be larger than parent aspect ratio to be applied.
         final float targetMinAspectRatio = 3.0f;
 
-        // Create fixed portait activity with min aspect ratio greater than parent aspect ratio.
+        // Create fixed portrait activity with min aspect ratio greater than parent aspect ratio.
         final ActivityRecord fixedOrientationActivity = new ActivityBuilder(mAtm)
                 .setTask(task).setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .setMinAspectRatio(targetMinAspectRatio).build();
@@ -4686,7 +4766,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final Rect minAspectRatioAppBounds = new Rect(minAspectRatioActivity.getConfiguration()
                 .windowConfiguration.getAppBounds());
 
-        // Create unresizeable fixed portait activity with min aspect ratio greater than parent
+        // Create unresizeable fixed portrait activity with min aspect ratio greater than parent
         // aspect ratio.
         final ActivityRecord sizeCompatActivity = new ActivityBuilder(mAtm)
                 .setTask(task).setResizeMode(RESIZE_MODE_UNRESIZEABLE)
@@ -4719,7 +4799,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Activity should enter size compat with old density after display density change.
         display.setForcedDensity(newDensity, UserHandle.USER_CURRENT);
 
-        assertScaled();
+        assertDownScaled();
         assertEquals(origDensity, mActivity.getConfiguration().densityDpi);
 
         // Activity should exit size compat with new density.
@@ -4958,14 +5038,25 @@ public class SizeCompatTests extends WindowTestsBase {
         }
     }
 
-    private void assertScaled() {
-        assertScaled(mActivity);
+    private void assertUpScaled() {
+        assertScaled(mActivity, /* upScalingExpected */ true);
     }
 
-    /** Asserts that the size of activity is larger than its parent so it is scaling. */
-    private void assertScaled(ActivityRecord activity) {
+    private void assertDownScaled() {
+        assertScaled(mActivity, /* upScalingExpected */ false);
+    }
+
+    /**
+     * Asserts that the size of an activity differs from its parent and so it is scaling (either up
+     * or down).
+     */
+    private void assertScaled(ActivityRecord activity, boolean upScalingExpected) {
         assertTrue(activity.inSizeCompatMode());
-        assertNotEquals(1f, activity.getCompatScale(), 0.0001f /* delta */);
+        if (upScalingExpected) {
+            assertTrue(activity.getCompatScale() > 1f);
+        } else {
+            assertTrue(activity.getCompatScale() < 1f);
+        }
     }
 
     private void assertFitted() {

@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
-import android.hardware.input.InputManager;
 import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseConfig;
@@ -60,8 +59,8 @@ import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
  * In case multiple physical keyboard are connected to a device,
  * mouse keys of each physical keyboard will control a single (global) mouse pointer.
  */
-public class MouseKeysInterceptor extends BaseEventStreamTransformation implements Handler.Callback,
-        InputManager.InputDeviceListener {
+public class MouseKeysInterceptor extends BaseEventStreamTransformation
+        implements Handler.Callback {
     private static final String LOG_TAG = "MouseKeysInterceptor";
 
     // To enable these logs, run: 'adb shell setprop log.tag.MouseKeysInterceptor DEBUG'
@@ -77,10 +76,7 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
     private static final int INTERVAL_MILLIS = 10;
 
     private final AccessibilityManagerService mAms;
-    private final InputManager mInputManager;
     private final Handler mHandler;
-
-    private final int mDisplayId;
 
     VirtualDeviceManager.VirtualDevice mVirtualDevice = null;
 
@@ -100,23 +96,23 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
     /** Last time the key action was performed */
     private long mLastTimeKeyActionPerformed = 0;
 
-    // TODO (b/346706749): This is currently using the numpad key bindings for mouse keys.
-    //  Decide the final mouse key bindings with UX input.
+    /** Whether scroll toggle is on */
+    private boolean mScrollToggleOn = false;
+
     public enum MouseKeyEvent {
-        DIAGONAL_DOWN_LEFT_MOVE(KeyEvent.KEYCODE_NUMPAD_1),
-        DOWN_MOVE(KeyEvent.KEYCODE_NUMPAD_2),
-        DIAGONAL_DOWN_RIGHT_MOVE(KeyEvent.KEYCODE_NUMPAD_3),
-        LEFT_MOVE(KeyEvent.KEYCODE_NUMPAD_4),
-        RIGHT_MOVE(KeyEvent.KEYCODE_NUMPAD_6),
-        DIAGONAL_UP_LEFT_MOVE(KeyEvent.KEYCODE_NUMPAD_7),
-        UP_MOVE(KeyEvent.KEYCODE_NUMPAD_8),
-        DIAGONAL_UP_RIGHT_MOVE(KeyEvent.KEYCODE_NUMPAD_9),
-        LEFT_CLICK(KeyEvent.KEYCODE_NUMPAD_5),
-        RIGHT_CLICK(KeyEvent.KEYCODE_NUMPAD_DOT),
-        HOLD(KeyEvent.KEYCODE_NUMPAD_MULTIPLY),
-        RELEASE(KeyEvent.KEYCODE_NUMPAD_SUBTRACT),
-        SCROLL_UP(KeyEvent.KEYCODE_A),
-        SCROLL_DOWN(KeyEvent.KEYCODE_S);
+        DIAGONAL_UP_LEFT_MOVE(KeyEvent.KEYCODE_7),
+        UP_MOVE_OR_SCROLL(KeyEvent.KEYCODE_8),
+        DIAGONAL_UP_RIGHT_MOVE(KeyEvent.KEYCODE_9),
+        LEFT_MOVE(KeyEvent.KEYCODE_U),
+        RIGHT_MOVE(KeyEvent.KEYCODE_O),
+        DIAGONAL_DOWN_LEFT_MOVE(KeyEvent.KEYCODE_J),
+        DOWN_MOVE_OR_SCROLL(KeyEvent.KEYCODE_K),
+        DIAGONAL_DOWN_RIGHT_MOVE(KeyEvent.KEYCODE_L),
+        LEFT_CLICK(KeyEvent.KEYCODE_I),
+        RIGHT_CLICK(KeyEvent.KEYCODE_SLASH),
+        HOLD(KeyEvent.KEYCODE_M),
+        RELEASE(KeyEvent.KEYCODE_COMMA),
+        SCROLL_TOGGLE(KeyEvent.KEYCODE_PERIOD);
 
         private final int mKeyCode;
         MouseKeyEvent(int enumValue) {
@@ -149,22 +145,19 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
      * Construct a new MouseKeysInterceptor.
      *
      * @param service The service to notify of key events
-     * @param inputManager InputManager to track changes to connected input devices
      * @param looper Looper to use for callbacks and messages
      * @param displayId Display ID to send mouse events to
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public MouseKeysInterceptor(AccessibilityManagerService service, InputManager inputManager,
-            Looper looper, int displayId) {
+    public MouseKeysInterceptor(AccessibilityManagerService service, Looper looper, int displayId) {
         mAms = service;
-        mInputManager = inputManager;
         mHandler = new Handler(looper, this);
-        mInputManager.registerInputDeviceListener(this, mHandler);
-        mDisplayId = displayId;
         // Create the virtual mouse on a separate thread since virtual device creation
         // should happen on an auxiliary thread, and not from the handler's thread.
+        // This is because virtual device creation is a blocking operation and can cause a
+        // deadlock if it is called from the handler's thread.
         new Thread(() -> {
-            mVirtualMouse = createVirtualMouse();
+            mVirtualMouse = createVirtualMouse(displayId);
         }).start();
 
     }
@@ -193,22 +186,23 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
 
     /**
      * Performs a mouse scroll action based on the provided key code.
+     * The scroll action will only be performed if the scroll toggle is on.
      * This method interprets the key code as a mouse scroll and sends
      * the corresponding {@code VirtualMouseScrollEvent#mYAxisMovement}.
 
      * @param keyCode The key code representing the mouse scroll action.
      *                Supported keys are:
      *                <ul>
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent SCROLL_UP}
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent SCROLL_DOWN}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#UP_MOVE_OR_SCROLL}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#DOWN_MOVE_OR_SCROLL}
      *                </ul>
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     private void performMouseScrollAction(int keyCode) {
         MouseKeyEvent mouseKeyEvent = MouseKeyEvent.from(keyCode);
         float y = switch (mouseKeyEvent) {
-            case SCROLL_UP -> 1.0f;
-            case SCROLL_DOWN -> -1.0f;
+            case UP_MOVE_OR_SCROLL -> 1.0f;
+            case DOWN_MOVE_OR_SCROLL -> -1.0f;
             default -> 0.0f;
         };
         if (mVirtualMouse != null) {
@@ -231,8 +225,8 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
      * @param keyCode The key code representing the mouse button action.
      *                Supported keys are:
      *                <ul>
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent LEFT_CLICK} (Primary Button)
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent RIGHT_CLICK} (Secondary
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#LEFT_CLICK} (Primary Button)
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#RIGHT_CLICK} (Secondary
      *                  Button)
      *                </ul>
      */
@@ -264,17 +258,20 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
      * The method calculates the relative movement of the mouse pointer
      * and sends the corresponding event to the virtual mouse.
      *
+     * The UP and DOWN pointer actions will only take place for their respective keys
+     * if the scroll toggle is off.
+     *
      * @param keyCode The key code representing the direction or button press.
      *                Supported keys are:
      *                <ul>
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent DIAGONAL_DOWN_LEFT}
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent DOWN}
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent DIAGONAL_DOWN_RIGHT}
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent LEFT}
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent RIGHT}
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent DIAGONAL_UP_LEFT}
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent UP}
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent DIAGONAL_UP_RIGHT}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#DIAGONAL_DOWN_LEFT_MOVE}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#DOWN_MOVE_OR_SCROLL}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#DIAGONAL_DOWN_RIGHT_MOVE}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#LEFT_MOVE}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#RIGHT_MOVE}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#DIAGONAL_UP_LEFT_MOVE}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#UP_MOVE_OR_SCROLL}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#DIAGONAL_UP_RIGHT_MOVE}
      *                </ul>
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
@@ -287,8 +284,10 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
                 x = -MOUSE_POINTER_MOVEMENT_STEP / sqrt(2);
                 y = MOUSE_POINTER_MOVEMENT_STEP / sqrt(2);
             }
-            case DOWN_MOVE -> {
-                y = MOUSE_POINTER_MOVEMENT_STEP;
+            case DOWN_MOVE_OR_SCROLL -> {
+                if (!mScrollToggleOn) {
+                    y = MOUSE_POINTER_MOVEMENT_STEP;
+                }
             }
             case DIAGONAL_DOWN_RIGHT_MOVE -> {
                 x = MOUSE_POINTER_MOVEMENT_STEP / sqrt(2);
@@ -304,8 +303,10 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
                 x = -MOUSE_POINTER_MOVEMENT_STEP / sqrt(2);
                 y = -MOUSE_POINTER_MOVEMENT_STEP / sqrt(2);
             }
-            case UP_MOVE -> {
-                y = -MOUSE_POINTER_MOVEMENT_STEP;
+            case UP_MOVE_OR_SCROLL -> {
+                if (!mScrollToggleOn) {
+                    y = -MOUSE_POINTER_MOVEMENT_STEP;
+                }
             }
             case DIAGONAL_UP_RIGHT_MOVE -> {
                 x = MOUSE_POINTER_MOVEMENT_STEP / sqrt(2);
@@ -333,8 +334,8 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
     }
 
     private boolean isMouseScrollKey(int keyCode) {
-        return keyCode == MouseKeyEvent.SCROLL_UP.getKeyCodeValue()
-                || keyCode == MouseKeyEvent.SCROLL_DOWN.getKeyCodeValue();
+        return keyCode == MouseKeyEvent.UP_MOVE_OR_SCROLL.getKeyCodeValue()
+                || keyCode == MouseKeyEvent.DOWN_MOVE_OR_SCROLL.getKeyCodeValue();
     }
 
     /**
@@ -343,7 +344,7 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
      * @return The created VirtualMouse.
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    private VirtualMouse createVirtualMouse() {
+    private VirtualMouse createVirtualMouse(int displayId) {
         final VirtualDeviceManagerInternal localVdm =
                 LocalServices.getService(VirtualDeviceManagerInternal.class);
         mVirtualDevice = localVdm.createVirtualDevice(
@@ -351,7 +352,7 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
         VirtualMouse virtualMouse = mVirtualDevice.createVirtualMouse(
                 new VirtualMouseConfig.Builder()
                 .setInputDeviceName("Mouse Keys Virtual Mouse")
-                .setAssociatedDisplayId(mDisplayId)
+                .setAssociatedDisplayId(displayId)
                 .build());
         return virtualMouse;
     }
@@ -375,42 +376,56 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
         if (!isMouseKey(keyCode)) {
             // Pass non-mouse key events to the next handler
             super.onKeyEvent(event, policyFlags);
-        } else if (keyCode == MouseKeyEvent.HOLD.getKeyCodeValue()) {
-            sendVirtualMouseButtonEvent(VirtualMouseButtonEvent.BUTTON_PRIMARY,
-                    VirtualMouseButtonEvent.ACTION_BUTTON_PRESS);
-        } else if (keyCode == MouseKeyEvent.RELEASE.getKeyCodeValue()) {
-            sendVirtualMouseButtonEvent(VirtualMouseButtonEvent.BUTTON_PRIMARY,
-                    VirtualMouseButtonEvent.ACTION_BUTTON_RELEASE);
-        } else if (isDown && isMouseButtonKey(keyCode)) {
-            performMouseButtonAction(keyCode);
-        } else if (isDown && isMouseScrollKey(keyCode)) {
-            // If the scroll key is pressed down and no other key is active,
-            // set it as the active key and send a message to scroll the pointer
-            if (mActiveScrollKey == KEY_NOT_SET) {
-                mActiveScrollKey = keyCode;
-                mLastTimeKeyActionPerformed = event.getDownTime();
-                mHandler.sendEmptyMessage(MESSAGE_SCROLL_MOUSE_POINTER);
-            }
         } else if (isDown) {
-            // This is a directional key.
-            // If the key is pressed down and no other key is active,
-            // set it as the active key and send a message to move the pointer
-            if (mActiveMoveKey == KEY_NOT_SET) {
-                mActiveMoveKey = keyCode;
-                mLastTimeKeyActionPerformed = event.getDownTime();
-                mHandler.sendEmptyMessage(MESSAGE_MOVE_MOUSE_POINTER);
+            if (keyCode == MouseKeyEvent.SCROLL_TOGGLE.getKeyCodeValue()) {
+                mScrollToggleOn = !mScrollToggleOn;
+                if (DEBUG) {
+                    Slog.d(LOG_TAG, "Scroll toggle " + (mScrollToggleOn ? "ON" : "OFF"));
+                }
+            } else if (keyCode == MouseKeyEvent.HOLD.getKeyCodeValue()) {
+                sendVirtualMouseButtonEvent(
+                        VirtualMouseButtonEvent.BUTTON_PRIMARY,
+                        VirtualMouseButtonEvent.ACTION_BUTTON_PRESS
+                );
+            } else if (keyCode == MouseKeyEvent.RELEASE.getKeyCodeValue()) {
+                sendVirtualMouseButtonEvent(
+                        VirtualMouseButtonEvent.BUTTON_PRIMARY,
+                        VirtualMouseButtonEvent.ACTION_BUTTON_RELEASE
+                );
+            } else if (isMouseButtonKey(keyCode)) {
+                performMouseButtonAction(keyCode);
+            } else if (mScrollToggleOn && isMouseScrollKey(keyCode)) {
+                // If the scroll key is pressed down and no other key is active,
+                // set it as the active key and send a message to scroll the pointer
+                if (mActiveScrollKey == KEY_NOT_SET) {
+                    mActiveScrollKey = keyCode;
+                    mLastTimeKeyActionPerformed = event.getDownTime();
+                    mHandler.sendEmptyMessage(MESSAGE_SCROLL_MOUSE_POINTER);
+                }
+            } else {
+                // This is a directional key.
+                // If the key is pressed down and no other key is active,
+                // set it as the active key and send a message to move the pointer
+                if (mActiveMoveKey == KEY_NOT_SET) {
+                    mActiveMoveKey = keyCode;
+                    mLastTimeKeyActionPerformed = event.getDownTime();
+                    mHandler.sendEmptyMessage(MESSAGE_MOVE_MOUSE_POINTER);
+                }
             }
-        } else if (mActiveMoveKey == keyCode) {
-            // If the key is released, and it is the active key, stop moving the pointer
-            mActiveMoveKey = KEY_NOT_SET;
-            mHandler.removeMessages(MESSAGE_MOVE_MOUSE_POINTER);
-        } else if (mActiveScrollKey == keyCode) {
-            // If the key is released, and it is the active key, stop scrolling the pointer
-            mActiveScrollKey = KEY_NOT_SET;
-            mHandler.removeMessages(MESSAGE_SCROLL_MOUSE_POINTER);
         } else {
-            Slog.i(LOG_TAG, "Dropping event with key code: '" + keyCode
-                    + "', with no matching down event from deviceId = " + event.getDeviceId());
+            // Up event received
+            if (mActiveMoveKey == keyCode) {
+                // If the key is released, and it is the active key, stop moving the pointer
+                mActiveMoveKey = KEY_NOT_SET;
+                mHandler.removeMessages(MESSAGE_MOVE_MOUSE_POINTER);
+            } else if (mActiveScrollKey == keyCode) {
+                // If the key is released, and it is the active key, stop scrolling the pointer
+                mActiveScrollKey = KEY_NOT_SET;
+                mHandler.removeMessages(MESSAGE_SCROLL_MOUSE_POINTER);
+            } else {
+                Slog.i(LOG_TAG, "Dropping event with key code: '" + keyCode
+                        + "', with no matching down event from deviceId = " + event.getDeviceId());
+            }
         }
     }
 
@@ -470,14 +485,6 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
         }
     }
 
-    @Override
-    public void onInputDeviceAdded(int deviceId) {
-    }
-
-    @Override
-    public void onInputDeviceRemoved(int deviceId) {
-    }
-
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override
     public void onDestroy() {
@@ -485,14 +492,8 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation implemen
         mActiveMoveKey = KEY_NOT_SET;
         mActiveScrollKey = KEY_NOT_SET;
         mLastTimeKeyActionPerformed = 0;
+
         mHandler.removeCallbacksAndMessages(null);
-
         mVirtualDevice.close();
-        mInputManager.unregisterInputDeviceListener(this);
     }
-
-    @Override
-    public void onInputDeviceChanged(int deviceId) {
-    }
-
 }

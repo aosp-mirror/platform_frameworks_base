@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.IntSize
  * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
  *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
  * @param scenes the configuration of the different scenes of this layout.
- * @see updateSceneTransitionLayoutState
  */
 @Composable
 fun SceneTransitionLayout(
@@ -66,56 +65,6 @@ fun SceneTransitionLayout(
         swipeDetector,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
-        scenes,
-    )
-}
-
-/**
- * [SceneTransitionLayout] is a container that automatically animates its content whenever
- * [currentScene] changes, using the transitions defined in [transitions].
- *
- * Note: You should use [androidx.compose.animation.AnimatedContent] instead of
- * [SceneTransitionLayout] if it fits your need. Use [SceneTransitionLayout] over AnimatedContent if
- * you need support for swipe gestures, shared elements or transitions defined declaratively outside
- * UI code.
- *
- * @param currentScene the current scene
- * @param onChangeScene a mutator that should set [currentScene] to the given scene when called.
- *   This is called when the user commits a transition to a new scene because of a [UserAction], for
- *   instance by triggering back navigation or by swiping to a new scene.
- * @param transitions the definition of the transitions used to animate a change of scene.
- * @param swipeSourceDetector the source detector used to detect which source a swipe is started
- *   from, if any.
- * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
- *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
- * @param scenes the configuration of the different scenes of this layout.
- */
-@Composable
-fun SceneTransitionLayout(
-    currentScene: SceneKey,
-    onChangeScene: (SceneKey) -> Unit,
-    transitions: SceneTransitions,
-    modifier: Modifier = Modifier,
-    swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
-    swipeDetector: SwipeDetector = DefaultSwipeDetector,
-    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
-    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
-    scenes: SceneTransitionLayoutScope.() -> Unit,
-) {
-    val state =
-        updateSceneTransitionLayoutState(
-            currentScene,
-            onChangeScene,
-            transitions,
-            enableInterruptions = enableInterruptions,
-        )
-
-    SceneTransitionLayout(
-        state,
-        modifier,
-        swipeSourceDetector,
-        swipeDetector,
-        transitionInterceptionThreshold,
         scenes,
     )
 }

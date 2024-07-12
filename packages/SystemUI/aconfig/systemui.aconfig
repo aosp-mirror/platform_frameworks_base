@@ -591,6 +591,16 @@ flag {
 }
 
 flag {
+    name: "screenshot_save_image_exporter"
+    namespace: "systemui"
+    description: "Save all screenshots using ImageExporter"
+    bug: "352308052"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
    name: "run_fingerprint_detect_on_dismissible_keyguard"
    namespace: "systemui"
    description: "Run fingerprint detect instead of authenticate if the keyguard is dismissible."
@@ -1143,3 +1153,21 @@ flag {
        purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+  namespace: "systemui"
+  name: "qs_register_setting_observer_on_bg_thread"
+  description: "Registers Quick Settings content providers on background thread"
+  bug: "351766769"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "sounddose_customization"
+  namespace: "systemui"
+  description: "Enables custom actions for sounddose notifications"
+  bug: "345227709"
+}
+

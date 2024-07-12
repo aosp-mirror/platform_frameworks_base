@@ -348,12 +348,16 @@ public class WindowOnBackInvokedDispatcherTest {
 
         waitForIdle();
         verify(mCallback1).onBackStarted(any(BackEvent.class));
+        assertTrue(mDispatcher.mProgressAnimator.isBackAnimationInProgress());
 
         mDispatcher.unregisterOnBackInvokedCallback(mCallback1);
 
         waitForIdle();
         verify(mCallback1).onBackCancelled();
         verify(mWindowSession).setOnBackInvokedCallbackInfo(Mockito.eq(mWindow), isNull());
+        // Verify that ProgressAnimator is reset (and thus does not cause further callback event
+        // dispatching)
+        assertFalse(mDispatcher.mProgressAnimator.isBackAnimationInProgress());
     }
 
     @Test
