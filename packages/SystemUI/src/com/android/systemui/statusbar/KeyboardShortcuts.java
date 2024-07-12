@@ -524,7 +524,7 @@ public final class KeyboardShortcuts {
                 keyboardShortcutInfoAppItems.add(new KeyboardShortcutInfo(
                         mContext.getString(R.string.keyboard_shortcut_group_applications_assist),
                         assistIcon,
-                        KeyEvent.KEYCODE_UNKNOWN,
+                        KeyEvent.KEYCODE_A,
                         KeyEvent.META_META_ON));
             }
         }
