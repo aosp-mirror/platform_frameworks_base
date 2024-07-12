@@ -716,6 +716,8 @@
     <!-- QuickSettings: Do not disturb - Priority only [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Do not disturb - Alarms only [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Do not disturb - Total silence [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Priority modes [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_modes_label">Priority modes</string>
     <!-- QuickSettings: Bluetooth [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_label">Bluetooth</string>
     <!-- QuickSettings: Bluetooth (Multiple) [CHAR LIMIT=NONE] -->
