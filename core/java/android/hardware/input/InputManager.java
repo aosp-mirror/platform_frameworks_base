@@ -1251,8 +1251,22 @@ public final class InputManager {
      * canceled. Only the pilfering window will continue to receive events for the affected pointers
      * until the pointer is lifted.
      *
-     * This method should be used with caution as unexpected pilfering can break fundamental user
-     * interactions.
+     * Furthermore, if any new pointers go down within the touchable region of the pilfering window
+     * and are part of the same gesture, those new pointers will be pilfered as well, and will not
+     * be sent to any other windows.
+     *
+     * Pilfering is designed to be used only once per gesture. Once the gesture is complete
+     * (i.e. on {@link MotionEvent#ACTION_UP}, {@link MotionEvent#ACTION_CANCEL},
+     * or {@link MotionEvent#ACTION_HOVER_EXIT}), the system will resume dispatching pointers
+     * to the appropriately touched windows.
+     *
+     * NOTE: This method should be used with caution as unexpected pilfering can break fundamental
+     * user interactions.
+     *
+     * NOTE: Since this method pilfers pointers based on gesture stream that is
+     * currently active for the window, the behavior will depend on the state of the system, and
+     * is inherently racy. For example, a pilfer request on a quick tap may not be successful if
+     * the tap is already complete by the time the pilfer request is received by the system.
      *
      * @see android.os.InputConfig#SPY
      * @hide
