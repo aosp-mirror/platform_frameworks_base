@@ -120,6 +120,7 @@ fun ShortcutHelper(
                 ShortcutHelperSinglePane(
                     modifier,
                     shortcutsUiState.shortcutCategories,
+                    shortcutsUiState.defaultSelectedCategory,
                     onKeyboardSettingsClicked
                 )
             } else {
@@ -146,6 +147,7 @@ private fun shouldUseSinglePane() =
 private fun ShortcutHelperSinglePane(
     modifier: Modifier = Modifier,
     categories: List<ShortcutCategory>,
+    defaultSelectedCategory: ShortcutCategoryType,
     onKeyboardSettingsClicked: () -> Unit,
 ) {
     Column(
@@ -159,7 +161,7 @@ private fun ShortcutHelperSinglePane(
         Spacer(modifier = Modifier.height(6.dp))
         ShortcutsSearchBar()
         Spacer(modifier = Modifier.height(16.dp))
-        CategoriesPanelSinglePane(categories)
+        CategoriesPanelSinglePane(categories, defaultSelectedCategory)
         Spacer(modifier = Modifier.weight(1f))
         KeyboardSettings(onClick = onKeyboardSettingsClicked)
     }
@@ -168,8 +170,10 @@ private fun ShortcutHelperSinglePane(
 @Composable
 private fun CategoriesPanelSinglePane(
     categories: List<ShortcutCategory>,
+    defaultSelectedCategory: ShortcutCategoryType,
 ) {
-    var expandedCategory by remember { mutableStateOf<ShortcutCategory?>(null) }
+    val selectedCategory = categories.firstOrNull { it.type == defaultSelectedCategory }
+    var expandedCategory by remember { mutableStateOf(selectedCategory) }
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         categories.fastForEachIndexed { index, category ->
             val isExpanded = expandedCategory == category
