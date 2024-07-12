@@ -1107,8 +1107,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // Search for InputMethodSettingsRepository.put() to find where and when it's actually
             // being updated. In general IMMS should refrain from exposing the existence of IMEs
             // until systemReady().
-            InputMethodSettingsRepository.initialize(mHandler, mContext);
-            AdditionalSubtypeMapRepository.initialize(mHandler, mContext);
+            InputMethodSettingsRepository.initialize(mIoHandler, mContext);
+            AdditionalSubtypeMapRepository.initialize(mIoHandler, mContext);
 
             mCurrentUserId = mActivityManagerInternal.getCurrentUserId();
             @SuppressWarnings("GuardedBy") final IntFunction<InputMethodBindingController>
