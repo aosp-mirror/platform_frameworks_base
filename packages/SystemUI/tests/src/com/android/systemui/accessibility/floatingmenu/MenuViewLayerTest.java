@@ -288,7 +288,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         mockActivityQuery(true);
         mMenuViewLayer.dispatchAccessibilityAction(R.id.action_edit);
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mSpyContext).startActivity(intentCaptor.capture());
+        verify(mSpyContext).startActivityAsUser(intentCaptor.capture(), eq(UserHandle.CURRENT));
         assertThat(intentCaptor.getValue().getAction()).isEqualTo(
                 mMenuViewLayer.getIntentForEditScreen().getAction());
     }
@@ -299,6 +299,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         mockActivityQuery(false);
         mMenuViewLayer.dispatchAccessibilityAction(R.id.action_edit);
         verify(mSpyContext, never()).startActivity(any());
+        verify(mSpyContext, never()).startActivityAsUser(any(), any());
     }
 
     @Test
