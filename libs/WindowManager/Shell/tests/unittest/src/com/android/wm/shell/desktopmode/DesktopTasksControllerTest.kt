@@ -313,6 +313,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun showDesktopApps_onSecondaryDisplay_desktopWallpaperEnabled_shouldNotShowWallpaper() {
+    val homeTask = setUpHomeTask(SECOND_DISPLAY)
     val task1 = setUpFreeformTask(SECOND_DISPLAY)
     val task2 = setUpFreeformTask(SECOND_DISPLAY)
     markTaskHidden(task1)
@@ -321,10 +322,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.showDesktopApps(SECOND_DISPLAY, RemoteTransition(TestRemoteTransition()))
 
     val wct = getLatestWct(type = TRANSIT_TO_FRONT, handlerClass = OneShotRemoteHandler::class.java)
-    assertThat(wct.hierarchyOps).hasSize(2)
-    // Expect order to be from bottom: task1, task2 (no wallpaper intent)
-    wct.assertReorderAt(index = 0, task1)
-    wct.assertReorderAt(index = 1, task2)
+    assertThat(wct.hierarchyOps).hasSize(3)
+    // Expect order to be from bottom: home, task1, task2 (no wallpaper intent)
+    wct.assertReorderAt(index = 0, homeTask)
+    wct.assertReorderAt(index = 1, task1)
+    wct.assertReorderAt(index = 2, task2)
   }
 
   @Test
@@ -349,6 +351,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun showDesktopApps_onSecondaryDisplay_desktopWallpaperDisabled_shouldNotMoveLauncher() {
+    val homeTask = setUpHomeTask(SECOND_DISPLAY)
     val task1 = setUpFreeformTask(SECOND_DISPLAY)
     val task2 = setUpFreeformTask(SECOND_DISPLAY)
     markTaskHidden(task1)
@@ -357,9 +360,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.showDesktopApps(SECOND_DISPLAY, RemoteTransition(TestRemoteTransition()))
 
     val wct = getLatestWct(type = TRANSIT_TO_FRONT, handlerClass = OneShotRemoteHandler::class.java)
-    assertThat(wct.hierarchyOps).hasSize(2)
-    wct.assertReorderAt(index = 0, task1)
-    wct.assertReorderAt(index = 1, task2)
+    assertThat(wct.hierarchyOps).hasSize(3)
+    // Expect order to be from bottom: home, task1, task2
+    wct.assertReorderAt(index = 0, homeTask)
+    wct.assertReorderAt(index = 1, task1)
+    wct.assertReorderAt(index = 2, task2)
   }
 
   @Test
@@ -460,6 +465,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun showDesktopApps_twoDisplays_bringsToFrontOnlyOneDisplay_desktopWallpaperEnabled() {
+    val homeTaskDefaultDisplay = setUpHomeTask(DEFAULT_DISPLAY)
     val taskDefaultDisplay = setUpFreeformTask(DEFAULT_DISPLAY)
     setUpHomeTask(SECOND_DISPLAY)
     val taskSecondDisplay = setUpFreeformTask(SECOND_DISPLAY)
@@ -469,10 +475,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.showDesktopApps(DEFAULT_DISPLAY, RemoteTransition(TestRemoteTransition()))
 
     val wct = getLatestWct(type = TRANSIT_TO_FRONT, handlerClass = OneShotRemoteHandler::class.java)
-    assertThat(wct.hierarchyOps).hasSize(2)
-    // Expect order to be from bottom: wallpaper intent, task
-    wct.assertPendingIntentAt(index = 0, desktopWallpaperIntent)
-    wct.assertReorderAt(index = 1, taskDefaultDisplay)
+    assertThat(wct.hierarchyOps).hasSize(3)
+    // Move home to front
+    wct.assertReorderAt(index = 0, homeTaskDefaultDisplay)
+    // Add desktop wallpaper activity
+    wct.assertPendingIntentAt(index = 1, desktopWallpaperIntent)
+    // Move freeform task to front
+    wct.assertReorderAt(index = 2, taskDefaultDisplay)
   }
 
   @Test
@@ -497,7 +506,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun showDesktopApps_desktopWallpaperEnabled_dontReorderMinimizedTask() {
-    setUpHomeTask()
+    val homeTask = setUpHomeTask()
     val freeformTask = setUpFreeformTask()
     val minimizedTask = setUpFreeformTask()
 
@@ -507,11 +516,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.showDesktopApps(DEFAULT_DISPLAY, RemoteTransition(TestRemoteTransition()))
 
     val wct = getLatestWct(type = TRANSIT_TO_FRONT, handlerClass = OneShotRemoteHandler::class.java)
-    assertThat(wct.hierarchyOps).hasSize(2)
+    assertThat(wct.hierarchyOps).hasSize(3)
+    // Move home to front
+    wct.assertReorderAt(index = 0, homeTask, toTop = true)
     // Add desktop wallpaper activity
-    wct.assertPendingIntentAt(index = 0, desktopWallpaperIntent)
+    wct.assertPendingIntentAt(index = 1, desktopWallpaperIntent)
     // Reorder freeform task to top, don't reorder the minimized task
-    wct.assertReorderAt(index = 1, freeformTask, toTop = true)
+    wct.assertReorderAt(index = 2, freeformTask, toTop = true)
   }
 
   @Test
@@ -894,16 +905,19 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
     val freeformTasks = (1..taskLimit).map { _ -> setUpFreeformTask() }
     val newTask = setUpFullscreenTask()
-    setUpHomeTask()
+    val homeTask = setUpHomeTask()
 
     controller.moveToDesktop(newTask, transitionSource = UNKNOWN)
 
     val wct = getLatestEnterDesktopWct()
-    assertThat(wct.hierarchyOps.size).isEqualTo(taskLimit + 1) // visible tasks + wallpaper
+    assertThat(wct.hierarchyOps.size).isEqualTo(taskLimit + 2) // tasks + home + wallpaper
+    // Move home to front
+    wct.assertReorderAt(0, homeTask)
     // Add desktop wallpaper activity
-    wct.assertPendingIntentAt(0, desktopWallpaperIntent)
+    wct.assertPendingIntentAt(1, desktopWallpaperIntent)
+    // Bring freeform tasks to front
     wct.assertReorderSequenceInRange(
-      range = 1..<(taskLimit + 1),
+      range = 2..<(taskLimit + 2),
       *freeformTasks.drop(1).toTypedArray(), // Skipping freeformTasks[0]
       newTask
     )
