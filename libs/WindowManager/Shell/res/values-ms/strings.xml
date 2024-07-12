@@ -84,6 +84,10 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Gelembung"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Urus"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Gelembung diketepikan."</string>
+    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
+    <skip />
+    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
+    <skip />
     <string name="restart_button_description" msgid="4564728020654658478">"Ketik untuk memulakan semula apl ini untuk mendapatkan paparan yang lebih baik"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Tukar nisbah bidang apl ini dalam Tetapan"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Tukar nisbah bidang"</string>

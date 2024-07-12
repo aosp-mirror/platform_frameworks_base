@@ -163,7 +163,7 @@
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Połączono z szyfrowaną siecią <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Połączenie przy użyciu karty SIM w sieci <xliff:g id="NETWORK_NAME">%1$s</xliff:g> jest teraz bezpieczniejsze"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Połączono z niezaszyfrowaną siecią"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Gdy korzystasz z karty SIM w sieci <xliff:g id="NETWORK_NAME">%1$s</xliff:g>, połączenia, wiadomości i dane są bardziej narażone na ataki"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Gdy korzystasz z karty SIM w sieci <xliff:g id="NETWORK_NAME">%1$s</xliff:g>, połączenia, SMS-y i dane są bardziej narażone na ataki"</string>
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Połączenia, wiadomości i dane są obecnie bardziej podatne na ataki podczas korzystania z karty SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g>.\n\nGdy połączenie zostanie ponownie zaszyfrowane, otrzymasz kolejne powiadomienie."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Ustawienia bezpieczeństwa sieci komórkowej"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Więcej informacji"</string>

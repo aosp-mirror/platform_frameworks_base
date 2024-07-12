@@ -2411,7 +2411,7 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privaatne ruum"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Märguande delikaatne sisu peideti"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Rakenduse sisu on ekraani jagamises turvalisuse huvides peidetud"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Rakenduse sisu on ekraani jagamisel turvalisuse huvides peidetud"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Satelliidiga loodi automaatselt ühendus"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Teil on võimalik sõnumeid saata ja vastu võtta ilma mobiilside- ja WiFi-võrguta"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ava rakendus Messages"</string>

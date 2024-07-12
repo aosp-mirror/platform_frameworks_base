@@ -1523,7 +1523,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"பணிக் கணக்கில் பயன்பாட்டைப் பயன்படுத்துகிறீர்கள்"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"உள்ளீட்டு முறை"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"ஒத்திசை"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"அணுகல்தன்மை"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"மாற்றுத்திறன் வசதி"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"வால்பேப்பர்"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"வால்பேப்பரை மாற்று"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"அறிவிப்புகளைக் கண்காணிக்கும் சேவை"</string>
@@ -2054,7 +2054,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"செய்திகளும் பத்திரிகைகளும்"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"வரைபடங்களும் வழிசெலுத்தலும்"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"உற்பத்தித்திறன்"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"அணுகல்தன்மை"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"மாற்றுத்திறன் வசதி"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"சாதனச் சேமிப்பகம்"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB பிழைதிருத்தம்"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"மணி"</string>

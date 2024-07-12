@@ -345,7 +345,7 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"Telefonanrufe tätigen und verwalten"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Körpersensoren"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"auf Sensordaten zu deinen Vitaldaten zugreifen"</string>
-    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Benachrichtigungen"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Benachrichtigun­gen"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"Benachrichtigungen anzeigen"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Fensterinhalte abrufen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Die Inhalte eines Fensters, mit dem du interagierst, werden abgerufen."</string>
@@ -1573,7 +1573,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"Konto hinzufügen"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Verlängern"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Verringern"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> berühren und halten."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> gedrückt halten."</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Zum Verlängern nach oben und zum Verringern nach unten schieben"</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Minuten verlängern"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Minuten verringern"</string>
@@ -1600,7 +1600,7 @@
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> konnte nicht gestartet werden."</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Teilen mit"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Mit <xliff:g id="APPLICATION_NAME">%s</xliff:g> teilen"</string>
-    <string name="content_description_sliding_handle" msgid="982510275422590757">"Schieberegler: Berühren und halten"</string>
+    <string name="content_description_sliding_handle" msgid="982510275422590757">"Schieberegler: Gedrückt halten"</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Zum Entsperren den Finger über den Bildschirm ziehen"</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Zur Startseite navigieren"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Nach oben navigieren"</string>
@@ -2411,7 +2411,7 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Vertrauliches Profil"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Vertrauliche Benachrichtigungsinhalte ausgeblendet"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"App-Inhalte werden aus Sicherheitsgründen bei der Bildschirmfreigabe ausgeblendet"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Aus Sicherheitsgründen werden bei der Bildschirmfreigabe App-Inhalte ausgeblendet"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automatisch mit Satellit verbunden"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Du kannst Nachrichten ohne Mobilfunknetz oder WLAN senden und empfangen"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages öffnen"</string>

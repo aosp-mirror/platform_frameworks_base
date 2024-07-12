@@ -107,7 +107,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Záznam obrazovky se zpracovává"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Trvalé oznámení o relaci nahrávání"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Začít nahrávat?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Během nahrávání má Android přístup k veškerému obsahu, který je viditelný na obrazovce nebo se přehrává v zařízení. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Během nahrávání má Android přístup k veškerému obsahu, který je viditelný na obrazovce nebo se přehrává v zařízení. Dejte proto pozor na hesla, platební údaje, zprávy, fotografie, zvukové záznamy nebo videa."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Během nahrávání aplikace má Android přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s informacemi, jako jsou hesla, platební údaje, zprávy, fotky, zvukové záznamy nebo videa."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Začít nahrávat"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrávat zvuk"</string>
@@ -129,18 +129,21 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Přestane se nahrávat aplikace &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
+    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Přestane se sdílet aplikace &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Přestane se odesílat aplikace &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
     <!-- no translation found for close_dialog_button (4749497706540104133) -->
@@ -189,6 +192,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odemknuto obličejem. Pokračujte stisknutím."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Obličej rozpoznán. Pokračujte stisknutím."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Obličej rozpoznán. Klepněte na ikonu odemknutí."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Odemknuto obličejem. Pokračujte klepnutím."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Ověřeno"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Zrušit ověření"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Další možnosti"</string>
@@ -303,10 +307,8 @@
     <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Bluetooth využívají funkce jako Quick Share a Najdi moje zařízení."</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth se zapne zítra ráno."</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Sdílet zvuk"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Zvuk se sdílí"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvuk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Sluchátka"</string>
@@ -383,7 +385,7 @@
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Ukončit"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Zpráva o chybě"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Co v zařízení bylo ovlivněno?"</string>
-    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Vyberte druh problém"</string>
+    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Vyberte druh problému"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Záznam obrazovky"</string>
     <string name="performance" msgid="6552785217174378320">"Výkon"</string>
     <string name="user_interface" msgid="3712869377953950887">"Uživatelské rozhraní"</string>
@@ -397,7 +399,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliknutím spárujete nové zařízení"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Předvolbu nelze aktualizovat"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Předvolba"</string>
-    <string name="live_caption_title" msgid="8916875614623730005">"Živý přepis"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"Okamžité titulky"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Odblokovat mikrofon zařízení?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Odblokovat fotoaparát zařízení?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Odblokovat fotoaparát a mikrofon zařízení?"</string>
@@ -597,7 +599,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktivovat"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Zvuk a vibrace"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Nastavení"</string>
-    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Živý přepis"</string>
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Okamžité titulky"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Hlasitost byla snížena na bezpečnou úroveň"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Hlasitost sluchátek byla vysoká déle, než je doporučeno"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Hlasitost sluchátek překročila bezpečný limit pro tento týden"</string>
@@ -618,11 +620,11 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, děkuji"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikace byla připnuta"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikace byla odepnuta"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Hovor"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Hovory"</string>
     <string name="stream_system" msgid="7663148785370565134">"Systém"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Vyzvánění"</string>
     <string name="stream_music" msgid="2188224742361847580">"Média"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"Budík"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"Budíky"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Oznámení"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Tónová volba"</string>
@@ -1197,6 +1199,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Klepnutím zobrazíte další informace"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Budík nenastaven"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"zadejte zámek obrazovky"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Dotkněte se snímače otisků prstů. Vypínač je kratší tlačítko na boku telefonu."</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Snímač otisků prstů"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ověříte"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"zadáte zařízení"</string>

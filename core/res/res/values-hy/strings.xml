@@ -2411,7 +2411,7 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Մասնավոր տարածք"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Ծանուցման զգայուն բովանդակությունը թաքցված է"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Անվտանգության նկատառումներից ելնելով՝ հավելվածի բովանդակությունը թաքցվել է էկրանի ցուցադրումից"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Անվտանգության նկատառումներով՝ բովանդակությունը թաքցվել է ցուցադրումից"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Ավտոմատ միացել է արբանյակին"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Դուք կարող եք ուղարկել և ստանալ հաղորդագրություններ՝ առանց բջջային կամ Wi-Fi կապի"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Բացել Messages-ը"</string>
