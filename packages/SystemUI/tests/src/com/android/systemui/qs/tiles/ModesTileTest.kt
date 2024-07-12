@@ -33,7 +33,9 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileDataInteractor
+import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.modes.ui.ModesTileMapper
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigTestBuilder
@@ -77,6 +79,7 @@ class ModesTileTest : SysuiTestCase() {
 
     @Mock private lateinit var qsTileConfigProvider: QSTileConfigProvider
 
+    private val inputHandler = FakeQSTileIntentUserInputHandler()
     private val zenModeRepository = FakeZenModeRepository()
     private val tileDataInteractor = ModesTileDataInteractor(zenModeRepository)
     private val mapper =
@@ -93,6 +96,7 @@ class ModesTileTest : SysuiTestCase() {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
+    private lateinit var userActionInteractor: ModesTileUserActionInteractor
     private lateinit var secureSettings: SecureSettings
     private lateinit var testableLooper: TestableLooper
     private lateinit var underTest: ModesTile
@@ -118,6 +122,8 @@ class ModesTileTest : SysuiTestCase() {
                 }
             )
 
+        userActionInteractor = ModesTileUserActionInteractor(inputHandler)
+
         underTest =
             ModesTile(
                 qsHost,
@@ -131,7 +137,8 @@ class ModesTileTest : SysuiTestCase() {
                 qsLogger,
                 qsTileConfigProvider,
                 tileDataInteractor,
-                mapper
+                mapper,
+                userActionInteractor,
             )
 
         underTest.initialize()

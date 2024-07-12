@@ -36,6 +36,7 @@ import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileDataInteractor
+import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import com.android.systemui.qs.tiles.impl.modes.ui.ModesTileMapper
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
@@ -59,6 +60,7 @@ constructor(
     qsTileConfigProvider: QSTileConfigProvider,
     dataInteractor: ModesTileDataInteractor,
     private val tileMapper: ModesTileMapper,
+    private val userActionInteractor: ModesTileUserActionInteractor,
 ) :
     QSTileImpl<BooleanState>(
         host,
@@ -93,10 +95,7 @@ constructor(
         // TODO(b/346519570) open dialog
     }
 
-    override fun getLongClickIntent(): Intent? {
-        // TODO(b/346519570) open settings
-        return null
-    }
+    override fun getLongClickIntent(): Intent = userActionInteractor.longClickIntent
 
     override fun handleUpdateState(booleanState: BooleanState?, arg: Any?) {
         if (arg is ModesTileModel) {
@@ -108,8 +107,6 @@ constructor(
                 label = tileLabel
                 secondaryLabel = tileState.secondaryLabel
                 contentDescription = tileState.contentDescription
-                // TODO(b/346519570) open settings
-                handlesLongClick = false
             }
         }
     }
