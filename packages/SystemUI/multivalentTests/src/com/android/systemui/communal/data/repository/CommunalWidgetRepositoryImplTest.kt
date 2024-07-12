@@ -34,6 +34,7 @@ import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalItemRank
 import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.data.db.CommunalWidgetItem
+import com.android.systemui.communal.data.db.defaultWidgetPopulation
 import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.communal.proto.toByteArray
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
@@ -134,6 +135,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                 backupUtils,
                 packageChangeRepository,
                 userManager,
+                kosmos.defaultWidgetPopulation,
             )
     }
 
