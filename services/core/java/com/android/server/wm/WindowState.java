@@ -1101,7 +1101,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mPolicy = mWmService.mPolicy;
         mContext = mWmService.mContext;
         mForceSeamlesslyRotate = token.mRoundedCornerOverlay;
-        mLastReportedActivityWindowInfo = Flags.activityWindowInfoFlag() && mActivityRecord != null
+        mLastReportedActivityWindowInfo = mActivityRecord != null
                 ? new ActivityWindowInfo()
                 : null;
         mInputWindowHandle = new InputWindowHandleWrapper(new InputWindowHandle(
