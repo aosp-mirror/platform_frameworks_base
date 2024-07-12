@@ -17,6 +17,7 @@
 package com.android.settingslib.notification.data.repository
 
 import android.app.NotificationManager
+import android.app.NotificationManager.EXTRA_NOTIFICATION_POLICY
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
@@ -74,7 +75,7 @@ class ZenModeRepositoryImpl(
                 val receiver =
                     object : BroadcastReceiver() {
                         override fun onReceive(context: Context?, intent: Intent?) {
-                            intent?.action?.let { action -> launch { send(action) } }
+                            intent?.let { launch { send(it) } }
                         }
                     }
 
@@ -112,7 +113,9 @@ class ZenModeRepositoryImpl(
     override val consolidatedNotificationPolicy: StateFlow<NotificationManager.Policy?> by lazy {
         if (Flags.volumePanelBroadcastFix() && android.app.Flags.modesApi())
             flowFromBroadcast(NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED) {
-                notificationManager.consolidatedNotificationPolicy
+                // If available, get the value from extras to avoid a potential binder call.
+                it?.extras?.getParcelable(EXTRA_NOTIFICATION_POLICY)
+                    ?: notificationManager.consolidatedNotificationPolicy
             }
         else
             flowFromBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED) {
@@ -126,11 +129,11 @@ class ZenModeRepositoryImpl(
         }
     }
 
-    private fun <T> flowFromBroadcast(intentAction: String, mapper: () -> T) =
+    private fun <T> flowFromBroadcast(intentAction: String, mapper: (Intent?) -> T) =
         notificationBroadcasts
-            .filter { intentAction == it }
-            .map { mapper() }
-            .onStart { emit(mapper()) }
+            .filter { intentAction == it.action }
+            .map { mapper(it) }
+            .onStart { emit(mapper(null)) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
