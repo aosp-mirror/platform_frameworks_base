@@ -1107,6 +1107,10 @@ class DesktopTasksController(
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
+        if (desktopModeTaskRepository.isOnlyVisibleNonClosingTask(taskInfo.taskId)) {
+            // Remove wallpaper activity when leaving desktop mode
+            removeWallpaperActivity(wct)
+        }
     }
 
     /**
@@ -1122,6 +1126,10 @@ class DesktopTasksController(
         // The task's density may have been overridden in freeform; revert it here as we don't
         // want it overridden in multi-window.
         wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
+        if (desktopModeTaskRepository.isOnlyVisibleNonClosingTask(taskInfo.taskId)) {
+            // Remove wallpaper activity when leaving desktop mode
+            removeWallpaperActivity(wct)
+        }
     }
 
     /** Returns the ID of the Task that will be minimized, or null if no task will be minimized. */
