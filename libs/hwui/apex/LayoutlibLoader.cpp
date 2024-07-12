@@ -28,6 +28,7 @@ using namespace std;
 
 extern int register_android_graphics_Bitmap(JNIEnv*);
 extern int register_android_graphics_BitmapFactory(JNIEnv*);
+extern int register_android_graphics_BitmapRegionDecoder(JNIEnv*);
 extern int register_android_graphics_ByteBufferStreamAdaptor(JNIEnv* env);
 extern int register_android_graphics_Camera(JNIEnv* env);
 extern int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
@@ -53,8 +54,11 @@ extern int register_android_graphics_ColorSpace(JNIEnv* env);
 extern int register_android_graphics_DrawFilter(JNIEnv* env);
 extern int register_android_graphics_FontFamily(JNIEnv* env);
 extern int register_android_graphics_Gainmap(JNIEnv* env);
+extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
 extern int register_android_graphics_HardwareRendererObserver(JNIEnv* env);
 extern int register_android_graphics_Matrix(JNIEnv* env);
+extern int register_android_graphics_Mesh(JNIEnv* env);
+extern int register_android_graphics_MeshSpecification(JNIEnv* env);
 extern int register_android_graphics_Paint(JNIEnv* env);
 extern int register_android_graphics_Path(JNIEnv* env);
 extern int register_android_graphics_PathIterator(JNIEnv* env);
@@ -87,6 +91,8 @@ struct RegJNIRec {
 static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.Bitmap", REG_JNI(register_android_graphics_Bitmap)},
         {"android.graphics.BitmapFactory", REG_JNI(register_android_graphics_BitmapFactory)},
+        {"android.graphics.BitmapRegionDecoder",
+         REG_JNI(register_android_graphics_BitmapRegionDecoder)},
         {"android.graphics.ByteBufferStreamAdaptor",
          REG_JNI(register_android_graphics_ByteBufferStreamAdaptor)},
         {"android.graphics.Camera", REG_JNI(register_android_graphics_Camera)},
@@ -101,6 +107,8 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.FontFamily", REG_JNI(register_android_graphics_FontFamily)},
         {"android.graphics.Gainmap", REG_JNI(register_android_graphics_Gainmap)},
         {"android.graphics.Graphics", REG_JNI(register_android_graphics_Graphics)},
+        {"android.graphics.HardwareBufferRenderer",
+         REG_JNI(register_android_graphics_HardwareBufferRenderer)},
         {"android.graphics.HardwareRenderer", REG_JNI(register_android_view_ThreadedRenderer)},
         {"android.graphics.HardwareRendererObserver",
          REG_JNI(register_android_graphics_HardwareRendererObserver)},
@@ -108,6 +116,9 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.Interpolator", REG_JNI(register_android_graphics_Interpolator)},
         {"android.graphics.MaskFilter", REG_JNI(register_android_graphics_MaskFilter)},
         {"android.graphics.Matrix", REG_JNI(register_android_graphics_Matrix)},
+        {"android.graphics.Mesh", REG_JNI(register_android_graphics_Mesh)},
+        {"android.graphics.MeshSpecification",
+         REG_JNI(register_android_graphics_MeshSpecification)},
         {"android.graphics.NinePatch", REG_JNI(register_android_graphics_NinePatch)},
         {"android.graphics.Paint", REG_JNI(register_android_graphics_Paint)},
         {"android.graphics.Path", REG_JNI(register_android_graphics_Path)},
