@@ -16,6 +16,7 @@
 
 package com.android.server.inputmethod;
 
+import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -31,31 +32,46 @@ import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.server.pm.UserManagerInternal;
 
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
 final class UserDataRepository {
 
-    @GuardedBy("ImfLock.class")
+    private final ReentrantReadWriteLock mUserDataLock = new ReentrantReadWriteLock();
+
+    @GuardedBy("mUserDataLock")
     private final SparseArray<UserData> mUserData = new SparseArray<>();
 
     private final IntFunction<InputMethodBindingController> mBindingControllerFactory;
 
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     @NonNull
     UserData getOrCreate(@UserIdInt int userId) {
-        UserData userData = mUserData.get(userId);
-        if (userData == null) {
-            userData = new UserData(userId, mBindingControllerFactory.apply(userId));
-            mUserData.put(userId, userData);
+        mUserDataLock.writeLock().lock();
+        try {
+            UserData userData = mUserData.get(userId);
+            if (userData == null) {
+                userData = new UserData(userId, mBindingControllerFactory.apply(userId));
+                mUserData.put(userId, userData);
+            }
+            return userData;
+        } finally {
+            mUserDataLock.writeLock().unlock();
         }
-        return userData;
     }
 
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     void forAllUserData(Consumer<UserData> consumer) {
-        for (int i = 0; i < mUserData.size(); i++) {
-            consumer.accept(mUserData.valueAt(i));
+        final SparseArray<UserData> copiedArray;
+        mUserDataLock.readLock().lock();
+        try {
+            copiedArray = mUserData.clone();
+        } finally {
+            mUserDataLock.readLock().unlock();
+        }
+        for (int i = 0; i < copiedArray.size(); i++) {
+            consumer.accept(copiedArray.valueAt(i));
         }
     }
 
@@ -69,8 +85,11 @@ final class UserDataRepository {
                     public void onUserRemoved(UserInfo user) {
                         final int userId = user.id;
                         handler.post(() -> {
-                            synchronized (ImfLock.class) {
+                            mUserDataLock.writeLock().lock();
+                            try {
                                 mUserData.remove(userId);
+                            } finally {
+                                mUserDataLock.writeLock().unlock();
                             }
                         });
                     }

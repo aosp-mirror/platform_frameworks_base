@@ -34,6 +34,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.app.viewcapture.ViewCapture
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
+import com.android.app.viewcapture.ViewCaptureFactory
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -79,6 +82,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.isNull
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -114,11 +118,11 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
     @Mock
     lateinit var mDreamComplicationComponentFactory:
-        com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
+            com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
 
     @Mock
     lateinit var mDreamComplicationComponent:
-        com.android.systemui.dreams.complication.dagger.ComplicationComponent
+            com.android.systemui.dreams.complication.dagger.ComplicationComponent
 
     @Mock lateinit var mHideComplicationTouchHandler: HideComplicationTouchHandler
 
@@ -154,8 +158,12 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
     @Mock lateinit var mDreamOverlayCallbackController: DreamOverlayCallbackController
 
+    @Mock lateinit var mLazyViewCapture: Lazy<ViewCapture>
+
+    private lateinit var mViewCaptureAwareWindowManager: ViewCaptureAwareWindowManager
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var communalRepository: FakeCommunalSceneRepository
+    private var viewCaptureSpy = spy(ViewCaptureFactory.getInstance(context))
 
     @Captor var mViewCaptor: ArgumentCaptor<View>? = null
     private lateinit var mService: DreamOverlayService
@@ -192,13 +200,16 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         whenever(mDreamOverlayContainerViewController.containerView)
             .thenReturn(mDreamOverlayContainerView)
         whenever(mScrimManager.getCurrentController()).thenReturn(mScrimController)
+        whenever(mLazyViewCapture.value).thenReturn(viewCaptureSpy)
         mWindowParams = WindowManager.LayoutParams()
+        mViewCaptureAwareWindowManager = ViewCaptureAwareWindowManager(mWindowManager,
+                mLazyViewCapture, isViewCaptureEnabled = false)
         mService =
             DreamOverlayService(
                 mContext,
                 mLifecycleOwner,
                 mMainExecutor,
-                mWindowManager,
+                mViewCaptureAwareWindowManager,
                 mComplicationComponentFactory,
                 mDreamComplicationComponentFactory,
                 mDreamOverlayComponentFactory,
@@ -246,7 +257,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         mMainExecutor.runAllReady()
         verify(mUiEventLogger).log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_ENTER_START)
         verify(mUiEventLogger)
-            .log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START)
+                .log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START)
     }
 
     @Test

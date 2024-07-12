@@ -75,7 +75,9 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
 
     @Test
     fun message_entireScreen_unknownDevice() {
-        createAndSetDelegate(ENTIRE_SCREEN, deviceName = null)
+        createAndSetDelegate(
+            MediaProjectionState.Projecting.EntireScreen(HOST_PACKAGE, hostDeviceName = null)
+        )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
@@ -87,7 +89,12 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
 
     @Test
     fun message_entireScreen_hasDevice() {
-        createAndSetDelegate(ENTIRE_SCREEN, deviceName = "My Favorite Device")
+        createAndSetDelegate(
+            MediaProjectionState.Projecting.EntireScreen(
+                HOST_PACKAGE,
+                hostDeviceName = "My Favorite Device"
+            )
+        )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
@@ -110,9 +117,9 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
         createAndSetDelegate(
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
+                hostDeviceName = null,
                 createTask(taskId = 1, baseIntent = baseIntent)
             ),
-            deviceName = null,
         )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
@@ -133,9 +140,9 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
         createAndSetDelegate(
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
+                hostDeviceName = "My Favorite Device",
                 createTask(taskId = 1, baseIntent = baseIntent)
             ),
-            deviceName = "My Favorite Device",
         )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
@@ -161,9 +168,9 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
         createAndSetDelegate(
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
+                hostDeviceName = null,
                 createTask(taskId = 1, baseIntent = baseIntent)
             ),
-            deviceName = null,
         )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
@@ -189,9 +196,9 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
         createAndSetDelegate(
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
-                createTask(taskId = 1, baseIntent = baseIntent)
+                hostDeviceName = "My Favorite Device",
+                createTask(taskId = 1, baseIntent = baseIntent),
             ),
-            deviceName = "My Favorite Device",
         )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
@@ -240,10 +247,7 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
             assertThat(kosmos.fakeMediaProjectionRepository.stopProjectingInvoked).isTrue()
         }
 
-    private fun createAndSetDelegate(
-        state: MediaProjectionState.Projecting,
-        deviceName: String? = null,
-    ) {
+    private fun createAndSetDelegate(state: MediaProjectionState.Projecting) {
         underTest =
             EndCastScreenToOtherDeviceDialogDelegate(
                 kosmos.endMediaProjectionDialogHelper,
@@ -252,15 +256,19 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
                 ProjectionChipModel.Projecting(
                     ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE,
                     state,
-                    deviceName,
                 ),
             )
     }
 
     companion object {
         private const val HOST_PACKAGE = "fake.host.package"
-        private val ENTIRE_SCREEN = MediaProjectionState.Projecting.EntireScreen(HOST_PACKAGE)
+        private val ENTIRE_SCREEN =
+            MediaProjectionState.Projecting.EntireScreen(HOST_PACKAGE, hostDeviceName = null)
         private val SINGLE_TASK =
-            MediaProjectionState.Projecting.SingleTask(HOST_PACKAGE, createTask(taskId = 1))
+            MediaProjectionState.Projecting.SingleTask(
+                HOST_PACKAGE,
+                hostDeviceName = null,
+                createTask(taskId = 1)
+            )
     }
 }

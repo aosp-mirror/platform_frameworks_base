@@ -27,12 +27,6 @@ fun TestSceneScope(
     content: @Composable SceneScope.() -> Unit,
 ) {
     val currentScene = remember { SceneKey("current") }
-    SceneTransitionLayout(
-        currentScene,
-        onChangeScene = { /* do nothing */},
-        transitions = remember { transitions {} },
-        modifier,
-    ) {
-        scene(currentScene, content = content)
-    }
+    val state = remember { MutableSceneTransitionLayoutState(currentScene) }
+    SceneTransitionLayout(state, modifier) { scene(currentScene, content = content) }
 }

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 import android.app.ActivityManager
 import android.content.Context
 import androidx.annotation.DrawableRes
-import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
@@ -52,7 +51,6 @@ constructor(
     private val interactor: ScreenRecordChipInteractor,
     private val systemClock: SystemClock,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
-    private val dialogTransitionAnimator: DialogTransitionAnimator,
 ) : OngoingActivityChipViewModel {
     override val chip: StateFlow<OngoingActivityChipModel> =
         interactor.screenRecordState
@@ -78,7 +76,6 @@ constructor(
                             startTimeMs = systemClock.elapsedRealtime(),
                             createDialogLaunchOnClickListener(
                                 createDelegate(state.recordedTask),
-                                dialogTransitionAnimator,
                             ),
                         )
                     }

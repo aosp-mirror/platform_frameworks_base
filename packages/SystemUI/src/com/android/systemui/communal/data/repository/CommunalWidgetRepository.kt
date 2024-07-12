@@ -20,10 +20,12 @@ import android.app.backup.BackupManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
+import android.os.UserManager
 import com.android.systemui.common.data.repository.PackageChangeRepository
 import com.android.systemui.common.shared.model.PackageInstallSession
 import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalWidgetDao
+import com.android.systemui.communal.data.db.CommunalWidgetItem
 import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.communal.proto.toCommunalHubState
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
@@ -98,6 +100,7 @@ constructor(
     private val backupManager: BackupManager,
     private val backupUtils: CommunalBackupUtils,
     packageChangeRepository: PackageChangeRepository,
+    private val userManager: UserManager,
 ) : CommunalWidgetRepository {
     companion object {
         const val TAG = "CommunalWidgetRepository"
@@ -185,6 +188,7 @@ constructor(
                     widgetId = id,
                     provider = provider,
                     priority = priority,
+                    userSerialNumber = userManager.getUserSerialNumber(user.identifier),
                 )
                 backupManager.dataChanged()
             } else {
@@ -228,8 +232,37 @@ constructor(
                 return@launch
             }
 
+            // Abort restoring widgets if this code is somehow run on a device that does not have
+            // a main user, e.g. auto.
+            val mainUser = userManager.mainUser
+            if (mainUser == null) {
+                logger.w("Skipped restoring widgets because device does not have a main user")
+                return@launch
+            }
+
             val widgetsWithHost = appWidgetHost.appWidgetIds.toList()
             val widgetsToRemove = widgetsWithHost.toMutableList()
+
+            val oldUserSerialNumbers = state.widgets.map { it.userSerialNumber }.distinct()
+            val usersMap =
+                oldUserSerialNumbers.associateWith { oldUserSerialNumber ->
+                    if (oldUserSerialNumber == CommunalWidgetItem.USER_SERIAL_NUMBER_UNDEFINED) {
+                        // If user serial number from the backup is undefined, the widget was added
+                        // to the hub before user serial numbers are stored in the database. In this
+                        // case, we restore the widget with the main user.
+                        mainUser
+                    } else {
+                        // If the user serial number is defined, look up whether the user is
+                        // restored. This API returns a user handle matching its backed up user
+                        // serial number, if the user is restored. Otherwise, null is returned.
+                        backupManager.getUserForAncestralSerialNumber(oldUserSerialNumber.toLong())
+                            ?: null
+                    }
+                }
+            logger.d({ "Restored users map: $str1" }) { str1 = usersMap.toString() }
+
+            // A set to hold all widgets that belong to non-main users
+            val secondaryUserWidgets = mutableSetOf<CommunalHubState.CommunalWidgetItem>()
 
             // Produce a new state to be restored, skipping invalid widgets
             val newWidgets =
@@ -249,19 +282,63 @@ constructor(
                         return@mapNotNull null
                     }
 
+                    // Skip if user / profile is not registered
+                    val newUser = usersMap[restoredWidget.userSerialNumber]
+                    if (newUser == null) {
+                        logger.d({
+                            "Skipped restoring widget $int1 because its user $int2 is not " +
+                                "registered"
+                        }) {
+                            int1 = restoredWidget.widgetId
+                            int2 = restoredWidget.userSerialNumber
+                        }
+                        return@mapNotNull null
+                    }
+
+                    // Place secondary user widgets in a bucket to be manually bound later because
+                    // of a platform bug (b/349852237) that backs up work profile widgets as
+                    // personal.
+                    if (newUser.identifier != mainUser.identifier) {
+                        logger.d({
+                            "Skipped restoring widget $int1 for now because its new user $int2 " +
+                                "is secondary. This widget will be bound later."
+                        }) {
+                            int1 = restoredWidget.widgetId
+                            int2 = newUser.identifier
+                        }
+                        secondaryUserWidgets.add(restoredWidget)
+                        return@mapNotNull null
+                    }
+
                     widgetsToRemove.remove(newWidgetId)
 
                     CommunalHubState.CommunalWidgetItem().apply {
                         widgetId = newWidgetId
                         componentName = restoredWidget.componentName
                         rank = restoredWidget.rank
+                        userSerialNumber = userManager.getUserSerialNumber(newUser.identifier)
                     }
                 }
             val newState = CommunalHubState().apply { widgets = newWidgets.toTypedArray() }
 
             // Restore database
-            logger.i("Restoring communal database $newState")
+            logger.i("Restoring communal database:\n$newState")
             communalWidgetDao.restoreCommunalHubState(newState)
+
+            // Manually bind each secondary user widget due to platform bug b/349852237
+            secondaryUserWidgets.forEach { widget ->
+                val newUser = usersMap[widget.userSerialNumber]!!
+                logger.i({ "Binding secondary user ($int1) widget $int2: $str1" }) {
+                    int1 = newUser.identifier
+                    int2 = widget.widgetId
+                    str1 = widget.componentName
+                }
+                addWidget(
+                    provider = ComponentName.unflattenFromString(widget.componentName)!!,
+                    user = newUser,
+                    priority = widget.rank,
+                )
+            }
 
             // Delete restored state file from disk
             backupUtils.clear()

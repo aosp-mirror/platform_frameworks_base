@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 
 import android.content.applicationContext
-import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.statusbar.chips.casttootherdevice.domain.interactor.mediaRouterChipInteractor
@@ -34,6 +33,5 @@ val Kosmos.castToOtherDeviceChipViewModel: CastToOtherDeviceChipViewModel by
             mediaRouterChipInteractor = mediaRouterChipInteractor,
             systemClock = fakeSystemClock,
             endMediaProjectionDialogHelper = endMediaProjectionDialogHelper,
-            dialogTransitionAnimator = mockDialogTransitionAnimator,
         )
     }

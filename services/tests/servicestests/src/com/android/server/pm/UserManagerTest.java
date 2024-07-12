@@ -1862,6 +1862,25 @@ public final class UserManagerTest {
         assertThat(profilesExcludingHidden).asList().doesNotContain(profile.id);
     }
 
+    /**
+     * Test that UserManager.isQuietModeEnabled return false for unsupported
+     * arguments such as UserHandle.NULL, UserHandle.CURRENT or UserHandle.ALL.
+     **/
+    @MediumTest
+    @Test
+    public void testQuietModeEnabledForUnsupportedUserHandles() throws Exception {
+        assumeManagedUsersSupported();
+        final int mainUserId = mUserManager.getMainUser().getIdentifier();
+        UserInfo userInfo = createProfileForUser("Profile",
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
+        mUserManager.requestQuietModeEnabled(true, userInfo.getUserHandle());
+        assertThat(mUserManager.isQuietModeEnabled(userInfo.getUserHandle())).isTrue();
+        assertThat(mUserManager.isQuietModeEnabled(UserHandle.of(UserHandle.USER_NULL))).isFalse();
+        assertThat(mUserManager.isQuietModeEnabled(UserHandle.CURRENT)).isFalse();
+        assertThat(mUserManager.isQuietModeEnabled(UserHandle.CURRENT_OR_SELF)).isFalse();
+        assertThat(mUserManager.isQuietModeEnabled(UserHandle.ALL)).isFalse();
+    }
+
     private String generateLongString() {
         String partialString = "Test Name Test Name Test Name Test Name Test Name Test Name Test "
                 + "Name Test Name Test Name Test Name "; //String of length 100
