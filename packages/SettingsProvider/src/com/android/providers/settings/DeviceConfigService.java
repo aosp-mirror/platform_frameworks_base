@@ -42,7 +42,6 @@ import android.provider.Settings.Config.SyncDisabledMode;
 import android.provider.UpdatableDeviceConfigServiceReadiness;
 import android.util.Slog;
 
-import com.android.internal.pm.pkg.component.AconfigFlags;
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.File;
@@ -426,13 +425,7 @@ public final class DeviceConfigService extends Binder {
                     DeviceConfig.setProperty(namespace, key, value, makeDefault);
                     break;
                 case OVERRIDE:
-                    AconfigFlags.Permission permission =
-                            (new AconfigFlags()).getFlagPermission(key);
-                    if (permission == AconfigFlags.Permission.READ_ONLY) {
-                        pout.println("cannot override read-only flag " + key);
-                    } else {
-                        DeviceConfig.setLocalOverride(namespace, key, value);
-                    }
+                    DeviceConfig.setLocalOverride(namespace, key, value);
                     break;
                 case CLEAR_OVERRIDE:
                     DeviceConfig.clearLocalOverride(namespace, key);
