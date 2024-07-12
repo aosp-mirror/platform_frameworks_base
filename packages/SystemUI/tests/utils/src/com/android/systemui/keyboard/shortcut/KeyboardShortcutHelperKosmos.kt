@@ -68,16 +68,17 @@ val Kosmos.shortcutHelperStateRepository by
         )
     }
 
-val Kosmos.shortcutHelperInputShortcutsSource by
+var Kosmos.shortcutHelperInputShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { InputShortcutsSource(mainResources, windowManager) }
 
-val Kosmos.shortcutHelperCurrentAppShortcutsSource by
+var Kosmos.shortcutHelperCurrentAppShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { CurrentAppShortcutsSource(windowManager) }
 
 val Kosmos.shortcutHelperCategoriesRepository by
     Kosmos.Fixture {
         ShortcutHelperCategoriesRepository(
             applicationContext,
+            applicationCoroutineScope,
             testDispatcher,
             shortcutHelperSystemShortcutsSource,
             shortcutHelperMultiTaskingShortcutsSource,
@@ -96,7 +97,8 @@ val Kosmos.shortcutHelperTestHelper by
             applicationContext,
             broadcastDispatcher,
             fakeCommandQueue,
-            windowManager
+            fakeInputManager,
+            windowManager,
         )
     }
 

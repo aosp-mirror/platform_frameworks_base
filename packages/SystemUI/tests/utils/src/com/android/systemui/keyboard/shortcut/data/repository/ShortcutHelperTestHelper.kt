@@ -18,6 +18,7 @@ package com.android.systemui.keyboard.shortcut.data.repository
 
 import android.content.Context
 import android.content.Intent
+import android.hardware.input.FakeInputManager
 import android.view.KeyboardShortcutGroup
 import android.view.WindowManager
 import android.view.WindowManager.KeyboardShortcutsReceiver
@@ -31,6 +32,7 @@ class ShortcutHelperTestHelper(
     private val context: Context,
     private val fakeBroadcastDispatcher: FakeBroadcastDispatcher,
     private val fakeCommandQueue: FakeCommandQueue,
+    private val fakeInputManager: FakeInputManager,
     windowManager: WindowManager
 ) {
 
@@ -79,6 +81,7 @@ class ShortcutHelperTestHelper(
     }
 
     fun toggle(deviceId: Int) {
+        fakeInputManager.addPhysicalKeyboard(deviceId)
         fakeCommandQueue.doForEachCallback { it.toggleKeyboardShortcutsMenu(deviceId) }
     }
 

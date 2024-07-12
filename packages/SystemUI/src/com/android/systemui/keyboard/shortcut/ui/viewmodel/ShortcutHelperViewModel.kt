@@ -19,7 +19,6 @@ package com.android.systemui.keyboard.shortcut.ui.viewmodel
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperStateInteractor
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -40,8 +39,8 @@ constructor(
 ) {
 
     val shouldShow =
-        stateInteractor.state
-            .map { it is ShortcutHelperState.Active }
+        categoriesInteractor.shortcutCategories
+            .map { it.isNotEmpty() }
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
 

@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.drawable.Icon
 import android.hardware.input.InputManager
 import android.util.Log
+import android.view.InputDevice
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.KeyboardShortcutGroup
@@ -47,8 +48,11 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
@@ -56,6 +60,7 @@ class ShortcutHelperCategoriesRepository
 @Inject
 constructor(
     private val context: Context,
+    @Background private val backgroundScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @SystemShortcuts private val systemShortcutsSource: KeyboardShortcutGroupsSource,
     @MultitaskingShortcuts private val multitaskingShortcutsSource: KeyboardShortcutGroupsSource,
@@ -75,81 +80,82 @@ constructor(
             }
         }
 
-    val systemShortcutsCategory =
-        activeInputDevice.map {
-            if (it != null) {
-                toShortcutCategory(
-                    it.keyCharacterMap,
-                    System,
-                    systemShortcutsSource.shortcutGroups(it.id),
-                    keepIcons = true,
-                )
-            } else {
-                null
-            }
-        }
-
-    val multitaskingShortcutsCategory =
-        activeInputDevice.map {
-            if (it != null) {
-                toShortcutCategory(
-                    it.keyCharacterMap,
-                    MultiTasking,
-                    multitaskingShortcutsSource.shortcutGroups(it.id),
-                    keepIcons = true,
-                )
-            } else {
-                null
-            }
-        }
-
-    val appCategoriesShortcutsCategory =
-        activeInputDevice.map {
-            if (it != null) {
-                toShortcutCategory(
-                    it.keyCharacterMap,
-                    AppCategories,
-                    appCategoriesShortcutsSource.shortcutGroups(it.id),
-                    keepIcons = true,
-                )
-            } else {
-                null
-            }
-        }
-
-    val imeShortcutsCategory =
-        activeInputDevice.map {
-            if (it != null) {
-                toShortcutCategory(
-                    it.keyCharacterMap,
-                    InputMethodEditor,
-                    inputShortcutsSource.shortcutGroups(it.id),
-                    keepIcons = false,
-                )
-            } else {
-                null
-            }
-        }
-
-    val currentAppShortcutsCategory: Flow<ShortcutCategory?> =
-        activeInputDevice.map {
-            if (it != null) {
-                val shortcutGroups = currentAppShortcutsSource.shortcutGroups(it.id)
-                val categoryType = getCurrentAppShortcutCategoryType(shortcutGroups)
-                if (categoryType == null) {
-                    null
-                } else {
-                    toShortcutCategory(
-                        it.keyCharacterMap,
-                        categoryType,
-                        shortcutGroups,
-                        keepIcons = false
-                    )
+    val categories: Flow<List<ShortcutCategory>> =
+        activeInputDevice
+            .map {
+                if (it == null) {
+                    return@map emptyList()
                 }
-            } else {
-                null
+                return@map listOfNotNull(
+                    fetchSystemShortcuts(it),
+                    fetchMultiTaskingShortcuts(it),
+                    fetchAppCategoriesShortcuts(it),
+                    fetchImeShortcuts(it),
+                    fetchCurrentAppShortcuts(it),
+                )
             }
+            .stateIn(
+                scope = backgroundScope,
+                started = SharingStarted.Lazily,
+                initialValue = emptyList(),
+            )
+
+    private suspend fun fetchSystemShortcuts(inputDevice: InputDevice) =
+        toShortcutCategory(
+            inputDevice.keyCharacterMap,
+            System,
+            systemShortcutsSource.shortcutGroups(inputDevice.id),
+            keepIcons = true,
+        )
+
+    private suspend fun fetchMultiTaskingShortcuts(inputDevice: InputDevice) =
+        toShortcutCategory(
+            inputDevice.keyCharacterMap,
+            MultiTasking,
+            multitaskingShortcutsSource.shortcutGroups(inputDevice.id),
+            keepIcons = true,
+        )
+
+    private suspend fun fetchAppCategoriesShortcuts(inputDevice: InputDevice) =
+        toShortcutCategory(
+            inputDevice.keyCharacterMap,
+            AppCategories,
+            appCategoriesShortcutsSource.shortcutGroups(inputDevice.id),
+            keepIcons = true,
+        )
+
+    private suspend fun fetchImeShortcuts(inputDevice: InputDevice) =
+        toShortcutCategory(
+            inputDevice.keyCharacterMap,
+            InputMethodEditor,
+            inputShortcutsSource.shortcutGroups(inputDevice.id),
+            keepIcons = false,
+        )
+
+    private suspend fun fetchCurrentAppShortcuts(inputDevice: InputDevice): ShortcutCategory? {
+        val shortcutGroups = currentAppShortcutsSource.shortcutGroups(inputDevice.id)
+        val categoryType = getCurrentAppShortcutCategoryType(shortcutGroups)
+        return if (categoryType == null) {
+            null
+        } else {
+            toShortcutCategory(
+                inputDevice.keyCharacterMap,
+                categoryType,
+                shortcutGroups,
+                keepIcons = false
+            )
         }
+    }
+
+    private fun getCurrentAppShortcutCategoryType(
+        shortcutGroups: List<KeyboardShortcutGroup>
+    ): ShortcutCategoryType? {
+        return if (shortcutGroups.isEmpty()) {
+            null
+        } else {
+            CurrentApp(packageName = shortcutGroups[0].packageName.toString())
+        }
+    }
 
     private fun toShortcutCategory(
         keyCharacterMap: KeyCharacterMap,
@@ -171,16 +177,6 @@ constructor(
             null
         } else {
             ShortcutCategory(type, subCategories)
-        }
-    }
-
-    private fun getCurrentAppShortcutCategoryType(
-        shortcutGroups: List<KeyboardShortcutGroup>
-    ): ShortcutCategoryType? {
-        return if (shortcutGroups.isEmpty()) {
-            null
-        } else {
-            CurrentApp(packageName = shortcutGroups[0].packageName.toString())
         }
     }
 
