@@ -1084,6 +1084,15 @@
     <!-- QuickStep: Accessibility to toggle overview [CHAR LIMIT=40] -->
     <string name="quick_step_accessibility_toggle_overview">Toggle Overview</string>
 
+    <!-- Priority modes dialog title [CHAR LIMIT=35] -->
+    <string name="zen_modes_dialog_title">Priority modes</string>
+
+    <!-- Priority modes dialog confirmation button [CHAR LIMIT=15] -->
+    <string name="zen_modes_dialog_done">Done</string>
+
+    <!-- Priority modes dialog settings shortcut button [CHAR LIMIT=15] -->
+    <string name="zen_modes_dialog_settings">Settings</string>
+
     <!-- Zen mode: Priority only introduction message on first use -->
     <string name="zen_priority_introduction">You won\'t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify. You\'ll still hear anything you choose to play including music, videos, and games.</string>
 
