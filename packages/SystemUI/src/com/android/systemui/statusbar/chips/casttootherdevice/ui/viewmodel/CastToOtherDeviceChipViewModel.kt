@@ -163,10 +163,13 @@ constructor(
 
     /** Stops the currently active projection. */
     private fun stopProjecting() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop casting requested (projection)" })
         mediaProjectionChipInteractor.stopProjecting()
     }
 
+    /** Stops the currently active media route. */
     private fun stopMediaRouterCasting() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop casting requested (router)" })
         mediaRouterChipInteractor.stopCasting()
     }
 
@@ -187,6 +190,8 @@ constructor(
             startTimeMs = systemClock.elapsedRealtime(),
             createDialogLaunchOnClickListener(
                 createCastScreenToOtherDeviceDialogDelegate(state),
+                logger,
+                TAG,
             ),
         )
     }
@@ -202,6 +207,8 @@ constructor(
             colors = ColorsModel.Red,
             createDialogLaunchOnClickListener(
                 createGenericCastToOtherDeviceDialogDelegate(deviceName),
+                logger,
+                TAG,
             ),
         )
     }

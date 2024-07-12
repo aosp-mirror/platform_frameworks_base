@@ -17,6 +17,9 @@
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import android.view.View
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import kotlinx.coroutines.flow.StateFlow
@@ -33,8 +36,11 @@ interface OngoingActivityChipViewModel {
         /** Creates a chip click listener that launches a dialog created by [dialogDelegate]. */
         fun createDialogLaunchOnClickListener(
             dialogDelegate: SystemUIDialog.Delegate,
+            @StatusBarChipsLog logger: LogBuffer,
+            tag: String,
         ): View.OnClickListener {
-            return View.OnClickListener { view ->
+            return View.OnClickListener { _ ->
+                logger.log(tag, LogLevel.INFO, {}, { "Chip clicked" })
                 val dialog = dialogDelegate.createDialog()
                 dialog.show()
             }

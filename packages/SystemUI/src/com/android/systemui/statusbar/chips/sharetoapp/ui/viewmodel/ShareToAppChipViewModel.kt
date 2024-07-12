@@ -22,7 +22,10 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractor
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
@@ -52,6 +55,7 @@ constructor(
     private val mediaProjectionChipInteractor: MediaProjectionChipInteractor,
     private val systemClock: SystemClock,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
+    @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
     override val chip: StateFlow<OngoingActivityChipModel> =
         mediaProjectionChipInteractor.projection
@@ -72,6 +76,7 @@ constructor(
 
     /** Stops the currently active projection. */
     private fun stopProjecting() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop sharing requested" })
         mediaProjectionChipInteractor.stopProjecting()
     }
 
@@ -87,7 +92,7 @@ constructor(
             colors = ColorsModel.Red,
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),
-            createDialogLaunchOnClickListener(createShareToAppDialogDelegate(state)),
+            createDialogLaunchOnClickListener(createShareToAppDialogDelegate(state), logger, TAG),
         )
     }
 
@@ -101,5 +106,6 @@ constructor(
 
     companion object {
         @DrawableRes val SHARE_TO_APP_ICON = R.drawable.ic_present_to_all
+        private const val TAG = "ShareToAppVM"
     }
 }

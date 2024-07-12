@@ -69,7 +69,11 @@ constructor(
     }
 
     override suspend fun stopProjecting() {
-        withContext(backgroundDispatcher) { mediaProjectionManager.stopActiveProjection() }
+        withContext(backgroundDispatcher) {
+            // TODO(b/332662551): Convert Logcat to LogBuffer.
+            Log.d(TAG, "Requesting MediaProjectionManager#stopActiveProjection")
+            mediaProjectionManager.stopActiveProjection()
+        }
     }
 
     override val mediaProjectionState: Flow<MediaProjectionState> =
