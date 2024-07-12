@@ -1380,10 +1380,7 @@ public class LowPowerStandbyController {
             Slog.d(TAG, "notifyStandbyPortsChanged");
         }
 
-        final Intent intent = new Intent(PowerManager.ACTION_LOW_POWER_STANDBY_PORTS_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
-                Manifest.permission.MANAGE_LOW_POWER_STANDBY);
+        sendExplicitBroadcast(PowerManager.ACTION_LOW_POWER_STANDBY_PORTS_CHANGED);
     }
 
     /**
