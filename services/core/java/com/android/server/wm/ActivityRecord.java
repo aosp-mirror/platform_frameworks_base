@@ -1101,11 +1101,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         pw.println(prefix + "mLastReportedConfigurations:");
         mLastReportedConfiguration.dump(pw, prefix + "  ");
 
-        if (Flags.activityWindowInfoFlag()) {
-            pw.print(prefix);
-            pw.print("mLastReportedActivityWindowInfo=");
-            pw.println(mLastReportedActivityWindowInfo);
-        }
+        pw.print(prefix);
+        pw.print("mLastReportedActivityWindowInfo=");
+        pw.println(mLastReportedActivityWindowInfo);
 
         pw.print(prefix); pw.print("CurrentConfiguration="); pw.println(getConfiguration());
         if (!getRequestedOverrideConfiguration().equals(EMPTY)) {
@@ -3160,7 +3158,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @NonNull
     ActivityWindowInfo getActivityWindowInfo() {
-        if (!Flags.activityWindowInfoFlag() || !isAttached()) {
+        if (!isAttached()) {
             return mTmpActivityWindowInfo;
         }
         if (isFixedRotationTransforming()) {
@@ -8283,9 +8281,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void setLastReportedActivityWindowInfo(@NonNull ActivityWindowInfo activityWindowInfo) {
-        if (Flags.activityWindowInfoFlag()) {
-            mLastReportedActivityWindowInfo.set(activityWindowInfo);
-        }
+        mLastReportedActivityWindowInfo.set(activityWindowInfo);
     }
 
     @Nullable
@@ -9701,8 +9697,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // the combine configurations are equal, but would otherwise differ in the override config
         mTmpConfig.setTo(mLastReportedConfiguration.getMergedConfiguration());
         final ActivityWindowInfo newActivityWindowInfo = getActivityWindowInfo();
-        final boolean isActivityWindowInfoChanged = Flags.activityWindowInfoFlag()
-                && !mLastReportedActivityWindowInfo.equals(newActivityWindowInfo);
+        final boolean isActivityWindowInfoChanged =
+                !mLastReportedActivityWindowInfo.equals(newActivityWindowInfo);
         if (!displayChanged && !isActivityWindowInfoChanged
                 && getConfiguration().equals(mTmpConfig)) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration & display "

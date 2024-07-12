@@ -204,11 +204,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     /** Listener registered to {@link ClientTransactionListenerController}. */
     @GuardedBy("mLock")
-    @Nullable
+    @NonNull
     private final BiConsumer<IBinder, ActivityWindowInfo> mActivityWindowInfoListener =
-            Flags.activityWindowInfoFlag()
-                    ? this::onActivityWindowInfoChanged
-                    : null;
+            this::onActivityWindowInfoChanged;
 
     private final Handler mHandler;
     private final MainThreadExecutor mExecutor;
@@ -3096,20 +3094,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     public boolean isActivityEmbedded(@NonNull Activity activity) {
         Objects.requireNonNull(activity);
         synchronized (mLock) {
-            if (Flags.activityWindowInfoFlag()) {
-                final ActivityWindowInfo activityWindowInfo = getActivityWindowInfo(activity);
-                return activityWindowInfo != null && activityWindowInfo.isEmbedded();
-            }
-            return mPresenter.isActivityEmbedded(activity.getActivityToken());
+            final ActivityWindowInfo activityWindowInfo = getActivityWindowInfo(activity);
+            return activityWindowInfo != null && activityWindowInfo.isEmbedded();
         }
     }
 
     @Override
     public void setEmbeddedActivityWindowInfoCallback(@NonNull Executor executor,
             @NonNull Consumer<EmbeddedActivityWindowInfo> callback) {
-        if (!Flags.activityWindowInfoFlag()) {
-            return;
-        }
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
         synchronized (mLock) {
@@ -3123,9 +3115,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     public void clearEmbeddedActivityWindowInfoCallback() {
-        if (!Flags.activityWindowInfoFlag()) {
-            return;
-        }
         synchronized (mLock) {
             if (mEmbeddedActivityWindowInfoCallback == null) {
                 return;
@@ -3146,9 +3135,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @Nullable
     @Override
     public EmbeddedActivityWindowInfo getEmbeddedActivityWindowInfo(@NonNull Activity activity) {
-        if (!Flags.activityWindowInfoFlag()) {
-            return null;
-        }
         synchronized (mLock) {
             final ActivityWindowInfo activityWindowInfo = getActivityWindowInfo(activity);
             return activityWindowInfo != null
