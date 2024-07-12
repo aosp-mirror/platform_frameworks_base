@@ -41,8 +41,12 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
+import com.android.systemui.keyguard.shared.model.TransitionState;
+import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository;
 import com.android.systemui.shade.data.repository.ShadeRepository;
@@ -130,6 +134,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 mVisualStabilityProvider,
                 mWakefulnessLifecycle,
                 mKosmos.getCommunalInteractor(),
+                mKosmos.getKeyguardTransitionInteractor(),
                 mLogger);
         mCoordinator.attach(mNotifPipeline);
         mTestScope.getTestScheduler().runCurrent();
@@ -232,6 +237,38 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setFullyDozed(false);
         setSleepy(false);
         setPanelExpanded(true);
+        setPulsing(false);
+
+        // THEN group changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
+
+        // THEN section changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
+    }
+
+    @Test
+    public void testLockscreenPartlyShowing_groupAndSectionChangesNotAllowed() {
+        // GIVEN the panel true expanded and device isn't pulsing
+        setFullyDozed(false);
+        setSleepy(false);
+        setLockscreenShowing(0.5f);
+        setPulsing(false);
+
+        // THEN group changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
+
+        // THEN section changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
+    }
+
+    @Test
+    public void testLockscreenFullyShowing_groupAndSectionChangesNotAllowed() {
+        // GIVEN the panel true expanded and device isn't pulsing
+        setFullyDozed(false);
+        setSleepy(false);
+        setLockscreenShowing(1.0f);
         setPulsing(false);
 
         // THEN group changes are NOT allowed
@@ -616,7 +653,37 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     }
 
     private void setPanelExpanded(boolean expanded) {
-        mStatusBarStateListener.onExpandedChanged(expanded);
+        setPanelExpandedAndLockscreenShowing(expanded, /* lockscreenShowing = */ 0.0f);
     }
 
+    private void setLockscreenShowing(float lockscreenShowing) {
+        setPanelExpandedAndLockscreenShowing(/* panelExpanded = */ false, lockscreenShowing);
+    }
+
+    private void setPanelExpandedAndLockscreenShowing(boolean panelExpanded,
+            float lockscreenShowing) {
+        if (SceneContainerFlag.isEnabled()) {
+            mStatusBarStateListener.onExpandedChanged(panelExpanded);
+            mKosmos.getKeyguardTransitionRepository().sendTransitionStepJava(
+                    mTestScope,
+                    makeLockscreenTransitionStep(lockscreenShowing),
+                    /* validateStep = */ false);
+        } else {
+            mStatusBarStateListener.onExpandedChanged(panelExpanded || lockscreenShowing > 0.0f);
+        }
+    }
+
+    private TransitionStep makeLockscreenTransitionStep(float value) {
+        if (value <= 0.0f) {
+            return new TransitionStep(KeyguardState.GONE);
+        } else if (value >= 1.0f) {
+            return new TransitionStep(KeyguardState.LOCKSCREEN);
+        } else {
+            return new TransitionStep(
+                    KeyguardState.GONE,
+                    KeyguardState.LOCKSCREEN,
+                    value,
+                    TransitionState.RUNNING);
+        }
+    }
 }

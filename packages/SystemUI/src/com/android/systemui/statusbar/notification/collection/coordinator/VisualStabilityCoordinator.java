@@ -27,7 +27,10 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
@@ -68,6 +71,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private final VisualStabilityProvider mVisualStabilityProvider;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final CommunalInteractor mCommunalInteractor;
+    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final VisualStabilityCoordinatorLogger mLogger;
 
     private boolean mSleepy = true;
@@ -77,6 +81,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private boolean mNotifPanelCollapsing;
     private boolean mNotifPanelLaunchingActivity;
     private boolean mCommunalShowing = false;
+    private boolean mLockscreenShowing = false;
 
     private boolean mPipelineRunAllowed;
     private boolean mReorderingAllowed;
@@ -106,6 +111,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
             VisualStabilityProvider visualStabilityProvider,
             WakefulnessLifecycle wakefulnessLifecycle,
             CommunalInteractor communalInteractor,
+            KeyguardTransitionInteractor keyguardTransitionInteractor,
             VisualStabilityCoordinatorLogger logger) {
         mHeadsUpManager = headsUpManager;
         mShadeAnimationInteractor = shadeAnimationInteractor;
@@ -117,6 +123,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         mStatusBarStateController = statusBarStateController;
         mDelayableExecutor = delayableExecutor;
         mCommunalInteractor = communalInteractor;
+        mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mLogger = logger;
 
         dumpManager.registerDumpable(this);
@@ -136,6 +143,9 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                 this::onLaunchingActivityChanged);
         mJavaAdapter.alwaysCollectFlow(mCommunalInteractor.isIdleOnCommunal(),
                 this::onCommunalShowingChanged);
+        mJavaAdapter.alwaysCollectFlow(mKeyguardTransitionInteractor.transitionValue(
+                        KeyguardState.LOCKSCREEN),
+                this::onLockscreenKeyguardStateTransitionValueChanged);
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
@@ -249,7 +259,9 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     }
 
     private boolean isReorderingAllowed() {
-        return ((mFullyDozed && mSleepy) || !mPanelExpanded || mCommunalShowing) && !mPulsing;
+        final boolean sleepyAndDozed = mFullyDozed && mSleepy;
+        final boolean stackShowing = mPanelExpanded || mLockscreenShowing;
+        return (sleepyAndDozed || !stackShowing || mCommunalShowing) && !mPulsing;
     }
 
     /**
@@ -361,5 +373,15 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private void onCommunalShowingChanged(boolean isShowing) {
         mCommunalShowing = isShowing;
         updateAllowedStates("communalShowing", isShowing);
+    }
+
+    private void onLockscreenKeyguardStateTransitionValueChanged(float value) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+
+        final boolean isShowing = value > 0.0f;
+        mLockscreenShowing = isShowing;
+        updateAllowedStates("lockscreenShowing", isShowing);
     }
 }
