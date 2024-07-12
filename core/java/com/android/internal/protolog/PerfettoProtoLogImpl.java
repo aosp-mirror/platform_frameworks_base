@@ -111,13 +111,12 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     private final Lock mBackgroundServiceLock = new ReentrantLock();
     private ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
-    public PerfettoProtoLogImpl(String viewerConfigFilePath, Runnable cacheUpdater) {
+    public PerfettoProtoLogImpl(@NonNull String viewerConfigFilePath, Runnable cacheUpdater) {
         this(() -> {
             try {
                 return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
             } catch (FileNotFoundException e) {
-                Slog.w(LOG_TAG, "Failed to load viewer config file " + viewerConfigFilePath, e);
-                return null;
+                throw new RuntimeException("Failed to load viewer config file " + viewerConfigFilePath, e);
             }
         }, cacheUpdater);
     }
@@ -127,7 +126,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     public PerfettoProtoLogImpl(
-            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             Runnable cacheUpdater
     ) {
         this(viewerConfigInputStreamProvider,
