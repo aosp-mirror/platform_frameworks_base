@@ -54,16 +54,16 @@ final class InputMethodSettingsRepository {
         sPerUserMap.put(userId, obj);
     }
 
-    static void initialize(@NonNull Handler handler, @NonNull Context context) {
+    static void initialize(@NonNull Handler ioHandler, @NonNull Context context) {
         final UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);
-        handler.post(() -> {
+        ioHandler.post(() -> {
             userManagerInternal.addUserLifecycleListener(
                     new UserManagerInternal.UserLifecycleListener() {
                         @Override
                         public void onUserRemoved(UserInfo user) {
                             final int userId = user.id;
-                            handler.post(() -> {
+                            ioHandler.post(() -> {
                                 synchronized (ImfLock.class) {
                                     sPerUserMap.remove(userId);
                                 }

@@ -225,17 +225,17 @@ final class AdditionalSubtypeMapRepository {
         sWriter.startThread();
     }
 
-    static void initialize(@NonNull Handler handler, @NonNull Context context) {
+    static void initialize(@NonNull Handler ioHandler, @NonNull Context context) {
         final UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);
-        handler.post(() -> {
+        ioHandler.post(() -> {
             userManagerInternal.addUserLifecycleListener(
                     new UserManagerInternal.UserLifecycleListener() {
                         @Override
                         public void onUserCreated(UserInfo user, @Nullable Object token) {
                             final int userId = user.id;
                             sWriter.onUserCreated(userId);
-                            handler.post(() -> {
+                            ioHandler.post(() -> {
                                 synchronized (ImfLock.class) {
                                     if (!sPerUserMap.contains(userId)) {
                                         final AdditionalSubtypeMap additionalSubtypeMap =
@@ -257,7 +257,7 @@ final class AdditionalSubtypeMapRepository {
                         public void onUserRemoved(UserInfo user) {
                             final int userId = user.id;
                             sWriter.onUserRemoved(userId);
-                            handler.post(() -> {
+                            ioHandler.post(() -> {
                                 synchronized (ImfLock.class) {
                                     sPerUserMap.remove(userId);
                                 }
