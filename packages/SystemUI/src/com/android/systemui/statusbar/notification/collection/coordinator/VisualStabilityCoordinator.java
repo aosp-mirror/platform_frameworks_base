@@ -18,8 +18,6 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
@@ -41,7 +39,6 @@ import com.android.systemui.statusbar.notification.collection.provider.VisualSta
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.util.Compile;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
@@ -61,8 +58,6 @@ import javax.inject.Inject;
 // TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
 public class VisualStabilityCoordinator implements Coordinator, Dumpable {
-    public static final String TAG = "VisualStability";
-    public static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     private final DelayableExecutor mDelayableExecutor;
     private final HeadsUpManager mHeadsUpManager;
     private final SeenNotificationsInteractor mSeenNotificationsInteractor;
@@ -73,6 +68,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private final VisualStabilityProvider mVisualStabilityProvider;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final CommunalInteractor mCommunalInteractor;
+    private final VisualStabilityCoordinatorLogger mLogger;
 
     private boolean mSleepy = true;
     private boolean mFullyDozed;
@@ -109,7 +105,8 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
             VisibilityLocationProvider visibilityLocationProvider,
             VisualStabilityProvider visualStabilityProvider,
             WakefulnessLifecycle wakefulnessLifecycle,
-            CommunalInteractor communalInteractor) {
+            CommunalInteractor communalInteractor,
+            VisualStabilityCoordinatorLogger logger) {
         mHeadsUpManager = headsUpManager;
         mShadeAnimationInteractor = shadeAnimationInteractor;
         mJavaAdapter = javaAdapter;
@@ -120,6 +117,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         mStatusBarStateController = statusBarStateController;
         mDelayableExecutor = delayableExecutor;
         mCommunalInteractor = communalInteractor;
+        mLogger = logger;
 
         dumpManager.registerDumpable(this);
     }
@@ -221,12 +219,12 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         boolean wasReorderingAllowed = mReorderingAllowed;
         mPipelineRunAllowed = !isPanelCollapsingOrLaunchingActivity();
         mReorderingAllowed = isReorderingAllowed();
-        if (DEBUG && (wasPipelineRunAllowed != mPipelineRunAllowed
-                || wasReorderingAllowed != mReorderingAllowed)) {
-            Log.d(TAG, "Stability allowances changed:"
-                    + "  pipelineRunAllowed " + wasPipelineRunAllowed + "->" + mPipelineRunAllowed
-                    + "  reorderingAllowed " + wasReorderingAllowed + "->" + mReorderingAllowed
-                    + "  when setting " + field + "=" + value);
+        if (wasPipelineRunAllowed != mPipelineRunAllowed
+                || wasReorderingAllowed != mReorderingAllowed) {
+            mLogger.logAllowancesChanged(
+                    wasPipelineRunAllowed, mPipelineRunAllowed,
+                    wasReorderingAllowed, mReorderingAllowed,
+                    field, value);
         }
         if (mPipelineRunAllowed && mIsSuppressingPipelineRun) {
             mNotifStabilityManager.invalidateList("pipeline run suppression ended");

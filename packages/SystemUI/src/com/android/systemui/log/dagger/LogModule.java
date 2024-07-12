@@ -169,6 +169,14 @@ public class LogModule {
         return factory.create("NotifRemoteInputLog", 50 /* maxSize */, false /* systrace */);
     }
 
+    /** Provides a logging buffer for all logs related to notification visual stability. */
+    @Provides
+    @SysUISingleton
+    @VisualStabilityLog
+    public static LogBuffer provideVisualStabilityLogBuffer(LogBufferFactory factory) {
+        return factory.create("VisualStabilityLog", 50 /* maxSize */, false /* systrace */);
+    }
+
     /** Provides a logging buffer for all logs related to keyguard media controller. */
     @Provides
     @SysUISingleton

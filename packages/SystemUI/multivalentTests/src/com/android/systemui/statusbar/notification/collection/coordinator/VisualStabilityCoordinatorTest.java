@@ -91,6 +91,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private VisibilityLocationProvider mVisibilityLocationProvider;
     @Mock private VisualStabilityProvider mVisualStabilityProvider;
+    @Mock private VisualStabilityCoordinatorLogger mLogger;
 
     @Captor private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefulnessObserverCaptor;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mSBStateListenerCaptor;
@@ -128,7 +129,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 mVisibilityLocationProvider,
                 mVisualStabilityProvider,
                 mWakefulnessLifecycle,
-                mKosmos.getCommunalInteractor());
+                mKosmos.getCommunalInteractor(),
+                mLogger);
         mCoordinator.attach(mNotifPipeline);
         mTestScope.getTestScheduler().runCurrent();
 
