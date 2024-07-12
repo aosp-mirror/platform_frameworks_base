@@ -36,7 +36,7 @@ import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.shared.flag.fakeComposeBouncerFlags
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
@@ -83,7 +83,7 @@ class BouncerMessageViewModelTest : SysuiTestCase() {
         underTest = kosmos.bouncerMessageViewModel
         overrideResource(R.string.kg_trust_agent_disabled, "Trust agent is unavailable")
         kosmos.fakeSystemPropertiesHelper.set(
-            DeviceEntryInteractor.SYS_BOOT_REASON_PROP,
+            DeviceUnlockedInteractor.SYS_BOOT_REASON_PROP,
             "not mainline reboot"
         )
     }
