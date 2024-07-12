@@ -53,3 +53,14 @@ flag {
         purpose: PURPOSE_FEATURE
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "vendor_vibration_effects"
+    is_exported: true
+    description: "Enabled System APIs for vendor-defined vibration effects"
+    bug: "345454923"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}

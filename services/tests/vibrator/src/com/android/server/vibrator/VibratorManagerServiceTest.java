@@ -16,6 +16,8 @@
 
 package com.android.server.vibrator;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -66,6 +68,7 @@ import android.os.IBinder;
 import android.os.IExternalVibrationController;
 import android.os.IVibratorStateListener;
 import android.os.Looper;
+import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
@@ -1545,6 +1548,50 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void vibrate_vendorEffectsWithoutPermission_doesNotVibrate() throws Exception {
+        // Deny permission to vibrate with vendor effects
+        denyPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS);
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setCapabilities(IVibrator.CAP_PERFORM_VENDOR_EFFECTS);
+        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_TICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putString("key", "value");
+        VibrationEffect vendorEffect = VibrationEffect.createVendorEffect(vendorData);
+        VibrationEffect tickEffect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK);
+
+        vibrateAndWaitUntilFinished(service, vendorEffect, RINGTONE_ATTRS);
+        vibrateAndWaitUntilFinished(service, tickEffect, RINGTONE_ATTRS);
+
+        // No vendor effect played, but predefined TICK plays successfully.
+        assertThat(fakeVibrator.getAllVendorEffects()).isEmpty();
+        assertThat(fakeVibrator.getAllEffectSegments()).hasSize(1);
+        assertThat(fakeVibrator.getAllEffectSegments().get(0)).isInstanceOf(PrebakedSegment.class);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void vibrate_vendorEffectsWithPermission_successful() throws Exception {
+        // Deny permission to vibrate with vendor effects
+        grantPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS);
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setCapabilities(IVibrator.CAP_PERFORM_VENDOR_EFFECTS);
+        VibratorManagerService service = createSystemReadyService();
+
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putString("key", "value");
+        VibrationEffect vendorEffect = VibrationEffect.createVendorEffect(vendorData);
+
+        vibrateAndWaitUntilFinished(service, vendorEffect, RINGTONE_ATTRS);
+
+        assertThat(fakeVibrator.getAllVendorEffects()).containsExactly(vendorEffect);
+    }
+
+    @Test
     public void vibrate_withIntensitySettings_appliesSettingsToScaleVibrations() throws Exception {
         int defaultNotificationIntensity =
                 mVibrator.getDefaultVibrationIntensity(VibrationAttributes.USAGE_NOTIFICATION);
@@ -1683,6 +1730,39 @@ public class VibratorManagerServiceTest {
         verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 0.4f);
         verify(mVibratorFrameworkStatsLoggerMock,
                 timeout(TEST_TIMEOUT_MILLIS)).logVibrationAdaptiveHapticScale(UID, 1f);
+    }
+
+    @Test
+    @RequiresFlagsEnabled({
+            android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED,
+            android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS,
+    })
+    public void vibrate_withIntensitySettingsAndAdaptiveHaptics_appliesSettingsToVendorEffects()
+            throws Exception {
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_LOW);
+
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setCapabilities(IVibrator.CAP_PERFORM_VENDOR_EFFECTS);
+        VibratorManagerService service = createSystemReadyService();
+
+        SparseArray<Float> vibrationScales = new SparseArray<>();
+        vibrationScales.put(ScaleParam.TYPE_NOTIFICATION, 0.4f);
+
+        mVibratorControlService.setVibrationParams(
+                VibrationParamGenerator.generateVibrationParams(vibrationScales),
+                mFakeVibratorController);
+
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putString("key", "value");
+        VibrationEffect vendorEffect = VibrationEffect.createVendorEffect(vendorData);
+        vibrateAndWaitUntilFinished(service, vendorEffect, NOTIFICATION_ATTRS);
+
+        assertThat(fakeVibrator.getAllVendorEffects()).hasSize(1);
+        VibrationEffect.VendorEffect scaled = fakeVibrator.getAllVendorEffects().get(0);
+        assertThat(scaled.getEffectStrength()).isEqualTo(VibrationEffect.EFFECT_STRENGTH_STRONG);
+        assertThat(scaled.getLinearScale()).isEqualTo(0.4f);
     }
 
     @Test
@@ -2701,7 +2781,9 @@ public class VibratorManagerServiceTest {
             CombinedVibration effect, VibrationAttributes attrs) {
         HalVibration vib = service.vibrateWithPermissionCheck(UID, deviceId, PACKAGE_NAME, effect,
                 attrs, "some reason", service);
-        mPendingVibrations.add(vib);
+        if (vib != null) {
+            mPendingVibrations.add(vib);
+        }
         return vib;
     }
 
