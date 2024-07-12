@@ -21,6 +21,7 @@ import android.os.Handler
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.mediaprojection.taskswitcher.activityTaskManagerTasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
 
@@ -37,5 +38,6 @@ val Kosmos.realMediaProjectionRepository by
             tasksRepository = activityTaskManagerTasksRepository,
             backgroundDispatcher = testDispatcher,
             mediaProjectionServiceHelper = fakeMediaProjectionManager.helper,
+            logger = logcatLogBuffer("TestMediaProjection"),
         )
     }
