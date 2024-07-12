@@ -268,16 +268,9 @@ public class InputMethodManagerServiceTestBase {
         // Public local InputMethodManagerService.
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         lifecycle.onStart();
-        try {
-            // After this boot phase, services can broadcast Intents.
-            lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
-        } catch (SecurityException e) {
-            // Security exception to permission denial is expected in test, mocking out to ensure
-            // InputMethodManagerService as system ready state.
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+
+        // After this boot phase, services can broadcast Intents.
+        lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
 
         // Call InputMethodManagerService#addClient() as a preparation to start interacting with it.
         mInputMethodManagerService.addClient(mMockInputMethodClient, mMockRemoteInputConnection, 0);
