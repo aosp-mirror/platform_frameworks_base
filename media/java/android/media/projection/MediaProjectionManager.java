@@ -257,6 +257,7 @@ public final class MediaProjectionManager {
      * @see <a href="/guide/topics/large-screens/media-projection">
      * Media projection developer guide</a>
      */
+    @Nullable
     public MediaProjection getMediaProjection(int resultCode, @NonNull Intent resultData) {
         if (resultCode != Activity.RESULT_OK || resultData == null) {
             return null;
