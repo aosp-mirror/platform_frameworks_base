@@ -198,6 +198,7 @@ static bool UpdateConfigChangesIfNeeded(xml::Element* el, IAaptContext* context)
           android::DiagMessage(el->line_number)
           << "Cannot find symbol for android:configChanges with min sdk: "
           << context->GetMinSdkVersion());
+      return false;
     }
 
     std::stringstream new_value;
