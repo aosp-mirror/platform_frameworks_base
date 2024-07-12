@@ -98,6 +98,7 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
 
+import static com.android.input.flags.Flags.removeInputChannelFromWindowstate;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -633,6 +634,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     // Input channel and input window handle used by the input dispatcher.
     final InputWindowHandleWrapper mInputWindowHandle;
+    /**
+     * Only populated if flag REMOVE_INPUT_CHANNEL_FROM_WINDOWSTATE is disabled.
+     */
     InputChannel mInputChannel;
 
     /**
@@ -1877,6 +1881,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Input Manager uses when discarding windows from input consideration.
      */
     boolean isPotentialDragTarget(boolean targetInterceptsGlobalDrag) {
+        if (removeInputChannelFromWindowstate()) {
+            return (targetInterceptsGlobalDrag || isVisibleNow()) && !mRemoved
+                    && mInputChannelToken != null && mInputWindowHandle != null;
+        }
         return (targetInterceptsGlobalDrag || isVisibleNow()) && !mRemoved
                 && mInputChannel != null && mInputWindowHandle != null;
     }
@@ -2626,6 +2634,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void openInputChannel(@NonNull InputChannel outInputChannel) {
+        if (mInputChannelToken != null) {
+            throw new IllegalStateException("Window already has an input channel token.");
+        }
+        if (removeInputChannelFromWindowstate()) {
+            String name = getName();
+            InputChannel channel = mWmService.mInputManager.createInputChannel(name);
+            mInputChannelToken = channel.getToken();
+            mInputWindowHandle.setToken(mInputChannelToken);
+            mWmService.mInputToWindowMap.put(mInputChannelToken, this);
+            channel.copyTo(outInputChannel);
+            channel.dispose();
+            return;
+        }
         if (mInputChannel != null) {
             throw new IllegalStateException("Window already has an input channel.");
         }
@@ -2657,9 +2678,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mInputChannelToken = null;
         }
 
-        if (mInputChannel != null) {
-            mInputChannel.dispose();
-            mInputChannel = null;
+        if (!removeInputChannelFromWindowstate()) {
+            if (mInputChannel != null) {
+                mInputChannel.dispose();
+                mInputChannel = null;
+            }
         }
         mInputWindowHandle.setToken(null);
     }
