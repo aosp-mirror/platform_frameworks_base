@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
@@ -28,15 +28,11 @@ import com.android.systemui.statusbar.notification.shared.HeadsUpRowKey
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 
 class HeadsUpNotificationInteractor
 @Inject
@@ -97,17 +93,6 @@ constructor(
                     animatingAway ->
                     hasPinnedRows || animatingAway
                 }
-                .debounce { isHeadsUpOrAnimatingAway ->
-                    if (isHeadsUpOrAnimatingAway) {
-                        0
-                    } else {
-                        // When the last pinned entry is removed from the [HeadsUpRepository],
-                        // there might be a delay before the View starts animating.
-                        50L
-                    }
-                }
-                .onStart { emit(false) } // emit false, so we don't wait for the initial update
-                .distinctUntilChanged()
         }
     }
 
