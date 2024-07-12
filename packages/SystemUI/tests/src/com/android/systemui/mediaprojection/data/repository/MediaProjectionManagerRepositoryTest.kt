@@ -19,6 +19,7 @@ package com.android.systemui.mediaprojection.data.repository
 import android.hardware.display.displayManager
 import android.media.projection.MediaProjectionInfo
 import android.os.Binder
+import android.os.Handler
 import android.os.UserHandle
 import android.view.ContentRecordingSession
 import android.view.Display
@@ -26,11 +27,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createToken
 import com.android.systemui.mediaprojection.taskswitcher.FakeMediaProjectionManager.Companion.createDisplaySession
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeTasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
 import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
 import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherKosmos
@@ -251,6 +255,50 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
 
             assertThat((state as MediaProjectionState.Projecting.SingleTask).hostDeviceName)
                 .isNull()
+        }
+
+    /** Regression test for b/352483752. */
+    @Test
+    fun mediaProjectionState_sessionStartedThenImmediatelyStopped_emitsOnlyNotProjecting() =
+        testScope.runTest {
+            val fakeTasksRepo = FakeTasksRepository()
+            val repoWithTimingControl =
+                MediaProjectionManagerRepository(
+                    // fakeTasksRepo lets us have control over when the background dispatcher
+                    // finishes fetching the tasks info.
+                    tasksRepository = fakeTasksRepo,
+                    mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
+                    displayManager = displayManager,
+                    handler = Handler.getMain(),
+                    applicationScope = kosmos.applicationCoroutineScope,
+                    backgroundDispatcher = kosmos.testDispatcher,
+                    mediaProjectionServiceHelper = fakeMediaProjectionManager.helper,
+                )
+
+            val state by collectLastValue(repoWithTimingControl.mediaProjectionState)
+
+            val token = createToken()
+            val task = createTask(taskId = 1, token = token)
+
+            // Dispatch a session using a task session so that MediaProjectionManagerRepository
+            // has to ask TasksRepository for the tasks info.
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = ContentRecordingSession.createTaskSession(token.asBinder())
+            )
+            // FakeTasksRepository is set up to not return the tasks info until the test manually
+            // calls [FakeTasksRepository#setRunningTaskResult]. At this point,
+            // MediaProjectionManagerRepository is waiting for the tasks info and hasn't emitted
+            // anything yet.
+
+            // Before the tasks info comes back, dispatch a stop event.
+            fakeMediaProjectionManager.dispatchOnStop()
+
+            // Then let the tasks info come back.
+            fakeTasksRepo.setRunningTaskResult(task)
+
+            // Verify that MediaProjectionManagerRepository threw away the tasks info because
+            // a newer callback event (#onStop) occurred.
+            assertThat(state).isEqualTo(MediaProjectionState.NotProjecting)
         }
 
     @Test
