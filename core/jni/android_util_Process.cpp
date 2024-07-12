@@ -1063,8 +1063,8 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     }
     env->ReleaseStringUTFChars(file, file8);
 
-    // Most proc files we read are small, so we only go through the
-    // loop once and use the stack buffer.  We allocate a buffer big
+    // Most proc files we read are small, so we go through the loop
+    // with the stack buffer firstly. We allocate a buffer big
     // enough for the whole file.
 
     char readBufferStack[kProcReadStackBufferSize];
@@ -1072,37 +1072,47 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     char* readBuffer = &readBufferStack[0];
     ssize_t readBufferSize = kProcReadStackBufferSize;
     ssize_t numberBytesRead;
+    off_t offset = 0;
     for (;;) {
+        ssize_t requestedBufferSize = readBufferSize - offset;
         // By using pread, we can avoid an lseek to rewind the FD
         // before retry, saving a system call.
-        numberBytesRead = pread(fd, readBuffer, readBufferSize, 0);
-        if (numberBytesRead < 0 && errno == EINTR) {
-            continue;
-        }
+        numberBytesRead =
+                TEMP_FAILURE_RETRY(pread(fd, readBuffer + offset, requestedBufferSize, offset));
         if (numberBytesRead < 0) {
             if (kDebugProc) {
-                ALOGW("Unable to open process file: %s fd=%d\n", file8, fd.get());
+                ALOGW("Unable to read process file err: %s file: %s fd=%d\n",
+                      strerror_r(errno, &readBufferStack[0], sizeof(readBufferStack)), file8,
+                      fd.get());
             }
             return JNI_FALSE;
         }
-        if (numberBytesRead < readBufferSize) {
+        if (numberBytesRead == 0) {
+            // End of file.
+            numberBytesRead = offset;
             break;
         }
-        if (readBufferSize > std::numeric_limits<ssize_t>::max() / 2) {
-            if (kDebugProc) {
-                ALOGW("Proc file too big: %s fd=%d\n", file8, fd.get());
+        if (numberBytesRead < requestedBufferSize) {
+            // Read less bytes than requested, it's not an error per pread(2).
+            offset += numberBytesRead;
+        } else {
+            // Buffer is fully used, try to grow it.
+            if (readBufferSize > std::numeric_limits<ssize_t>::max() / 2) {
+                if (kDebugProc) {
+                    ALOGW("Proc file too big: %s fd=%d\n", file8, fd.get());
+                }
+                return JNI_FALSE;
             }
-            return JNI_FALSE;
+            readBufferSize = std::max(readBufferSize * 2, kProcReadMinHeapBufferSize);
+            readBufferHeap.reset(); // Free address space before getting more.
+            readBufferHeap = std::make_unique<char[]>(readBufferSize);
+            if (!readBufferHeap) {
+                jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+                return JNI_FALSE;
+            }
+            readBuffer = readBufferHeap.get();
+            offset = 0;
         }
-        readBufferSize = std::max(readBufferSize * 2,
-                                  kProcReadMinHeapBufferSize);
-        readBufferHeap.reset();  // Free address space before getting more.
-        readBufferHeap = std::make_unique<char[]>(readBufferSize);
-        if (!readBufferHeap) {
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
-            return JNI_FALSE;
-        }
-        readBuffer = readBufferHeap.get();
     }
 
     // parseProcLineArray below modifies the buffer while parsing!
