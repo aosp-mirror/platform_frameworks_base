@@ -1038,13 +1038,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // Called on ActivityManager thread.
             final int userId = user.getUserIdentifier();
             SecureSettingsWrapper.onUserStarting(userId);
-            synchronized (ImfLock.class) {
-                if (mService.mConcurrentMultiUserModeEnabled) {
-                    if (mService.mCurrentUserId != userId && mService.mSystemReady) {
-                        mService.initializeVisibleBackgroundUserLocked(userId);
+            mService.mIoHandler.post(() -> {
+                synchronized (ImfLock.class) {
+                    if (mService.mConcurrentMultiUserModeEnabled) {
+                        if (mService.mCurrentUserId != userId && mService.mSystemReady) {
+                            mService.initializeVisibleBackgroundUserLocked(userId);
+                        }
                     }
                 }
-            }
+            });
         }
 
     }
