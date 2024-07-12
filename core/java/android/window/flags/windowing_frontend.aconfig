@@ -208,7 +208,7 @@ flag {
 
 flag {
   name: "enforce_shell_thread_model"
-  namespace: "windowing_frentend"
+  namespace: "windowing_frontend"
   description: "Crash the shell process if someone calls in from the wrong thread"
   bug: "351189446"
   is_fixed_read_only: true
