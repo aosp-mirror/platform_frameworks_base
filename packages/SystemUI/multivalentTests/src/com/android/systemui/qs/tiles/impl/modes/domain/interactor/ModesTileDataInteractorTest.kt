@@ -20,7 +20,6 @@ import android.app.Flags
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.annotations.EnabledOnRavenwood
 import android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
 import android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
 import android.provider.Settings.Global.ZEN_MODE_OFF
@@ -42,7 +41,6 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class ModesTileDataInteractorTest : SysuiTestCase() {
     private val zenModeRepository = FakeZenModeRepository()
