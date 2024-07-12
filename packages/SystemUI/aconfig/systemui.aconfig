@@ -1180,3 +1180,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "msdl_feedback"
+  namespace: "systemui"
+  description: "Enables MSDL feedback in SysUI surfaces."
+  bug: "352600066"
+}
