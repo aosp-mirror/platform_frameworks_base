@@ -236,7 +236,7 @@ void BootAnimation::onFirstRef() {
         ALOGD("%sAnimationPreloadTiming start time: %" PRId64 "ms",
                 mShuttingDown ? "Shutdown" : "Boot", elapsedRealtime());
         preloadAnimation();
-        ALOGD("%sAnimationPreloadStopTiming start time: %" PRId64 "ms",
+        ALOGD("%sAnimationPreloadTiming stop time: %" PRId64 "ms",
                 mShuttingDown ? "Shutdown" : "Boot", elapsedRealtime());
     }
 }
