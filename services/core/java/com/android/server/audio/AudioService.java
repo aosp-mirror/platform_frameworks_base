@@ -497,19 +497,40 @@ public class AudioService extends IAudioService.Stub
     private AudioSystemThread mAudioSystemThread;
     /** @see AudioHandler */
     private AudioHandler mAudioHandler;
-    /** @see VolumeStreamState */
-    private VolumeStreamState[] mStreamStates;
+    /**
+     *  @see VolumeStreamState
+     *  Mapping which contains for each stream type its associated {@link VolumeStreamState}
+     **/
+    private SparseArray<VolumeStreamState> mStreamStates;
 
     /*package*/ int getVssVolumeForDevice(int stream, int device) {
-        return mStreamStates[stream].getIndex(device);
+        final VolumeStreamState streamState = mStreamStates.get(stream);
+        return streamState != null ? streamState.getIndex(device) : -1;
     }
 
-    /*package*/ VolumeStreamState getVssVolumeForStream(int stream) {
-        return mStreamStates[stream];
+    @Nullable
+    /*package*/ VolumeStreamState getVssForStream(int stream) {
+        return mStreamStates.get(stream);
+    }
+
+    @NonNull
+    /*package*/ VolumeStreamState getVssForStreamOrDefault(int stream) {
+        VolumeStreamState streamState = mStreamStates.get(stream);
+        if (streamState == null) {
+            if (replaceStreamBtSco()) {
+                throw new IllegalArgumentException("No VolumeStreamState for stream " + stream);
+            } else {
+                Log.e(TAG, "No VolumeStreamState for stream " + stream
+                        + ". Returning default state for STREAM_MUSIC", new Exception());
+                streamState = mStreamStates.get(AudioSystem.STREAM_MUSIC);
+            }
+        }
+        return streamState;
     }
 
     /*package*/ int getMaxVssVolumeForStream(int stream) {
-        return mStreamStates[stream].getMaxIndex();
+        final VolumeStreamState streamState = mStreamStates.get(stream);
+        return streamState != null ? streamState.getMaxIndex() : -1;
     }
 
     private SettingsObserver mSettingsObserver;
@@ -551,13 +572,13 @@ public class AudioService extends IAudioService.Stub
         0   // STREAM_ASSISTANT
     };
 
-    /* mStreamVolumeAlias[] indicates for each stream if it uses the volume settings
+    /* sStreamVolumeAlias[] indicates for each stream if it uses the volume settings
      * of another stream: This avoids multiplying the volume settings for hidden
      * stream types that follow other stream behavior for volume settings
      * NOTE: do not create loops in aliases!
      * Some streams alias to different streams according to device category (phone or tablet) or
      * use case (in call vs off call...). See updateStreamVolumeAlias() for more details.
-     *  mStreamVolumeAlias contains STREAM_VOLUME_ALIAS_VOICE aliases for a voice capable device
+     *  sStreamVolumeAlias contains STREAM_VOLUME_ALIAS_VOICE aliases for a voice capable device
      *  (phone), STREAM_VOLUME_ALIAS_TELEVISION for a television or set-top box and
      *  STREAM_VOLUME_ALIAS_DEFAULT for other devices (e.g. tablets).*/
     private final int[] STREAM_VOLUME_ALIAS_VOICE = new int[] {
@@ -622,12 +643,12 @@ public class AudioService extends IAudioService.Stub
         AudioSystem.STREAM_MUSIC,           // STREAM_ACCESSIBILITY
         AudioSystem.STREAM_MUSIC            // STREAM_ASSISTANT
     };
-    protected static int[] mStreamVolumeAlias;
+    protected static SparseIntArray sStreamVolumeAlias;
     private static final int UNSET_INDEX = -1;
 
     /**
      * Map AudioSystem.STREAM_* constants to app ops.  This should be used
-     * after mapping through mStreamVolumeAlias.
+     * after mapping through sStreamVolumeAlias.
      */
     private static final int[] STREAM_VOLUME_OPS = new int[] {
         AppOpsManager.OP_AUDIO_VOICE_VOLUME,            // STREAM_VOICE_CALL
@@ -1417,7 +1438,7 @@ public class AudioService extends IAudioService.Stub
         mRecordMonitor = new RecordingActivityMonitor(mContext);
         mRecordMonitor.registerRecordingCallback(mVoiceRecordingActivityMonitor, true);
 
-        // must be called before readPersistedSettings() which needs a valid mStreamVolumeAlias[]
+        // must be called before readPersistedSettings() which needs a valid sStreamVolumeAlias[]
         // array initialized by updateStreamVolumeAlias()
         updateStreamVolumeAlias(false /*updateVolumes*/, TAG);
         readPersistedSettings();
@@ -1474,7 +1495,7 @@ public class AudioService extends IAudioService.Stub
         int numStreamTypes = AudioSystem.getNumStreamTypes();
         synchronized (VolumeStreamState.class) {
             for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                VolumeStreamState streamState = mStreamStates[streamType];
+                final VolumeStreamState streamState = getVssForStream(streamType);
                 if (streamState == null) {
                     continue;
                 }
@@ -2084,7 +2105,10 @@ public class AudioService extends IAudioService.Stub
         // keep track of any error during stream volume initialization
         int status = AudioSystem.AUDIO_STATUS_OK;
         for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-            VolumeStreamState streamState = mStreamStates[streamType];
+            VolumeStreamState streamState = getVssForStream(streamType);
+            if (streamState == null) {
+                continue;
+            }
             final int res = AudioSystem.initStreamVolume(
                     streamType, MIN_STREAM_VOLUME[streamType], MAX_STREAM_VOLUME[streamType]);
             if (res != AudioSystem.AUDIO_STATUS_OK) {
@@ -2244,12 +2268,13 @@ public class AudioService extends IAudioService.Stub
             synchronized (VolumeStreamState.class) {
                 int numStreamTypes = AudioSystem.getNumStreamTypes();
                 for (int streamType = 0; streamType < numStreamTypes; streamType++) {
-                    if (mStreamVolumeAlias[streamType] >= 0) {
-                        mStreamStates[streamType]
-                                .setAllIndexes(mStreamStates[mStreamVolumeAlias[streamType]], TAG);
+                    int streamAlias = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1);
+                    final VolumeStreamState streamState = getVssForStream(streamType);
+                    if (streamAlias != -1 && streamState != null) {
+                        streamState.setAllIndexes(getVssForStream(streamAlias), TAG);
                         // apply stream volume
-                        if (!mStreamStates[streamType].mIsMuted) {
-                            mStreamStates[streamType].applyAllVolumes();
+                        if (!streamState.mIsMuted) {
+                            streamState.applyAllVolumes();
                         }
                     }
                 }
@@ -2349,11 +2374,17 @@ public class AudioService extends IAudioService.Stub
         if (device == AudioSystem.DEVICE_OUT_SPEAKER_SAFE) {
             device = AudioSystem.DEVICE_OUT_SPEAKER;
         }
-        if (!mStreamStates[streamType].hasIndexForDevice(device)) {
+
+        final VolumeStreamState streamState = getVssForStream(streamType);
+        if (streamState == null) {
+            // nothing to update
+            return;
+        }
+
+        if (!streamState.hasIndexForDevice(device)) {
             // set the default value, if device is affected by a full/fix/abs volume rule, it
             // will taken into account in checkFixedVolumeDevices()
-            mStreamStates[streamType].setIndex(
-                    mStreamStates[mStreamVolumeAlias[streamType]]
+            streamState.setIndex(getVssForStreamOrDefault(sStreamVolumeAlias.get(streamType))
                             .getIndex(AudioSystem.DEVICE_OUT_DEFAULT),
                     device, caller, true /*hasModifyAudioSettings*/);
         }
@@ -2366,11 +2397,11 @@ public class AudioService extends IAudioService.Stub
         for (AudioDeviceAttributes deviceAttributes : devicesForAttributes) {
             if (deviceAttributes.getType() == AudioDeviceInfo.convertInternalDeviceToDeviceType(
                     device)) {
-                mStreamStates[streamType].checkFixedVolumeDevices();
+                streamState.checkFixedVolumeDevices();
 
                 // Unmute streams if required and device is full volume
                 if (isStreamMute(streamType) && mFullVolumeDevices.contains(device)) {
-                    mStreamStates[streamType].mute(false, "updateVolumeStates(" + caller);
+                    streamState.mute(false, "updateVolumeStates(" + caller);
                 }
             }
         }
@@ -2380,22 +2411,27 @@ public class AudioService extends IAudioService.Stub
     {
         int numStreamTypes = AudioSystem.getNumStreamTypes();
         for (int streamType = 0; streamType < numStreamTypes; streamType++) {
-            if (mStreamStates[streamType] != null) {
-                mStreamStates[streamType].checkFixedVolumeDevices();
+            final VolumeStreamState vss = getVssForStream(streamType);
+            if (vss != null) {
+                vss.checkFixedVolumeDevices();
             }
         }
     }
 
     private void checkAllFixedVolumeDevices(int streamType) {
-        mStreamStates[streamType].checkFixedVolumeDevices();
+        final VolumeStreamState vss = getVssForStream(streamType);
+        if (vss == null) {
+            return;
+        }
+        vss.checkFixedVolumeDevices();
     }
 
     private void checkMuteAffectedStreams() {
         // any stream with a min level > 0 is not muteable by definition
         // STREAM_VOICE_CALL and STREAM_BLUETOOTH_SCO can be muted by applications
         // that has the the MODIFY_PHONE_STATE permission.
-        for (int i = 0; i < mStreamStates.length; i++) {
-            final VolumeStreamState vss = mStreamStates[i];
+        for (int i = 0; i < mStreamStates.size(); i++) {
+            final VolumeStreamState vss = mStreamStates.valueAt(i);
             if (vss != null && vss.mIndexMin > 0
                     && (vss.mStreamType != AudioSystem.STREAM_VOICE_CALL
                     && vss.mStreamType != AudioSystem.STREAM_BLUETOOTH_SCO)) {
@@ -2407,13 +2443,14 @@ public class AudioService extends IAudioService.Stub
 
     private void createStreamStates() {
         int numStreamTypes = AudioSystem.getNumStreamTypes();
-        VolumeStreamState[] streams = mStreamStates = new VolumeStreamState[numStreamTypes];
+        mStreamStates = new SparseArray<>(numStreamTypes);
 
         for (int i = 0; i < numStreamTypes; i++) {
-            // a negative mStreamVolumeAlias value means the stream state type is not supported
-            if (mStreamVolumeAlias[i] >= 0) {
-                streams[i] =
-                        new VolumeStreamState(System.VOLUME_SETTINGS_INT[mStreamVolumeAlias[i]], i);
+            final int streamAlias = sStreamVolumeAlias.get(i, /*valueIfKeyNotFound=*/-1);
+            // a negative sStreamVolumeAlias value means the stream state type is not supported
+            if (streamAlias >= 0) {
+                mStreamStates.set(i,
+                        new VolumeStreamState(System.VOLUME_SETTINGS_INT[streamAlias], i));
             }
         }
 
@@ -2432,24 +2469,25 @@ public class AudioService extends IAudioService.Stub
      * For other volume groups not linked to any streams, default music stream index is considered.
      */
     private void updateDefaultVolumes() {
-        for (int stream = 0; stream < mStreamStates.length; stream++) {
-            int streamVolumeAlias = mStreamVolumeAlias[stream];
+        for (int stream = 0; stream < mStreamStates.size(); stream++) {
+            int streamType = mStreamStates.keyAt(stream);
+            int streamVolumeAlias = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1);
             if (mUseVolumeGroupAliases) {
-                if (AudioSystem.DEFAULT_STREAM_VOLUME[stream] != UNSET_INDEX) {
+                if (AudioSystem.DEFAULT_STREAM_VOLUME[streamType] != UNSET_INDEX) {
                     // Already initialized through default property based mecanism.
                     continue;
                 }
                 streamVolumeAlias = AudioSystem.STREAM_MUSIC;
-                int defaultAliasVolume = getUiDefaultRescaledIndex(streamVolumeAlias, stream);
-                if ((defaultAliasVolume >= MIN_STREAM_VOLUME[stream])
-                        && (defaultAliasVolume <= MAX_STREAM_VOLUME[stream])) {
-                    AudioSystem.DEFAULT_STREAM_VOLUME[stream] = defaultAliasVolume;
+                int defaultAliasVolume = getUiDefaultRescaledIndex(streamVolumeAlias, streamType);
+                if ((defaultAliasVolume >= MIN_STREAM_VOLUME[streamType])
+                        && (defaultAliasVolume <= MAX_STREAM_VOLUME[streamType])) {
+                    AudioSystem.DEFAULT_STREAM_VOLUME[streamType] = defaultAliasVolume;
                     continue;
                 }
             }
-            if (streamVolumeAlias >= 0 && stream != streamVolumeAlias) {
-                AudioSystem.DEFAULT_STREAM_VOLUME[stream] =
-                        getUiDefaultRescaledIndex(streamVolumeAlias, stream);
+            if (streamVolumeAlias >= 0 && streamType != streamVolumeAlias) {
+                AudioSystem.DEFAULT_STREAM_VOLUME[streamType] =
+                        getUiDefaultRescaledIndex(streamVolumeAlias, streamType);
             }
         }
     }
@@ -2491,19 +2529,30 @@ public class AudioService extends IAudioService.Stub
                 continue;
             }
             StringBuilder alias = new StringBuilder();
-            if (mStreamVolumeAlias[i] != i) {
+            final int streamAlias = sStreamVolumeAlias.get(i, /*valueIfKeyNotFound*/-1);
+            if (streamAlias != i && streamAlias != -1) {
                 alias.append(" (aliased to: ")
-                        .append(AudioSystem.STREAM_NAMES[mStreamVolumeAlias[i]])
+                        .append(AudioSystem.STREAM_NAMES[streamAlias])
                         .append(")");
             }
             pw.println("- " + AudioSystem.STREAM_NAMES[i] + alias + ":");
-            mStreamStates[i].dump(pw);
+            final VolumeStreamState vss = getVssForStream(i);
+            if (vss != null) {
+                vss.dump(pw);
+            }
             pw.println("");
         }
         pw.print("\n- mute affected streams = 0x");
         pw.println(Integer.toHexString(mMuteAffectedStreams));
         pw.print("\n- user mutable streams = 0x");
         pw.println(Integer.toHexString(mUserMutableStreams));
+    }
+
+    private void initStreamVolumeAlias(int[] streamVolumeAlias) {
+        sStreamVolumeAlias = new SparseIntArray(streamVolumeAlias.length);
+        for (int i = 0; i < streamVolumeAlias.length; ++i) {
+            sStreamVolumeAlias.put(i, streamVolumeAlias[i]);
+        }
     }
 
     private void updateStreamVolumeAlias(boolean updateVolumes, String caller) {
@@ -2515,24 +2564,24 @@ public class AudioService extends IAudioService.Stub
                 AudioSystem.STREAM_ASSISTANT : AudioSystem.STREAM_MUSIC;
 
         if (mIsSingleVolume) {
-            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_TELEVISION.clone();
+            initStreamVolumeAlias(STREAM_VOLUME_ALIAS_TELEVISION);
             dtmfStreamAlias = AudioSystem.STREAM_MUSIC;
         } else if (mUseVolumeGroupAliases) {
-            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_NONE.clone();
+            initStreamVolumeAlias(STREAM_VOLUME_ALIAS_NONE);
             dtmfStreamAlias = AudioSystem.STREAM_DTMF;
         } else {
             switch (mPlatformType) {
                 case AudioSystem.PLATFORM_VOICE:
-                    mStreamVolumeAlias = STREAM_VOLUME_ALIAS_VOICE.clone();
+                    initStreamVolumeAlias(STREAM_VOLUME_ALIAS_VOICE);
                     dtmfStreamAlias = AudioSystem.STREAM_RING;
                     break;
                 default:
-                    mStreamVolumeAlias = STREAM_VOLUME_ALIAS_DEFAULT.clone();
+                    initStreamVolumeAlias(STREAM_VOLUME_ALIAS_DEFAULT);
                     dtmfStreamAlias = AudioSystem.STREAM_MUSIC;
             }
             if (!mNotifAliasRing) {
-                mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] =
-                        AudioSystem.STREAM_NOTIFICATION;
+                sStreamVolumeAlias.put(AudioSystem.STREAM_NOTIFICATION,
+                        AudioSystem.STREAM_NOTIFICATION);
             }
         }
 
@@ -2547,15 +2596,14 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
-        mStreamVolumeAlias[AudioSystem.STREAM_DTMF] = dtmfStreamAlias;
-        mStreamVolumeAlias[AudioSystem.STREAM_ACCESSIBILITY] = a11yStreamAlias;
-        mStreamVolumeAlias[AudioSystem.STREAM_ASSISTANT] = assistantStreamAlias;
+        sStreamVolumeAlias.put(AudioSystem.STREAM_DTMF, dtmfStreamAlias);
+        sStreamVolumeAlias.put(AudioSystem.STREAM_ACCESSIBILITY, a11yStreamAlias);
+        sStreamVolumeAlias.put(AudioSystem.STREAM_ASSISTANT, assistantStreamAlias);
 
         if (replaceStreamBtSco()) {
             // we do not support STREAM_BLUETOOTH_SCO, this will lead to having
-            // mStreanStates[STREAM_BLUETOOTH_SCO] = null
-            // TODO: replace arrays with SparseIntArrays to avoid null checks
-            mStreamVolumeAlias[AudioSystem.STREAM_BLUETOOTH_SCO] = -1;
+            // mStreanStates.get(STREAM_BLUETOOTH_SCO) == null
+            sStreamVolumeAlias.delete(AudioSystem.STREAM_BLUETOOTH_SCO);
         }
 
         if (updateVolumes && mStreamStates != null) {
@@ -2563,17 +2611,17 @@ public class AudioService extends IAudioService.Stub
 
             synchronized (mSettingsLock) {
                 synchronized (VolumeStreamState.class) {
-                    mStreamStates[AudioSystem.STREAM_DTMF]
-                            .setAllIndexes(mStreamStates[dtmfStreamAlias], caller);
-                    mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].setSettingName(
+                    getVssForStreamOrDefault(AudioSystem.STREAM_DTMF)
+                            .setAllIndexes(getVssForStreamOrDefault(dtmfStreamAlias), caller);
+                    getVssForStreamOrDefault(AudioSystem.STREAM_ACCESSIBILITY).setSettingName(
                             System.VOLUME_SETTINGS_INT[a11yStreamAlias]);
-                    mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].setAllIndexes(
-                            mStreamStates[a11yStreamAlias], caller);
+                    getVssForStreamOrDefault(AudioSystem.STREAM_ACCESSIBILITY).setAllIndexes(
+                            getVssForStreamOrDefault(a11yStreamAlias), caller);
                 }
             }
             if (sIndependentA11yVolume) {
                 // restore the a11y values from the settings
-                mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].readSettings();
+                getVssForStreamOrDefault(AudioSystem.STREAM_ACCESSIBILITY).readSettings();
             }
 
             // apply stream mute states according to new value of mRingerModeAffectedStreams
@@ -2583,13 +2631,13 @@ public class AudioService extends IAudioService.Stub
                     SENDMSG_QUEUE,
                     0,
                     0,
-                    mStreamStates[AudioSystem.STREAM_DTMF], 0);
+                    getVssForStreamOrDefault(AudioSystem.STREAM_DTMF), 0);
             sendMsg(mAudioHandler,
                     MSG_SET_ALL_VOLUMES,
                     SENDMSG_QUEUE,
                     0,
                     0,
-                    mStreamStates[AudioSystem.STREAM_ACCESSIBILITY], 0);
+                    getVssForStreamOrDefault(AudioSystem.STREAM_ACCESSIBILITY), 0);
         }
         dispatchStreamAliasingUpdate();
     }
@@ -3066,7 +3114,8 @@ public class AudioService extends IAudioService.Stub
     }
 
     private int getIndexRange(int streamType) {
-        return (mStreamStates[streamType].getMaxIndex() - mStreamStates[streamType].getMinIndex());
+        return (getVssForStreamOrDefault(streamType).getMaxIndex() - getVssForStreamOrDefault(
+                streamType).getMinIndex());
     }
 
     private int rescaleIndex(VolumeInfo volumeInfo, int dstStream) {
@@ -3074,11 +3123,12 @@ public class AudioService extends IAudioService.Stub
                 || volumeInfo.getMinVolumeIndex() == VolumeInfo.INDEX_NOT_SET
                 || volumeInfo.getMaxVolumeIndex() == VolumeInfo.INDEX_NOT_SET) {
             Log.e(TAG, "rescaleIndex: volumeInfo has invalid index or range");
-            return mStreamStates[dstStream].getMinIndex();
+            return getVssForStreamOrDefault(dstStream).getMinIndex();
         }
         return rescaleIndex(volumeInfo.getVolumeIndex(),
                 volumeInfo.getMinVolumeIndex(), volumeInfo.getMaxVolumeIndex(),
-                mStreamStates[dstStream].getMinIndex(), mStreamStates[dstStream].getMaxIndex());
+                getVssForStreamOrDefault(dstStream).getMinIndex(),
+                getVssForStreamOrDefault(dstStream).getMaxIndex());
     }
 
     private int rescaleIndex(int index, int srcStream, VolumeInfo dstVolumeInfo) {
@@ -3089,14 +3139,17 @@ public class AudioService extends IAudioService.Stub
             return index;
         }
         return rescaleIndex(index,
-                mStreamStates[srcStream].getMinIndex(), mStreamStates[srcStream].getMaxIndex(),
+                getVssForStreamOrDefault(srcStream).getMinIndex(),
+                getVssForStreamOrDefault(srcStream).getMaxIndex(),
                 dstMin, dstMax);
     }
 
     private int rescaleIndex(int index, int srcStream, int dstStream) {
         return rescaleIndex(index,
-                mStreamStates[srcStream].getMinIndex(), mStreamStates[srcStream].getMaxIndex(),
-                mStreamStates[dstStream].getMinIndex(), mStreamStates[dstStream].getMaxIndex());
+                getVssForStreamOrDefault(srcStream).getMinIndex(),
+                getVssForStreamOrDefault(srcStream).getMaxIndex(),
+                getVssForStreamOrDefault(dstStream).getMinIndex(),
+                getVssForStreamOrDefault(dstStream).getMaxIndex());
     }
 
     private int rescaleIndex(int index, int srcMin, int srcMax, int dstMin, int dstMax) {
@@ -3619,7 +3672,7 @@ public class AudioService extends IAudioService.Stub
         streamType = replaceBtScoStreamWithVoiceCall(streamType, "adjustSuggestedStreamVolume");
 
         ensureValidStreamType(streamType);
-        final int resolvedStream = mStreamVolumeAlias[streamType];
+        final int resolvedStream = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1);
 
         // Play sounds on STREAM_RING only.
         if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0 &&
@@ -3736,9 +3789,9 @@ public class AudioService extends IAudioService.Stub
         // use stream type alias here so that streams with same alias have the same behavior,
         // including with regard to silent mode control (e.g the use of STREAM_RING below and in
         // checkForRingerModeChange() in place of STREAM_RING or STREAM_NOTIFICATION)
-        int streamTypeAlias = mStreamVolumeAlias[streamType];
+        int streamTypeAlias = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1);
 
-        VolumeStreamState streamState = mStreamStates[streamTypeAlias];
+        VolumeStreamState streamState = getVssForStreamOrDefault(streamTypeAlias);
 
         final int device = getDeviceForStream(streamTypeAlias);
 
@@ -3824,7 +3877,7 @@ public class AudioService extends IAudioService.Stub
         if (!volumeAdjustmentAllowedByDnd(streamTypeAlias, flags)) {
             adjustVolume = false;
         }
-        int oldIndex = mStreamStates[streamType].getIndex(device);
+        int oldIndex = getVssForStreamOrDefault(streamType).getIndex(device);
 
         // Check if the volume adjustment should be handled by an absolute volume controller instead
         if (isAbsoluteVolumeDevice(device) && (flags & AudioManager.FLAG_ABSOLUTE_VOLUME) == 0) {
@@ -3880,7 +3933,7 @@ public class AudioService extends IAudioService.Stub
                         0);
             }
 
-            int newIndex = mStreamStates[streamType].getIndex(device);
+            int newIndex = getVssForStreamOrDefault(streamType).getIndex(device);
 
             int streamToDriveAbsVol = absVolumeIndexFix() ? getBluetoothContextualVolumeStream() :
                     AudioSystem.STREAM_MUSIC;
@@ -3907,7 +3960,7 @@ public class AudioService extends IAudioService.Stub
                             + newIndex + " stream=" + streamType);
                 }
                 mDeviceBroker.postSetLeAudioVolumeIndex(newIndex,
-                    mStreamStates[streamType].getMaxIndex(), streamType);
+                        getVssForStreamOrDefault(streamType).getMaxIndex(), streamType);
             }
 
             // Check if volume update should be send to Hearing Aid.
@@ -3923,7 +3976,7 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
-        final int newIndex = mStreamStates[streamType].getIndex(device);
+        final int newIndex = getVssForStreamOrDefault(streamType).getIndex(device);
         if (adjustVolume) {
             synchronized (mHdmiClientLock) {
                 if (mHdmiManager != null) {
@@ -4005,22 +4058,22 @@ public class AudioService extends IAudioService.Stub
         synchronized (mSettingsLock) {
             synchronized (VolumeStreamState.class) {
                 List<Integer> streamsToMute = new ArrayList<>();
-                for (int stream = 0; stream < mStreamStates.length; stream++) {
-                    VolumeStreamState vss = mStreamStates[stream];
-                    if (vss != null && streamAlias == mStreamVolumeAlias[stream]
+                for (int stream = 0; stream < mStreamStates.size(); stream++) {
+                    final VolumeStreamState vss = mStreamStates.valueAt(stream);
+                    if (vss != null && streamAlias == sStreamVolumeAlias.get(vss.getStreamType())
                             && vss.isMutable()) {
                         if (!(mCameraSoundForced && (vss.getStreamType()
                                 == AudioSystem.STREAM_SYSTEM_ENFORCED))) {
                             boolean changed = vss.mute(state, /* apply= */ false,
                                     "muteAliasStreams");
                             if (changed) {
-                                streamsToMute.add(stream);
+                                streamsToMute.add(vss.getStreamType());
                             }
                         }
                     }
                 }
                 streamsToMute.forEach(streamToMute -> {
-                    mStreamStates[streamToMute].doMute();
+                    getVssForStreamOrDefault(streamToMute).doMute();
                     broadcastMuteSetting(streamToMute, state);
                 });
             }
@@ -4048,7 +4101,7 @@ public class AudioService extends IAudioService.Stub
         // vss.updateVolumeGroupIndex
         synchronized (mSettingsLock) {
             synchronized (VolumeStreamState.class) {
-                final VolumeStreamState streamState = mStreamStates[streamAlias];
+                final VolumeStreamState streamState = getVssForStreamOrDefault(streamAlias);
                 // if unmuting causes a change, it was muted
                 wasMuted = streamState.mute(false, "onUnmuteStreamOnSingleVolDevice");
                 if (wasMuted) {
@@ -4146,7 +4199,7 @@ public class AudioService extends IAudioService.Stub
      */
     /*package*/ void onSetStreamVolume(int streamType, int index, int flags, int device,
             String caller, boolean hasModifyAudioSettings, boolean canChangeMute) {
-        final int stream = mStreamVolumeAlias[streamType];
+        final int stream = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1);
         // setting volume on ui sounds stream type also controls silent mode
         if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
                 (stream == getUiSoundsStreamType())) {
@@ -4287,26 +4340,30 @@ public class AudioService extends IAudioService.Stub
         // that can interfere with the sending of the VOLUME_CHANGED_ACTION intent
         mAudioSystem.clearRoutingCache();
 
+        int streamType = replaceBtScoStreamWithVoiceCall(vi.getStreamType(), "setDeviceVolume");
+
+        final VolumeStreamState vss = getVssForStream(streamType);
+
         // log the current device that will be used when evaluating the sending of the
         // VOLUME_CHANGED_ACTION intent to see if the current device is the one being modified
-        final int currDev = getDeviceForStream(vi.getStreamType());
+        final int currDev = getDeviceForStream(streamType);
 
-        final boolean skipping = (currDev == ada.getInternalType());
+        final boolean skipping = (currDev == ada.getInternalType()) || (vss == null);
 
-        AudioService.sVolumeLogger.enqueue(new DeviceVolumeEvent(vi.getStreamType(), index, ada,
+        AudioService.sVolumeLogger.enqueue(new DeviceVolumeEvent(streamType, index, ada,
                 currDev, callingPackage, skipping));
 
         if (skipping) {
-            // setDeviceVolume was called on a device currently being used
+            // setDeviceVolume was called on a device currently being used or stream state is null
             return;
         }
 
         // TODO handle unmuting of current audio device
         // if a stream is not muted but the VolumeInfo is for muting, set the volume index
         // for the device to min volume
-        if (vi.hasMuteCommand() && vi.isMuted() && !isStreamMute(vi.getStreamType())) {
-            setStreamVolumeWithAttributionInt(vi.getStreamType(),
-                    mStreamStates[vi.getStreamType()].getMinIndex(),
+        if (vi.hasMuteCommand() && vi.isMuted() && !isStreamMute(streamType)) {
+            setStreamVolumeWithAttributionInt(streamType,
+                    vss.getMinIndex(),
                     /*flags*/ 0,
                     ada, callingPackage, null,
                     //TODO handle unmuting of current audio device
@@ -4320,22 +4377,22 @@ public class AudioService extends IAudioService.Stub
         if (vi.getMinVolumeIndex() == VolumeInfo.INDEX_NOT_SET
                 || vi.getMaxVolumeIndex() == VolumeInfo.INDEX_NOT_SET) {
             // assume index meant to be in stream type range, validate
-            if ((index * 10) < mStreamStates[vi.getStreamType()].getMinIndex()
-                    || (index * 10) > mStreamStates[vi.getStreamType()].getMaxIndex()) {
+            if ((index * 10) < vss.getMinIndex()
+                    || (index * 10) > vss.getMaxIndex()) {
                 throw new IllegalArgumentException("invalid volume index " + index
                         + " not between min/max for stream " + vi.getStreamType());
             }
         } else {
             // check if index needs to be rescaled
-            final int min = (mStreamStates[vi.getStreamType()].getMinIndex() + 5) / 10;
-            final int max = (mStreamStates[vi.getStreamType()].getMaxIndex() + 5) / 10;
+            final int min = (vss.getMinIndex() + 5) / 10;
+            final int max = (vss.getMaxIndex() + 5) / 10;
             if (vi.getMinVolumeIndex() != min || vi.getMaxVolumeIndex() != max) {
                 index = rescaleIndex(index,
                         /*srcMin*/ vi.getMinVolumeIndex(), /*srcMax*/ vi.getMaxVolumeIndex(),
                         /*dstMin*/ min, /*dstMax*/ max);
             }
         }
-        setStreamVolumeWithAttributionInt(vi.getStreamType(), index, /*flags*/ 0,
+        setStreamVolumeWithAttributionInt(streamType, index, /*flags*/ 0,
                 ada, callingPackage, null,
                 false /*canChangeMuteAndUpdateController*/);
     }
@@ -4763,7 +4820,7 @@ public class AudioService extends IAudioService.Stub
 
         if (AudioSystem.isLeAudioDeviceType(device)) {
             mDeviceBroker.postSetLeAudioVolumeIndex(index * 10,
-                    mStreamStates[streamType].getMaxIndex(), streamType);
+                    getVssForStreamOrDefault(streamType).getMaxIndex(), streamType);
         } else if (device == AudioSystem.DEVICE_OUT_HEARING_AID) {
             mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
         } else {
@@ -4791,8 +4848,8 @@ public class AudioService extends IAudioService.Stub
         streamType = replaceBtScoStreamWithVoiceCall(streamType, "setStreamVolume");
 
         ensureValidStreamType(streamType);
-        int streamTypeAlias = mStreamVolumeAlias[streamType];
-        VolumeStreamState streamState = mStreamStates[streamTypeAlias];
+        int streamTypeAlias = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound*/-1);
+        final VolumeStreamState streamState = getVssForStreamOrDefault(streamTypeAlias);
 
         if (!replaceStreamBtSco() && (streamType == AudioManager.STREAM_VOICE_CALL)
                 && isInCommunication() && mDeviceBroker.isBluetoothScoActive()) {
@@ -4858,7 +4915,7 @@ public class AudioService extends IAudioService.Stub
                         // ada is non-null when called from setDeviceVolume,
                         // which shouldn't update the mute state
                         canChangeMuteAndUpdateController /*canChangeMute*/);
-                index = mStreamStates[streamType].getIndex(device);
+                index = getVssForStreamOrDefault(streamType).getIndex(device);
             }
         }
 
@@ -4886,8 +4943,8 @@ public class AudioService extends IAudioService.Stub
                 Log.d(TAG, "setStreamVolume postSetLeAudioVolumeIndex index="
                         + index + " stream=" + streamType);
             }
-            mDeviceBroker.postSetLeAudioVolumeIndex(index, mStreamStates[streamType].getMaxIndex(),
-                    streamType);
+            mDeviceBroker.postSetLeAudioVolumeIndex(index,
+                    getVssForStreamOrDefault(streamType).getMaxIndex(), streamType);
         }
 
         if (device == AudioSystem.DEVICE_OUT_HEARING_AID
@@ -4917,7 +4974,7 @@ public class AudioService extends IAudioService.Stub
                         // ada is non-null when called from setDeviceVolume,
                         // which shouldn't update the mute state
                         canChangeMuteAndUpdateController /*canChangeMute*/);
-                index = mStreamStates[streamType].getIndex(device);
+                index = getVssForStreamOrDefault(streamType).getIndex(device);
             }
         }
 
@@ -5100,7 +5157,7 @@ public class AudioService extends IAudioService.Stub
     // UI update and Broadcast Intent
     protected void sendVolumeUpdate(int streamType, int oldIndex, int index, int flags, int device)
     {
-        streamType = mStreamVolumeAlias[streamType];
+        streamType = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1);
 
         if (streamType == AudioSystem.STREAM_MUSIC && isFullVolumeDevice(device)) {
             flags &= ~AudioManager.FLAG_SHOW_UI;
@@ -5148,7 +5205,7 @@ public class AudioService extends IAudioService.Stub
         if (isFullVolumeDevice(device)) {
             return;
         }
-        VolumeStreamState streamState = mStreamStates[streamType];
+        final VolumeStreamState streamState = getVssForStreamOrDefault(streamType);
 
         if (streamState.setIndex(index, device, caller, hasModifyAudioSettings) || force) {
             // Post message to set system volume (it in turn will post a message
@@ -5172,7 +5229,7 @@ public class AudioService extends IAudioService.Stub
 
         synchronized (VolumeStreamState.class) {
             ensureValidStreamType(streamType);
-            return mStreamStates[streamType].mIsMuted;
+            return getVssForStreamOrDefault(streamType).mIsMuted;
         }
     }
 
@@ -5271,7 +5328,7 @@ public class AudioService extends IAudioService.Stub
             if (applyRequired) {
                 // Assumes only STREAM_MUSIC going through DEVICE_OUT_REMOTE_SUBMIX
                 checkAllFixedVolumeDevices(AudioSystem.STREAM_MUSIC);
-                mStreamStates[AudioSystem.STREAM_MUSIC].applyAllVolumes();
+                getVssForStreamOrDefault(AudioSystem.STREAM_MUSIC).applyAllVolumes();
             }
         }
     }
@@ -5352,15 +5409,16 @@ public class AudioService extends IAudioService.Stub
 
     private int getStreamVolume(int streamType, int device) {
         synchronized (VolumeStreamState.class) {
-            int index = mStreamStates[streamType].getIndex(device);
+            final VolumeStreamState vss = getVssForStreamOrDefault(streamType);
+            int index = vss.getIndex(device);
 
             // by convention getStreamVolume() returns 0 when a stream is muted.
-            if (mStreamStates[streamType].mIsMuted) {
+            if (vss.mIsMuted) {
                 index = 0;
             }
-            if (index != 0 && (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
-                    isFixedVolumeDevice(device)) {
-                index = mStreamStates[streamType].getMaxIndex();
+            if (index != 0 && (sStreamVolumeAlias.get(streamType) == AudioSystem.STREAM_MUSIC)
+                    && isFixedVolumeDevice(device)) {
+                index = vss.getMaxIndex();
             }
             return (index + 5) / 10;
         }
@@ -5383,20 +5441,27 @@ public class AudioService extends IAudioService.Stub
             return getDefaultVolumeInfo();
         }
 
-        int streamType = vi.getStreamType();
+        int streamType = replaceBtScoStreamWithVoiceCall(vi.getStreamType(), "getStreamMaxVolume");
         final VolumeInfo.Builder vib = new VolumeInfo.Builder(vi);
-        vib.setMinVolumeIndex((mStreamStates[streamType].mIndexMin + 5) / 10);
-        vib.setMaxVolumeIndex((mStreamStates[streamType].mIndexMax + 5) / 10);
+        final VolumeStreamState vss = getVssForStream(streamType);
+        if (vss == null) {
+            Log.w(TAG,
+                    "getDeviceVolume unsupported stream type " + streamType + ". Return default");
+            return getDefaultVolumeInfo();
+        }
+
+        vib.setMinVolumeIndex((vss.mIndexMin + 5) / 10);
+        vib.setMaxVolumeIndex((vss.mIndexMax + 5) / 10);
         synchronized (VolumeStreamState.class) {
             final int index;
             if (isFixedVolumeDevice(ada.getInternalType())) {
-                index = (mStreamStates[streamType].mIndexMax + 5) / 10;
+                index = (vss.mIndexMax + 5) / 10;
             } else {
-                index = (mStreamStates[streamType].getIndex(ada.getInternalType()) + 5) / 10;
+                index = (vss.getIndex(ada.getInternalType()) + 5) / 10;
             }
             vib.setVolumeIndex(index);
             // only set as a mute command if stream muted
-            if (mStreamStates[streamType].mIsMuted) {
+            if (vss.mIsMuted) {
                 vib.setMuted(true);
             }
             return vib.build();
@@ -5407,7 +5472,7 @@ public class AudioService extends IAudioService.Stub
     public int getStreamMaxVolume(int streamType) {
         streamType = replaceBtScoStreamWithVoiceCall(streamType, "getStreamMaxVolume");
         ensureValidStreamType(streamType);
-        return (mStreamStates[streamType].getMaxIndex() + 5) / 10;
+        return (getVssForStreamOrDefault(streamType).getMaxIndex() + 5) / 10;
     }
 
     /** @see AudioManager#getStreamMinVolumeInt(int)
@@ -5420,7 +5485,7 @@ public class AudioService extends IAudioService.Stub
                  || callingHasAudioSettingsPermission()
                  || (mContext.checkCallingPermission(MODIFY_AUDIO_ROUTING)
                         == PackageManager.PERMISSION_GRANTED);
-        return (mStreamStates[streamType].getMinIndex(isPrivileged) + 5) / 10;
+        return (getVssForStreamOrDefault(streamType).getMinIndex(isPrivileged) + 5) / 10;
     }
 
     @android.annotation.EnforcePermission(QUERY_AUDIO_STATE)
@@ -5433,7 +5498,7 @@ public class AudioService extends IAudioService.Stub
         ensureValidStreamType(streamType);
 
         int device = getDeviceForStream(streamType);
-        return (mStreamStates[streamType].getIndex(device) + 5) / 10;
+        return (getVssForStreamOrDefault(streamType).getIndex(device) + 5) / 10;
     }
 
     /**
@@ -5503,9 +5568,10 @@ public class AudioService extends IAudioService.Stub
                     .boxed().toList());
         }
         ArrayList<Integer> res = new ArrayList(1);
-        for (int stream : mStreamVolumeAlias) {
-            if (stream >= 0 && !res.contains(stream)) {
-                res.add(stream);
+        for (int stream = 0; stream < sStreamVolumeAlias.size(); ++stream) {
+            final int streamAlias = sStreamVolumeAlias.valueAt(stream);
+            if (!res.contains(streamAlias)) {
+                res.add(streamAlias);
             }
         }
         return res;
@@ -5526,7 +5592,7 @@ public class AudioService extends IAudioService.Stub
         // verify parameters
         ensureValidStreamType(sourceStreamType);
 
-        return mStreamVolumeAlias[sourceStreamType];
+        return sStreamVolumeAlias.get(sourceStreamType, /*valueIfKeyNotFound=*/-1);
     }
 
     /**
@@ -5548,7 +5614,7 @@ public class AudioService extends IAudioService.Stub
      */
     public int getUiSoundsStreamType() {
         return mUseVolumeGroupAliases ? STREAM_VOLUME_ALIAS_VOICE[AudioSystem.STREAM_SYSTEM]
-                : mStreamVolumeAlias[AudioSystem.STREAM_SYSTEM];
+                : sStreamVolumeAlias.get(AudioSystem.STREAM_SYSTEM);
     }
 
     /**
@@ -5560,7 +5626,7 @@ public class AudioService extends IAudioService.Stub
         return mUseVolumeGroupAliases
                 ? STREAM_VOLUME_ALIAS_VOICE[aliasStreamType]
                         == STREAM_VOLUME_ALIAS_VOICE[AudioSystem.STREAM_SYSTEM]
-                : aliasStreamType == mStreamVolumeAlias[AudioSystem.STREAM_SYSTEM];
+                : aliasStreamType == sStreamVolumeAlias.get(AudioSystem.STREAM_SYSTEM);
     }
 
     /** @see AudioManager#setMicrophoneMute(boolean) */
@@ -5854,6 +5920,10 @@ public class AudioService extends IAudioService.Stub
                 forceUse, eventSource, 0);
 
         for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+            final VolumeStreamState vss = getVssForStream(streamType);
+            if (vss == null) {
+                continue;
+            }
             final boolean isMuted = isStreamMutedByRingerOrZenMode(streamType);
             final boolean muteAllowedBySco =
                     !((shouldRingSco || shouldRingBle) && streamType == AudioSystem.STREAM_RING);
@@ -5864,10 +5934,9 @@ public class AudioService extends IAudioService.Stub
             if (!shouldMute) {
                 // unmute
                 // ring and notifications volume should never be 0 when not silenced
-                if (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_RING
-                        || mStreamVolumeAlias[streamType] == AudioSystem.STREAM_NOTIFICATION) {
+                if (sStreamVolumeAlias.get(streamType) == AudioSystem.STREAM_RING
+                        || sStreamVolumeAlias.get(streamType) == AudioSystem.STREAM_NOTIFICATION) {
                     synchronized (VolumeStreamState.class) {
-                        final VolumeStreamState vss = mStreamStates[streamType];
                         for (int i = 0; i < vss.mIndexMap.size(); i++) {
                             int device = vss.mIndexMap.keyAt(i);
                             int value = vss.mIndexMap.valueAt(i);
@@ -5882,20 +5951,20 @@ public class AudioService extends IAudioService.Stub
                               SENDMSG_QUEUE,
                               device,
                               0,
-                              mStreamStates[streamType],
+                              vss,
                               PERSIST_DELAY);
                     }
                 }
                 sRingerAndZenModeMutedStreams &= ~(1 << streamType);
                 sMuteLogger.enqueue(new AudioServiceEvents.RingerZenMutedStreamsEvent(
                         sRingerAndZenModeMutedStreams, "muteRingerModeStreams"));
-                mStreamStates[streamType].mute(false, "muteRingerModeStreams");
+                vss.mute(false, "muteRingerModeStreams");
             } else {
                 // mute
                 sRingerAndZenModeMutedStreams |= (1 << streamType);
                 sMuteLogger.enqueue(new AudioServiceEvents.RingerZenMutedStreamsEvent(
                         sRingerAndZenModeMutedStreams, "muteRingerModeStreams"));
-                mStreamStates[streamType].mute(true, "muteRingerModeStreams");
+                vss.mute(true, "muteRingerModeStreams");
             }
         }
     }
@@ -6318,15 +6387,15 @@ public class AudioService extends IAudioService.Stub
 
                 final int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
                 final int device = getDeviceForStream(streamType);
-                final int streamAlias = mStreamVolumeAlias[streamType];
+                final int streamAlias = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/
+                        -1);
 
                 if (DEBUG_MODE) {
                     Log.v(TAG, "onUpdateAudioMode: streamType=" + streamType
                             + ", streamAlias=" + streamAlias);
                 }
 
-                final int index = mStreamStates[streamAlias].getIndex(device);
-                final int maxIndex = mStreamStates[streamAlias].getMaxIndex();
+                final int index = getVssForStreamOrDefault(streamAlias).getIndex(device);
                 setStreamVolumeInt(streamAlias, index, device, true,
                         requesterPackage, true /*hasModifyAudioSettings*/);
 
@@ -6631,13 +6700,13 @@ public class AudioService extends IAudioService.Stub
         // restore volume settings
         int numStreamTypes = AudioSystem.getNumStreamTypes();
         for (int streamType = 0; streamType < numStreamTypes; streamType++) {
-            VolumeStreamState streamState = mStreamStates[streamType];
+            final VolumeStreamState streamState = getVssForStream(streamType);
 
             if (streamState == null) {
                 continue;
             }
 
-            if (userSwitch && mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) {
+            if (userSwitch && sStreamVolumeAlias.get(streamType) == AudioSystem.STREAM_MUSIC) {
                 continue;
             }
 
@@ -7205,7 +7274,7 @@ public class AudioService extends IAudioService.Stub
         } else {
             ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
         }
-        if (mStreamVolumeAlias[AudioSystem.STREAM_DTMF] == AudioSystem.STREAM_RING) {
+        if (sStreamVolumeAlias.get(AudioSystem.STREAM_DTMF) == AudioSystem.STREAM_RING) {
             ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_DTMF);
         } else {
             ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_DTMF);
@@ -7261,7 +7330,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void ensureValidStreamType(int streamType) {
-        if (streamType < 0 || streamType >= mStreamStates.length) {
+        if (streamType < 0 || streamType >= AudioSystem.getNumStreamTypes()) {
             throw new IllegalArgumentException("Bad stream type " + streamType);
         }
     }
@@ -7526,9 +7595,10 @@ public class AudioService extends IAudioService.Stub
                 ? MIN_STREAM_VOLUME[AudioSystem.STREAM_ALARM]
                 : Math.min(idx + 1, MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM]);
         // update the VolumeStreamState for STREAM_ALARM and its aliases
-        for (int stream : mStreamVolumeAlias) {
-            if (stream >= 0 && mStreamVolumeAlias[stream] == AudioSystem.STREAM_ALARM) {
-                mStreamStates[stream].updateNoPermMinIndex(safeIndex);
+        for (int stream = 0; stream < sStreamVolumeAlias.size(); ++stream) {
+            final int streamAlias = sStreamVolumeAlias.valueAt(stream);
+            if (streamAlias == AudioSystem.STREAM_ALARM) {
+                getVssForStreamOrDefault(streamAlias).updateNoPermMinIndex(safeIndex);
             }
         }
     }
@@ -7643,21 +7713,21 @@ public class AudioService extends IAudioService.Stub
         stream = replaceBtScoStreamWithVoiceCall(stream, "getDeviceSetForStream");
         ensureValidStreamType(stream);
         synchronized (VolumeStreamState.class) {
-            return mStreamStates[stream].observeDevicesForStream_syncVSS(true);
+            return getVssForStreamOrDefault(stream).observeDevicesForStream_syncVSS(true);
         }
     }
 
     private void onObserveDevicesForAllStreams(int skipStream) {
         synchronized (mSettingsLock) {
             synchronized (VolumeStreamState.class) {
-                for (int stream = 0; stream < mStreamStates.length; stream++) {
-                    if (stream != skipStream && mStreamStates[stream] != null) {
+                for (int stream = 0; stream < mStreamStates.size(); stream++) {
+                    final VolumeStreamState vss = mStreamStates.valueAt(stream);
+                    if (vss != null && vss.getStreamType() != skipStream) {
                         Set<Integer> deviceSet =
-                                mStreamStates[stream].observeDevicesForStream_syncVSS(
-                                        false /*checkOthers*/);
+                                vss.observeDevicesForStream_syncVSS(false /*checkOthers*/);
                         for (Integer device : deviceSet) {
                             // Update volume states for devices routed for the stream
-                            updateVolumeStates(device, stream,
+                            updateVolumeStates(device, vss.getStreamType(),
                                     "AudioService#onObserveDevicesForAllStreams");
                         }
                     }
@@ -7690,7 +7760,7 @@ public class AudioService extends IAudioService.Stub
 
     private void onUpdateScoDeviceActive(boolean scoDeviceActive) {
         if (mScoDeviceActive.compareAndSet(!scoDeviceActive, scoDeviceActive)) {
-            getVssVolumeForStream(AudioSystem.STREAM_VOICE_CALL).updateIndexFactors();
+            getVssForStreamOrDefault(AudioSystem.STREAM_VOICE_CALL).updateIndexFactors();
         }
     }
 
@@ -8085,7 +8155,7 @@ public class AudioService extends IAudioService.Stub
     /** only public for mocking/spying, do not call outside of AudioService */
     @VisibleForTesting
     public void setMusicMute(boolean mute) {
-        mStreamStates[AudioSystem.STREAM_MUSIC].muteInternally(mute);
+        getVssForStreamOrDefault(AudioSystem.STREAM_MUSIC).muteInternally(mute);
     }
 
     private static final Set<Integer> DEVICE_MEDIA_UNMUTED_ON_PLUG_SET;
@@ -8116,8 +8186,8 @@ public class AudioService extends IAudioService.Stub
         if (mNm.getZenMode() != Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
                 && !isStreamMutedByRingerOrZenMode(AudioSystem.STREAM_MUSIC)
                 && DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.contains(newDevice)
-                && mStreamStates[AudioSystem.STREAM_MUSIC].mIsMuted
-                && mStreamStates[AudioSystem.STREAM_MUSIC].getIndex(newDevice) != 0
+                && getVssForStreamOrDefault(AudioSystem.STREAM_MUSIC).mIsMuted
+                && getVssForStreamOrDefault(AudioSystem.STREAM_MUSIC).getIndex(newDevice) != 0
                 && getDeviceSetForStreamDirect(AudioSystem.STREAM_MUSIC).contains(newDevice)) {
             if (DEBUG_VOL) {
                 Log.i(TAG, String.format("onAccessoryPlugMediaUnmute unmuting device=%d [%s]",
@@ -8126,7 +8196,8 @@ public class AudioService extends IAudioService.Stub
             // Locking mSettingsLock to avoid inversion when calling vss.mute -> vss.doMute ->
             // vss.updateVolumeGroupIndex
             synchronized (mSettingsLock) {
-                mStreamStates[AudioSystem.STREAM_MUSIC].mute(false, "onAccessoryPlugMediaUnmute");
+                getVssForStreamOrDefault(AudioSystem.STREAM_MUSIC).mute(false,
+                        "onAccessoryPlugMediaUnmute");
             }
         }
     }
@@ -8297,8 +8368,8 @@ public class AudioService extends IAudioService.Stub
                 }
 
                 if (replaceStreamBtSco()) {
-                    mIndexMin = mStreamStates[mPublicStreamType].getMinIndex() / 10;
-                    mIndexMax = mStreamStates[mPublicStreamType].getMaxIndex() / 10;
+                    mIndexMin = getVssForStreamOrDefault(mPublicStreamType).getMinIndex() / 10;
+                    mIndexMax = getVssForStreamOrDefault(mPublicStreamType).getMaxIndex() / 10;
                 } else {
                     mIndexMin = MIN_STREAM_VOLUME[mPublicStreamType];
                     mIndexMax = MAX_STREAM_VOLUME[mPublicStreamType];
@@ -8335,7 +8406,7 @@ public class AudioService extends IAudioService.Stub
          */
         private boolean isVssMuteBijective(int stream) {
             return isStreamAffectedByMute(stream)
-                    && (getMinIndex() == (mStreamStates[stream].getMinIndex() + 5) / 10)
+                    && (getMinIndex() == (getVssForStreamOrDefault(stream).getMinIndex() + 5) / 10)
                     && (getMinIndex() == 0 || isCallStream(stream));
         }
 
@@ -8381,7 +8452,8 @@ public class AudioService extends IAudioService.Stub
                         return;
                     }
 
-                    float stepFactor = mStreamStates[mPublicStreamType].getIndexStepFactor();
+                    float stepFactor = getVssForStreamOrDefault(
+                            mPublicStreamType).getIndexStepFactor();
                     switch (direction) {
                         case AudioManager.ADJUST_TOGGLE_MUTE: {
                             // Note: If muted by volume 0, unmute will restore volume 0.
@@ -8477,7 +8549,7 @@ public class AudioService extends IAudioService.Stub
             // This allows RX path muting by the audio HAL only when explicitly muted but not when
             // index is just set to 0 to repect BT requirements
             if (mHasValidStreamType && isVssMuteBijective(mPublicStreamType)
-                    && mStreamStates[mPublicStreamType].isFullyMuted()) {
+                    && getVssForStreamOrDefault(mPublicStreamType).isFullyMuted()) {
                 index = 0;
             } else if (isStreamBluetoothSco(mPublicStreamType) && index == 0) {
                 index = 1;
@@ -8485,7 +8557,7 @@ public class AudioService extends IAudioService.Stub
 
             if (replaceStreamBtSco()) {
                 index = (int) (mIndexMin + (index - mIndexMin)
-                        / mStreamStates[mPublicStreamType].getIndexStepFactor());
+                        / getVssForStreamOrDefault(mPublicStreamType).getIndexStepFactor());
             }
 
             if (DEBUG_VOL) {
@@ -8518,7 +8590,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         private boolean isValidStream(int stream) {
-            return (stream != AudioSystem.STREAM_DEFAULT) && (stream < mStreamStates.length);
+            return (stream != AudioSystem.STREAM_DEFAULT) && getVssForStream(stream) != null;
         }
 
         public boolean isMusic() {
@@ -8536,10 +8608,10 @@ public class AudioService extends IAudioService.Stub
                     if (device != AudioSystem.DEVICE_OUT_DEFAULT) {
                         for (int stream : getLegacyStreamTypes()) {
                             if (isValidStream(stream)) {
-                                boolean streamMuted = mStreamStates[stream].mIsMuted;
+                                final VolumeStreamState vss = getVssForStreamOrDefault(stream);
+                                boolean streamMuted = vss.mIsMuted;
                                 int deviceForStream = getDeviceForStream(stream);
-                                int indexForStream =
-                                        (mStreamStates[stream].getIndex(deviceForStream) + 5) / 10;
+                                int indexForStream = (vss.getIndex(deviceForStream) + 5) / 10;
                                 if (device == deviceForStream) {
                                     if (indexForStream == index && (isMuted() == streamMuted)
                                             && isVssMuteBijective(stream)) {
@@ -8549,19 +8621,17 @@ public class AudioService extends IAudioService.Stub
                                     if (vgsVssSyncMuteOrder()) {
                                         if ((isMuted() != streamMuted) && isVssMuteBijective(
                                                 stream)) {
-                                            mStreamStates[stream].mute(isMuted(),
-                                                    "VGS.applyAllVolumes#1");
+                                            vss.mute(isMuted(), "VGS.applyAllVolumes#1");
                                         }
                                     }
                                     if (indexForStream != index) {
-                                        mStreamStates[stream].setIndex(index * 10, device, caller,
-                                                true /*hasModifyAudioSettings*/);
+                                        vss.setIndex(index * 10, device,
+                                                caller, true /*hasModifyAudioSettings*/);
                                     }
                                     if (!vgsVssSyncMuteOrder()) {
                                         if ((isMuted() != streamMuted) && isVssMuteBijective(
                                                 stream)) {
-                                            mStreamStates[stream].mute(isMuted(),
-                                                    "VGS.applyAllVolumes#1");
+                                            vss.mute(isMuted(), "VGS.applyAllVolumes#1");
                                         }
                                     }
                                 }
@@ -8585,11 +8655,12 @@ public class AudioService extends IAudioService.Stub
                 boolean forceDeviceSync = userSwitch && (mIndexMap.indexOfKey(deviceForVolume) < 0);
                 for (int stream : getLegacyStreamTypes()) {
                     if (isValidStream(stream)) {
-                        boolean streamMuted = mStreamStates[stream].mIsMuted;
-                        int defaultStreamIndex = (mStreamStates[stream].getIndex(
-                                        AudioSystem.DEVICE_OUT_DEFAULT) + 5) / 10;
+                        final VolumeStreamState vss = getVssForStreamOrDefault(stream);
+                        boolean streamMuted = vss.mIsMuted;
+                        int defaultStreamIndex = (vss.getIndex(AudioSystem.DEVICE_OUT_DEFAULT) + 5)
+                                / 10;
                         if (forceDeviceSync) {
-                            mStreamStates[stream].setIndex(index * 10, deviceForVolume, caller,
+                            vss.setIndex(index * 10, deviceForVolume, caller,
                                     true /*hasModifyAudioSettings*/);
                         }
                         if (defaultStreamIndex == index && (isMuted() == streamMuted)
@@ -8598,12 +8669,11 @@ public class AudioService extends IAudioService.Stub
                             continue;
                         }
                         if (defaultStreamIndex != index) {
-                            mStreamStates[stream].setIndex(
-                                    index * 10, AudioSystem.DEVICE_OUT_DEFAULT, caller,
+                            vss.setIndex(index * 10, AudioSystem.DEVICE_OUT_DEFAULT, caller,
                                     true /*hasModifyAudioSettings*/);
                         }
                         if ((isMuted() != streamMuted) && isVssMuteBijective(stream)) {
-                            mStreamStates[stream].mute(isMuted(), "VGS.applyAllVolumes#2");
+                            vss.mute(isMuted(), "VGS.applyAllVolumes#2");
                         }
                     }
                 }
@@ -8951,7 +9021,7 @@ public class AudioService extends IAudioService.Stub
                 postObserveDevicesForAllStreams(mStreamType);
             }
             // log base stream changes to the event log
-            if (mStreamVolumeAlias[mStreamType] == mStreamType) {
+            if (sStreamVolumeAlias.get(mStreamType, /*valueIfKeyNotFound=*/-1) == mStreamType) {
                 EventLogTags.writeStreamDevicesChanged(mStreamType, prevDevices, devices);
             }
             // send STREAM_DEVICES_CHANGED_ACTION on the message handler so it is scheduled after
@@ -9203,10 +9273,11 @@ public class AudioService extends IAudioService.Stub
                     isCurrentDevice = (device == getDeviceForStream(mStreamType));
                     final int numStreamTypes = AudioSystem.getNumStreamTypes();
                     for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                        final VolumeStreamState aliasStreamState = mStreamStates[streamType];
-                        if (streamType != mStreamType &&
-                                mStreamVolumeAlias[streamType] == mStreamType &&
-                                (changed || !aliasStreamState.hasIndexForDevice(device))) {
+                        final VolumeStreamState aliasStreamState = getVssForStream(streamType);
+                        if (aliasStreamState != null && streamType != mStreamType
+                                && sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound*/-1)
+                                == mStreamType && (changed || !aliasStreamState.hasIndexForDevice(
+                                device))) {
                             final int scaledIndex =
                                     rescaleIndex(aliasIndex, mStreamType, streamType);
                             boolean changedAlias = aliasStreamState.setIndex(scaledIndex, device,
@@ -9241,7 +9312,7 @@ public class AudioService extends IAudioService.Stub
                 oldIndex = (oldIndex + 5) / 10;
                 index = (index + 5) / 10;
                 // log base stream changes to the event log
-                if (mStreamVolumeAlias[mStreamType] == mStreamType) {
+                if (sStreamVolumeAlias.get(mStreamType, /*valueIfKeyNotFound=*/-1) == mStreamType) {
                     if (caller == null) {
                         Log.w(TAG, "No caller for volume_changed event", new Throwable());
                     }
@@ -9253,7 +9324,9 @@ public class AudioService extends IAudioService.Stub
                 if ((index != oldIndex) && isCurrentDevice) {
                     // for single volume devices, only send the volume change broadcast
                     // on the alias stream
-                    if (!mIsSingleVolume || (mStreamVolumeAlias[mStreamType] == mStreamType)) {
+                    final int streamAlias = sStreamVolumeAlias.get(
+                            mStreamType, /*valueIfKeyNotFound=*/-1);
+                    if (!mIsSingleVolume || streamAlias == mStreamType) {
                         mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
                         mVolumeChanged.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE,
                                 oldIndex);
@@ -9268,9 +9341,9 @@ public class AudioService extends IAudioService.Stub
                                     mStreamType);
                         }
                         mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE_ALIAS,
-                                mStreamVolumeAlias[mStreamType]);
+                                streamAlias);
 
-                        if (mStreamType == mStreamVolumeAlias[mStreamType]) {
+                        if (mStreamType == streamAlias) {
                             String aliasStreamIndexesString = "";
                             if (!aliasStreamIndexes.isEmpty()) {
                                 aliasStreamIndexesString =
@@ -9528,7 +9601,7 @@ public class AudioService extends IAudioService.Stub
         public void checkFixedVolumeDevices() {
             synchronized (VolumeStreamState.class) {
                 // ignore settings for fixed volume devices: volume should always be at max or 0
-                if (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_MUSIC) {
+                if (sStreamVolumeAlias.get(mStreamType) == AudioSystem.STREAM_MUSIC) {
                     for (int i = 0; i < mIndexMap.size(); i++) {
                         int device = mIndexMap.keyAt(i);
                         int index = mIndexMap.valueAt(i);
@@ -9674,7 +9747,11 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void onSetVolumeIndexOnDevice(@NonNull DeviceVolumeUpdate update) {
-        final VolumeStreamState streamState = mStreamStates[update.mStreamType];
+        final VolumeStreamState streamState = getVssForStream(update.mStreamType);
+        if (streamState == null) {
+            Log.w(TAG, "Invalid onSetVolumeIndexOnDevice for stream type " + update.mStreamType);
+            return;
+        }
         if (update.hasVolumeIndex()) {
             int index = update.getVolumeIndex();
             if (mSoundDoseHelper.checkSafeMediaVolume(update.mStreamType, index, update.mDevice)) {
@@ -9705,8 +9782,10 @@ public class AudioService extends IAudioService.Stub
             // Apply change to all streams using this one as alias
             int numStreamTypes = AudioSystem.getNumStreamTypes();
             for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                if (streamType != streamState.mStreamType &&
-                        mStreamVolumeAlias[streamType] == streamState.mStreamType) {
+                final VolumeStreamState vss = getVssForStream(streamType);
+                if (vss != null && streamType != streamState.mStreamType
+                        && sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1)
+                                == streamState.mStreamType) {
                     // Make sure volume is also maxed out on A2DP device for aliased stream
                     // that may have a different device selected
                     int streamDevice = getDeviceForStream(streamType);
@@ -9714,9 +9793,9 @@ public class AudioService extends IAudioService.Stub
                             && (isAbsoluteVolumeDevice(device)
                                 || isA2dpAbsoluteVolumeDevice(device)
                                 || AudioSystem.isLeAudioDeviceType(device))) {
-                        mStreamStates[streamType].applyDeviceVolume_syncVSS(device);
+                        vss.applyDeviceVolume_syncVSS(device);
                     }
-                    mStreamStates[streamType].applyDeviceVolume_syncVSS(streamDevice);
+                    vss.applyDeviceVolume_syncVSS(streamDevice);
                 }
             }
         }
@@ -9750,9 +9829,11 @@ public class AudioService extends IAudioService.Stub
             // Apply change to all streams using this one as alias
             int numStreamTypes = AudioSystem.getNumStreamTypes();
             for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                if (streamType != streamState.mStreamType &&
-                        mStreamVolumeAlias[streamType] == streamState.mStreamType) {
-                    mStreamStates[streamType].applyAllVolumes();
+                final VolumeStreamState vss = getVssForStream(streamType);
+                if (vss != null && streamType != streamState.mStreamType
+                        && sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1)
+                                == streamState.mStreamType) {
+                    vss.applyAllVolumes();
                 }
             }
         }
@@ -10202,7 +10283,7 @@ public class AudioService extends IAudioService.Stub
         }
         sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
                     AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0,
-                    mStreamStates[AudioSystem.STREAM_MUSIC], 0);
+                    getVssForStreamOrDefault(AudioSystem.STREAM_MUSIC), 0);
     }
 
     /**
@@ -10322,7 +10403,7 @@ public class AudioService extends IAudioService.Stub
                         SENDMSG_QUEUE,
                         0,
                         0,
-                        mStreamStates[AudioSystem.STREAM_MUSIC], 0);
+                        getVssForStreamOrDefault(AudioSystem.STREAM_MUSIC), 0);
             } else if (action.equals(Intent.ACTION_USER_BACKGROUND)) {
                 // Disable audio recording for the background user/profile
                 int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
@@ -11489,13 +11570,15 @@ public class AudioService extends IAudioService.Stub
                 if (cameraSoundForcedChanged) {
                     if (!mIsSingleVolume) {
                         synchronized (VolumeStreamState.class) {
-                            VolumeStreamState s = mStreamStates[AudioSystem.STREAM_SYSTEM_ENFORCED];
+                            final VolumeStreamState s = getVssForStreamOrDefault(
+                                    AudioSystem.STREAM_SYSTEM_ENFORCED);
                             if (cameraSoundForced) {
                                 s.setAllIndexesToMax();
                                 mRingerModeAffectedStreams &=
                                         ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
                             } else {
-                                s.setAllIndexes(mStreamStates[AudioSystem.STREAM_SYSTEM], TAG);
+                                s.setAllIndexes(getVssForStreamOrDefault(AudioSystem.STREAM_SYSTEM),
+                                        TAG);
                                 mRingerModeAffectedStreams |=
                                         (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
                             }
@@ -11512,7 +11595,7 @@ public class AudioService extends IAudioService.Stub
                             SENDMSG_QUEUE,
                             0,
                             0,
-                            mStreamStates[AudioSystem.STREAM_SYSTEM_ENFORCED], 0);
+                            getVssForStreamOrDefault(AudioSystem.STREAM_SYSTEM_ENFORCED), 0);
 
                 }
             }
