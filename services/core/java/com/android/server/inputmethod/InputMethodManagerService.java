@@ -67,6 +67,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.app.ActivityManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -169,7 +170,6 @@ import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.AccessibilityManagerInternal;
@@ -202,7 +202,6 @@ import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
@@ -399,15 +398,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @SharedByAllUsersField
     private IntArray mStylusIds;
 
-    @GuardedBy("ImfLock.class")
-    @Nullable
-    @MultiUserUnawareField
-    private OverlayableSystemBooleanResourceWrapper mImeDrawsImeNavBarRes;
-    @GuardedBy("ImfLock.class")
-    @Nullable
-    @MultiUserUnawareField
-    Future<?> mImeDrawsImeNavBarResLazyInitFuture;
-
     private final ImeTracing.ServiceDumper mDumper = new ImeTracing.ServiceDumper() {
         /**
          * {@inheritDoc}
@@ -484,13 +474,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @SharedByAllUsersField
     boolean mSystemReady;
 
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     @NonNull
     UserDataRepository.UserData getUserData(@UserIdInt int userId) {
         return mUserDataRepository.getOrCreate(userId);
     }
 
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     @NonNull
     InputMethodBindingController getInputMethodBindingController(@UserIdInt int userId) {
         return getUserData(userId).mBindingController;
@@ -934,9 +924,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // For production code, hook up user lifecycle
             mService.mUserManagerInternal.addUserLifecycleListener(this);
 
+            // Hook up resource change first before initializeUsersAsync() starts reading the
+            // seemingly initial data so that we can eliminate the race condition.
+            InputMethodDrawsNavBarResourceMonitor.registerCallback(context, mService.mIoHandler,
+                    mService::onUpdateResourceOverlay);
+
             // Also schedule user init tasks onto an I/O thread.
-            initializeUsersAsync(context, mService.mIoHandler,
-                    mService.mUserManagerInternal.getUserIds());
+            initializeUsersAsync(mService.mUserManagerInternal.getUserIds());
         }
 
         @VisibleForTesting
@@ -1019,7 +1013,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void onUserCreated(UserInfo user, @Nullable Object token) {
             // Called directly from UserManagerService. Do not block the calling thread.
-            initializeUsersAsync(mService.mContext, mService.mIoHandler, new int[user.id]);
+            initializeUsersAsync(new int[user.id]);
         }
 
         @Override
@@ -1057,9 +1051,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         @AnyThread
-        private static void initializeUsersAsync(
-                @NonNull Context context, @NonNull Handler ioHandler, @UserIdInt int[] userIds) {
-            ioHandler.post(() -> {
+        private void initializeUsersAsync(@UserIdInt int[] userIds) {
+            mService.mIoHandler.post(() -> {
+                final var service = mService;
+                final var context = service.mContext;
+                final var userManagerInternal = service.mUserManagerInternal;
+
                 // We first create InputMethodMap for each user without loading AdditionalSubtypes.
                 final int numUsers = userIds.length;
                 final InputMethodMap[] rawMethodMaps = new InputMethodMap[numUsers];
@@ -1068,6 +1065,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     rawMethodMaps[i] = InputMethodManagerService.queryInputMethodServicesInternal(
                             context, userId, AdditionalSubtypeMap.EMPTY_MAP,
                             DirectBootAwareness.AUTO).getMethodMap();
+                    final int profileParentId = userManagerInternal.getProfileParentId(userId);
+                    final boolean value =
+                            InputMethodDrawsNavBarResourceMonitor.evaluate(context,
+                                    profileParentId);
+                    final var userData = mService.getUserData(userId);
+                    userData.mImeDrawsNavBar.set(value);
                 }
 
                 // Then create full InputMethodMap for each user. Note that
@@ -1242,36 +1245,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_ID, false, userId);
     }
 
-    @GuardedBy("ImfLock.class")
-    private void maybeInitImeNavbarConfigLocked(@UserIdInt int targetUserId) {
-        // Currently, com.android.internal.R.bool.config_imeDrawsImeNavBar is overlaid only for the
-        // profile parent user.
-        // TODO(b/221443458): See if we can make OverlayManager be aware of profile groups.
-        final int profileParentUserId = mUserManagerInternal.getProfileParentId(targetUserId);
-        if (mImeDrawsImeNavBarRes != null
-                && mImeDrawsImeNavBarRes.getUserId() != profileParentUserId) {
-            mImeDrawsImeNavBarRes.close();
-            mImeDrawsImeNavBarRes = null;
-        }
-        if (mImeDrawsImeNavBarRes == null) {
-            final Context userContext;
-            if (mContext.getUserId() == profileParentUserId) {
-                userContext = mContext;
-            } else {
-                userContext = mContext.createContextAsUser(UserHandle.of(profileParentUserId),
-                        0 /* flags */);
-            }
-            mImeDrawsImeNavBarRes = OverlayableSystemBooleanResourceWrapper.create(userContext,
-                    com.android.internal.R.bool.config_imeDrawsImeNavBar, mHandler, resource -> {
-                        synchronized (ImfLock.class) {
-                            if (resource == mImeDrawsImeNavBarRes) {
-                                sendOnNavButtonFlagsChangedLocked();
-                            }
-                        }
-                    });
-        }
-    }
-
     @NonNull
     private static PackageManager getPackageManagerForUser(@NonNull Context context,
             @UserIdInt int userId) {
@@ -1303,8 +1276,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         unbindCurrentClientLocked(UnbindReason.SWITCH_USER, prevUserId);
 
         // Hereafter we start initializing things for "newUserId".
-
-        maybeInitImeNavbarConfigLocked(newUserId);
 
         final var newUserData = getUserData(newUserId);
 
@@ -1383,23 +1354,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                 available ? 1 : 0, 0 /* unused */).sendToTarget();
                     });
                 }
-
-                // TODO(b/32343335): The entire systemRunning() method needs to be revisited.
-                mImeDrawsImeNavBarResLazyInitFuture = SystemServerInitThreadPool.submit(() -> {
-                    // Note that the synchronization block below guarantees that the task
-                    // can never be completed before the returned Future<?> object is assigned to
-                    // the "mImeDrawsImeNavBarResLazyInitFuture" field.
-                    synchronized (ImfLock.class) {
-                        mImeDrawsImeNavBarResLazyInitFuture = null;
-                        if (currentUserId != mCurrentUserId) {
-                            // This means that the current user is already switched to other user
-                            // before the background task is executed. In this scenario the relevant
-                            // field should already be initialized.
-                            return;
-                        }
-                        maybeInitImeNavbarConfigLocked(currentUserId);
-                    }
-                }, "Lazily initialize IMMS#mImeDrawsImeNavBarRes");
 
                 mMyPackageMonitor.register(mContext, UserHandle.ALL, mIoHandler);
                 SecureSettingsChangeCallback.register(mHandler, mContext.getContentResolver(),
@@ -1922,7 +1876,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     userData.mCurClient.mUid, true /* direct */);
         }
 
-        @InputMethodNavButtonFlags final int navButtonFlags = getInputMethodNavButtonFlagsLocked();
+        @InputMethodNavButtonFlags final int navButtonFlags =
+                getInputMethodNavButtonFlagsLocked(userData);
         final SessionState session = userData.mCurClient.mCurSession;
         setEnabledSessionLocked(session, userData);
         session.mMethod.startInput(startInputToken, userData.mCurInputConnection,
@@ -2314,15 +2269,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     void initializeImeLocked(@NonNull IInputMethodInvoker inputMethod, @NonNull IBinder token,
-            @UserIdInt int userId) {
+            @NonNull InputMethodBindingController bindingController) {
         if (DEBUG) {
             Slog.v(TAG, "Sending attach of token: " + token + " for display: "
-                    + getInputMethodBindingController(userId).getCurTokenDisplayId());
+                    + bindingController.getCurTokenDisplayId());
         }
+        final int userId = bindingController.getUserId();
         inputMethod.initializeInternal(token,
                 new InputMethodPrivilegedOperationsImpl(this, token, userId),
-                // TODO(b/345519864): Make getInputMethodNavButtonFlagsLocked() multi-user aware
-                getInputMethodNavButtonFlagsLocked());
+                getInputMethodNavButtonFlagsLocked(getUserData(userId)));
     }
 
     @AnyThread
@@ -2621,23 +2576,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     @InputMethodNavButtonFlags
-    private int getInputMethodNavButtonFlagsLocked() {
-        // TODO(b/345519864): Make mImeDrawsImeNavBarRes multi-user aware.
-        final int userId = mCurrentUserId;
-        final var bindingController = getInputMethodBindingController(userId);
-        if (mImeDrawsImeNavBarResLazyInitFuture != null) {
-            // TODO(b/225366708): Avoid Future.get(), which is internally used here.
-            ConcurrentUtils.waitForFutureNoInterrupt(mImeDrawsImeNavBarResLazyInitFuture,
-                    "Waiting for the lazy init of mImeDrawsImeNavBarRes");
-        }
+    private int getInputMethodNavButtonFlagsLocked(
+            @NonNull UserDataRepository.UserData userData) {
+        final int userId = userData.mUserId;
+        final var bindingController = userData.mBindingController;
         // Whether the current display has a navigation bar. When this is false (e.g. emulator),
         // the IME should not draw the IME navigation bar.
         final int tokenDisplayId = bindingController.getCurTokenDisplayId();
         final boolean hasNavigationBar = mWindowManagerInternal
                 .hasNavigationBar(tokenDisplayId != INVALID_DISPLAY
                         ? tokenDisplayId : DEFAULT_DISPLAY);
-        final boolean canImeDrawsImeNavBar =
-                mImeDrawsImeNavBarRes != null && mImeDrawsImeNavBarRes.get() && hasNavigationBar;
+        final boolean canImeDrawsImeNavBar = userData.mImeDrawsNavBar.get() && hasNavigationBar;
         final boolean shouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherLocked(
                 InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE, userId);
         return (canImeDrawsImeNavBar ? InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR : 0)
@@ -2981,7 +2930,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final var userData = getUserData(userId);
         userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
-        sendOnNavButtonFlagsChangedLocked();
+        sendOnNavButtonFlagsChangedLocked(userData);
     }
 
     @GuardedBy("ImfLock.class")
@@ -5005,7 +4954,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             case MSG_HARD_KEYBOARD_SWITCH_CHANGED:
                 mMenuController.handleHardKeyboardStatusChange(msg.arg1 == 1);
                 synchronized (ImfLock.class) {
-                    sendOnNavButtonFlagsChangedLocked();
+                    sendOnNavButtonFlagsChangedToAllImesLocked();
                 }
                 return true;
             case MSG_SYSTEM_UNLOCK_USER: {
@@ -5339,7 +5288,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
 
-        sendOnNavButtonFlagsChangedLocked();
+        sendOnNavButtonFlagsChangedLocked(userData);
 
         // Notify InputMethodListListeners of the new installed InputMethods.
         final List<InputMethodInfo> inputMethodList = settings.getMethodList();
@@ -5348,14 +5297,38 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    void sendOnNavButtonFlagsChangedLocked() {
-        final var bindingController = getInputMethodBindingController(mCurrentUserId);
+    void sendOnNavButtonFlagsChangedToAllImesLocked() {
+        for (int userId : mUserManagerInternal.getUserIds()) {
+            sendOnNavButtonFlagsChangedLocked(getUserData(userId));
+        }
+    }
+
+    @GuardedBy("ImfLock.class")
+    void sendOnNavButtonFlagsChangedLocked(@NonNull UserDataRepository.UserData userData) {
+        final var bindingController = userData.mBindingController;
         final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         if (curMethod == null) {
             // No need to send the data if the IME is not yet bound.
             return;
         }
-        curMethod.onNavButtonFlagsChanged(getInputMethodNavButtonFlagsLocked());
+        curMethod.onNavButtonFlagsChanged(getInputMethodNavButtonFlagsLocked(userData));
+    }
+
+    @WorkerThread
+    private void onUpdateResourceOverlay(@UserIdInt int userId) {
+        final int profileParentId = mUserManagerInternal.getProfileParentId(userId);
+        final boolean value =
+                InputMethodDrawsNavBarResourceMonitor.evaluate(mContext, profileParentId);
+        final var profileUserIds = mUserManagerInternal.getProfileIds(profileParentId, false);
+        final ArrayList<UserDataRepository.UserData> updatedUsers = new ArrayList<>();
+        for (int profileUserId : profileUserIds) {
+            final var userData = getUserData(profileUserId);
+            userData.mImeDrawsNavBar.set(value);
+            updatedUsers.add(userData);
+        }
+        synchronized (ImfLock.class) {
+            updatedUsers.forEach(this::sendOnNavButtonFlagsChangedLocked);
+        }
     }
 
     @GuardedBy("ImfLock.class")
@@ -6123,6 +6096,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         u.mImeBindingState.dump("        ", p);
                         p.println("      enabledSession=" + u.mEnabledSession);
                         p.println("      inFullscreenMode=" + u.mInFullscreenMode);
+                        p.println("      imeDrawsNavBar=" + u.mImeDrawsNavBar.get());
                         p.println("      switchingController:");
                         u.mSwitchingController.dump(p, "        ");
                         p.println("      mLastEnabledInputMethodsStr="

@@ -29,6 +29,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
@@ -179,6 +180,12 @@ final class UserDataRepository {
         @GuardedBy("ImfLock.class")
         @NonNull
         String mLastEnabledInputMethodsStr = "";
+
+        /**
+         * {@code true} when the IME is responsible for drawing the navigation bar and its buttons.
+         */
+        @NonNull
+        final AtomicBoolean mImeDrawsNavBar = new AtomicBoolean();
 
         /**
          * Intended to be instantiated only from this file.

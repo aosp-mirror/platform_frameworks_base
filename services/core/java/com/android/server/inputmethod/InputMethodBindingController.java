@@ -408,7 +408,8 @@ final class InputMethodBindingController {
                         InputMethodManager
                                 .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
                     }
-                    mService.initializeImeLocked(mCurMethod, mCurToken, mUserId);
+                    mService.initializeImeLocked(mCurMethod, mCurToken,
+                            InputMethodBindingController.this);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
                     mService.reRequestCurrentClientSessionLocked(mUserId);
                     mAutofillController.performOnCreateInlineSuggestionsRequest();
