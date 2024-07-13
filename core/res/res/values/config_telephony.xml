@@ -393,12 +393,6 @@
     <bool name="config_wait_for_device_alignment_in_demo_datagram">false</bool>
     <java-symbol type="bool" name="config_wait_for_device_alignment_in_demo_datagram" />
 
-    <!-- Boolean indicating whether to enable MMS to be attempted on IWLAN if possible, even if
-     existing cellular networks already supports IWLAN.
-     -->
-    <bool name="force_iwlan_mms_feature_enabled">false</bool>
-    <java-symbol type="bool" name="force_iwlan_mms_feature_enabled" />
-
     <!-- The time duration in millis after which Telephony will abort the last message datagram
      sending requests. Telephony starts a timer when receiving a last message datagram sending
      request in either OFF, IDLE, or NOT_CONNECTED state. In NOT_CONNECTED, the duration of the

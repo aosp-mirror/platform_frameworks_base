@@ -698,7 +698,7 @@ public final class NotificationEntry extends ListEntry implements NotificationRo
     }
 
     public void setHeadsUpIsVisible() {
-        if (row != null) row.setHeadsUpIsVisible();
+        if (row != null) row.markHeadsUpSeen();
     }
 
     //TODO: i'm imagining a world where this isn't just the row, but I could be rwong

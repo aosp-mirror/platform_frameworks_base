@@ -23,8 +23,11 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel.Starting.Companion.toCountdownSeconds
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
 import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
@@ -51,6 +54,7 @@ constructor(
     private val interactor: ScreenRecordChipInteractor,
     private val systemClock: SystemClock,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
+    @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
     override val chip: StateFlow<OngoingActivityChipModel> =
         interactor.screenRecordState
@@ -76,6 +80,8 @@ constructor(
                             startTimeMs = systemClock.elapsedRealtime(),
                             createDialogLaunchOnClickListener(
                                 createDelegate(state.recordedTask),
+                                logger,
+                                TAG,
                             ),
                         )
                     }
@@ -90,12 +96,18 @@ constructor(
         return EndScreenRecordingDialogDelegate(
             endMediaProjectionDialogHelper,
             context,
-            stopAction = interactor::stopRecording,
+            stopAction = this::stopRecording,
             recordedTask,
         )
     }
 
+    private fun stopRecording() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop recording requested" })
+        interactor.stopRecording()
+    }
+
     companion object {
         @DrawableRes val ICON = R.drawable.ic_screenrecord
+        private const val TAG = "ScreenRecordVM"
     }
 }

@@ -805,17 +805,10 @@ public class WindowContainerTests extends WindowTestsBase {
 
         final TestWindowContainer root2 = builder.setLayer(0).build();
 
+        assertEquals("Roots have the same z-order", 0, root.compareTo(root2));
         assertEquals(0, root.compareTo(root));
         assertEquals(-1, child1.compareTo(child2));
         assertEquals(1, child2.compareTo(child1));
-
-        boolean inTheSameTree = true;
-        try {
-            root.compareTo(root2);
-        } catch (IllegalArgumentException e) {
-            inTheSameTree = false;
-        }
-        assertFalse(inTheSameTree);
 
         assertEquals(-1, child1.compareTo(child11));
         assertEquals(1, child21.compareTo(root));

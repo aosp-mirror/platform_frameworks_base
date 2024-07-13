@@ -25,6 +25,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -38,6 +39,7 @@ import android.app.ActivityManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.hardware.input.IInputManager;
@@ -157,6 +159,7 @@ public class InputMethodManagerServiceTestBase {
                 mockitoSession()
                         .initMocks(this)
                         .strictness(Strictness.LENIENT)
+                        .spyStatic(InputMethodUtils.class)
                         .mockStatic(ServiceManager.class)
                         .mockStatic(SystemServerInitThreadPool.class)
                         .startMocking();
@@ -227,6 +230,10 @@ public class InputMethodManagerServiceTestBase {
                 .thenReturn(TEST_IME_TARGET_INFO);
         when(mMockInputMethodClient.asBinder()).thenReturn(mMockInputMethodBinder);
 
+        // This changes the real IME component state. Not appropriate to do in tests.
+        doNothing().when(() -> InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
+                        any(PackageManager.class), anyList()));
+
         // Used by lazy initializing draw IMS nav bar at InputMethodManagerService#systemRunning(),
         // which is ok to be mocked out for now.
         doReturn(null).when(() -> SystemServerInitThreadPool.submit(any(), anyString()));
@@ -243,9 +250,13 @@ public class InputMethodManagerServiceTestBase {
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
         mIoThread.start();
+
+        final var ioHandler = spy(Handler.createAsync(mIoThread.getLooper()));
+        doReturn(true).when(ioHandler).post(any());
+
         mInputMethodManagerService = new InputMethodManagerService(mContext,
                 InputMethodManagerService.shouldEnableConcurrentMultiUserMode(mContext),
-                mServiceThread.getLooper(), Handler.createAsync(mIoThread.getLooper()),
+                mServiceThread.getLooper(), ioHandler,
                 unusedUserId -> mMockInputMethodBindingController);
         spyOn(mInputMethodManagerService);
 
@@ -257,16 +268,9 @@ public class InputMethodManagerServiceTestBase {
         // Public local InputMethodManagerService.
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         lifecycle.onStart();
-        try {
-            // After this boot phase, services can broadcast Intents.
-            lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
-        } catch (SecurityException e) {
-            // Security exception to permission denial is expected in test, mocking out to ensure
-            // InputMethodManagerService as system ready state.
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+
+        // After this boot phase, services can broadcast Intents.
+        lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
 
         // Call InputMethodManagerService#addClient() as a preparation to start interacting with it.
         mInputMethodManagerService.addClient(mMockInputMethodClient, mMockRemoteInputConnection, 0);

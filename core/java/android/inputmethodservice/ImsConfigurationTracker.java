@@ -16,6 +16,8 @@
 
 package android.inputmethodservice;
 
+import static android.content.pm.ActivityInfo.CONFIG_RESOURCES_UNUSED;
+
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -88,12 +90,16 @@ public final class ImsConfigurationTracker {
         if (!mInitialized) {
             return;
         }
+        // Don't restart InputMethodService that claims it does not use resources at all.
+        boolean neverReset = android.content.res.Flags.handleAllConfigChanges()
+                && (mHandledConfigChanges & CONFIG_RESOURCES_UNUSED) != 0;
+
         final int diff = mLastKnownConfig != null
                 ? mLastKnownConfig.diffPublicOnly(newConfig) : CONFIG_CHANGED;
         // If the new config is the same as the config this Service is already running with,
         // then don't bother calling resetStateForNewConfiguration.
         final int unhandledDiff = (diff & ~mHandledConfigChanges);
-        if (unhandledDiff != 0) {
+        if (unhandledDiff != 0 && !neverReset) {
             resetStateForNewConfigurationRunner.run();
         }
         if (diff != 0) {

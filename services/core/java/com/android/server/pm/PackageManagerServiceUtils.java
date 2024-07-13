@@ -1419,10 +1419,23 @@ public class PackageManagerServiceUtils {
 
     /**
      * Check and throw if the given before/after packages would be considered a
-     * downgrade.
+     * downgrade with {@link PackageSetting}.
      */
-    public static void checkDowngrade(AndroidPackage before, PackageInfoLite after)
-            throws PackageManagerException {
+    public static void checkDowngrade(@NonNull PackageSetting before,
+            @NonNull PackageInfoLite after) throws PackageManagerException {
+        if (after.getLongVersionCode() < before.getVersionCode()) {
+            throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                    "Update version code " + after.versionCode + " is older than current "
+                            + before.getVersionCode());
+        }
+    }
+
+    /**
+     * Check and throw if the given before/after packages would be considered a
+     * downgrade with {@link AndroidPackage}.
+     */
+    public static void checkDowngrade(@NonNull AndroidPackage before,
+            @NonNull PackageInfoLite after) throws PackageManagerException {
         if (after.getLongVersionCode() < before.getLongVersionCode()) {
             throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
                     "Update version code " + after.versionCode + " is older than current "

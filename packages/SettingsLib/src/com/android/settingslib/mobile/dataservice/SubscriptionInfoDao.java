@@ -40,15 +40,6 @@ public interface SubscriptionInfoDao {
             + DataServiceUtils.SubscriptionInfoData.COLUMN_ID + " = :subId")
     SubscriptionInfoEntity querySubInfoById(String subId);
 
-    @Query("SELECT * FROM " + DataServiceUtils.SubscriptionInfoData.TABLE_NAME + " WHERE "
-            + DataServiceUtils.SubscriptionInfoData.COLUMN_IS_ACTIVE_SUBSCRIPTION_ID
-            + " = :isActiveSubscription" + " AND "
-            + DataServiceUtils.SubscriptionInfoData.COLUMN_IS_SUBSCRIPTION_VISIBLE
-            + " = :isSubscriptionVisible" + " ORDER BY "
-            + DataServiceUtils.SubscriptionInfoData.COLUMN_SIM_SLOT_INDEX)
-    LiveData<List<SubscriptionInfoEntity>> queryActiveSubInfos(
-            boolean isActiveSubscription, boolean isSubscriptionVisible);
-
     @Query("SELECT COUNT(*) FROM " + DataServiceUtils.SubscriptionInfoData.TABLE_NAME)
     int count();
 

@@ -54,7 +54,6 @@ import com.android.compatibility.common.util.SystemUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,7 +71,6 @@ public final class ConcurrentMultiUserTest {
     private static final ComponentName TEST_ACTIVITY = new ComponentName(
             getInstrumentation().getTargetContext().getPackageName(),
             MainActivity.class.getName());
-    private static final long WAIT_TIME_MS = 3000L;
     private final Context mContext = getInstrumentation().getTargetContext();
     private final InputMethodManager mInputMethodManager =
             mContext.getSystemService(InputMethodManager.class);
@@ -111,7 +109,6 @@ public final class ConcurrentMultiUserTest {
         assertPassengerImeHidden();
     }
 
-    @Ignore("b/350562427")
     @Test
     public void passengerShowImeNotAffectDriver() throws Exception {
         assertDriverImeHidden();
@@ -259,8 +256,6 @@ public final class ConcurrentMultiUserTest {
         float[] driverEditTextCenter = mActivity.getEditTextCenter();
         SystemUtil.runShellCommand(mUiAutomation, String.format("input tap %f %f",
                 driverEditTextCenter[0], driverEditTextCenter[1]));
-        // TODO(b/350562427): get rid of Thread.sleep().
-        Thread.sleep(WAIT_TIME_MS);
     }
 
     private void movePassengerDisplayToTop() throws Exception {
@@ -276,8 +271,6 @@ public final class ConcurrentMultiUserTest {
         final int passengerDisplayId = receivedBundle.getInt(KEY_DISPLAY_ID);
         SystemUtil.runShellCommand(mUiAutomation, String.format("input -d %d tap %f %f",
                 passengerDisplayId, passengerEditTextCenter[0], passengerEditTextCenter[1]));
-        // TODO(b/350562427): get rid of Thread.sleep().
-        Thread.sleep(WAIT_TIME_MS);
     }
 
     /**

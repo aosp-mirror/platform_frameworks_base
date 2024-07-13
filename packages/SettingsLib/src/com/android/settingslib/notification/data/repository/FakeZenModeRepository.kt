@@ -18,6 +18,9 @@ package com.android.settingslib.notification.data.repository
 
 import android.app.NotificationManager
 import android.provider.Settings
+import com.android.settingslib.notification.modes.TestModeBuilder
+import com.android.settingslib.notification.modes.ZenMode
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +35,11 @@ class FakeZenModeRepository : ZenModeRepository {
     override val globalZenMode: StateFlow<Int>
         get() = mutableZenMode.asStateFlow()
 
+    private val mutableModesFlow: MutableStateFlow<List<ZenMode>> =
+        MutableStateFlow(listOf(TestModeBuilder.EXAMPLE))
+    override val modes: Flow<List<ZenMode>>
+        get() = mutableModesFlow.asStateFlow()
+
     init {
         updateNotificationPolicy()
     }
@@ -42,6 +50,20 @@ class FakeZenModeRepository : ZenModeRepository {
 
     fun updateZenMode(zenMode: Int) {
         mutableZenMode.value = zenMode
+    }
+
+    fun addMode(id: String, active: Boolean = false) {
+        mutableModesFlow.value += newMode(id, active)
+    }
+
+    fun removeMode(id: String) {
+        mutableModesFlow.value = mutableModesFlow.value.filter { it.id != id }
+    }
+
+    fun deactivateMode(id: String) {
+        val oldMode = mutableModesFlow.value.find { it.id == id } ?: return
+        removeMode(id)
+        mutableModesFlow.value += TestModeBuilder(oldMode).setActive(false).build()
     }
 }
 
@@ -61,5 +83,8 @@ fun FakeZenModeRepository.updateNotificationPolicy(
             suppressedVisualEffects,
             state,
             priorityConversationSenders,
-        )
-    )
+        ))
+
+private fun newMode(id: String, active: Boolean = false): ZenMode {
+    return TestModeBuilder().setId(id).setName("Mode $id").setActive(active).build()
+}

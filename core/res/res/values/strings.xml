@@ -6534,4 +6534,23 @@ ul.</string>
     <string name="bg_user_sound_notification_button_mute">Mute</string>
     <!-- Notification text to mute the sound from the background user [CHAR LIMIT=NOTIF_BODY]-->
     <string name="bg_user_sound_notification_message">Tap to mute sound</string>
+
+    <!-- User visible title for the keyboard shortcut that takes the user to the browser app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_browser">Browser</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the contacts app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_contacts">Contacts</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the email app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_email">Email</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the SMS messaging app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_sms">SMS</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the music app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_music">Music</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the calendar app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_calendar">Calendar</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the calculator app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_calculator">Calculator</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the maps app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_maps">Maps</string>
+    <!-- User visible title for the keyboard shortcut group containing system-wide application launch shortcuts. [CHAR-LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications">Applications</string>
 </resources>

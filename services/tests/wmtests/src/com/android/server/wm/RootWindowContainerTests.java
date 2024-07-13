@@ -274,17 +274,28 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testAttachApplication() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setProcessName("testAttach")
+                .setCreateTask(true).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setProcessName("testAttach")
+                .setUseProcess(activity.app).setTask(activity.getTask()).build();
         activity.detachFromProcess();
-        mAtm.startProcessAsync(activity, false /* knownToBeDead */,
+        topActivity.detachFromProcess();
+        mAtm.startProcessAsync(topActivity, false /* knownToBeDead */,
                 true /* isTop */, "test" /* hostingType */);
+        // Even if the activity is added after topActivity, the start order should still follow
+        // z-order, i.e. the topActivity will be started first.
+        mAtm.startProcessAsync(activity, false /* knownToBeDead */,
+                false /* isTop */, "test" /* hostingType */);
+        assertEquals(2, mAtm.mStartingProcessActivities.size());
+        assertEquals("Top record must be at the tail to start first",
+                topActivity, mAtm.mStartingProcessActivities.get(1));
         final WindowProcessController proc = mSystemServicesTestRule.addProcess(
                 activity.packageName, activity.processName,
                 6789 /* pid */, activity.info.applicationInfo.uid);
         try {
             mRootWindowContainer.attachApplication(proc);
-            verify(mSupervisor).realStartActivityLocked(eq(activity), eq(proc), anyBoolean(),
-                    anyBoolean());
+            verify(mSupervisor).realStartActivityLocked(eq(topActivity), eq(proc),
+                    anyBoolean(), anyBoolean());
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }

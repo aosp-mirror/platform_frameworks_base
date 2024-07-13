@@ -18,7 +18,9 @@ package com.android.systemui.communal
 
 import android.provider.Settings
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.communalHub
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -28,6 +30,8 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dock.DockManager
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -74,6 +78,7 @@ constructor(
     private val systemSettings: SystemSettings,
     centralSurfacesOpt: Optional<CentralSurfaces>,
     private val notificationShadeWindowController: NotificationShadeWindowController,
+    private val featureFlagsClassic: FeatureFlagsClassic,
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
@@ -86,13 +91,21 @@ constructor(
 
     private val centralSurfaces: CentralSurfaces? by centralSurfacesOpt
 
+    private val flagEnabled: Boolean by lazy {
+        featureFlagsClassic.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) && communalHub()
+    }
+
     override fun start() {
+        if (!flagEnabled) {
+            return
+        }
+
         // Handle automatically switching based on keyguard state.
         keyguardTransitionInteractor.startedKeyguardTransitionStep
             .mapLatest(::determineSceneAfterTransition)
             .filterNotNull()
-            .onEach { nextScene ->
-                communalSceneInteractor.changeScene(nextScene, CommunalTransitionKeys.SimpleFade)
+            .onEach { (nextScene, nextTransition) ->
+                communalSceneInteractor.changeScene(nextScene, nextTransition)
             }
             .launchIn(applicationScope)
 
@@ -188,7 +201,7 @@ constructor(
 
     private suspend fun determineSceneAfterTransition(
         lastStartedTransition: TransitionStep,
-    ): SceneKey? {
+    ): Pair<SceneKey, TransitionKey>? {
         val to = lastStartedTransition.to
         val from = lastStartedTransition.from
         val docked = dockManager.isDocked
@@ -201,22 +214,27 @@ constructor(
                 // underneath the hub is shown. When launching activities over lockscreen, we only
                 // change scenes once the activity launch animation is finished, so avoid
                 // changing the scene here.
-                CommunalScenes.Blank
+                Pair(CommunalScenes.Blank, CommunalTransitionKeys.SimpleFade)
             }
             to == KeyguardState.GLANCEABLE_HUB && from == KeyguardState.OCCLUDED -> {
                 // When transitioning to the hub from an occluded state, fade out the hub without
                 // doing any translation.
-                CommunalScenes.Communal
+                Pair(CommunalScenes.Communal, CommunalTransitionKeys.SimpleFade)
             }
             // Transitioning to Blank scene when entering the edit mode will be handled separately
             // with custom animations.
             to == KeyguardState.GONE && !communalInteractor.editModeOpen.value ->
-                CommunalScenes.Blank
+                Pair(CommunalScenes.Blank, CommunalTransitionKeys.SimpleFade)
             !docked && !KeyguardState.deviceIsAwakeInState(to) -> {
                 // If the user taps the screen and wakes the device within this timeout, we don't
                 // want to dismiss the hub
                 delay(AWAKE_DEBOUNCE_DELAY)
-                CommunalScenes.Blank
+                Pair(CommunalScenes.Blank, CommunalTransitionKeys.SimpleFade)
+            }
+            from == KeyguardState.DOZING && to == KeyguardState.GLANCEABLE_HUB -> {
+                // Make sure the communal hub is showing (immediately, not fading in) when
+                // transitioning from dozing to hub.
+                Pair(CommunalScenes.Communal, CommunalTransitionKeys.Immediately)
             }
             else -> null
         }

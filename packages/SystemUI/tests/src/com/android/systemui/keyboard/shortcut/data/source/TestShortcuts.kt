@@ -189,6 +189,15 @@ object TestShortcuts {
             listOf(standardShortcutInfo1, standardShortcutInfo2, standardShortcutInfo3)
         )
 
+    private val standardPackageName1 = "standard.app.group1"
+
+    private val standardAppGroup1 =
+        KeyboardShortcutGroup(
+                "Standard app group 1",
+                listOf(standardShortcutInfo1, standardShortcutInfo2, standardShortcutInfo3)
+            )
+            .apply { packageName = standardPackageName1 }
+
     private val standardSubCategory1 =
         ShortcutSubCategory(
             standardGroup1.label!!.toString(),
@@ -229,6 +238,9 @@ object TestShortcuts {
                     standardSubCategory3
                 )
         )
+
+    val currentAppGroups = listOf(standardAppGroup1)
+    val currentAppPackageName = standardPackageName1
 
     val systemGroups = listOf(standardGroup3, standardGroup2, standardGroup1)
     val systemCategory =
