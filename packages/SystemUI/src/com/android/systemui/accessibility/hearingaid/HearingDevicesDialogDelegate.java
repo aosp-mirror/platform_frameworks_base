@@ -186,7 +186,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     }
 
     @Override
-    public void onDeviceItemGearClicked(@NonNull  DeviceItem deviceItem, @NonNull View view) {
+    public void onDeviceItemGearClicked(@NonNull DeviceItem deviceItem, @NonNull View view) {
         dismissDialogIfExists();
         Intent intent = new Intent(ACTION_BLUETOOTH_DEVICE_DETAILS);
         Bundle bundle = new Bundle();
@@ -198,7 +198,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     }
 
     @Override
-    public void onDeviceItemOnClicked(@NonNull  DeviceItem deviceItem, @NonNull View view) {
+    public void onDeviceItemOnClicked(@NonNull DeviceItem deviceItem, @NonNull View view) {
         CachedBluetoothDevice cachedBluetoothDevice = deviceItem.getCachedBluetoothDevice();
         switch (deviceItem.getType()) {
             case ACTIVE_MEDIA_BLUETOOTH_DEVICE, CONNECTED_BLUETOOTH_DEVICE ->
@@ -226,8 +226,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
             final int activePresetIndex = mPresetsController.getActivePresetIndex();
             refreshPresetInfoAdapter(presetInfos, activePresetIndex);
             mPresetSpinner.setVisibility(
-                    (activeHearingDevice != null && !mPresetInfoAdapter.isEmpty()) ? VISIBLE
-                            : GONE);
+                    (activeHearingDevice != null && activeHearingDevice.isConnectedHapClientDevice()
+                            && !mPresetInfoAdapter.isEmpty()) ? VISIBLE : GONE);
         });
     }
 
@@ -303,6 +303,11 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         mLocalBluetoothManager.getEventManager().unregisterCallback(this);
     }
 
+    @VisibleForTesting
+    void setHearingDevicesPresetsController(HearingDevicesPresetsController controller) {
+        mPresetsController = controller;
+    }
+
     private void setupDeviceListView(SystemUIDialog dialog) {
         mDeviceList.setLayoutManager(new LinearLayoutManager(dialog.getContext()));
         mHearingDeviceItemList = getHearingDevicesList();
@@ -311,12 +316,15 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     }
 
     private void setupPresetSpinner(SystemUIDialog dialog) {
-        mPresetsController = new HearingDevicesPresetsController(mProfileManager, mPresetCallback);
+        if (mPresetsController == null) {
+            mPresetsController = new HearingDevicesPresetsController(mProfileManager,
+                    mPresetCallback);
+        }
         final CachedBluetoothDevice activeHearingDevice = getActiveHearingDevice(
                 mHearingDeviceItemList);
         mPresetsController.setActiveHearingDevice(activeHearingDevice);
 
-        mPresetInfoAdapter = new ArrayAdapter<String>(dialog.getContext(),
+        mPresetInfoAdapter = new ArrayAdapter<>(dialog.getContext(),
                 R.layout.hearing_devices_preset_spinner_selected,
                 R.id.hearing_devices_preset_option_text);
         mPresetInfoAdapter.setDropDownViewResource(
@@ -350,7 +358,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         final int activePresetIndex = mPresetsController.getActivePresetIndex();
         refreshPresetInfoAdapter(presetInfos, activePresetIndex);
         mPresetSpinner.setVisibility(
-                (activeHearingDevice != null && !mPresetInfoAdapter.isEmpty()) ? VISIBLE : GONE);
+                (activeHearingDevice != null && activeHearingDevice.isConnectedHapClientDevice()
+                        && !mPresetInfoAdapter.isEmpty()) ? VISIBLE : GONE);
     }
 
     private void setupPairNewDeviceButton(SystemUIDialog dialog, @Visibility int visibility) {

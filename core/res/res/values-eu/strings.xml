@@ -265,14 +265,12 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Akatsen txostena"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Amaitu saioa"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Pantaila-argazkia"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Akatsen txostena"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Gailuaren oraingo egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Txosten dinamikoa"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Aukera hau erabili beharko zenuke ia beti. Txostenaren jarraipena egin ahal izango duzu eta arazoari buruzko xehetasunak eman ahal izango dituzu. Baliteke gutxitan erabili behar izaten diren atalak ez agertzea, denbora aurrezteko."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Txosten osoa"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Erabili aukera hau sisteman ahalik eta traba gutxien eragiteko gailuak erantzuten ez duenean, mantsoegi dabilenean edo txosteneko atal guztiak behar dituzunean. Ez dizu uzten xehetasun gehiago idazten, ezta beste pantaila-argazkirik ateratzen ere."</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Erabili aukera hau sistemaren interferentzia ahalik eta txikiena izateko gailuak erantzuten ez duenean, mantsoegi dabilenean edo txosteneko atal guztiak behar dituzunean. Ez dizu uzten xehetasun gehiago idazten, ezta beste pantaila-argazkirik ateratzen ere."</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Akatsen txostenerako argazkia aterako da # segundo barru.}other{Akatsen txostenerako argazkia aterako da # segundo barru.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Pantaila-argazkia egin da akatsen txostenarekin"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Ezin izan da egin pantaila-argazkia akatsen txostenarekin"</string>
@@ -1767,12 +1765,9 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Erabilerraztasuna botoia sakatzen duzun hurrengoan irekiko da eginbidea"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Lasterbidea erabiltzen duzun hurrengoan irekiko da eginbidea. Pasatu 2 hatz pantailaren behealdetik gorantz eta askatu bizkor."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Lasterbidea erabiltzen duzun hurrengoan irekiko da eginbidea. Pasatu 3 hatz pantailaren behealdetik gorantz eta askatu bizkor."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Lupa"</string>
     <string name="user_switched" msgid="7249833311585228097">"Erabiltzailea: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"\"<xliff:g id="NAME">%1$s</xliff:g>\" erabiltzailera aldatzen…"</string>
@@ -2436,17 +2431,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Nola funtzionatzen du?"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Zain…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfiguratu berriro hatz-marka bidez desblokeatzeko eginbidea"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ez da ezagutzen jada."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> eta <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ez dira ezagutzen jada."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> ez da ezagutzen jada. Konfiguratu berriro hatz-marka bidez desblokeatzeko eginbidea."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> eta <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ez dira ezagutzen jada. Konfiguratu berriro hatz-marka bidez desblokeatzeko eginbidea."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Konfiguratu berriro aurpegi bidez desblokeatzeko eginbidea"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Zure aurpegi-eredua ez da ezagutzen jada. Konfiguratu berriro aurpegi bidez desblokeatzeko eginbidea."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Konfiguratu"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Orain ez"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> erabiltzailearentzako alarma"</string>

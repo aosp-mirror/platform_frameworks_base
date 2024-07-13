@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.util.Range;
 import android.view.WindowManager;
 
+import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.util.settings.SecureSettings;
@@ -40,7 +41,8 @@ import com.android.systemui.util.settings.SecureSettings;
 public class MagnificationSettingsController implements ComponentCallbacks {
 
     // It should be consistent with the value defined in WindowMagnificationGestureHandler.
-    private static final Range<Float> A11Y_ACTION_SCALE_RANGE = new Range<>(1.0f, 8.0f);
+    private static final Range<Float> A11Y_ACTION_SCALE_RANGE =
+        new Range<>(1.0f, MagnificationConstants.SCALE_MAX_VALUE);
 
     private final Context mContext;
 

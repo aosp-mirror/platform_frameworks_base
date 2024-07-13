@@ -286,11 +286,7 @@ public class ZenMode implements Parcelable {
                 mRule, oldCondition, conditionId));
     }
 
-    public boolean canEditName() {
-        return !isManualDnd();
-    }
-
-    public boolean canEditIcon() {
+    public boolean canEditNameAndIcon() {
         return !isManualDnd();
     }
 

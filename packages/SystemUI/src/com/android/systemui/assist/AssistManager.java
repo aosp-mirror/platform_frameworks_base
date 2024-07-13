@@ -515,7 +515,7 @@ public class AssistManager {
     }
 
     @Nullable
-    private ComponentName getAssistInfo() {
+    public ComponentName getAssistInfo() {
         return getAssistInfoForUser(mSelectedUserInteractor.getSelectedUserId());
     }
 

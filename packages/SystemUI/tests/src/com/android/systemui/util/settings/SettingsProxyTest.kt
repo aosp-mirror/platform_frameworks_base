@@ -28,9 +28,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -44,6 +45,7 @@ import org.mockito.kotlin.eq
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper
+@OptIn(ExperimentalCoroutinesApi::class)
 class SettingsProxyTest : SysuiTestCase() {
 
     private val testDispatcher = StandardTestDispatcher()
@@ -60,11 +62,12 @@ class SettingsProxyTest : SysuiTestCase() {
     }
 
     @Test
-    fun registerContentObserver_inputString_success() {
-        mSettings.registerContentObserverSync(TEST_SETTING, mContentObserver)
-        verify(mSettings.getContentResolver())
-            .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
-    }
+    fun registerContentObserver_inputString_success() =
+        testScope.runTest {
+            mSettings.registerContentObserverSync(TEST_SETTING, mContentObserver)
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
+        }
 
     @Test
     fun registerContentObserverSuspend_inputString_success() =
@@ -75,24 +78,25 @@ class SettingsProxyTest : SysuiTestCase() {
         }
 
     @Test
-    fun registerContentObserverAsync_inputString_success() {
-        mSettings.registerContentObserverAsync(TEST_SETTING, mContentObserver)
-        testScope.launch {
+    fun registerContentObserverAsync_inputString_success() =
+        testScope.runTest {
+            mSettings.registerContentObserverAsync(TEST_SETTING, mContentObserver)
+            testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver())
                 .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
         }
-    }
 
     @Test
-    fun registerContentObserver_inputString_notifyForDescendants_true() {
-        mSettings.registerContentObserverSync(
-            TEST_SETTING,
-            notifyForDescendants = true,
-            mContentObserver
-        )
-        verify(mSettings.getContentResolver())
-            .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
-    }
+    fun registerContentObserver_inputString_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverSync(
+                TEST_SETTING,
+                notifyForDescendants = true,
+                mContentObserver
+            )
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
+        }
 
     @Test
     fun registerContentObserverSuspend_inputString_notifyForDescendants_true() =
@@ -107,24 +111,25 @@ class SettingsProxyTest : SysuiTestCase() {
         }
 
     @Test
-    fun registerContentObserverAsync_inputString_notifyForDescendants_true() {
-        mSettings.registerContentObserverAsync(
-            TEST_SETTING,
-            notifyForDescendants = true,
-            mContentObserver
-        )
-        testScope.launch {
+    fun registerContentObserverAsync_inputString_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverAsync(
+                TEST_SETTING,
+                notifyForDescendants = true,
+                mContentObserver
+            )
+            testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver())
                 .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
         }
-    }
 
     @Test
-    fun registerContentObserver_inputUri_success() {
-        mSettings.registerContentObserverSync(TEST_SETTING_URI, mContentObserver)
-        verify(mSettings.getContentResolver())
-            .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
-    }
+    fun registerContentObserver_inputUri_success() =
+        testScope.runTest {
+            mSettings.registerContentObserverSync(TEST_SETTING_URI, mContentObserver)
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
+        }
 
     @Test
     fun registerContentObserverSuspend_inputUri_success() =
@@ -135,24 +140,25 @@ class SettingsProxyTest : SysuiTestCase() {
         }
 
     @Test
-    fun registerContentObserverAsync_inputUri_success() {
-        mSettings.registerContentObserverAsync(TEST_SETTING_URI, mContentObserver)
-        testScope.launch {
+    fun registerContentObserverAsync_inputUri_success() =
+        testScope.runTest {
+            mSettings.registerContentObserverAsync(TEST_SETTING_URI, mContentObserver)
+            testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver())
                 .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
         }
-    }
 
     @Test
-    fun registerContentObserver_inputUri_notifyForDescendants_true() {
-        mSettings.registerContentObserverSync(
-            TEST_SETTING_URI,
-            notifyForDescendants = true,
-            mContentObserver
-        )
-        verify(mSettings.getContentResolver())
-            .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
-    }
+    fun registerContentObserver_inputUri_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverSync(
+                TEST_SETTING_URI,
+                notifyForDescendants = true,
+                mContentObserver
+            )
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
+        }
 
     @Test
     fun registerContentObserverSuspend_inputUri_notifyForDescendants_true() =
@@ -167,23 +173,56 @@ class SettingsProxyTest : SysuiTestCase() {
         }
 
     @Test
-    fun registerContentObserverAsync_inputUri_notifyForDescendants_true() {
-        mSettings.registerContentObserverAsync(
-            TEST_SETTING_URI,
-            notifyForDescendants = true,
-            mContentObserver
-        )
-        testScope.launch {
+    fun registerContentObserverAsync_inputUri_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverAsync(
+                TEST_SETTING_URI,
+                notifyForDescendants = true,
+                mContentObserver
+            )
+            testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver())
                 .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
         }
+
+    @Test
+    fun registerContentObserverAsync_registeredLambdaPassed_callsCallback() =
+        testScope.runTest {
+            verifyRegisteredCallbackForRegistration {
+                mSettings.registerContentObserverAsync(TEST_SETTING, mContentObserver, it)
+            }
+            verifyRegisteredCallbackForRegistration {
+                mSettings.registerContentObserverAsync(TEST_SETTING_URI, mContentObserver, it)
+            }
+            verifyRegisteredCallbackForRegistration {
+                mSettings.registerContentObserverAsync(TEST_SETTING, false, mContentObserver, it)
+            }
+            verifyRegisteredCallbackForRegistration {
+                mSettings.registerContentObserverAsync(
+                    TEST_SETTING_URI,
+                    false,
+                    mContentObserver,
+                    it
+                )
+            }
+        }
+
+    private fun verifyRegisteredCallbackForRegistration(
+        call: (registeredRunnable: Runnable) -> Unit
+    ) {
+        var callbackCalled = false
+        val runnable = { callbackCalled = true }
+        call(runnable)
+        testScope.advanceUntilIdle()
+        assertThat(callbackCalled).isTrue()
     }
 
     @Test
-    fun unregisterContentObserverSync() {
-        mSettings.unregisterContentObserverSync(mContentObserver)
-        verify(mSettings.getContentResolver()).unregisterContentObserver(eq(mContentObserver))
-    }
+    fun unregisterContentObserverSync() =
+        testScope.runTest {
+            mSettings.unregisterContentObserverSync(mContentObserver)
+            verify(mSettings.getContentResolver()).unregisterContentObserver(eq(mContentObserver))
+        }
 
     @Test
     fun unregisterContentObserverSuspend_inputString_success() =
@@ -193,12 +232,12 @@ class SettingsProxyTest : SysuiTestCase() {
         }
 
     @Test
-    fun unregisterContentObserverAsync_inputString_success() {
-        mSettings.unregisterContentObserverAsync(mContentObserver)
-        testScope.launch {
+    fun unregisterContentObserverAsync_inputString_success() =
+        testScope.runTest {
+            mSettings.unregisterContentObserverAsync(mContentObserver)
+            testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver()).unregisterContentObserver(eq(mContentObserver))
         }
-    }
 
     @Test
     fun getString_keyPresent_returnValidValue() {

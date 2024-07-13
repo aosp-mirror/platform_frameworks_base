@@ -34,9 +34,11 @@ import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -51,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
@@ -60,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.UserAction
@@ -255,6 +259,8 @@ private fun SceneScope.SingleShade(
     val mediaOffset by
         animateSceneDpAsState(value = InQQS, key = MediaLandscapeTopOffset, canOverflow = false)
 
+    val navBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+
     Box(
         modifier =
             modifier.thenIf(shouldPunchHoleBehindScrim) {
@@ -358,11 +364,22 @@ private fun SceneScope.SingleShade(
                 notificationsPlaceable.placeRelative(x = 0, y = maxNotifScrimTop.value.roundToInt())
             }
         }
-        NotificationStackCutoffGuideline(
-            stackScrollView = notificationStackScrollView,
-            viewModel = notificationsPlaceholderViewModel,
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
-        )
+        Box(
+            modifier =
+                Modifier.align(Alignment.BottomCenter)
+                    .height(navBarHeight)
+                    .pointerInteropFilter { true }
+                    .verticalNestedScrollToScene(
+                        topBehavior = NestedScrollBehavior.EdgeAlways,
+                        isExternalOverscrollGesture = { false }
+                    )
+        ) {
+            NotificationStackCutoffGuideline(
+                stackScrollView = notificationStackScrollView,
+                viewModel = notificationsPlaceholderViewModel,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+        }
     }
 }
 

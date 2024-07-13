@@ -17,10 +17,12 @@
 package com.android.systemui.haptics.qs
 
 import android.os.VibrationEffect
+import android.service.quicksettings.Tile
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.falsingManager
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.qsTileFactory
@@ -69,6 +71,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
             QSLongPressEffect(
                 vibratorHelper,
                 kosmos.keyguardStateController,
+                kosmos.falsingManager,
             )
         longPressEffect.callback = callback
         longPressEffect.qsTile = qsTile
@@ -175,17 +178,17 @@ class QSLongPressEffectTest : SysuiTestCase() {
         }
 
     @Test
-    fun onAnimationComplete_keyguardDismissible_effectCompletes() =
+    fun onAnimationComplete_keyguardDismissible_effectEndsInLongClicked() =
         testWhileInState(QSLongPressEffect.State.RUNNING_FORWARD) {
             // GIVEN that the animation completes
             longPressEffect.handleAnimationComplete()
 
-            // THEN the long-press effect completes
-            assertEffectCompleted()
+            // THEN the long-press effect completes with a long-click state
+            assertEffectCompleted(QSLongPressEffect.State.LONG_CLICKED)
         }
 
     @Test
-    fun onAnimationComplete_keyguardNotDismissible_effectEndsWithReset() =
+    fun onAnimationComplete_keyguardNotDismissible_effectEndsInIdleWithReset() =
         testWhileInState(QSLongPressEffect.State.RUNNING_FORWARD) {
             // GIVEN that the keyguard is not dismissible
             whenever(kosmos.keyguardStateController.isUnlocked).thenReturn(false)
@@ -193,19 +196,20 @@ class QSLongPressEffectTest : SysuiTestCase() {
             // GIVEN that the animation completes
             longPressEffect.handleAnimationComplete()
 
-            // THEN the long-press effect completes and the properties are called to reset
-            assertEffectCompleted()
+            // THEN the long-press effect ends in the idle state and the properties are reset
+            assertEffectCompleted(QSLongPressEffect.State.IDLE)
             verify(callback, times(1)).onResetProperties()
         }
 
     @Test
-    fun onAnimationComplete_whenRunningBackwardsFromUp_endsWithFinishedReversing() =
+    fun onAnimationComplete_whenRunningBackwardsFromUp_endsWithFinishedReversingAndClick() =
         testWhileInState(QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_UP) {
             // GIVEN that the animation completes
             longPressEffect.handleAnimationComplete()
 
-            // THEN the callback for finished reversing is used.
+            // THEN the callback for finished reversing is used and the effect ends with a click.
             verify(callback, times(1)).onEffectFinishedReversing()
+            assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.CLICKED)
         }
 
     @Test
@@ -262,17 +266,87 @@ class QSLongPressEffectTest : SysuiTestCase() {
         }
 
     @Test
-    fun onTileClick_whileWaiting_withoutQSTile_cannotClick() =
-        testWhileInState(QSLongPressEffect.State.TIMEOUT_WAIT) {
-            // GIVEN that no QSTile has been set
-            longPressEffect.qsTile = null
-
+    fun onTileClick_whileIdle_withQSTile_clicks() =
+        testWhileInState(QSLongPressEffect.State.IDLE) {
             // GIVEN that a click was detected
+            val couldClick = longPressEffect.onTileClick()
+
+            // THEN the click is successful
+            assertThat(couldClick).isTrue()
+        }
+
+    @Test
+    fun onTileClick_whenBouncerIsShowing_ignoresClick() =
+        testWhileInState(QSLongPressEffect.State.IDLE) {
+            // GIVEN that the bouncer is showing
+            whenever(kosmos.keyguardStateController.isPrimaryBouncerShowing).thenReturn(true)
+
+            // WHEN a click is detected by the tile view
             val couldClick = longPressEffect.onTileClick()
 
             // THEN the click is not successful
             assertThat(couldClick).isFalse()
         }
+
+    @Test
+    fun getStateForClick_withUnavailableTile_returnsIdle() {
+        // GIVEN an unavailable tile
+        qsTile.state?.state = Tile.STATE_UNAVAILABLE
+
+        // WHEN determining the state of a click action
+        val clickState = longPressEffect.getStateForClick()
+
+        // THEN the state is IDLE
+        assertThat(clickState).isEqualTo(QSLongPressEffect.State.IDLE)
+    }
+
+    @Test
+    fun getStateForClick_withFalseTapWhenLocked_returnsIdle() {
+        // GIVEN an active tile
+        qsTile.state?.state = Tile.STATE_ACTIVE
+
+        // GIVEN that the device is locked and a false tap is detected
+        whenever(kosmos.keyguardStateController.isUnlocked).thenReturn(false)
+        kosmos.falsingManager.setFalseTap(true)
+
+        // WHEN determining the state of a click action
+        val clickState = longPressEffect.getStateForClick()
+
+        // THEN the state is IDLE
+        assertThat(clickState).isEqualTo(QSLongPressEffect.State.IDLE)
+    }
+
+    @Test
+    fun getStateForClick_withValidTapAndTile_returnsClicked() {
+        // GIVEN an active tile
+        qsTile.state?.state = Tile.STATE_ACTIVE
+
+        // GIVEN that the device is locked and a false tap is not detected
+        whenever(kosmos.keyguardStateController.isUnlocked).thenReturn(false)
+        kosmos.falsingManager.setFalseTap(false)
+
+        // WHEN determining the state of a click action
+        val clickState = longPressEffect.getStateForClick()
+
+        // THEN the state is CLICKED
+        assertThat(clickState).isEqualTo(QSLongPressEffect.State.CLICKED)
+    }
+
+    @Test
+    fun getStateForClick_withNullTile_returnsIdle() {
+        // GIVEN that the tile is null
+        longPressEffect.qsTile = null
+
+        // GIVEN that the device is locked and a false tap is not detected
+        whenever(kosmos.keyguardStateController.isUnlocked).thenReturn(false)
+        kosmos.falsingManager.setFalseTap(false)
+
+        // WHEN determining the state of a click action
+        val clickState = longPressEffect.getStateForClick()
+
+        // THEN the state is IDLE
+        assertThat(clickState).isEqualTo(QSLongPressEffect.State.IDLE)
+    }
 
     private fun testWithScope(initialize: Boolean = true, test: suspend TestScope.() -> Unit) =
         with(kosmos) {
@@ -339,14 +413,14 @@ class QSLongPressEffectTest : SysuiTestCase() {
     /**
      * Asserts that the effect completes by checking that:
      * 1. The final snap haptics are played
-     * 2. The internal state goes back to [QSLongPressEffect.State.IDLE]
+     * 2. The internal state goes back to specified end state.
      */
-    private fun assertEffectCompleted() {
+    private fun assertEffectCompleted(endState: QSLongPressEffect.State) {
         val snapEffect = LongPressHapticBuilder.createSnapEffect()
 
         assertThat(snapEffect).isNotNull()
         assertThat(vibratorHelper.hasVibratedWithEffects(snapEffect!!)).isTrue()
-        assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.IDLE)
+        assertThat(longPressEffect.state).isEqualTo(endState)
     }
 
     /**

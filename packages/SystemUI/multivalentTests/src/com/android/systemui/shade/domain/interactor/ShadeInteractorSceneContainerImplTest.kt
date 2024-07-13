@@ -29,7 +29,6 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
@@ -568,21 +567,6 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
 
             // THEN interacting is false
-            Truth.assertThat(interacting).isFalse()
-        }
-
-    @Test
-    fun shadeMode() =
-        testScope.runTest {
-            val shadeMode by collectLastValue(underTest.shadeMode)
-
-            shadeRepository.setShadeMode(ShadeMode.Split)
-            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
-
-            shadeRepository.setShadeMode(ShadeMode.Single)
-            assertThat(shadeMode).isEqualTo(ShadeMode.Single)
-
-            shadeRepository.setShadeMode(ShadeMode.Split)
-            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
+            assertThat(interacting).isFalse()
         }
 }

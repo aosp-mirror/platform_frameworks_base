@@ -67,8 +67,7 @@ constructor(
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
-        val shouldUseSplitNotificationShade by
-            viewModel.shouldUseSplitNotificationShade.collectAsStateWithLifecycle()
+        val isShadeLayoutWide by viewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
 
         LockscreenLongPress(
@@ -100,7 +99,7 @@ constructor(
                                         }
                                 )
                             }
-                            if (shouldUseSplitNotificationShade) {
+                            if (isShadeLayoutWide) {
                                 with(notificationSection) {
                                     Notifications(
                                         burnInParams = null,
@@ -112,7 +111,7 @@ constructor(
                                 }
                             }
                         }
-                        if (!shouldUseSplitNotificationShade) {
+                        if (!isShadeLayoutWide) {
                             with(notificationSection) {
                                 Notifications(
                                     burnInParams = null,

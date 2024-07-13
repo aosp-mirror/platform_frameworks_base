@@ -97,6 +97,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 FORCE_QUERYABLE_OVERRIDE,
                 SCANNED_AS_STOPPED_SYSTEM_APP,
                 PENDING_RESTORE,
+                DEBUGGABLE,
         })
         public @interface Flags {
         }
@@ -105,6 +106,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         private static final int FORCE_QUERYABLE_OVERRIDE = 1 << 2;
         private static final int SCANNED_AS_STOPPED_SYSTEM_APP = 1 << 3;
         private static final int PENDING_RESTORE = 1 << 4;
+        private static final int DEBUGGABLE = 1 << 5;
     }
     private int mBooleans;
 
@@ -560,6 +562,20 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @Override
     public boolean isPendingRestore() {
         return getBoolean(Booleans.PENDING_RESTORE);
+    }
+
+    /**
+     * @see PackageState#isDebuggable
+     */
+    public PackageSetting setDebuggable(boolean value) {
+        setBoolean(Booleans.DEBUGGABLE, value);
+        onChanged();
+        return this;
+    }
+
+    @Override
+    public boolean isDebuggable() {
+        return getBoolean(Booleans.DEBUGGABLE);
     }
 
     @Override

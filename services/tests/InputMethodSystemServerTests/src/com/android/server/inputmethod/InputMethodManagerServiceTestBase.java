@@ -25,6 +25,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -35,17 +36,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManagerInternal;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.view.InputChannel;
 import android.view.inputmethod.EditorInfo;
 import android.window.ImeOnBackInvokedDispatcher;
@@ -131,6 +137,14 @@ public class InputMethodManagerServiceTestBase {
     protected boolean mIsLargeScreen;
     private InputManagerGlobal.TestSession mInputManagerGlobalSession;
 
+    private final ArraySet<Class<?>> mRegisteredLocalServices = new ArraySet<>();
+
+    protected <T> void addLocalServiceMock(Class<T> type, T service) {
+        mRegisteredLocalServices.add(type);
+        LocalServices.removeServiceForTest(type);
+        LocalServices.addService(type, service);
+    }
+
     @BeforeClass
     public static void setupClass() {
         // Make sure DeviceConfig's lazy-initialized ContentProvider gets
@@ -145,7 +159,7 @@ public class InputMethodManagerServiceTestBase {
                 mockitoSession()
                         .initMocks(this)
                         .strictness(Strictness.LENIENT)
-                        .spyStatic(LocalServices.class)
+                        .spyStatic(InputMethodUtils.class)
                         .mockStatic(ServiceManager.class)
                         .mockStatic(SystemServerInitThreadPool.class)
                         .startMocking();
@@ -160,18 +174,13 @@ public class InputMethodManagerServiceTestBase {
         mEditorInfo.packageName = TEST_EDITOR_PKG_NAME;
 
         // Injecting and mocking local services.
-        doReturn(mMockWindowManagerInternal)
-                .when(() -> LocalServices.getService(WindowManagerInternal.class));
-        doReturn(mMockActivityManagerInternal)
-                .when(() -> LocalServices.getService(ActivityManagerInternal.class));
-        doReturn(mMockPackageManagerInternal)
-                .when(() -> LocalServices.getService(PackageManagerInternal.class));
-        doReturn(mMockInputManagerInternal)
-                .when(() -> LocalServices.getService(InputManagerInternal.class));
-        doReturn(mMockUserManagerInternal)
-                .when(() -> LocalServices.getService(UserManagerInternal.class));
-        doReturn(mMockImeTargetVisibilityPolicy)
-                .when(() -> LocalServices.getService(ImeTargetVisibilityPolicy.class));
+        addLocalServiceMock(WindowManagerInternal.class, mMockWindowManagerInternal);
+        addLocalServiceMock(ActivityManagerInternal.class, mMockActivityManagerInternal);
+        addLocalServiceMock(PackageManagerInternal.class, mMockPackageManagerInternal);
+        addLocalServiceMock(InputManagerInternal.class, mMockInputManagerInternal);
+        addLocalServiceMock(UserManagerInternal.class, mMockUserManagerInternal);
+        addLocalServiceMock(ImeTargetVisibilityPolicy.class, mMockImeTargetVisibilityPolicy);
+
         doReturn(mMockIInputMethodManager)
                 .when(() -> ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE));
         doReturn(mMockIPlatformCompat)
@@ -182,6 +191,9 @@ public class InputMethodManagerServiceTestBase {
         doNothing().when(mContext).enforceCallingPermission(anyString(), anyString());
         doNothing().when(mContext).sendBroadcastAsUser(any(), any());
         doReturn(null).when(mContext).registerReceiver(any(), any());
+        doReturn(null).when(mContext).registerReceiver(
+                any(BroadcastReceiver.class),
+                any(IntentFilter.class), anyString(), any(Handler.class));
         doReturn(null)
                 .when(mContext)
                 .registerReceiverAsUser(any(), any(), any(), anyString(), any(), anyInt());
@@ -218,6 +230,10 @@ public class InputMethodManagerServiceTestBase {
                 .thenReturn(TEST_IME_TARGET_INFO);
         when(mMockInputMethodClient.asBinder()).thenReturn(mMockInputMethodBinder);
 
+        // This changes the real IME component state. Not appropriate to do in tests.
+        doNothing().when(() -> InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
+                        any(PackageManager.class), anyList()));
+
         // Used by lazy initializing draw IMS nav bar at InputMethodManagerService#systemRunning(),
         // which is ok to be mocked out for now.
         doReturn(null).when(() -> SystemServerInitThreadPool.submit(any(), anyString()));
@@ -227,14 +243,20 @@ public class InputMethodManagerServiceTestBase {
                         "immstest1",
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
+        mServiceThread.start();
         mIoThread =
                 new ServiceThread(
                         "immstest2",
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
+        mIoThread.start();
+
+        final var ioHandler = spy(Handler.createAsync(mIoThread.getLooper()));
+        doReturn(true).when(ioHandler).post(any());
+
         mInputMethodManagerService = new InputMethodManagerService(mContext,
                 InputMethodManagerService.shouldEnableConcurrentMultiUserMode(mContext),
-                mServiceThread, mIoThread,
+                mServiceThread.getLooper(), ioHandler,
                 unusedUserId -> mMockInputMethodBindingController);
         spyOn(mInputMethodManagerService);
 
@@ -246,16 +268,9 @@ public class InputMethodManagerServiceTestBase {
         // Public local InputMethodManagerService.
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         lifecycle.onStart();
-        try {
-            // After this boot phase, services can broadcast Intents.
-            lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
-        } catch (SecurityException e) {
-            // Security exception to permission denial is expected in test, mocking out to ensure
-            // InputMethodManagerService as system ready state.
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+
+        // After this boot phase, services can broadcast Intents.
+        lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
 
         // Call InputMethodManagerService#addClient() as a preparation to start interacting with it.
         mInputMethodManagerService.addClient(mMockInputMethodClient, mMockRemoteInputConnection, 0);
@@ -283,7 +298,7 @@ public class InputMethodManagerServiceTestBase {
         if (mInputManagerGlobalSession != null) {
             mInputManagerGlobalSession.close();
         }
-        LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
+        mRegisteredLocalServices.forEach(LocalServices::removeServiceForTest);
     }
 
     protected void verifyShowSoftInput(boolean setVisible, boolean showSoftInput)

@@ -3411,7 +3411,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void requestProvisionSubscriberIds(in ResultReceiver receiver);
+    void requestProvisionSubscriberIds(in ResultReceiver result);
 
     /**
      * Request to get provisioned status for given a satellite subscriber id.

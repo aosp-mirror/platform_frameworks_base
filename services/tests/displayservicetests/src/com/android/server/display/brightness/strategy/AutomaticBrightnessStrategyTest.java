@@ -559,7 +559,6 @@ public class AutomaticBrightnessStrategyTest {
                 mock(DisplayManagerInternal.DisplayPowerRequest.class);
         DisplayBrightnessState expectedDisplayBrightnessState = new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
-                .setSdrBrightness(brightness)
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(mAutomaticBrightnessStrategy.getName())
                 .setIsSlowChange(false)
@@ -608,7 +607,6 @@ public class AutomaticBrightnessStrategyTest {
 
         DisplayBrightnessState expectedDisplayBrightnessState = new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
-                .setSdrBrightness(brightness)
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(mAutomaticBrightnessStrategy.getName())
                 .setIsSlowChange(false)
@@ -648,7 +646,6 @@ public class AutomaticBrightnessStrategyTest {
 
         DisplayBrightnessState expectedDisplayBrightnessState = new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
-                .setSdrBrightness(brightness)
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(mAutomaticBrightnessStrategy.getName())
                 .setIsSlowChange(true)
@@ -688,7 +685,6 @@ public class AutomaticBrightnessStrategyTest {
 
         DisplayBrightnessState expectedDisplayBrightnessState = new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
-                .setSdrBrightness(brightness)
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(mAutomaticBrightnessStrategy.getName())
                 .setIsSlowChange(false)

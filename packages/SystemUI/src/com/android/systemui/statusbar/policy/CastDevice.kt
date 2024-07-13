@@ -38,6 +38,9 @@ data class CastDevice(
 ) {
     val isCasting = state == CastState.Connecting || state == CastState.Connected
 
+    val shortLogString: String =
+        "CastDevice(id=$id name=$name description=$description state=$state origin=$origin)"
+
     companion object {
         /** Creates a [CastDevice] based on the provided information from MediaRouter. */
         fun MediaRouter.RouteInfo.toCastDevice(context: Context): CastDevice {

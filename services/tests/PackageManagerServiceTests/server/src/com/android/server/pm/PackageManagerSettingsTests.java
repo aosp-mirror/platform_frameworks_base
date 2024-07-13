@@ -1027,6 +1027,25 @@ public class PackageManagerSettingsTests {
     }
 
     @Test
+    public void testWriteReadDebuggable() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        packageSetting.setDebuggable(true);
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        assertThat(settings.getPackageLPr(PACKAGE_NAME_1).isDebuggable(), is(true));
+    }
+
+    @Test
     public void testWriteReadArchiveState() {
         Settings settings = makeSettings();
         PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);

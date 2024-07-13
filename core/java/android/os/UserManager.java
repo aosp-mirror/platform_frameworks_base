@@ -3927,7 +3927,12 @@ public class UserManager {
             android.Manifest.permission.QUERY_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public @NonNull UserProperties getUserProperties(@NonNull UserHandle userHandle) {
-        return mUserPropertiesCache.query(userHandle.getIdentifier());
+        final int userId = userHandle.getIdentifier();
+        // Avoid calling into system server for invalid user ids.
+        if (android.multiuser.Flags.fixGetUserPropertyCache() && userId < 0) {
+            throw new IllegalArgumentException("Cannot access properties for user " + userId);
+        }
+        return mUserPropertiesCache.query(userId);
     }
 
     /**
@@ -5663,6 +5668,33 @@ public class UserManager {
         }
     }
 
+    private static final String CACHE_KEY_QUIET_MODE_ENABLED_PROPERTY =
+        PropertyInvalidatedCache.createPropertyName(
+            PropertyInvalidatedCache.MODULE_SYSTEM, "quiet_mode_enabled");
+
+    private final PropertyInvalidatedCache<Integer, Boolean> mQuietModeEnabledCache =
+            new PropertyInvalidatedCache<Integer, Boolean>(
+                32, CACHE_KEY_QUIET_MODE_ENABLED_PROPERTY) {
+                @Override
+                public Boolean recompute(Integer query) {
+                    try {
+                        return mService.isQuietModeEnabled(query);
+                    } catch (RemoteException re) {
+                        throw re.rethrowFromSystemServer();
+                    }
+                }
+                @Override
+                public boolean bypass(Integer query) {
+                    return query < 0;
+                }
+            };
+
+
+    /** @hide */
+    public static final void invalidateQuietModeEnabledCache() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_QUIET_MODE_ENABLED_PROPERTY);
+    }
+
     /**
      * Returns whether the given profile is in quiet mode or not.
      *
@@ -5670,6 +5702,13 @@ public class UserManager {
      * @return true if the profile is in quiet mode, false otherwise.
      */
     public boolean isQuietModeEnabled(UserHandle userHandle) {
+        if (android.multiuser.Flags.cacheQuietModeState()){
+            final int userId = userHandle.getIdentifier();
+            if (userId < 0) {
+                return false;
+            }
+            return mQuietModeEnabledCache.query(userId);
+        }
         try {
             return mService.isQuietModeEnabled(userHandle.getIdentifier());
         } catch (RemoteException re) {

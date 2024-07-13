@@ -44,6 +44,7 @@ import static com.android.providers.settings.SettingsState.isSystemSettingsKey;
 import static com.android.providers.settings.SettingsState.makeKey;
 
 import android.Manifest;
+import android.aconfigd.AconfigdFlagInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -1371,10 +1372,27 @@ public class SettingsProvider extends ContentProvider {
                 }
             }
 
+            Map<String, AconfigdFlagInfo> aconfigFlagInfos =
+                    settingsState.getAconfigDefaultFlags();
+
             for (int i = 0; i < nameCount; i++) {
                 String name = names.get(i);
                 Setting setting = settingsState.getSettingLocked(name);
-                if (prefix == null || setting.getName().startsWith(prefix)) {
+                if (prefix == null || name.startsWith(prefix)) {
+                    if (Flags.ignoreXmlForReadOnlyFlags()) {
+                        int slashIndex = name.indexOf("/");
+                        boolean validSlashIndex = slashIndex != -1
+                                && slashIndex != 0
+                                && slashIndex != name.length();
+                        if (validSlashIndex) {
+                            String flagName = name.substring(slashIndex + 1);
+                            AconfigdFlagInfo flagInfo = aconfigFlagInfos.get(flagName);
+                            if (flagInfo != null && !flagInfo.getIsReadWrite()) {
+                                continue;
+                            }
+                        }
+                    }
+
                     flagsToValues.put(setting.getName(), setting.getValue());
                 }
             }

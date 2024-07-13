@@ -81,7 +81,6 @@ import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.load
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileUiState
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toUiState
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
@@ -91,7 +90,6 @@ import com.android.systemui.res.R
 import java.util.function.Supplier
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.mapLatest
 
 object TileType
 
@@ -103,29 +101,27 @@ fun Tile(
     showLabels: Boolean = false,
     modifier: Modifier,
 ) {
-    val state: TileUiState by
-        tile.state
-            .mapLatest { it.toUiState() }
-            .collectAsStateWithLifecycle(tile.currentState.toUiState())
-    val colors = TileDefaults.getColorForState(state.state)
+    val state by tile.state.collectAsStateWithLifecycle(tile.currentState)
+    val uiState = remember(state) { state.toUiState() }
+    val colors = TileDefaults.getColorForState(uiState.state)
 
     TileContainer(
         colors = colors,
         showLabels = showLabels,
-        label = state.label.toString(),
+        label = uiState.label,
         iconOnly = iconOnly,
         clickEnabled = true,
         onClick = tile::onClick,
         onLongClick = tile::onLongClick,
         modifier = modifier,
     ) {
-        val icon = getTileIcon(icon = state.icon)
+        val icon = getTileIcon(icon = uiState.icon)
         if (iconOnly) {
             TileIcon(icon = icon, color = colors.icon, modifier = Modifier.align(Alignment.Center))
         } else {
             LargeTileContent(
-                label = state.label.toString(),
-                secondaryLabel = state.secondaryLabel.toString(),
+                label = uiState.label,
+                secondaryLabel = uiState.secondaryLabel,
                 icon = icon,
                 colors = colors,
                 clickEnabled = true,
@@ -234,17 +230,24 @@ private fun LargeTileContent(
             Text(
                 label,
                 color = colors.label,
-                modifier = Modifier.basicMarquee(),
+                modifier = Modifier.tileMarquee(),
             )
             if (!TextUtils.isEmpty(secondaryLabel)) {
                 Text(
                     secondaryLabel ?: "",
                     color = colors.secondaryLabel,
-                    modifier = Modifier.basicMarquee(),
+                    modifier = Modifier.tileMarquee(),
                 )
             }
         }
     }
+}
+
+private fun Modifier.tileMarquee(): Modifier {
+    return basicMarquee(
+        iterations = 1,
+        initialDelayMillis = 200,
+    )
 }
 
 @Composable
@@ -270,6 +273,7 @@ fun DefaultEditTileGrid(
     modifier: Modifier,
     onAddTile: (TileSpec, Int) -> Unit,
     onRemoveTile: (TileSpec) -> Unit,
+    onResize: (TileSpec, Boolean) -> Unit,
 ) {
     val currentListState = rememberEditListState(tiles)
     val dragAndDropState = rememberDragAndDropState(currentListState)
@@ -289,6 +293,9 @@ fun DefaultEditTileGrid(
     val onDropRemove: (TileSpec, Int) -> Unit by rememberUpdatedState { tileSpec, _ ->
         onRemoveTile(tileSpec)
     }
+    val onDoubleTap: (TileSpec) -> Unit by rememberUpdatedState { tileSpec ->
+        onResize(tileSpec, !isIconOnly(tileSpec))
+    }
 
     TileLazyGrid(
         modifier = modifier.dragAndDropTileList(dragAndDropState, { true }, onDropAdd),
@@ -301,6 +308,7 @@ fun DefaultEditTileGrid(
             currentTiles,
             ClickAction.REMOVE,
             onRemoveTile,
+            onDoubleTap,
             isIconOnly,
             indicatePosition = true,
             dragAndDropState = dragAndDropState,
@@ -314,6 +322,7 @@ fun DefaultEditTileGrid(
             otherTilesStock,
             ClickAction.ADD,
             addTileToEnd,
+            onDoubleTap,
             isIconOnly,
             dragAndDropState = dragAndDropState,
             acceptDrops = { true },
@@ -328,6 +337,7 @@ fun DefaultEditTileGrid(
             otherTilesCustom,
             ClickAction.ADD,
             addTileToEnd,
+            onDoubleTap,
             isIconOnly,
             dragAndDropState = dragAndDropState,
             acceptDrops = { true },
@@ -340,6 +350,7 @@ fun LazyGridScope.editTiles(
     tiles: List<EditTileViewModel>,
     clickAction: ClickAction,
     onClick: (TileSpec) -> Unit,
+    onDoubleTap: (TileSpec) -> Unit,
     isIconOnly: (TileSpec) -> Boolean,
     dragAndDropState: DragAndDropState,
     acceptDrops: (TileSpec) -> Boolean,
@@ -386,6 +397,7 @@ fun LazyGridScope.editTiles(
                         .dragAndDropTileSource(
                             viewModel.tileSpec,
                             onClick,
+                            onDoubleTap,
                             dragAndDropState,
                         )
             )
