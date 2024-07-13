@@ -492,6 +492,11 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         return mHideHandle;
     }
 
+    /** Returns true if the divider is currently being physically controlled by the user. */
+    boolean isMoving() {
+        return mMoving;
+    }
+
     private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onDoubleTap(MotionEvent e) {

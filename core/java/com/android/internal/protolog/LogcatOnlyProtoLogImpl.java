@@ -16,6 +16,8 @@
 
 package com.android.internal.protolog;
 
+import static com.android.internal.protolog.ProtoLog.REQUIRE_PROTOLOGTOOL;
+
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -42,6 +44,11 @@ public class LogcatOnlyProtoLogImpl implements IProtoLog {
 
     @Override
     public void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object[] args) {
+        if (REQUIRE_PROTOLOGTOOL) {
+            throw new RuntimeException(
+                    "REQUIRE_PROTOLOGTOOL not set to false before the first log call.");
+        }
+
         String formattedString = TextUtils.formatSimple(messageString, args);
         switch (logLevel) {
             case VERBOSE -> Log.v(group.getTag(), formattedString);

@@ -3443,6 +3443,14 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
+        public void removeShortcutChangeCallback(
+                @NonNull LauncherApps.ShortcutChangeCallback callback) {
+            synchronized (mServiceLock) {
+                mShortcutChangeCallbacks.remove(Objects.requireNonNull(callback));
+            }
+        }
+
+        @Override
         public int getShortcutIconResId(int launcherUserId, @NonNull String callingPackage,
                 @NonNull String packageName, @NonNull String shortcutId, int userId) {
             Objects.requireNonNull(callingPackage, "callingPackage");
@@ -4482,8 +4490,9 @@ public class ShortcutService extends IShortcutService.Stub {
             ActivityOptions options = ActivityOptions.makeBasic()
                     .setPendingIntentBackgroundActivityStartMode(
                             MODE_BACKGROUND_ACTIVITY_START_DENIED);
-            intentSender.sendIntent(mContext, /* code= */ 0, extras,
-                    /* onFinished=*/ null, /* handler= */ null, null, options.toBundle());
+            intentSender.sendIntent(mContext, 0 /* code */, extras,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (SendIntentException e) {
             Slog.w(TAG, "sendIntent failed().", e);
         }

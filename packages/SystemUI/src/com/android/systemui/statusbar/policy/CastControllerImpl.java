@@ -183,6 +183,7 @@ public class CastControllerImpl implements CastController {
 
     @Override
     public void stopCasting(CastDevice device) {
+        // TODO(b/332662551): Convert Logcat to LogBuffer.
         final boolean isProjection = device.getTag() instanceof MediaProjectionInfo;
         if (DEBUG) Log.d(TAG, "stopCasting isProjection=" + isProjection);
         if (isProjection) {

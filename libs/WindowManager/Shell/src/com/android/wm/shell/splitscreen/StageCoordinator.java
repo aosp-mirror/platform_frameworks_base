@@ -592,12 +592,21 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    /** Use this method to launch an existing Task via a taskId */
-    void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {
+    /**
+     * Use this method to launch an existing Task via a taskId.
+     * @param hideTaskToken If non-null, a task matching this token will be moved to back in the
+     *                      same window container transaction as the starting of the intent.
+     */
+    void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options,
+            @Nullable WindowContainerToken hideTaskToken) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "startTask: task=%d position=%d", taskId, position);
         mSplitRequest = new SplitRequest(taskId, position);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         options = resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, null /* wct */);
+        if (hideTaskToken != null) {
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Reordering hide-task to bottom");
+            wct.reorder(hideTaskToken, false /* onTop */);
+        }
         wct.startTask(taskId, options);
         // If this should be mixed, send the task to avoid split handle transition directly.
         if (mMixedHandler != null && mMixedHandler.isTaskInPip(taskId, mTaskOrganizer)) {
@@ -623,9 +632,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 extraTransitType, !mIsDropEntering);
     }
 
-    /** Launches an activity into split. */
+    /**
+     * Launches an activity into split.
+     * @param hideTaskToken If non-null, a task matching this token will be moved to back in the
+     *                      same window container transaction as the starting of the intent.
+     */
     void startIntent(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
-            @Nullable Bundle options) {
+            @Nullable Bundle options, @Nullable WindowContainerToken hideTaskToken) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "startIntent: intent=%s position=%d", intent.getIntent(),
                 position);
         mSplitRequest = new SplitRequest(intent.getIntent(), position);
@@ -636,6 +649,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         options = resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, null /* wct */);
+        if (hideTaskToken != null) {
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Reordering hide-task to bottom");
+            wct.reorder(hideTaskToken, false /* onTop */);
+        }
         wct.sendPendingIntent(intent, fillInIntent, options);
 
         // If this should be mixed, just send the intent to avoid split handle transition directly.

@@ -16,7 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
+import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
+
 import android.annotation.NonNull;
+import android.content.res.Configuration;
+import android.graphics.Rect;
 
 import java.util.function.BooleanSupplier;
 
@@ -47,5 +52,25 @@ class AppCompatUtils {
                 return mValue;
             }
         };
+    }
+
+    /**
+     * Returns the aspect ratio of the given {@code rect}.
+     */
+    static float computeAspectRatio(Rect rect) {
+        final int width = rect.width();
+        final int height = rect.height();
+        if (width == 0 || height == 0) {
+            return 0;
+        }
+        return Math.max(width, height) / (float) Math.min(width, height);
+    }
+
+    /**
+     * @param config The current {@link Configuration}
+     * @return {@code true} if using a VR headset.
+     */
+    static boolean isInVrUiMode(Configuration config) {
+        return (config.uiMode & UI_MODE_TYPE_MASK) == UI_MODE_TYPE_VR_HEADSET;
     }
 }

@@ -151,7 +151,6 @@ public class HintManagerServiceTest {
 
     private HintManagerService mService;
     private ChannelConfig mConfig;
-    private ApplicationInfo mApplicationInfo;
 
     private static Answer<Long> fakeCreateWithConfig(Long ptr, Long sessionId) {
         return new Answer<Long>() {
@@ -168,12 +167,12 @@ public class HintManagerServiceTest {
         mConfig = new ChannelConfig();
         mConfig.readFlagBitmask = 1;
         mConfig.writeFlagBitmask = 2;
-        mApplicationInfo = new ApplicationInfo();
-        mApplicationInfo.category = ApplicationInfo.CATEGORY_GAME;
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.category = ApplicationInfo.CATEGORY_GAME;
         when(mContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getNameForUid(anyInt())).thenReturn(TEST_APP_NAME);
         when(mMockPackageManager.getApplicationInfo(eq(TEST_APP_NAME), anyInt()))
-                .thenReturn(mApplicationInfo);
+                .thenReturn(applicationInfo);
         when(mNativeWrapperMock.halGetHintSessionPreferredRate())
                 .thenReturn(DEFAULT_HINT_PREFERRED_RATE);
         when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_A),

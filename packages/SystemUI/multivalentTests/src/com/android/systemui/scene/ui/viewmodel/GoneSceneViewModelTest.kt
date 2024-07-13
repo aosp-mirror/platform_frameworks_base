@@ -28,7 +28,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -63,7 +62,7 @@ class GoneSceneViewModelTest : SysuiTestCase() {
     fun downTransitionKey_splitShadeEnabled_isGoneToSplitShade() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
-            shadeRepository.setShadeMode(ShadeMode.Split)
+            shadeRepository.setShadeLayoutWide(true)
             runCurrent()
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Down))?.transitionKey)
@@ -74,7 +73,7 @@ class GoneSceneViewModelTest : SysuiTestCase() {
     fun downTransitionKey_splitShadeDisabled_isNull() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
-            shadeRepository.setShadeMode(ShadeMode.Single)
+            shadeRepository.setShadeLayoutWide(false)
             runCurrent()
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Down))?.transitionKey).isNull()

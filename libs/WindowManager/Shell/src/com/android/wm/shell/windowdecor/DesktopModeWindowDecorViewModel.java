@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_HOVER_ENTER;
@@ -41,12 +42,17 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -91,7 +97,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
 import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
-import com.android.wm.shell.shared.DesktopModeStatus;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -410,6 +416,26 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         decoration.closeMaximizeMenu();
     }
 
+    private void onOpenInBrowser(@NonNull DesktopModeWindowDecoration decor, @NonNull Uri uri) {
+        openInBrowser(uri);
+        decor.closeHandleMenu();
+        decor.closeMaximizeMenu();
+    }
+
+    private void openInBrowser(Uri uri) {
+        final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
+                .setComponent(getDefaultBrowser())
+                .addFlags(FLAG_ACTIVITY_NEW_TASK);
+        mContext.startActivity(intent);
+    }
+
+    private ComponentName getDefaultBrowser() {
+        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://"));
+        final ResolveInfo info = mContext.getPackageManager()
+                .resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        return info.getComponentInfo().getComponentName();
+    }
+
     private class DesktopModeTouchEventListener extends GestureDetector.SimpleOnGestureListener
             implements View.OnClickListener, View.OnTouchListener, View.OnLongClickListener,
             View.OnGenericMotionListener, DragDetector.MotionEventHandler {
@@ -489,6 +515,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.split_screen_button) {
                 decoration.closeHandleMenu();
                 mDesktopTasksController.requestSplit(decoration.mTaskInfo);
+            } else if (id == R.id.open_in_browser_button) {
+                // TODO(b/346441962): let the decoration handle the click gesture and only call back
+                //  to the ViewModel via #setOpenInBrowserClickListener
+                decoration.onOpenInBrowserClick();
             } else if (id == R.id.collapse_menu_button) {
                 decoration.closeHandleMenu();
             } else if (id == R.id.maximize_window) {
@@ -1010,7 +1040,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private void createInputChannel(int displayId) {
         final InputManager inputManager = mContext.getSystemService(InputManager.class);
         final InputMonitor inputMonitor =
-                mInputMonitorFactory.create(inputManager, mContext);
+                mInputMonitorFactory.create(inputManager, displayId);
         final EventReceiver eventReceiver = new EventReceiver(inputMonitor,
                 inputMonitor.getInputChannel(), Looper.myLooper());
         mEventReceiversByDisplay.put(displayId, eventReceiver);
@@ -1091,6 +1121,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.setOnRightSnapClickListener((taskId, tag) -> {
             onSnapResize(taskId, false /* isLeft */);
         });
+        windowDecoration.setOpenInBrowserClickListener(this::onOpenInBrowser);
         windowDecoration.setCaptionListeners(
                 touchEventListener, touchEventListener, touchEventListener, touchEventListener);
         windowDecoration.setExclusionRegionListener(mExclusionRegionListener);
@@ -1163,8 +1194,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     static class InputMonitorFactory {
-        InputMonitor create(InputManager inputManager, Context context) {
-            return inputManager.monitorGestureInput("caption-touch", context.getDisplayId());
+        InputMonitor create(InputManager inputManager, int displayId) {
+            return inputManager.monitorGestureInput("caption-touch", displayId);
         }
     }
 

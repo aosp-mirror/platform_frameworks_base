@@ -25,8 +25,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteract
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -48,27 +48,21 @@ constructor(
     val shadeInteractor: ShadeInteractor,
     @Application private val applicationScope: CoroutineScope,
     unfoldTransitionInteractor: UnfoldTransitionInteractor,
+    occlusionInteractor: SceneContainerOcclusionInteractor,
 ) {
     @VisibleForTesting val clockSize = clockInteractor.clockSize
 
     val isUdfpsVisible: Boolean
         get() = authController.isUdfpsSupported
 
-    val shouldUseSplitNotificationShade: StateFlow<Boolean> =
-        shadeInteractor.shadeMode
-            .map { it == ShadeMode.Split }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
+    val isShadeLayoutWide: StateFlow<Boolean> = shadeInteractor.isShadeLayoutWide
 
     val areNotificationsVisible: StateFlow<Boolean> =
         combine(
                 clockSize,
-                shouldUseSplitNotificationShade,
-            ) { clockSize, shouldUseSplitNotificationShade ->
-                clockSize == ClockSize.SMALL || shouldUseSplitNotificationShade
+                shadeInteractor.isShadeLayoutWide,
+            ) { clockSize, isShadeLayoutWide ->
+                clockSize == ClockSize.SMALL || isShadeLayoutWide
             }
             .stateIn(
                 scope = applicationScope,
@@ -91,6 +85,16 @@ constructor(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = UnfoldTranslations(),
+            )
+
+    /** Whether the content of the scene UI should be shown. */
+    val isContentVisible: StateFlow<Boolean> =
+        occlusionInteractor.isOccludingActivityShown
+            .map { !it }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = true,
             )
 
     fun getSmartSpacePaddingTop(resources: Resources): Int {

@@ -79,7 +79,7 @@ class MediaProjectionPermissionDialogDelegateTest : SysuiTestCase() {
         val overrideDisableSingleAppOption = false
         setUpAndShowDialog(overrideDisableSingleAppOption)
 
-        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
         val secondOptionText =
             spinner.adapter
                 .getDropDownView(1, null, spinner)
@@ -100,7 +100,7 @@ class MediaProjectionPermissionDialogDelegateTest : SysuiTestCase() {
         val overrideDisableSingleAppOption = true
         setUpAndShowDialog(overrideDisableSingleAppOption)
 
-        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
         val secondOptionText =
             spinner.adapter
                 .getDropDownView(1, null, spinner)

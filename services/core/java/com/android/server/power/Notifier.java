@@ -206,7 +206,6 @@ public class Notifier {
         mPolicy = policy;
         mFaceDownDetector = faceDownDetector;
         mScreenUndimDetector = screenUndimDetector;
-        mWakefulnessSessionObserver = new WakefulnessSessionObserver(mContext, null);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
@@ -214,6 +213,7 @@ public class Notifier {
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mTrustManager = mContext.getSystemService(TrustManager.class);
         mVibrator = mContext.getSystemService(Vibrator.class);
+        mWakefulnessSessionObserver = new WakefulnessSessionObserver(mContext, null);
 
         mHandler = new NotifierHandler(looper);
         mBackgroundExecutor = backgroundExecutor;
@@ -813,6 +813,8 @@ public class Notifier {
         if (DEBUG) {
             Slog.d(TAG, "onScreenPolicyUpdate: newPolicy=" + newPolicy);
         }
+        mWakefulnessSessionObserver.onScreenPolicyUpdate(
+                SystemClock.uptimeMillis(), displayGroupId, newPolicy);
 
         synchronized (mLock) {
             Message msg = mHandler.obtainMessage(MSG_SCREEN_POLICY);

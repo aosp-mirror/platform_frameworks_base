@@ -921,8 +921,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     //helper function to determine if limit on num listeners applies to callingUid
     private boolean doesLimitApplyForListeners(int callingUid, int exemptUid) {
-        return (callingUid != Process.SYSTEM_UID
-                && callingUid != Process.PHONE_UID
+        return (!TelephonyPermissions.isSystemOrPhone(callingUid)
                 && callingUid != exemptUid);
     }
 
@@ -2990,7 +2989,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // Always redact location info from PhysicalChannelConfig if the registrant is from neither
         // PHONE nor SYSTEM process. There is no user case that the registrant needs the location
         // info (e.g. physicalCellId). This also remove the need for the location permissions check.
-        return record.callerUid != Process.PHONE_UID && record.callerUid != Process.SYSTEM_UID;
+        return !TelephonyPermissions.isSystemOrPhone(record.callerUid);
     }
 
     /**

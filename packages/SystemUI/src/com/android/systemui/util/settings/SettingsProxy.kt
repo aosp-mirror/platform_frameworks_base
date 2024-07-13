@@ -19,6 +19,8 @@ import android.content.ContentResolver
 import android.database.ContentObserver
 import android.net.Uri
 import android.provider.Settings.SettingNotFoundException
+import androidx.annotation.AnyThread
+import androidx.annotation.WorkerThread
 import com.android.app.tracing.TraceUtils.trace
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -56,13 +58,16 @@ interface SettingsProxy {
      * @param name to look up in the table
      * @return the corresponding content URI, or null if not present
      */
-    fun getUriFor(name: String): Uri
+    @AnyThread fun getUriFor(name: String): Uri
 
     /**
-     * Convenience wrapper around [ContentResolver.registerContentObserver].'
-     *
+     * Registers listener for a given content observer <b>while blocking the current thread</b>.
      * Implicitly calls [getUriFor] on the passed in name.
+     *
+     * This should not be called from the main thread, use [registerContentObserver] or
+     * [registerContentObserverAsync] instead.
      */
+    @WorkerThread
     fun registerContentObserverSync(name: String, settingsObserver: ContentObserver) {
         registerContentObserverSync(getUriFor(name), settingsObserver)
     }
@@ -85,12 +90,37 @@ interface SettingsProxy {
      *
      * API corresponding to [registerContentObserver] for Java usage.
      */
+    @AnyThread
     fun registerContentObserverAsync(name: String, settingsObserver: ContentObserver) =
         CoroutineScope(backgroundDispatcher).launch {
             registerContentObserverSync(getUriFor(name), settingsObserver)
         }
 
-    /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserver] for Java usage. After registration is
+     * complete, the callback block is called on the <b>background thread</b> to allow for update of
+     * value.
+     */
+    @AnyThread
+    fun registerContentObserverAsync(
+        name: String,
+        settingsObserver: ContentObserver,
+        @WorkerThread registered: Runnable
+    ) =
+        CoroutineScope(backgroundDispatcher).launch {
+            registerContentObserverSync(getUriFor(name), settingsObserver)
+            registered.run()
+        }
+
+    /**
+     * Registers listener for a given content observer <b>while blocking the current thread</b>.
+     *
+     * This should not be called from the main thread, use [registerContentObserver] or
+     * [registerContentObserverAsync] instead.
+     */
+    @WorkerThread
     fun registerContentObserverSync(uri: Uri, settingsObserver: ContentObserver) =
         registerContentObserverSync(uri, false, settingsObserver)
 
@@ -110,6 +140,7 @@ interface SettingsProxy {
      *
      * API corresponding to [registerContentObserver] for Java usage.
      */
+    @AnyThread
     fun registerContentObserverAsync(uri: Uri, settingsObserver: ContentObserver) =
         CoroutineScope(backgroundDispatcher).launch {
             registerContentObserverSync(uri, settingsObserver)
@@ -118,8 +149,27 @@ interface SettingsProxy {
     /**
      * Convenience wrapper around [ContentResolver.registerContentObserver].'
      *
+     * API corresponding to [registerContentObserver] for Java usage. After registration is
+     * complete, the callback block is called on the <b>background thread</b> to allow for update of
+     * value.
+     */
+    @AnyThread
+    fun registerContentObserverAsync(
+        uri: Uri,
+        settingsObserver: ContentObserver,
+        @WorkerThread registered: Runnable
+    ) =
+        CoroutineScope(backgroundDispatcher).launch {
+            registerContentObserverSync(uri, settingsObserver)
+            registered.run()
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
      * Implicitly calls [getUriFor] on the passed in name.
      */
+    @WorkerThread
     fun registerContentObserverSync(
         name: String,
         notifyForDescendants: Boolean,
@@ -148,6 +198,7 @@ interface SettingsProxy {
      *
      * API corresponding to [registerContentObserver] for Java usage.
      */
+    @AnyThread
     fun registerContentObserverAsync(
         name: String,
         notifyForDescendants: Boolean,
@@ -157,7 +208,32 @@ interface SettingsProxy {
             registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
         }
 
-    /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserver] for Java usage. After registration is
+     * complete, the callback block is called on the <b>background thread</b> to allow for update of
+     * value.
+     */
+    @AnyThread
+    fun registerContentObserverAsync(
+        name: String,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver,
+        @WorkerThread registered: Runnable
+    ) =
+        CoroutineScope(backgroundDispatcher).launch {
+            registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
+            registered.run()
+        }
+
+    /**
+     * Registers listener for a given content observer <b>while blocking the current thread</b>.
+     *
+     * This should not be called from the main thread, use [registerContentObserver] or
+     * [registerContentObserverAsync] instead.
+     */
+    @WorkerThread
     fun registerContentObserverSync(
         uri: Uri,
         notifyForDescendants: Boolean,
@@ -191,6 +267,7 @@ interface SettingsProxy {
      *
      * API corresponding to [registerContentObserver] for Java usage.
      */
+    @AnyThread
     fun registerContentObserverAsync(
         uri: Uri,
         notifyForDescendants: Boolean,
@@ -200,7 +277,32 @@ interface SettingsProxy {
             registerContentObserverSync(uri, notifyForDescendants, settingsObserver)
         }
 
-    /** See [ContentResolver.unregisterContentObserver]. */
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserver] for Java usage. After registration is
+     * complete, the callback block is called on the <b>background thread</b> to allow for update of
+     * value.
+     */
+    @AnyThread
+    fun registerContentObserverAsync(
+        uri: Uri,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver,
+        @WorkerThread registered: Runnable
+    ) =
+        CoroutineScope(backgroundDispatcher).launch {
+            registerContentObserverSync(uri, notifyForDescendants, settingsObserver)
+            registered.run()
+        }
+
+    /**
+     * Unregisters the given content observer <b>while blocking the current thread</b>.
+     *
+     * This should not be called from the main thread, use [unregisterContentObserver] or
+     * [unregisterContentObserverAsync] instead.
+     */
+    @WorkerThread
     fun unregisterContentObserverSync(settingsObserver: ContentObserver) {
         trace({ "SP#unregisterObserver" }) {
             getContentResolver().unregisterContentObserver(settingsObserver)
@@ -224,6 +326,7 @@ interface SettingsProxy {
      * API corresponding to [unregisterContentObserver] for Java usage to ensure that
      * [ContentObserver] registration happens on a worker thread.
      */
+    @AnyThread
     fun unregisterContentObserverAsync(settingsObserver: ContentObserver) =
         CoroutineScope(backgroundDispatcher).launch { unregisterContentObserver(settingsObserver) }
 

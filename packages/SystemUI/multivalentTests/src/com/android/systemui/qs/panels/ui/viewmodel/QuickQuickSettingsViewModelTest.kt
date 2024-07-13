@@ -24,8 +24,8 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.qs.panels.data.repository.IconTilesRepository
-import com.android.systemui.qs.panels.data.repository.iconTilesRepository
+import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
+import com.android.systemui.qs.panels.data.repository.defaultLargeTilesRepository
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.res.R
@@ -40,18 +40,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class QuickQuickSettingsViewModelTest : SysuiTestCase() {
 
-    private val kosmos =
-        testKosmos().apply {
-            iconTilesRepository =
-                object : IconTilesRepository {
-                    override fun isIconTile(spec: TileSpec): Boolean {
-                        return spec.spec.startsWith(PREFIX_SMALL)
-                    }
-                }
-        }
-
-    private val underTest = kosmos.quickQuickSettingsViewModel
-
     private val tiles =
         listOf(
                 "$PREFIX_SMALL:1",
@@ -65,6 +53,17 @@ class QuickQuickSettingsViewModelTest : SysuiTestCase() {
                 "$PREFIX_LARGE:9",
             )
             .map(TileSpec::create)
+
+    private val kosmos =
+        testKosmos().apply {
+            defaultLargeTilesRepository =
+                object : DefaultLargeTilesRepository {
+                    override val defaultLargeTiles: Set<TileSpec> =
+                        tiles.filter { it.spec.startsWith(PREFIX_LARGE) }.toSet()
+                }
+        }
+
+    private val underTest = kosmos.quickQuickSettingsViewModel
 
     @Before
     fun setUp() {

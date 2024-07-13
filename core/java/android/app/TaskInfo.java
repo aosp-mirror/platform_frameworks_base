@@ -30,6 +30,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -303,6 +304,19 @@ public class TaskInfo {
     public boolean isTopActivityStyleFloating;
 
     /**
+     * The URI of the intent that generated the top-most activity opened using a URL.
+     * @hide
+     */
+    @Nullable
+    public Uri capturedLink;
+
+    /**
+     * The time of the last launch of the activity opened using the {@link #capturedLink}.
+     * @hide
+     */
+    public long capturedLinkTimestamp;
+
+    /**
      * Encapsulate specific App Compat information.
      * @hide
      */
@@ -436,6 +450,8 @@ public class TaskInfo {
                 && Objects.equals(topActivity, that.topActivity)
                 && isTopActivityTransparent == that.isTopActivityTransparent
                 && isTopActivityStyleFloating == that.isTopActivityStyleFloating
+                && Objects.equals(capturedLink, that.capturedLink)
+                && capturedLinkTimestamp == that.capturedLinkTimestamp
                 && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo);
     }
 
@@ -506,6 +522,8 @@ public class TaskInfo {
         displayAreaFeatureId = source.readInt();
         isTopActivityTransparent = source.readBoolean();
         isTopActivityStyleFloating = source.readBoolean();
+        capturedLink = source.readTypedObject(Uri.CREATOR);
+        capturedLinkTimestamp = source.readLong();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
     }
 
@@ -554,6 +572,8 @@ public class TaskInfo {
         dest.writeInt(displayAreaFeatureId);
         dest.writeBoolean(isTopActivityTransparent);
         dest.writeBoolean(isTopActivityStyleFloating);
+        dest.writeTypedObject(capturedLink, flags);
+        dest.writeLong(capturedLinkTimestamp);
         dest.writeTypedObject(appCompatTaskInfo, flags);
     }
 
@@ -592,6 +612,8 @@ public class TaskInfo {
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " isTopActivityTransparent=" + isTopActivityTransparent
                 + " isTopActivityStyleFloating=" + isTopActivityStyleFloating
+                + " capturedLink=" + capturedLink
+                + " capturedLinkTimestamp=" + capturedLinkTimestamp
                 + " appCompatTaskInfo=" + appCompatTaskInfo
                 + "}";
     }

@@ -334,13 +334,17 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     }
 
     private void resetPackageManagerMockingForUsingFallbackBacklinks() {
+        ResolveInfo backlinksTaskResolveInfo = createBacklinksTaskResolveInfo();
         reset(mPackageManager);
         when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
         when(mPackageManager.resolveActivity(any(Intent.class), anyInt()))
-                // First the logic queries whether a package has a launcher activity, this should
+                // Firstly, the logic queries whether a package has a launcher activity, this should
                 // resolve otherwise the logic filters out the task.
-                .thenReturn(createBacklinksTaskResolveInfo())
-                // Then logic queries with the backlinks intent, this should not resolve for the
+                .thenReturn(backlinksTaskResolveInfo)
+                // Secondly, the logic builds a fallback main launcher intent, this should also
+                // resolve for the fallback intent to build correctly.
+                .thenReturn(backlinksTaskResolveInfo)
+                // Lastly, logic queries with the backlinks intent, this should not resolve for the
                 // logic to use the fallback intent.
                 .thenReturn(null);
     }
@@ -360,6 +364,8 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         assertThat(actualBacklinksIntent.getPackage()).isEqualTo(BACKLINKS_TASK_PACKAGE_NAME);
         assertThat(actualBacklinksIntent.getAction()).isEqualTo(ACTION_MAIN);
         assertThat(actualBacklinksIntent.getCategories()).containsExactly(CATEGORY_LAUNCHER);
+        assertThat(actualBacklinksIntent.getComponent()).isEqualTo(
+                new ComponentName(BACKLINKS_TASK_PACKAGE_NAME, BACKLINKS_TASK_APP_NAME));
     }
 
     private static ResolveInfo createBacklinksTaskResolveInfo() {

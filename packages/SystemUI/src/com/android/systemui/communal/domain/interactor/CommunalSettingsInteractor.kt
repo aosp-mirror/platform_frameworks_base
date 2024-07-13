@@ -92,15 +92,22 @@ constructor(
         awaitClose { userTracker.removeCallback(callback) }
     }
 
-    /** Whether or not keyguard widgets are allowed for work profile by device policy manager. */
-    val allowedByDevicePolicyForWorkProfile: StateFlow<Boolean> =
+    /**
+     * A user that device policy says shouldn't allow communal widgets, or null if there are no
+     * restrictions.
+     */
+    val workProfileUserDisallowedByDevicePolicy: StateFlow<UserInfo?> =
         workProfileUserInfoCallbackFlow
             .flatMapLatest { workProfile ->
-                workProfile?.let { repository.getAllowedByDevicePolicy(it) } ?: flowOf(false)
+                workProfile?.let {
+                    repository.getAllowedByDevicePolicy(it).map { allowed ->
+                        if (!allowed) it else null
+                    }
+                } ?: flowOf(null)
             }
             .stateIn(
                 scope = bgScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = false
+                initialValue = null
             )
 }

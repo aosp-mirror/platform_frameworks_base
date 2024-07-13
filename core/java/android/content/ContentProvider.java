@@ -61,6 +61,7 @@ import android.os.storage.StorageManager;
 import android.permission.PermissionCheckerManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 
@@ -486,6 +487,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             validateIncomingAuthority(authority);
             int numOperations = operations.size();
             final int[] userIds = new int[numOperations];
+            final ArraySet<String> readPermissions = new ArraySet<String>();
+            final ArraySet<String> writePermissions = new ArraySet<String>();
             for (int i = 0; i < numOperations; i++) {
                 ContentProviderOperation operation = operations.get(i);
                 Uri uri = operation.getUri();
@@ -499,17 +502,19 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 }
                 final AttributionSource accessAttributionSource =
                         attributionSource;
-                if (operation.isReadOperation()) {
+                if (operation.isReadOperation() && !readPermissions.contains(uri.toString())) {
                     if (enforceReadPermission(accessAttributionSource, uri)
                             != PermissionChecker.PERMISSION_GRANTED) {
                         throw new OperationApplicationException("App op not allowed", 0);
                     }
+                    readPermissions.add(uri.toString());
                 }
-                if (operation.isWriteOperation()) {
+                if (operation.isWriteOperation() && !writePermissions.contains(uri.toString())) {
                     if (enforceWritePermission(accessAttributionSource, uri)
                             != PermissionChecker.PERMISSION_GRANTED) {
                         throw new OperationApplicationException("App op not allowed", 0);
                     }
+                    writePermissions.add(uri.toString());
                 }
             }
             traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "applyBatch: ", authority);
@@ -2774,6 +2779,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                         + " provider from user:" + mContext.getUserId());
             }
             if (userId != UserHandle.USER_CURRENT
+                    // getUserIdFromAuthority can return USER_NULL when can't cast the userId to
+                    // an int, which can cause high volume of binder calls.
+                    && (!android.multiuser.Flags.fixGetUserPropertyCache()
+                        || userId != UserHandle.USER_NULL)
                     && userId != mContext.getUserId()
                     // Since userId specified in content uri, the provider userId would be
                     // determined from it.

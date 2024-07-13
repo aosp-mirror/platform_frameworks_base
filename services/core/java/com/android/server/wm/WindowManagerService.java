@@ -283,6 +283,7 @@ import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationAdapter;
 import android.view.ScrollCaptureResponse;
@@ -334,8 +335,8 @@ import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.protolog.LegacyProtoLogImpl;
-import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -731,6 +732,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final DisplayWindowListenerController mDisplayNotificationController;
     final TaskSystemBarsListenerController mTaskSystemBarsListenerController;
+
+    /** Amount of time (in milliseconds) to delay the pointer down outside focus handling */
+    private static final int POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS = 50;
+
+    /** A runnable to handle pointer down outside focus event. */
+    @Nullable
+    private Runnable mPointerDownOutsideFocusRunnable;
 
     boolean mDisplayFrozen = false;
     long mDisplayFreezeTime = 0;
@@ -5896,7 +5904,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 case ON_POINTER_DOWN_OUTSIDE_FOCUS: {
                     synchronized (mGlobalLock) {
                         final IBinder touchedToken = (IBinder) msg.obj;
-                        onPointerDownOutsideFocusLocked(getInputTargetFromToken(touchedToken));
+                        onPointerDownOutsideFocusLocked(getInputTargetFromToken(touchedToken),
+                                true /* fromHandler */);
                     }
                     break;
                 }
@@ -7432,6 +7441,16 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            return mPolicy.getApplicationLaunchKeyboardShortcuts(deviceId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
     public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
         enforceRegisterWindowManagerListenersPermission("requestAppKeyboardShortcuts");
 
@@ -7922,7 +7941,8 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final InputTarget inputTarget =
                         WindowManagerService.this.getInputTargetFromWindowTokenLocked(windowToken);
-                WindowManagerService.this.onPointerDownOutsideFocusLocked(inputTarget);
+                WindowManagerService.this.onPointerDownOutsideFocusLocked(inputTarget,
+                        false /* fromHandler */);
             }
         }
 
@@ -8997,39 +9017,78 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void onPointerDownOutsideFocusLocked(InputTarget t) {
+    void clearPointerDownOutsideFocusRunnable() {
+        if (mPointerDownOutsideFocusRunnable == null) return;
+
+        mH.removeCallbacks(mPointerDownOutsideFocusRunnable);
+        mPointerDownOutsideFocusRunnable = null;
+    }
+
+    private void onPointerDownOutsideFocusLocked(InputTarget t, boolean fromHandler) {
         if (t == null || !t.receiveFocusFromTapOutside()) {
             // If the window that received the input event cannot receive keys, don't move the
             // display it's on to the top since that window won't be able to get focus anyway.
             return;
         }
-        if (mRecentsAnimationController != null
-            && mRecentsAnimationController.getTargetAppMainWindow() == t) {
-            // If there is an active recents animation and touched window is the target, then ignore
-            // the touch. The target already handles touches using its own input monitor and we
-            // don't want to trigger any lifecycle changes from focusing another window.
-            // TODO(b/186770026): We should remove this once we support multiple resumed activities
-            //                    while in overview
-            return;
-        }
+        clearPointerDownOutsideFocusRunnable();
+
+        // For embedded activity that is showing side-by-side with another activity, delay
+        // handling the touch-outside event to prevent focus rapid changes back-n-forth.
+        // Otherwise, handle the touch-outside event directly.
         final WindowState w = t.getWindowState();
-        if (w != null) {
-            final Task task = w.getTask();
-            if (task != null && w.mTransitionController.isTransientHide(task)) {
-                // Don't disturb transient animation by accident touch.
+        final ActivityRecord activity = w != null ? w.getActivityRecord() : null;
+        if (activity != null && activity.isEmbedded()
+                && activity.getTaskFragment().getAdjacentTaskFragment() != null) {
+            mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
+            mH.postDelayed(mPointerDownOutsideFocusRunnable, POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS);
+        } else if (!fromHandler) {
+            // Still post the runnable to handler thread in case there is already a runnable
+            // in execution, but still waiting to hold the wm lock.
+            mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
+            mH.post(mPointerDownOutsideFocusRunnable);
+        } else {
+            handlePointerDownOutsideFocus(t);
+        }
+    }
+
+    private void handlePointerDownOutsideFocus(InputTarget t) {
+        synchronized (mGlobalLock) {
+            if (mPointerDownOutsideFocusRunnable != null
+                    && mH.hasCallbacks(mPointerDownOutsideFocusRunnable)) {
+                // Skip if there's another pending pointer-down-outside-focus event.
                 return;
             }
-        }
+            clearPointerDownOutsideFocusRunnable();
 
-        ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "onPointerDownOutsideFocusLocked called on %s",
-                t);
-        if (mFocusedInputTarget != t && mFocusedInputTarget != null) {
-            mFocusedInputTarget.handleTapOutsideFocusOutsideSelf();
+            if (mRecentsAnimationController != null
+                    && mRecentsAnimationController.getTargetAppMainWindow() == t) {
+                // If there is an active recents animation and touched window is the target,
+                // then ignore the touch. The target already handles touches using its own
+                // input monitor and we don't want to trigger any lifecycle changes from
+                // focusing another window.
+                // TODO(b/186770026): We should remove this once we support multiple resumed
+                //  activities while in overview
+                return;
+            }
+
+            final WindowState w = t.getWindowState();
+            if (w != null) {
+                final Task task = w.getTask();
+                if (task != null && w.mTransitionController.isTransientHide(task)) {
+                    // Don't disturb transient animation by accident touch.
+                    return;
+                }
+            }
+
+            ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "onPointerDownOutsideFocusLocked called on %s", t);
+            if (mFocusedInputTarget != t && mFocusedInputTarget != null) {
+                mFocusedInputTarget.handleTapOutsideFocusOutsideSelf();
+            }
+            // Trigger Activity#onUserLeaveHint() if the order change of task pauses any activities.
+            mAtmService.mTaskSupervisor.mUserLeaving = true;
+            t.handleTapOutsideFocusInsideSelf();
+            mAtmService.mTaskSupervisor.mUserLeaving = false;
         }
-        // Trigger Activity#onUserLeaveHint() if the order change of task pauses any activities.
-        mAtmService.mTaskSupervisor.mUserLeaving = true;
-        t.handleTapOutsideFocusInsideSelf();
-        mAtmService.mTaskSupervisor.mUserLeaving = false;
     }
 
     @VisibleForTesting
@@ -9251,7 +9310,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 isTrustedOverlay);
 
         final int sanitizedLpFlags =
-                (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE))
+                (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE
+                    | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH))
                 | LayoutParams.FLAG_NOT_TOUCH_MODAL;
         h.layoutParamsType = type;
         h.layoutParamsFlags = sanitizedLpFlags;

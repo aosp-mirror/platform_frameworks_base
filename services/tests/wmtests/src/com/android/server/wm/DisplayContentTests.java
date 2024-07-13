@@ -117,8 +117,8 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.view.Display;
@@ -1871,6 +1871,46 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(recentsActivity.hasFixedRotationTransform());
     }
 
+    @EnableFlags(com.android.window.flags.Flags.FLAG_RESPECT_NON_TOP_VISIBLE_FIXED_ORIENTATION)
+    @Test
+    public void testRespectNonTopVisibleFixedOrientation() {
+        spyOn(mWm.mLetterboxConfiguration);
+        doReturn(false).when(mWm.mLetterboxConfiguration).isTranslucentLetterboxingEnabled();
+        makeDisplayPortrait(mDisplayContent);
+        final ActivityRecord nonTopVisible = new ActivityBuilder(mAtm)
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .setCreateTask(true).build();
+        final ActivityRecord translucentTop = new ActivityBuilder(mAtm)
+                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
+                .setTask(nonTopVisible.getTask()).setVisible(false)
+                .setActivityTheme(android.R.style.Theme_Translucent).build();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+        mDisplayContent.requestTransitionAndLegacyPrepare(WindowManager.TRANSIT_OPEN, 0);
+        translucentTop.setVisibility(true);
+        mDisplayContent.updateOrientation();
+        assertEquals("Non-top visible activity must be portrait",
+                Configuration.ORIENTATION_PORTRAIT, nonTopVisible.getConfiguration().orientation);
+        assertEquals("Top translucent activity must be landscape",
+                Configuration.ORIENTATION_LANDSCAPE, translucentTop.getConfiguration().orientation);
+
+        player.start();
+        player.finish();
+        assertEquals("Display must be landscape after the transition is finished",
+                Configuration.ORIENTATION_LANDSCAPE,
+                mDisplayContent.getConfiguration().orientation);
+        assertEquals("Non-top visible activity must still be portrait",
+                Configuration.ORIENTATION_PORTRAIT,
+                nonTopVisible.getConfiguration().orientation);
+
+        translucentTop.finishIfPossible("test", false /* oomAdj */);
+        mDisplayContent.updateOrientation();
+        player.start();
+        player.finish();
+        assertEquals("Display must be portrait after closing the translucent activity",
+                Configuration.ORIENTATION_PORTRAIT,
+                mDisplayContent.getConfiguration().orientation);
+    }
+
     @Test
     public void testSecondaryInternalDisplayRotationFollowsDefaultDisplay() {
         // Skip freezing so the unrelated conditions in updateRotationUnchecked won't disturb.
@@ -2832,7 +2872,7 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(true).when(() ->
                 DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
 
-        assertNotNull(createNewDisplay().mCameraCompatFreeformPolicy);
+        assertTrue(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
     @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
@@ -2841,14 +2881,14 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(true).when(() ->
                 DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
 
-        assertNull(createNewDisplay().mCameraCompatFreeformPolicy);
+        assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
     @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
     public void desktopWindowingFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
-        assertNull(createNewDisplay().mCameraCompatFreeformPolicy);
+        assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
     private void removeRootTaskTests(Runnable runnable) {

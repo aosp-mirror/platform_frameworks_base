@@ -53,6 +53,7 @@ constructor(
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     val deviceEntryRepository: DeviceEntryRepository,
+    private val wakeToGoneInteractor: KeyguardWakeDirectlyToGoneInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.AOD,
@@ -98,6 +99,7 @@ constructor(
                     keyguardInteractor.primaryBouncerShowing,
                     keyguardInteractor.isKeyguardOccluded,
                     canDismissLockscreen,
+                    wakeToGoneInteractor.canWakeDirectlyToGone,
                 )
                 .collect {
                     (
@@ -107,6 +109,7 @@ constructor(
                         primaryBouncerShowing,
                         isKeyguardOccludedLegacy,
                         canDismissLockscreen,
+                        canWakeDirectlyToGone,
                     ) ->
                     if (!maybeHandleInsecurePowerGesture()) {
                         val shouldTransitionToLockscreen =
@@ -131,10 +134,11 @@ constructor(
 
                         val shouldTransitionToGone =
                             (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen) ||
-                                (KeyguardWmStateRefactor.isEnabled &&
-                                    !deviceEntryRepository.isLockscreenEnabled())
+                                (KeyguardWmStateRefactor.isEnabled && canWakeDirectlyToGone)
 
                         if (shouldTransitionToGone) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                            if (SceneContainerFlag.isEnabled) return@collect
                             startTransitionTo(
                                 toState = KeyguardState.GONE,
                             )
@@ -195,6 +199,7 @@ constructor(
      * PRIMARY_BOUNCER.
      */
     private fun listenForAodToPrimaryBouncer() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch("$TAG#listenForAodToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing

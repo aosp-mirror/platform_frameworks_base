@@ -738,6 +738,28 @@ class MobileIconInteractorTest : SysuiTestCase() {
             assertThat(latest).isInstanceOf(SignalIconModel.Satellite::class.java)
         }
 
+    @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @Test
+    // See b/346904529 for more context
+    fun satBasedIcon_doesNotInflateSignalStrength() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.signalLevelIcon)
+
+            // GIVEN a satellite connection
+            connectionRepository.isNonTerrestrial.value = true
+            // GIVEN this carrier has set INFLATE_SIGNAL_STRENGTH
+            connectionRepository.inflateSignalStrength.value = true
+
+            connectionRepository.primaryLevel.value = 4
+            assertThat(latest!!.level).isEqualTo(4)
+
+            connectionRepository.inflateSignalStrength.value = true
+            connectionRepository.primaryLevel.value = 4
+
+            // Icon level is unaffected
+            assertThat(latest!!.level).isEqualTo(4)
+        }
+
     private fun createInteractor(
         overrides: MobileIconCarrierIdOverrides = MobileIconCarrierIdOverridesImpl()
     ) =

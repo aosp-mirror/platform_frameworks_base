@@ -103,8 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ја откри оваа слика од екранот."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> и други отворени апликации ја открија оваа слика од екранот."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Додај во белешка"</string>
-    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
-    <skip />
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Опфати линк"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Снимач на екран"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Се обработува снимка од екран"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Тековно известување за сесија за снимање на екранот"</string>
@@ -134,8 +133,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Ќе го сопрете снимањето на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
-    <!-- no translation found for share_to_app_chip_accessibility_label (4210256229976947065) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Се споделува екранот"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -143,8 +141,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Ќе го сопрете споделувањето на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
-    <!-- no translation found for cast_to_other_device_chip_accessibility_label (1680650146639059938) -->
-    <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"Се емитува екранот"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -198,8 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Отклучено со лик. Притиснете за да продолжите."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Лицето е препознаено. Притиснете за да продолжите."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лицето е препознаено. Притиснете ја иконата за отклучување за да продолжите."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Отклучено со лик. Допрете за да продолжите."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Проверена"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Откажување автентикација"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Повеќе опции"</string>
@@ -480,8 +476,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Додајте повеќе виџети"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Притиснете долго за да ги приспособите виџетите"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Приспособете ги виџетите"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Отклучете за да ги приспособите виџетите"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Икона за апликација за оневозможен виџет"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Икона за апликација за виџет што се инсталира"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Изменување виџети"</string>
@@ -1359,15 +1354,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Се користи од <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Неодамна користено од <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Систем"</string>
-    <!-- no translation found for shortcut_helper_category_system_controls (3153344561395751020) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_system_apps (6001757545472556810) -->
-    <skip />
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Системски контроли"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Системски апликации"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Мултитаскинг"</string>
-    <!-- no translation found for shortcutHelper_category_recent_apps (7918731953612377145) -->
-    <skip />
-    <!-- no translation found for shortcutHelper_category_split_screen (1159669813444812244) -->
-    <skip />
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Неодамнешни апликации"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Поделен екран"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Внесување"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Кратенки за апликации"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Пристапност"</string>
@@ -1383,6 +1374,8 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
     <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"За да се вратите назад, повлечете налево или надесно со три прста каде било на допирната подлога."</string>

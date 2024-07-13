@@ -21,6 +21,7 @@ import static android.Manifest.permission.DETECT_SCREEN_CAPTURE;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.app.Instrumentation.DEBUG_FINISH_ACTIVITY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
@@ -7297,6 +7298,9 @@ public class Activity extends ContextThemeWrapper
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void finish(int finishTask) {
+        if (DEBUG_FINISH_ACTIVITY) {
+            Log.d("Instrumentation", "finishActivity: finishTask=" + finishTask, new Throwable());
+        }
         if (mParent == null) {
             int resultCode;
             Intent resultData;

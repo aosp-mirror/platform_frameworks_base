@@ -29,8 +29,6 @@ import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.shade.TouchLogger.Companion.logTouchesTo
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
-import com.android.systemui.shade.shared.flag.DualShade
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.transition.ScrimShadeTransitionController
 import com.android.systemui.statusbar.PulseExpansionHandler
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -40,7 +38,6 @@ import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -63,7 +60,7 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        hydrateShadeMode()
+        hydrateShadeLayoutWidth()
         hydrateShadeExpansionStateManager()
         logTouchesTo(touchLog)
         scrimShadeTransitionController.init()
@@ -86,22 +83,17 @@ constructor(
         }
     }
 
-    private fun hydrateShadeMode() {
-        if (DualShade.isEnabled) {
-            shadeRepository.setShadeMode(ShadeMode.Dual)
-            return
-        }
+    private fun hydrateShadeLayoutWidth() {
         applicationScope.launch {
             configurationRepository.onAnyConfigurationChange
                 // Force initial collection.
                 .onStart { emit(Unit) }
-                .map { applicationContext.resources }
-                .map { resources ->
-                    splitShadeStateController.shouldUseSplitNotificationShade(resources)
-                }
-                .collect { isSplitShade ->
-                    shadeRepository.setShadeMode(
-                        if (isSplitShade) ShadeMode.Split else ShadeMode.Single
+                .collect {
+                    val resources = applicationContext.resources
+                    // The configuration for 'shouldUseSplitNotificationShade' dictates the width of
+                    // the shade in both split-shade and dual-shade modes.
+                    shadeRepository.setShadeLayoutWide(
+                        splitShadeStateController.shouldUseSplitNotificationShade(resources)
                     )
                 }
         }

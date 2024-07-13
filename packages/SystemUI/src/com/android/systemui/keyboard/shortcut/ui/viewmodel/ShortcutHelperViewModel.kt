@@ -19,39 +19,58 @@ package com.android.systemui.keyboard.shortcut.ui.viewmodel
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperStateInteractor
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.CurrentApp
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 class ShortcutHelperViewModel
 @Inject
 constructor(
+    @Background private val backgroundScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val stateInteractor: ShortcutHelperStateInteractor,
     categoriesInteractor: ShortcutHelperCategoriesInteractor,
 ) {
 
     val shouldShow =
-        stateInteractor.state
-            .map { it is ShortcutHelperState.Active }
+        categoriesInteractor.shortcutCategories
+            .map { it.isNotEmpty() }
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
 
     val shortcutsUiState =
-        categoriesInteractor.shortcutCategories.map {
-            if (it.isEmpty()) {
-                ShortcutsUiState.Inactive
-            } else {
-                ShortcutsUiState.Active(
-                    shortcutCategories = it,
-                    defaultSelectedCategory = it.first().type,
-                )
+        categoriesInteractor.shortcutCategories
+            .map {
+                if (it.isEmpty()) {
+                    ShortcutsUiState.Inactive
+                } else {
+                    ShortcutsUiState.Active(
+                        shortcutCategories = it,
+                        defaultSelectedCategory = getDefaultSelectedCategory(it),
+                    )
+                }
             }
-        }
+            .stateIn(
+                scope = backgroundScope,
+                started = SharingStarted.Lazily,
+                initialValue = ShortcutsUiState.Inactive
+            )
+
+    private fun getDefaultSelectedCategory(
+        categories: List<ShortcutCategory>
+    ): ShortcutCategoryType {
+        val currentAppShortcuts = categories.firstOrNull { it.type is CurrentApp }
+        return currentAppShortcuts?.type ?: categories.first().type
+    }
 
     fun onViewClosed() {
         stateInteractor.onViewClosed()
