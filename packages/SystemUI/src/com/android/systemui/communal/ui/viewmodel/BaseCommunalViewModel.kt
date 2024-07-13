@@ -59,6 +59,18 @@ abstract class BaseCommunalViewModel(
     /** Accessibility delegate to be set on CommunalAppWidgetHostView. */
     open val widgetAccessibilityDelegate: View.AccessibilityDelegate? = null
 
+    /**
+     * The up-to-date value of the grid scroll offset. persisted to interactor on
+     * {@link #persistScrollPosition}
+     */
+    private var currentScrollOffset = 0
+
+    /**
+     * The up-to-date value of the grid scroll index. persisted to interactor on
+     * {@link #persistScrollPosition}
+     */
+    private var currentScrollIndex = 0
+
     fun signalUserInteraction() {
         communalInteractor.signalUserInteraction()
     }
@@ -146,6 +158,28 @@ abstract class BaseCommunalViewModel(
 
     /** Called as the user request to show the customize widget button. */
     open fun onLongClick() {}
+
+    /** Called when the grid scroll position has been updated. */
+    open fun onScrollPositionUpdated(firstVisibleItemIndex: Int, firstVisibleItemScroll: Int) {
+        currentScrollIndex = firstVisibleItemIndex
+        currentScrollOffset = firstVisibleItemScroll
+    }
+
+    /** Stores scroll values to interactor. */
+    protected fun persistScrollPosition() {
+        communalInteractor.setScrollPosition(currentScrollIndex, currentScrollOffset)
+    }
+
+    /** Invoked after scroll values are used to initialize grid position. */
+    open fun clearPersistedScrollPosition() {
+        communalInteractor.setScrollPosition(0, 0)
+    }
+
+    val savedFirstScrollIndex: Int
+        get() = communalInteractor.firstVisibleItemIndex
+
+    val savedFirstScrollOffset: Int
+        get() = communalInteractor.firstVisibleItemOffset
 
     /** Set the key of the currently selected item */
     fun setSelectedKey(key: String?) {

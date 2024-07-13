@@ -2629,17 +2629,27 @@ final class InstallPackageHelper {
 
         String packageName = pkgLite.packageName;
         synchronized (mPm.mLock) {
-            // Package which currently owns the data that the new package will own if installed.
-            // If an app is uninstalled while keeping data (e.g. adb uninstall -k), installedPkg
-            // will be null whereas dataOwnerPkg will contain information about the package
-            // which was uninstalled while keeping its data.
-            AndroidPackage dataOwnerPkg = mPm.mPackages.get(packageName);
             PackageSetting dataOwnerPs = mPm.mSettings.getPackageLPr(packageName);
-            if (dataOwnerPkg  == null) {
-                if (dataOwnerPs != null) {
-                    dataOwnerPkg = dataOwnerPs.getPkg();
+            if (dataOwnerPs == null) {
+                if (requiredInstalledVersionCode != PackageManager.VERSION_CODE_HIGHEST) {
+                    String errorMsg = "Required installed version code was "
+                            + requiredInstalledVersionCode
+                            + " but package is not installed";
+                    Slog.w(TAG, errorMsg);
+                    return Pair.create(
+                            PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION, errorMsg);
                 }
+                // The package doesn't exist in the system, don't need to check the version
+                // replacing.
+                return Pair.create(PackageManager.INSTALL_SUCCEEDED, null);
             }
+
+            // Package which currently owns the data that the new package will own if installed.
+            // If an app is uninstalled while keeping data (e.g. adb uninstall -k), dataOwnerPkg
+            // will be null whereas dataOwnerPs will contain information about the package
+            // which was uninstalled while keeping its data. The AndroidPackage object that the
+            // PackageSetting refers to is the same object that is stored in mPackages.
+            AndroidPackage dataOwnerPkg = dataOwnerPs.getPkg();
 
             if (requiredInstalledVersionCode != PackageManager.VERSION_CODE_HIGHEST) {
                 if (dataOwnerPkg == null) {
@@ -2662,7 +2672,27 @@ final class InstallPackageHelper {
                 }
             }
 
-            if (dataOwnerPkg != null && !dataOwnerPkg.isSdkLibrary()) {
+            // If dataOwnerPkg is null but dataOwnerPs is not null, there is always data on
+            // some users. Wwe should do the downgrade check. E.g. DELETE_KEEP_DATA and
+            // archived apps
+            if (dataOwnerPkg == null) {
+                if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags,
+                        dataOwnerPs.isDebuggable())) {
+                    // The data exists on some users and downgrade is not permitted; a lower
+                    // version of the app will not be allowed.
+                    try {
+                        PackageManagerServiceUtils.checkDowngrade(dataOwnerPs, pkgLite);
+                    } catch (PackageManagerException e) {
+                        String errorMsg = "Downgrade detected on app uninstalled with"
+                                + " DELETE_KEEP_DATA: " + e.getMessage();
+                        Slog.w(TAG, errorMsg);
+                        return Pair.create(
+                                PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE, errorMsg);
+                    }
+                }
+                // dataOwnerPs.getPkg() is not null on system apps case. Don't need to consider
+                // system apps case like below.
+            } else if (dataOwnerPkg != null && !dataOwnerPkg.isSdkLibrary()) {
                 if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags,
                         dataOwnerPkg.isDebuggable())) {
                     // Downgrade is not permitted; a lower version of the app will not be allowed

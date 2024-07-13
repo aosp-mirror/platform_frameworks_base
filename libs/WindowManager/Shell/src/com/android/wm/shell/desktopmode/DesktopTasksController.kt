@@ -772,15 +772,13 @@ class DesktopTasksController(
             newTaskIdInFront ?: "null"
         )
 
+        // Move home to front, ensures that we go back home when all desktop windows are closed
+        moveHomeTask(wct, toTop = true)
+
         // Currently, we only handle the desktop on the default display really.
-        if (displayId == DEFAULT_DISPLAY) {
-            if (Flags.enableDesktopWindowingWallpaperActivity()) {
-                // Add translucent wallpaper activity to show the wallpaper underneath
-                addWallpaperActivity(wct)
-            } else {
-                // Move home to front
-                moveHomeTask(wct, toTop = true)
-            }
+        if (displayId == DEFAULT_DISPLAY && Flags.enableDesktopWindowingWallpaperActivity()) {
+            // Add translucent wallpaper activity to show the wallpaper underneath
+            addWallpaperActivity(wct)
         }
 
         val nonMinimizedTasksOrderedFrontToBack =
@@ -1109,6 +1107,10 @@ class DesktopTasksController(
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
+        if (desktopModeTaskRepository.isOnlyVisibleNonClosingTask(taskInfo.taskId)) {
+            // Remove wallpaper activity when leaving desktop mode
+            removeWallpaperActivity(wct)
+        }
     }
 
     /**
@@ -1124,6 +1126,10 @@ class DesktopTasksController(
         // The task's density may have been overridden in freeform; revert it here as we don't
         // want it overridden in multi-window.
         wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
+        if (desktopModeTaskRepository.isOnlyVisibleNonClosingTask(taskInfo.taskId)) {
+            // Remove wallpaper activity when leaving desktop mode
+            removeWallpaperActivity(wct)
+        }
     }
 
     /** Returns the ID of the Task that will be minimized, or null if no task will be minimized. */

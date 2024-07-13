@@ -98,6 +98,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             this::onTracingFlush,
             this::onTracingInstanceStop
     );
+    @Nullable
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
     private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
@@ -126,7 +127,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     public PerfettoProtoLogImpl(
-            ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             Runnable cacheUpdater
     ) {
         this(viewerConfigInputStreamProvider,
@@ -136,8 +137,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
     @VisibleForTesting
     public PerfettoProtoLogImpl(
-            ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            ProtoLogViewerConfigReader viewerConfigReader,
+            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            @Nullable ProtoLogViewerConfigReader viewerConfigReader,
             Runnable cacheUpdater
     ) {
         Producer.init(InitArguments.DEFAULTS);
@@ -209,7 +210,9 @@ public class PerfettoProtoLogImpl implements IProtoLog {
      * @return status code
      */
     public int startLoggingToLogcat(String[] groups, ILogger logger) {
-        mViewerConfigReader.loadViewerConfig(logger);
+        if (mViewerConfigReader != null) {
+            mViewerConfigReader.loadViewerConfig(groups, logger);
+        }
         return setTextLogging(true, logger, groups);
     }
 
@@ -220,7 +223,9 @@ public class PerfettoProtoLogImpl implements IProtoLog {
      * @return status code
      */
     public int stopLoggingToLogcat(String[] groups, ILogger logger) {
-        mViewerConfigReader.unloadViewerConfig();
+        if (mViewerConfigReader != null) {
+            mViewerConfigReader.unloadViewerConfig(groups, logger);
+        }
         return setTextLogging(false, logger, groups);
     }
 
@@ -262,7 +267,9 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 return -1;
             }
             case "enable-text" -> {
-                mViewerConfigReader.loadViewerConfig(logger);
+                if (mViewerConfigReader != null) {
+                    mViewerConfigReader.loadViewerConfig(groups, logger);
+                }
                 return setTextLogging(true, logger, groups);
             }
             case "disable-text" -> {
@@ -420,7 +427,12 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
     private void logToLogcat(String tag, LogLevel level, Message message,
             @Nullable Object[] args) {
-        String messageString = message.getMessage(mViewerConfigReader);
+        String messageString;
+        if (mViewerConfigReader == null) {
+            messageString = message.getMessage();
+        } else {
+            messageString = message.getMessage(mViewerConfigReader);
+        }
 
         if (messageString == null) {
             StringBuilder builder = new StringBuilder("UNKNOWN MESSAGE");
@@ -827,7 +839,11 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             return mMessageMask;
         }
 
-        private String getMessage(ProtoLogViewerConfigReader viewerConfigReader) {
+        private String getMessage() {
+            return mMessageString;
+        }
+
+        private String getMessage(@NonNull ProtoLogViewerConfigReader viewerConfigReader) {
             if (mMessageString != null) {
                 return mMessageString;
             }

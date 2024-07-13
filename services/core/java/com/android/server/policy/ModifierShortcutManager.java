@@ -22,8 +22,10 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
+import android.graphics.drawable.Icon;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -36,7 +38,11 @@ import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
+import android.view.KeyboardShortcutInfo;
 
+import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.XmlUtils;
 import com.android.server.input.KeyboardMetricsCollector;
@@ -46,7 +52,9 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -183,8 +191,12 @@ public class ModifierShortcutManager {
                 String rolePackage = mRoleManager.getDefaultApplication(role);
                 if (rolePackage != null) {
                     intent = mPackageManager.getLaunchIntentForPackage(rolePackage);
-                    intent.putExtra(EXTRA_ROLE, role);
-                    mRoleIntents.put(role, intent);
+                    if (intent != null) {
+                        intent.putExtra(EXTRA_ROLE, role);
+                        mRoleIntents.put(role, intent);
+                    } else {
+                        Log.w(TAG, "No launch intent for role " + role);
+                    }
                 } else {
                     Log.w(TAG, "No default application for role " + role);
                 }
@@ -198,8 +210,7 @@ public class ModifierShortcutManager {
     private void loadShortcuts() {
 
         try {
-            XmlResourceParser parser = mContext.getResources().getXml(
-                    com.android.internal.R.xml.bookmarks);
+            XmlResourceParser parser = mContext.getResources().getXml(R.xml.bookmarks);
             XmlUtils.beginDocument(parser, TAG_BOOKMARKS);
 
             while (true) {
@@ -270,6 +281,9 @@ public class ModifierShortcutManager {
                         continue;
                     }
                     intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, categoryName);
+                    if (intent == null) {
+                        Log.w(TAG, "Null selector intent for " + categoryName);
+                    }
                 } else if (roleName != null) {
                     // We can't resolve the role at the time of this file being parsed as the
                     // device hasn't finished booting, so we will look it up lazily.
@@ -466,4 +480,131 @@ public class ModifierShortcutManager {
 
         return false;
     }
+
+    /**
+     * @param deviceId The input device id of the input device that will handle the shortcuts.
+     *
+     * @return a {@link KeyboardShortcutGroup} containing the application launch keyboard
+     *         shortcuts parsed at boot time from {@code bookmarks.xml}.
+     */
+    public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
+        List<KeyboardShortcutInfo> shortcuts = new ArrayList();
+        for (int i = 0; i <  mIntentShortcuts.size(); i++) {
+            KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                    (char) (mIntentShortcuts.keyAt(i)), mIntentShortcuts.valueAt(i), false);
+            if (info != null) {
+                shortcuts.add(info);
+            }
+        }
+
+        for (int i = 0; i <  mShiftShortcuts.size(); i++) {
+            KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                    (char) (mShiftShortcuts.keyAt(i)), mShiftShortcuts.valueAt(i), true);
+            if (info != null) {
+                shortcuts.add(info);
+            }
+        }
+
+        for (int i = 0; i <  mRoleShortcuts.size(); i++) {
+            String role = mRoleShortcuts.valueAt(i);
+            KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                    (char) (mRoleShortcuts.keyAt(i)), getRoleLaunchIntent(role), false);
+            if (info != null) {
+                shortcuts.add(info);
+            }
+        }
+
+        for (int i = 0; i <  mShiftRoleShortcuts.size(); i++) {
+            String role = mShiftRoleShortcuts.valueAt(i);
+            KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                    (char) (mShiftRoleShortcuts.keyAt(i)), getRoleLaunchIntent(role), true);
+            if (info != null) {
+                shortcuts.add(info);
+            }
+        }
+
+        return new KeyboardShortcutGroup(
+                mContext.getString(R.string.keyboard_shortcut_group_applications),
+                shortcuts);
+    }
+
+    /**
+     * Given an intent to launch an application and the character and shift state that should
+     * trigger it, return a suitable {@link KeyboardShortcutInfo} that contains the label and
+     * icon for the target application.
+     *
+     * @param baseChar the character that triggers the shortcut
+     * @param intent the application launch intent
+     * @param shift whether the shift key is required to be presed.
+     */
+    @VisibleForTesting
+    KeyboardShortcutInfo shortcutInfoFromIntent(char baseChar, Intent intent, boolean shift) {
+        if (intent == null) {
+            return null;
+        }
+
+        CharSequence label;
+        Icon icon;
+        ActivityInfo resolvedActivity = intent.resolveActivityInfo(
+                mPackageManager, PackageManager.MATCH_DEFAULT_ONLY);
+        if (resolvedActivity == null) {
+            return null;
+        }
+        boolean isResolver = com.android.internal.app.ResolverActivity.class.getName().equals(
+                resolvedActivity.name);
+        if (isResolver) {
+            label = getIntentCategoryLabel(mContext,
+                    intent.getSelector().getCategories().iterator().next());
+            if (label == null) {
+                return null;
+            }
+            icon = Icon.createWithResource(mContext, R.drawable.sym_def_app_icon);
+
+        } else {
+            label = resolvedActivity.loadLabel(mPackageManager);
+            icon = Icon.createWithResource(
+                    resolvedActivity.packageName, resolvedActivity.getIconResource());
+        }
+        int modifiers = KeyEvent.META_META_ON;
+        if (shift) {
+            modifiers |= KeyEvent.META_SHIFT_ON;
+        }
+        return new KeyboardShortcutInfo(label, icon, baseChar, modifiers);
+    }
+
+    @VisibleForTesting
+    static String getIntentCategoryLabel(Context context, CharSequence category) {
+        int resid;
+        switch (category.toString()) {
+            case Intent.CATEGORY_APP_BROWSER:
+                resid = R.string.keyboard_shortcut_group_applications_browser;
+                break;
+            case Intent.CATEGORY_APP_CONTACTS:
+                resid = R.string.keyboard_shortcut_group_applications_contacts;
+                break;
+            case Intent.CATEGORY_APP_EMAIL:
+                resid = R.string.keyboard_shortcut_group_applications_email;
+                break;
+            case Intent.CATEGORY_APP_CALENDAR:
+                resid = R.string.keyboard_shortcut_group_applications_calendar;
+                break;
+            case Intent.CATEGORY_APP_MAPS:
+                resid = R.string.keyboard_shortcut_group_applications_maps;
+                break;
+            case Intent.CATEGORY_APP_MUSIC:
+                resid = R.string.keyboard_shortcut_group_applications_music;
+                break;
+            case Intent.CATEGORY_APP_MESSAGING:
+                resid = R.string.keyboard_shortcut_group_applications_sms;
+                break;
+            case Intent.CATEGORY_APP_CALCULATOR:
+                resid = R.string.keyboard_shortcut_group_applications_calculator;
+                break;
+            default:
+                Log.e(TAG, ("No label for app category " + category));
+                return null;
+        }
+        return context.getString(resid);
+    };
+
 }

@@ -79,6 +79,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
@@ -923,11 +924,19 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * {@link SystemService} used to publish and manage the lifecycle of
      * {@link InputMethodManagerService}.
      */
-    public static final class Lifecycle extends SystemService {
+    public static final class Lifecycle extends SystemService
+            implements UserManagerInternal.UserLifecycleListener {
         private final InputMethodManagerService mService;
 
         public Lifecycle(Context context) {
             this(context, createServiceForProduction(context));
+
+            // For production code, hook up user lifecycle
+            mService.mUserManagerInternal.addUserLifecycleListener(this);
+
+            // Also schedule user init tasks onto an I/O thread.
+            initializeUsersAsync(context, mService.mIoHandler,
+                    mService.mUserManagerInternal.getUserIds());
         }
 
         @VisibleForTesting
@@ -958,6 +967,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final ServiceThread ioThread = new ServiceThread(PACKAGE_MONITOR_THREAD_NAME,
                     Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
             ioThread.start();
+
+            SecureSettingsWrapper.setContentResolver(context.getContentResolver());
 
             return new InputMethodManagerService(context,
                     shouldEnableConcurrentMultiUserMode(context), thread.getLooper(),
@@ -1006,6 +1017,22 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         @Override
+        public void onUserCreated(UserInfo user, @Nullable Object token) {
+            // Called directly from UserManagerService. Do not block the calling thread.
+            initializeUsersAsync(mService.mContext, mService.mIoHandler, new int[user.id]);
+        }
+
+        @Override
+        public void onUserRemoved(UserInfo user) {
+            // Called directly from UserManagerService. Do not block the calling thread.
+            final int userId = user.id;
+            SecureSettingsWrapper.onUserRemoved(userId);
+            AdditionalSubtypeMapRepository.remove(userId, mService.mIoHandler);
+            InputMethodSettingsRepository.remove(userId);
+            mService.mUserDataRepository.remove(userId);
+        }
+
+        @Override
         public void onUserUnlocking(@NonNull TargetUser user) {
             // Called on ActivityManager thread.
             SecureSettingsWrapper.onUserUnlocking(user.getUserIdentifier());
@@ -1018,15 +1045,46 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // Called on ActivityManager thread.
             final int userId = user.getUserIdentifier();
             SecureSettingsWrapper.onUserStarting(userId);
-            synchronized (ImfLock.class) {
-                if (mService.mConcurrentMultiUserModeEnabled) {
-                    if (mService.mCurrentUserId != userId && mService.mSystemReady) {
-                        mService.initializeVisibleBackgroundUserLocked(userId);
+            mService.mIoHandler.post(() -> {
+                synchronized (ImfLock.class) {
+                    if (mService.mConcurrentMultiUserModeEnabled) {
+                        if (mService.mCurrentUserId != userId && mService.mSystemReady) {
+                            mService.initializeVisibleBackgroundUserLocked(userId);
+                        }
                     }
                 }
-            }
+            });
         }
 
+        @AnyThread
+        private static void initializeUsersAsync(
+                @NonNull Context context, @NonNull Handler ioHandler, @UserIdInt int[] userIds) {
+            ioHandler.post(() -> {
+                // We first create InputMethodMap for each user without loading AdditionalSubtypes.
+                final int numUsers = userIds.length;
+                final InputMethodMap[] rawMethodMaps = new InputMethodMap[numUsers];
+                for (int i = 0; i < numUsers; ++i) {
+                    final int userId = userIds[i];
+                    rawMethodMaps[i] = InputMethodManagerService.queryInputMethodServicesInternal(
+                            context, userId, AdditionalSubtypeMap.EMPTY_MAP,
+                            DirectBootAwareness.AUTO).getMethodMap();
+                }
+
+                // Then create full InputMethodMap for each user. Note that
+                // AdditionalSubtypeMapRepository#get() and InputMethodSettingsRepository#put()
+                // need to be called with ImfLock held (b/352387655).
+                // TODO(b/343601565): Avoid ImfLock after fixing b/352387655.
+                synchronized (ImfLock.class) {
+                    for (int i = 0; i < numUsers; ++i) {
+                        final int userId = userIds[i];
+                        final var map = AdditionalSubtypeMapRepository.get(userId);
+                        final var methodMap = rawMethodMaps[i].applyAdditionalSubtypes(map);
+                        final var settings = InputMethodSettings.create(methodMap, userId);
+                        InputMethodSettingsRepository.put(userId, settings);
+                    }
+                }
+            });
+        }
     }
 
     void onUnlockUser(@UserIdInt int userId) {
@@ -1082,7 +1140,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mConcurrentMultiUserModeEnabled = concurrentMultiUserModeEnabled;
             mContext = context;
             mRes = context.getResources();
-            SecureSettingsWrapper.onStart(mContext);
 
             mHandler = Handler.createAsync(uiLooper, this);
             mIoHandler = ioHandler;
@@ -1100,21 +1157,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             mShowOngoingImeSwitcherForPhones = false;
 
-            // Executing InputMethodSettingsRepository.initialize() does not mean that it
-            // immediately becomes ready to return the up-to-date InputMethodSettings for each
-            // running user, because we want to return from the constructor as early as possible so
-            // as not to delay the system boot process.
-            // Search for InputMethodSettingsRepository.put() to find where and when it's actually
-            // being updated. In general IMMS should refrain from exposing the existence of IMEs
-            // until systemReady().
-            InputMethodSettingsRepository.initialize(mHandler, mContext);
-            AdditionalSubtypeMapRepository.initialize(mHandler, mContext);
-
             mCurrentUserId = mActivityManagerInternal.getCurrentUserId();
             @SuppressWarnings("GuardedBy") final IntFunction<InputMethodBindingController>
                     bindingControllerFactory = userId -> new InputMethodBindingController(userId,
                     InputMethodManagerService.this);
-            mUserDataRepository = new UserDataRepository(mHandler, mUserManagerInternal,
+            mUserDataRepository = new UserDataRepository(
                     bindingControllerForTesting != null ? bindingControllerForTesting
                             : bindingControllerFactory);
 

@@ -55,7 +55,11 @@ interface ShadeInteractor : BaseShadeInteractor {
     /** Whether the shade can be expanded from QQS to QS. */
     val isExpandToQsEnabled: Flow<Boolean>
 
-    /** The version of the shade layout to use. */
+    /**
+     * The version of the shade layout to use.
+     *
+     * Note: Most likely, you want to read [isShadeLayoutWide] instead of this.
+     */
     val shadeMode: StateFlow<ShadeMode>
 
     /**

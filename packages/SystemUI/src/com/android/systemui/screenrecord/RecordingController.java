@@ -258,6 +258,7 @@ public class RecordingController
      * Stop the recording
      */
     public void stopRecording() {
+        // TODO(b/332662551): Convert Logcat to LogBuffer.
         try {
             if (mStopIntent != null) {
                 mStopIntent.send(mInteractiveBroadcastOption);

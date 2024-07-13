@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.ui.viewmodel
 
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -32,6 +33,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.keyguardStatusBarInteractor
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.notification.stack.data.repository.setNotifications
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
@@ -126,6 +128,7 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCa
         }
 
     @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
     fun isVisible_headsUpStatusBarShown_false() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isVisible)

@@ -31,7 +31,6 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.util.kotlin.combine
@@ -104,21 +103,21 @@ constructor(
     val clockShouldBeCentered: Flow<Boolean> =
         if (SceneContainerFlag.isEnabled) {
             combine(
-                shadeInteractor.shadeMode,
+                shadeInteractor.isShadeLayoutWide,
                 activeNotificationsInteractor.areAnyNotificationsPresent,
                 keyguardInteractor.isActiveDreamLockscreenHosted,
                 isOnAod,
                 headsUpNotificationInteractor.isHeadsUpOrAnimatingAway,
                 keyguardInteractor.isDozing,
             ) {
-                shadeMode,
+                isShadeLayoutWide,
                 areAnyNotificationsPresent,
                 isActiveDreamLockscreenHosted,
                 isOnAod,
                 isHeadsUp,
                 isDozing ->
                 when {
-                    shadeMode != ShadeMode.Split -> true
+                    !isShadeLayoutWide -> true
                     !areAnyNotificationsPresent -> true
                     isActiveDreamLockscreenHosted -> true
                     // Pulsing notification appears on the right. Move clock left to avoid overlap.

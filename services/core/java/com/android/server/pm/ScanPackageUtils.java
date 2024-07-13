@@ -437,6 +437,9 @@ final class ScanPackageUtils {
             pkgSetting.setIsOrphaned(true);
         }
 
+        // update debuggable to packageSetting
+        pkgSetting.setDebuggable(parsedPackage.isDebuggable());
+
         // Take care of first install / last update times.
         final long scanFileTime = getLastModifiedTime(parsedPackage);
         final long existingFirstInstallTime = userId == UserHandle.USER_ALL

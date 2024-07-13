@@ -22,11 +22,15 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.FakeStatusBarStateController
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
@@ -34,13 +38,17 @@ import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRe
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.SystemClock
 import junit.framework.Assert
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -51,12 +59,16 @@ import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper
 class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManagerTest(flags) {
 
     private val mHeadsUpManagerLogger = HeadsUpManagerLogger(logcatLogBuffer())
+
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     @Mock private lateinit var mGroupManager: GroupMembershipManager
 
@@ -72,7 +84,7 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
 
     @Mock private lateinit var mUiEventLogger: UiEventLogger
 
-    @Mock private lateinit var mJavaAdapter: JavaAdapter
+    private val mJavaAdapter: JavaAdapter = JavaAdapter(testScope.backgroundScope)
 
     @Mock private lateinit var mShadeInteractor: ShadeInteractor
 
@@ -119,6 +131,11 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         init {
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME
             mAutoDismissTime = TEST_AUTO_DISMISS_TIME
+        }
+
+        /** Wrapper for [BaseHeadsUpManager.shouldHeadsUpBecomePinned] for testing */
+        fun shouldHeadsUpBecomePinnedWrapper(entry: NotificationEntry): Boolean {
+            return shouldHeadsUpBecomePinned(entry)
         }
     }
 
@@ -218,6 +235,196 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         mSystemClock.advanceTime((TEST_AUTO_DISMISS_TIME + hmp.mExtensionTime / 2).toLong())
         Assert.assertTrue(hmp.isHeadsUpEntry(entry.key))
     }
+
+    @Test
+    fun shouldHeadsUpBecomePinned_shadeNotExpanded_true() =
+        testScope.runTest {
+            // GIVEN
+            val statusBarStateController = FakeStatusBarStateController()
+            whenever(mShadeInteractor.isAnyFullyExpanded).thenReturn(MutableStateFlow(false))
+            val hmp =
+                TestableHeadsUpManagerPhone(
+                    mContext,
+                    mHeadsUpManagerLogger,
+                    mGroupManager,
+                    mVSProvider,
+                    statusBarStateController,
+                    mBypassController,
+                    mConfigurationController,
+                    mGlobalSettings,
+                    mSystemClock,
+                    mExecutor,
+                    mAccessibilityManagerWrapper,
+                    mUiEventLogger,
+                    mJavaAdapter,
+                    mShadeInteractor,
+                    mAvalancheController
+                )
+            val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+            statusBarStateController.setState(StatusBarState.SHADE)
+            runCurrent()
+
+            // THEN
+            Assert.assertTrue(hmp.shouldHeadsUpBecomePinnedWrapper(entry))
+        }
+
+    @Test
+    fun shouldHeadsUpBecomePinned_shadeLocked_false() =
+        testScope.runTest {
+            // GIVEN
+            val statusBarStateController = FakeStatusBarStateController()
+            val hmp =
+                TestableHeadsUpManagerPhone(
+                    mContext,
+                    mHeadsUpManagerLogger,
+                    mGroupManager,
+                    mVSProvider,
+                    statusBarStateController,
+                    mBypassController,
+                    mConfigurationController,
+                    mGlobalSettings,
+                    mSystemClock,
+                    mExecutor,
+                    mAccessibilityManagerWrapper,
+                    mUiEventLogger,
+                    mJavaAdapter,
+                    mShadeInteractor,
+                    mAvalancheController
+                )
+            val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+            statusBarStateController.setState(StatusBarState.SHADE_LOCKED)
+            runCurrent()
+
+            // THEN
+            Assert.assertFalse(hmp.shouldHeadsUpBecomePinnedWrapper(entry))
+        }
+
+    @Test
+    fun shouldHeadsUpBecomePinned_shadeUnknown_false() =
+        testScope.runTest {
+            // GIVEN
+            val statusBarStateController = FakeStatusBarStateController()
+            val hmp =
+                TestableHeadsUpManagerPhone(
+                    mContext,
+                    mHeadsUpManagerLogger,
+                    mGroupManager,
+                    mVSProvider,
+                    statusBarStateController,
+                    mBypassController,
+                    mConfigurationController,
+                    mGlobalSettings,
+                    mSystemClock,
+                    mExecutor,
+                    mAccessibilityManagerWrapper,
+                    mUiEventLogger,
+                    mJavaAdapter,
+                    mShadeInteractor,
+                    mAvalancheController
+                )
+            val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+            statusBarStateController.setState(1207)
+            runCurrent()
+
+            // THEN
+            Assert.assertFalse(hmp.shouldHeadsUpBecomePinnedWrapper(entry))
+        }
+
+    @Test
+    fun shouldHeadsUpBecomePinned_keyguardWithBypassOn_true() =
+        testScope.runTest {
+            // GIVEN
+            val statusBarStateController = FakeStatusBarStateController()
+            whenever(mBypassController.bypassEnabled).thenReturn(true)
+            val hmp =
+                TestableHeadsUpManagerPhone(
+                    mContext,
+                    mHeadsUpManagerLogger,
+                    mGroupManager,
+                    mVSProvider,
+                    statusBarStateController,
+                    mBypassController,
+                    mConfigurationController,
+                    mGlobalSettings,
+                    mSystemClock,
+                    mExecutor,
+                    mAccessibilityManagerWrapper,
+                    mUiEventLogger,
+                    mJavaAdapter,
+                    mShadeInteractor,
+                    mAvalancheController
+                )
+            val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+            statusBarStateController.setState(StatusBarState.KEYGUARD)
+            runCurrent()
+
+            // THEN
+            Assert.assertTrue(hmp.shouldHeadsUpBecomePinnedWrapper(entry))
+        }
+
+    @Test
+    fun shouldHeadsUpBecomePinned_keyguardWithBypassOff_false() =
+        testScope.runTest {
+            // GIVEN
+            val statusBarStateController = FakeStatusBarStateController()
+            whenever(mBypassController.bypassEnabled).thenReturn(false)
+            val hmp =
+                TestableHeadsUpManagerPhone(
+                    mContext,
+                    mHeadsUpManagerLogger,
+                    mGroupManager,
+                    mVSProvider,
+                    statusBarStateController,
+                    mBypassController,
+                    mConfigurationController,
+                    mGlobalSettings,
+                    mSystemClock,
+                    mExecutor,
+                    mAccessibilityManagerWrapper,
+                    mUiEventLogger,
+                    mJavaAdapter,
+                    mShadeInteractor,
+                    mAvalancheController
+                )
+            val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+            statusBarStateController.setState(StatusBarState.KEYGUARD)
+            runCurrent()
+
+            // THEN
+            Assert.assertFalse(hmp.shouldHeadsUpBecomePinnedWrapper(entry))
+        }
+
+    @Test
+    fun shouldHeadsUpBecomePinned_shadeExpanded_false() =
+        testScope.runTest {
+            // GIVEN
+            val statusBarStateController = FakeStatusBarStateController()
+            whenever(mShadeInteractor.isAnyExpanded).thenReturn(MutableStateFlow(true))
+            val hmp =
+                TestableHeadsUpManagerPhone(
+                    mContext,
+                    mHeadsUpManagerLogger,
+                    mGroupManager,
+                    mVSProvider,
+                    statusBarStateController,
+                    mBypassController,
+                    mConfigurationController,
+                    mGlobalSettings,
+                    mSystemClock,
+                    mExecutor,
+                    mAccessibilityManagerWrapper,
+                    mUiEventLogger,
+                    mJavaAdapter,
+                    mShadeInteractor,
+                    mAvalancheController
+                )
+            val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+            statusBarStateController.setState(StatusBarState.SHADE)
+            runCurrent()
+
+            // THEN
+            Assert.assertFalse(hmp.shouldHeadsUpBecomePinnedWrapper(entry))
+        }
 
     companion object {
         @get:Parameters(name = "{0}")

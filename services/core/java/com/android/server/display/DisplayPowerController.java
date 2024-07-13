@@ -87,6 +87,7 @@ import com.android.server.display.brightness.strategy.AutomaticBrightnessStrateg
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategyConstants;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
+import com.android.server.display.config.HighBrightnessModeData;
 import com.android.server.display.config.HysteresisLevels;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.Layout;
@@ -2017,7 +2018,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final DisplayDeviceConfig ddConfig = mDisplayDevice.getDisplayDeviceConfig();
         final IBinder displayToken = mDisplayDevice.getDisplayTokenLocked();
         final String displayUniqueId = mDisplayDevice.getUniqueId();
-        final DisplayDeviceConfig.HighBrightnessModeData hbmData =
+        final HighBrightnessModeData hbmData =
                 ddConfig != null ? ddConfig.getHighBrightnessModeData() : null;
         final DisplayDeviceInfo info = mDisplayDevice.getDisplayDeviceInfoLocked();
         return mInjector.getHighBrightnessModeController(mHandler, info.width, info.height,
@@ -3251,7 +3252,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         HighBrightnessModeController getHighBrightnessModeController(Handler handler, int width,
                 int height, IBinder displayToken, String displayUniqueId, float brightnessMin,
-                float brightnessMax, DisplayDeviceConfig.HighBrightnessModeData hbmData,
+                float brightnessMax, HighBrightnessModeData hbmData,
                 HighBrightnessModeController.HdrBrightnessDeviceConfig hdrBrightnessCfg,
                 Runnable hbmChangeCallback, HighBrightnessModeMetadata hbmMetadata,
                 Context context) {

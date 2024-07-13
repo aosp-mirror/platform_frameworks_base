@@ -328,6 +328,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * only occupies a portion of Task bounds.
      * @hide
      */
+    // TODO(b/287582673): cleanup
     public boolean isActivityEmbedded(@NonNull IBinder activityToken) {
         try {
             return getController().isActivityEmbedded(activityToken);

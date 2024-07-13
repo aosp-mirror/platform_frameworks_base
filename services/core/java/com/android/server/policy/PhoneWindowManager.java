@@ -189,6 +189,7 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.FallbackAction;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
@@ -3319,6 +3320,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         KeyEvent eventToLog = KeyEvent.obtain(event);
         mHandler.obtainMessage(MSG_LOG_KEYBOARD_SYSTEM_EVENT, keyboardSystemEvent.getIntValue(), 0,
                 eventToLog).sendToTarget();
+    }
+
+    @Override
+    public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
+        return mModifierShortcutManager.getApplicationLaunchKeyboardShortcuts(deviceId);
     }
 
     // TODO(b/117479243): handle it in InputPolicy
