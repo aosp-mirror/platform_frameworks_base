@@ -19,6 +19,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="@dimen/desktop_mode_handle_menu_width"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:paddingBottom="@dimen/desktop_mode_handle_menu_pill_elevation"
+    android:paddingRight="@dimen/desktop_mode_handle_menu_pill_elevation"
     android:orientation="vertical">
 
     <LinearLayout
@@ -27,7 +31,7 @@
         android:layout_height="@dimen/desktop_mode_handle_menu_app_info_pill_height"
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_margin_top"
         android:layout_marginStart="1dp"
-        android:elevation="1dp"
+        android:elevation="@dimen/desktop_mode_handle_menu_pill_elevation"
         android:orientation="horizontal"
         android:background="@drawable/desktop_mode_decor_handle_menu_background"
         android:gravity="center_vertical">
@@ -73,7 +77,7 @@
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
         android:layout_marginStart="1dp"
         android:orientation="horizontal"
-        android:elevation="1dp"
+        android:elevation="@dimen/desktop_mode_handle_menu_pill_elevation"
         android:background="@drawable/desktop_mode_decor_handle_menu_background"
         android:gravity="center_vertical">
 
@@ -124,7 +128,7 @@
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
         android:layout_marginStart="1dp"
         android:orientation="vertical"
-        android:elevation="1dp"
+        android:elevation="@dimen/desktop_mode_handle_menu_pill_elevation"
         android:background="@drawable/desktop_mode_decor_handle_menu_background">
 
         <Button
@@ -143,7 +147,7 @@
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
         android:layout_marginStart="1dp"
         android:orientation="vertical"
-        android:elevation="1dp"
+        android:elevation="@dimen/desktop_mode_handle_menu_pill_elevation"
         android:background="@drawable/desktop_mode_decor_handle_menu_background">
 
         <Button

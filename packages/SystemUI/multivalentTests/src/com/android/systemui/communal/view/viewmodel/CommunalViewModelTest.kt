@@ -37,6 +37,7 @@ import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
@@ -97,7 +98,9 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -121,6 +124,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private lateinit var shadeTestUtil: ShadeTestUtil
     private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
     private lateinit var communalRepository: FakeCommunalSceneRepository
+    private lateinit var communalInteractor: CommunalInteractor
 
     private lateinit var underTest: CommunalViewModel
 
@@ -154,6 +158,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
         kosmos.powerInteractor.setAwakeForTest()
 
+        communalInteractor = spy(kosmos.communalInteractor)
+
         underTest =
             CommunalViewModel(
                 kosmos.testDispatcher,
@@ -164,7 +170,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 kosmos.keyguardInteractor,
                 mock<KeyguardIndicationController>(),
                 kosmos.communalSceneInteractor,
-                kosmos.communalInteractor,
+                communalInteractor,
                 kosmos.communalSettingsInteractor,
                 kosmos.communalTutorialInteractor,
                 kosmos.shadeInteractor,
@@ -778,6 +784,16 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(communalContent?.get(3))
                 .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
         }
+
+    @Test
+    fun scrollPosition_persistedOnEditEntry() {
+        val index = 2
+        val offset = 30
+        underTest.onScrollPositionUpdated(index, offset)
+        underTest.onOpenWidgetEditor(false)
+
+        verify(communalInteractor).setScrollPosition(eq(index), eq(offset))
+    }
 
     private suspend fun setIsMainUser(isMainUser: Boolean) {
         val user = if (isMainUser) MAIN_USER_INFO else SECONDARY_USER_INFO

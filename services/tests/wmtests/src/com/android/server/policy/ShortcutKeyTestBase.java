@@ -49,6 +49,7 @@ import static java.util.Collections.unmodifiableMap;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.view.InputDevice;
@@ -102,6 +103,9 @@ class ShortcutKeyTestBase {
         doReturn(mResources).when(mContext).getResources();
         doReturn(mSettingsProviderRule.mockContentResolver(mContext))
                 .when(mContext).getContentResolver();
+        XmlResourceParser testBookmarks = mResources.getXml(
+                com.android.frameworks.wmtests.R.xml.bookmarks);
+        doReturn(testBookmarks).when(mResources).getXml(com.android.internal.R.xml.bookmarks);
     }
 
 

@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.chips.ui.viewmodel
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import kotlin.test.Test
@@ -32,7 +33,12 @@ class OngoingActivityChipViewModelTest : SysuiTestCase() {
 
     @Test
     fun createDialogLaunchOnClickListener_showsDialogOnClick() {
-        val clickListener = createDialogLaunchOnClickListener(dialogDelegate)
+        val clickListener =
+            createDialogLaunchOnClickListener(
+                dialogDelegate,
+                logcatLogBuffer("OngoingActivityChipViewModelTest"),
+                "tag",
+            )
 
         // Dialogs must be created on the main thread
         context.mainExecutor.execute {

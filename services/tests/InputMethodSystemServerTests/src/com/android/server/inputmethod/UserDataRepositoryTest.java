@@ -18,23 +18,12 @@ package com.android.server.inputmethod;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import android.content.pm.UserInfo;
-import android.os.ConditionVariable;
-import android.os.Handler;
-import android.os.Looper;
 import android.platform.test.ravenwood.RavenwoodRule;
-
-import com.android.server.pm.UserManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -52,12 +41,7 @@ public final class UserDataRepositoryTest {
             .setProvideMainThread(true).build();
 
     @Mock
-    private UserManagerInternal mMockUserManagerInternal;
-
-    @Mock
     private InputMethodManagerService mMockInputMethodManagerService;
-
-    private Handler mHandler;
 
     private IntFunction<InputMethodBindingController> mBindingControllerFactory;
 
@@ -66,7 +50,6 @@ public final class UserDataRepositoryTest {
         MockitoAnnotations.initMocks(this);
         SecureSettingsWrapper.startTestMode();
 
-        mHandler = new Handler(Looper.getMainLooper());
         mBindingControllerFactory = new IntFunction<InputMethodBindingController>() {
 
             @Override
@@ -81,38 +64,12 @@ public final class UserDataRepositoryTest {
         SecureSettingsWrapper.endTestMode();
     }
 
-    @Test
-    public void testUserDataRepository_addsNewUserInfoOnUserCreatedEvent() {
-        // Create UserDataRepository and capture the user lifecycle listener
-        final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
-        final var bindingControllerFactorySpy = spy(mBindingControllerFactory);
-        final var repository = new UserDataRepository(mHandler,
-                mMockUserManagerInternal, bindingControllerFactorySpy);
-
-        verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
-        final var listener = captor.getValue();
-
-        // Assert that UserDataRepository is empty and then call onUserCreated
-        assertThat(collectUserData(repository)).isEmpty();
-        final var userInfo = new UserInfo();
-        userInfo.id = ANY_USER_ID;
-        listener.onUserCreated(userInfo, /* unused token */ new Object());
-        waitForIdle();
-
-        // Assert UserDataRepository remains to be empty.
-        assertThat(collectUserData(repository)).isEmpty();
-    }
-
+    // TODO(b/352615651): Move this to end-to-end test.
     @Test
     public void testUserDataRepository_removesUserInfoOnUserRemovedEvent() {
-        // Create UserDataRepository and capture the user lifecycle listener
-        final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
-        final var repository = new UserDataRepository(mHandler,
-                mMockUserManagerInternal,
+        // Create UserDataRepository
+        final var repository = new UserDataRepository(
                 userId -> new InputMethodBindingController(userId, mMockInputMethodManagerService));
-
-        verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
-        final var listener = captor.getValue();
 
         // Add one UserData ...
         final var userData = repository.getOrCreate(ANY_USER_ID);
@@ -120,10 +77,7 @@ public final class UserDataRepositoryTest {
 
         // ... and then call onUserRemoved
         assertThat(collectUserData(repository)).hasSize(1);
-        final var userInfo = new UserInfo();
-        userInfo.id = ANY_USER_ID;
-        listener.onUserRemoved(userInfo);
-        waitForIdle();
+        repository.remove(ANY_USER_ID);
 
         // Assert UserDataRepository is now empty
         assertThat(collectUserData(repository)).isEmpty();
@@ -131,8 +85,7 @@ public final class UserDataRepositoryTest {
 
     @Test
     public void testGetOrCreate() {
-        final var repository = new UserDataRepository(mHandler,
-                mMockUserManagerInternal, mBindingControllerFactory);
+        final var repository = new UserDataRepository(mBindingControllerFactory);
 
         final var userData = repository.getOrCreate(ANY_USER_ID);
         assertThat(userData.mUserId).isEqualTo(ANY_USER_ID);
@@ -151,9 +104,4 @@ public final class UserDataRepositoryTest {
         return collected;
     }
 
-    private void waitForIdle() {
-        final var done = new ConditionVariable();
-        mHandler.post(done::open);
-        done.block();
-    }
 }

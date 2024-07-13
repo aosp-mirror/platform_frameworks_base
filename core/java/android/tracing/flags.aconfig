@@ -46,3 +46,11 @@ flag {
     is_fixed_read_only: true
     bug: "323165543"
 }
+
+flag {
+    name: "client_side_proto_logging"
+    namespace: "windowing_tools"
+    description: "Add support for client side protologging"
+    is_fixed_read_only: true
+    bug: "352538294"
+}

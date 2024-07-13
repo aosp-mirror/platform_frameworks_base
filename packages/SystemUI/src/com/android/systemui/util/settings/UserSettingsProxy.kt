@@ -21,6 +21,7 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.UserHandle
 import android.provider.Settings.SettingNotFoundException
+import androidx.annotation.WorkerThread
 import com.android.app.tracing.TraceUtils.trace
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloat
@@ -196,6 +197,24 @@ interface UserSettingsProxy : SettingsProxy {
     ) =
         CoroutineScope(backgroundDispatcher).launch {
             registerContentObserverForUserSync(uri, settingsObserver, userHandle)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserverForUser] for Java usage. After registration is
+     * complete, the callback block is called on the <b>background thread</b> to allow for update of
+     * value.
+     */
+    fun registerContentObserverForUserAsync(
+        uri: Uri,
+        settingsObserver: ContentObserver,
+        userHandle: Int,
+        @WorkerThread registered: Runnable
+    ) =
+        CoroutineScope(backgroundDispatcher).launch {
+            registerContentObserverForUserSync(uri, settingsObserver, userHandle)
+            registered.run()
         }
 
     /**

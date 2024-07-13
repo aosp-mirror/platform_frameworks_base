@@ -27,6 +27,7 @@ import android.os.PowerManager.GoToSleepReason;
 import android.os.PowerManager.WakeReason;
 import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 
@@ -35,6 +36,7 @@ import com.android.internal.policy.IShortcutService;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
+import java.util.Collections;
 
 class TestWindowManagerPolicy implements WindowManagerPolicy {
 
@@ -361,5 +363,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public boolean isGlobalKey(int keyCode) {
         return false;
+    }
+
+    @Override
+    public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
+        return new KeyboardShortcutGroup("", Collections.emptyList());
     }
 }

@@ -23,10 +23,13 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.ACTIVITY_BG_START_GRACE_PERIOD_MS;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_DISALLOW;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_BOUND_BY_FOREGROUND;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_FOREGROUND;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_GRACE_PERIOD;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_PERMISSION;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_TOKEN;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW;
+import static com.android.window.flags.Flags.balImprovedMetrics;
 
 import static java.util.Objects.requireNonNull;
 
@@ -110,8 +113,8 @@ class BackgroundLaunchProcessController {
         }
         // Allow if the flag was explicitly set.
         if (isBackgroundStartAllowedByToken(uid, packageName, isCheckingForFgsStart)) {
-            return new BalVerdict(BAL_ALLOW_PERMISSION, /*background*/ true,
-                    "process allowed by token");
+            return new BalVerdict(balImprovedMetrics() ? BAL_ALLOW_TOKEN : BAL_ALLOW_PERMISSION,
+                    /*background*/ true, "process allowed by token");
         }
         // Allow if the caller is bound by a UID that's currently foreground.
         // But still respect the appSwitchState.
@@ -120,7 +123,8 @@ class BackgroundLaunchProcessController {
                 ? appSwitchState != APP_SWITCH_DISALLOW && isBoundByForegroundUid()
                 : isBoundByForegroundUid();
         if (allowBoundByForegroundUid) {
-            return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW, /*background*/ false,
+            return new BalVerdict(balImprovedMetrics() ? BAL_ALLOW_BOUND_BY_FOREGROUND
+                    : BAL_ALLOW_VISIBLE_WINDOW, /*background*/ false,
                     "process bound by foreground uid");
         }
         // Allow if the caller has an activity in any foreground task.

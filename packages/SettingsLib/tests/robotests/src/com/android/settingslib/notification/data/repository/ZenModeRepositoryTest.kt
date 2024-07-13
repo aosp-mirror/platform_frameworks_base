@@ -18,13 +18,18 @@ package com.android.settingslib.notification.data.repository
 
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.database.ContentObserver
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.provider.Settings.Global
 import androidx.test.filters.SmallTest
 import com.android.settingslib.flags.Flags
+import com.android.settingslib.notification.modes.TestModeBuilder
+import com.android.settingslib.notification.modes.ZenMode
+import com.android.settingslib.notification.modes.ZenModesBackend
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -36,6 +41,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.any
@@ -52,7 +58,15 @@ class ZenModeRepositoryTest {
 
     @Mock private lateinit var notificationManager: NotificationManager
 
+    @Mock private lateinit var zenModesBackend: ZenModesBackend
+
+    @Mock private lateinit var contentResolver: ContentResolver
+
     @Captor private lateinit var receiverCaptor: ArgumentCaptor<BroadcastReceiver>
+
+    @Captor private lateinit var zenModeObserverCaptor: ArgumentCaptor<ContentObserver>
+
+    @Captor private lateinit var zenConfigObserverCaptor: ArgumentCaptor<ContentObserver>
 
     private lateinit var underTest: ZenModeRepository
 
@@ -66,6 +80,8 @@ class ZenModeRepositoryTest {
             ZenModeRepositoryImpl(
                 context,
                 notificationManager,
+                zenModesBackend,
+                contentResolver,
                 testScope.backgroundScope,
                 testScope.testScheduler,
                 backgroundHandler = null,
@@ -128,9 +144,59 @@ class ZenModeRepositoryTest {
         }
     }
 
+    @EnableFlags(android.app.Flags.FLAG_MODES_UI)
+    @Test
+    fun modesListEmitsOnSettingsChange() {
+        testScope.runTest {
+            val values = mutableListOf<List<ZenMode>>()
+            val modes1 = listOf(TestModeBuilder().setId("One").build())
+            `when`(zenModesBackend.modes).thenReturn(modes1)
+            underTest.modes.onEach { values.add(it) }.launchIn(backgroundScope)
+            runCurrent()
+
+            // zen mode change triggers update
+            val modes2 = listOf(TestModeBuilder().setId("Two").build())
+            `when`(zenModesBackend.modes).thenReturn(modes2)
+            triggerZenModeSettingUpdate()
+            runCurrent()
+
+            // zen config change also triggers update
+            val modes3 = listOf(TestModeBuilder().setId("Three").build())
+            `when`(zenModesBackend.modes).thenReturn(modes3)
+            triggerZenConfigSettingUpdate()
+            runCurrent()
+
+            // setting update with no list change doesn't trigger update
+            triggerZenModeSettingUpdate()
+            runCurrent()
+
+            assertThat(values).containsExactly(modes1, modes2, modes3).inOrder()
+        }
+    }
+
     private fun triggerIntent(action: String) {
         verify(context).registerReceiver(receiverCaptor.capture(), any(), any(), any())
         receiverCaptor.value.onReceive(context, Intent(action))
+    }
+
+    private fun triggerZenModeSettingUpdate() {
+        verify(contentResolver)
+            .registerContentObserver(
+                eq(Global.getUriFor(Global.ZEN_MODE)),
+                eq(false),
+                zenModeObserverCaptor.capture(),
+            )
+        zenModeObserverCaptor.value.onChange(false)
+    }
+
+    private fun triggerZenConfigSettingUpdate() {
+        verify(contentResolver)
+            .registerContentObserver(
+                eq(Global.getUriFor(Global.ZEN_MODE_CONFIG_ETAG)),
+                eq(false),
+                zenConfigObserverCaptor.capture(),
+            )
+        zenConfigObserverCaptor.value.onChange(false)
     }
 
     private companion object {

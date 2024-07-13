@@ -19,11 +19,13 @@ package com.android.systemui.statusbar.chips.casttootherdevice.domain.interactor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.mediarouter.data.repository.fakeMediaRouterRepository
+import com.android.systemui.statusbar.chips.statusBarChipsLogger
 
 val Kosmos.mediaRouterChipInteractor by
     Kosmos.Fixture {
         MediaRouterChipInteractor(
             scope = applicationCoroutineScope,
             mediaRouterRepository = fakeMediaRouterRepository,
+            logger = statusBarChipsLogger,
         )
     }

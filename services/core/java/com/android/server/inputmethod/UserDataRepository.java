@@ -20,8 +20,6 @@ import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.content.pm.UserInfo;
-import android.os.Handler;
 import android.util.SparseArray;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ImeTracker;
@@ -30,7 +28,6 @@ import android.window.ImeOnBackInvokedDispatcher;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
-import com.android.server.pm.UserManagerInternal;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
@@ -76,24 +73,18 @@ final class UserDataRepository {
     }
 
     UserDataRepository(
-            @NonNull Handler handler, @NonNull UserManagerInternal userManagerInternal,
             @NonNull IntFunction<InputMethodBindingController> bindingControllerFactory) {
         mBindingControllerFactory = bindingControllerFactory;
-        userManagerInternal.addUserLifecycleListener(
-                new UserManagerInternal.UserLifecycleListener() {
-                    @Override
-                    public void onUserRemoved(UserInfo user) {
-                        final int userId = user.id;
-                        handler.post(() -> {
-                            mUserDataLock.writeLock().lock();
-                            try {
-                                mUserData.remove(userId);
-                            } finally {
-                                mUserDataLock.writeLock().unlock();
-                            }
-                        });
-                    }
-                });
+    }
+
+    @AnyThread
+    void remove(@UserIdInt int userId) {
+        mUserDataLock.writeLock().lock();
+        try {
+            mUserData.remove(userId);
+        } finally {
+            mUserDataLock.writeLock().unlock();
+        }
     }
 
     /** Placeholder for all IMMS user specific fields */

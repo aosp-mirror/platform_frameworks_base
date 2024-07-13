@@ -26,6 +26,8 @@ import com.android.systemui.common.shared.model.PackageInstallSession
 import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.data.db.CommunalWidgetItem
+import com.android.systemui.communal.data.db.DefaultWidgetPopulation
+import com.android.systemui.communal.data.db.DefaultWidgetPopulation.SkipReason.RESTORED_FROM_BACKUP
 import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.communal.proto.toCommunalHubState
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
@@ -101,6 +103,7 @@ constructor(
     private val backupUtils: CommunalBackupUtils,
     packageChangeRepository: PackageChangeRepository,
     private val userManager: UserManager,
+    private val defaultWidgetPopulation: DefaultWidgetPopulation,
 ) : CommunalWidgetRepository {
     companion object {
         const val TAG = "CommunalWidgetRepository"
@@ -320,6 +323,9 @@ constructor(
                     }
                 }
             val newState = CommunalHubState().apply { widgets = newWidgets.toTypedArray() }
+
+            // Skip default widgets population
+            defaultWidgetPopulation.skipDefaultWidgetsPopulation(RESTORED_FROM_BACKUP)
 
             // Restore database
             logger.i("Restoring communal database:\n$newState")
