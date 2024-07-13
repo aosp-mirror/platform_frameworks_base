@@ -337,65 +337,65 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
-    fun getVisibleTaskCount() {
+    fun visibleTaskCount_defaultDisplay_returnsCorrectCount() {
         // No tasks, count is 0
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
 
         // New task increments count to 1
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
 
         // Visibility update to same task does not increase count
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
 
         // Second task visible increments count
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = true)
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(2)
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(2)
 
         // Hiding a task decrements count
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = false)
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
 
         // Hiding all tasks leaves count at 0
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = false)
-        assertThat(repo.getVisibleTaskCount(displayId = 9)).isEqualTo(0)
+        assertThat(repo.visibleTaskCount(displayId = 9)).isEqualTo(0)
 
         // Hiding a not existing task, count remains at 0
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 999, visible = false)
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
     }
 
     @Test
-    fun getVisibleTaskCount_multipleDisplays() {
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
-        assertThat(repo.getVisibleTaskCount(SECOND_DISPLAY)).isEqualTo(0)
+    fun visibleTaskCount_multipleDisplays_returnsCorrectCount() {
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
+        assertThat(repo.visibleTaskCount(SECOND_DISPLAY)).isEqualTo(0)
 
         // New task on default display increments count for that display only
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
-        assertThat(repo.getVisibleTaskCount(SECOND_DISPLAY)).isEqualTo(0)
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
+        assertThat(repo.visibleTaskCount(SECOND_DISPLAY)).isEqualTo(0)
 
         // New task on secondary display, increments count for that display only
         repo.updateVisibleFreeformTasks(SECOND_DISPLAY, taskId = 2, visible = true)
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
-        assertThat(repo.getVisibleTaskCount(SECOND_DISPLAY)).isEqualTo(1)
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
+        assertThat(repo.visibleTaskCount(SECOND_DISPLAY)).isEqualTo(1)
 
         // Marking task visible on another display, updates counts for both displays
         repo.updateVisibleFreeformTasks(SECOND_DISPLAY, taskId = 1, visible = true)
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
-        assertThat(repo.getVisibleTaskCount(SECOND_DISPLAY)).isEqualTo(2)
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
+        assertThat(repo.visibleTaskCount(SECOND_DISPLAY)).isEqualTo(2)
 
         // Marking task that is on secondary display, hidden on default display, does not affect
         // secondary display
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = false)
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
-        assertThat(repo.getVisibleTaskCount(SECOND_DISPLAY)).isEqualTo(2)
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
+        assertThat(repo.visibleTaskCount(SECOND_DISPLAY)).isEqualTo(2)
 
         // Hiding a task on that display, decrements count
         repo.updateVisibleFreeformTasks(SECOND_DISPLAY, taskId = 1, visible = false)
-        assertThat(repo.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
-        assertThat(repo.getVisibleTaskCount(SECOND_DISPLAY)).isEqualTo(1)
+        assertThat(repo.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
+        assertThat(repo.visibleTaskCount(SECOND_DISPLAY)).isEqualTo(1)
     }
 
     @Test
@@ -491,28 +491,6 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         repo.updateVisibleFreeformTasks(displayId = 10, taskId = 2, visible = true)
 
         assertThat(repo.isMinimizedTask(taskId = 2)).isFalse()
-    }
-
-    @Test
-    fun isDesktopModeShowing_noActiveTasks_returnsFalse() {
-        assertThat(repo.isDesktopModeShowing(displayId = 0)).isFalse()
-    }
-
-    @Test
-    fun isDesktopModeShowing_noTasksVisible_returnsFalse() {
-        repo.addActiveTask(displayId = 0, taskId = 1)
-        repo.addActiveTask(displayId = 0, taskId = 2)
-
-        assertThat(repo.isDesktopModeShowing(displayId = 0)).isFalse()
-    }
-
-    @Test
-    fun isDesktopModeShowing_tasksActiveAndVisible_returnsTrue() {
-        repo.addActiveTask(displayId = 0, taskId = 1)
-        repo.addActiveTask(displayId = 0, taskId = 2)
-        repo.updateVisibleFreeformTasks(displayId = 0, taskId = 1, visible = true)
-
-        assertThat(repo.isDesktopModeShowing(displayId = 0)).isTrue()
     }
 
     @Test
