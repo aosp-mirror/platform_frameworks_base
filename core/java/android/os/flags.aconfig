@@ -68,6 +68,14 @@ flag {
 }
 
 flag {
+    name: "ordered_broadcast_multiple_permissions"
+    is_exported: true
+    namespace: "bluetooth"
+    description: "Guards the Context.sendOrderedBroadcastMultiplePermissions API"
+    bug: "345802719"
+}
+
+flag {
     name: "battery_saver_supported_check_api"
     namespace: "backstage_power"
     description: "Guards a new API in PowerManager to check if battery saver is supported or not."
