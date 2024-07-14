@@ -1047,21 +1047,21 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
         return JNI_FALSE;
     }
 
-    const char* file8 = env->GetStringUTFChars(file, NULL);
-    if (file8 == NULL) {
+    auto releaser = [&](const char* jniStr) { env->ReleaseStringUTFChars(file, jniStr); };
+    std::unique_ptr<const char[], decltype(releaser)> file8(env->GetStringUTFChars(file, NULL),
+                                                            releaser);
+    if (!file8) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return JNI_FALSE;
     }
 
-    ::android::base::unique_fd fd(open(file8, O_RDONLY | O_CLOEXEC));
+    ::android::base::unique_fd fd(open(file8.get(), O_RDONLY | O_CLOEXEC));
     if (!fd.ok()) {
         if (kDebugProc) {
-            ALOGW("Unable to open process file: %s\n", file8);
+            ALOGW("Unable to open process file: %s\n", file8.get());
         }
-        env->ReleaseStringUTFChars(file, file8);
         return JNI_FALSE;
     }
-    env->ReleaseStringUTFChars(file, file8);
 
     // Most proc files we read are small, so we go through the loop
     // with the stack buffer firstly. We allocate a buffer big
@@ -1082,7 +1082,7 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
         if (numberBytesRead < 0) {
             if (kDebugProc) {
                 ALOGW("Unable to read process file err: %s file: %s fd=%d\n",
-                      strerror_r(errno, &readBufferStack[0], sizeof(readBufferStack)), file8,
+                      strerror_r(errno, &readBufferStack[0], sizeof(readBufferStack)), file8.get(),
                       fd.get());
             }
             return JNI_FALSE;
@@ -1099,7 +1099,7 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
             // Buffer is fully used, try to grow it.
             if (readBufferSize > std::numeric_limits<ssize_t>::max() / 2) {
                 if (kDebugProc) {
-                    ALOGW("Proc file too big: %s fd=%d\n", file8, fd.get());
+                    ALOGW("Proc file too big: %s fd=%d\n", file8.get(), fd.get());
                 }
                 return JNI_FALSE;
             }
