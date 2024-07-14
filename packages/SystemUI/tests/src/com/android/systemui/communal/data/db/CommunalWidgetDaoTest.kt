@@ -67,11 +67,12 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
     @Test
     fun addWidget_readValueInDb() =
         testScope.runTest {
-            val (widgetId, provider, priority) = widgetInfo1
+            val (widgetId, provider, priority, userSerialNumber) = widgetInfo1
             communalWidgetDao.addWidget(
                 widgetId = widgetId,
                 provider = provider,
                 priority = priority,
+                userSerialNumber = userSerialNumber,
             )
             val entry = communalWidgetDao.getWidgetByIdNow(id = 1)
             assertThat(entry).isEqualTo(communalWidgetItemEntry1)
@@ -80,11 +81,12 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
     @Test
     fun deleteWidget_notInDb_returnsFalse() =
         testScope.runTest {
-            val (widgetId, provider, priority) = widgetInfo1
+            val (widgetId, provider, priority, userSerialNumber) = widgetInfo1
             communalWidgetDao.addWidget(
                 widgetId = widgetId,
                 provider = provider,
                 priority = priority,
+                userSerialNumber = userSerialNumber,
             )
             assertThat(communalWidgetDao.deleteWidgetById(widgetId = 123)).isFalse()
         }
@@ -95,11 +97,12 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
             val widgetsToAdd = listOf(widgetInfo1, widgetInfo2)
             val widgets = collectLastValue(communalWidgetDao.getWidgets())
             widgetsToAdd.forEach {
-                val (widgetId, provider, priority) = it
+                val (widgetId, provider, priority, userSerialNumber) = it
                 communalWidgetDao.addWidget(
                     widgetId = widgetId,
                     provider = provider,
                     priority = priority,
+                    userSerialNumber = userSerialNumber
                 )
             }
             assertThat(widgets())
@@ -118,11 +121,12 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
             val widgets = collectLastValue(communalWidgetDao.getWidgets())
 
             widgetsToAdd.forEach {
-                val (widgetId, provider, priority) = it
+                val (widgetId, provider, priority, userSerialNumber) = it
                 communalWidgetDao.addWidget(
                     widgetId = widgetId,
                     provider = provider,
                     priority = priority,
+                    userSerialNumber = userSerialNumber,
                 )
             }
             assertThat(widgets())
@@ -144,11 +148,12 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
             val widgets = collectLastValue(communalWidgetDao.getWidgets())
 
             widgetsToAdd.forEach {
-                val (widgetId, provider, priority) = it
+                val (widgetId, provider, priority, userSerialNumber) = it
                 communalWidgetDao.addWidget(
                     widgetId = widgetId,
                     provider = provider,
                     priority = priority,
+                    userSerialNumber = userSerialNumber,
                 )
             }
             assertThat(widgets())
@@ -180,11 +185,12 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
             val widgets = collectLastValue(communalWidgetDao.getWidgets())
 
             existingWidgets.forEach {
-                val (widgetId, provider, priority) = it
+                val (widgetId, provider, priority, userSerialNumber) = it
                 communalWidgetDao.addWidget(
                     widgetId = widgetId,
                     provider = provider,
                     priority = priority,
+                    userSerialNumber = userSerialNumber,
                 )
             }
             assertThat(widgets())
@@ -212,6 +218,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                 widgetId = widgetInfo3.widgetId,
                 provider = widgetInfo3.provider,
                 priority = 2,
+                userSerialNumber = widgetInfo3.userSerialNumber,
             )
             assertThat(widgets())
                 .containsExactly(
@@ -246,6 +253,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                         widgetId = fakeWidget.widgetId,
                         componentName = fakeWidget.componentName,
                         itemId = rank.uid,
+                        userSerialNumber = fakeWidget.userSerialNumber,
                     )
                 expected[rank] = widget
             }
@@ -258,13 +266,15 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
             widgetId = metadata.widgetId,
             provider = metadata.provider,
             priority = priority ?: metadata.priority,
+            userSerialNumber = metadata.userSerialNumber,
         )
     }
 
     data class FakeWidgetMetadata(
         val widgetId: Int,
         val provider: ComponentName,
-        val priority: Int
+        val priority: Int,
+        val userSerialNumber: Int,
     )
 
     companion object {
@@ -272,19 +282,22 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
             FakeWidgetMetadata(
                 widgetId = 1,
                 provider = ComponentName("pk_name", "cls_name_1"),
-                priority = 1
+                priority = 1,
+                userSerialNumber = 0,
             )
         val widgetInfo2 =
             FakeWidgetMetadata(
                 widgetId = 2,
                 provider = ComponentName("pk_name", "cls_name_2"),
-                priority = 2
+                priority = 2,
+                userSerialNumber = 0,
             )
         val widgetInfo3 =
             FakeWidgetMetadata(
                 widgetId = 3,
                 provider = ComponentName("pk_name", "cls_name_3"),
-                priority = 3
+                priority = 3,
+                userSerialNumber = 10,
             )
         val communalItemRankEntry1 = CommunalItemRank(uid = 1L, rank = widgetInfo1.priority)
         val communalItemRankEntry2 = CommunalItemRank(uid = 2L, rank = widgetInfo2.priority)
@@ -295,6 +308,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                 widgetId = widgetInfo1.widgetId,
                 componentName = widgetInfo1.provider.flattenToString(),
                 itemId = communalItemRankEntry1.uid,
+                userSerialNumber = widgetInfo1.userSerialNumber,
             )
         val communalWidgetItemEntry2 =
             CommunalWidgetItem(
@@ -302,6 +316,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                 widgetId = widgetInfo2.widgetId,
                 componentName = widgetInfo2.provider.flattenToString(),
                 itemId = communalItemRankEntry2.uid,
+                userSerialNumber = widgetInfo2.userSerialNumber,
             )
         val communalWidgetItemEntry3 =
             CommunalWidgetItem(
@@ -309,6 +324,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                 widgetId = widgetInfo3.widgetId,
                 componentName = widgetInfo3.provider.flattenToString(),
                 itemId = communalItemRankEntry3.uid,
+                userSerialNumber = widgetInfo3.userSerialNumber,
             )
         val fakeState =
             CommunalHubState().apply {
@@ -318,11 +334,13 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                                 widgetId = 1
                                 componentName = "pk_name/fake_widget_1"
                                 rank = 1
+                                userSerialNumber = 0
                             },
                             CommunalHubState.CommunalWidgetItem().apply {
                                 widgetId = 2
                                 componentName = "pk_name/fake_widget_2"
                                 rank = 2
+                                userSerialNumber = 10
                             },
                         )
                         .toTypedArray()

@@ -210,6 +210,7 @@ public class SettingsToPropertiesMapper {
         "safety_center",
         "sensors",
         "spoon",
+        "stability",
         "statsd",
         "system_performance",
         "system_sw_touch",

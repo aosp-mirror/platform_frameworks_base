@@ -16,6 +16,7 @@
 
 package com.android.systemui.mediaprojection.data.repository
 
+import android.hardware.display.displayManager
 import android.os.Handler
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -30,6 +31,7 @@ val Kosmos.realMediaProjectionRepository by
     Kosmos.Fixture {
         MediaProjectionManagerRepository(
             mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
+            displayManager = displayManager,
             handler = Handler.getMain(),
             applicationScope = applicationCoroutineScope,
             tasksRepository = activityTaskManagerTasksRepository,

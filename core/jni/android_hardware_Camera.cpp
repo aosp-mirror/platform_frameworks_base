@@ -582,8 +582,8 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz, jin
 
 // connect to camera service
 static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-                                                 jint cameraId, jstring clientPackageName,
-                                                 jint rotationOverride, jboolean forceSlowJpegMode,
+                                                 jint cameraId, jint rotationOverride,
+                                                 jboolean forceSlowJpegMode,
                                                  jobject jClientAttributionParcel,
                                                  jint devicePolicy) {
     AttributionSourceState clientAttribution;
@@ -591,16 +591,8 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobj
         return -EACCES;
     }
 
-    // Convert jstring to String16
-    const char16_t *rawClientName = reinterpret_cast<const char16_t*>(
-        env->GetStringChars(clientPackageName, NULL));
-    jsize rawClientNameLen = env->GetStringLength(clientPackageName);
-    std::string clientName = toStdString(rawClientName, rawClientNameLen);
-    env->ReleaseStringChars(clientPackageName,
-                            reinterpret_cast<const jchar*>(rawClientName));
-
     int targetSdkVersion = android_get_application_target_sdk_version();
-    sp<Camera> camera = Camera::connect(cameraId, clientName, targetSdkVersion, rotationOverride,
+    sp<Camera> camera = Camera::connect(cameraId, targetSdkVersion, rotationOverride,
                                         forceSlowJpegMode, clientAttribution, devicePolicy);
     if (camera == NULL) {
         return -EACCES;
@@ -1089,7 +1081,7 @@ static const JNINativeMethod camMethods[] = {
          (void *)android_hardware_Camera_getNumberOfCameras},
         {"_getCameraInfo", "(IILandroid/os/Parcel;ILandroid/hardware/Camera$CameraInfo;)V",
          (void *)android_hardware_Camera_getCameraInfo},
-        {"native_setup", "(Ljava/lang/Object;ILjava/lang/String;IZLandroid/os/Parcel;I)I",
+        {"native_setup", "(Ljava/lang/Object;IIZLandroid/os/Parcel;I)I",
          (void *)android_hardware_Camera_native_setup},
         {"native_release", "()V", (void *)android_hardware_Camera_release},
         {"setPreviewSurface", "(Landroid/view/Surface;)V",

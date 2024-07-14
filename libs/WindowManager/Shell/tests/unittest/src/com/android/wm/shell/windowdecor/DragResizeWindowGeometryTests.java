@@ -55,8 +55,6 @@ public class DragResizeWindowGeometryTests {
     private static final Size TASK_SIZE = new Size(500, 1000);
     private static final int TASK_CORNER_RADIUS = 10;
     private static final int EDGE_RESIZE_THICKNESS = 15;
-    private static final int EDGE_RESIZE_DEBUG_THICKNESS = EDGE_RESIZE_THICKNESS
-            + (DragResizeWindowGeometry.DEBUG ? DragResizeWindowGeometry.EDGE_DEBUG_BUFFER : 0);
     private static final int FINE_CORNER_SIZE = EDGE_RESIZE_THICKNESS * 2 + 10;
     private static final int LARGE_CORNER_SIZE = FINE_CORNER_SIZE + 10;
     private static final DragResizeWindowGeometry GEOMETRY = new DragResizeWindowGeometry(
@@ -91,14 +89,13 @@ public class DragResizeWindowGeometryTests {
                                 EDGE_RESIZE_THICKNESS + 10, FINE_CORNER_SIZE, LARGE_CORNER_SIZE),
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
                                 EDGE_RESIZE_THICKNESS + 10, FINE_CORNER_SIZE, LARGE_CORNER_SIZE))
-                .addEqualityGroup(new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
-                                EDGE_RESIZE_THICKNESS, FINE_CORNER_SIZE, LARGE_CORNER_SIZE + 5),
+                .addEqualityGroup(
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
-                                EDGE_RESIZE_THICKNESS, FINE_CORNER_SIZE, LARGE_CORNER_SIZE + 5))
-                .addEqualityGroup(new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
-                                EDGE_RESIZE_THICKNESS, FINE_CORNER_SIZE + 4, LARGE_CORNER_SIZE),
+                                EDGE_RESIZE_THICKNESS + 10, FINE_CORNER_SIZE,
+                                LARGE_CORNER_SIZE + 5),
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
-                                EDGE_RESIZE_THICKNESS, FINE_CORNER_SIZE + 4, LARGE_CORNER_SIZE))
+                                EDGE_RESIZE_THICKNESS + 10, FINE_CORNER_SIZE,
+                                LARGE_CORNER_SIZE + 5))
                 .testEquals();
     }
 
@@ -124,21 +121,21 @@ public class DragResizeWindowGeometryTests {
     private static void verifyHorizontalEdge(@NonNull Region region, @NonNull Point point) {
         assertThat(region.contains(point.x, point.y)).isTrue();
         // Horizontally along the edge is still contained.
-        assertThat(region.contains(point.x + EDGE_RESIZE_DEBUG_THICKNESS, point.y)).isTrue();
-        assertThat(region.contains(point.x - EDGE_RESIZE_DEBUG_THICKNESS, point.y)).isTrue();
+        assertThat(region.contains(point.x + EDGE_RESIZE_THICKNESS, point.y)).isTrue();
+        assertThat(region.contains(point.x - EDGE_RESIZE_THICKNESS, point.y)).isTrue();
         // Vertically along the edge is not contained.
-        assertThat(region.contains(point.x, point.y - EDGE_RESIZE_DEBUG_THICKNESS)).isFalse();
-        assertThat(region.contains(point.x, point.y + EDGE_RESIZE_DEBUG_THICKNESS)).isFalse();
+        assertThat(region.contains(point.x, point.y - EDGE_RESIZE_THICKNESS)).isFalse();
+        assertThat(region.contains(point.x, point.y + EDGE_RESIZE_THICKNESS)).isFalse();
     }
 
     private static void verifyVerticalEdge(@NonNull Region region, @NonNull Point point) {
         assertThat(region.contains(point.x, point.y)).isTrue();
         // Horizontally along the edge is not contained.
-        assertThat(region.contains(point.x + EDGE_RESIZE_DEBUG_THICKNESS, point.y)).isFalse();
-        assertThat(region.contains(point.x - EDGE_RESIZE_DEBUG_THICKNESS, point.y)).isFalse();
+        assertThat(region.contains(point.x + EDGE_RESIZE_THICKNESS, point.y)).isFalse();
+        assertThat(region.contains(point.x - EDGE_RESIZE_THICKNESS, point.y)).isFalse();
         // Vertically along the edge is contained.
-        assertThat(region.contains(point.x, point.y - EDGE_RESIZE_DEBUG_THICKNESS)).isTrue();
-        assertThat(region.contains(point.x, point.y + EDGE_RESIZE_DEBUG_THICKNESS)).isTrue();
+        assertThat(region.contains(point.x, point.y - EDGE_RESIZE_THICKNESS)).isTrue();
+        assertThat(region.contains(point.x, point.y + EDGE_RESIZE_THICKNESS)).isTrue();
     }
 
     /**
@@ -151,10 +148,7 @@ public class DragResizeWindowGeometryTests {
     public void testRegionUnion_edgeDragResizeEnabled_containsLargeCorners() {
         Region region = new Region();
         GEOMETRY.union(region);
-        // Make sure we're choosing a point outside of any debug region buffer.
-        final int cornerRadius = DragResizeWindowGeometry.DEBUG
-                ? Math.max(LARGE_CORNER_SIZE / 2, EDGE_RESIZE_DEBUG_THICKNESS)
-                : LARGE_CORNER_SIZE / 2;
+        final int cornerRadius = LARGE_CORNER_SIZE / 2;
 
         new TestPoints(TASK_SIZE, cornerRadius).validateRegion(region);
     }
@@ -168,9 +162,7 @@ public class DragResizeWindowGeometryTests {
     public void testRegionUnion_edgeDragResizeDisabled_containsFineCorners() {
         Region region = new Region();
         GEOMETRY.union(region);
-        final int cornerRadius = DragResizeWindowGeometry.DEBUG
-                ? Math.max(LARGE_CORNER_SIZE / 2, EDGE_RESIZE_DEBUG_THICKNESS)
-                : LARGE_CORNER_SIZE / 2;
+        final int cornerRadius = FINE_CORNER_SIZE / 2;
 
         new TestPoints(TASK_SIZE, cornerRadius).validateRegion(region);
     }

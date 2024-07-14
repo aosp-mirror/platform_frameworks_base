@@ -53,6 +53,7 @@ import android.view.IWallpaperVisibilityListener;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
+import android.view.KeyboardShortcutGroup;
 import android.view.KeyEvent;
 import android.view.InputEvent;
 import android.view.InsetsState;
@@ -1095,4 +1096,11 @@ interface IWindowManager
 
     boolean transferTouchGesture(in InputTransferToken transferFromToken,
             in InputTransferToken transferToToken);
+
+    /**
+     * Request the application launch keyboard shortcuts the system has defined.
+     *
+     * @param deviceId The id of the {@link InputDevice} that will handle the shortcut.
+     */
+    KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId);
 }

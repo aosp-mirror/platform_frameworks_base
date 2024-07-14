@@ -43,8 +43,14 @@ constructor(
     sceneInteractor: SceneInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
-    /** Whether a show-when-locked activity is at the top of the current activity stack. */
-    private val isOccludingActivityShown: StateFlow<Boolean> =
+    /**
+     * Whether a show-when-locked activity is at the top of the current activity stack.
+     *
+     * Note: this isn't enough to figure out whether the scene container UI should be invisible as
+     * that also depends on the things like the state of AOD and the current scene. If the code
+     * needs that, [invisibleDueToOcclusion] should be collected instead.
+     */
+    val isOccludingActivityShown: StateFlow<Boolean> =
         keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop.stateIn(
             scope = applicationScope,
             started = SharingStarted.WhileSubscribed(),
@@ -69,6 +75,9 @@ constructor(
     /**
      * Whether the scene container should become invisible due to "occlusion" by an in-foreground
      * "show when locked" activity.
+     *
+     * Note: this returns `false` when an overlaid scene (like shade or QS) is shown above the
+     * occluding activity.
      */
     val invisibleDueToOcclusion: StateFlow<Boolean> =
         combine(

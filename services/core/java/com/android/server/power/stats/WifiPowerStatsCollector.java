@@ -86,8 +86,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
     private ConsumedEnergyRetriever mConsumedEnergyRetriever;
     private IntSupplier mVoltageSupplier;
     private int[] mEnergyConsumerIds = new int[0];
-    private WifiActivityEnergyInfo mLastWifiActivityInfo =
-            new WifiActivityEnergyInfo(0, 0, 0, 0, 0, 0);
+    private WifiActivityEnergyInfo mLastWifiActivityInfo;
     private NetworkStats mLastNetworkStats;
     private long[] mLastConsumedEnergyUws;
     private int mLastVoltageMv;
@@ -206,14 +205,21 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
-        long rxDuration = activityInfo.getControllerRxDurationMillis()
-                - mLastWifiActivityInfo.getControllerRxDurationMillis();
-        long txDuration = activityInfo.getControllerTxDurationMillis()
-                - mLastWifiActivityInfo.getControllerTxDurationMillis();
-        long scanDuration = activityInfo.getControllerScanDurationMillis()
-                - mLastWifiActivityInfo.getControllerScanDurationMillis();
-        long idleDuration = activityInfo.getControllerIdleDurationMillis()
-                - mLastWifiActivityInfo.getControllerIdleDurationMillis();
+        long rxDuration = 0;
+        long txDuration = 0;
+        long scanDuration = 0;
+        long idleDuration = 0;
+
+        if (mLastWifiActivityInfo != null) {
+            rxDuration = activityInfo.getControllerRxDurationMillis()
+                    - mLastWifiActivityInfo.getControllerRxDurationMillis();
+            txDuration = activityInfo.getControllerTxDurationMillis()
+                    - mLastWifiActivityInfo.getControllerTxDurationMillis();
+            scanDuration = activityInfo.getControllerScanDurationMillis()
+                    - mLastWifiActivityInfo.getControllerScanDurationMillis();
+            idleDuration = activityInfo.getControllerIdleDurationMillis()
+                    - mLastWifiActivityInfo.getControllerIdleDurationMillis();
+        }
 
         mLayout.setDeviceRxTime(mDeviceStats, rxDuration);
         mLayout.setDeviceTxTime(mDeviceStats, txDuration);

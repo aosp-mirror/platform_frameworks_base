@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor.additionalviewcontainer
 
 import android.content.Context
 import android.graphics.PixelFormat
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.View
@@ -45,9 +46,11 @@ class AdditionalSystemViewContainer(
             WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSPARENT
-        )
-        lp.title = "Additional view container of Task=$taskId"
-        lp.setTrustedOverlay()
+        ).apply {
+            title = "Additional view container of Task=$taskId"
+            gravity = Gravity.LEFT or Gravity.TOP
+            setTrustedOverlay()
+        }
         val wm: WindowManager? = context.getSystemService(WindowManager::class.java)
         wm?.addView(view, lp)
     }

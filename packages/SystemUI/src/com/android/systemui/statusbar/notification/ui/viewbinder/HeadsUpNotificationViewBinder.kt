@@ -51,8 +51,8 @@ constructor(private val viewModel: NotificationListViewModel) {
                             }
                             removed.forEach { key ->
                                 val row = obtainView(key)
-                                parentView.generateHeadsUpAnimation(row, /* isHeadsUp = */ false)
-                                row.setHeadsUpIsVisible()
+                                parentView.generateHeadsUpAnimation(row, /* isHeadsUp= */ false)
+                                row.markHeadsUpSeen()
                             }
                         }
                     }

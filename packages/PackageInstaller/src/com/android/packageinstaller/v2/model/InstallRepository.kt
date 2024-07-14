@@ -206,7 +206,7 @@ class InstallRepository(private val context: Context) {
             return InstallAborted(ABORT_REASON_INTERNAL_ERROR)
         }
 
-        val restriction = getDevicePolicyRestrictions()
+        val restriction = getDevicePolicyRestrictions(isTrustedSource)
         if (restriction != null) {
             val adminSupportDetailsIntent =
                 devicePolicyManager!!.createAdminSupportIntent(restriction)
@@ -237,18 +237,25 @@ class InstallRepository(private val context: Context) {
         intent: Intent,
         callingUid: Int,
     ): Boolean {
-        val isNotUnknownSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false)
-        return (sourceInfo != null && sourceInfo.isPrivilegedApp
-            && (isNotUnknownSource
-            || isPermissionGranted(context, Manifest.permission.INSTALL_PACKAGES, callingUid)))
+        val isPrivilegedAndKnown = sourceInfo != null && sourceInfo.isPrivilegedApp &&
+            intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false)
+        val isInstallPkgPermissionGranted =
+            isPermissionGranted(context, Manifest.permission.INSTALL_PACKAGES, callingUid)
+
+        return isPrivilegedAndKnown || isInstallPkgPermissionGranted
     }
 
-    private fun getDevicePolicyRestrictions(): String? {
-        val restrictions = arrayOf(
-            UserManager.DISALLOW_INSTALL_APPS,
-            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
-            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
-        )
+    private fun getDevicePolicyRestrictions(isTrustedSource: Boolean): String? {
+        val restrictions: Array<String> = if (isTrustedSource) {
+            arrayOf(UserManager.DISALLOW_INSTALL_APPS)
+        } else {
+            arrayOf(
+                UserManager.DISALLOW_INSTALL_APPS,
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
+            )
+        }
+
         for (restriction in restrictions) {
             if (!userManager!!.hasUserRestrictionForUser(restriction, Process.myUserHandle())) {
                 continue

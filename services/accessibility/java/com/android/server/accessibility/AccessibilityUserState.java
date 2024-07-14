@@ -169,6 +169,8 @@ class AccessibilityUserState {
     private final int mFocusStrokeWidthDefaultValue;
     // The default value of the focus color.
     private final int mFocusColorDefaultValue;
+    /** Whether mouse keys feature is enabled. */
+    private boolean mMouseKeysEnabled = false;
     private final Map<ComponentName, ComponentName> mA11yServiceToTileService = new ArrayMap<>();
     private final Map<ComponentName, ComponentName> mA11yActivityToTileService = new ArrayMap<>();
 
@@ -232,6 +234,8 @@ class AccessibilityUserState {
         mAccessibilityShortcutKeyTargets.clear();
         mAccessibilityButtonTargets.clear();
         mAccessibilityGestureTargets.clear();
+        mAccessibilityQsTargets.clear();
+        mA11yTilesInQsPanel.clear();
         mTargetAssignedToAccessibilityButton = null;
         mIsTouchExplorationEnabled = false;
         mServiceHandlesDoubleTap = false;
@@ -672,6 +676,14 @@ class AccessibilityUserState {
 
     public void setFilterKeyEventsEnabledLocked(boolean enabled) {
         mIsFilterKeyEventsEnabled = enabled;
+    }
+
+    public void setMouseKeysEnabled(boolean enabled) {
+        mMouseKeysEnabled = enabled;
+    }
+
+    public boolean isMouseKeysEnabled() {
+        return mMouseKeysEnabled;
     }
 
     public int getInteractiveUiTimeoutLocked() {

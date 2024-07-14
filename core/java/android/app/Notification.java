@@ -10979,6 +10979,18 @@ public class Notification implements Parcelable
     }
 
     /**
+     * An object that can apply a rich ongoing notification style to a {@link Notification.Builder}
+     * object.
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public abstract static class RichOngoingStyle extends Notification.Style {
+        /**
+         * @hide
+         */
+        public RichOngoingStyle() {}
+    }
+
+    /**
      * Notification style for custom views that are decorated by the system
      *
      * <p>Instead of providing a notification that is completely custom, a developer can set this

@@ -18,20 +18,14 @@ package com.android.server.inputmethod;
 
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
-import android.content.Context;
-import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.os.Process;
 import android.util.IntArray;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.inputmethod.DirectBootAwareness;
-import com.android.server.LocalServices;
-import com.android.server.pm.UserManagerInternal;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.Condition;
@@ -225,49 +219,12 @@ final class AdditionalSubtypeMapRepository {
         sWriter.startThread();
     }
 
-    static void initialize(@NonNull Handler handler, @NonNull Context context) {
-        final UserManagerInternal userManagerInternal =
-                LocalServices.getService(UserManagerInternal.class);
-        handler.post(() -> {
-            userManagerInternal.addUserLifecycleListener(
-                    new UserManagerInternal.UserLifecycleListener() {
-                        @Override
-                        public void onUserCreated(UserInfo user, @Nullable Object token) {
-                            final int userId = user.id;
-                            sWriter.onUserCreated(userId);
-                            handler.post(() -> {
-                                synchronized (ImfLock.class) {
-                                    if (!sPerUserMap.contains(userId)) {
-                                        final AdditionalSubtypeMap additionalSubtypeMap =
-                                                AdditionalSubtypeUtils.load(userId);
-                                        sPerUserMap.put(userId, additionalSubtypeMap);
-                                        final InputMethodSettings settings =
-                                                InputMethodManagerService
-                                                        .queryInputMethodServicesInternal(context,
-                                                                userId,
-                                                                additionalSubtypeMap,
-                                                                DirectBootAwareness.AUTO);
-                                        InputMethodSettingsRepository.put(userId, settings);
-                                    }
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onUserRemoved(UserInfo user) {
-                            final int userId = user.id;
-                            sWriter.onUserRemoved(userId);
-                            handler.post(() -> {
-                                synchronized (ImfLock.class) {
-                                    sPerUserMap.remove(userId);
-                                }
-                            });
-                        }
-                    });
+    @AnyThread
+    static void remove(@UserIdInt int userId, @NonNull Handler ioHandler) {
+        sWriter.onUserRemoved(userId);
+        ioHandler.post(() -> {
             synchronized (ImfLock.class) {
-                for (int userId : userManagerInternal.getUserIds()) {
-                    sPerUserMap.put(userId, AdditionalSubtypeUtils.load(userId));
-                }
+                sPerUserMap.remove(userId);
             }
         });
     }

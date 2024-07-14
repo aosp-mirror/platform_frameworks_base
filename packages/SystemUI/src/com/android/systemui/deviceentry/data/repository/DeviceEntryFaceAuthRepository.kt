@@ -303,7 +303,10 @@ constructor(
 
     private fun listenForSchedulingWatchdog() {
         keyguardTransitionInteractor
-            .transition(Edge.create(to = KeyguardState.GONE))
+            .transition(
+                edge = Edge.create(to = Scenes.Gone),
+                edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE),
+            )
             .filter { it.transitionState == TransitionState.FINISHED }
             .onEach {
                 // We deliberately want to run this in background because scheduleWatchdog does
@@ -324,7 +327,7 @@ constructor(
                 combine(
                     keyguardTransitionInteractor.isFinishedIn(
                         scene = Scenes.Gone,
-                        stateWithoutSceneContainer = KeyguardState.GONE
+                        stateWithoutSceneContainer = KeyguardState.GONE,
                     ),
                     keyguardInteractor.statusBarState,
                 ) { isFinishedInGoneState, statusBarState ->

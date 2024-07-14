@@ -33,6 +33,7 @@ import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.HardwareRenderer;
 import android.graphics.RecordingCanvas;
@@ -267,6 +268,8 @@ final class AppClipsViewModel extends ViewModel {
     }
 
     private boolean canAppStartThroughLauncher(String packageName) {
+        // Use Intent.resolveActivity API to check if the intent resolves as that is what Android
+        // uses internally when apps use Context.startActivity.
         return getMainLauncherIntentForPackage(packageName).resolveActivity(mPackageManager)
                 != null;
     }
@@ -366,10 +369,19 @@ final class AppClipsViewModel extends ViewModel {
         return taskInfo.topActivityInfo.loadLabel(mPackageManager).toString();
     }
 
-    private Intent getMainLauncherIntentForPackage(String packageName) {
-        return new Intent(ACTION_MAIN)
-                .addCategory(CATEGORY_LAUNCHER)
-                .setPackage(packageName);
+    private Intent getMainLauncherIntentForPackage(String pkgName) {
+        Intent intent = new Intent(ACTION_MAIN).addCategory(CATEGORY_LAUNCHER).setPackage(pkgName);
+
+        // Not all apps use DEFAULT_CATEGORY for their main launcher activity so the exact component
+        // needs to be queried and set on the Intent in order for note-taking apps to be able to
+        // start this intent. When starting an activity with an implicit intent, Android adds the
+        // DEFAULT_CATEGORY flag otherwise it fails to resolve the intent.
+        ResolveInfo resolvedActivity = mPackageManager.resolveActivity(intent, /* flags= */ 0);
+        if (resolvedActivity != null) {
+            intent.setComponent(resolvedActivity.getComponentInfo().getComponentName());
+        }
+
+        return intent;
     }
 
     /** Helper factory to help with injecting {@link AppClipsViewModel}. */

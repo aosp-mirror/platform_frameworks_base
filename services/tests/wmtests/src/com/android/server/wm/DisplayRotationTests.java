@@ -1607,6 +1607,7 @@ public class DisplayRotationTests {
                     .thenReturn(mMockDeviceStateManager);
 
             mDeviceStateController = mock(DeviceStateController.class);
+            mMockDisplayContent.mAppCompatCameraPolicy = mock(AppCompatCameraPolicy.class);
             mTarget = new TestDisplayRotation(mMockDisplayContent, mMockDisplayAddress,
                     mMockDisplayPolicy, mMockDisplayWindowSettings, mMockContext,
                     mDeviceStateController);

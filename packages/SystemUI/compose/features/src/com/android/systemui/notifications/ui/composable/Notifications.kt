@@ -337,7 +337,7 @@ fun SceneScope.NotificationScrollingStack(
     // expanded, reset scrim offset.
     LaunchedEffect(stackHeight, scrimOffset) {
         snapshotFlow { stackHeight.intValue < minVisibleScrimHeight() && scrimOffset.value < 0f }
-            .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.snapTo(0f) }
+            .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.animateTo(0f, tween()) }
     }
 
     // if we receive scroll delta from NSSL, offset the scrim and placeholder accordingly.

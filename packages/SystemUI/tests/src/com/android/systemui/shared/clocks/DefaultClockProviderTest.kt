@@ -72,6 +72,10 @@ class DefaultClockProviderTest : SysuiTestCase() {
             .thenReturn(mockSmallClockView)
         whenever(layoutInflater.inflate(eq(R.layout.clock_default_large), any(), anyBoolean()))
             .thenReturn(mockLargeClockView)
+        whenever(resources.getString(R.string.clock_default_name))
+            .thenReturn("DEFAULT_CLOCK_NAME")
+        whenever(resources.getString(R.string.clock_default_description))
+            .thenReturn("DEFAULT_CLOCK_DESC")
         whenever(resources.getDrawable(R.drawable.clock_default_thumbnail, null))
             .thenReturn(mockClockThumbnail)
         whenever(mockSmallClockView.getLayoutParams()).thenReturn(FrameLayout.LayoutParams(10, 10))
@@ -85,7 +89,7 @@ class DefaultClockProviderTest : SysuiTestCase() {
         // All providers need to provide clocks & thumbnails for exposed clocks
         for (metadata in provider.getClocks()) {
             assertNotNull(provider.createClock(metadata.clockId))
-            assertNotNull(provider.getClockThumbnail(metadata.clockId))
+            assertNotNull(provider.getClockPickerConfig(metadata.clockId))
         }
     }
 

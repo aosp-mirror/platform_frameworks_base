@@ -174,11 +174,9 @@ public class ProtoLog {
         if (android.tracing.Flags.perfettoProtologTracing()) {
             sProtoLogInstance = new PerfettoProtoLogImpl();
         } else {
-            if (REQUIRE_PROTOLOGTOOL) {
-                throw new RuntimeException("REQUIRE_PROTOLOGTOOL not set to false.");
-            } else {
-                sProtoLogInstance = new LogcatOnlyProtoLogImpl();
-            }
+            // The first call to ProtoLog is likely to flip REQUIRE_PROTOLOGTOOL, which is when this
+            // static block will be executed before REQUIRE_PROTOLOGTOOL is actually set.
+            sProtoLogInstance = new LogcatOnlyProtoLogImpl();
         }
     }
 }

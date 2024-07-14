@@ -103,8 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ушул скриншотту аныктады."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> жана ачылып турган башка колдонмолор ушул скриншотту аныктады."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Кыска жазууга кошуу"</string>
-    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
-    <skip />
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Шилтеме кошуу"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Экрандан видео жаздырып алуу"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Экрандан жаздырылып алынган видео иштетилүүдө"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды жаздыруу сеансы боюнча учурдагы билдирме"</string>
@@ -196,8 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Кулпуну жүзүңүз менен ачтыңыз. Улантуу үчүн басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Жүз таанылды. Улантуу үчүн басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Жүз таанылды. Улантуу үчүн кулпусун ачуу сүрөтчөсүн басыңыз."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Кулпусун жүзүңүз менен ачтыңыз. Улантуу үчүн таптап коюңуз."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Аныктыгы текшерилди"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Аныктыгын текшерүүнү жокко чыгаруу"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Дагы параметрлер"</string>
@@ -478,8 +476,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Көбүрөөк виджеттерди кошуу"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Виджеттерди ыңгайлаштыруу үчүн кое бербей басып туруңуз"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Виджеттерди ыңгайлаштыруу"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Виджеттерди ыңгайлаштыруу үчүн кулпуну ачыңыз"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Өчүрүлгөн виджет үчүн колдонмонун сүрөтчөсү"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Виджет үчүн колдонмонун сүрөтчөсү орнотулууда"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Виджетти түзөтүү"</string>
@@ -1377,6 +1374,8 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
     <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Артка кайтуу"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Кайтуу үчүн сенсордук тактанын каалаган жерин үч манжаңыз менен солго же оңго сүрүңүз."</string>

@@ -591,10 +591,13 @@ flag {
 }
 
 flag {
-    name: "screenshot_shelf_ui2"
+    name: "screenshot_save_image_exporter"
     namespace: "systemui"
-    description: "Use new shelf UI flow for screenshots"
-    bug: "329659738"
+    description: "Save all screenshots using ImageExporter"
+    bug: "352308052"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -824,13 +827,6 @@ flag {
 }
 
 flag {
-    name: "media_controls_refactor"
-    namespace: "systemui"
-    description: "Refactors media code to follow the recommended architecture"
-    bug: "326408371"
-}
-
-flag {
     name: "qs_tile_focus_state"
     namespace: "systemui"
     description: "enables new focus outline for qs tiles when focused on with physical keyboard"
@@ -1052,6 +1048,16 @@ flag {
 }
 
 flag {
+  name: "glanceable_hub_back_gesture"
+  namespace: "systemui"
+  description: "Enables back gesture on the glanceable hub"
+  bug: "346331399"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "glanceable_hub_allow_keyguard_when_dreaming"
   namespace: "systemui"
   description: "Allows users to exit dream to keyguard with glanceable hub enabled"
@@ -1146,4 +1152,38 @@ flag {
    metadata {
        purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+  namespace: "systemui"
+  name: "qs_register_setting_observer_on_bg_thread"
+  description: "Registers Quick Settings content providers on background thread"
+  bug: "351766769"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "sounddose_customization"
+  namespace: "systemui"
+  description: "Enables custom actions for sounddose notifications"
+  bug: "345227709"
+}
+
+flag {
+  namespace: "systemui"
+  name: "register_content_observers_async"
+  description: "Use new Async API to register content observers"
+  bug: "316922634"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "msdl_feedback"
+  namespace: "systemui"
+  description: "Enables MSDL feedback in SysUI surfaces."
+  bug: "352600066"
 }

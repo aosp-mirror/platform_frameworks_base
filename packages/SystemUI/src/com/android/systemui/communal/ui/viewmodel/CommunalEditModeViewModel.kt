@@ -43,6 +43,7 @@ import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import javax.inject.Inject
@@ -93,7 +94,10 @@ constructor(
      */
     val canShowEditMode =
         allOf(
-                keyguardTransitionInteractor.isFinishedIn(KeyguardState.GONE),
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = KeyguardState.GONE
+                ),
                 communalInteractor.editModeOpen
             )
             .filter { it }
@@ -186,7 +190,16 @@ constructor(
                 AppWidgetManager.EXTRA_CATEGORY_FILTER,
                 CommunalWidgetCategories.defaultCategories
             )
+
+            communalSettingsInteractor.workProfileUserDisallowedByDevicePolicy.value?.let {
+                putExtra(EXTRA_USER_ID_FILTER, arrayListOf(it.id))
+            }
             putExtra(EXTRA_UI_SURFACE_KEY, EXTRA_UI_SURFACE_VALUE)
+            putExtra(EXTRA_PICKER_TITLE, resources.getString(R.string.communal_widget_picker_title))
+            putExtra(
+                EXTRA_PICKER_DESCRIPTION,
+                resources.getString(R.string.communal_widget_picker_description)
+            )
             putParcelableArrayListExtra(EXTRA_ADDED_APP_WIDGETS_KEY, excludeList)
         }
     }
@@ -207,6 +220,9 @@ constructor(
     /** Called when exiting the edit mode, before transitioning back to the communal scene. */
     fun cleanupEditModeState() {
         communalSceneInteractor.setEditModeState(null)
+
+        // Set the scroll position of the glanceable hub to match where we are now.
+        persistScrollPosition()
     }
 
     companion object {
@@ -214,8 +230,11 @@ constructor(
 
         private const val EXTRA_DESIRED_WIDGET_WIDTH = "desired_widget_width"
         private const val EXTRA_DESIRED_WIDGET_HEIGHT = "desired_widget_height"
+        private const val EXTRA_PICKER_TITLE = "picker_title"
+        private const val EXTRA_PICKER_DESCRIPTION = "picker_description"
         private const val EXTRA_UI_SURFACE_KEY = "ui_surface"
         private const val EXTRA_UI_SURFACE_VALUE = "widgets_hub"
+        private const val EXTRA_USER_ID_FILTER = "filtered_user_ids"
         const val EXTRA_ADDED_APP_WIDGETS_KEY = "added_app_widgets"
     }
 }

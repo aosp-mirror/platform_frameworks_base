@@ -94,6 +94,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -171,7 +172,11 @@ fun CommunalHub(
     var removeButtonCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     var toolbarSize: IntSize? by remember { mutableStateOf(null) }
     var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
-    val gridState = rememberLazyGridState()
+
+    val gridState =
+        rememberLazyGridState(viewModel.savedFirstScrollIndex, viewModel.savedFirstScrollOffset)
+    viewModel.clearPersistedScrollPosition()
+
     val contentListState = rememberContentListState(widgetConfigurator, communalContent, viewModel)
     val reorderingWidgets by viewModel.reorderingWidgets.collectAsStateWithLifecycle()
     val selectedKey = viewModel.selectedKey.collectAsStateWithLifecycle()
@@ -186,6 +191,8 @@ fun CommunalHub(
 
     val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
     val contentOffset = beforeContentPadding(contentPadding).toOffset()
+
+    ObserveScrollEffect(gridState, viewModel)
 
     if (!viewModel.isEditMode) {
         ScrollOnUpdatedLiveContentEffect(communalContent, gridState)
@@ -417,6 +424,20 @@ private fun DisclaimerBottomSheetContent(onButtonClicked: () -> Unit) {
                 style = MaterialTheme.typography.labelLarge,
             )
         }
+    }
+}
+
+@Composable
+private fun ObserveScrollEffect(
+    gridState: LazyGridState,
+    communalViewModel: BaseCommunalViewModel
+) {
+
+    LaunchedEffect(gridState) {
+        snapshotFlow {
+                Pair(gridState.firstVisibleItemIndex, gridState.firstVisibleItemScrollOffset)
+            }
+            .collect { communalViewModel.onScrollPositionUpdated(it.first, it.second) }
     }
 }
 
@@ -658,14 +679,15 @@ private fun Toolbar(
                 )
                 .onSizeChanged { setToolbarSize(it) },
     ) {
+        val addWidgetText = stringResource(R.string.hub_mode_add_widget_button_text)
         ToolbarButton(
             isPrimary = !removeEnabled,
             modifier = Modifier.align(Alignment.CenterStart),
             onClick = onOpenWidgetPicker,
         ) {
-            Icon(Icons.Default.Add, stringResource(R.string.hub_mode_add_widget_button_text))
+            Icon(Icons.Default.Add, null)
             Text(
-                text = stringResource(R.string.hub_mode_add_widget_button_text),
+                text = addWidgetText,
             )
         }
 
@@ -697,7 +719,7 @@ private fun Toolbar(
                         ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.Close, stringResource(R.string.button_to_remove_widget))
+                    Icon(Icons.Default.Close, contentDescription = null)
                     Text(
                         text = stringResource(R.string.button_to_remove_widget),
                     )
@@ -710,10 +732,7 @@ private fun Toolbar(
             modifier = Modifier.align(Alignment.CenterEnd),
             onClick = onEditDone,
         ) {
-            Icon(
-                Icons.Default.Check,
-                stringResource(id = R.string.hub_mode_editing_exit_button_text)
-            )
+            Icon(Icons.Default.Check, contentDescription = null)
             Text(
                 text = stringResource(R.string.hub_mode_editing_exit_button_text),
             )

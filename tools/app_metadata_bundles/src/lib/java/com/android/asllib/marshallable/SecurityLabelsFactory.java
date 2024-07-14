@@ -22,15 +22,10 @@ import com.android.asllib.util.XmlUtils;
 
 import org.w3c.dom.Element;
 
-import java.util.List;
-
 public class SecurityLabelsFactory implements AslMarshallableFactory<SecurityLabels> {
 
     /** Creates a {@link SecurityLabels} from the human-readable DOM element. */
-    @Override
-    public SecurityLabels createFromHrElements(List<Element> elements)
-            throws MalformedXmlException {
-        Element ele = XmlUtils.getSingleElement(elements);
+    public SecurityLabels createFromHrElement(Element ele) throws MalformedXmlException {
         if (ele == null) {
             AslgenUtil.logI("No SecurityLabels found in hr format.");
             return null;
@@ -43,10 +38,7 @@ public class SecurityLabelsFactory implements AslMarshallableFactory<SecurityLab
     }
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
-    @Override
-    public SecurityLabels createFromOdElements(List<Element> elements)
-            throws MalformedXmlException {
-        Element ele = XmlUtils.getSingleElement(elements);
+    public SecurityLabels createFromOdElement(Element ele) throws MalformedXmlException {
         if (ele == null) {
             AslgenUtil.logI("No SecurityLabels found in od format.");
             return null;

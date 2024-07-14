@@ -90,17 +90,13 @@ constructor(
          * GONE.
          */
         scope.launch {
-            repository.isKeyguardEnabled
-                .filter { enabled -> !enabled }
-                .sampleCombine(
-                    biometricSettingsRepository.isCurrentUserInLockdown,
-                    internalTransitionInteractor.currentTransitionInfoInternal,
-                )
-                .collect { (_, inLockdown, currentTransitionInfo) ->
-                    if (currentTransitionInfo.to != KeyguardState.GONE && !inLockdown) {
+            if (!SceneContainerFlag.isEnabled) {
+                showKeyguardWhenReenabled
+                    .filter { shouldDismiss -> shouldDismiss }
+                    .collect {
                         transitionInteractor.startDismissKeyguardTransition("keyguard disabled")
                     }
-                }
+            }
         }
     }
 
