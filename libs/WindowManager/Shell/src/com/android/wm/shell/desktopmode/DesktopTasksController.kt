@@ -159,18 +159,6 @@ class DesktopTasksController(
             }
         }
 
-    private val transitionAreaHeight
-        get() =
-            context.resources.getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height
-            )
-
-    private val transitionAreaWidth
-        get() =
-            context.resources.getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_transition_area_width
-            )
-
     /** Task id of the task currently being dragged from fullscreen/split. */
     val draggingTaskId
         get() = dragToDesktopTransitionHandler.draggingTaskId
@@ -229,6 +217,15 @@ class DesktopTasksController(
         dragToDesktopTransitionHandler.setSplitScreenController(controller)
     }
 
+    /** Returns the transition type for the given remote transition. */
+    private fun transitionType(remoteTransition: RemoteTransition?): Int {
+        if (remoteTransition == null) {
+            ProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: remoteTransition is null")
+            return TRANSIT_NONE
+        }
+        return TRANSIT_TO_FRONT
+    }
+
     /** Show all tasks, that are part of the desktop, on top of launcher */
     fun showDesktopApps(displayId: Int, remoteTransition: RemoteTransition? = null) {
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: showDesktopApps")
@@ -236,8 +233,7 @@ class DesktopTasksController(
         bringDesktopAppsToFront(displayId, wct)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            // TODO(b/309014605): ensure remote transition is supplied once state is introduced
-            val transitionType = if (remoteTransition == null) TRANSIT_NONE else TRANSIT_TO_FRONT
+            val transitionType = transitionType(remoteTransition)
             val handler =
                 remoteTransition?.let {
                     OneShotRemoteHandler(transitions.mainExecutor, remoteTransition)
@@ -776,12 +772,13 @@ class DesktopTasksController(
             newTaskIdInFront ?: "null"
         )
 
-        if (Flags.enableDesktopWindowingWallpaperActivity()) {
+        // Move home to front, ensures that we go back home when all desktop windows are closed
+        moveHomeTask(wct, toTop = true)
+
+        // Currently, we only handle the desktop on the default display really.
+        if (displayId == DEFAULT_DISPLAY && Flags.enableDesktopWindowingWallpaperActivity()) {
             // Add translucent wallpaper activity to show the wallpaper underneath
             addWallpaperActivity(wct)
-        } else {
-            // Move home to front
-            moveHomeTask(wct, toTop = true)
         }
 
         val nonMinimizedTasksOrderedFrontToBack =
@@ -1110,6 +1107,10 @@ class DesktopTasksController(
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
+        if (desktopModeTaskRepository.isOnlyVisibleNonClosingTask(taskInfo.taskId)) {
+            // Remove wallpaper activity when leaving desktop mode
+            removeWallpaperActivity(wct)
+        }
     }
 
     /**
@@ -1125,6 +1126,10 @@ class DesktopTasksController(
         // The task's density may have been overridden in freeform; revert it here as we don't
         // want it overridden in multi-window.
         wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
+        if (desktopModeTaskRepository.isOnlyVisibleNonClosingTask(taskInfo.taskId)) {
+            // Remove wallpaper activity when leaving desktop mode
+            removeWallpaperActivity(wct)
+        }
     }
 
     /** Returns the ID of the Task that will be minimized, or null if no task will be minimized. */

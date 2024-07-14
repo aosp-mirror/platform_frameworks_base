@@ -219,7 +219,7 @@ constructor(
     }
 
     private fun getScreenshotController(display: Display): ScreenshotController {
-        val controller = screenshotController ?: screenshotControllerFactory.create(display, false)
+        val controller = screenshotController ?: screenshotControllerFactory.create(display)
         screenshotController = controller
         return controller
     }

@@ -53,9 +53,9 @@ import com.android.server.display.config.DisplayBrightnessPoint;
 import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.EvenDimmerBrightnessData;
-import com.android.server.display.config.HbmTiming;
 import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.display.config.HighBrightnessMode;
+import com.android.server.display.config.HighBrightnessModeData;
 import com.android.server.display.config.HysteresisLevels;
 import com.android.server.display.config.IdleScreenRefreshRateTimeout;
 import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
@@ -75,8 +75,6 @@ import com.android.server.display.config.RefreshRateRange;
 import com.android.server.display.config.RefreshRateThrottlingMap;
 import com.android.server.display.config.RefreshRateThrottlingPoint;
 import com.android.server.display.config.RefreshRateZone;
-import com.android.server.display.config.SdrHdrRatioMap;
-import com.android.server.display.config.SdrHdrRatioPoint;
 import com.android.server.display.config.SensorData;
 import com.android.server.display.config.ThermalStatus;
 import com.android.server.display.config.ThermalThrottling;
@@ -302,6 +300,19 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *         <brightnessIncreaseDurationMillis>10000</brightnessIncreaseDurationMillis>
  *         <brightnessDecreaseDebounceMillis>13000</brightnessDecreaseDebounceMillis>
  *         <brightnessDecreaseDurationMillis>10000</brightnessDecreaseDurationMillis>
+ *         <minimumHdrPercentOfScreenForNbm>0.2</minimumHdrPercentOfScreenForNbm>
+ *         <minimumHdrPercentOfScreenForHbm>0.5</minimumHdrPercentOfScreenForHbm>
+ *         <allowInLowPowerMode>true</allowInLowPowerMode>
+ *         <sdrHdrRatioMap>
+ *             <point>
+ *                 <first>2.0</first>
+ *                 <second>4.0</second>
+ *             </point>
+ *             <point>
+ *                 <first>100</first>
+ *                 <second>8.0</second>
+ *             </point>
+ *         </sdrHdrRatioMap>
  *      </hdrBrightnessConfig>
  *      <luxThrottling>
  *        <brightnessLimitMap>
@@ -659,9 +670,6 @@ public class DisplayDeviceConfig {
     // Invalid value of AutoBrightness brightening and darkening light debounce
     private static final int INVALID_AUTO_BRIGHTNESS_LIGHT_DEBOUNCE = -1;
 
-    @VisibleForTesting
-    static final float HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT = 0.5f;
-
     private final Context mContext;
 
     // The details of the ambient light sensor associated with this display.
@@ -743,13 +751,13 @@ public class DisplayDeviceConfig {
     private Spline mNitsToBacklightSpline;
 
     private List<String> mQuirks;
-    private boolean mIsHighBrightnessModeEnabled = false;
+    @Nullable
     private HighBrightnessModeData mHbmData;
     @Nullable
     private PowerThrottlingConfigData mPowerThrottlingConfigData;
     private DensityMapping mDensityMapping;
     private String mLoadedFrom = null;
-    private Spline mSdrToHdrRatioSpline;
+
 
     // Represents the auto-brightness brightening light debounce.
     private long mAutoBrightnessBrighteningLightDebounce =
@@ -872,7 +880,7 @@ public class DisplayDeviceConfig {
     private final DisplayManagerFlags mFlags;
 
     @VisibleForTesting
-    DisplayDeviceConfig(Context context, DisplayManagerFlags flags) {
+    public DisplayDeviceConfig(Context context, DisplayManagerFlags flags) {
         mContext = context;
         mFlags = flags;
     }
@@ -1155,7 +1163,7 @@ public class DisplayDeviceConfig {
      * @return true if there is sdrHdrRatioMap, false otherwise.
      */
     public boolean hasSdrToHdrRatioSpline() {
-        return mSdrToHdrRatioSpline != null;
+        return mHbmData != null && mHbmData.sdrToHdrRatioSpline != null;
     }
 
     /**
@@ -1165,7 +1173,8 @@ public class DisplayDeviceConfig {
      * @return the HDR brightness or BRIGHTNESS_INVALID when no mapping exists.
      */
     public float getHdrBrightnessFromSdr(float brightness, float maxDesiredHdrSdrRatio) {
-        if (mSdrToHdrRatioSpline == null) {
+        Spline sdrToHdrSpline = mHbmData != null ? mHbmData.sdrToHdrRatioSpline : null;
+        if (sdrToHdrSpline == null) {
             return PowerManager.BRIGHTNESS_INVALID;
         }
 
@@ -1175,7 +1184,7 @@ public class DisplayDeviceConfig {
             return PowerManager.BRIGHTNESS_INVALID;
         }
 
-        float ratio = Math.min(mSdrToHdrRatioSpline.interpolate(nits), maxDesiredHdrSdrRatio);
+        float ratio = Math.min(sdrToHdrSpline.interpolate(nits), maxDesiredHdrSdrRatio);
         float hdrNits = nits * ratio;
         if (getNitsToBacklightSpline() == null) {
             return PowerManager.BRIGHTNESS_INVALID;
@@ -1321,13 +1330,11 @@ public class DisplayDeviceConfig {
      * @return high brightness mode configuration data for the display.
      */
     public HighBrightnessModeData getHighBrightnessModeData() {
-        if (!mIsHighBrightnessModeEnabled || mHbmData == null) {
+        if  (mHbmData == null || !mHbmData.isHighBrightnessModeEnabled) {
             return null;
         }
 
-        HighBrightnessModeData hbmData = new HighBrightnessModeData();
-        mHbmData.copyTo(hbmData);
-        return hbmData;
+        return mHbmData;
     }
 
     /**
@@ -1604,11 +1611,10 @@ public class DisplayDeviceConfig {
                 + ", mBacklightMaximum=" + mBacklightMaximum
                 + ", mBrightnessDefault=" + mBrightnessDefault
                 + ", mQuirks=" + mQuirks
-                + ", mIsHighBrightnessModeEnabled=" + mIsHighBrightnessModeEnabled
                 + "\n"
                 + "mLuxThrottlingData=" + mLuxThrottlingData
                 + ", mHbmData=" + mHbmData
-                + ", mSdrToHdrRatioSpline=" + mSdrToHdrRatioSpline
+
                 + ", mThermalBrightnessThrottlingDataMapByThrottlingId="
                 + mThermalBrightnessThrottlingDataMapByThrottlingId
                 + "\n"
@@ -1715,7 +1721,7 @@ public class DisplayDeviceConfig {
     }
 
     @VisibleForTesting
-    boolean initFromFile(File configFile) {
+    public boolean initFromFile(File configFile) {
         if (!configFile.exists()) {
             // Display configuration files aren't required to exist.
             return false;
@@ -1740,7 +1746,23 @@ public class DisplayDeviceConfig {
                 loadBrightnessMap(config);
                 loadThermalThrottlingConfig(config);
                 loadPowerThrottlingConfigData(config);
-                loadHighBrightnessModeData(config);
+                // Backlight and evenDimmer data should be loaded for HbmData
+                mHbmData = HighBrightnessModeData.loadHighBrightnessModeData(config, (hbm) -> {
+                    float transitionPointBacklightScale = hbm.getTransitionPoint_all().floatValue();
+                    if (transitionPointBacklightScale >= mBacklightMaximum) {
+                        throw new IllegalArgumentException("HBM transition point invalid. "
+                                + mHbmData.transitionPoint + " is not less than "
+                                + mBacklightMaximum);
+                    }
+                    return  getBrightnessFromBacklight(transitionPointBacklightScale);
+                });
+                if (mHbmData.isHighBrightnessModeEnabled && mHbmData.refreshRateLimit != null) {
+                    // TODO(b/331650248): cleanup, DMD can use mHbmData.refreshRateLimit
+                    mRefreshRateLimitations.add(new RefreshRateLimitation(
+                            DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE,
+                            mHbmData.refreshRateLimit));
+                }
+
                 loadLuxThrottling(config);
                 loadQuirks(config);
                 loadBrightnessRamps(config);
@@ -1936,40 +1958,6 @@ public class DisplayDeviceConfig {
         mRawNits = nits;
         mRawBacklight = backlight;
         constrainNitsAndBacklightArrays();
-    }
-
-    private Spline loadSdrHdrRatioMap(HighBrightnessMode hbmConfig) {
-        final SdrHdrRatioMap sdrHdrRatioMap = hbmConfig.getSdrHdrRatioMap_all();
-
-        if (sdrHdrRatioMap == null) {
-            return null;
-        }
-
-        final List<SdrHdrRatioPoint> points = sdrHdrRatioMap.getPoint();
-        final int size = points.size();
-        if (size == 0) {
-            return null;
-        }
-
-        float[] nits = new float[size];
-        float[] ratios = new float[size];
-
-        int i = 0;
-        for (SdrHdrRatioPoint point : points) {
-            nits[i] = point.getSdrNits().floatValue();
-            if (i > 0) {
-                if (nits[i] < nits[i - 1]) {
-                    Slog.e(TAG, "sdrHdrRatioMap must be non-decreasing, ignoring rest "
-                            + " of configuration. nits: " + nits[i] + " < "
-                            + nits[i - 1]);
-                    return null;
-                }
-            }
-            ratios[i] = point.getHdrRatio().floatValue();
-            ++i;
-        }
-
-        return Spline.createSpline(nits, ratios);
     }
 
     private void loadThermalThrottlingConfig(DisplayConfiguration config) {
@@ -2525,49 +2513,6 @@ public class DisplayDeviceConfig {
         }
     }
 
-    private void loadHighBrightnessModeData(DisplayConfiguration config) {
-        final HighBrightnessMode hbm = config.getHighBrightnessMode();
-        if (hbm != null) {
-            mIsHighBrightnessModeEnabled = hbm.getEnabled();
-            mHbmData = new HighBrightnessModeData();
-            mHbmData.minimumLux = hbm.getMinimumLux_all().floatValue();
-            float transitionPointBacklightScale = hbm.getTransitionPoint_all().floatValue();
-            if (transitionPointBacklightScale >= mBacklightMaximum) {
-                throw new IllegalArgumentException("HBM transition point invalid. "
-                        + mHbmData.transitionPoint + " is not less than "
-                        + mBacklightMaximum);
-            }
-            mHbmData.transitionPoint =
-                    getBrightnessFromBacklight(transitionPointBacklightScale);
-            final HbmTiming hbmTiming = hbm.getTiming_all();
-            mHbmData.timeWindowMillis = hbmTiming.getTimeWindowSecs_all().longValue() * 1000;
-            mHbmData.timeMaxMillis = hbmTiming.getTimeMaxSecs_all().longValue() * 1000;
-            mHbmData.timeMinMillis = hbmTiming.getTimeMinSecs_all().longValue() * 1000;
-            mHbmData.allowInLowPowerMode = hbm.getAllowInLowPowerMode_all();
-            final RefreshRateRange rr = hbm.getRefreshRate_all();
-            if (rr != null) {
-                final float min = rr.getMinimum().floatValue();
-                final float max = rr.getMaximum().floatValue();
-                mRefreshRateLimitations.add(new RefreshRateLimitation(
-                        DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE, min, max));
-            }
-            BigDecimal minHdrPctOfScreen = hbm.getMinimumHdrPercentOfScreen_all();
-            if (minHdrPctOfScreen != null) {
-                mHbmData.minimumHdrPercentOfScreen = minHdrPctOfScreen.floatValue();
-                if (mHbmData.minimumHdrPercentOfScreen > 1
-                        || mHbmData.minimumHdrPercentOfScreen < 0) {
-                    Slog.w(TAG, "Invalid minimum HDR percent of screen: "
-                            + String.valueOf(mHbmData.minimumHdrPercentOfScreen));
-                    mHbmData.minimumHdrPercentOfScreen = HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT;
-                }
-            } else {
-                mHbmData.minimumHdrPercentOfScreen = HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT;
-            }
-
-            mSdrToHdrRatioSpline = loadSdrHdrRatioMap(hbm);
-        }
-    }
-
     private void loadLuxThrottling(DisplayConfiguration config) {
         LuxThrottling cfg = config.getLuxThrottling();
         if (cfg != null) {
@@ -2918,73 +2863,6 @@ public class DisplayDeviceConfig {
         mBrightnessCapForWearBedtimeMode = BrightnessSynchronizer.brightnessIntToFloat(
                 mContext.getResources().getInteger(com.android.internal.R.integer
                         .config_screenBrightnessCapForWearBedtimeMode));
-    }
-
-    /**
-     * Container for high brightness mode configuration data.
-     */
-    static class HighBrightnessModeData {
-        /** Minimum lux needed to enter high brightness mode */
-        public float minimumLux;
-
-        /** Brightness level at which we transition from normal to high-brightness. */
-        public float transitionPoint;
-
-        /** Whether HBM is allowed when {@code Settings.Global.LOW_POWER_MODE} is active. */
-        public boolean allowInLowPowerMode;
-
-        /** Time window for HBM. */
-        public long timeWindowMillis;
-
-        /** Maximum time HBM is allowed to be during in a {@code timeWindowMillis}. */
-        public long timeMaxMillis;
-
-        /** Minimum time that HBM can be on before being enabled. */
-        public long timeMinMillis;
-
-        /** Minimum HDR video size to enter high brightness mode */
-        public float minimumHdrPercentOfScreen;
-
-        HighBrightnessModeData() {}
-
-        HighBrightnessModeData(float minimumLux, float transitionPoint, long timeWindowMillis,
-                long timeMaxMillis, long timeMinMillis, boolean allowInLowPowerMode,
-                float minimumHdrPercentOfScreen) {
-            this.minimumLux = minimumLux;
-            this.transitionPoint = transitionPoint;
-            this.timeWindowMillis = timeWindowMillis;
-            this.timeMaxMillis = timeMaxMillis;
-            this.timeMinMillis = timeMinMillis;
-            this.allowInLowPowerMode = allowInLowPowerMode;
-            this.minimumHdrPercentOfScreen = minimumHdrPercentOfScreen;
-        }
-
-        /**
-         * Copies the HBM data to the specified parameter instance.
-         * @param other the instance to copy data to.
-         */
-        public void copyTo(@NonNull HighBrightnessModeData other) {
-            other.minimumLux = minimumLux;
-            other.timeWindowMillis = timeWindowMillis;
-            other.timeMaxMillis = timeMaxMillis;
-            other.timeMinMillis = timeMinMillis;
-            other.transitionPoint = transitionPoint;
-            other.allowInLowPowerMode = allowInLowPowerMode;
-            other.minimumHdrPercentOfScreen = minimumHdrPercentOfScreen;
-        }
-
-        @Override
-        public String toString() {
-            return "HBM{"
-                    + "minLux: " + minimumLux
-                    + ", transition: " + transitionPoint
-                    + ", timeWindow: " + timeWindowMillis + "ms"
-                    + ", timeMax: " + timeMaxMillis + "ms"
-                    + ", timeMin: " + timeMinMillis + "ms"
-                    + ", allowInLowPowerMode: " + allowInLowPowerMode
-                    + ", minimumHdrPercentOfScreen: " + minimumHdrPercentOfScreen
-                    + "} ";
-        }
     }
 
     /**

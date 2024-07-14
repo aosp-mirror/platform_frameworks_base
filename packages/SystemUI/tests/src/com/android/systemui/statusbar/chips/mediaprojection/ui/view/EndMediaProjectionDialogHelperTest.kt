@@ -72,6 +72,7 @@ class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
         val projectionState =
             MediaProjectionState.Projecting.SingleTask(
                 "host.package",
+                hostDeviceName = null,
                 createTask(taskId = 1, baseIntent = baseIntent),
             )
 
@@ -92,6 +93,7 @@ class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
         val projectionState =
             MediaProjectionState.Projecting.SingleTask(
                 "host.package",
+                hostDeviceName = null,
                 createTask(taskId = 1, baseIntent = baseIntent),
             )
 

@@ -93,6 +93,7 @@ constructor(
         @VisibleForTesting internal const val TILE_STATE_RES_PREFIX = "tile_states_"
         @VisibleForTesting internal const val LONG_PRESS_EFFECT_WIDTH_SCALE = 1.1f
         @VisibleForTesting internal const val LONG_PRESS_EFFECT_HEIGHT_SCALE = 1.2f
+        internal val EMPTY_RECT = Rect()
     }
 
     private val icon: QSIconViewImpl = QSIconViewImpl(context)
@@ -916,7 +917,7 @@ constructor(
         }
     }
 
-    fun prepareForLaunch() {
+    private fun prepareForLaunch() {
         val startingHeight = initialLongPressProperties?.height?.toInt() ?: 0
         val startingWidth = initialLongPressProperties?.width?.toInt() ?: 0
         val deltaH = finalLongPressProperties?.height?.minus(startingHeight)?.toInt() ?: 0
@@ -927,7 +928,12 @@ constructor(
         paddingForLaunch.bottom = deltaH / 2
     }
 
-    override fun getPaddingForLaunchAnimation(): Rect = paddingForLaunch
+    override fun getPaddingForLaunchAnimation(): Rect =
+        if (longPressEffect?.state == QSLongPressEffect.State.LONG_CLICKED) {
+            paddingForLaunch
+        } else {
+            EMPTY_RECT
+        }
 
     fun updateLongPressEffectProperties(effectProgress: Float) {
         if (!isLongClickable || longPressEffect == null) return

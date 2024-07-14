@@ -241,43 +241,50 @@ internal class MultiPointerDraggableNode(
                 }
             }
 
-            awaitPointerEventScope {
-                while (isActive) {
-                    try {
-                        detectDragGestures(
-                            orientation = orientation,
-                            startDragImmediately = startDragImmediately,
-                            onDragStart = { startedPosition, overSlop, pointersDown ->
-                                velocityTracker.resetTracking()
-                                onDragStarted(startedPosition, overSlop, pointersDown)
-                            },
-                            onDrag = { controller, change, amount ->
-                                velocityTracker.addPointerInputChange(change)
-                                controller.onDrag(amount)
-                            },
-                            onDragEnd = { controller ->
-                                val viewConfiguration = currentValueOf(LocalViewConfiguration)
-                                val maxVelocity =
-                                    viewConfiguration.maximumFlingVelocity.let { Velocity(it, it) }
-                                val velocity = velocityTracker.calculateVelocity(maxVelocity)
-                                controller.onStop(
-                                    velocity =
-                                        when (orientation) {
-                                            Orientation.Horizontal -> velocity.x
-                                            Orientation.Vertical -> velocity.y
-                                        },
-                                    canChangeScene = true,
-                                )
-                            },
-                            onDragCancel = { controller ->
-                                controller.onStop(velocity = 0f, canChangeScene = true)
-                            },
-                            swipeDetector = swipeDetector
-                        )
-                    } catch (exception: CancellationException) {
-                        // If the coroutine scope is active, we can just restart the drag cycle.
-                        if (!isActive) {
-                            throw exception
+            // The order is important here: we want to make sure that the previous PointerEventScope
+            // is initialized first. This ensures that the following PointerEventScope doesn't
+            // receive more events than the first one.
+            launch {
+                awaitPointerEventScope {
+                    while (isActive) {
+                        try {
+                            detectDragGestures(
+                                orientation = orientation,
+                                startDragImmediately = startDragImmediately,
+                                onDragStart = { startedPosition, overSlop, pointersDown ->
+                                    velocityTracker.resetTracking()
+                                    onDragStarted(startedPosition, overSlop, pointersDown)
+                                },
+                                onDrag = { controller, change, amount ->
+                                    velocityTracker.addPointerInputChange(change)
+                                    controller.onDrag(amount)
+                                },
+                                onDragEnd = { controller ->
+                                    val viewConfiguration = currentValueOf(LocalViewConfiguration)
+                                    val maxVelocity =
+                                        viewConfiguration.maximumFlingVelocity.let {
+                                            Velocity(it, it)
+                                        }
+                                    val velocity = velocityTracker.calculateVelocity(maxVelocity)
+                                    controller.onStop(
+                                        velocity =
+                                            when (orientation) {
+                                                Orientation.Horizontal -> velocity.x
+                                                Orientation.Vertical -> velocity.y
+                                            },
+                                        canChangeScene = true,
+                                    )
+                                },
+                                onDragCancel = { controller ->
+                                    controller.onStop(velocity = 0f, canChangeScene = true)
+                                },
+                                swipeDetector = swipeDetector
+                            )
+                        } catch (exception: CancellationException) {
+                            // If the coroutine scope is active, we can just restart the drag cycle.
+                            if (!isActive) {
+                                throw exception
+                            }
                         }
                     }
                 }

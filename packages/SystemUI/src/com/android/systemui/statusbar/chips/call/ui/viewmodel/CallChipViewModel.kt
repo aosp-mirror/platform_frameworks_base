@@ -23,8 +23,11 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.call.domain.interactor.CallChipInteractor
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
@@ -48,6 +51,7 @@ constructor(
     interactor: CallChipInteractor,
     systemClock: SystemClock,
     private val activityStarter: ActivityStarter,
+    @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
     override val chip: StateFlow<OngoingActivityChipModel> =
         interactor.ongoingCallState
@@ -86,9 +90,9 @@ constructor(
         }
 
         return View.OnClickListener { view ->
+            logger.log(TAG, LogLevel.INFO, {}, { "Chip clicked" })
             val backgroundView =
                 view.requireViewById<ChipBackgroundContainer>(R.id.ongoing_activity_chip_background)
-            // TODO(b/332662551): Log the click event.
             // This mimics OngoingCallController#updateChipClickListener.
             activityStarter.postStartActivityDismissingKeyguard(
                 state.intent,
@@ -108,5 +112,6 @@ constructor(
                     R.string.ongoing_phone_call_content_description,
                 ),
             )
+        private const val TAG = "CallVM"
     }
 }

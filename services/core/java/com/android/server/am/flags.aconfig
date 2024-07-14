@@ -163,7 +163,7 @@ flag {
 
 flag {
     name: "collect_logcat_on_run_synchronously"
-    namespace: "dropbox"
+    namespace: "stability"
     description: "Allow logcat collection on synchronous dropbox collection"
     bug: "324222683"
     is_fixed_read_only: true
@@ -171,8 +171,16 @@ flag {
 
 flag {
     name: "enable_dropbox_watchdog_headers"
-    namespace: "dropbox"
+    namespace: "stability"
     description: "Add watchdog-specific dropbox headers"
     bug: "330682397"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "defer_binders_when_paused"
+    namespace: "system_performance"
+    is_fixed_read_only: true
+    description: "Defer submitting binder calls to paused processes."
+    bug: "327038797"
 }

@@ -1294,8 +1294,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testRelayout_appWindowSendActivityWindowInfo() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
-
         // Skip unnecessary operations of relayout.
         spyOn(mWm.mWindowPlacerLocked);
         doNothing().when(mWm.mWindowPlacerLocked).performSurfacePlacement(anyBoolean());

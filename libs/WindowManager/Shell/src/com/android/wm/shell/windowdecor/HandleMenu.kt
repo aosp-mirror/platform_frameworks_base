@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.windowdecor
 
+import android.annotation.DimenRes
 import android.app.ActivityManager
 import android.app.WindowConfiguration
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
@@ -75,10 +76,17 @@ class HandleMenu(
     private val isViewAboveStatusBar: Boolean
         get() = (Flags.enableAdditionalWindowsAboveStatusBar() && !taskInfo.isFreeform)
 
-    private var marginMenuTop = 0
-    private var marginMenuStart = 0
-    private var menuHeight = 0
-    private var menuWidth = 0
+    private val pillElevation: Int = loadDimensionPixelSize(
+        R.dimen.desktop_mode_handle_menu_pill_elevation)
+    private val pillTopMargin: Int = loadDimensionPixelSize(
+        R.dimen.desktop_mode_handle_menu_pill_spacing_margin)
+    private val menuWidth = loadDimensionPixelSize(
+        R.dimen.desktop_mode_handle_menu_width) + pillElevation
+    private val menuHeight = getHandleMenuHeight()
+    private val marginMenuTop = loadDimensionPixelSize(R.dimen.desktop_mode_handle_menu_margin_top)
+    private val marginMenuStart = loadDimensionPixelSize(
+        R.dimen.desktop_mode_handle_menu_margin_start)
+
     private var handleMenuAnimator: HandleMenuAnimator? = null
 
     @VisibleForTesting
@@ -120,7 +128,6 @@ class HandleMenu(
         }
 
     init {
-        loadHandleMenuDimensions()
         updateHandleMenuPillPositions()
     }
 
@@ -426,49 +433,35 @@ class HandleMenu(
      */
     private fun viewsLaidOut(): Boolean = handleMenuViewContainer?.view?.isLaidOut ?: false
 
-    private fun loadHandleMenuDimensions() {
-        val resources = context.resources
-        menuWidth = loadDimensionPixelSize(resources, R.dimen.desktop_mode_handle_menu_width)
-        menuHeight = getHandleMenuHeight(resources)
-        marginMenuTop = loadDimensionPixelSize(
-            resources,
-            R.dimen.desktop_mode_handle_menu_margin_top
-        )
-        marginMenuStart = loadDimensionPixelSize(
-            resources,
-            R.dimen.desktop_mode_handle_menu_margin_start
-        )
-    }
-
     /**
-     * Determines handle menu height based on if windowing pill should be shown.
+     * Determines handle menu height based the max size and the visibility of pills.
      */
-    private fun getHandleMenuHeight(resources: Resources): Int {
-        var menuHeight = loadDimensionPixelSize(resources, R.dimen.desktop_mode_handle_menu_height)
+    private fun getHandleMenuHeight(): Int {
+        var menuHeight = loadDimensionPixelSize(
+            R.dimen.desktop_mode_handle_menu_height) + pillElevation
         if (!shouldShowWindowingPill) {
             menuHeight -= loadDimensionPixelSize(
-                resources,
-                R.dimen.desktop_mode_handle_menu_windowing_pill_height
-            )
+                R.dimen.desktop_mode_handle_menu_windowing_pill_height)
+            menuHeight -= pillTopMargin
         }
         if (!SHOULD_SHOW_MORE_ACTIONS_PILL) {
             menuHeight -= loadDimensionPixelSize(
-                resources,
-                R.dimen.desktop_mode_handle_menu_more_actions_pill_height
-            )
+                R.dimen.desktop_mode_handle_menu_more_actions_pill_height)
+            menuHeight -= pillTopMargin
         }
         if (!shouldShowBrowserPill) {
-            menuHeight -= loadDimensionPixelSize(resources,
+            menuHeight -= loadDimensionPixelSize(
                 R.dimen.desktop_mode_handle_menu_open_in_browser_pill_height)
+            menuHeight -= pillTopMargin
         }
         return menuHeight
     }
 
-    private fun loadDimensionPixelSize(resources: Resources, resourceId: Int): Int {
+    private fun loadDimensionPixelSize(@DimenRes resourceId: Int): Int {
         if (resourceId == Resources.ID_NULL) {
             return 0
         }
-        return resources.getDimensionPixelSize(resourceId)
+        return context.resources.getDimensionPixelSize(resourceId)
     }
 
     fun close() {

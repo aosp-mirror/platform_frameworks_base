@@ -82,6 +82,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.IDisplayFoldListener;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants;
@@ -696,6 +697,15 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @return Actions flags: may be {@link #ACTION_PASS_TO_USER}.
      */
     public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
+
+    /**
+     * Return the set of applicaition launch keyboard shortcuts the system supports.
+     *
+     * @param deviceId The id of the {@link InputDevice} that will trigger the shortcut.
+     *
+     * @return {@link KeyboardShortcutGroup} containing the shortcuts.
+     */
+    KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId);
 
     /**
      * Called from the input reader thread before a motion is enqueued when the device is in a

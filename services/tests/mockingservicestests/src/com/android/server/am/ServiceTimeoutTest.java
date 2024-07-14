@@ -145,7 +145,7 @@ public final class ServiceTimeoutTest {
                 name,                  // processName
                 name,                  // packageName
                 mAms);
-        app.makeActive(mock(IApplicationThread.class), mAms.mProcessStats);
+        app.makeActive(mock(ApplicationThreadDeferred.class), mAms.mProcessStats);
         mProcessList.updateLruProcessLocked(app, false, null);
 
         final long now = SystemClock.uptimeMillis();

@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.view.Display;
+import android.view.KeyboardShortcutGroup;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -52,6 +53,11 @@ public class TestableWindowManager implements WindowManager {
     public void requestAppKeyboardShortcuts(WindowManager.KeyboardShortcutsReceiver receiver,
             int deviceId) {
         mWindowManager.requestAppKeyboardShortcuts(receiver, deviceId);
+    }
+
+    @Override
+    public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
+        return mWindowManager.getApplicationLaunchKeyboardShortcuts(deviceId);
     }
 
     @Override

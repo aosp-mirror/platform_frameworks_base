@@ -71,11 +71,11 @@ constructor(
                             {
                                 str1 = type.name
                                 str2 = state.hostPackage
+                                str3 = state.hostDeviceName
                             },
-                            { "State: Projecting(type=$str1 hostPackage=$str2)" }
+                            { "State: Projecting(type=$str1 hostPackage=$str2 hostDevice=$str3)" }
                         )
-                        // TODO(b/351851835): Get the device name.
-                        ProjectionChipModel.Projecting(type, state, deviceName = null)
+                        ProjectionChipModel.Projecting(type, state)
                     }
                 }
             }

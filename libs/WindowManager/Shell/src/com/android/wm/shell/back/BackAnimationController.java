@@ -422,6 +422,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @VisibleForTesting
     public void onThresholdCrossed() {
         mThresholdCrossed = true;
+        // There was no focus window when calling startBackNavigation, still pilfer pointers so
+        // the next focus window won't receive motion events.
+        if (mBackNavigationInfo == null) {
+            tryPilferPointers();
+            return;
+        }
         // Dispatch onBackStarted, only to app callbacks.
         // System callbacks will receive onBackStarted when the remote animation starts.
         final boolean shouldDispatchToAnimator = shouldDispatchToAnimator();
@@ -542,6 +548,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         if (backNavigationInfo == null) {
             ProtoLog.e(WM_SHELL_BACK_PREVIEW, "Received BackNavigationInfo is null.");
             cancelLatencyTracking();
+            tryPilferPointers();
             return;
         }
         final int backType = backNavigationInfo.getType();

@@ -17,11 +17,11 @@
 package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 
 import android.content.applicationContext
-import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.endMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.screenRecordChipInteractor
+import com.android.systemui.statusbar.chips.statusBarChipsLogger
 import com.android.systemui.util.time.fakeSystemClock
 
 val Kosmos.screenRecordChipViewModel: ScreenRecordChipViewModel by
@@ -31,7 +31,7 @@ val Kosmos.screenRecordChipViewModel: ScreenRecordChipViewModel by
             context = applicationContext,
             interactor = screenRecordChipInteractor,
             endMediaProjectionDialogHelper = endMediaProjectionDialogHelper,
-            dialogTransitionAnimator = mockDialogTransitionAnimator,
             systemClock = fakeSystemClock,
+            logger = statusBarChipsLogger,
         )
     }

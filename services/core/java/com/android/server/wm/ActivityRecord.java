@@ -64,6 +64,7 @@ import static android.content.Intent.CATEGORY_SECONDARY_HOME;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
+import static android.content.pm.ActivityInfo.CONFIG_RESOURCES_UNUSED;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
@@ -232,6 +233,7 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_F
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutMillisLocked;
+import static com.android.server.wm.DesktopModeLaunchParamsModifier.canEnterDesktopMode;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -858,8 +860,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /** The last set {@link DropInputMode} for this activity surface. */
     @DropInputMode
     private int mLastDropInputMode = DropInputMode.NONE;
-    /** Whether the input to this activity will be dropped during the current playing animation. */
-    private boolean mIsInputDroppedForAnimation;
 
     /**
      * Whether the application has desk mode resources. Calculated and cached when
@@ -1102,11 +1102,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         pw.println(prefix + "mLastReportedConfigurations:");
         mLastReportedConfiguration.dump(pw, prefix + "  ");
 
-        if (Flags.activityWindowInfoFlag()) {
-            pw.print(prefix);
-            pw.print("mLastReportedActivityWindowInfo=");
-            pw.println(mLastReportedActivityWindowInfo);
-        }
+        pw.print(prefix);
+        pw.print("mLastReportedActivityWindowInfo=");
+        pw.println(mLastReportedActivityWindowInfo);
 
         pw.print(prefix); pw.print("CurrentConfiguration="); pw.println(getConfiguration());
         if (!getRequestedOverrideConfiguration().equals(EMPTY)) {
@@ -1699,15 +1697,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    /** Sets if all input will be dropped as a protection during the client-driven animation. */
-    void setDropInputForAnimation(boolean isInputDroppedForAnimation) {
-        if (mIsInputDroppedForAnimation == isInputDroppedForAnimation) {
-            return;
-        }
-        mIsInputDroppedForAnimation = isInputDroppedForAnimation;
-        updateUntrustedEmbeddingInputProtection();
-    }
-
     /**
      * Sets to drop input when obscured to activity if it is embedded in untrusted mode.
      *
@@ -1720,10 +1709,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (getSurfaceControl() == null) {
             return;
         }
-        if (mIsInputDroppedForAnimation) {
-            // Disable all input during the animation.
-            setDropInputMode(DropInputMode.ALL);
-        } else if (isEmbeddedInUntrustedMode()) {
+        if (isEmbeddedInUntrustedMode()) {
             // Set drop input to OBSCURED when untrusted embedded.
             setDropInputMode(DropInputMode.OBSCURED);
         } else {
@@ -3173,7 +3159,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @NonNull
     ActivityWindowInfo getActivityWindowInfo() {
-        if (!Flags.activityWindowInfoFlag() || !isAttached()) {
+        if (!isAttached()) {
             return mTmpActivityWindowInfo;
         }
         if (isFixedRotationTransforming()) {
@@ -8296,9 +8282,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void setLastReportedActivityWindowInfo(@NonNull ActivityWindowInfo activityWindowInfo) {
-        if (Flags.activityWindowInfoFlag()) {
-            mLastReportedActivityWindowInfo.set(activityWindowInfo);
-        }
+        mLastReportedActivityWindowInfo.set(activityWindowInfo);
     }
 
     @Nullable
@@ -9283,18 +9267,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void updateSizeCompatScale(Rect resolvedAppBounds, Rect containerAppBounds) {
-        // Only allow to scale down.
         mSizeCompatScale = mAppCompatController.getTransparentPolicy()
                 .findOpaqueNotFinishingActivityBelow()
                 .map(activityRecord -> activityRecord.mSizeCompatScale)
-                .orElseGet(() -> {
-                    final int contentW = resolvedAppBounds.width();
-                    final int contentH = resolvedAppBounds.height();
-                    final int viewportW = containerAppBounds.width();
-                    final int viewportH = containerAppBounds.height();
-                    return (contentW <= viewportW && contentH <= viewportH) ? 1f : Math.min(
-                            (float) viewportW / contentW, (float) viewportH / contentH);
-                });
+                .orElseGet(() -> calculateSizeCompatScale(resolvedAppBounds, containerAppBounds));
+    }
+
+    private float calculateSizeCompatScale(Rect resolvedAppBounds, Rect containerAppBounds) {
+        final int contentW = resolvedAppBounds.width();
+        final int contentH = resolvedAppBounds.height();
+        final int viewportW = containerAppBounds.width();
+        final int viewportH = containerAppBounds.height();
+        // Allow an application to be up-scaled if its window is smaller than its
+        // original container or if it's a freeform window in desktop mode.
+        boolean shouldAllowUpscaling = !(contentW <= viewportW && contentH <= viewportH)
+                || (canEnterDesktopMode(mAtmService.mContext)
+                    && getWindowingMode() == WINDOWING_MODE_FREEFORM);
+        return shouldAllowUpscaling ? Math.min(
+                (float) viewportW / contentW, (float) viewportH / contentH) : 1f;
     }
 
     private boolean isInSizeCompatModeForBounds(final Rect appBounds, final Rect containerBounds) {
@@ -9708,8 +9698,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // the combine configurations are equal, but would otherwise differ in the override config
         mTmpConfig.setTo(mLastReportedConfiguration.getMergedConfiguration());
         final ActivityWindowInfo newActivityWindowInfo = getActivityWindowInfo();
-        final boolean isActivityWindowInfoChanged = Flags.activityWindowInfoFlag()
-                && !mLastReportedActivityWindowInfo.equals(newActivityWindowInfo);
+        final boolean isActivityWindowInfoChanged =
+                !mLastReportedActivityWindowInfo.equals(newActivityWindowInfo);
         if (!displayChanged && !isActivityWindowInfoChanged
                 && getConfiguration().equals(mTmpConfig)) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration & display "
@@ -9846,6 +9836,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean shouldRelaunchLocked(int changes, Configuration changesConfig) {
         int configChanged = info.getRealConfigChanged();
+        if (android.content.res.Flags.handleAllConfigChanges()) {
+            if ((configChanged & CONFIG_RESOURCES_UNUSED) != 0) {
+                // Don't relaunch any activities that claim they do not use resources at all.
+                // If they still do, the onConfigurationChanged() callback will get called to
+                // let them know anyway.
+                return false;
+            }
+        }
+
         boolean onlyVrUiModeChanged = onlyVrUiModeChanged(changes, changesConfig);
 
         // Override for apps targeting pre-O sdks

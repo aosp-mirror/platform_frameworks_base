@@ -223,6 +223,10 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         Settings.System.putInt(getContext().getContentResolver(),
                 Settings.System.NOTIFICATION_LIGHT_PULSE, 1);
 
+        // Enable notification cooldown independent of device Settings
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.NOTIFICATION_COOLDOWN_ENABLED, 1);
+
         Resources resources = spy(getContext().getResources());
         when(resources.getBoolean(R.bool.config_useAttentionLight)).thenReturn(true);
         when(resources.getBoolean(

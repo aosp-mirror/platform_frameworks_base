@@ -26,16 +26,10 @@ sealed class ProjectionChipModel {
     /** There is no media being projected. */
     data object NotProjecting : ProjectionChipModel()
 
-    /**
-     * Media is currently being projected.
-     *
-     * @property deviceName the name of the device receiving the projection, or null if the
-     *   projection is to this device (as opposed to a different device).
-     */
+    /** Media is currently being projected. */
     data class Projecting(
         val type: Type,
         val projectionState: MediaProjectionState.Projecting,
-        val deviceName: String?,
     ) : ProjectionChipModel()
 
     enum class Type {

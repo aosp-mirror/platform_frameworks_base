@@ -127,6 +127,30 @@ interface KeyguardRepository {
      */
     val isKeyguardEnabled: StateFlow<Boolean>
 
+    /**
+     * Whether we can transition directly back to GONE from AOD/DOZING without any authentication
+     * events (such as a fingerprint wake and unlock), even though authentication would normally be
+     * required. This means that if you tap the screen or press the power button, you'll return
+     * directly to the unlocked app content without seeing the lockscreen, even if a secure
+     * authentication method (PIN/password/biometrics) is set.
+     *
+     * This is true in these cases:
+     * - The screen timed out, but the "lock after screen timeout" duration (default 5 seconds) has
+     *   not yet elapsed.
+     * - The power button was pressed, but "power button instantly locks" is not enabled, and the
+     *   "lock after screen timeout" duration has not elapsed.
+     *
+     * Note that this value specifically tells us if we can *ignore* authentication that would
+     * otherwise be required to transition from AOD/DOZING -> GONE. AOD/DOZING -> GONE is also
+     * possible if keyguard is disabled, either from an app request or because security is set to
+     * "none", but in that case, auth is not required so this boolean is not relevant.
+     *
+     * See [KeyguardWakeToGoneInteractor].
+     */
+    val canIgnoreAuthAndReturnToGone: StateFlow<Boolean>
+
+    fun setCanIgnoreAuthAndReturnToGone(canWake: Boolean)
+
     /** Is the always-on display available to be used? */
     val isAodAvailable: StateFlow<Boolean>
 
@@ -385,6 +409,13 @@ constructor(
     private val _isKeyguardEnabled =
         MutableStateFlow(!lockPatternUtils.isLockScreenDisabled(userTracker.userId))
     override val isKeyguardEnabled: StateFlow<Boolean> = _isKeyguardEnabled.asStateFlow()
+
+    private val _canIgnoreAuthAndReturnToGone = MutableStateFlow(false)
+    override val canIgnoreAuthAndReturnToGone = _canIgnoreAuthAndReturnToGone.asStateFlow()
+
+    override fun setCanIgnoreAuthAndReturnToGone(canWakeToGone: Boolean) {
+        _canIgnoreAuthAndReturnToGone.value = canWakeToGone
+    }
 
     private val _isDozing = MutableStateFlow(statusBarStateController.isDozing)
     override val isDozing: StateFlow<Boolean> = _isDozing.asStateFlow()
