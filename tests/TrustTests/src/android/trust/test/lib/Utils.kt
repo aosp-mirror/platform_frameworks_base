@@ -39,13 +39,44 @@ internal fun wait(
 ) {
     var waited = 0L
     var count = 0
-    while (!conditionFunction.invoke(count)) {
+    while (!conditionFunction(count)) {
         assertWithMessage("Condition exceeded maximum wait time of $maxWait ms: $description")
             .that(waited <= maxWait)
             .isTrue()
         waited += rate
         count++
         Log.i(TAG, "Waiting for $description ($waited/$maxWait) #$count")
+        Thread.sleep(rate)
+    }
+}
+
+/**
+ * Ensures that [conditionFunction] is true with a failed assertion if it is not within [window]
+ * ms.
+ *
+ * The condition function can perform additional logic (for example, logging or attempting to make
+ * the condition become true).
+ *
+ * @param conditionFunction function which takes the attempt count & returns whether the condition
+ *                          is met
+ */
+internal fun ensure(
+    description: String? = null,
+    window: Long = 30000L,
+    rate: Long = 50L,
+    conditionFunction: (count: Int) -> Boolean
+) {
+    var waited = 0L
+    var count = 0
+    while (waited <= window) {
+        assertWithMessage("Condition failed within $window ms: $description").that(
+                conditionFunction(
+                    count
+                )
+            ).isTrue()
+        waited += rate
+        count++
+        Log.i(TAG, "Ensuring $description ($waited/$window) #$count")
         Thread.sleep(rate)
     }
 }
