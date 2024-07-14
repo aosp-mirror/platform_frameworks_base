@@ -3719,8 +3719,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSplitTransitions.startDismissTransition(wct, StageCoordinator.this, stageType,
                         EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW);
                 Log.w(TAG, splitFailureMessage("onNoLongerSupportMultiWindow",
-                        "app package " + taskInfo.baseActivity.getPackageName()
-                        + " does not support splitscreen, or is a controlled activity type"));
+                        "app package " + taskInfo.baseIntent.getComponent()
+                                + " does not support splitscreen, or is a controlled activity"
+                                + " type"));
                 if (splitScreenVisible) {
                     handleUnsupportedSplitStart();
                 }
