@@ -42,6 +42,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.Cuj;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 
@@ -60,6 +62,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
 
     private final Context mContext;
     private final Transitions mTransitions;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
     private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
     private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
@@ -67,17 +70,21 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
 
     public ExitDesktopTaskTransitionHandler(
             Transitions transitions,
-            Context context) {
-        this(transitions, SurfaceControl.Transaction::new, context);
+            Context context,
+            InteractionJankMonitor interactionJankMonitor
+            ) {
+        this(transitions, SurfaceControl.Transaction::new, context, interactionJankMonitor);
     }
 
     private ExitDesktopTaskTransitionHandler(
             Transitions transitions,
             Supplier<SurfaceControl.Transaction> supplier,
-            Context context) {
+            Context context,
+            InteractionJankMonitor interactionJankMonitor) {
         mTransitions = transitions;
         mTransactionSupplier = supplier;
         mContext = context;
+        mInteractionJankMonitor = interactionJankMonitor;
     }
 
     /**
@@ -146,6 +153,8 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
             final int screenHeight = metrics.heightPixels;
             final SurfaceControl sc = change.getLeash();
             final Rect endBounds = change.getEndAbsBounds();
+            mInteractionJankMonitor
+                .begin(sc, mContext, Cuj.CUJ_DESKTOP_MODE_EXIT_MODE);
             // Hide the first (fullscreen) frame because the animation will start from the freeform
             // size.
             startT.hide(sc)
@@ -175,6 +184,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
                     if (mOnAnimationFinishedCallback != null) {
                         mOnAnimationFinishedCallback.accept(finishT);
                     }
+                    mInteractionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_EXIT_MODE);
                     mTransitions.getMainExecutor().execute(
                             () -> finishCallback.onTransitionFinished(null));
                 }

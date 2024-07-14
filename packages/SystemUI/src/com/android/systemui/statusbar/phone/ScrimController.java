@@ -474,6 +474,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         // PRIMARY_BOUNCER->GONE
         collectFlow(behindScrim, mKeyguardTransitionInteractor.transition(
+                Edge.Companion.getINVALID(),
                 Edge.Companion.create(PRIMARY_BOUNCER, GONE)),
                 mBouncerToGoneTransition, mMainDispatcher);
         collectFlow(behindScrim, mPrimaryBouncerToGoneTransitionViewModel.getScrimAlpha(),

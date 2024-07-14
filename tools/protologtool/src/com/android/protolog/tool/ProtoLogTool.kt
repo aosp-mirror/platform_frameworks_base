@@ -443,10 +443,10 @@ object ProtoLogTool {
             val command = CommandOptions(args)
             invoke(command)
         } catch (ex: InvalidCommandException) {
-            println("\n${ex.message}\n")
+            println("InvalidCommandException: \n${ex.message}\n")
             showHelpAndExit()
         } catch (ex: CodeProcessingException) {
-            println("\n${ex.message}\n")
+            println("CodeProcessingException: \n${ex.message}\n")
             exitProcess(1)
         }
     }

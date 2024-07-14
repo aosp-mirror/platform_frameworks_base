@@ -1060,6 +1060,23 @@ public final class UserManagerTest {
         assertThrows(SecurityException.class, userProps::getAlwaysVisible);
     }
 
+    /**
+     * Test that UserManager.getUserProperties throws the IllegalArgumentException for unsupported
+     * arguments such as UserHandle.NULL, UserHandle.CURRENT or UserHandle.ALL.
+     **/
+    @MediumTest
+    @Test
+    public void testThrowUserPropertiesForUnsupportedUserHandles() throws Exception {
+        assertThrows(IllegalArgumentException.class, () ->
+            mUserManager.getUserProperties(UserHandle.of(UserHandle.USER_NULL)));
+        assertThrows(IllegalArgumentException.class, () ->
+            mUserManager.getUserProperties(UserHandle.CURRENT));
+        assertThrows(IllegalArgumentException.class, () ->
+            mUserManager.getUserProperties(UserHandle.CURRENT_OR_SELF));
+        assertThrows(IllegalArgumentException.class, () ->
+            mUserManager.getUserProperties(UserHandle.ALL));
+    }
+
     // Make sure only max managed profiles can be created
     @MediumTest
     @Test
@@ -1843,6 +1860,25 @@ public final class UserManagerTest {
 
         assertThat(allProfiles).asList().contains(profile.id);
         assertThat(profilesExcludingHidden).asList().doesNotContain(profile.id);
+    }
+
+    /**
+     * Test that UserManager.isQuietModeEnabled return false for unsupported
+     * arguments such as UserHandle.NULL, UserHandle.CURRENT or UserHandle.ALL.
+     **/
+    @MediumTest
+    @Test
+    public void testQuietModeEnabledForUnsupportedUserHandles() throws Exception {
+        assumeManagedUsersSupported();
+        final int mainUserId = mUserManager.getMainUser().getIdentifier();
+        UserInfo userInfo = createProfileForUser("Profile",
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
+        mUserManager.requestQuietModeEnabled(true, userInfo.getUserHandle());
+        assertThat(mUserManager.isQuietModeEnabled(userInfo.getUserHandle())).isTrue();
+        assertThat(mUserManager.isQuietModeEnabled(UserHandle.of(UserHandle.USER_NULL))).isFalse();
+        assertThat(mUserManager.isQuietModeEnabled(UserHandle.CURRENT)).isFalse();
+        assertThat(mUserManager.isQuietModeEnabled(UserHandle.CURRENT_OR_SELF)).isFalse();
+        assertThat(mUserManager.isQuietModeEnabled(UserHandle.ALL)).isFalse();
     }
 
     private String generateLongString() {

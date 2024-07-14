@@ -515,7 +515,7 @@ class MenuViewLayer extends FrameLayout implements
         List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
                 PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY));
         if (!activities.isEmpty()) {
-            mContext.startActivity(intent);
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
             mStatusBarManager.collapsePanels();
         }
     }

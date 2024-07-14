@@ -189,6 +189,7 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.FallbackAction;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
@@ -3321,6 +3322,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 eventToLog).sendToTarget();
     }
 
+    @Override
+    public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
+        return mModifierShortcutManager.getApplicationLaunchKeyboardShortcuts(deviceId);
+    }
+
     // TODO(b/117479243): handle it in InputPolicy
     // TODO (b/283241997): Add the remaining keyboard shortcut logging after refactoring
     /** {@inheritDoc} */
@@ -3567,24 +3573,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOICE_ASSIST:
                 Slog.wtf(TAG, "KEYCODE_VOICE_ASSIST should be handled in"
                         + " interceptKeyBeforeQueueing");
-                return true;
-            case KeyEvent.KEYCODE_VIDEO_APP_1:
-            case KeyEvent.KEYCODE_VIDEO_APP_2:
-            case KeyEvent.KEYCODE_VIDEO_APP_3:
-            case KeyEvent.KEYCODE_VIDEO_APP_4:
-            case KeyEvent.KEYCODE_VIDEO_APP_5:
-            case KeyEvent.KEYCODE_VIDEO_APP_6:
-            case KeyEvent.KEYCODE_VIDEO_APP_7:
-            case KeyEvent.KEYCODE_VIDEO_APP_8:
-            case KeyEvent.KEYCODE_FEATURED_APP_1:
-            case KeyEvent.KEYCODE_FEATURED_APP_2:
-            case KeyEvent.KEYCODE_FEATURED_APP_3:
-            case KeyEvent.KEYCODE_FEATURED_APP_4:
-            case KeyEvent.KEYCODE_DEMO_APP_1:
-            case KeyEvent.KEYCODE_DEMO_APP_2:
-            case KeyEvent.KEYCODE_DEMO_APP_3:
-            case KeyEvent.KEYCODE_DEMO_APP_4:
-                Slog.wtf(TAG, "KEYCODE_APP_X should be handled in interceptKeyBeforeQueueing");
                 return true;
             case KeyEvent.KEYCODE_BRIGHTNESS_UP:
             case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
@@ -5496,9 +5484,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // In case startedGoingToSleep is called after screenTurnedOff (the source caller is in
         // order but the methods run on different threads) and updateScreenOffSleepToken was
         // skipped. Then acquire sleep token if screen was off.
-        if (!mDefaultDisplayPolicy.isScreenOnFully() && !mDefaultDisplayPolicy.isScreenOnEarly()
-                && com.android.window.flags.Flags.skipSleepingWhenSwitchingDisplay()) {
-            updateScreenOffSleepToken(true /* acquire */, false /* isSwappingDisplay */);
+        if (!mDefaultDisplayPolicy.isScreenOnFully() && !mDefaultDisplayPolicy.isScreenOnEarly()) {
+            updateScreenOffSleepToken(true /* acquire */);
         }
 
         if (mKeyguardDelegate != null) {
@@ -5661,9 +5648,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Display" + displayId + " turned off...");
 
         if (displayId == DEFAULT_DISPLAY) {
-            if (!isSwappingDisplay || mIsGoingToSleepDefaultDisplay
-                    || !com.android.window.flags.Flags.skipSleepingWhenSwitchingDisplay()) {
-                updateScreenOffSleepToken(true /* acquire */, isSwappingDisplay);
+            if (!isSwappingDisplay || mIsGoingToSleepDefaultDisplay) {
+                updateScreenOffSleepToken(true /* acquire */);
             }
             mRequestedOrSleepingDefaultDisplay = false;
             mDefaultDisplayPolicy.screenTurnedOff();
@@ -5722,7 +5708,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (displayId == DEFAULT_DISPLAY) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurningOn",
                     0 /* cookie */);
-            updateScreenOffSleepToken(false /* acquire */, false /* isSwappingDisplay */);
+            updateScreenOffSleepToken(false /* acquire */);
             mDefaultDisplayPolicy.screenTurningOn(screenOnListener);
             mBootAnimationDismissable = false;
 
@@ -6228,9 +6214,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     // TODO (multidisplay): Support multiple displays in WindowManagerPolicy.
-    private void updateScreenOffSleepToken(boolean acquire, boolean isSwappingDisplay) {
+    private void updateScreenOffSleepToken(boolean acquire) {
         if (acquire) {
-            mScreenOffSleepTokenAcquirer.acquire(DEFAULT_DISPLAY, isSwappingDisplay);
+            mScreenOffSleepTokenAcquirer.acquire(DEFAULT_DISPLAY);
         } else {
             mScreenOffSleepTokenAcquirer.release(DEFAULT_DISPLAY);
         }

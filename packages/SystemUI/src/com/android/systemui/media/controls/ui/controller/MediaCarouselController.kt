@@ -662,13 +662,9 @@ constructor(
     @VisibleForTesting
     internal fun listenForAnyStateToGoneKeyguardTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            if (SceneContainerFlag.isEnabled) {
-                    sceneInteractor.transitionState.filter { it.isIdle(Scenes.Gone) }
-                } else {
-                    keyguardTransitionInteractor.transition(Edge.create(to = GONE)).filter {
-                        it.transitionState == TransitionState.FINISHED
-                    }
-                }
+            keyguardTransitionInteractor
+                .isFinishedIn(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
+                .filter { it }
                 .collect {
                     showMediaCarousel()
                     updateHostVisibility()
@@ -849,8 +845,25 @@ constructor(
         commonViewModels.addAll(viewModels)
 
         // Ensure we only show the needed UMOs in media carousel.
-        val viewSet = viewModels.toHashSet()
-        controllerByViewModel.filter { !viewSet.contains(it.key) }.forEach { onRemoved(it.key) }
+        val viewIds =
+            viewModels
+                .map { mediaCommonViewModel ->
+                    when (mediaCommonViewModel) {
+                        is MediaCommonViewModel.MediaControl ->
+                            mediaCommonViewModel.instanceId.toString()
+                        is MediaCommonViewModel.MediaRecommendations -> mediaCommonViewModel.key
+                    }
+                }
+                .toHashSet()
+        controllerByViewModel
+            .filter {
+                when (val viewModel = it.key) {
+                    is MediaCommonViewModel.MediaControl ->
+                        !viewIds.contains(viewModel.instanceId.toString())
+                    is MediaCommonViewModel.MediaRecommendations -> !viewIds.contains(viewModel.key)
+                }
+            }
+            .forEach { onRemoved(it.key) }
     }
 
     private suspend fun getMediaLockScreenSetting(): Boolean {

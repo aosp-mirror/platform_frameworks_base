@@ -17,8 +17,10 @@
 package com.android.systemui.haptics.qs
 
 import android.os.VibrationEffect
+import android.service.quicksettings.Tile
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.animation.Expandable
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -40,6 +42,7 @@ class QSLongPressEffect
 constructor(
     private val vibratorHelper: VibratorHelper?,
     private val keyguardStateController: KeyguardStateController,
+    private val falsingManager: FalsingManager,
 ) {
 
     var effectDuration = 0
@@ -130,18 +133,18 @@ constructor(
     fun handleAnimationComplete() {
         when (state) {
             State.RUNNING_FORWARD -> {
-                setState(State.IDLE)
                 vibrate(snapEffect)
                 if (keyguardStateController.isUnlocked) {
-                    qsTile?.longClick(expandable)
+                    setState(State.LONG_CLICKED)
                 } else {
                     callback?.onResetProperties()
-                    qsTile?.longClick(expandable)
+                    setState(State.IDLE)
                 }
+                qsTile?.longClick(expandable)
             }
             State.RUNNING_BACKWARDS_FROM_UP -> {
-                setState(State.IDLE)
                 callback?.onEffectFinishedReversing()
+                setState(getStateForClick())
                 qsTile?.click(expandable)
             }
             State.RUNNING_BACKWARDS_FROM_CANCEL -> setState(State.IDLE)
@@ -160,14 +163,37 @@ constructor(
     }
 
     fun onTileClick(): Boolean {
-        if (state == State.TIMEOUT_WAIT) {
-            setState(State.IDLE)
-            qsTile?.let {
-                it.click(expandable)
-                return true
-            }
+        val isStateClickable = state == State.TIMEOUT_WAIT || state == State.IDLE
+
+        // Ignore View-generated clicks on invalid states or if the bouncer is showing
+        if (keyguardStateController.isPrimaryBouncerShowing || !isStateClickable) return false
+
+        setState(getStateForClick())
+        qsTile?.click(expandable)
+        return true
+    }
+
+    /**
+     * Get the appropriate state for a click action.
+     *
+     * In some occasions, the click action will not result in a subsequent action that resets the
+     * state upon completion (e.g., a launch transition animation). In these cases, the state needs
+     * to be reset before the click is dispatched.
+     */
+    @VisibleForTesting
+    fun getStateForClick(): State {
+        val isTileUnavailable = qsTile?.state?.state == Tile.STATE_UNAVAILABLE
+        val isFalseTapWhileLocked =
+            !keyguardStateController.isUnlocked &&
+                falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)
+        val handlesLongClick = qsTile?.state?.handlesLongClick == true
+        return if (isTileUnavailable || isFalseTapWhileLocked || !handlesLongClick) {
+            // The click event will not perform an action that resets the state. Therefore, this is
+            // the last opportunity to reset the state back to IDLE.
+            State.IDLE
+        } else {
+            State.CLICKED
         }
-        return false
     }
 
     /**
@@ -194,6 +220,8 @@ constructor(
         return true
     }
 
+    fun resetState() = setState(State.IDLE)
+
     enum class State {
         IDLE, /* The effect is idle waiting for touch input */
         TIMEOUT_WAIT, /* The effect is waiting for a tap timeout period */
@@ -202,6 +230,8 @@ constructor(
         RUNNING_BACKWARDS_FROM_UP,
         /* The effect was interrupted by an ACTION_CANCEL and is now running backwards */
         RUNNING_BACKWARDS_FROM_CANCEL,
+        CLICKED, /* The effect has ended with a click */
+        LONG_CLICKED, /* The effect has ended with a long-click */
     }
 
     /** Callbacks to notify view and animator actions */

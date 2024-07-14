@@ -61,6 +61,11 @@ enum class KeyguardState {
      * The security screen prompt UI, containing PIN, Password, Pattern for the user to verify their
      * credentials.
      */
+    @Deprecated(
+        "This state won't exist anymore when scene container gets enabled. If you are " +
+            "writing prod code today, make sure to either use flag aware APIs in " +
+            "[KeyguardTransitionInteractor] or flag appropriately with [SceneContainerFlag]."
+    )
     PRIMARY_BOUNCER,
     /**
      * Device is actively displaying keyguard UI and is not in low-power mode. Device may be
@@ -72,12 +77,22 @@ enum class KeyguardState {
      * hub UI. From this state, the user can swipe from the left edge to go back to the lock screen
      * or dream, as well as swipe down for the notifications and up for the bouncer.
      */
+    @Deprecated(
+        "This state won't exist anymore when scene container gets enabled. If you are " +
+            "writing prod code today, make sure to either use flag aware APIs in " +
+            "[KeyguardTransitionInteractor] or flag appropriately with [SceneContainerFlag]."
+    )
     GLANCEABLE_HUB,
     /**
      * Keyguard is no longer visible. In most cases the user has just authenticated and keyguard is
      * being removed, but there are other cases where the user is swiping away keyguard, such as
      * with SWIPE security method or face unlock without bypass.
      */
+    @Deprecated(
+        "This state won't exist anymore when scene container gets enabled. If you are " +
+            "writing prod code today, make sure to either use flag aware APIs in " +
+            "[KeyguardTransitionInteractor] or flag appropriately with [SceneContainerFlag]."
+    )
     GONE,
     /**
      * Only used in scene framework. This means we are currently on any scene framework scene that
@@ -143,6 +158,7 @@ enum class KeyguardState {
 
         /** Whether the lockscreen is visible when we're FINISHED in the given state. */
         fun lockscreenVisibleInState(state: KeyguardState): Boolean {
+            // TODO(b/349784682): Transform deprecated states for Flexiglass
             return state != GONE
         }
 

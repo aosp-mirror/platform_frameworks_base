@@ -266,8 +266,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Rapport de bug"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Fermer la session"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Capture d\'écran"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Signaler un bug"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Cela permet de recueillir des informations concernant l\'état actuel de votre appareil. Ces informations sont ensuite envoyées sous forme d\'e-mail. Merci de patienter pendant la préparation du rapport de bug. Cette opération peut prendre quelques instants."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Rapport interactif"</string>
@@ -1768,12 +1766,9 @@
     <skip />
     <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
     <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"La fonctionnalité s\'ouvrira la prochaine fois que vous appuierez sur le bouton Accessibilité"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"La fonctionnalité s\'ouvrira la prochaine fois que vous utiliserez ce raccourci. Balayez du bas de l\'écran vers le haut avec deux doigts et relâchez rapidement."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"La fonctionnalité s\'ouvrira la prochaine fois que vous utiliserez ce raccourci. Balayez du bas de l\'écran vers le haut avec trois doigts et relâchez rapidement."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Agrandissement"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Passage à <xliff:g id="NAME">%1$s</xliff:g>..."</string>
@@ -2437,17 +2432,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Fonctionnement"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"En attente…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Reconfigurer le déverrouillage par empreinte digitale"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ne peut plus être reconnue."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> et <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ne peuvent plus être reconnues."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> ne peut plus être reconnue. Reconfigurez le déverrouillage par empreinte digitale."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> et <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ne peuvent plus être reconnues. Reconfigurez le déverrouillage par empreinte digitale."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Reconfigurer le déverrouillage par reconnaissance faciale"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Votre empreinte faciale ne peut plus être reconnue. Reconfigurez le déverrouillage par reconnaissance faciale."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configuration"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Pas maintenant"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarme pour <xliff:g id="USER_NAME">%s</xliff:g>"</string>

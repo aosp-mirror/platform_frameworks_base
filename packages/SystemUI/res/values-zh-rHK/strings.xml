@@ -476,8 +476,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"新增更多小工具"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"長按即可自訂小工具"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"自訂小工具"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"解鎖即可自訂小工具"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"已停用小工具的應用程式圖示"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"此應用程式圖示用來表示安裝中的小工具"</string>
     <string name="edit_widget" msgid="9030848101135393954">"編輯小工具"</string>
@@ -1375,6 +1374,8 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
     <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"返回"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"用三隻手指在觸控板上任何一處左右滑動即可返回。"</string>

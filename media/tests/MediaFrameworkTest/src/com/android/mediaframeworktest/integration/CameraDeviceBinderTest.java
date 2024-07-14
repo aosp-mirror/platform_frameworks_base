@@ -242,9 +242,6 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
         ICameraDeviceCallbacks.Stub dummyCallbacks = new DummyCameraDeviceCallbacks();
 
-        String clientPackageName = getContext().getPackageName();
-        String clientAttributionTag = getContext().getAttributionTag();
-
         mMockCb = spy(dummyCallbacks);
 
         AttributionSourceState clientAttribution = CameraTestUtils.getClientAttribution(mContext);
@@ -252,7 +249,6 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         clientAttribution.uid = ICameraService.USE_CALLING_UID;
 
         mCameraUser = mUtils.getCameraService().connectDevice(mMockCb, mCameraId,
-                clientPackageName, clientAttributionTag,
                 /*oomScoreOffset*/0, getContext().getApplicationInfo().targetSdkVersion,
                 ICameraService.ROTATION_OVERRIDE_NONE, clientAttribution, DEVICE_POLICY_DEFAULT);
         assertNotNull(String.format("Camera %s was null", mCameraId), mCameraUser);

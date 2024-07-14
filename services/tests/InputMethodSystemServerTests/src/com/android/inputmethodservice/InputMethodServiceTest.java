@@ -99,6 +99,12 @@ public class InputMethodServiceTest {
                     InputMethodServiceWrapper.getInputMethodServiceWrapperForTesting();
             assertThat(mInputMethodService).isNotNull();
 
+            // The activity gets focus.
+            assertThat(mActivity.hasWindowFocus()).isTrue();
+            assertThat(mInputMethodService.getCurrentInputEditorInfo()).isNotNull();
+            assertThat(mInputMethodService.getCurrentInputEditorInfo().packageName)
+                    .isEqualTo(mTargetPackageName);
+
             // The editor won't bring up keyboard by default.
             assertThat(mInputMethodService.getCurrentInputStarted()).isTrue();
             assertThat(mInputMethodService.getCurrentInputViewStarted()).isFalse();

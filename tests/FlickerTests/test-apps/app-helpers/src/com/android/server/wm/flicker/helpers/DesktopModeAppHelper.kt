@@ -165,4 +165,37 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             Corners.RIGHT_BOTTOM -> Pair(windowRect.right, windowRect.bottom)
         }
     }
+
+    /** Exit desktop mode by dragging the app handle to the top drag zone. */
+    fun exitDesktopWithDragToTopDragZone(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+    ) {
+        dragAppWindowToTopDragZone(wmHelper, device)
+        waitForTransitionToFullscreen(wmHelper)
+    }
+
+    private fun dragAppWindowToTopDragZone(wmHelper: WindowManagerStateHelper, device: UiDevice) {
+        val windowRect = wmHelper.getWindowRegion(innerHelper).bounds
+        val displayRect =
+            wmHelper.currentState.wmState.getDefaultDisplay()?.displayRect
+                ?: throw IllegalStateException("Default display is null")
+
+        val startX = windowRect.centerX()
+        val endX = displayRect.centerX()
+        val startY = windowRect.top
+        val endY = 0 // top of the screen
+
+        // drag the app window to top drag zone
+        device.drag(startX, startY, endX, endY, 100)
+    }
+
+    /** Wait for transition to full screen to finish. */
+    private fun waitForTransitionToFullscreen(wmHelper: WindowManagerStateHelper) {
+        wmHelper
+            .StateSyncBuilder()
+            .withFullScreenApp(innerHelper)
+            .withAppTransitionIdle()
+            .waitForAndVerify()
+    }
 }

@@ -103,8 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> zbuloi këtë pamje ekrani."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> dhe aplikacionet e tjera të hapura zbuluan këtë pamje ekrani."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Shto te shënimi"</string>
-    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
-    <skip />
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Përfshi lidhjen"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Regjistruesi i ekranit"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Regjistrimi i ekranit po përpunohet"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Njoftim i vazhdueshëm për një seancë regjistrimi të ekranit"</string>
@@ -134,8 +133,7 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Do të ndalosh regjistrimin me &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
-    <!-- no translation found for share_to_app_chip_accessibility_label (4210256229976947065) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Ekrani po ndahet"</string>
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
@@ -143,8 +141,7 @@
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Do të ndalosh ndarjen e &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
-    <!-- no translation found for cast_to_other_device_chip_accessibility_label (1680650146639059938) -->
-    <skip />
+    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"Po transmeton ekranin"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
@@ -198,8 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"U shkyç me fytyrë. Shtyp për të vazhduar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Fytyra u njoh. Shtyp për të vazhduar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Fytyra u njoh. Shtyp ikonën e shkyçjes për të vazhduar."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"U shkyç me fytyrë. Trokit për të vazhduar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"U vërtetua"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Anulo vërtetimin"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Opsione të tjera"</string>
@@ -480,8 +476,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Shto miniaplikacione të tjera"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Shtyp gjatë për të personalizuar miniaplikacionet"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personalizo miniaplikacionet"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Shkyç për të personalizuar miniaplikacionet"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ikona e aplikacionit për miniaplikacionin e çaktivizuar"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Ikona e aplikacionit për një miniaplikacion që po instalohet"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Modifiko miniaplikacionin"</string>
@@ -1359,15 +1354,11 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Në përdorim nga <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Përdorur së fundi nga <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Sistemi"</string>
-    <!-- no translation found for shortcut_helper_category_system_controls (3153344561395751020) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_system_apps (6001757545472556810) -->
-    <skip />
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Kontrollet e sistemit"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Aplikacionet e sistemit"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Kryerja e shumë detyrave"</string>
-    <!-- no translation found for shortcutHelper_category_recent_apps (7918731953612377145) -->
-    <skip />
-    <!-- no translation found for shortcutHelper_category_split_screen (1159669813444812244) -->
-    <skip />
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Aplikacionet e fundit"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Ekrani i ndarë"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Hyrja"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Shkurtoret e aplikacionit"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Qasshmëria"</string>
@@ -1383,6 +1374,8 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
     <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Kthehu prapa"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Për t\'u kthyer prapa, rrëshqit shpejt majtas ose djathtas duke përdorur tre gishta kudo në bllokun me prekje."</string>

@@ -988,7 +988,40 @@ public class SettingsStateTest {
     }
 
     @Test
-   public void testGetFlagOverrideToSync() {
+    public void testMemoryUsagePerPackage_StatsUpdatedOnAppDataCleared() {
+        SettingsState settingsState =
+                new SettingsState(
+                        InstrumentationRegistry.getContext(), mLock, mSettingsFile, 1,
+                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
+        final String testKey1 = SETTING_NAME;
+        final String testKey2 = SETTING_NAME + "_2";
+        final String testValue1 = Strings.repeat("A", 9000);
+        final String testValue2 = Strings.repeat("A", 9001);
+        final String packageName = "p";
+        // Inserting the first setting should be okay
+        settingsState.insertSettingLocked(testKey1, testValue1, null, true, packageName);
+        int expectedMemUsageForPackage = (testKey1.length() + testValue1.length()
+                + testValue1.length() /* size for default */) * Character.BYTES;
+        assertEquals(expectedMemUsageForPackage, settingsState.getMemoryUsage(packageName));
+        // Inserting the second setting should fail
+        try {
+            settingsState.insertSettingLocked(testKey2, testValue2, null, true, packageName);
+            fail("Should throw because it exceeded max memory usage per package");
+        } catch (IllegalStateException ex) {
+            assertTrue(ex.getMessage().startsWith("You are adding too many system settings."));
+        }
+        // Now clear app data and check that the memory usage is cleared
+        settingsState.removeSettingsForPackageLocked(packageName);
+        assertEquals(0, settingsState.getMemoryUsage(packageName));
+        // Try inserting the second setting again and it should go through
+        settingsState.insertSettingLocked(testKey2, testValue2, null, true, packageName);
+        expectedMemUsageForPackage = (testKey2.length() + testValue2.length()
+                + testValue2.length() /* size for default */) * Character.BYTES;
+        assertEquals(expectedMemUsageForPackage, settingsState.getMemoryUsage(packageName));
+    }
+
+    @Test
+    public void testGetFlagOverrideToSync() {
         int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
         Object lock = new Object();
         SettingsState settingsState =

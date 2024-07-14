@@ -2006,6 +2006,7 @@
   <java-symbol type="array" name="config_notificationFallbackVibeWaveform" />
   <java-symbol type="bool" name="config_enableServerNotificationEffectsForAutomotive" />
   <java-symbol type="bool" name="config_useAttentionLight" />
+  <java-symbol type="bool" name="config_enableNotificationAccessibilityEvents" />
   <java-symbol type="bool" name="config_adaptive_sleep_available" />
   <java-symbol type="bool" name="config_camera_autorotate"/>
   <java-symbol type="bool" name="config_animateScreenLights" />
@@ -4059,6 +4060,7 @@
   <java-symbol type="id" name="snooze_button" />
   <java-symbol type="dimen" name="text_size_body_2_material" />
   <java-symbol type="dimen" name="notification_icon_circle_size" />
+  <java-symbol type="drawable" name="notification_icon_circle" />
   <java-symbol type="dimen" name="messaging_avatar_size" />
   <java-symbol type="dimen" name="messaging_group_sending_progress_size" />
   <java-symbol type="dimen" name="messaging_image_rounding" />
@@ -5559,4 +5561,15 @@
   <java-symbol type="string" name="bg_user_sound_notification_button_switch_user" />
   <java-symbol type="string" name="bg_user_sound_notification_button_mute" />
   <java-symbol type="string" name="bg_user_sound_notification_message" />
+
+  <!-- Keyboard Shortcut default category names. -->
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_browser" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_calculator" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_calendar" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_contacts" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_email" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_maps" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_music" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications_sms" />
+  <java-symbol type="string" name="keyboard_shortcut_group_applications" />
 </resources>

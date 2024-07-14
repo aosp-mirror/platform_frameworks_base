@@ -7435,6 +7435,21 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * Queries the volume policy
+     * @return the volume policy currently in use
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    public @NonNull VolumePolicy getVolumePolicy() {
+        try {
+            return getService().getVolumePolicy();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Set Hdmi Cec system audio mode.
      *
      * @param on whether to be on system audio mode

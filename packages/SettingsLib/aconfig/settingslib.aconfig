@@ -92,3 +92,23 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "volume_dialog_audio_sharing_fix"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to show separate volume bars during audio sharing"
+    bug: "336716411"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "extreme_power_low_state_vulnerability"
+    namespace: "pixel_energizer"
+    description: "the battery saver can pause all non-essential apps and their corresponding notification when device is in locked state to introduce the security vulnerability"
+    bug: "346513692"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

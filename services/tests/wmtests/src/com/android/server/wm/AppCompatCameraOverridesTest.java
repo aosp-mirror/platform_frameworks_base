@@ -26,7 +26,6 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTA
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
 
@@ -264,11 +263,26 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
     public void testShouldRecomputeConfigurationForCameraCompat() {
         runTestScenario((robot) -> {
             robot.conf().enableCameraCompatSplitScreenAspectRatio(true);
-            robot.activity().createActivityWithComponentInNewTask();
-            robot.activateCamera(true);
-            robot.activity().setShouldCreateCompatDisplayInsets(false);
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponentInNewTask();
+                a.activateCameraInPolicy(true);
+                a.setShouldCreateCompatDisplayInsets(false);
+            });
 
             robot.checkShouldApplyFreeformTreatmentForCameraCompat(true);
+        });
+    }
+
+    @Test
+    public void testIsCameraActive() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.activateCameraInPolicy(/* isCameraActive */ false);
+                robot.checkIsCameraActive(/* active */ false);
+                a.activateCameraInPolicy(/* isCameraActive */ true);
+                robot.checkIsCameraActive(/* active */ true);
+            });
         });
     }
 
@@ -289,10 +303,6 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
             super(wm, atm, supervisor);
         }
 
-        void activateCamera(boolean isCameraActive) {
-            doReturn(isCameraActive).when(activity().top()).isCameraActive();
-        }
-
         void checkShouldRefreshActivityForCameraCompat(boolean expected) {
             Assert.assertEquals(getAppCompatCameraOverrides()
                     .shouldRefreshActivityForCameraCompat(), expected);
@@ -311,6 +321,10 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
         void checkShouldApplyFreeformTreatmentForCameraCompat(boolean expected) {
             Assert.assertEquals(getAppCompatCameraOverrides()
                     .shouldApplyFreeformTreatmentForCameraCompat(), expected);
+        }
+
+        void checkIsCameraActive(boolean active) {
+            Assert.assertEquals(getAppCompatCameraOverrides().isCameraActive(), active);
         }
 
         private AppCompatCameraOverrides getAppCompatCameraOverrides() {

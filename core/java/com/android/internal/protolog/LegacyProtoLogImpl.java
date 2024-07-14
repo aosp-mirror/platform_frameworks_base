@@ -97,7 +97,7 @@ public class LegacyProtoLogImpl implements IProtoLog {
     @VisibleForTesting
     @Override
     public void log(LogLevel level, IProtoLogGroup group, long messageHash, int paramsMask,
-            Object[] args) {
+            @Nullable Object[] args) {
         if (group.isLogToProto()) {
             logToProto(messageHash, paramsMask, args);
         }
@@ -113,7 +113,8 @@ public class LegacyProtoLogImpl implements IProtoLog {
                 "Not implemented. Only implemented for PerfettoProtoLogImpl.");
     }
 
-    private void logToLogcat(String tag, LogLevel level, long messageHash, Object[] args) {
+    private void logToLogcat(String tag, LogLevel level, long messageHash,
+            @Nullable Object[] args) {
         String message = null;
         final String messageString = mViewerConfig.getViewerString(messageHash);
         if (messageString != null) {
@@ -129,8 +130,10 @@ public class LegacyProtoLogImpl implements IProtoLog {
         }
         if (message == null) {
             StringBuilder builder = new StringBuilder("UNKNOWN MESSAGE (" + messageHash + ")");
-            for (Object o : args) {
-                builder.append(" ").append(o);
+            if (args != null) {
+                for (Object o : args) {
+                    builder.append(" ").append(o);
+                }
             }
             message = builder.toString();
         }

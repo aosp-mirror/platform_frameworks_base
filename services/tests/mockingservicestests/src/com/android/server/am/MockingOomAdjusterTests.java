@@ -3209,7 +3209,7 @@ public class MockingOomAdjusterTests {
             final ProcessReceiverRecord receivers = app.mReceivers;
             final ProcessProfileRecord profile = app.mProfile;
             final ProcessProviderRecord providers = app.mProviders;
-            app.makeActive(mock(IApplicationThread.class), mService.mProcessStats);
+            app.makeActive(mock(ApplicationThreadDeferred.class), mService.mProcessStats);
             app.setLastActivityTime(mLastActivityTime);
             app.setKilledByAm(mKilledByAm);
             app.setIsolatedEntryPoint(mIsolatedEntryPoint);

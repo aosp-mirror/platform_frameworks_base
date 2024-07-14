@@ -169,10 +169,8 @@ public class CameraBinderTest extends AndroidTestCase {
 
             ICameraClient dummyCallbacks = new DummyCameraClient();
 
-            String clientPackageName = getContext().getPackageName();
-
             ICamera cameraUser = mUtils.getCameraService()
-                    .connect(dummyCallbacks, cameraId, clientPackageName,
+                    .connect(dummyCallbacks, cameraId,
                             getContext().getApplicationInfo().targetSdkVersion,
                             ICameraService.ROTATION_OVERRIDE_NONE,
                             /*forceSlowJpegMode*/false,
@@ -267,8 +265,6 @@ public class CameraBinderTest extends AndroidTestCase {
 
             ICameraDeviceCallbacks dummyCallbacks = new DummyCameraDeviceCallbacks();
 
-            String clientPackageName = getContext().getPackageName();
-            String clientAttributionTag = getContext().getAttributionTag();
             AttributionSourceState clientAttribution =
                     CameraTestUtils.getClientAttribution(mContext);
             clientAttribution.deviceId = DEVICE_ID_DEFAULT;
@@ -277,7 +273,6 @@ public class CameraBinderTest extends AndroidTestCase {
             ICameraDeviceUser cameraUser =
                     mUtils.getCameraService().connectDevice(
                         dummyCallbacks, String.valueOf(cameraId),
-                        clientPackageName, clientAttributionTag,
                         0 /*oomScoreOffset*/,
                         getContext().getApplicationInfo().targetSdkVersion,
                         ICameraService.ROTATION_OVERRIDE_NONE, clientAttribution,

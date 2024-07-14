@@ -315,6 +315,42 @@
         <xs:element name="screenBrightnessRampDecrease" type="nonNegativeDecimal">
             <xs:annotation name="final"/>
         </xs:element>
+
+        <!-- The minimum HDR layer % at which hdr boost will be applied with transition point cap.
+             Should be lower or equal to minimumHdrPercentOfScreenForHbm. -->
+        <xs:element name="minimumHdrPercentOfScreenForNbm" type="nonNegativeDecimal"
+            minOccurs="0" maxOccurs="1">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- The minimum HDR layer size at which hdr boost will be applied. -->
+        <xs:element name="minimumHdrPercentOfScreenForHbm" type="nonNegativeDecimal"
+            minOccurs="0" maxOccurs="1">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- If hdr boost is allowed in low power mode. -->
+        <xs:element name="allowInLowPowerMode" type="xs:boolean" minOccurs="0" maxOccurs="1">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- sdrNits, hdrRatio This LUT specifies how to boost HDR brightness at given SDR brightness (nits). -->
+        <!-- sdr brightness to hdr boost ratio map
+           Format: first = sdrNits, second = hdrRatio. E.g. :
+           <sdrHdrRatioMap>
+               <point>
+                   <first>2.0</first>   // sdrNits
+                   <second>4.0</second> // hdrRatio
+               </point>
+               ....
+           </sdrHdrRatioMap>
+        -->
+        <xs:element type="nonNegativeFloatToFloatMap" name="sdrHdrRatioMap" minOccurs="0" maxOccurs="1">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+
+
     </xs:complexType>
 
     <!-- Maps to PowerManager.THERMAL_STATUS_* values. -->

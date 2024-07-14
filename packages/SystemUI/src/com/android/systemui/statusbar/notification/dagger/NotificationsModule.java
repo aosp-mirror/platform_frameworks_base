@@ -18,12 +18,14 @@ package com.android.systemui.statusbar.notification.dagger;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.os.Handler;
 import android.service.notification.NotificationListenerService;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.settingslib.notification.data.repository.ZenModeRepository;
 import com.android.settingslib.notification.data.repository.ZenModeRepositoryImpl;
 import com.android.settingslib.notification.domain.interactor.NotificationsSoundPolicyInteractor;
+import com.android.settingslib.notification.modes.ZenModesBackend;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Application;
@@ -283,9 +285,12 @@ public interface NotificationsModule {
             Context context,
             NotificationManager notificationManager,
             @Application CoroutineScope coroutineScope,
-            @Background CoroutineContext coroutineContext) {
+            @Background CoroutineContext coroutineContext,
+            @Background Handler handler
+    ) {
         return new ZenModeRepositoryImpl(context, notificationManager,
-                coroutineScope, coroutineContext);
+                ZenModesBackend.getInstance(context), context.getContentResolver(),
+                coroutineScope, coroutineContext, handler);
     }
 
     @Provides

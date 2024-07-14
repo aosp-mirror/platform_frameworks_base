@@ -686,8 +686,12 @@ public abstract class DisplayManagerInternal {
         public RefreshRateRange range;
 
         public RefreshRateLimitation(@RefreshRateLimitType int type, float min, float max) {
+            this(type, new RefreshRateRange(min, max));
+        }
+
+        public RefreshRateLimitation(@RefreshRateLimitType int type, RefreshRateRange range) {
             this.type = type;
-            range = new RefreshRateRange(min, max);
+            this.range = range;
         }
 
         @Override

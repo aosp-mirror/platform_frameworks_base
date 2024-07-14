@@ -104,6 +104,7 @@ interface INfcAdapter
 
     void notifyPollingLoop(in PollingFrame frame);
     void notifyHceDeactivated();
+    void notifyTestHceData(in int technology, in byte[] data);
     int sendVendorNciMessage(int mt, int gid, int oid, in byte[] payload);
     void registerVendorExtensionCallback(in INfcVendorNciCallback callbacks);
     void unregisterVendorExtensionCallback(in INfcVendorNciCallback callbacks);

@@ -5056,16 +5056,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void acquire(int displayId) {
-            acquire(displayId, false /* isSwappingDisplay */);
-        }
-
-        @Override
-        public void acquire(int displayId, boolean isSwappingDisplay) {
             synchronized (mGlobalLock) {
                 if (!mSleepTokens.contains(displayId)) {
                     mSleepTokens.append(displayId,
-                            mRootWindowContainer.createSleepToken(mTag, displayId,
-                                    isSwappingDisplay));
+                            mRootWindowContainer.createSleepToken(mTag, displayId));
                     updateSleepIfNeededLocked();
                 }
             }
@@ -5189,6 +5183,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             String hostingType) {
         if (!mStartingProcessActivities.contains(activity)) {
             mStartingProcessActivities.add(activity);
+            // Let the activity with higher z-order be started first.
+            if (mStartingProcessActivities.size() > 1) {
+                mStartingProcessActivities.sort(null /* by WindowContainer#compareTo */);
+            }
         } else if (mProcessNames.get(
                 activity.processName, activity.info.applicationInfo.uid) != null) {
             // The process is already starting. Wait for it to attach.

@@ -19,7 +19,6 @@ package com.android.test.input
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.os.Environment
 import android.view.ContextThemeWrapper
 import android.view.PointerIcon
 import android.view.flags.Flags.enableVectorCursorA11ySettings
@@ -158,8 +157,7 @@ class PointerIconLoadingTest {
         const val SCREEN_WIDTH_DP = 480
         const val SCREEN_HEIGHT_DP = 800
         const val ASSETS_PATH = "tests/input/assets"
-        val TEST_OUTPUT_PATH = Environment.getExternalStorageDirectory().absolutePath +
-                "/InputTests/" +
-                PointerIconLoadingTest::class.java.simpleName
+        val TEST_OUTPUT_PATH =
+            "/sdcard/Download/InputTests/" + PointerIconLoadingTest::class.java.simpleName
     }
 }

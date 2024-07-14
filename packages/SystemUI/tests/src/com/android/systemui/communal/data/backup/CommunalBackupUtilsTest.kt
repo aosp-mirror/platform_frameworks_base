@@ -66,11 +66,28 @@ class CommunalBackupUtilsTest : SysuiTestCase() {
         // Set up database
         val expectedWidgets =
             listOf(
-                FakeWidgetMetadata(11, "com.android.fakePackage1/fakeWidget1", 3),
-                FakeWidgetMetadata(12, "com.android.fakePackage2/fakeWidget2", 2),
-                FakeWidgetMetadata(13, "com.android.fakePackage3/fakeWidget3", 1),
+                FakeWidgetMetadata(
+                    widgetId = 11,
+                    componentName = "com.android.fakePackage1/fakeWidget1",
+                    rank = 3,
+                    userSerialNumber = 0,
+                ),
+                FakeWidgetMetadata(
+                    widgetId = 12,
+                    componentName = "com.android.fakePackage2/fakeWidget2",
+                    rank = 2,
+                    userSerialNumber = 0,
+                ),
+                FakeWidgetMetadata(
+                    widgetId = 13,
+                    componentName = "com.android.fakePackage3/fakeWidget3",
+                    rank = 1,
+                    userSerialNumber = 10,
+                ),
             )
-        expectedWidgets.forEach { dao.addWidget(it.widgetId, it.componentName, it.rank) }
+        expectedWidgets.forEach {
+            dao.addWidget(it.widgetId, it.componentName, it.rank, it.userSerialNumber)
+        }
 
         // Get communal hub state
         val state = underTest.getCommunalHubState()
@@ -128,7 +145,12 @@ class CommunalBackupUtilsTest : SysuiTestCase() {
         assertThat(underTest.fileExists()).isFalse()
     }
 
-    data class FakeWidgetMetadata(val widgetId: Int, val componentName: String, val rank: Int)
+    data class FakeWidgetMetadata(
+        val widgetId: Int,
+        val componentName: String,
+        val rank: Int,
+        val userSerialNumber: Int,
+    )
 
     companion object {
         /**
@@ -140,7 +162,8 @@ class CommunalBackupUtilsTest : SysuiTestCase() {
                 { actual, expected ->
                     actual?.widgetId == expected?.widgetId &&
                         actual?.componentName == expected?.componentName &&
-                        actual?.rank == expected?.rank
+                        actual?.rank == expected?.rank &&
+                        actual?.userSerialNumber == expected?.userSerialNumber
                 },
                 "represents",
             )

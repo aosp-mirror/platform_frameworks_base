@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‎‏‎‏‎‎‏‏‏‎‏‏‎‎‎‎‎‎‎‎‏‎‎‎‎‏‎‎‏‎‎‏‎‏‎‎‎‏‏‎‏‎‎‏‎‎‏‎‎‎‏‎‎‏‏‎Bug report‎‏‎‎‏‎"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‎‎‏‎‎‎‎‏‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‎‏‎‏‎‏‎‎‎‎‎‏‏‎‏‎‏‏‏‎‏‏‏‏‏‎End session‎‏‎‎‏‎"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‎‏‏‏‎‎‎‏‏‎‎‎‏‎‏‏‏‎‎‏‏‎‎‎‏‏‏‏‏‏‏‎‎‎‎‏‎‎‎‏‎‏‏‎‎‎‎‎‏‏‎‎‏‎‎‎Screenshot‎‏‎‎‏‎"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‎‎‏‏‏‏‎‏‎‏‎‏‏‎‏‎‏‎‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‏‎‎‎‎‎‎‏‎‎‏‏‎‏‏‏‏‎‏‎‎Bug report‎‏‎‎‏‎"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‎‏‎‏‎‏‏‎‏‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‎‏‎‎‏‏‏‏‏‎‏‎‏‎‎‏‎‎‏‎‏‏‎‏‎‎‎‎‏‏‎‎This will collect information about your current device state, to send as an e-mail message. It will take a little time from starting the bug report until it is ready to be sent; please be patient.‎‏‎‎‏‎"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‎‏‎‏‎‎‎‎‏‎‏‏‏‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‎‎‎‏‎‎‎‎‎‏‏‎‏‎‏‏‏‏‏‎‎‏‎Interactive report‎‏‎‎‏‎"</string>
@@ -2427,17 +2425,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‏‎‏‏‏‎‏‎‏‏‎‎‎‎‏‏‏‎‏‎‎‎‎‏‏‎‏‎‎‎‏‎‏‏‏‏‎‎‏‏‎‎‎‎‏‏‎‎‎‎‏‏‏‎How it works‎‏‎‎‏‎"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‎‎‎‏‎‎‎‏‎‎‏‎‎‏‏‏‏‎‏‎‏‎‏‎‏‏‏‏‏‎‏‏‏‎‏‎‏‎‏‏‎‏‎‏‏‏‎‏‎‏‎‏‏‎‏‎Pending...‎‏‎‎‏‎"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‏‎‏‎‏‏‎‏‎‏‏‎‎‎‎‏‏‎‎‎‏‎‎‏‏‎‏‎‏‎‏‏‎‎‎‏‏‎‎‏‏‏‏‏‎‎‏‏‏‏‎‏‎‏‎Set up Fingerprint Unlock again‎‏‎‎‏‎"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‎‏‏‎‏‎‏‏‎‏‏‎‏‏‏‎‎‎‏‎‎‎‏‏‏‎‎‎‏‎‎‎‎‎‎‎‏‎‎‏‏‎‎‏‏‎‎‏‎‏‏‎‏‏‎‎‎‏‎‎‏‏‎<xliff:g id="FINGERPRINT">%s</xliff:g>‎‏‎‎‏‏‏‎ can no longer be recognized.‎‏‎‎‏‎"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‏‎‎‏‏‏‎‏‎‏‎‎‏‎‎‏‏‎‎‏‏‎‏‏‏‎‏‎‎‎‎‏‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>‎‏‎‎‏‏‏‎ and ‎‏‎‎‏‏‎<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>‎‏‎‎‏‏‏‎ can no longer be recognized.‎‏‎‎‏‎"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‎‏‎‏‎‎‏‏‎‎‎‎‏‎‎‏‎‏‏‏‎‎‏‏‏‎‏‏‎‎‏‏‎‏‎‏‎‏‏‏‎‏‎‏‎‎‏‏‏‎‏‎‏‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="FINGERPRINT">%s</xliff:g>‎‏‎‎‏‏‏‎ can no longer be recognized. Set up Fingerprint Unlock again.‎‏‎‎‏‎"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‏‏‎‏‎‏‎‎‎‏‏‏‏‏‏‎‎‏‏‏‏‎‎‎‎‎‏‎‏‏‎‎‎‎‎‎‎‎‏‎‏‎‎‏‎‎‏‏‏‎‏‏‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>‎‏‎‎‏‏‏‎ and ‎‏‎‎‏‏‎<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>‎‏‎‎‏‏‏‎ can no longer be recognized. Set up Fingerprint Unlock again.‎‏‎‎‏‎"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‎‎‏‎‎‏‏‏‎‏‏‏‎‎‏‎‏‏‎‏‏‏‎‏‎‎‏‏‏‎‎‏‎‏‏‎‎‏‎‎‎‎‎‎‏‎‏‏‎‏‏‏‎‎‎‏‎Set up Face Unlock again‎‏‎‎‏‎"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‎‏‎‏‏‎‏‏‎‎‏‎‏‎‎‏‎‎‎‎‎‏‎‎‏‎‏‏‏‏‎‏‏‎‏‏‎‎‎‎‎‎‎‎‎‎‎‎‏‎‏‎‏‎‎‎‎Your face model can no longer be recognized. Set up Face Unlock again.‎‏‎‎‏‎"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‏‎‎‏‎‏‏‎‏‎‎‏‎‎‎‏‏‏‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‎‏‏‎‏‎‏‏‏‏‎‎‏‏‏‎‏‎‎‏‎Set up‎‏‎‎‏‎"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‏‎‎‎‎‎‎‏‏‎‏‎‎‏‎‎‎‏‎‏‏‎‏‏‎‎‏‏‎‏‏‏‎‏‏‎‏‏‎‏‏‏‎‎‎‏‏‎‎‎‏‏‎Not now‎‏‎‎‏‎"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‏‎‎‎‎‏‏‎‏‏‎‏‎‏‏‏‎‎‎‎‎‏‏‎‎‎‏‏‎‏‎‎‏‏‎‏‎‏‏‏‏‎‎‎‏‎‏‏‏‎‎‏‏‏‎Alarm for ‎‏‎‎‏‏‎<xliff:g id="USER_NAME">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>

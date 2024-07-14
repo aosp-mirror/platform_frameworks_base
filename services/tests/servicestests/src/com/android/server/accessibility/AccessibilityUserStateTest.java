@@ -152,6 +152,7 @@ public class AccessibilityUserStateTest {
 
     @Test
     public void onSwitchToAnotherUser_userStateClearedNonDefaultValues() {
+        String componentNameString = COMPONENT_NAME.flattenToString();
         mUserState.getBoundServicesLocked().add(mMockConnection);
         mUserState.getBindingServicesLocked().add(COMPONENT_NAME);
         mUserState.setLastSentClientStateLocked(
@@ -162,10 +163,13 @@ public class AccessibilityUserStateTest {
         mUserState.setInteractiveUiTimeoutLocked(30);
         mUserState.mEnabledServices.add(COMPONENT_NAME);
         mUserState.mTouchExplorationGrantedServices.add(COMPONENT_NAME);
-        mUserState.updateShortcutTargetsLocked(Set.of(COMPONENT_NAME.flattenToString()), HARDWARE);
-        mUserState.updateShortcutTargetsLocked(Set.of(COMPONENT_NAME.flattenToString()), SOFTWARE);
-        mUserState.updateShortcutTargetsLocked(Set.of(COMPONENT_NAME.flattenToString()), GESTURE);
-        mUserState.setTargetAssignedToAccessibilityButton(COMPONENT_NAME.flattenToString());
+        mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), HARDWARE);
+        mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), SOFTWARE);
+        mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), GESTURE);
+        mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), QUICK_SETTINGS);
+        mUserState.updateA11yTilesInQsPanelLocked(
+                Set.of(AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME));
+        mUserState.setTargetAssignedToAccessibilityButton(componentNameString);
         mUserState.setTouchExplorationEnabledLocked(true);
         mUserState.setMagnificationSingleFingerTripleTapEnabledLocked(true);
         mUserState.setMagnificationTwoFingerTripleTapEnabledLocked(true);
@@ -189,6 +193,8 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.getShortcutTargetsLocked(HARDWARE).isEmpty());
         assertTrue(mUserState.getShortcutTargetsLocked(SOFTWARE).isEmpty());
         assertTrue(mUserState.getShortcutTargetsLocked(GESTURE).isEmpty());
+        assertTrue(mUserState.getShortcutTargetsLocked(QUICK_SETTINGS).isEmpty());
+        assertTrue(mUserState.getA11yQsTilesInQsPanel().isEmpty());
         assertNull(mUserState.getTargetAssignedToAccessibilityButton());
         assertFalse(mUserState.isTouchExplorationEnabledLocked());
         assertFalse(mUserState.isMagnificationSingleFingerTripleTapEnabledLocked());

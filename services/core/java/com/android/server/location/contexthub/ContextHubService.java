@@ -1087,6 +1087,8 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param messageDeliveryStatus     The message delivery status to deliver.
      */
     private void handleMessageDeliveryStatusCallback(MessageDeliveryStatus messageDeliveryStatus) {
+        ContextHubEventLogger.getInstance().logReliableMessageToNanoappStatus(
+                messageDeliveryStatus.messageSequenceNumber, messageDeliveryStatus.errorCode);
         mTransactionManager.onMessageDeliveryResponse(messageDeliveryStatus.messageSequenceNumber,
                 messageDeliveryStatus.errorCode == ErrorCode.OK);
     }

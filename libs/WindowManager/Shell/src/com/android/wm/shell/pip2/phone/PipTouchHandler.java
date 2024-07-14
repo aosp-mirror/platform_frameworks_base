@@ -106,9 +106,6 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
 
     private float mStashVelocityThreshold;
 
-    // The reference inset bounds, used to determine the dismiss fraction
-    private final Rect mInsetBounds = new Rect();
-
     // Used to workaround an issue where the WM rotation happens before we are notified, allowing
     // us to send stale bounds
     private int mDeferResizeToNormalBoundsUntilRotation = -1;
@@ -206,17 +203,10 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                 mMotionHelper, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
                 () -> {
-                    if (mPipBoundsState.isStashed()) {
-                        animateToUnStashedState();
-                        mPipUiEventLogger.log(
-                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_UNSTASHED);
-                        mPipBoundsState.setStashed(STASH_TYPE_NONE);
-                    } else {
-                        mMenuController.showMenuWithPossibleDelay(MENU_STATE_FULL,
-                                mPipBoundsState.getBounds(), true /* allowMenuTimeout */,
-                                willResizeMenu(),
-                                shouldShowResizeHandle());
-                    }
+                    mMenuController.showMenuWithPossibleDelay(MENU_STATE_FULL,
+                            mPipBoundsState.getBounds(), true /* allowMenuTimeout */,
+                            willResizeMenu(),
+                            shouldShowResizeHandle());
                 },
                 menuController::hideMenu,
                 mainExecutor);
@@ -438,7 +428,6 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mPipBoundsState.setNormalMovementBounds(normalMovementBounds);
         mPipBoundsState.setExpandedMovementBounds(expandedMovementBounds);
         mDisplayRotation = displayRotation;
-        mInsetBounds.set(insetBounds);
         updateMovementBounds();
         mMovementBoundsExtraOffsets = extraOffset;
 
@@ -748,10 +737,13 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         final Rect pipBounds = mPipBoundsState.getBounds();
         final boolean onLeftEdge = pipBounds.left < mPipBoundsState.getDisplayBounds().left;
         final Rect unStashedBounds = new Rect(0, pipBounds.top, 0, pipBounds.bottom);
-        unStashedBounds.left = onLeftEdge ? mInsetBounds.left
-                : mInsetBounds.right - pipBounds.width();
-        unStashedBounds.right = onLeftEdge ? mInsetBounds.left + pipBounds.width()
-                : mInsetBounds.right;
+
+        Rect insetBounds = new Rect();
+        mPipBoundsAlgorithm.getInsetBounds(insetBounds);
+        unStashedBounds.left = onLeftEdge ? insetBounds.left
+                : insetBounds.right - pipBounds.width();
+        unStashedBounds.right = onLeftEdge ? insetBounds.left + pipBounds.width()
+                : insetBounds.right;
         mMotionHelper.animateToUnStashedBounds(unStashedBounds);
     }
 
@@ -899,8 +891,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                 // Reset the touch state on up before the fling settles
                 mTouchState.reset();
                 if (mEnableStash && shouldStash(vel, getPossiblyMotionBounds())) {
-                    // mMotionHelper.stashToEdge(vel.x, vel.y,
-                    //      this::stashEndAction /* endAction */);
+                    mMotionHelper.stashToEdge(vel.x, vel.y, null /* endAction */);
                 } else {
                     if (mPipBoundsState.isStashed()) {
                         // Reset stashed state if previously stashed
@@ -1030,8 +1021,10 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
      * resized.
      */
     private void updateMovementBounds() {
+        Rect insetBounds = new Rect();
+        mPipBoundsAlgorithm.getInsetBounds(insetBounds);
         mPipBoundsAlgorithm.getMovementBounds(mPipBoundsState.getBounds(),
-                mInsetBounds, mPipBoundsState.getMovementBounds(), mIsImeShowing ? mImeHeight : 0);
+                insetBounds, mPipBoundsState.getMovementBounds(), mIsImeShowing ? mImeHeight : 0);
         mMotionHelper.onMovementBoundsChanged();
     }
 

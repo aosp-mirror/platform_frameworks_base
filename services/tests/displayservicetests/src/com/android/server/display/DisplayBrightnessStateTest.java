@@ -18,6 +18,8 @@ package com.android.server.display;
 
 import static org.junit.Assert.assertEquals;
 
+import android.hardware.display.BrightnessInfo;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -44,7 +46,7 @@ public class DisplayBrightnessStateTest {
     @Test
     public void validateAllDisplayBrightnessStateFieldsAreSetAsExpected() {
         float brightness = 0.3f;
-        float sdrBrightness = 0.2f;
+        float hdrBrightness = 0.4f;
         boolean shouldUseAutoBrightness = true;
         boolean shouldUpdateScreenBrightnessSetting = true;
         int brightnessAdjustmentFlag = 2;
@@ -53,7 +55,7 @@ public class DisplayBrightnessStateTest {
         brightnessReason.setModifier(BrightnessReason.MODIFIER_DIMMED);
         DisplayBrightnessState displayBrightnessState = mDisplayBrightnessStateBuilder
                 .setBrightness(brightness)
-                .setSdrBrightness(sdrBrightness)
+                .setHdrBrightness(hdrBrightness)
                 .setBrightnessReason(brightnessReason)
                 .setShouldUseAutoBrightness(shouldUseAutoBrightness)
                 .setShouldUpdateScreenBrightnessSetting(shouldUpdateScreenBrightnessSetting)
@@ -62,7 +64,7 @@ public class DisplayBrightnessStateTest {
                 .build();
 
         assertEquals(displayBrightnessState.getBrightness(), brightness, FLOAT_DELTA);
-        assertEquals(displayBrightnessState.getSdrBrightness(), sdrBrightness, FLOAT_DELTA);
+        assertEquals(displayBrightnessState.getHdrBrightness(), hdrBrightness, FLOAT_DELTA);
         assertEquals(displayBrightnessState.getBrightnessReason(), brightnessReason);
         assertEquals(displayBrightnessState.getShouldUseAutoBrightness(), shouldUseAutoBrightness);
         assertEquals(shouldUpdateScreenBrightnessSetting,
@@ -78,7 +80,7 @@ public class DisplayBrightnessStateTest {
         DisplayBrightnessState state1 = new DisplayBrightnessState.Builder()
                 .setBrightnessReason(reason)
                 .setBrightness(0.26f)
-                .setSdrBrightness(0.23f)
+                .setHdrBrightness(0.29f)
                 .setShouldUseAutoBrightness(false)
                 .setShouldUpdateScreenBrightnessSetting(true)
                 .build();
@@ -91,8 +93,8 @@ public class DisplayBrightnessStateTest {
         sb.append("DisplayBrightnessState:")
                 .append("\n    brightness:")
                 .append(displayBrightnessState.getBrightness())
-                .append("\n    sdrBrightness:")
-                .append(displayBrightnessState.getSdrBrightness())
+                .append("\n    hdrBrightness:")
+                .append(displayBrightnessState.getHdrBrightness())
                 .append("\n    brightnessReason:")
                 .append(displayBrightnessState.getBrightnessReason())
                 .append("\n    shouldUseAutoBrightness:")
@@ -112,7 +114,10 @@ public class DisplayBrightnessStateTest {
                 .append("\n    mBrightnessAdjustmentFlag:")
                 .append(displayBrightnessState.getBrightnessAdjustmentFlag())
                 .append("\n    mIsUserInitiatedChange:")
-                .append(displayBrightnessState.isUserInitiatedChange());
+                .append(displayBrightnessState.isUserInitiatedChange())
+                .append("\n    mBrightnessMaxReason:")
+                .append(BrightnessInfo.briMaxReasonToString(
+                        displayBrightnessState.getBrightnessMaxReason()));
         return sb.toString();
     }
 }
