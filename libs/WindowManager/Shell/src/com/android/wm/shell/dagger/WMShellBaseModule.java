@@ -71,6 +71,8 @@ import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
+import com.android.wm.shell.compatui.api.CompatUIHandler;
+import com.android.wm.shell.compatui.impl.DefaultCompatUIHandler;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -211,7 +213,7 @@ public abstract class WMShellBaseModule {
             Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
-            Optional<CompatUIController> compatUI,
+            Optional<CompatUIHandler> compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasksOptional,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -230,7 +232,7 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static Optional<CompatUIController> provideCompatUIController(
+    static Optional<CompatUIHandler> provideCompatUIController(
             Context context,
             ShellInit shellInit,
             ShellController shellController,
@@ -246,6 +248,9 @@ public abstract class WMShellBaseModule {
             Lazy<AccessibilityManager> accessibilityManager) {
         if (!context.getResources().getBoolean(R.bool.config_enableCompatUIController)) {
             return Optional.empty();
+        }
+        if (Flags.appCompatUiFramework()) {
+            return Optional.of(new DefaultCompatUIHandler());
         }
         return Optional.of(
                 new CompatUIController(

@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.view.viewmodel
 
-import android.app.smartspace.SmartspaceTarget
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -32,12 +31,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.FakeCommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalPrefsInteractor
@@ -57,8 +60,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.settings.fakeUserTracker
-import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
-import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
@@ -76,6 +77,8 @@ import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.spy
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -91,9 +94,10 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
 
     private lateinit var tutorialRepository: FakeCommunalTutorialRepository
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
-    private lateinit var smartspaceRepository: FakeSmartspaceRepository
+    private lateinit var smartspaceRepository: FakeCommunalSmartspaceRepository
     private lateinit var mediaRepository: FakeCommunalMediaRepository
     private lateinit var communalSceneInteractor: CommunalSceneInteractor
+    private lateinit var communalInteractor: CommunalInteractor
 
     private val testableResources = context.orCreateTestableResources
 
@@ -105,9 +109,10 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
 
         tutorialRepository = kosmos.fakeCommunalTutorialRepository
         widgetRepository = kosmos.fakeCommunalWidgetRepository
-        smartspaceRepository = kosmos.fakeSmartspaceRepository
+        smartspaceRepository = kosmos.fakeCommunalSmartspaceRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
         communalSceneInteractor = kosmos.communalSceneInteractor
+        communalInteractor = spy(kosmos.communalInteractor)
         kosmos.fakeUserRepository.setUserInfos(listOf(MAIN_USER_INFO))
         kosmos.fakeUserTracker.set(
             userInfos = listOf(MAIN_USER_INFO),
@@ -119,7 +124,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         underTest =
             CommunalEditModeViewModel(
                 communalSceneInteractor,
-                kosmos.communalInteractor,
+                communalInteractor,
                 kosmos.communalSettingsInteractor,
                 kosmos.keyguardTransitionInteractor,
                 mediaHost,
@@ -152,11 +157,15 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             widgetRepository.setCommunalWidgets(widgets)
 
             // Smartspace available.
-            val target = Mockito.mock(SmartspaceTarget::class.java)
-            whenever(target.smartspaceTargetId).thenReturn("target")
-            whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
-            whenever(target.remoteViews).thenReturn(Mockito.mock(RemoteViews::class.java))
-            smartspaceRepository.setCommunalSmartspaceTargets(listOf(target))
+            smartspaceRepository.setTimers(
+                listOf(
+                    CommunalSmartspaceTimer(
+                        smartspaceTargetId = "target",
+                        createdTimestampMillis = 0L,
+                        remoteViews = Mockito.mock(RemoteViews::class.java),
+                    )
+                )
+            )
 
             // Media playing.
             mediaRepository.mediaActive()
@@ -341,6 +350,16 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             underTest.onDisclaimerDismissed()
             assertThat(showDisclaimer).isFalse()
         }
+
+    @Test
+    fun scrollPosition_persistedOnEditCleanup() {
+        val index = 2
+        val offset = 30
+        underTest.onScrollPositionUpdated(index, offset)
+        underTest.cleanupEditModeState()
+
+        verify(communalInteractor).setScrollPosition(eq(index), eq(offset))
+    }
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)

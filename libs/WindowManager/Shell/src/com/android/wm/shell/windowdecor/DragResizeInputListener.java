@@ -468,8 +468,7 @@ class DragResizeInputListener implements AutoCloseable {
                 case MotionEvent.ACTION_HOVER_ENTER:
                 case MotionEvent.ACTION_HOVER_MOVE: {
                     updateCursorType(e.getDisplayId(), e.getDeviceId(),
-                            e.getPointerId(/*pointerIndex=*/0), e.getXCursorPosition(),
-                            e.getYCursorPosition());
+                            e.getPointerId(/*pointerIndex=*/0), e.getX(), e.getY());
                     result = true;
                     break;
                 }

@@ -269,8 +269,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"تقرير الأخطاء"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"إنهاء الجلسة"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"لقطة شاشة"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"تقرير الأخطاء"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"سيجمع هذا معلومات حول حالة جهازك الحالي لإرسالها كرسالة إلكترونية، ولكنه سيستغرق وقتًا قليلاً من بدء عرض تقرير بالأخطاء. وحتى يكون جاهزًا للإرسال، يُرجى الانتظار."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"تقرير تفاعلي"</string>
@@ -1779,7 +1777,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"جارٍ التبديل إلى <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"جارٍ الخروج <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"المالك"</string>
-    <string name="guest_name" msgid="8502103277839834324">"ضيف"</string>
+    <string name="guest_name" msgid="8502103277839834324">"وضع الضيف"</string>
     <string name="error_message_title" msgid="4082495589294631966">"خطأ"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"لا يسمح المشرف بإجراء هذا التغيير"</string>
     <string name="app_not_found" msgid="3429506115332341800">"لم يتم العثور على تطبيق يمكنه التعامل مع هذا الإجراء."</string>
@@ -2437,17 +2435,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"طريقة العمل"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"بانتظار الإزالة من الأرشيف…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"إعادة إعداد ميزة \"فتح الجهاز ببصمة الإصبع\""</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"لا يمكن بعد الآن التعرّف على \"<xliff:g id="FINGERPRINT">%s</xliff:g>\"."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"لا يمكن بعد الآن التعرّف على \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" و\"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\"."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"لا يمكن بعد الآن التعرّف على \"<xliff:g id="FINGERPRINT">%s</xliff:g>\". يجب ضبط ميزة \"فتح الجهاز ببصمة الإصبع\" مجددًا."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"لا يمكن بعد الآن التعرّف على \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" و\"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\". يجب ضبط ميزة \"فتح الجهاز ببصمة الإصبع\" مجددًا."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"إعادة إعداد ميزة \"فتح الجهاز بالتعرّف على الوجه\""</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"لا يمكن بعد الآن التعرّف على نموذج الوجه الخاص بك. يجب ضبط ميزة \"فتح الجهاز بالتعرّف على الوجه\" مجددًا."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"إعداد"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"لاحقًا"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"تنبيه لـ \"<xliff:g id="USER_NAME">%s</xliff:g>\""</string>

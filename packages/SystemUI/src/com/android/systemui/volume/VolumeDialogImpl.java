@@ -50,6 +50,7 @@ import android.app.KeyguardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -77,6 +78,7 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.text.InputFilter;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.ContextThemeWrapper;
@@ -140,11 +142,14 @@ import com.android.systemui.volume.domain.interactor.VolumePanelNavigationIntera
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
+import com.google.common.collect.ImmutableList;
+
 import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -315,6 +320,9 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final com.android.systemui.util.time.SystemClock mSystemClock;
     private final VolumePanelFlag mVolumePanelFlag;
     private final VolumeDialogInteractor mInteractor;
+    // Optional actions for soundDose
+    private Optional<ImmutableList<Pair<String, Intent>>> mCsdWarningNotificationActions =
+            Optional.of(ImmutableList.of());
 
     public VolumeDialogImpl(
             Context context,
@@ -2198,6 +2206,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         rescheduleTimeoutH();
     }
 
+    public void setCsdWarningNotificationActionIntents(
+            ImmutableList<Pair<String, Intent>> actionIntent) {
+        mCsdWarningNotificationActions = Optional.of(actionIntent);
+    }
+
     @VisibleForTesting void showCsdWarningH(int csdWarning, int durationMs) {
         synchronized (mSafetyWarningLock) {
 
@@ -2212,7 +2225,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 recheckH(null);
             };
 
-            mCsdDialog = mCsdWarningDialogFactory.create(csdWarning, cleanUp);
+            mCsdDialog = mCsdWarningDialogFactory.create(
+                    csdWarning, cleanUp, mCsdWarningNotificationActions);
             mCsdDialog.show();
         }
         recheckH(null);

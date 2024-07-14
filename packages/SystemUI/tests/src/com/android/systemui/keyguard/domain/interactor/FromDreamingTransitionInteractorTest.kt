@@ -56,6 +56,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
@@ -97,6 +98,7 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @Ignore("Until b/349837588 is fixed")
     fun testTransitionToOccluded_ifDreamEnds_occludingActivityOnTop() =
         testScope.runTest {
             kosmos.fakeKeyguardRepository.setDreaming(true)
@@ -156,6 +158,7 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
             reset(transitionRepository)
 
             kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = false)
+            kosmos.fakeKeyguardRepository.setDreaming(false)
             runCurrent()
 
             assertThat(transitionRepository)

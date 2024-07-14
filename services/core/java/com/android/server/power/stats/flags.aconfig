@@ -47,3 +47,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "add_battery_usage_stats_slice_atom"
+    namespace: "backstage_power"
+    description: "Adds battery_usage_stats_slice atom"
+    bug: "324602949"
+}

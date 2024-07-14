@@ -30,7 +30,6 @@ import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxy
 import javax.inject.Inject
@@ -119,26 +118,25 @@ constructor(
         combine(
                 isLargeClockVisible,
                 clockShouldBeCentered,
-                shadeInteractor.shadeMode,
+                shadeInteractor.isShadeLayoutWide,
                 currentClock,
-            ) { isLargeClockVisible, clockShouldBeCentered, shadeMode, currentClock ->
-                val shouldUseSplitShade = shadeMode == ShadeMode.Split
+            ) { isLargeClockVisible, clockShouldBeCentered, isShadeLayoutWide, currentClock ->
                 if (currentClock?.config?.useCustomClockScene == true) {
                     when {
-                        shouldUseSplitShade && clockShouldBeCentered ->
+                        isShadeLayoutWide && clockShouldBeCentered ->
                             ClockLayout.WEATHER_LARGE_CLOCK
-                        shouldUseSplitShade && isLargeClockVisible ->
+                        isShadeLayoutWide && isLargeClockVisible ->
                             ClockLayout.SPLIT_SHADE_WEATHER_LARGE_CLOCK
-                        shouldUseSplitShade -> ClockLayout.SPLIT_SHADE_SMALL_CLOCK
+                        isShadeLayoutWide -> ClockLayout.SPLIT_SHADE_SMALL_CLOCK
                         isLargeClockVisible -> ClockLayout.WEATHER_LARGE_CLOCK
                         else -> ClockLayout.SMALL_CLOCK
                     }
                 } else {
                     when {
-                        shouldUseSplitShade && clockShouldBeCentered -> ClockLayout.LARGE_CLOCK
-                        shouldUseSplitShade && isLargeClockVisible ->
+                        isShadeLayoutWide && clockShouldBeCentered -> ClockLayout.LARGE_CLOCK
+                        isShadeLayoutWide && isLargeClockVisible ->
                             ClockLayout.SPLIT_SHADE_LARGE_CLOCK
-                        shouldUseSplitShade -> ClockLayout.SPLIT_SHADE_SMALL_CLOCK
+                        isShadeLayoutWide -> ClockLayout.SPLIT_SHADE_SMALL_CLOCK
                         isLargeClockVisible -> ClockLayout.LARGE_CLOCK
                         else -> ClockLayout.SMALL_CLOCK
                     }
@@ -164,7 +162,7 @@ constructor(
     /** Calculates the top margin for the small clock. */
     fun getSmallClockTopMargin(): Int {
         val statusBarHeight = systemBarUtils.getStatusBarHeaderHeightKeyguard()
-        return if (shadeInteractor.shadeMode.value == ShadeMode.Split) {
+        return if (shadeInteractor.isShadeLayoutWide.value) {
             resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin) -
                 if (ComposeLockscreen.isEnabled) statusBarHeight else 0
         } else {
@@ -176,7 +174,7 @@ constructor(
     val smallClockTopMargin =
         combine(
             configurationInteractor.onAnyConfigurationChange,
-            shadeInteractor.shadeMode,
+            shadeInteractor.isShadeLayoutWide,
         ) { _, _ ->
             getSmallClockTopMargin()
         }

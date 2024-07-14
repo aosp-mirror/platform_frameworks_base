@@ -56,3 +56,13 @@ flag {
     # This flag is read in ResourcesImpl at boot time.
     is_fixed_read_only: true
 }
+
+flag {
+    name: "handle_all_config_changes"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Feature flag for allowing activities to handle all kinds of configuration changes"
+    bug: "180625460"
+    # This flag is read at boot time.
+    is_fixed_read_only: true
+}

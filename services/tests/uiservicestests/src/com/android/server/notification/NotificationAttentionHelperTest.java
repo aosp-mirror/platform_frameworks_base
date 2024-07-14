@@ -223,10 +223,16 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         Settings.System.putInt(getContext().getContentResolver(),
                 Settings.System.NOTIFICATION_LIGHT_PULSE, 1);
 
+        // Enable notification cooldown independent of device Settings
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.NOTIFICATION_COOLDOWN_ENABLED, 1);
+
         Resources resources = spy(getContext().getResources());
         when(resources.getBoolean(R.bool.config_useAttentionLight)).thenReturn(true);
         when(resources.getBoolean(
                 com.android.internal.R.bool.config_intrusiveNotificationLed)).thenReturn(true);
+        when(resources.getBoolean(R.bool.config_enableNotificationAccessibilityEvents))
+                .thenReturn(true);
         when(getContext().getResources()).thenReturn(resources);
 
         // TODO (b/291907312): remove feature flag
@@ -2828,6 +2834,34 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         NotificationRecord r = getBuzzyBeepyNotification();
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
         assertThat(r.getRankingTimeMs()).isEqualTo(r.getSbn().getPostTime());
+    }
+
+    @Test
+    public void testAccessibilityEventsEnabledInConfig() throws Exception {
+        Resources resources = spy(getContext().getResources());
+        when(resources.getBoolean(R.bool.config_enableNotificationAccessibilityEvents))
+                .thenReturn(true);
+        when(getContext().getResources()).thenReturn(resources);
+        initAttentionHelper(mTestFlagResolver);
+        NotificationRecord r = getBeepyNotification();
+
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+
+        verify(mAccessibilityService).sendAccessibilityEvent(any(), anyInt());
+    }
+
+    @Test
+    public void testAccessibilityEventsDisabledInConfig() throws Exception {
+        Resources resources = spy(getContext().getResources());
+        when(resources.getBoolean(R.bool.config_enableNotificationAccessibilityEvents))
+                .thenReturn(false);
+        when(getContext().getResources()).thenReturn(resources);
+        initAttentionHelper(mTestFlagResolver);
+        NotificationRecord r = getBeepyNotification();
+
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+
+        verify(mAccessibilityService, never()).sendAccessibilityEvent(any(), anyInt());
     }
 
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {

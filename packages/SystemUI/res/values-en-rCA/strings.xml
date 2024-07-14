@@ -464,8 +464,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Add more widgets"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Long press to customize widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Customize widgets"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Unlock to customize widgets"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"App icon for disabled widget"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"App icon for a widget being installed"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Edit widget"</string>
@@ -1357,6 +1356,8 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Home gesture"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Action key"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Done"</string>
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
+    <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Go back"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"To go back, swipe left or right using three fingers anywhere on the touchpad."</string>
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Touchpad showing three fingers moving right and left"</string>

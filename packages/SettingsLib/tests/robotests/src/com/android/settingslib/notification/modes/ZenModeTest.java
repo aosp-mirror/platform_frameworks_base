@@ -56,12 +56,14 @@ public class ZenModeTest {
         assertThat(zenMode.getId()).isEqualTo("id");
         assertThat(zenMode.getRule()).isEqualTo(ZEN_RULE);
         assertThat(zenMode.isManualDnd()).isFalse();
+        assertThat(zenMode.canEditNameAndIcon()).isTrue();
         assertThat(zenMode.canBeDeleted()).isTrue();
         assertThat(zenMode.isActive()).isTrue();
 
         ZenMode manualMode = ZenMode.manualDndMode(ZEN_RULE, false);
         assertThat(manualMode.getId()).isEqualTo(ZenMode.MANUAL_DND_MODE_ID);
         assertThat(manualMode.isManualDnd()).isTrue();
+        assertThat(manualMode.canEditNameAndIcon()).isFalse();
         assertThat(manualMode.canBeDeleted()).isFalse();
         assertThat(manualMode.isActive()).isFalse();
     }

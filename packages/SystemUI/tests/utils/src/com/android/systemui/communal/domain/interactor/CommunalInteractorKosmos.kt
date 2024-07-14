@@ -19,6 +19,7 @@ package com.android.systemui.communal.domain.interactor
 import android.os.userManager
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.repository.communalMediaRepository
+import com.android.systemui.communal.data.repository.communalSmartspaceRepository
 import com.android.systemui.communal.data.repository.communalWidgetRepository
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.flags.Flags
@@ -34,7 +35,6 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.userTracker
-import com.android.systemui.smartspace.data.repository.smartspaceRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.mock
 
@@ -47,7 +47,7 @@ val Kosmos.communalInteractor by Fixture {
         widgetRepository = communalWidgetRepository,
         communalPrefsInteractor = communalPrefsInteractor,
         mediaRepository = communalMediaRepository,
-        smartspaceRepository = smartspaceRepository,
+        smartspaceRepository = communalSmartspaceRepository,
         keyguardInteractor = keyguardInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         communalSettingsInteractor = communalSettingsInteractor,
@@ -64,13 +64,17 @@ val Kosmos.communalInteractor by Fixture {
 
 val Kosmos.editWidgetsActivityStarter by Fixture<EditWidgetsActivityStarter> { mock() }
 
-suspend fun Kosmos.setCommunalAvailable(available: Boolean) {
-    fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, available)
-    if (available) {
+suspend fun Kosmos.setCommunalEnabled(enabled: Boolean) {
+    fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, enabled)
+    if (enabled) {
         fakeUserRepository.asMainUser()
     } else {
         fakeUserRepository.asDefaultUser()
     }
+}
+
+suspend fun Kosmos.setCommunalAvailable(available: Boolean) {
+    setCommunalEnabled(available)
     with(fakeKeyguardRepository) {
         setIsEncryptedOrLockdown(!available)
         setKeyguardShowing(available)

@@ -69,7 +69,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        whenever(controllerFactory.create(any(), any())).thenReturn(controller)
+        whenever(controllerFactory.create(any())).thenReturn(controller)
         whenever(notificationControllerFactory.create(eq(0))).thenReturn(notificationsController0)
         whenever(notificationControllerFactory.create(eq(1))).thenReturn(notificationsController1)
     }
@@ -83,8 +83,8 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             val onSaved = { _: Uri? -> }
             screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
 
-            verify(controllerFactory).create(eq(internalDisplay), any())
-            verify(controllerFactory, never()).create(eq(externalDisplay), any())
+            verify(controllerFactory).create(eq(internalDisplay))
+            verify(controllerFactory, never()).create(eq(externalDisplay))
 
             val capturer = ArgumentCaptor<ScreenshotData>()
 
@@ -118,8 +118,8 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
                 callback
             )
 
-            verify(controllerFactory).create(eq(internalDisplay), any())
-            verify(controllerFactory, never()).create(eq(externalDisplay), any())
+            verify(controllerFactory).create(eq(internalDisplay))
+            verify(controllerFactory, never()).create(eq(externalDisplay))
 
             val capturer = ArgumentCaptor<ScreenshotData>()
 
@@ -151,7 +151,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
     @Test
     fun executeScreenshots_allowedTypes_allCaptured() =
         testScope.runTest {
-            whenever(controllerFactory.create(any(), any())).thenReturn(controller)
+            whenever(controllerFactory.create(any())).thenReturn(controller)
 
             setDisplays(
                 display(TYPE_INTERNAL, id = 0),

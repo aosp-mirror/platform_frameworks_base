@@ -36,6 +36,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
@@ -339,10 +340,10 @@ public final class WebViewFactory {
             if (sProviderInstance != null) return sProviderInstance;
 
             sTimestamps.mWebViewLoadStart = SystemClock.uptimeMillis();
-            final int uid = android.os.Process.myUid();
-            if (uid == android.os.Process.ROOT_UID || uid == android.os.Process.SYSTEM_UID
-                    || uid == android.os.Process.PHONE_UID || uid == android.os.Process.NFC_UID
-                    || uid == android.os.Process.BLUETOOTH_UID) {
+            final int appId = UserHandle.getAppId(android.os.Process.myUid());
+            if (appId == android.os.Process.ROOT_UID || appId == android.os.Process.SYSTEM_UID
+                    || appId == android.os.Process.PHONE_UID || appId == android.os.Process.NFC_UID
+                    || appId == android.os.Process.BLUETOOTH_UID) {
                 throw new UnsupportedOperationException(
                         "For security reasons, WebView is not allowed in privileged processes");
             }

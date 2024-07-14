@@ -63,6 +63,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.bouncer.ui.BouncerView;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
@@ -167,6 +168,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final BouncerView mPrimaryBouncerView;
     private final Lazy<ShadeController> mShadeController;
     private final Lazy<SceneInteractor> mSceneInteractorLazy;
+    private final Lazy<DeviceEntryInteractor> mDeviceEntryInteractorLazy;
 
     private Job mListenForAlternateBouncerTransitionSteps = null;
     private Job mListenForKeyguardAuthenticatedBiometricsHandled = null;
@@ -395,7 +397,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             Lazy<KeyguardSurfaceBehindInteractor> surfaceBehindInteractor,
             JavaAdapter javaAdapter,
             Lazy<SceneInteractor> sceneInteractorLazy,
-            StatusBarKeyguardViewManagerInteractor statusBarKeyguardViewManagerInteractor
+            StatusBarKeyguardViewManagerInteractor statusBarKeyguardViewManagerInteractor,
+            Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy
     ) {
         mContext = context;
         mViewMediatorCallback = callback;
@@ -430,6 +433,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mJavaAdapter = javaAdapter;
         mSceneInteractorLazy = sceneInteractorLazy;
         mStatusBarKeyguardViewManagerInteractor = statusBarKeyguardViewManagerInteractor;
+        mDeviceEntryInteractorLazy = deviceEntryInteractorLazy;
     }
 
     KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -735,6 +739,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      *                 {@see KeyguardBouncer#show(boolean, boolean)}
      */
     public void showBouncer(boolean scrimmed) {
+        if (SceneContainerFlag.isEnabled()) {
+            mDeviceEntryInteractorLazy.get().attemptDeviceEntry();
+            return;
+        }
+
         if (DeviceEntryUdfpsRefactor.isEnabled()) {
             if (mAlternateBouncerInteractor.canShowAlternateBouncerForFingerprint()) {
                 Log.d(TAG, "showBouncer:alternateBouncer.forceShow()");
@@ -777,8 +786,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         hideAlternateBouncer(false);
         if (mKeyguardStateController.isShowing() && !isBouncerShowing()) {
             if (SceneContainerFlag.isEnabled()) {
-                mSceneInteractorLazy.get().changeScene(
-                        Scenes.Bouncer, "StatusBarKeyguardViewManager.showPrimaryBouncer");
+                mDeviceEntryInteractorLazy.get().attemptDeviceEntry();
             } else {
                 mPrimaryBouncerInteractor.show(scrimmed);
             }

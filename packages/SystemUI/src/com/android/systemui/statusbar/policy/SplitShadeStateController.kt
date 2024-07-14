@@ -22,10 +22,10 @@ interface SplitShadeStateController {
 
     /** Returns true if the device should use the split notification shade. */
     @Deprecated(
-        message = "This is deprecated, please use ShadeInteractor#isSplitShade instead",
+        message = "This is deprecated, please use ShadeInteractor#shadeMode instead",
         replaceWith =
             ReplaceWith(
-                "shadeInteractor.isSplitShade",
+                "shadeInteractor.shadeMode",
                 "com.android.systemui.shade.domain.interactor.ShadeInteractor",
             ),
     )

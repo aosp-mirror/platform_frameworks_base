@@ -77,7 +77,7 @@
                 android:scaleType="center"
                 />
 
-            <com.android.internal.widget.CachingIconView
+            <com.android.internal.widget.NotificationRowIconView
                 android:id="@+id/icon"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

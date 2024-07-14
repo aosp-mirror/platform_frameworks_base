@@ -38,6 +38,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.Intent.ACTION_VIEW;
 import static android.content.pm.PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -121,6 +122,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -142,6 +144,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
+import android.webkit.URLUtil;
 import android.window.ActivityWindowInfo;
 
 import com.android.internal.R;
@@ -158,6 +161,7 @@ import com.android.server.am.UserState;
 import com.android.server.pm.SaferIntentUtils;
 import com.android.server.utils.Slogf;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
+import com.android.window.flags.Flags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -188,9 +192,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     // How long we can hold the launch wake lock before giving up.
     private static final int LAUNCH_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
-
-    // How long we delay processing the stopping and finishing activities.
-    private static final int SCHEDULE_FINISHING_STOPPING_ACTIVITY_MS = 200;
 
     /** How long we wait until giving up on the activity telling us it released the top state. */
     private static final int TOP_RESUMED_STATE_LOSS_TIMEOUT = 500;
@@ -2093,7 +2094,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             boolean processPausingActivities, String reason) {
         // Stop any activities that are scheduled to do so but have been waiting for the transition
         // animation to finish.
-        boolean displaySwapping = false;
         ArrayList<ActivityRecord> readyToStopActivities = null;
         for (int i = 0; i < mStoppingActivities.size(); i++) {
             final ActivityRecord s = mStoppingActivities.get(i);
@@ -2101,10 +2101,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // send onStop before any configuration change when removing pip transition is ongoing.
             final boolean animating = s.isInTransition()
                     && s.getTask() != null && !s.getTask().isForceHidden();
-            displaySwapping |= s.isDisplaySleepingAndSwapping();
             ProtoLog.v(WM_DEBUG_STATES, "Stopping %s: nowVisible=%b animating=%b "
                     + "finishing=%s", s, s.nowVisible, animating, s.finishing);
-            if ((!animating && !displaySwapping) || mService.mShuttingDown
+            if (!animating || mService.mShuttingDown
                     || s.getRootTask().isForceHiddenForPinnedTask()) {
                 if (!processPausingActivities && s.isState(PAUSING)) {
                     // Defer processing pausing activities in this iteration and reschedule
@@ -2123,16 +2122,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 mStoppingActivities.remove(i);
                 i--;
             }
-        }
-
-        // Stopping activities are deferred processing if the display is swapping. Check again
-        // later to ensure the stopping activities can be stopped after display swapped.
-        if (displaySwapping) {
-            mHandler.postDelayed(() -> {
-                synchronized (mService.mGlobalLock) {
-                    scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
-                }
-            }, SCHEDULE_FINISHING_STOPPING_ACTIVITY_MS);
         }
 
         final int numReadyStops = readyToStopActivities == null ? 0 : readyToStopActivities.size();
@@ -2915,6 +2904,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
         @Override
         public void accept(ActivityRecord r) {
+            if (Flags.enableDesktopWindowingAppToWeb() && mInfo.capturedLink == null) {
+                setCapturedLink(r);
+            }
             if (r.mLaunchCookie != null) {
                 mInfo.addLaunchCookie(r.mLaunchCookie);
             }
@@ -2926,6 +2918,16 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             if (mTopRunning == null) {
                 mTopRunning = r;
             }
+        }
+
+        private void setCapturedLink(ActivityRecord r) {
+            final Uri uri = r.intent.getData();
+            if (uri == null || !ACTION_VIEW.equals(r.intent.getAction())
+                    || !URLUtil.isNetworkUrl(uri.toString())) {
+                return;
+            }
+            mInfo.capturedLink = uri;
+            mInfo.capturedLinkTimestamp = r.lastLaunchTime;
         }
     }
 

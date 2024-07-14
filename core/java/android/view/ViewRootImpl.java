@@ -23,7 +23,7 @@ import static android.graphics.HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUN
 import static android.os.IInputConstants.INVALID_INPUT_EVENT_ID;
 import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.util.SequenceUtils.getInitSeq;
-import static android.util.SequenceUtils.isIncomingSeqNewer;
+import static android.util.SequenceUtils.isIncomingSeqStale;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_LOCATION;
@@ -128,8 +128,8 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.text.flags.Flags.disableHandwritingInitiatorForIme;
-import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
+import static com.android.window.flags.Flags.enableCaptionCompatInsetForceConsumption;
 import static com.android.window.flags.Flags.insetsControlChangedItem;
 import static com.android.window.flags.Flags.insetsControlSeq;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
@@ -1207,6 +1207,8 @@ public final class ViewRootImpl implements ViewParent,
     private final Rect mChildBoundingInsets = new Rect();
     private boolean mChildBoundingInsetsChanged = false;
 
+    private final boolean mDisableDrawWakeLock;
+
     private String mTag = TAG;
     private String mFpsTraceName;
     private String mLargestViewTraceName;
@@ -1336,6 +1338,10 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mAppStartInfoTimestampsFlagValue = android.app.Flags.appStartInfoTimestamps();
+
+        // Disable DRAW_WAKE_LOCK starting U.
+        mDisableDrawWakeLock =
+                CompatChanges.isChangeEnabled(DISABLE_DRAW_WAKE_LOCK) && disableDrawWakeLock();
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1367,9 +1373,6 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void setActivityConfigCallback(@Nullable ActivityConfigCallback callback) {
         mActivityConfigCallback = callback;
-        if (!activityWindowInfoFlag()) {
-            return;
-        }
         if (callback == null) {
             mPendingActivityWindowInfo = null;
             mLastReportedActivityWindowInfo = null;
@@ -2329,23 +2332,23 @@ public final class ViewRootImpl implements ViewParent,
         if (mLastReportedFrames == null) {
             return;
         }
-        if (isIncomingSeqNewer(mLastReportedFrames.seq, inOutFrames.seq)) {
+        if (isIncomingSeqStale(mLastReportedFrames.seq, inOutFrames.seq)) {
+            // If the incoming is stale, use the last reported instead.
+            inOutFrames.setTo(mLastReportedFrames);
+        } else {
             // Keep track of the latest.
             mLastReportedFrames.setTo(inOutFrames);
-        } else {
-            // If the last reported frames is newer, use the last reported instead.
-            inOutFrames.setTo(mLastReportedFrames);
         }
     }
 
     private void onInsetsStateChanged(@NonNull InsetsState insetsState) {
         if (insetsControlSeq()) {
-            if (isIncomingSeqNewer(mLastReportedInsetsStateSeq, insetsState.getSeq())) {
-                mLastReportedInsetsStateSeq = insetsState.getSeq();
-            } else {
-                // The last reported InsetsState is newer. Skip.
+            if (isIncomingSeqStale(mLastReportedInsetsStateSeq, insetsState.getSeq())) {
+                // The incoming is stale. Skip.
                 return;
             }
+            // Keep track of the latest.
+            mLastReportedInsetsStateSeq = insetsState.getSeq();
         }
 
         if (mTranslator != null) {
@@ -2362,13 +2365,13 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (insetsControlSeq()) {
-            if (isIncomingSeqNewer(mLastReportedActiveControlsSeq, activeControls.getSeq())) {
-                mLastReportedActiveControlsSeq = activeControls.getSeq();
-            } else {
-                // The last reported controls is newer. Skip.
+            if (isIncomingSeqStale(mLastReportedActiveControlsSeq, activeControls.getSeq())) {
+                // The incoming is stale. Skip.
                 activeControls.release();
                 return;
             }
+            // Keep track of the latest.
+            mLastReportedActiveControlsSeq = activeControls.getSeq();
         }
 
         final InsetsSourceControl[] controls = activeControls.get();
@@ -2472,11 +2475,7 @@ public final class ViewRootImpl implements ViewParent,
 
     void pokeDrawLockIfNeeded() {
         // Disable DRAW_WAKE_LOCK starting U. Otherwise, only need to acquire it for DOZE state.
-        if (CompatChanges.isChangeEnabled(DISABLE_DRAW_WAKE_LOCK) && disableDrawWakeLock()) {
-            return;
-        }
-
-        if (mAttachInfo.mDisplayState != Display.STATE_DOZE) {
+        if (mDisableDrawWakeLock || mAttachInfo.mDisplayState != Display.STATE_DOZE) {
             // In DOZE_SUSPEND, Android shouldn't control the display; therefore we only poke the
             // draw wake lock when display state is DOZE. Noted that Display#isDozeState includes
             // DOZE_SUSPEND as well, so, it's not feasible here.
@@ -3187,7 +3186,9 @@ public final class ViewRootImpl implements ViewParent,
         inOutParams.privateFlags &= ~PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
     }
 
-    private void controlInsetsForCompatibility(WindowManager.LayoutParams params) {
+    /** Updates the {@link InsetsType}s to hide or show based on layout params. */
+    @VisibleForTesting
+    public void controlInsetsForCompatibility(WindowManager.LayoutParams params) {
         final int sysUiVis = params.systemUiVisibility | params.subtreeSystemUiVisibility;
         final int flags = params.flags;
         final boolean matchParent = params.width == MATCH_PARENT && params.height == MATCH_PARENT;
@@ -3198,6 +3199,9 @@ public final class ViewRootImpl implements ViewParent,
                 || ((flags & FLAG_FULLSCREEN) != 0 && matchParent && nonAttachedAppWindow);
         final boolean navWasHiddenByFlags = (mTypesHiddenByFlags & Type.navigationBars()) != 0;
         final boolean navIsHiddenByFlags = (sysUiVis & SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
+        final boolean captionWasHiddenByFlags = (mTypesHiddenByFlags & Type.captionBar()) != 0;
+        final boolean captionIsHiddenByFlags = (sysUiVis & SYSTEM_UI_FLAG_FULLSCREEN) != 0
+                || ((flags & FLAG_FULLSCREEN) != 0 && matchParent && nonAttachedAppWindow);
 
         @InsetsType int typesToHide = 0;
         @InsetsType int typesToShow = 0;
@@ -3210,6 +3214,13 @@ public final class ViewRootImpl implements ViewParent,
             typesToHide |= Type.navigationBars();
         } else if (!navIsHiddenByFlags && navWasHiddenByFlags) {
             typesToShow |= Type.navigationBars();
+        }
+        if (captionIsHiddenByFlags && !captionWasHiddenByFlags
+                && enableCaptionCompatInsetForceConsumption()) {
+            typesToHide |= Type.captionBar();
+        } else if (!captionIsHiddenByFlags && captionWasHiddenByFlags
+                && enableCaptionCompatInsetForceConsumption()) {
+            typesToShow |= Type.captionBar();
         }
         if (typesToHide != 0) {
             getInsetsController().hide(typesToHide);
@@ -4422,6 +4433,8 @@ public final class ViewRootImpl implements ViewParent,
             }
             mFrameRateCategoryHighCount = mFrameRateCategoryHighCount > 0
                     ? mFrameRateCategoryHighCount - 1 : mFrameRateCategoryHighCount;
+            mFrameRateCategoryHighHintCount = mFrameRateCategoryHighHintCount > 0
+                    ? mFrameRateCategoryHighHintCount - 1 : mFrameRateCategoryHighHintCount;
             mFrameRateCategoryNormalCount = mFrameRateCategoryNormalCount > 0
                     ? mFrameRateCategoryNormalCount - 1 : mFrameRateCategoryNormalCount;
             mFrameRateCategoryLowCount = mFrameRateCategoryLowCount > 0
@@ -9343,7 +9356,7 @@ public final class ViewRootImpl implements ViewParent,
 
             onClientWindowFramesChanged(mTmpFrames);
 
-            if (activityWindowInfoFlag() && mPendingActivityWindowInfo != null) {
+            if (mPendingActivityWindowInfo != null) {
                 final ActivityWindowInfo outInfo = mRelayoutResult.activityWindowInfo;
                 if (outInfo != null) {
                     mPendingActivityWindowInfo.set(outInfo);

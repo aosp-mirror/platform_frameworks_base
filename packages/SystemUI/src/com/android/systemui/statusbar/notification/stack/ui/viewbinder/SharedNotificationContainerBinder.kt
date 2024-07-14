@@ -38,12 +38,14 @@ import com.android.systemui.util.kotlin.DisposableHandles
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** Binds the shared notification container to its view-model. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SharedNotificationContainerBinder
 @Inject

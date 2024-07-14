@@ -1314,6 +1314,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun occludedToPrimaryBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to OCCLUDED

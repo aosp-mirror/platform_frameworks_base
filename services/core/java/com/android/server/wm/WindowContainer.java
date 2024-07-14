@@ -117,6 +117,7 @@ import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.AlwaysTruePredicate;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -458,6 +459,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         source.setFrame(provider.getArbitraryRectangle())
                 .updateSideHint(getBounds())
                 .setBoundingRects(provider.getBoundingRects());
+        if (Flags.enableCaptionCompatInsetForceConsumption()) {
+            source.setFlags(provider.getFlags());
+        }
         mLocalInsetsSources.put(id, source);
         mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
     }
@@ -2579,8 +2583,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
             // Containers don't belong to the same hierarchy???
             if (commonAncestor == null) {
-                throw new IllegalArgumentException("No in the same hierarchy this="
-                        + thisParentChain + " other=" + otherParentChain);
+                final int thisZ = getPrefixOrderIndex();
+                final int otherZ = other.getPrefixOrderIndex();
+                Slog.w(TAG, "Compare not in the same hierarchy this="
+                        + thisParentChain + " thisZ=" + thisZ + " other="
+                        + otherParentChain + " otherZ=" + otherZ);
+                return Integer.compare(thisZ, otherZ);
             }
 
             // Children are always considered greater than their parents, so if one of the containers

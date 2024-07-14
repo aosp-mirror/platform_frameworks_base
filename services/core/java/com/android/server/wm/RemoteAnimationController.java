@@ -44,8 +44,8 @@ import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
@@ -53,7 +53,6 @@ import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 /**
  * Helper class to run app animations in a remote process.
@@ -349,10 +348,6 @@ class RemoteAnimationController implements DeathRecipient {
             } finally {
                 mIsFinishing = false;
             }
-            // Reset input for all activities when the remote animation is finished.
-            final Consumer<ActivityRecord> updateActivities =
-                    activity -> activity.setDropInputForAnimation(false);
-            mDisplayContent.forAllActivities(updateActivities);
         }
         setRunningRemoteAnimation(false);
         ProtoLog.i(WM_DEBUG_REMOTE_ANIMATIONS, "Finishing remote animation");

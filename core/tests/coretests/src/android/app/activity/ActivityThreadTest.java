@@ -25,8 +25,6 @@ import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.window.flags.Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -810,7 +808,6 @@ public class ActivityThreadTest {
 
     @Test
     public void testActivityWindowInfoChanged_activityLaunch() {
-        mSetFlagsRule.enableFlags(FLAG_ACTIVITY_WINDOW_INFO_FLAG);
         ClientTransactionListenerController.getInstance().registerActivityWindowInfoChangedListener(
                 mActivityWindowInfoListener);
 
@@ -825,7 +822,6 @@ public class ActivityThreadTest {
 
     @Test
     public void testActivityWindowInfoChanged_activityRelaunch() {
-        mSetFlagsRule.enableFlags(FLAG_ACTIVITY_WINDOW_INFO_FLAG);
         ClientTransactionListenerController.getInstance().registerActivityWindowInfoChangedListener(
                 mActivityWindowInfoListener);
 
@@ -866,7 +862,6 @@ public class ActivityThreadTest {
 
     @Test
     public void testActivityWindowInfoChanged_activityConfigurationChanged() {
-        mSetFlagsRule.enableFlags(FLAG_ACTIVITY_WINDOW_INFO_FLAG);
         ClientTransactionListenerController.getInstance().registerActivityWindowInfoChangedListener(
                 mActivityWindowInfoListener);
 

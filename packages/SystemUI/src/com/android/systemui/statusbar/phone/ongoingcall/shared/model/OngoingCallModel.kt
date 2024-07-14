@@ -18,7 +18,13 @@ package com.android.systemui.statusbar.phone.ongoingcall.shared.model
 
 import android.app.PendingIntent
 
-/** Represents the state of any ongoing calls. */
+/**
+ * Represents the state of any ongoing calls.
+ *
+ * TODO(b/332662551): If there's an ongoing call but the user has the call app open, then we use the
+ *   NoCall model, *not* the InCall model, which is confusing when looking at the logs. We may want
+ *   to make that more clear, either with better logging or different models.
+ */
 sealed interface OngoingCallModel {
     /** There is no ongoing call. */
     data object NoCall : OngoingCallModel

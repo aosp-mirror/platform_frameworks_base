@@ -436,8 +436,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Всички приложения ще отговарят на условията да бъдат записвани във външното хранилище независимо от стойностите в манифеста"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Възможност за преоразмеряване на активностите"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Дава възможност за преоразмеряване на всички активности в режима за няколко прозореца независимо от стойностите в манифеста."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Активиране на прозорците в свободна форма"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Активиране на поддръжката за експерименталните прозорци в свободна форма."</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"Актив. на прозорците в свободна форма (наследени)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Активиране на поддръжката за експерименталните наследени прозорци в свободна форма."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Парола за резервни копия"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Понастоящем пълните резервни копия за настолен компютър не са защитени"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Докоснете, за да промените или премахнете паролата за пълни резервни копия на настолния компютър"</string>

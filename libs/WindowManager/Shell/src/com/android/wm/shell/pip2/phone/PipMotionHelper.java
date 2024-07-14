@@ -816,6 +816,26 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mPipBoundsState.getMotionBoundsState().onPhysicsAnimationEnded();
         mSpringingToTouch = false;
         mDismissalPending = false;
+
+        // Check whether new bounds after fling imply we need to update stash state too.
+        stashEndActionIfNeeded();
+    }
+
+    private void stashEndActionIfNeeded() {
+        boolean isStashing = mPipBoundsState.getBounds().right > mPipBoundsState
+                .getDisplayBounds().width() || mPipBoundsState.getBounds().left < 0;
+        if (!isStashing) {
+            return;
+        }
+
+        if (mPipBoundsState.getBounds().left < 0
+                && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT) {
+            mPipBoundsState.setStashed(STASH_TYPE_LEFT);
+        } else if (mPipBoundsState.getBounds().left >= 0
+                && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT) {
+            mPipBoundsState.setStashed(STASH_TYPE_RIGHT);
+        }
+        mMenuController.hideMenu();
     }
 
     /**

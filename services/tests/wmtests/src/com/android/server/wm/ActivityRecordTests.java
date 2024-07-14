@@ -116,7 +116,6 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
@@ -685,7 +684,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Asserts fixed orientation request is not ignored, and the orientation is changed.
         assertNotEquals(activityCurOrientation, activity.getConfiguration().orientation);
-        assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertTrue(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
     @Test
@@ -718,7 +718,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Relaunching the app should still respect the orientation request.
         assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
-        assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertTrue(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
     @Test
@@ -3505,23 +3506,6 @@ public class ActivityRecordTests extends WindowTestsBase {
                 /* transformationApplied */ true, /* callback */ null);
 
         assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_HIDDEN);
-    }
-
-    @Test
-    public void testIsCameraActive() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        final DisplayRotationCompatPolicy displayRotationCompatPolicy = mock(
-                DisplayRotationCompatPolicy.class);
-        when(mDisplayContent.getDisplayRotationCompatPolicy()).thenReturn(
-                displayRotationCompatPolicy);
-
-        when(displayRotationCompatPolicy.isCameraActive(any(ActivityRecord.class),
-                anyBoolean())).thenReturn(false);
-        assertFalse(app.mActivityRecord.isCameraActive());
-
-        when(displayRotationCompatPolicy.isCameraActive(any(ActivityRecord.class),
-                anyBoolean())).thenReturn(true);
-        assertTrue(app.mActivityRecord.isCameraActive());
     }
 
     @Test

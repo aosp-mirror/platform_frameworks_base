@@ -66,7 +66,9 @@ public class KeyboardShortcutListSearchTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mKeyboardShortcutListSearch = new KeyboardShortcutListSearch(mContext, mWindowManager);
+        when(mWindowManager.getApplicationLaunchKeyboardShortcuts(anyInt())).thenReturn(
+                new KeyboardShortcutGroup("", Collections.emptyList()));
+        mKeyboardShortcutListSearch = new KeyboardShortcutListSearch(mContext, mWindowManager, -1);
         mKeyboardShortcutListSearch.sInstance = mKeyboardShortcutListSearch;
         mKeyboardShortcutListSearch.mKeyboardShortcutsBottomSheetDialog = mBottomSheetDialog;
         mKeyboardShortcutListSearch.mContext = mContext;

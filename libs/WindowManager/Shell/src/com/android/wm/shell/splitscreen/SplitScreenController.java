@@ -64,6 +64,7 @@ import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.widget.Toast;
 import android.window.RemoteTransition;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
@@ -526,7 +527,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.requestEnterSplitSelect(taskInfo, wct, splitPosition, taskBounds);
     }
 
-    public void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {
+    /**
+     * Starts an existing task into split.
+     * TODO(b/351900580): We should remove this path and use StageCoordinator#startTask() instead
+     * @param hideTaskToken is not supported.
+     */
+    public void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options,
+            @Nullable WindowContainerToken hideTaskToken) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                "Legacy startTask does not support hide task token");
         final int[] result = new int[1];
         IRemoteAnimationRunner wrapper = new IRemoteAnimationRunner.Stub() {
             @Override
@@ -584,8 +593,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         if (options == null) options = new Bundle();
         final ActivityOptions activityOptions = ActivityOptions.fromBundle(options);
 
-        if (samePackage(packageName, getPackageName(reverseSplitPosition(position)),
-                user.getIdentifier(), getUserId(reverseSplitPosition(position)))) {
+        if (samePackage(packageName, getPackageName(reverseSplitPosition(position), null),
+                user.getIdentifier(), getUserId(reverseSplitPosition(position), null))) {
             if (mMultiInstanceHelpher.supportsMultiInstanceSplit(
                     getShortcutComponent(packageName, shortcutId, user, mLauncherApps))) {
                 activityOptions.setApplyMultipleTaskFlagForShortcut(true);
@@ -676,10 +685,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      * See {@link #startIntent(PendingIntent, int, Intent, int, Bundle)}
      * @param instanceId to be used by {@link SplitscreenEventLogger}
      */
-    public void startIntent(PendingIntent intent, int userId, @Nullable Intent fillInIntent,
-            @SplitPosition int position, @Nullable Bundle options, @NonNull InstanceId instanceId) {
+    public void startIntentWithInstanceId(PendingIntent intent, int userId,
+            @Nullable Intent fillInIntent, @SplitPosition int position, @Nullable Bundle options,
+            @NonNull InstanceId instanceId) {
         mStageCoordinator.onRequestToSplit(instanceId, ENTER_REASON_LAUNCHER);
-        startIntent(intent, userId, fillInIntent, position, options);
+        startIntent(intent, userId, fillInIntent, position, options, null /* hideTaskToken */);
     }
 
     private void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent, int userId1,
@@ -825,9 +835,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 instanceId);
     }
 
+    /**
+     * Starts the given intent into split.
+     * @param hideTaskToken If non-null, a task matching this token will be moved to back in the
+     *                      same window container transaction as the starting of the intent.
+     */
     @Override
     public void startIntent(PendingIntent intent, int userId1, @Nullable Intent fillInIntent,
-            @SplitPosition int position, @Nullable Bundle options) {
+            @SplitPosition int position, @Nullable Bundle options,
+            @Nullable WindowContainerToken hideTaskToken) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                 "startIntent(): intent=%s user=%d fillInIntent=%s position=%d", intent, userId1,
                 fillInIntent, position);
@@ -838,23 +854,24 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
 
         final String packageName1 = SplitScreenUtils.getPackageName(intent);
-        final String packageName2 = getPackageName(reverseSplitPosition(position));
-        final int userId2 = getUserId(reverseSplitPosition(position));
+        final String packageName2 = getPackageName(reverseSplitPosition(position), hideTaskToken);
+        final int userId2 = getUserId(reverseSplitPosition(position), hideTaskToken);
         final ComponentName component = intent.getIntent().getComponent();
 
         // To prevent accumulating large number of instances in the background, reuse task
         // in the background. If we don't explicitly reuse, new may be created even if the app
         // isn't multi-instance because WM won't automatically remove/reuse the previous instance
         final ActivityManager.RecentTaskInfo taskInfo = mRecentTasksOptional
-                .map(recentTasks -> recentTasks.findTaskInBackground(component, userId1))
+                .map(recentTasks -> recentTasks.findTaskInBackground(component, userId1,
+                        hideTaskToken))
                 .orElse(null);
         if (taskInfo != null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                     "Found suitable background task=%s", taskInfo);
             if (ENABLE_SHELL_TRANSITIONS) {
-                mStageCoordinator.startTask(taskInfo.taskId, position, options);
+                mStageCoordinator.startTask(taskInfo.taskId, position, options, hideTaskToken);
             } else {
-                startTask(taskInfo.taskId, position, options);
+                startTask(taskInfo.taskId, position, options, hideTaskToken);
             }
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Start task in background");
             return;
@@ -879,19 +896,23 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             }
         }
 
-        mStageCoordinator.startIntent(intent, fillInIntent, position, options);
+        mStageCoordinator.startIntent(intent, fillInIntent, position, options, hideTaskToken);
     }
 
-    /** Retrieve package name of a specific split position if split screen is activated, otherwise
-     *  returns the package name of the top running task. */
+    /**
+     * Retrieve package name of a specific split position if split screen is activated, otherwise
+     * returns the package name of the top running task.
+     * TODO(b/351900580): Merge this with getUserId() so we don't make multiple binder calls
+     */
     @Nullable
-    private String getPackageName(@SplitPosition int position) {
+    private String getPackageName(@SplitPosition int position,
+            @Nullable WindowContainerToken ignoreTaskToken) {
         ActivityManager.RunningTaskInfo taskInfo;
         if (isSplitScreenVisible()) {
             taskInfo = getTaskInfo(position);
         } else {
             taskInfo = mRecentTasksOptional
-                    .map(recentTasks -> recentTasks.getTopRunningTask())
+                    .map(recentTasks -> recentTasks.getTopRunningTask(ignoreTaskToken))
                     .orElse(null);
             if (!isValidToSplit(taskInfo)) {
                 return null;
@@ -901,15 +922,19 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return taskInfo != null ? SplitScreenUtils.getPackageName(taskInfo.baseIntent) : null;
     }
 
-    /** Retrieve user id of a specific split position if split screen is activated, otherwise
-     *  returns the user id of the top running task. */
-    private int getUserId(@SplitPosition int position) {
+    /**
+     * Retrieve user id of a specific split position if split screen is activated, otherwise
+     * returns the user id of the top running task.
+     * TODO: Merge this with getPackageName() so we don't make multiple binder calls
+     */
+    private int getUserId(@SplitPosition int position,
+            @Nullable WindowContainerToken ignoreTaskToken) {
         ActivityManager.RunningTaskInfo taskInfo;
         if (isSplitScreenVisible()) {
             taskInfo = getTaskInfo(position);
         } else {
             taskInfo = mRecentTasksOptional
-                    .map(recentTasks -> recentTasks.getTopRunningTask())
+                    .map(recentTasks -> recentTasks.getTopRunningTask(ignoreTaskToken))
                     .orElse(null);
             if (!isValidToSplit(taskInfo)) {
                 return -1;
@@ -1290,7 +1315,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         @Override
         public void startTask(int taskId, int position, @Nullable Bundle options) {
             executeRemoteCallWithTaskPermission(mController, "startTask",
-                    (controller) -> controller.startTask(taskId, position, options));
+                    (controller) -> controller.startTask(taskId, position, options,
+                            null /* hideTaskToken */));
         }
 
         @Override
@@ -1402,8 +1428,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         public void startIntent(PendingIntent intent, int userId, Intent fillInIntent, int position,
                 @Nullable Bundle options, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startIntent",
-                    (controller) -> controller.startIntent(intent, userId, fillInIntent, position,
-                            options, instanceId));
+                    (controller) -> controller.startIntentWithInstanceId(intent, userId,
+                            fillInIntent, position, options, instanceId));
         }
 
         @Override
