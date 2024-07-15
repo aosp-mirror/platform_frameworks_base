@@ -1411,10 +1411,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Hautatu hau hari gabeko arazketa desgaitzeko."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Proba-materialeko modua gaitu da"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Proba-materialaren modua desgaitzeko, berrezarri jatorrizko datuak."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Interfaze grafikorik gabeko sistema-erabiltzaile moduaren konpilazioaren konfigurazioa ez da zuzena"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Gailu honen interfaze grafikorik gabeko sistema-erabiltzaile moduaren egoera ez dator bat haren konpilazioaren konfigurazioarekin. Berrezarri gailuko jatorrizko datuak."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serie-kontsola gaituta"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Errendimenduari eragiten dio. Desgaitzeko, joan abiarazlera."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"MTE esperimentala gaituta dago"</string>
@@ -1759,12 +1757,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatu egin da."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desaktibatu egin da."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Askatu bolumen-botoiak. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatzeko, eduki sakatuta berriro bi bolumen-botoiak hiru segundoz."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Aukeratu eginbide bat"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Aukeratu eginbide bat"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Aukeratu eginbide bat"</string>
     <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Erabilerraztasuna botoia sakatzen duzun hurrengoan irekiko da eginbidea"</string>
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Lasterbidea erabiltzen duzun hurrengoan irekiko da eginbidea. Pasatu 2 hatz pantailaren behealdetik gorantz eta askatu bizkor."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Lasterbidea erabiltzen duzun hurrengoan irekiko da eginbidea. Pasatu 3 hatz pantailaren behealdetik gorantz eta askatu bizkor."</string>
@@ -1890,8 +1885,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINa laburregia da. Lau digitu izan behar ditu gutxienez."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Saiatu berriro geroago"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Pantaila osoko ikuspegia"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Irteteko, pasatu hatza pantailaren goialdetik beherantz"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ados"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Biratu pantaila ikuspegi hobea lortzeko"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Ireki <xliff:g id="NAME">%s</xliff:g> pantaila osoan eta ikuspegi hobea lortuko duzu"</string>
@@ -2443,4 +2437,22 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Aldatu erabiltzailea"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Desaktibatu audioa"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Sakatu audioa desaktibatzeko"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
+    <skip />
 </resources>
