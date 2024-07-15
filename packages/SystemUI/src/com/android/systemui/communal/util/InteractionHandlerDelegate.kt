@@ -24,17 +24,17 @@ import android.widget.RemoteViews
 import androidx.core.util.component1
 import androidx.core.util.component2
 import com.android.systemui.animation.ActivityTransitionAnimator
-
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.widgets.CommunalTransitionAnimatorController
 
 /** A delegate that can be used to launch activities from [RemoteViews] */
 class InteractionHandlerDelegate(
+    private val communalSceneInteractor: CommunalSceneInteractor,
     private val findViewToAnimate: (View) -> Boolean,
     private val intentStarter: IntentStarter,
 ) : RemoteViews.InteractionHandler {
 
-    /**
-     * Responsible for starting the pending intent for launching activities.
-     */
+    /** Responsible for starting the pending intent for launching activities. */
     fun interface IntentStarter {
         fun startPendingIntent(
             intent: PendingIntent,
@@ -57,7 +57,10 @@ class InteractionHandlerDelegate(
                 // activities.
                 val hostView = getNearestParent(view)
                 val animationController =
-                    hostView?.let(ActivityTransitionAnimator.Controller::fromView)
+                    hostView?.let(ActivityTransitionAnimator.Controller::fromView)?.let {
+                        communalSceneInteractor.setIsLaunchingWidget(true)
+                        CommunalTransitionAnimatorController(it, communalSceneInteractor)
+                    }
                 val (fillInIntent, activityOptions) = launchOptions
                 intentStarter.startPendingIntent(
                     pendingIntent,
@@ -66,7 +69,6 @@ class InteractionHandlerDelegate(
                     animationController
                 )
             }
-
             else -> RemoteViews.startPendingIntent(view, pendingIntent, launchOptions)
         }
     }

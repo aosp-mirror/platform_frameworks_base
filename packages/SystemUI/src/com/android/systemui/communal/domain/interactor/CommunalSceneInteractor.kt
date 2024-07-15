@@ -48,6 +48,15 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val communalSceneRepository: CommunalSceneRepository,
 ) {
+    val _isLaunchingWidget = MutableStateFlow(false)
+
+    /** Whether a widget launch is currently in progress. */
+    val isLaunchingWidget: StateFlow<Boolean> = _isLaunchingWidget.asStateFlow()
+
+    fun setIsLaunchingWidget(launching: Boolean) {
+        _isLaunchingWidget.value = launching
+    }
+
     /**
      * Asks for an asynchronous scene witch to [newScene], which will use the corresponding
      * installed transition or the one specified by [transitionKey], if provided.
