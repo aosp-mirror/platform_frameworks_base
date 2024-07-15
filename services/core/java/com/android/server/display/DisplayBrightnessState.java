@@ -332,6 +332,16 @@ public final class DisplayBrightnessState {
         }
 
         /**
+         * Sets the {@link BrightnessReason} using the int-based reason enum. This is a convenience
+         * function so we don't have to type out the constructor syntax everywhere.
+         *
+         * @param brightnessReason The int-based brightness enum.
+         */
+        public Builder setBrightnessReason(int brightnessReason) {
+            return setBrightnessReason(new BrightnessReason(brightnessReason));
+        }
+
+        /**
          * Gets the {@link com.android.server.display.brightness.strategy.DisplayBrightnessStrategy}
          * name
          */
