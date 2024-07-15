@@ -17,6 +17,7 @@
 package com.android.systemui.communal.ui.viewmodel
 
 import android.content.res.Resources
+import android.os.Bundle
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
@@ -208,6 +209,20 @@ constructor(
                             .lowercase()
                     )
                 )
+            }
+
+            override fun performAccessibilityAction(
+                host: View,
+                action: Int,
+                args: Bundle?
+            ): Boolean {
+                when (action) {
+                    AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id -> {
+                        onOpenWidgetEditor()
+                        return true
+                    }
+                }
+                return super.performAccessibilityAction(host, action, args)
             }
         }
 
