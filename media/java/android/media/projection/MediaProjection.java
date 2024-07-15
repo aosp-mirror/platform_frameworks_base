@@ -312,6 +312,10 @@ public final class MediaProjection {
          * <p>Once a MediaProjection has been stopped, it's up to the application to release any
          * resources it may be holding (e.g. releasing the {@link VirtualDisplay} and
          * {@link Surface}).
+         *
+         * <p>After this callback any call to
+         * {@link MediaProjection#createVirtualDisplay} will fail, even if no such
+         * {@link VirtualDisplay} was ever created for this MediaProjection session.
          */
         public void onStop() { }
 

@@ -324,7 +324,7 @@ class ScreenRotationAnimation {
             if (!w.mToken.mRoundedCornerOverlay || !w.isVisible() || !w.mWinAnimator.hasSurface()) {
                 return;
             }
-            t.setSkipScreenshot(w.mWinAnimator.mSurfaceController.mSurfaceControl, skipScreenshot);
+            t.setSkipScreenshot(w.mWinAnimator.mSurfaceControl, skipScreenshot);
         }, false);
         if (!skipScreenshot) {
             // Use sync apply to apply the change immediately, so that the next

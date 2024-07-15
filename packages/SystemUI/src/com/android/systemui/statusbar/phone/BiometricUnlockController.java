@@ -369,10 +369,12 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
 
     private void releaseBiometricWakeLock() {
         if (mWakeLock != null) {
+            Trace.beginSection("release wake-and-unlock");
             mHandler.removeCallbacks(mReleaseBiometricWakeLockRunnable);
             mLogger.i("releasing biometric wakelock");
             mWakeLock.release();
             mWakeLock = null;
+            Trace.endSection();
         }
     }
 
@@ -398,7 +400,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             }
             mWakeLock = mPowerManager.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK, BIOMETRIC_WAKE_LOCK_NAME);
-            Trace.beginSection("acquiring wake-and-unlock");
+            Trace.beginSection("acquire wake-and-unlock");
             mWakeLock.acquire();
             Trace.endSection();
             mLogger.i("biometric acquired, grabbing biometric wakelock");
@@ -412,14 +414,13 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     public void onBiometricDetected(int userId, BiometricSourceType biometricSourceType,
             boolean isStrongBiometric) {
         Trace.beginSection("BiometricUnlockController#onBiometricDetected");
-        if (mUpdateMonitor.isGoingToSleep()) {
-            Trace.endSection();
-            return;
+        if (!mUpdateMonitor.isGoingToSleep()) {
+            startWakeAndUnlock(
+                    MODE_SHOW_BOUNCER,
+                    BiometricUnlockSource.Companion.fromBiometricSourceType(biometricSourceType)
+            );
         }
-        startWakeAndUnlock(
-                MODE_SHOW_BOUNCER,
-                BiometricUnlockSource.Companion.fromBiometricSourceType(biometricSourceType)
-        );
+        Trace.endSection();
     }
 
     @Override
@@ -451,6 +452,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         } else {
             mLogger.d("onBiometricUnlocked aborted by bypass controller");
         }
+        Trace.endSection();
     }
 
     /**
@@ -479,6 +481,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             @WakeAndUnlockMode int mode,
             BiometricUnlockSource biometricUnlockSource
     ) {
+        Trace.beginSection("BiometricUnlockController#startWakeAndUnlock");
         mLogger.logStartWakeAndUnlock(mode);
         boolean wasDeviceInteractive = mUpdateMonitor.isDeviceInteractive();
         mMode = mode;
@@ -501,9 +504,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                         "android.policy:BIOMETRIC"
                 );
             }
-            Trace.beginSection("release wake-and-unlock");
             releaseBiometricWakeLock();
-            Trace.endSection();
         };
 
         final boolean wakeInKeyguard = mMode == MODE_WAKE_AND_UNLOCK_FROM_DREAM

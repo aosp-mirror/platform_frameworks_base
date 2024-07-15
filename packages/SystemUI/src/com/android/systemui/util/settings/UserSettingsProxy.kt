@@ -16,12 +16,12 @@
 package com.android.systemui.util.settings
 
 import android.annotation.UserIdInt
+import android.annotation.WorkerThread
 import android.content.ContentResolver
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.UserHandle
 import android.provider.Settings.SettingNotFoundException
-import androidx.annotation.WorkerThread
 import com.android.app.tracing.TraceUtils.trace
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloat
@@ -67,6 +67,7 @@ interface UserSettingsProxy : SettingsProxy {
         } else userTracker.userId
     }
 
+    @WorkerThread
     override fun registerContentObserverSync(uri: Uri, settingsObserver: ContentObserver) {
         registerContentObserverForUserSync(uri, settingsObserver, userId)
     }
@@ -83,6 +84,7 @@ interface UserSettingsProxy : SettingsProxy {
         }
 
     /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
+    @WorkerThread
     override fun registerContentObserverSync(
         uri: Uri,
         notifyForDescendants: Boolean,
@@ -120,6 +122,7 @@ interface UserSettingsProxy : SettingsProxy {
      *
      * Implicitly calls [getUriFor] on the passed in name.
      */
+    @WorkerThread
     fun registerContentObserverForUserSync(
         name: String,
         settingsObserver: ContentObserver,
@@ -160,6 +163,7 @@ interface UserSettingsProxy : SettingsProxy {
         }
 
     /** Convenience wrapper around [ContentResolver.registerContentObserver] */
+    @WorkerThread
     fun registerContentObserverForUserSync(
         uri: Uri,
         settingsObserver: ContentObserver,
@@ -222,6 +226,7 @@ interface UserSettingsProxy : SettingsProxy {
      *
      * Implicitly calls [getUriFor] on the passed in name.
      */
+    @WorkerThread
     fun registerContentObserverForUserSync(
         name: String,
         notifyForDescendants: Boolean,
@@ -281,6 +286,7 @@ interface UserSettingsProxy : SettingsProxy {
     }
 
     /** Convenience wrapper around [ContentResolver.registerContentObserver] */
+    @WorkerThread
     fun registerContentObserverForUserSync(
         uri: Uri,
         notifyForDescendants: Boolean,

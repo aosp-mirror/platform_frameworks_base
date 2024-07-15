@@ -109,8 +109,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private final String mStringName;
     SurfaceSession mSurfaceSession;
     private final ArrayList<WindowState> mAddedWindows = new ArrayList<>();
-    /** Set of visible alert/app-overlay window surfaces connected to this session. */
-    private final ArraySet<WindowSurfaceController> mAlertWindowSurfaces = new ArraySet<>();
+    /** Set of visible alert/app-overlay windows connected to this session. */
+    private final ArraySet<WindowState> mAlertWindows = new ArraySet<>();
     private final DragDropController mDragDropController;
     final boolean mCanAddInternalSystemWindow;
     boolean mCanForceShowingInsets;
@@ -769,9 +769,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         return !mAddedWindows.isEmpty();
     }
 
-    void onWindowSurfaceVisibilityChanged(WindowSurfaceController surfaceController,
-            boolean visible, int type) {
-
+    void onWindowSurfaceVisibilityChanged(WindowState window, boolean visible) {
+        final int type = window.mAttrs.type;
         if (!isSystemAlertWindowType(type)) {
             return;
         }
@@ -782,7 +781,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         final boolean noSystemOverlayPermission =
                 !mCanAddInternalSystemWindow && !mCanCreateSystemApplicationOverlay;
         if (visible) {
-            changed = mAlertWindowSurfaces.add(surfaceController);
+            changed = mAlertWindows.add(window);
             if (type == TYPE_APPLICATION_OVERLAY) {
                 MetricsLoggerWrapper.logAppOverlayEnter(mUid, mPackageName, changed, type,
                         false /* set false to only log for TYPE_APPLICATION_OVERLAY */);
@@ -791,7 +790,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                         true /* only log for non-TYPE_APPLICATION_OVERLAY */);
             }
         } else {
-            changed = mAlertWindowSurfaces.remove(surfaceController);
+            changed = mAlertWindows.remove(window);
             if (type == TYPE_APPLICATION_OVERLAY) {
                 MetricsLoggerWrapper.logAppOverlayExit(mUid, mPackageName, changed, type,
                         false /* set false to only log for TYPE_APPLICATION_OVERLAY */);
@@ -802,7 +801,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
 
         if (changed && noSystemOverlayPermission) {
-            if (mAlertWindowSurfaces.isEmpty()) {
+            if (mAlertWindows.isEmpty()) {
                 cancelAlertWindowNotification();
             } else if (mAlertWindowNotification == null && !isSatellitePointingUiPackage()) {
                 mAlertWindowNotification = new AlertWindowNotification(mService, mPackageName);
@@ -815,7 +814,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         if (changed && mPid != WindowManagerService.MY_PID) {
             // Notify activity manager that the process contains overlay/alert windows, so it can
             // adjust the importance score for the process.
-            setHasOverlayUi(!mAlertWindowSurfaces.isEmpty());
+            setHasOverlayUi(!mAlertWindows.isEmpty());
         }
     }
 
@@ -859,7 +858,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
         mSurfaceSession = null;
         mAddedWindows.clear();
-        mAlertWindowSurfaces.clear();
+        mAlertWindows.clear();
         setHasOverlayUi(false);
         cancelAlertWindowNotification();
     }
@@ -880,7 +879,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("numWindow="); pw.print(mAddedWindows.size());
                 pw.print(" mCanAddInternalSystemWindow="); pw.print(mCanAddInternalSystemWindow);
-                pw.print(" mAlertWindowSurfaces="); pw.print(mAlertWindowSurfaces);
+                pw.print(" mAlertWindows="); pw.print(mAlertWindows);
                 pw.print(" mClientDead="); pw.print(mClientDead);
                 pw.print(" mSurfaceSession="); pw.println(mSurfaceSession);
         pw.print(prefix); pw.print("mPackageName="); pw.println(mPackageName);
@@ -896,9 +895,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     /** @return {@code true} if there is an alert window surface on the given display. */
     boolean hasAlertWindowSurfaces(DisplayContent displayContent) {
-        for (int i = mAlertWindowSurfaces.size() - 1; i >= 0; i--) {
-            final WindowSurfaceController surfaceController = mAlertWindowSurfaces.valueAt(i);
-            if (surfaceController.mAnimator.mWin.getDisplayContent() == displayContent) {
+        for (int i = mAlertWindows.size() - 1; i >= 0; i--) {
+            final WindowState window = mAlertWindows.valueAt(i);
+            if (window.mDisplayContent == displayContent) {
                 return true;
             }
         }
