@@ -79,7 +79,7 @@
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"רוצה לבחור אפשרות עבור <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"להשתמש במידע הזה בשביל <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"כניסה בדרך אחרת"</string>
-    <string name="snackbar_action" msgid="37373514216505085">"הצגת האפשרויות"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"עיון באפשרויות"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"המשך"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"אפשרויות כניסה לחשבון"</string>
     <string name="button_label_view_more" msgid="3429098227286495651">"עוד מידע"</string>
