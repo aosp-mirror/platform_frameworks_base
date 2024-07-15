@@ -965,6 +965,51 @@ public final class DisplayDeviceConfigTest {
         assertThat(supportedModeData.vsyncRate).isEqualTo(240);
     }
 
+    @Test
+    public void testDozeBrightness_Ddc() throws IOException {
+        when(mFlags.isDozeBrightnessFloatEnabled()).thenReturn(true);
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        assertArrayEquals(new float[]{ -1, 0.1f, 0.2f, 0.3f, 0.4f },
+                mDisplayDeviceConfig.getDozeBrightnessSensorValueToBrightness(), SMALL_DELTA);
+        assertEquals(0.25f, mDisplayDeviceConfig.getDefaultDozeBrightness(), SMALL_DELTA);
+    }
+
+    @Test
+    public void testDefaultDozeBrightness_FallBackToConfigXmlFloat() throws IOException {
+        setupDisplayDeviceConfigFromConfigResourceFile();
+        when(mFlags.isDozeBrightnessFloatEnabled()).thenReturn(true);
+        when(mResources.getFloat(com.android.internal.R.dimen.config_screenBrightnessDozeFloat))
+                .thenReturn(0.31f);
+        when(mResources.getInteger(com.android.internal.R.integer.config_screenBrightnessDoze))
+                .thenReturn(90);
+
+        // Empty display config file
+        setupDisplayDeviceConfigFromDisplayConfigFile(
+                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                        + "<displayConfiguration />\n");
+
+        assertEquals(0.31f, mDisplayDeviceConfig.getDefaultDozeBrightness(), ZERO_DELTA);
+    }
+
+    @Test
+    public void testDefaultDozeBrightness_FallBackToConfigXmlInt() throws IOException {
+        setupDisplayDeviceConfigFromConfigResourceFile();
+        when(mFlags.isDozeBrightnessFloatEnabled()).thenReturn(true);
+        when(mResources.getFloat(com.android.internal.R.dimen.config_screenBrightnessDozeFloat))
+                .thenReturn(DisplayDeviceConfig.INVALID_BRIGHTNESS_IN_CONFIG);
+        when(mResources.getInteger(com.android.internal.R.integer.config_screenBrightnessDoze))
+                .thenReturn(90);
+
+        // Empty display config file
+        setupDisplayDeviceConfigFromDisplayConfigFile(
+                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                        + "<displayConfiguration />\n");
+
+        assertEquals(brightnessIntToFloat(90),
+                mDisplayDeviceConfig.getDefaultDozeBrightness(), ZERO_DELTA);
+    }
+
     private String getValidLuxThrottling() {
         return "<luxThrottling>\n"
                 + "    <brightnessLimitMap>\n"
@@ -1708,6 +1753,16 @@ public final class DisplayDeviceConfigTest {
                 +           "</point>"
                 +       "</luxThresholds>"
                 +   "</idleScreenRefreshRateTimeout>"
+                +   "<dozeBrightnessSensorValueToBrightness>\n"
+                +       "<item>-1</item>\n"
+                +       "<item>0.1</item>\n"
+                +       "<item>0.2</item>\n"
+                +       "<item>0.3</item>\n"
+                +       "<item>0.4</item>\n"
+                +   "</dozeBrightnessSensorValueToBrightness>\n"
+                +   "<defaultDozeBrightness>"
+                +       "0.25"
+                +   "</defaultDozeBrightness>\n"
                 + "</displayConfiguration>\n";
     }
 

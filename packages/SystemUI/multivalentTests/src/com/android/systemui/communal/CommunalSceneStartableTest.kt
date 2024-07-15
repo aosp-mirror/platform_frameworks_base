@@ -98,7 +98,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun keyguardGoesAway_forceBlankScene() =
+    fun keyguardGoesAway_whenLaunchingWidget_doNotForceBlankScene() =
         with(kosmos) {
             testScope.runTest {
                 val scene by collectLastValue(communalSceneInteractor.currentScene)
@@ -106,6 +106,27 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                 communalSceneInteractor.changeScene(CommunalScenes.Communal)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)
 
+                communalSceneInteractor.setIsLaunchingWidget(true)
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = KeyguardState.GONE,
+                    testScope = this
+                )
+
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+            }
+        }
+
+    @Test
+    fun keyguardGoesAway_whenNotLaunchingWidget_forceBlankScene() =
+        with(kosmos) {
+            testScope.runTest {
+                val scene by collectLastValue(communalSceneInteractor.currentScene)
+
+                communalSceneInteractor.changeScene(CommunalScenes.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                communalSceneInteractor.setIsLaunchingWidget(false)
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.PRIMARY_BOUNCER,
                     to = KeyguardState.GONE,

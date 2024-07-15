@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.window.ActivityWindowInfo.getActivityWindowInfo;
 import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_OP_TYPE;
@@ -80,6 +81,7 @@ import android.window.ActivityWindowInfo;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOperation;
+import android.window.TaskFragmentOrganizer;
 import android.window.TaskFragmentParentInfo;
 import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
@@ -2553,9 +2555,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return ActivityThread.currentActivityThread().getActivity(activityToken);
     }
 
-    @VisibleForTesting
     @Nullable
-    ActivityThread.ActivityClientRecord getActivityClientRecord(@NonNull Activity activity) {
+    private ActivityThread.ActivityClientRecord getActivityClientRecord(
+            @NonNull Activity activity) {
         return ActivityThread.currentActivityThread()
                 .getActivityClient(activity.getActivityToken());
     }
@@ -3092,10 +3094,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     @Override
     public boolean isActivityEmbedded(@NonNull Activity activity) {
-        Objects.requireNonNull(activity);
         synchronized (mLock) {
-            final ActivityWindowInfo activityWindowInfo = getActivityWindowInfo(activity);
-            return activityWindowInfo != null && activityWindowInfo.isEmbedded();
+            return TaskFragmentOrganizer.isActivityEmbedded(activity);
         }
     }
 
@@ -3163,15 +3163,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
             executor.execute(() -> callback.accept(info));
         }
-    }
-
-    @Nullable
-    private ActivityWindowInfo getActivityWindowInfo(@NonNull Activity activity) {
-        if (activity.isFinishing()) {
-            return null;
-        }
-        final ActivityThread.ActivityClientRecord record = getActivityClientRecord(activity);
-        return record != null ? record.getActivityWindowInfo() : null;
     }
 
     @NonNull

@@ -44,26 +44,26 @@ internal class EdgeTranslate(
             return value
         }
 
-        return when (edge) {
-            Edge.Top ->
+        return when (edge.resolve(layoutImpl.layoutDirection)) {
+            Edge.Resolved.Top ->
                 if (startsOutsideLayoutBounds) {
                     Offset(value.x, -elementSize.height.toFloat())
                 } else {
                     Offset(value.x, 0f)
                 }
-            Edge.Left ->
+            Edge.Resolved.Left ->
                 if (startsOutsideLayoutBounds) {
                     Offset(-elementSize.width.toFloat(), value.y)
                 } else {
                     Offset(0f, value.y)
                 }
-            Edge.Bottom ->
+            Edge.Resolved.Bottom ->
                 if (startsOutsideLayoutBounds) {
                     Offset(value.x, sceneSize.height.toFloat())
                 } else {
                     Offset(value.x, (sceneSize.height - elementSize.height).toFloat())
                 }
-            Edge.Right ->
+            Edge.Resolved.Right ->
                 if (startsOutsideLayoutBounds) {
                     Offset(sceneSize.width.toFloat(), value.y)
                 } else {

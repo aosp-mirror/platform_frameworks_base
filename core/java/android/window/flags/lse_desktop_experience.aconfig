@@ -176,3 +176,10 @@ flag {
     description: "Enables desktop windowing app handle education"
     bug: "348208342"
 }
+
+flag {
+    name: "enable_compat_ui_visibility_status"
+    namespace: "lse_desktop_experience"
+    description: "Enables the tracking of the status for compat ui elements."
+    bug: "350953004"
+}
