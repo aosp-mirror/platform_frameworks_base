@@ -1660,6 +1660,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // Otherwise if other places send wpc.getConfiguration() to client, the configuration may
         // be ignored due to the seq is older.
         resolvedConfig.seq = newParentConfig.seq;
+
+        if (mConfigActivityRecord != null) {
+            // Let the activity decide whether to apply the size override.
+            return;
+        }
+        final DisplayContent displayContent = mAtm.mWindowManager != null
+                ? mAtm.mWindowManager.getDefaultDisplayContentLocked()
+                : null;
+        applySizeOverrideIfNeeded(
+                displayContent,
+                mInfo,
+                newParentConfig,
+                resolvedConfig,
+                false /* optOutEdgeToEdge */,
+                false /* hasFixedRotationTransform */,
+                false /* hasCompatDisplayInsets */);
     }
 
     void dispatchConfiguration(@NonNull Configuration config) {
