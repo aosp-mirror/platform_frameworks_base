@@ -3972,10 +3972,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @BinderThread
     private void onImeSwitchButtonClickFromClient(@NonNull IBinder token, int displayId,
             @UserIdInt int userId) {
-        userId = mActivityManagerInternal.handleIncomingUser(
-                Binder.getCallingPid(), Binder.getCallingUid(), userId, false,
-                ActivityManagerInternal.ALLOW_FULL_ONLY, "onImeSwitchButtonClickFromClient", null);
-
         final var userData = getUserData(userId);
         synchronized (ImfLock.class) {
             if (!calledWithValidTokenLocked(token, userData)) {
@@ -6960,8 +6956,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         @BinderThread
         @Override
-        public void onImeSwitchButtonClickFromClient(int displayId, @UserIdInt int userId) {
-            mImms.onImeSwitchButtonClickFromClient(mToken, displayId, userId);
+        public void onImeSwitchButtonClickFromClient(int displayId) {
+            mImms.onImeSwitchButtonClickFromClient(mToken, displayId, mUserId);
         }
 
         @BinderThread
