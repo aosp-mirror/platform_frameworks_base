@@ -22,11 +22,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
-import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
-import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 
 /**
  * Defines the behavior of the [SceneTransitionLayout] when a scrollable component is scrolled.
@@ -70,7 +68,11 @@ enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
      * In addition, during scene transitions, scroll events are consumed by the
      * [SceneTransitionLayout] instead of the scrollable component.
      */
-    EdgeAlways(canStartOnPostFling = true),
+    EdgeAlways(canStartOnPostFling = true);
+
+    companion object {
+        val Default = EdgeNoPreview
+    }
 }
 
 internal fun Modifier.nestedScrollToScene(
@@ -131,7 +133,6 @@ private class NestedScrollToSceneNode(
     private var bottomOrRightBehavior: NestedScrollBehavior,
     private var isExternalOverscrollGesture: () -> Boolean,
 ) : DelegatingNode() {
-    lateinit var pointersInfoOwner: PointersInfoOwner
     private var scrollBehaviorOwner: ScrollBehaviorOwner? = null
 
     private fun requireScrollBehaviorOwner(): ScrollBehaviorOwner {
@@ -143,7 +144,7 @@ private class NestedScrollToSceneNode(
         return behaviorOwner
     }
 
-    val updateScrollBehaviorsConnection =
+    private val updateScrollBehaviorsConnection =
         object : NestedScrollConnection {
             /**
              * When using [NestedScrollConnection.onPostScroll], we can specify the desired behavior
@@ -174,37 +175,11 @@ private class NestedScrollToSceneNode(
             }
         }
 
-    private var priorityNestedScrollConnection: PriorityNestedScrollConnection =
-        scenePriorityNestedScrollConnection(
-            layoutImpl = layoutImpl,
-            orientation = orientation,
-            topOrLeftBehavior = topOrLeftBehavior,
-            bottomOrRightBehavior = bottomOrRightBehavior,
-            isExternalOverscrollGesture = isExternalOverscrollGesture,
-            pointersInfoOwner = { pointersInfoOwner.pointersInfo() }
-        )
-
-    private var nestedScrollNode: DelegatableNode =
-        nestedScrollModifierNode(
-            connection = priorityNestedScrollConnection,
-            dispatcher = null,
-        )
-
-    private var updateScrollBehaviorsNestedScrollNode: DelegatableNode =
-        nestedScrollModifierNode(
-            connection = updateScrollBehaviorsConnection,
-            dispatcher = null,
-        )
-
-    override fun onAttach() {
-        pointersInfoOwner = requireAncestorPointersInfoOwner()
-        delegate(nestedScrollNode)
-        delegate(updateScrollBehaviorsNestedScrollNode)
+    init {
+        delegate(nestedScrollModifierNode(updateScrollBehaviorsConnection, dispatcher = null))
     }
 
     override fun onDetach() {
-        // Make sure we reset the scroll connection when this modifier is removed from composition
-        priorityNestedScrollConnection.reset()
         scrollBehaviorOwner = null
     }
 
@@ -220,44 +195,5 @@ private class NestedScrollToSceneNode(
         this.topOrLeftBehavior = topOrLeftBehavior
         this.bottomOrRightBehavior = bottomOrRightBehavior
         this.isExternalOverscrollGesture = isExternalOverscrollGesture
-
-        // Clean up the old nested scroll connection
-        priorityNestedScrollConnection.reset()
-        undelegate(nestedScrollNode)
-
-        // Create a new nested scroll connection
-        priorityNestedScrollConnection =
-            scenePriorityNestedScrollConnection(
-                layoutImpl = layoutImpl,
-                orientation = orientation,
-                topOrLeftBehavior = topOrLeftBehavior,
-                bottomOrRightBehavior = bottomOrRightBehavior,
-                isExternalOverscrollGesture = isExternalOverscrollGesture,
-                pointersInfoOwner = pointersInfoOwner,
-            )
-        nestedScrollNode =
-            nestedScrollModifierNode(
-                connection = priorityNestedScrollConnection,
-                dispatcher = null,
-            )
-        delegate(nestedScrollNode)
     }
 }
-
-private fun scenePriorityNestedScrollConnection(
-    layoutImpl: SceneTransitionLayoutImpl,
-    orientation: Orientation,
-    topOrLeftBehavior: NestedScrollBehavior,
-    bottomOrRightBehavior: NestedScrollBehavior,
-    isExternalOverscrollGesture: () -> Boolean,
-    pointersInfoOwner: PointersInfoOwner,
-) =
-    NestedScrollHandlerImpl(
-            layoutImpl = layoutImpl,
-            orientation = orientation,
-            topOrLeftBehavior = topOrLeftBehavior,
-            bottomOrRightBehavior = bottomOrRightBehavior,
-            isExternalOverscrollGesture = isExternalOverscrollGesture,
-            pointersInfoOwner = pointersInfoOwner,
-        )
-        .connection

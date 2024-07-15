@@ -41,7 +41,6 @@ import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.PointerInputModifierNode
-import androidx.compose.ui.node.TraversableNode
 import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.node.findNearestAncestor
 import androidx.compose.ui.node.observeReads
@@ -139,15 +138,11 @@ internal class MultiPointerDraggableNode(
     DelegatingNode(),
     PointerInputModifierNode,
     CompositionLocalConsumerModifierNode,
-    TraversableNode,
-    PointersInfoOwner,
     ObserverModifierNode {
     private val pointerInputHandler: suspend PointerInputScope.() -> Unit = { pointerInput() }
     private val delegate = delegate(SuspendingPointerInputModifierNode(pointerInputHandler))
     private val velocityTracker = VelocityTracker()
     private var previousEnabled: Boolean = false
-
-    override val traverseKey: Any = TRAVERSE_KEY
 
     var enabled: () -> Boolean = enabled
         set(value) {
@@ -208,7 +203,7 @@ internal class MultiPointerDraggableNode(
     private var startedPosition: Offset? = null
     private var pointersDown: Int = 0
 
-    override fun pointersInfo(): PointersInfo {
+    internal fun pointersInfo(): PointersInfo {
         return PointersInfo(
             startedPosition = startedPosition,
             // Note: We could have 0 pointers during fling or for other reasons.
