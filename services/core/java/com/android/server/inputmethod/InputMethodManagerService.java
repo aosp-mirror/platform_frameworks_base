@@ -476,7 +476,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @AnyThread
     @NonNull
-    UserDataRepository.UserData getUserData(@UserIdInt int userId) {
+    UserData getUserData(@UserIdInt int userId) {
         return mUserDataRepository.getOrCreate(userId);
     }
 
@@ -1709,7 +1709,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         clearClientSessionLocked(client);
         clearClientSessionForAccessibilityLocked(client);
         // TODO(b/324907325): Remove the suppress warnings once b/324907325 is fixed.
-        @SuppressWarnings("GuardedBy") Consumer<UserDataRepository.UserData> clientRemovedForUser =
+        @SuppressWarnings("GuardedBy") Consumer<UserData> clientRemovedForUser =
                 userData -> onClientRemovedInternalLocked(client, userData);
         mUserDataRepository.forAllUserData(clientRemovedForUser);
     }
@@ -1719,8 +1719,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      */
     // TODO(b/325515685): Move this method to InputMethodBindingController
     @GuardedBy("ImfLock.class")
-    private void onClientRemovedInternalLocked(ClientState client,
-            @NonNull UserDataRepository.UserData userData) {
+    private void onClientRemovedInternalLocked(ClientState client, @NonNull UserData userData) {
         final int userId = userData.mUserId;
         if (userData.mCurClient == client) {
             hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow, 0 /* flags */,
@@ -2576,8 +2575,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     @InputMethodNavButtonFlags
-    private int getInputMethodNavButtonFlagsLocked(
-            @NonNull UserDataRepository.UserData userData) {
+    private int getInputMethodNavButtonFlagsLocked(@NonNull UserData userData) {
         final int userId = userData.mUserId;
         final var bindingController = userData.mBindingController;
         // Whether the current display has a navigation bar. When this is false (e.g. emulator),
@@ -4804,8 +4802,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    void setEnabledSessionLocked(SessionState session,
-            @NonNull UserDataRepository.UserData userData) {
+    void setEnabledSessionLocked(SessionState session, @NonNull UserData userData) {
         if (userData.mEnabledSession != session) {
             if (userData.mEnabledSession != null && userData.mEnabledSession.mSession != null) {
                 if (DEBUG) Slog.v(TAG, "Disabling: " + userData.mEnabledSession);
@@ -4824,7 +4821,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     void setEnabledSessionForAccessibilityLocked(
             SparseArray<AccessibilitySessionState> accessibilitySessions,
-            @NonNull UserDataRepository.UserData userData) {
+            @NonNull UserData userData) {
         // mEnabledAccessibilitySessions could the same object as accessibilitySessions.
         SparseArray<IAccessibilityInputMethodSession> disabledSessions = new SparseArray<>();
         for (int i = 0; i < userData.mEnabledAccessibilitySessions.size(); i++) {
@@ -5329,7 +5326,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    void sendOnNavButtonFlagsChangedLocked(@NonNull UserDataRepository.UserData userData) {
+    void sendOnNavButtonFlagsChangedLocked(@NonNull UserData userData) {
         final var bindingController = userData.mBindingController;
         final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         if (curMethod == null) {
@@ -5345,7 +5342,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final boolean value =
                 InputMethodDrawsNavBarResourceMonitor.evaluate(mContext, profileParentId);
         final var profileUserIds = mUserManagerInternal.getProfileIds(profileParentId, false);
-        final ArrayList<UserDataRepository.UserData> updatedUsers = new ArrayList<>();
+        final ArrayList<UserData> updatedUsers = new ArrayList<>();
         for (int profileUserId : profileUserIds) {
             final var userData = getUserData(profileUserId);
             userData.mImeDrawsNavBar.set(value);
@@ -6125,7 +6122,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             p.println("  mUserDataRepository=");
             // TODO(b/324907325): Remove the suppress warnings once b/324907325 is fixed.
-            @SuppressWarnings("GuardedBy") Consumer<UserDataRepository.UserData> userDataDump =
+            @SuppressWarnings("GuardedBy") Consumer<UserData> userDataDump =
                     u -> {
                         p.println("    mUserId=" + u.mUserId);
                         p.println("      hasMainConnection="
