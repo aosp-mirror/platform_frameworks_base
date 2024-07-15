@@ -19,6 +19,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedUtfChars.h>
+
 #include "jni.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
@@ -39,6 +42,75 @@ static rc_t throwIfMinusOne(JNIEnv* env, const char* name, rc_t rc) {
         throwErrnoException(env, name);
     }
     return rc;
+}
+
+// ---- Helper functions ---
+
+static jclass g_StructStat;
+static jclass g_StructTimespecClass;
+
+static jclass findClass(JNIEnv* env, const char* name) {
+    ScopedLocalRef<jclass> localClass(env, env->FindClass(name));
+    jclass result = reinterpret_cast<jclass>(env->NewGlobalRef(localClass.get()));
+    if (result == NULL) {
+        ALOGE("failed to find class '%s'", name);
+        abort();
+    }
+    return result;
+}
+
+static jobject makeStructTimespec(JNIEnv* env, const struct timespec& ts) {
+    static jmethodID ctor = env->GetMethodID(g_StructTimespecClass, "<init>",
+            "(JJ)V");
+    if (ctor == NULL) {
+        return NULL;
+    }
+    return env->NewObject(g_StructTimespecClass, ctor,
+            static_cast<jlong>(ts.tv_sec), static_cast<jlong>(ts.tv_nsec));
+}
+
+static jobject makeStructStat(JNIEnv* env, const struct stat64& sb) {
+    static jmethodID ctor = env->GetMethodID(g_StructStat, "<init>",
+            "(JJIJIIJJLandroid/system/StructTimespec;Landroid/system/StructTimespec;Landroid/system/StructTimespec;JJ)V");
+    if (ctor == NULL) {
+        return NULL;
+    }
+
+    jobject atim_timespec = makeStructTimespec(env, sb.st_atim);
+    if (atim_timespec == NULL) {
+        return NULL;
+    }
+    jobject mtim_timespec = makeStructTimespec(env, sb.st_mtim);
+    if (mtim_timespec == NULL) {
+        return NULL;
+    }
+    jobject ctim_timespec = makeStructTimespec(env, sb.st_ctim);
+    if (ctim_timespec == NULL) {
+        return NULL;
+    }
+
+    return env->NewObject(g_StructStat, ctor,
+            static_cast<jlong>(sb.st_dev), static_cast<jlong>(sb.st_ino),
+            static_cast<jint>(sb.st_mode), static_cast<jlong>(sb.st_nlink),
+            static_cast<jint>(sb.st_uid), static_cast<jint>(sb.st_gid),
+            static_cast<jlong>(sb.st_rdev), static_cast<jlong>(sb.st_size),
+            atim_timespec, mtim_timespec, ctim_timespec,
+            static_cast<jlong>(sb.st_blksize), static_cast<jlong>(sb.st_blocks));
+}
+
+static jobject doStat(JNIEnv* env, jstring javaPath, bool isLstat) {
+    ScopedUtfChars path(env, javaPath);
+    if (path.c_str() == NULL) {
+        return NULL;
+    }
+    struct stat64 sb;
+    int rc = isLstat ? TEMP_FAILURE_RETRY(lstat64(path.c_str(), &sb))
+                     : TEMP_FAILURE_RETRY(stat64(path.c_str(), &sb));
+    if (rc == -1) {
+        throwErrnoException(env, isLstat ? "lstat" : "stat");
+        return NULL;
+    }
+    return makeStructStat(env, sb);
 }
 
 // ---- JNI methods ----
@@ -77,6 +149,24 @@ static jlong nDup(JNIEnv* env, jclass, jint fd) {
     return throwIfMinusOne(env, "fcntl", TEMP_FAILURE_RETRY(fcntl(fd, F_DUPFD_CLOEXEC, 0)));
 }
 
+static jobject nFstat(JNIEnv* env, jobject, jint fd) {
+    struct stat64 sb;
+    int rc = TEMP_FAILURE_RETRY(fstat64(fd, &sb));
+    if (rc == -1) {
+        throwErrnoException(env, "fstat");
+        return NULL;
+    }
+    return makeStructStat(env, sb);
+}
+
+static jobject Linux_lstat(JNIEnv* env, jobject, jstring javaPath) {
+    return doStat(env, javaPath, true);
+}
+
+static jobject Linux_stat(JNIEnv* env, jobject, jstring javaPath) {
+    return doStat(env, javaPath, false);
+}
+
 // ---- Registration ----
 
 static const JNINativeMethod sMethods[] =
@@ -86,6 +176,9 @@ static const JNINativeMethod sMethods[] =
     { "nLseek", "(IJI)J", (void*)nLseek },
     { "nPipe2", "(I)[I", (void*)nPipe2 },
     { "nDup", "(I)I", (void*)nDup },
+    { "nFstat", "(I)Landroid/system/StructStat;", (void*)nFstat },
+    { "lstat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_lstat },
+    { "stat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_stat },
 };
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
@@ -100,6 +193,9 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     ALOG_ASSERT(env, "Could not retrieve the env!");
 
     ALOGI("%s: JNI_OnLoad", __FILE__);
+
+    g_StructStat = findClass(env, "android/system/StructStat");
+    g_StructTimespecClass = findClass(env, "android/system/StructTimespec");
 
     jint res = jniRegisterNativeMethods(env, "com/android/ravenwood/common/RavenwoodRuntimeNative",
             sMethods, NELEM(sMethods));

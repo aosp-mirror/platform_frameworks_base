@@ -30,7 +30,6 @@ public final class Os {
         return RavenwoodRuntimeNative.lseek(fd, offset, whence);
     }
 
-
     public static FileDescriptor[] pipe2(int flags) throws ErrnoException {
         return RavenwoodRuntimeNative.pipe2(flags);
     }
@@ -41,5 +40,17 @@ public final class Os {
 
     public static int fcntlInt(FileDescriptor fd, int cmd, int arg) throws ErrnoException {
         return RavenwoodRuntimeNative.fcntlInt(fd, cmd, arg);
+    }
+
+    public static StructStat fstat(FileDescriptor fd) throws ErrnoException {
+        return RavenwoodRuntimeNative.fstat(fd);
+    }
+
+    public static StructStat lstat(String path) throws ErrnoException {
+        return RavenwoodRuntimeNative.lstat(path);
+    }
+
+    public static StructStat stat(String path) throws ErrnoException {
+        return RavenwoodRuntimeNative.stat(path);
     }
 }
