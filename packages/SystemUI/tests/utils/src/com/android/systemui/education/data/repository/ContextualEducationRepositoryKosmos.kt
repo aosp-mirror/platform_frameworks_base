@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.education.data.model
+package com.android.systemui.education.data.repository
 
+import com.android.systemui.kosmos.Kosmos
 import java.time.Instant
 
-/**
- * Model to store education data related to each gesture (e.g. Back, Home, All Apps, Overview). Each
- * gesture stores its own model separately.
- */
-data class GestureEduModel(
-    val signalCount: Int = 0,
-    val educationShownCount: Int = 0,
-    val lastShortcutTriggeredTime: Instant? = null,
-)
+var Kosmos.contextualEducationRepository: ContextualEducationRepository by
+    Kosmos.Fixture { FakeContextualEducationRepository(FakeEduClock(Instant.MIN)) }

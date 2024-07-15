@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.systemui.education.data.model
+package com.android.systemui.education.data.repository
 
+import java.time.Clock
 import java.time.Instant
+import java.time.ZoneId
 
-/**
- * Model to store education data related to each gesture (e.g. Back, Home, All Apps, Overview). Each
- * gesture stores its own model separately.
- */
-data class GestureEduModel(
-    val signalCount: Int = 0,
-    val educationShownCount: Int = 0,
-    val lastShortcutTriggeredTime: Instant? = null,
-)
+class FakeEduClock(private val base: Instant) : Clock() {
+    private val zone: ZoneId = ZoneId.of("UTC")
+
+    override fun instant(): Instant {
+        return base
+    }
+
+    override fun withZone(zoneId: ZoneId?): Clock {
+        return FakeEduClock(base)
+    }
+
+    override fun getZone(): ZoneId {
+        return zone
+    }
+}
