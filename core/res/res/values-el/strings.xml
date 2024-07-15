@@ -2095,7 +2095,7 @@
     <string name="popup_window_default_title" msgid="6907717596694826919">"Αναδυόμενο παράθυρο"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"Η έκδοση εφαρμογής υποβαθμίστηκε ή δεν είναι συμβατή με αυτήν τη συντόμευση"</string>
-    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης, επειδή η εφαρμογή δεν υποστηρίζει τη δημιουργία αντιγράφων ασφαλείας και την επαναφορά"</string>
+    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης, επειδή η εφαρμογή δεν υποστηρίζει τη δημιουργία αντιγράφου ασφαλείας και την επαναφορά"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης, λόγω αναντιστοιχίας της υπογραφής εφαρμογής"</string>
     <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"Η συντόμευση είναι απενεργοποιημένη"</string>
