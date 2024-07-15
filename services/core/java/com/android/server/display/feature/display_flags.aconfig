@@ -246,6 +246,14 @@ flag {
 }
 
 flag {
+    name: "doze_brightness_float"
+    namespace: "display_manager"
+    description: "Define doze brightness in the float scale [0, 1]."
+    bug: "343796384"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "offload_controls_doze_auto_brightness"
     namespace: "display_manager"
     description: "Allows the registered DisplayOffloader to control if auto-brightness is used in doze"
