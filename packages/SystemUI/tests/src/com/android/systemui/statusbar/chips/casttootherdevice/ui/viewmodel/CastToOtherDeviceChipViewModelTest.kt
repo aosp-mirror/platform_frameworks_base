@@ -18,7 +18,10 @@ package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 
 import android.view.View
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.Cuj
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogCuj
+import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
@@ -37,6 +40,7 @@ import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.Me
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.statusbar.policy.CastDevice
@@ -45,7 +49,10 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -60,6 +67,16 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
     private val mockScreenCastDialog = mock<SystemUIDialog>()
     private val mockGenericCastDialog = mock<SystemUIDialog>()
+    private val chipBackgroundView = mock<ChipBackgroundContainer>()
+    private val chipView =
+        mock<View>().apply {
+            whenever(
+                    this.requireViewById<ChipBackgroundContainer>(
+                        R.id.ongoing_activity_chip_background
+                    )
+                )
+                .thenReturn(chipBackgroundView)
+        }
 
     private val underTest = kosmos.castToOtherDeviceChipViewModel
 
@@ -297,8 +314,14 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
             assertThat(clickListener).isNotNull()
 
-            clickListener!!.onClick(mock<View>())
-            verify(mockScreenCastDialog).show()
+            clickListener!!.onClick(chipView)
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    eq(mockScreenCastDialog),
+                    eq(chipBackgroundView),
+                    any(),
+                    anyBoolean(),
+                )
         }
 
     @Test
@@ -316,8 +339,14 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
             assertThat(clickListener).isNotNull()
 
-            clickListener!!.onClick(mock<View>())
-            verify(mockScreenCastDialog).show()
+            clickListener!!.onClick(chipView)
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    eq(mockScreenCastDialog),
+                    eq(chipBackgroundView),
+                    any(),
+                    anyBoolean(),
+                )
         }
 
     @Test
@@ -339,7 +368,70 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
             assertThat(clickListener).isNotNull()
 
-            clickListener!!.onClick(mock<View>())
-            verify(mockGenericCastDialog).show()
+            clickListener!!.onClick(chipView)
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    eq(mockGenericCastDialog),
+                    eq(chipBackgroundView),
+                    any(),
+                    anyBoolean(),
+                )
+        }
+
+    @Test
+    fun chip_projectionStateCasting_clickListenerHasCuj() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(CAST_TO_OTHER_DEVICES_PACKAGE)
+
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            clickListener!!.onClick(chipView)
+
+            val cujCaptor = argumentCaptor<DialogCuj>()
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    any(),
+                    any(),
+                    cujCaptor.capture(),
+                    anyBoolean(),
+                )
+
+            assertThat(cujCaptor.firstValue.cujType)
+                .isEqualTo(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP)
+            assertThat(cujCaptor.firstValue.tag).contains("Cast")
+        }
+
+    @Test
+    fun chip_routerStateCasting_clickListenerHasCuj() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            mediaRouterRepo.castDevices.value =
+                listOf(
+                    CastDevice(
+                        state = CastDevice.CastState.Connected,
+                        id = "id",
+                        name = "name",
+                        description = "desc",
+                        origin = CastDevice.CastOrigin.MediaRouter,
+                    )
+                )
+
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            clickListener!!.onClick(chipView)
+
+            val cujCaptor = argumentCaptor<DialogCuj>()
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    any(),
+                    any(),
+                    cujCaptor.capture(),
+                    anyBoolean(),
+                )
+
+            assertThat(cujCaptor.firstValue.cujType)
+                .isEqualTo(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP)
+            assertThat(cujCaptor.firstValue.tag).contains("Cast")
         }
 }

@@ -18,6 +18,9 @@ package com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import com.android.internal.jank.Cuj
+import com.android.systemui.animation.DialogCuj
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
@@ -55,6 +58,7 @@ constructor(
     private val mediaProjectionChipInteractor: MediaProjectionChipInteractor,
     private val systemClock: SystemClock,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
     override val chip: StateFlow<OngoingActivityChipModel> =
@@ -92,7 +96,16 @@ constructor(
             colors = ColorsModel.Red,
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),
-            createDialogLaunchOnClickListener(createShareToAppDialogDelegate(state), logger, TAG),
+            createDialogLaunchOnClickListener(
+                createShareToAppDialogDelegate(state),
+                dialogTransitionAnimator,
+                DialogCuj(
+                    Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP,
+                    tag = "Share to app",
+                ),
+                logger,
+                TAG,
+            ),
         )
     }
 

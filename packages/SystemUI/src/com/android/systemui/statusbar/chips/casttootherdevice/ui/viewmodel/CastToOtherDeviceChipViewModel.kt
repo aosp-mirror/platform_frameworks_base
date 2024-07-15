@@ -18,6 +18,9 @@ package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import com.android.internal.jank.Cuj
+import com.android.systemui.animation.DialogCuj
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
@@ -60,6 +63,7 @@ constructor(
     private val mediaProjectionChipInteractor: MediaProjectionChipInteractor,
     private val mediaRouterChipInteractor: MediaRouterChipInteractor,
     private val systemClock: SystemClock,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
     @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
@@ -190,6 +194,8 @@ constructor(
             startTimeMs = systemClock.elapsedRealtime(),
             createDialogLaunchOnClickListener(
                 createCastScreenToOtherDeviceDialogDelegate(state),
+                dialogTransitionAnimator,
+                DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Cast to other device"),
                 logger,
                 TAG,
             ),
@@ -207,6 +213,11 @@ constructor(
             colors = ColorsModel.Red,
             createDialogLaunchOnClickListener(
                 createGenericCastToOtherDeviceDialogDelegate(deviceName),
+                dialogTransitionAnimator,
+                DialogCuj(
+                    Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP,
+                    tag = "Cast to other device audio only",
+                ),
                 logger,
                 TAG,
             ),
