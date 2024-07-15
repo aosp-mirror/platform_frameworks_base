@@ -61,8 +61,7 @@ abstract class CrossActivityBackAnimation(
     private val context: Context,
     private val background: BackAnimationBackground,
     private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
-    protected val transaction: SurfaceControl.Transaction,
-    private val choreographer: Choreographer
+    protected val transaction: SurfaceControl.Transaction
 ) : ShellBackAnimation() {
 
     protected val startClosingRect = RectF()
@@ -269,7 +268,9 @@ abstract class CrossActivityBackAnimation(
             .setSpring(postCommitFlingSpring)
         flingAnimation.start()
         // do an animation-frame immediately to prevent idle frame
-        flingAnimation.doAnimationFrame(choreographer.lastFrameTimeNanos / TimeUtils.NANOS_PER_MS)
+        flingAnimation.doAnimationFrame(
+            Choreographer.getInstance().lastFrameTimeNanos / TimeUtils.NANOS_PER_MS
+        )
 
         val valueAnimator =
             ValueAnimator.ofFloat(1f, 0f).setDuration(getPostCommitAnimationDuration())
@@ -362,7 +363,7 @@ abstract class CrossActivityBackAnimation(
     }
 
     protected fun applyTransaction() {
-        transaction.setFrameTimelineVsync(choreographer.vsyncId)
+        transaction.setFrameTimelineVsync(Choreographer.getInstance().vsyncId)
         transaction.apply()
     }
 
