@@ -121,7 +121,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"பின்செல்"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"முகப்பு"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"மெனு"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"அணுகல்தன்மை"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"மாற்றுத்திறன் வசதி"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"திரையைச் சுழற்று"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"மேலோட்டப் பார்வை"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"கேமரா"</string>
@@ -507,7 +507,7 @@
     <string name="stream_notification" msgid="7930294049046243939">"அறிவிப்பு"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"புளூடூத்"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"டூயல் டோன் மல்டி ஃப்ரீக்வென்சி"</string>
-    <string name="stream_accessibility" msgid="3873610336741987152">"அணுகல்தன்மை"</string>
+    <string name="stream_accessibility" msgid="3873610336741987152">"மாற்றுத்திறன் வசதி"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"ஒலி"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"அதிர்வு"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"அமைதி"</string>
