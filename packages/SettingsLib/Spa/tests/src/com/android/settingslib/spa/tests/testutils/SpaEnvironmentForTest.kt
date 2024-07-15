@@ -216,8 +216,6 @@ class SpaEnvironmentForTest(
     context: Context,
     rootPages: List<SettingsPage> = emptyList(),
     override val browseActivityClass: Class<out Activity>? = BlankActivity::class.java,
-    override val sliceBroadcastReceiverClass: Class<out BroadcastReceiver>? =
-        BlankSliceBroadcastReceiver::class.java,
     override val logger: SpaLogger = object : SpaLogger {}
 ) : SpaEnvironment(context) {
 

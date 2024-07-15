@@ -176,7 +176,6 @@ import com.android.server.AccessibilityManagerInternal;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
-import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.input.InputManagerInternal;
@@ -1013,7 +1012,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void onUserCreated(UserInfo user, @Nullable Object token) {
             // Called directly from UserManagerService. Do not block the calling thread.
-            initializeUsersAsync(new int[user.id]);
+            final int userId = user.id;
+            AdditionalSubtypeMapRepository.onUserCreated(userId);
+            initializeUsersAsync(new int[userId]);
         }
 
         @Override
@@ -1390,9 +1391,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         getPackageManagerForUser(mContext, currentUserId),
                         newSettings.getEnabledInputMethodList());
 
-                final var unused = SystemServerInitThreadPool.submit(
-                        AdditionalSubtypeMapRepository::startWriterThread,
-                        "Start AdditionalSubtypeMapRepository's writer thread");
+                AdditionalSubtypeMapRepository.startWriterThread();
 
                 if (mConcurrentMultiUserModeEnabled) {
                     for (int userId : mUserManagerInternal.getUserIds()) {

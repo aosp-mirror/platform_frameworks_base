@@ -7173,7 +7173,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawn()
                         + ", isAnimationSet=" + isAnimationSet);
                 if (!w.isDrawn()) {
-                    Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceController
+                    Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceControl
                             + " pv=" + w.isVisibleByPolicy()
                             + " mDrawState=" + winAnimator.drawStateToString()
                             + " ph=" + w.isParentWindowHidden() + " th=" + mVisibleRequested

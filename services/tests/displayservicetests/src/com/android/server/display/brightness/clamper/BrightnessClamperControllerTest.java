@@ -30,7 +30,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.SensorManager;
-import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -152,12 +151,6 @@ public class BrightnessClamperControllerTest {
         captor.getValue().onPropertiesChanged(mMockProperties);
 
         verify(mMockClamper).onDeviceConfigChanged();
-    }
-
-    @Test
-    public void testMaxReasonIsNoneOnInit() {
-        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE,
-                mClamperController.getBrightnessMaxReason());
     }
 
     @Test

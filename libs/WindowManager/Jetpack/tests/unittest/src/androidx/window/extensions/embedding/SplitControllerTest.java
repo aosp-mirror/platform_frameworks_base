@@ -165,6 +165,7 @@ public class SplitControllerTest {
     private Consumer<List<SplitInfo>> mEmbeddingCallback;
     private List<SplitInfo> mSplitInfos;
     private TransactionManager mTransactionManager;
+    private ActivityThread mCurrentActivityThread;
 
     @Before
     public void setUp() {
@@ -181,10 +182,12 @@ public class SplitControllerTest {
         };
         mSplitController.setSplitInfoCallback(mEmbeddingCallback);
         mTransactionManager = mSplitController.mTransactionManager;
+        mCurrentActivityThread = ActivityThread.currentActivityThread();
         spyOn(mSplitController);
         spyOn(mSplitPresenter);
         spyOn(mEmbeddingCallback);
         spyOn(mTransactionManager);
+        spyOn(mCurrentActivityThread);
         doNothing().when(mSplitPresenter).applyTransaction(any(), anyInt(), anyBoolean());
         final Configuration activityConfig = new Configuration();
         activityConfig.windowConfiguration.setBounds(TASK_BOUNDS);
@@ -1668,7 +1671,8 @@ public class SplitControllerTest {
         final IBinder activityToken = new Binder();
         doReturn(activityToken).when(activity).getActivityToken();
         doReturn(activity).when(mSplitController).getActivity(activityToken);
-        doReturn(activityClientRecord).when(mSplitController).getActivityClientRecord(activity);
+        doReturn(activityClientRecord).when(mCurrentActivityThread).getActivityClient(
+                activityToken);
         doReturn(taskId).when(activity).getTaskId();
         doReturn(new ActivityInfo()).when(activity).getActivityInfo();
         doReturn(DEFAULT_DISPLAY).when(activity).getDisplayId();

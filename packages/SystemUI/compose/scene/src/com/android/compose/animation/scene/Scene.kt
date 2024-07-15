@@ -37,7 +37,7 @@ internal class Scene(
     val key: SceneKey,
     layoutImpl: SceneTransitionLayoutImpl,
     content: @Composable SceneScope.() -> Unit,
-    actions: Map<UserAction, UserActionResult>,
+    actions: Map<UserAction.Resolved, UserActionResult>,
     zIndex: Float,
 ) {
     internal val scope = SceneScopeImpl(layoutImpl, this)
@@ -54,8 +54,8 @@ internal class Scene(
         }
 
     private fun checkValid(
-        userActions: Map<UserAction, UserActionResult>
-    ): Map<UserAction, UserActionResult> {
+        userActions: Map<UserAction.Resolved, UserActionResult>
+    ): Map<UserAction.Resolved, UserActionResult> {
         userActions.forEach { (action, result) ->
             if (key == result.toScene) {
                 error(
