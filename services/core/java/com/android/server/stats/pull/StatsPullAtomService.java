@@ -1283,7 +1283,7 @@ public class StatsPullAtomService extends SystemService {
             }
             case FrameworkStatsLog.PROXY_BYTES_TRANSFER_BY_FG_BG: {
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTemplate(
-                        new NetworkTemplate.Builder(MATCH_PROXY).build(),  /*includeTags=*/true);
+                        new NetworkTemplate.Builder(MATCH_PROXY).build(),  /*includeTags=*/false);
                 if (stats != null) {
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
                             new int[]{TRANSPORT_BLUETOOTH},

@@ -17,26 +17,50 @@
 package com.android.systemui.education.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
+import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.shared.education.GestureType
+import java.time.Clock
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+
+/** Encapsulates the functions of ContextualEducationRepository. */
+interface ContextualEducationRepository {
+    fun setUser(userId: Int)
+
+    fun readGestureEduModelFlow(gestureType: GestureType): Flow<GestureEduModel>
+
+    suspend fun incrementSignalCount(gestureType: GestureType)
+
+    suspend fun updateShortcutTriggerTime(gestureType: GestureType)
+}
 
 /**
  * Provide methods to read and update on field level and allow setting datastore when user is
  * changed
  */
 @SysUISingleton
-class ContextualEducationRepository
+class ContextualEducationRepositoryImpl
 @Inject
-constructor(private val userEduRepository: UserContextualEducationRepository) {
+constructor(
+    @EduClock private val clock: Clock,
+    private val userEduRepository: UserContextualEducationRepository
+) : ContextualEducationRepository {
     /** To change data store when user is changed */
-    fun setUser(userId: Int) = userEduRepository.setUser(userId)
+    override fun setUser(userId: Int) = userEduRepository.setUser(userId)
 
-    fun readGestureEduModelFlow(gestureType: GestureType) =
+    override fun readGestureEduModelFlow(gestureType: GestureType) =
         userEduRepository.readGestureEduModelFlow(gestureType)
 
-    suspend fun incrementSignalCount(gestureType: GestureType) {
+    override suspend fun incrementSignalCount(gestureType: GestureType) {
         userEduRepository.updateGestureEduModel(gestureType) {
             it.copy(signalCount = it.signalCount + 1)
+        }
+    }
+
+    override suspend fun updateShortcutTriggerTime(gestureType: GestureType) {
+        userEduRepository.updateGestureEduModel(gestureType) {
+            it.copy(lastShortcutTriggeredTime = clock.instant())
         }
     }
 }

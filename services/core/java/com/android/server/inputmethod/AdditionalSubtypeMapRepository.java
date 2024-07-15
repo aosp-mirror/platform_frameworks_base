@@ -220,6 +220,11 @@ final class AdditionalSubtypeMapRepository {
     }
 
     @AnyThread
+    static void onUserCreated(@UserIdInt int userId) {
+        sWriter.onUserCreated(userId);
+    }
+
+    @AnyThread
     static void remove(@UserIdInt int userId, @NonNull Handler ioHandler) {
         sWriter.onUserRemoved(userId);
         ioHandler.post(() -> {

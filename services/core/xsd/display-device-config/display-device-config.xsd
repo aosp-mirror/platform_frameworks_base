@@ -179,6 +179,19 @@
                 <xs:element name="supportsVrr" type="xs:boolean" minOccurs="0">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <!-- Table that translates doze brightness sensor values to brightness values in
+                the float scale [0, 1]; -1 means the current brightness should be kept.
+                The following formula should be used for conversion between nits and the float
+                scale: float = (nits - minNits) / (maxNits - minNits). minNits and maxNits are
+                defined in screenBrightnessMap. -->
+                <xs:element type="float-array" name="dozeBrightnessSensorValueToBrightness">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- The default screen brightness in the scale [0, 1] to use while the device is
+                dozing. -->
+                <xs:element type="nonNegativeDecimal" name="defaultDozeBrightness">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -856,6 +869,12 @@
     <xs:complexType name="integer-array">
         <xs:sequence>
             <xs:element name="item" type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="float-array">
+        <xs:sequence>
+            <xs:element name="item" type="nonNegativeDecimal" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 

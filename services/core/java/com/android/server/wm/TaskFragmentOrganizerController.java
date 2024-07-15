@@ -1169,16 +1169,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
     }
 
-    @Override
-    public boolean isActivityEmbedded(IBinder activityToken) {
-        synchronized (mGlobalLock) {
-            final ActivityRecord activity = ActivityRecord.forTokenLocked(activityToken);
-            return activity != null
-                    ? activity.isEmbeddedInHostContainer()
-                    : false;
-        }
-    }
-
     @VisibleForTesting
     @NonNull
     IApplicationThread getAppThread(int pid, int uid) {

@@ -33,6 +33,7 @@ import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachReversed
 import com.android.compose.ui.util.lerp
@@ -45,6 +46,7 @@ internal typealias MovableElementContent = @Composable (@Composable () -> Unit) 
 internal class SceneTransitionLayoutImpl(
     internal val state: BaseSceneTransitionLayoutState,
     internal var density: Density,
+    internal var layoutDirection: LayoutDirection,
     internal var swipeSourceDetector: SwipeSourceDetector,
     internal var transitionInterceptionThreshold: Float,
     builder: SceneTransitionLayoutScope.() -> Unit,
@@ -114,7 +116,7 @@ internal class SceneTransitionLayoutImpl(
         private set
 
     init {
-        updateScenes(builder)
+        updateScenes(builder, layoutDirection)
 
         // DraggableHandlerImpl must wait for the scenes to be initialized, in order to access the
         // current scene (required for SwipeTransition).
@@ -147,7 +149,10 @@ internal class SceneTransitionLayoutImpl(
         return scenes[key] ?: error("Scene $key is not configured")
     }
 
-    internal fun updateScenes(builder: SceneTransitionLayoutScope.() -> Unit) {
+    internal fun updateScenes(
+        builder: SceneTransitionLayoutScope.() -> Unit,
+        layoutDirection: LayoutDirection,
+    ) {
         // Keep a reference of the current scenes. After processing [builder], the scenes that were
         // not configured will be removed.
         val scenesToRemove = scenes.keys.toMutableSet()
@@ -163,11 +168,13 @@ internal class SceneTransitionLayoutImpl(
                 ) {
                     scenesToRemove.remove(key)
 
+                    val resolvedUserActions =
+                        userActions.mapKeys { it.key.resolve(layoutDirection) }
                     val scene = scenes[key]
                     if (scene != null) {
                         // Update an existing scene.
                         scene.content = content
-                        scene.userActions = userActions
+                        scene.userActions = resolvedUserActions
                         scene.zIndex = zIndex
                     } else {
                         // New scene.
@@ -176,7 +183,7 @@ internal class SceneTransitionLayoutImpl(
                                 key,
                                 this@SceneTransitionLayoutImpl,
                                 content,
-                                userActions,
+                                resolvedUserActions,
                                 zIndex,
                             )
                     }
@@ -213,7 +220,7 @@ internal class SceneTransitionLayoutImpl(
     @Composable
     private fun BackHandler() {
         val targetSceneForBack =
-            scene(state.transitionState.currentScene).userActions[Back]?.toScene
+            scene(state.transitionState.currentScene).userActions[Back.Resolved]?.toScene
         PredictiveBackHandler(state, coroutineScope, targetSceneForBack)
     }
 

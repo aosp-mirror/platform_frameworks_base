@@ -23,11 +23,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
@@ -37,10 +39,12 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeWithVelocity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
+import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.subjects.assertThat
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -633,5 +637,153 @@ class SwipeToSceneTest {
 
         // Foo should be translated by (20dp, 30dp).
         rule.onNode(isElement(TestElements.Foo)).assertPositionInRootIsEqualTo(20.dp, 30.dp)
+    }
+
+    @Test
+    fun startEnd_ltrLayout() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    initialScene = SceneA,
+                    transitions =
+                        transitions {
+                            from(SceneA, to = SceneB) {
+                                // We go to B by swiping to the start (left in LTR), so we make
+                                // scene B appear from the end (right) edge.
+                                translate(SceneB.rootElementKey, Edge.End)
+                            }
+
+                            from(SceneA, to = SceneC) {
+                                // We go to C by swiping to the end (right in LTR), so we make
+                                // scene C appear from the start (left) edge.
+                                translate(SceneC.rootElementKey, Edge.Start)
+                            }
+                        },
+                )
+            }
+
+        val layoutSize = 200.dp
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(state, Modifier.size(layoutSize)) {
+                scene(SceneA, userActions = mapOf(Swipe.Start to SceneB, Swipe.End to SceneC)) {
+                    Box(Modifier.fillMaxSize())
+                }
+                scene(SceneB) { Box(Modifier.element(SceneB.rootElementKey).fillMaxSize()) }
+                scene(SceneC) { Box(Modifier.element(SceneC.rootElementKey).fillMaxSize()) }
+            }
+        }
+
+        // Swipe to the left (start).
+        rule.onRoot().performTouchInput {
+            val middle = (layoutSize / 2).toPx()
+            down(Offset(middle, middle))
+            moveBy(Offset(-touchSlop, 0f), delayMillis = 1_000)
+        }
+
+        // Scene B should come from the right (end) edge.
+        var transition = assertThat(state.transitionState).isTransition()
+        assertThat(transition).hasFromScene(SceneA)
+        assertThat(transition).hasToScene(SceneB)
+        rule
+            .onNode(isElement(SceneB.rootElementKey))
+            .assertPositionInRootIsEqualTo(layoutSize, 0.dp)
+
+        // Release to go back to A.
+        rule.onRoot().performTouchInput { up() }
+        rule.waitForIdle()
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentScene(SceneA)
+
+        // Swipe to the right (end).
+        rule.onRoot().performTouchInput {
+            val middle = (layoutSize / 2).toPx()
+            down(Offset(middle, middle))
+            moveBy(Offset(touchSlop, 0f), delayMillis = 1_000)
+        }
+
+        // Scene C should come from the left (start) edge.
+        transition = assertThat(state.transitionState).isTransition()
+        assertThat(transition).hasFromScene(SceneA)
+        assertThat(transition).hasToScene(SceneC)
+        rule
+            .onNode(isElement(SceneC.rootElementKey))
+            .assertPositionInRootIsEqualTo(-layoutSize, 0.dp)
+    }
+
+    @Test
+    fun startEnd_rtlLayout() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    initialScene = SceneA,
+                    transitions =
+                        transitions {
+                            from(SceneA, to = SceneB) {
+                                // We go to B by swiping to the start (right in RTL), so we make
+                                // scene B appear from the end (left) edge.
+                                translate(SceneB.rootElementKey, Edge.End)
+                            }
+
+                            from(SceneA, to = SceneC) {
+                                // We go to C by swiping to the end (left in RTL), so we make
+                                // scene C appear from the start (right) edge.
+                                translate(SceneC.rootElementKey, Edge.Start)
+                            }
+                        },
+                )
+            }
+
+        val layoutSize = 200.dp
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                SceneTransitionLayout(state, Modifier.size(layoutSize)) {
+                    scene(SceneA, userActions = mapOf(Swipe.Start to SceneB, Swipe.End to SceneC)) {
+                        Box(Modifier.fillMaxSize())
+                    }
+                    scene(SceneB) { Box(Modifier.element(SceneB.rootElementKey).fillMaxSize()) }
+                    scene(SceneC) { Box(Modifier.element(SceneC.rootElementKey).fillMaxSize()) }
+                }
+            }
+        }
+
+        // Swipe to the left (end).
+        rule.onRoot().performTouchInput {
+            val middle = (layoutSize / 2).toPx()
+            down(Offset(middle, middle))
+            moveBy(Offset(-touchSlop, 0f), delayMillis = 1_000)
+        }
+
+        // Scene C should come from the right (start) edge.
+        var transition = assertThat(state.transitionState).isTransition()
+        assertThat(transition).hasFromScene(SceneA)
+        assertThat(transition).hasToScene(SceneC)
+        rule
+            .onNode(isElement(SceneC.rootElementKey))
+            .assertPositionInRootIsEqualTo(layoutSize, 0.dp)
+
+        // Release to go back to A.
+        rule.onRoot().performTouchInput { up() }
+        rule.waitForIdle()
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentScene(SceneA)
+
+        // Swipe to the right (start).
+        rule.onRoot().performTouchInput {
+            val middle = (layoutSize / 2).toPx()
+            down(Offset(middle, middle))
+            moveBy(Offset(touchSlop, 0f), delayMillis = 1_000)
+        }
+
+        // Scene C should come from the left (end) edge.
+        transition = assertThat(state.transitionState).isTransition()
+        assertThat(transition).hasFromScene(SceneA)
+        assertThat(transition).hasToScene(SceneB)
+        rule
+            .onNode(isElement(SceneB.rootElementKey))
+            .assertPositionInRootIsEqualTo(-layoutSize, 0.dp)
     }
 }

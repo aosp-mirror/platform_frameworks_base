@@ -28,6 +28,8 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.education.GestureType.BACK_GESTURE
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import java.time.Clock
+import java.time.Instant
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.TestScope
@@ -48,6 +50,7 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
     private val dsScopeProvider: Provider<CoroutineScope> = Provider {
         TestScope(kosmos.testDispatcher).backgroundScope
     }
+    private val clock: Clock = FakeEduClock(Instant.ofEpochMilli(1000))
     private val testUserId = 1111
 
     // For deleting any test files created after the test
@@ -59,7 +62,7 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
         // needed before calling TemporaryFolder.newFolder().
         val testContext = TestContext(context, tmpFolder.newFolder())
         val userRepository = UserContextualEducationRepository(testContext, dsScopeProvider)
-        underTest = ContextualEducationRepository(userRepository)
+        underTest = ContextualEducationRepositoryImpl(clock, userRepository)
         underTest.setUser(testUserId)
     }
 
@@ -83,6 +86,15 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
             underTest.incrementSignalCount(BACK_GESTURE)
             val model by collectLastValue(underTest.readGestureEduModelFlow(BACK_GESTURE))
             assertThat(model?.signalCount).isEqualTo(1)
+        }
+
+    @Test
+    fun dataAddedOnUpdateShortcutTriggerTime() =
+        testScope.runTest {
+            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK_GESTURE))
+            assertThat(model?.lastShortcutTriggeredTime).isNull()
+            underTest.updateShortcutTriggerTime(BACK_GESTURE)
+            assertThat(model?.lastShortcutTriggeredTime).isEqualTo(clock.instant())
         }
 
     /** Test context which allows overriding getFilesDir path */

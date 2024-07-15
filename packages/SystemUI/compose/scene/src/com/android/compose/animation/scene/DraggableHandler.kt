@@ -184,31 +184,33 @@ internal class DraggableHandlerImpl(
     ): Swipes {
         val fromSource =
             startedPosition?.let { position ->
-                layoutImpl.swipeSourceDetector.source(
-                    fromScene.targetSize,
-                    position.round(),
-                    layoutImpl.density,
-                    orientation,
-                )
+                layoutImpl.swipeSourceDetector
+                    .source(
+                        fromScene.targetSize,
+                        position.round(),
+                        layoutImpl.density,
+                        orientation,
+                    )
+                    ?.resolve(layoutImpl.layoutDirection)
             }
 
         val upOrLeft =
-            Swipe(
+            Swipe.Resolved(
                 direction =
                     when (orientation) {
-                        Orientation.Horizontal -> SwipeDirection.Left
-                        Orientation.Vertical -> SwipeDirection.Up
+                        Orientation.Horizontal -> SwipeDirection.Resolved.Left
+                        Orientation.Vertical -> SwipeDirection.Resolved.Up
                     },
                 pointerCount = pointersDown,
                 fromSource = fromSource,
             )
 
         val downOrRight =
-            Swipe(
+            Swipe.Resolved(
                 direction =
                     when (orientation) {
-                        Orientation.Horizontal -> SwipeDirection.Right
-                        Orientation.Vertical -> SwipeDirection.Down
+                        Orientation.Horizontal -> SwipeDirection.Resolved.Right
+                        Orientation.Vertical -> SwipeDirection.Resolved.Down
                     },
                 pointerCount = pointersDown,
                 fromSource = fromSource,
@@ -833,10 +835,10 @@ private object DefaultSwipeDistance : UserActionDistance {
 
 /** The [Swipe] associated to a given fromScene, startedPosition and pointersDown. */
 private class Swipes(
-    val upOrLeft: Swipe?,
-    val downOrRight: Swipe?,
-    val upOrLeftNoSource: Swipe?,
-    val downOrRightNoSource: Swipe?,
+    val upOrLeft: Swipe.Resolved?,
+    val downOrRight: Swipe.Resolved?,
+    val upOrLeftNoSource: Swipe.Resolved?,
+    val downOrRightNoSource: Swipe.Resolved?,
 ) {
     /** The [UserActionResult] associated to up and down swipes. */
     var upOrLeftResult: UserActionResult? = null
@@ -844,7 +846,7 @@ private class Swipes(
 
     fun computeSwipesResults(fromScene: Scene): Pair<UserActionResult?, UserActionResult?> {
         val userActions = fromScene.userActions
-        fun result(swipe: Swipe?): UserActionResult? {
+        fun result(swipe: Swipe.Resolved?): UserActionResult? {
             return userActions[swipe ?: return null]
         }
 
@@ -940,25 +942,27 @@ internal class NestedScrollHandlerImpl(
                 when {
                     amount < 0f -> {
                         val actionUpOrLeft =
-                            Swipe(
+                            Swipe.Resolved(
                                 direction =
                                     when (orientation) {
-                                        Orientation.Horizontal -> SwipeDirection.Left
-                                        Orientation.Vertical -> SwipeDirection.Up
+                                        Orientation.Horizontal -> SwipeDirection.Resolved.Left
+                                        Orientation.Vertical -> SwipeDirection.Resolved.Up
                                     },
                                 pointerCount = pointersInfo().pointersDown,
+                                fromSource = null,
                             )
                         fromScene.userActions[actionUpOrLeft]
                     }
                     amount > 0f -> {
                         val actionDownOrRight =
-                            Swipe(
+                            Swipe.Resolved(
                                 direction =
                                     when (orientation) {
-                                        Orientation.Horizontal -> SwipeDirection.Right
-                                        Orientation.Vertical -> SwipeDirection.Down
+                                        Orientation.Horizontal -> SwipeDirection.Resolved.Right
+                                        Orientation.Vertical -> SwipeDirection.Resolved.Down
                                     },
                                 pointerCount = pointersInfo().pointersDown,
+                                fromSource = null,
                             )
                         fromScene.userActions[actionDownOrRight]
                     }
