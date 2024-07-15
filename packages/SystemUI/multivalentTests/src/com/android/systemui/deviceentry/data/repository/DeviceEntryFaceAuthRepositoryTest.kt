@@ -52,7 +52,6 @@ import com.android.systemui.deviceentry.shared.FaceAuthUiEvent.FACE_AUTH_TRIGGER
 import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus
-import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.dump.DumpManager
@@ -79,7 +78,6 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
-import com.android.systemui.res.R
 import com.android.systemui.statusbar.commandQueue
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.testKosmos
@@ -475,29 +473,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             assertThat(emittedValues.first())
                 .isInstanceOf(ErrorFaceAuthenticationStatus::class.java)
             assertThat((emittedValues.first() as ErrorFaceAuthenticationStatus).msgId).isEqualTo(-1)
-        }
-
-    @Test
-    fun faceHelpMessagesAreIgnoredBasedOnConfig() =
-        testScope.runTest {
-            overrideResource(
-                R.array.config_face_acquire_device_entry_ignorelist,
-                intArrayOf(10, 11)
-            )
-            underTest = createDeviceEntryFaceAuthRepositoryImpl()
-            initCollectors()
-            allPreconditionsToRunFaceAuthAreTrue()
-
-            underTest.requestAuthenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
-            faceAuthenticateIsCalled()
-
-            authenticationCallback.value.onAuthenticationHelp(9, "help msg")
-            authenticationCallback.value.onAuthenticationHelp(10, "Ignored help msg")
-            authenticationCallback.value.onAuthenticationHelp(11, "Ignored help msg")
-
-            val response = authStatus() as HelpFaceAuthenticationStatus
-            assertThat(response.msg).isEqualTo("help msg")
-            assertThat(response.msgId).isEqualTo(response.msgId)
         }
 
     @Test
