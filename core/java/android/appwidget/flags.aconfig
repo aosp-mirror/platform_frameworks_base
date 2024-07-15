@@ -55,7 +55,7 @@ flag {
   name: "remote_views_proto"
   namespace: "app_widgets"
   description: "Enable support for persisting RemoteViews previews to Protobuf"
-  bug: "306546610"
+  bug: "364420494"
 }
 
 flag {
