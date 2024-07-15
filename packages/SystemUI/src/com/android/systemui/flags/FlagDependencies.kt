@@ -28,6 +28,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.ComposeLockscreen
+import com.android.systemui.qs.flags.NewQsUI
+import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
@@ -66,14 +68,20 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
         // DualShade dependencies
         DualShade.token dependsOn SceneContainerFlag.getMainAconfigFlag()
+
+        // QS Fragment using Compose dependencies
+        QSComposeFragment.token dependsOn NewQsUI.token
     }
 
     private inline val politeNotifications
         get() = FlagToken(FLAG_POLITE_NOTIFICATIONS, politeNotifications())
+
     private inline val crossAppPoliteNotifications
         get() = FlagToken(FLAG_CROSS_APP_POLITE_NOTIFICATIONS, crossAppPoliteNotifications())
+
     private inline val vibrateWhileUnlockedToken: FlagToken
         get() = FlagToken(FLAG_VIBRATE_WHILE_UNLOCKED, vibrateWhileUnlocked())
+
     private inline val communalHub
         get() = FlagToken(FLAG_COMMUNAL_HUB, communalHub())
 }
