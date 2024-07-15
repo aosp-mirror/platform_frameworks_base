@@ -21,6 +21,7 @@
 #include "jni.h"
 
 #include <media/AudioCapabilities.h>
+#include <media/EncoderCapabilities.h>
 #include <media/VideoCapabilities.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <nativehelper/JNIHelp.h>
@@ -30,6 +31,7 @@ namespace android {
 struct fields_t {
     jfieldID audioCapsContext;
     jfieldID videoCapsContext;
+    jfieldID encoderCapsContext;
 };
 static fields_t fields;
 
@@ -44,6 +46,12 @@ static AudioCapabilities* getAudioCapabilities(JNIEnv *env, jobject thiz) {
 static VideoCapabilities* getVideoCapabilities(JNIEnv *env, jobject thiz) {
     VideoCapabilities* const p = (VideoCapabilities*)env->GetLongField(
             thiz, fields.videoCapsContext);
+    return p;
+}
+
+static EncoderCapabilities* getEncoderCapabilities(JNIEnv *env, jobject thiz) {
+    EncoderCapabilities* const p = (EncoderCapabilities*)env->GetLongField(
+            thiz, fields.encoderCapsContext);
     return p;
 }
 
@@ -305,6 +313,35 @@ static jint android_media_VideoCapabilities_getSmallerDimensionUpperLimit(JNIEnv
     return smallerDimensionUpperLimit;
 }
 
+// EncoderCapabilities
+
+static void android_media_EncoderCapabilities_native_init(JNIEnv *env, jobject /* thiz */) {
+    jclass clazz = env->FindClass(
+            "android/media/MediaCodecInfo$EncoderCapabilities$EncoderCapsNativeImpl");
+    if (clazz == NULL) {
+        return;
+    }
+
+    fields.encoderCapsContext = env->GetFieldID(clazz, "mNativeContext", "J");
+    if (fields.encoderCapsContext == NULL) {
+        return;
+    }
+
+    env->DeleteLocalRef(clazz);
+}
+
+static jboolean android_media_EncoderCapabilities_isBitrateModeSupported(JNIEnv *env, jobject thiz,
+        int mode) {
+    EncoderCapabilities* const encoderCaps = getEncoderCapabilities(env, thiz);
+    if (encoderCaps == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return 0;
+    }
+
+    bool res = encoderCaps->isBitrateModeSupported(mode);
+    return res;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gAudioCapsMethods[] = {
@@ -330,6 +367,11 @@ static const JNINativeMethod gVideoCapsMethods[] = {
     {"native_getSmallerDimensionUpperLimit", "()I", (void *)android_media_VideoCapabilities_getSmallerDimensionUpperLimit}
 };
 
+static const JNINativeMethod gEncoderCapsMethods[] = {
+    {"native_init", "()V", (void *)android_media_EncoderCapabilities_native_init},
+    {"native_isBitrateModeSupported", "(I)Z", (void *)android_media_EncoderCapabilities_isBitrateModeSupported}
+};
+
 int register_android_media_CodecCapabilities(JNIEnv *env) {
     int result = AndroidRuntime::registerNativeMethods(env,
             "android/media/MediaCodecInfo$AudioCapabilities$AudioCapsNativeImpl",
@@ -348,6 +390,13 @@ int register_android_media_CodecCapabilities(JNIEnv *env) {
     result = AndroidRuntime::registerNativeMethods(env,
             "android/media/MediaCodecInfo$VideoCapabilities$VideoCapsNativeImpl",
             gVideoCapsMethods, NELEM(gVideoCapsMethods));
+    if (result != JNI_OK) {
+        return result;
+    }
+
+    result = AndroidRuntime::registerNativeMethods(env,
+            "android/media/MediaCodecInfo$EncoderCapabilities$EncoderCapsNativeImpl",
+            gEncoderCapsMethods, NELEM(gEncoderCapsMethods));
     if (result != JNI_OK) {
         return result;
     }
