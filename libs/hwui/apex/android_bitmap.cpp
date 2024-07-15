@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-#include <log/log.h>
-
-#include "android/graphics/bitmap.h"
-#include "TypeCast.h"
-#include "GraphicsJNI.h"
-
+#include <Gainmap.h>
 #include <GraphicsJNI.h>
-#include <hwui/Bitmap.h>
 #include <SkBitmap.h>
 #include <SkColorSpace.h>
 #include <SkImageInfo.h>
 #include <SkRefCnt.h>
 #include <SkStream.h>
+#include <hwui/Bitmap.h>
+#include <log/log.h>
 #include <utils/Color.h>
+
+#include "GraphicsJNI.h"
+#include "TypeCast.h"
+#include "android/graphics/bitmap.h"
 
 using namespace android;
 
@@ -215,6 +215,14 @@ private:
 int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const void* pixels,
                      AndroidBitmapCompressFormat inFormat, int32_t quality, void* userContext,
                      AndroidBitmap_CompressWriteFunc fn) {
+    return ABitmap_compressWithGainmap(info, dataSpace, pixels, nullptr, -1.f, inFormat, quality,
+                                       userContext, fn);
+}
+
+int ABitmap_compressWithGainmap(const AndroidBitmapInfo* info, ADataSpace dataSpace,
+                                const void* pixels, const void* gainmapPixels, float hdrSdrRatio,
+                                AndroidBitmapCompressFormat inFormat, int32_t quality,
+                                void* userContext, AndroidBitmap_CompressWriteFunc fn) {
     Bitmap::JavaCompressFormat format;
     switch (inFormat) {
         case ANDROID_BITMAP_COMPRESS_FORMAT_JPEG:
@@ -275,7 +283,7 @@ int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const 
         // besides ADATASPACE_UNKNOWN as an error?
         cs = nullptr;
     } else {
-        cs = uirenderer::DataSpaceToColorSpace((android_dataspace) dataSpace);
+        cs = uirenderer::DataSpaceToColorSpace((android_dataspace)dataSpace);
         // DataSpaceToColorSpace treats UNKNOWN as SRGB, but compress forces the
         // client to specify SRGB if that is what they want.
         if (!cs || dataSpace == ADATASPACE_UNKNOWN) {
@@ -292,16 +300,70 @@ int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const 
 
     auto imageInfo =
             SkImageInfo::Make(info->width, info->height, colorType, alphaType, std::move(cs));
-    SkBitmap bitmap;
-    // We are not going to modify the pixels, but installPixels expects them to
-    // not be const, since for all it knows we might want to draw to the SkBitmap.
-    if (!bitmap.installPixels(imageInfo, const_cast<void*>(pixels), info->stride)) {
-        return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
+
+    // Validate the image info
+    {
+        SkBitmap tempBitmap;
+        if (!tempBitmap.installPixels(imageInfo, const_cast<void*>(pixels), info->stride)) {
+            return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
+        }
+    }
+
+    SkPixelRef pixelRef =
+            SkPixelRef(info->width, info->height, const_cast<void*>(pixels), info->stride);
+
+    auto bitmap = Bitmap::createFrom(imageInfo, pixelRef);
+
+    if (gainmapPixels) {
+        auto gainmap = sp<uirenderer::Gainmap>::make();
+        gainmap->info.fGainmapRatioMin = {
+                1.f,
+                1.f,
+                1.f,
+                1.f,
+        };
+        gainmap->info.fGainmapRatioMax = {
+                hdrSdrRatio,
+                hdrSdrRatio,
+                hdrSdrRatio,
+                1.f,
+        };
+        gainmap->info.fGainmapGamma = {
+                1.f,
+                1.f,
+                1.f,
+                1.f,
+        };
+
+        static constexpr auto kDefaultEpsilon = 1.f / 64.f;
+        gainmap->info.fEpsilonSdr = {
+                kDefaultEpsilon,
+                kDefaultEpsilon,
+                kDefaultEpsilon,
+                1.f,
+        };
+        gainmap->info.fEpsilonHdr = {
+                kDefaultEpsilon,
+                kDefaultEpsilon,
+                kDefaultEpsilon,
+                1.f,
+        };
+        gainmap->info.fDisplayRatioSdr = 1.f;
+        gainmap->info.fDisplayRatioHdr = hdrSdrRatio;
+
+        SkPixelRef gainmapPixelRef = SkPixelRef(info->width, info->height,
+                                                const_cast<void*>(gainmapPixels), info->stride);
+        auto gainmapBitmap = Bitmap::createFrom(imageInfo, gainmapPixelRef);
+        gainmap->bitmap = std::move(gainmapBitmap);
+        bitmap->setGainmap(std::move(gainmap));
     }
 
     CompressWriter stream(userContext, fn);
-    return Bitmap::compress(bitmap, format, quality, &stream) ? ANDROID_BITMAP_RESULT_SUCCESS
-                                                              : ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
+
+    return bitmap->compress(format, quality, &stream)
+
+                   ? ANDROID_BITMAP_RESULT_SUCCESS
+                   : ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
 }
 
 AHardwareBuffer* ABitmap_getHardwareBuffer(ABitmap* bitmapHandle) {
