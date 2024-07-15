@@ -65,6 +65,7 @@ import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -349,6 +350,21 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             assertThat(showDisclaimer).isTrue()
             underTest.onDisclaimerDismissed()
             assertThat(showDisclaimer).isFalse()
+        }
+
+    @Test
+    fun showDisclaimer_trueWhenTimeout() =
+        testScope.runTest {
+            underTest.setEditModeState(EditModeState.SHOWING)
+            kosmos.fakeUserRepository.setSelectedUserInfo(MAIN_USER_INFO)
+
+            val showDisclaimer by collectLastValue(underTest.showDisclaimer)
+
+            assertThat(showDisclaimer).isTrue()
+            underTest.onDisclaimerDismissed()
+            assertThat(showDisclaimer).isFalse()
+            advanceTimeBy(CommunalInteractor.DISCLAIMER_RESET_MILLIS)
+            assertThat(showDisclaimer).isTrue()
         }
 
     @Test
