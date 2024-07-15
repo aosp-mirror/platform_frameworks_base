@@ -1727,7 +1727,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     SoftInputShowHideReason.HIDE_REMOVE_CLIENT, userId);
             if (userData.mBoundToMethod) {
                 userData.mBoundToMethod = false;
-                final var userBindingController = getInputMethodBindingController(userId);
+                final var userBindingController = userData.mBindingController;
                 IInputMethodInvoker curMethod = userBindingController.getCurMethod();
                 if (curMethod != null) {
                     // When we unbind input, we are unbinding the client, so we always
@@ -1759,7 +1759,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 Slog.v(TAG, "unbindCurrentInputLocked: client="
                         + userData.mCurClient.mClient.asBinder());
             }
-            final var bindingController = getInputMethodBindingController(userId);
+            final var bindingController = userData.mBindingController;
             if (userData.mBoundToMethod) {
                 userData.mBoundToMethod = false;
                 IInputMethodInvoker curMethod = bindingController.getCurMethod();
@@ -1845,8 +1845,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @NonNull
     InputBindResult attachNewInputLocked(@StartInputReason int startInputReason, boolean initial,
             @UserIdInt int userId) {
-        final var bindingController = getInputMethodBindingController(userId);
         final var userData = getUserData(userId);
+        final var bindingController = userData.mBindingController;
         if (!userData.mBoundToMethod) {
             bindingController.getCurMethod().bindInput(userData.mCurClient.mBinding);
             userData.mBoundToMethod = true;
@@ -2317,8 +2317,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     channel.dispose();
                     return;
                 }
-                final var bindingController = getInputMethodBindingController(userId);
                 final var userData = getUserData(userId);
+                final var bindingController = userData.mBindingController;
                 IInputMethodInvoker curMethod = bindingController.getCurMethod();
                 if (curMethod != null && method != null
                         && curMethod.asBinder() == method.asBinder()) {
@@ -2747,8 +2747,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     private void updateSystemUiLocked(int vis, int backDisposition, @UserIdInt int userId) {
-        final var bindingController = getInputMethodBindingController(userId);
         final var userData = getUserData(userId);
+        final var bindingController = userData.mBindingController;
         final var curToken = bindingController.getCurToken();
         if (curToken == null) {
             return;
@@ -2846,11 +2846,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 settings.putSelectedInputMethod(id);
             }
         }
-        final var bindingController = getInputMethodBindingController(userId);
+        final var userData = getUserData(userId);
+        final var bindingController = userData.mBindingController;
         bindingController.setSelectedMethodId(id);
 
         // Also re-initialize controllers.
-        final var userData = getUserData(userId);
         userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
     }
@@ -2887,7 +2887,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
         }
 
-        final var bindingController = getInputMethodBindingController(userId);
+        final var userData = getUserData(userId);
+        final var bindingController = userData.mBindingController;
         if (bindingController.getDeviceIdToShowIme() == DEVICE_ID_DEFAULT) {
             String ime = SecureSettingsWrapper.getString(
                     Settings.Secure.DEFAULT_INPUT_METHOD, null, userId);
@@ -2927,7 +2928,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             resetCurrentMethodAndClientLocked(UnbindReason.NO_IME, userId);
         }
 
-        final var userData = getUserData(userId);
         userData.mSwitchingController.resetCircularListLocked(mContext, settings);
         userData.mHardwareKeyboardShortcutController.update(settings);
         sendOnNavButtonFlagsChangedLocked(userData);
@@ -3409,8 +3409,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         mVisibilityStateComputer.requestImeVisibility(windowToken, true);
 
         // Ensure binding the connection when IME is going to show.
-        final var bindingController = getInputMethodBindingController(userId);
         final var userData = getUserData(userId);
+        final var bindingController = userData.mBindingController;
         bindingController.setCurrentMethodVisible();
         final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         ImeTracker.forLogging().onCancelled(userData.mCurStatsToken,
@@ -3543,7 +3543,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     boolean hideCurrentInputLocked(IBinder windowToken, @NonNull ImeTracker.Token statsToken,
             @InputMethodManager.HideFlags int flags, @Nullable ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason, @UserIdInt int userId) {
-        final var bindingController = getInputMethodBindingController(userId);
+        final var userData = getUserData(userId);
+        final var bindingController = userData.mBindingController;
         if (!mVisibilityStateComputer.canHideIme(statsToken, flags)) {
             return false;
         }
@@ -3556,7 +3557,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // since Android Eclair.  That's why we need to accept IMM#hideSoftInput() even when only
         // IMMS#InputShown indicates that the software keyboard is shown.
         // TODO(b/246309664): Clean up IMMS#mImeWindowVis
-        final var userData = getUserData(userId);
         IInputMethodInvoker curMethod = bindingController.getCurMethod();
         final boolean shouldHideSoftInput = curMethod != null
                 && (isInputShownLocked()
@@ -3636,6 +3636,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             Slog.w(TAG, "User #" + userId + " is not running.");
             return InputBindResult.INVALID_USER;
         }
+        final var userData = getUserData(userId);
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                     "IMMS.startInputOrWindowGainedFocus");
@@ -3643,7 +3644,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     "InputMethodManagerService#startInputOrWindowGainedFocus", mDumper);
             final InputBindResult result;
             synchronized (ImfLock.class) {
-                final var bindingController = getInputMethodBindingController(userId);
+                final var bindingController = userData.mBindingController;
                 // If the system is not yet ready, we shouldn't be running third party code.
                 if (!mSystemReady) {
                     return new InputBindResult(
@@ -3708,7 +3709,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     final boolean shouldClearFlag =
                             mImePlatformCompatUtils.shouldClearShowForcedFlag(cs.mUid);
                     final boolean showForced = mVisibilityStateComputer.mShowForced;
-                    final var userData = getUserData(userId);
                     if (userData.mImeBindingState.mFocusedWindow != windowToken
                             && showForced && shouldClearFlag) {
                         mVisibilityStateComputer.mShowForced = false;
@@ -4556,8 +4556,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private void dumpDebug(ProtoOutputStream proto, long fieldId) {
         synchronized (ImfLock.class) {
             final int userId = mCurrentUserId;
-            final var bindingController = getInputMethodBindingController(userId);
             final var userData = getUserData(userId);
+            final var bindingController = userData.mBindingController;
             final long token = proto.start(fieldId);
             proto.write(CUR_METHOD_ID, bindingController.getSelectedMethodId());
             proto.write(CUR_SEQ, bindingController.getSequenceNumber());
@@ -4690,8 +4690,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @UserIdInt int userId) {
         final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(requestImeToken,
                 userId);
-        final var bindingController = getInputMethodBindingController(userId);
         final var userData = getUserData(userId);
+        final var bindingController = userData.mBindingController;
         final WindowManagerInternal.ImeTargetInfo info =
                 mWindowManagerInternal.onToggleImeRequested(
                         show, userData.mImeBindingState.mFocusedWindow, requestToken,
@@ -5034,8 +5034,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 final var handwritingRequest = (HandwritingRequest) msg.obj;
                 synchronized (ImfLock.class) {
                     final int userId = handwritingRequest.userId;
-                    final var bindingController = getInputMethodBindingController(userId);
                     final var userData = getUserData(userId);
+                    final var bindingController = userData.mBindingController;
                     IInputMethodInvoker curMethod = bindingController.getCurMethod();
                     if (curMethod == null || userData.mImeBindingState.mFocusedWindow == null) {
                         return true;
@@ -5092,12 +5092,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         synchronized (ImfLock.class) {
             // TODO(b/305849394): Support multiple IMEs.
             final int userId = mCurrentUserId;
-            final var bindingController = getInputMethodBindingController(userId);
+            final var userData = getUserData(userId);
+            final var bindingController = userData.mBindingController;
             mIsInteractive = interactive;
             updateSystemUiLocked(
                     interactive ? bindingController.getImeWindowVis() : 0,
                     bindingController.getBackDisposition(), userId);
-            final var userData = getUserData(userId);
             // Inform the current client of the change in active status
             if (userData.mCurClient == null || userData.mCurClient.mClient == null) {
                 return;
@@ -5775,7 +5775,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (displayId != bindingController.getCurTokenDisplayId()) {
                     return false;
                 }
-                curHostInputToken = getInputMethodBindingController(userId).getCurHostInputToken();
+                curHostInputToken = bindingController.getCurHostInputToken();
                 if (curHostInputToken == null) {
                     return false;
                 }
@@ -5831,8 +5831,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
                 IAccessibilityInputMethodSession session, @UserIdInt int userId) {
             synchronized (ImfLock.class) {
-                final var bindingController = getInputMethodBindingController(userId);
                 final var userData = getUserData(userId);
+                final var bindingController = userData.mBindingController;
                 // TODO(b/305829876): Implement user ID verification
                 if (userData.mCurClient != null) {
                     clearClientSessionForAccessibilityLocked(userData.mCurClient,
@@ -5869,8 +5869,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId,
                 @UserIdInt int userId) {
             synchronized (ImfLock.class) {
-                final var bindingController = getInputMethodBindingController(userId);
                 final var userData = getUserData(userId);
+                final var bindingController = userData.mBindingController;
                 // TODO(b/305829876): Implement user ID verification
                 if (userData.mCurClient != null) {
                     if (DEBUG) {
@@ -5938,7 +5938,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         synchronized (ImfLock.class) {
             final int uid = Binder.getCallingUid();
-            final var bindingController = getInputMethodBindingController(imeUserId);
+            final var userData = getUserData(imeUserId);
+            final var bindingController = userData.mBindingController;
             if (bindingController.getSelectedMethodId() == null) {
                 return null;
             }
@@ -5950,7 +5951,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // We cannot simply distinguish a bad IME that reports an arbitrary package name from
             // an unfortunate IME whose internal state is already obsolete due to the asynchronous
             // nature of our system.  Let's compare it with our internal record.
-            final var userData = getUserData(imeUserId);
             final var curPackageName = userData.mCurEditorInfo != null
                     ? userData.mCurEditorInfo.packageName : null;
             if (!TextUtils.equals(curPackageName, packageName)) {
@@ -6109,8 +6109,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 p.println("    pid=" + c.mPid);
             };
             mClientController.forAllClients(clientControllerDump);
-            final var bindingController = getInputMethodBindingController(mCurrentUserId);
-            p.println("  mCurrentUserId=" + mCurrentUserId);
+            final var bindingController = userData.mBindingController;
+            p.println("  mCurrentUserId=" + userData.mUserId);
             p.println("  mCurMethodId=" + bindingController.getSelectedMethodId());
             client = userData.mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq="
@@ -6662,7 +6662,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                     0 /* flags */,
                                     SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND, userId);
                         }
-                        final var bindingController = getInputMethodBindingController(userId);
+                        final var bindingController = userData.mBindingController;
                         bindingController.unbindCurrentMethod();
 
                         // Enable default IMEs, disable others
