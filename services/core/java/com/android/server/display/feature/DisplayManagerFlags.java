@@ -154,6 +154,10 @@ public class DisplayManagerFlags {
             Flags::useFusionProxSensor
     );
 
+    private final FlagState mDozeBrightnessFloat = new FlagState(
+            Flags.FLAG_DOZE_BRIGHTNESS_FLOAT,
+            Flags::dozeBrightnessFloat);
+
     private final FlagState mOffloadControlsDozeAutoBrightness = new FlagState(
             Flags.FLAG_OFFLOAD_CONTROLS_DOZE_AUTO_BRIGHTNESS,
             Flags::offloadControlsDozeAutoBrightness
@@ -347,6 +351,10 @@ public class DisplayManagerFlags {
         return mUseFusionProxSensor.getName();
     }
 
+    public boolean isDozeBrightnessFloatEnabled() {
+        return mDozeBrightnessFloat.isEnabled();
+    }
+
     /**
      * @return Whether DisplayOffload should control auto-brightness in doze
      */
@@ -415,6 +423,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mRefactorDisplayPowerController);
         pw.println(" " + mResolutionBackupRestore);
         pw.println(" " + mUseFusionProxSensor);
+        pw.println(" " + mDozeBrightnessFloat);
         pw.println(" " + mOffloadControlsDozeAutoBrightness);
         pw.println(" " + mPeakRefreshRatePhysicalLimit);
         pw.println(" " + mIgnoreAppPreferredRefreshRate);

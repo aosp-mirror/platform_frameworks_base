@@ -18,8 +18,6 @@ package com.android.server.display;
 
 import static org.junit.Assert.assertEquals;
 
-import android.hardware.display.BrightnessInfo;
-
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -114,10 +112,7 @@ public class DisplayBrightnessStateTest {
                 .append("\n    mBrightnessAdjustmentFlag:")
                 .append(displayBrightnessState.getBrightnessAdjustmentFlag())
                 .append("\n    mIsUserInitiatedChange:")
-                .append(displayBrightnessState.isUserInitiatedChange())
-                .append("\n    mBrightnessMaxReason:")
-                .append(BrightnessInfo.briMaxReasonToString(
-                        displayBrightnessState.getBrightnessMaxReason()));
+                .append(displayBrightnessState.isUserInitiatedChange());
         return sb.toString();
     }
 }

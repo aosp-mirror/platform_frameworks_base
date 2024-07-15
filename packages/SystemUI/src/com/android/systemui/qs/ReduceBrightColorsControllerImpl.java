@@ -29,7 +29,6 @@ import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 
-import com.android.server.display.feature.flags.Flags;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.UserTracker;
@@ -81,10 +80,17 @@ public class ReduceBrightColorsControllerImpl implements
                 mAvailable = true;
                 synchronized (mListeners) {
                     if (mListeners.size() > 0) {
-                        mSecureSettings.unregisterContentObserverSync(mContentObserver);
-                        mSecureSettings.registerContentObserverForUserSync(
-                                Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
-                                false, mContentObserver, newUser);
+                        if (com.android.systemui.Flags.registerContentObserversAsync()) {
+                            mSecureSettings.unregisterContentObserverAsync(mContentObserver);
+                            mSecureSettings.registerContentObserverForUserAsync(
+                                    Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
+                                    false, mContentObserver, newUser);
+                        } else {
+                            mSecureSettings.unregisterContentObserverSync(mContentObserver);
+                            mSecureSettings.registerContentObserverForUserSync(
+                                    Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
+                                    false, mContentObserver, newUser);
+                        }
                     }
                 }
             }
@@ -98,9 +104,15 @@ public class ReduceBrightColorsControllerImpl implements
             if (!mListeners.contains(listener)) {
                 mListeners.add(listener);
                 if (mListeners.size() == 1) {
-                    mSecureSettings.registerContentObserverForUserSync(
-                            Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
-                            false, mContentObserver, mUserTracker.getUserId());
+                    if (com.android.systemui.Flags.registerContentObserversAsync()) {
+                        mSecureSettings.registerContentObserverForUserAsync(
+                                Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
+                                false, mContentObserver, mUserTracker.getUserId());
+                    } else {
+                        mSecureSettings.registerContentObserverForUserSync(
+                                Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
+                                false, mContentObserver, mUserTracker.getUserId());
+                    }
                 }
             }
         }
@@ -110,7 +122,11 @@ public class ReduceBrightColorsControllerImpl implements
     public void removeCallback(@androidx.annotation.NonNull Listener listener) {
         synchronized (mListeners) {
             if (mListeners.remove(listener) && mListeners.size() == 0) {
-                mSecureSettings.unregisterContentObserverSync(mContentObserver);
+                if (com.android.systemui.Flags.registerContentObserversAsync()) {
+                    mSecureSettings.unregisterContentObserverAsync(mContentObserver);
+                } else {
+                    mSecureSettings.unregisterContentObserverSync(mContentObserver);
+                }
             }
         }
     }
@@ -139,7 +155,8 @@ public class ReduceBrightColorsControllerImpl implements
 
     @Override
     public boolean isInUpgradeMode(Resources resources) {
-        return Flags.evenDimmer() && resources.getBoolean(
+        return com.android.server.display.feature.flags.Flags.evenDimmer()
+            && resources.getBoolean(
                 com.android.internal.R.bool.config_evenDimmerEnabled);
     }
 
