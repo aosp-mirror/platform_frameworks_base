@@ -16,25 +16,26 @@
 
 package com.android.wm.shell.compatui.impl
 
-import com.android.wm.shell.compatui.api.CompatUIEvent
-import com.android.wm.shell.compatui.api.CompatUIHandler
-import com.android.wm.shell.compatui.api.CompatUIInfo
 import com.android.wm.shell.compatui.api.CompatUIRepository
-import java.util.function.Consumer
+import com.android.wm.shell.compatui.api.CompatUISpec
 
 /**
- * Default implementation of {@link CompatUIHandler} to handle CompatUI components
+ * Default {@link CompatUIRepository} implementation
  */
-class DefaultCompatUIHandler(
-    private val compatUIRepository: CompatUIRepository
-) : CompatUIHandler {
+class DefaultCompatUIRepository : CompatUIRepository {
 
-    private var compatUIEventSender: Consumer<CompatUIEvent>? = null
-    override fun onCompatInfoChanged(compatUIInfo: CompatUIInfo) {
-        // Empty at the moment
+    private val allSpecs = mutableMapOf<String, CompatUISpec>()
+
+    override fun addSpec(spec: CompatUISpec) {
+        if (allSpecs[spec.name] != null) {
+            throw IllegalStateException("Spec with id:${spec.name} already present")
+        }
+        allSpecs[spec.name] = spec
     }
 
-    override fun setCallback(compatUIEventSender: Consumer<CompatUIEvent>?) {
-        this.compatUIEventSender = compatUIEventSender
-    }
+    override fun iterateOn(fn: (CompatUISpec) -> Unit) =
+        allSpecs.values.forEach(fn)
+
+    override fun findSpec(name: String): CompatUISpec? =
+        allSpecs[name]
 }
