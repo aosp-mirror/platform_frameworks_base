@@ -39,6 +39,7 @@ android_library {
         "SettingsLibDisplayUtils",
         "SettingsLibEmergencyNumber",
         "SettingsLibEntityHeaderWidgets",
+        "SettingsLibExpandablePreference",
         "SettingsLibFooterPreference",
         "SettingsLibHelpUtils",
         "SettingsLibIllustrationPreference",
