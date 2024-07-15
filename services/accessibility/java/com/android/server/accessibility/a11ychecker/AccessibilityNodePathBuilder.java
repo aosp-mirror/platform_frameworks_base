@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.accessibility.a11ychecker;
+package com.android.server.accessibility.a11ychecker;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
