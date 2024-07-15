@@ -64,7 +64,6 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -413,11 +412,6 @@ public class PipController implements ConfigurationChangeListener,
 
         @Override
         public void showPictureInPictureMenu() {}
-
-        @Override
-        public void registerPipTransitionCallback(
-                PipTransitionController.PipTransitionCallback callback,
-                Executor executor) {}
     }
 
     /**
