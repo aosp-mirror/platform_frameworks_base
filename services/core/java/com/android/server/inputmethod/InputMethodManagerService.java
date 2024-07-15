@@ -1012,7 +1012,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void onUserCreated(UserInfo user, @Nullable Object token) {
             // Called directly from UserManagerService. Do not block the calling thread.
-            initializeUsersAsync(new int[user.id]);
+            final int userId = user.id;
+            AdditionalSubtypeMapRepository.onUserCreated(userId);
+            initializeUsersAsync(new int[userId]);
         }
 
         @Override
