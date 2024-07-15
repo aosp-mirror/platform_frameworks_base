@@ -1189,6 +1189,16 @@ flag {
 }
 
 flag {
+   namespace: "systemui"
+   name: "remove_update_listener_in_qs_icon_view_impl"
+   description: "Remove update listeners in QsIconViewImpl class to avoid memory leak."
+   bug: "327078684"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "sim_pin_race_condition_on_restart"
    namespace: "systemui"
    description: "The SIM PIN screen may be shown incorrectly on reboot"
