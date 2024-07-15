@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 
+import android.content.DialogInterface
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.Cuj
@@ -33,10 +34,13 @@ import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
+import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
 import com.android.systemui.statusbar.chips.screenrecord.ui.view.EndScreenRecordingDialogDelegate
+import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.shareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.getStopActionFromDialog
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.util.time.fakeSystemClock
@@ -75,6 +79,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        setUpPackageManagerForMediaProjection(kosmos)
         whenever(kosmos.mockSystemUIDialogFactory.create(any<EndScreenRecordingDialogDelegate>()))
             .thenReturn(mockSystemUIDialog)
     }
@@ -146,6 +151,40 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             val icon = (latest as OngoingActivityChipModel.Shown).icon
             assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_screenrecord)
             assertThat(icon.contentDescription).isNotNull()
+        }
+
+    @Test
+    fun chip_recordingStoppedFromDialog_screenRecordAndShareToAppChipImmediatelyHidden() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            val latestShareToApp by collectLastValue(kosmos.shareToAppChipViewModel.chip)
+
+            // On real devices, when screen recording is active then share-to-app is also active
+            // because screen record is just a special case of share-to-app where the app receiving
+            // the share is SysUI
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen("fake.package")
+
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            assertThat(latestShareToApp).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+
+            // WHEN the stop action on the dialog is clicked
+            val dialogStopAction =
+                getStopActionFromDialog(latest, chipView, mockSystemUIDialog, kosmos)
+            dialogStopAction.onClick(mock<DialogInterface>(), 0)
+
+            // THEN both the screen record chip and the share-to-app chip are immediately hidden...
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            assertThat(latestShareToApp).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            // ...even though the repos still say it's recording
+            assertThat(screenRecordRepo.screenRecordState.value)
+                .isEqualTo(ScreenRecordModel.Recording)
+            assertThat(mediaProjectionRepo.mediaProjectionState.value)
+                .isInstanceOf(MediaProjectionState.Projecting::class.java)
+
+            // AND we specify no animation
+            assertThat((latest as OngoingActivityChipModel.Hidden).shouldAnimate).isFalse()
         }
 
     @Test

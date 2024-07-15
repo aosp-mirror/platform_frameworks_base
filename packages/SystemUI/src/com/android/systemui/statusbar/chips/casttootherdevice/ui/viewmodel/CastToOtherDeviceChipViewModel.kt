@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.chips.mediaprojection.domain.model.Project
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.ChipTransitionHelper
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.util.time.SystemClock
@@ -78,18 +79,18 @@ constructor(
         mediaProjectionChipInteractor.projection
             .map { projectionModel ->
                 when (projectionModel) {
-                    is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Hidden
+                    is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Hidden()
                     is ProjectionChipModel.Projecting -> {
                         if (projectionModel.type != ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE) {
-                            OngoingActivityChipModel.Hidden
+                            OngoingActivityChipModel.Hidden()
                         } else {
                             createCastScreenToOtherDeviceChip(projectionModel)
                         }
                     }
                 }
             }
-            // See b/347726238.
-            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden)
+            // See b/347726238 for [SharingStarted.Lazily] reasoning.
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
 
     /**
      * The cast chip to show, based only on MediaRouter API events.
@@ -113,7 +114,7 @@ constructor(
         mediaRouterChipInteractor.mediaRouterCastingState
             .map { routerModel ->
                 when (routerModel) {
-                    is MediaRouterCastModel.DoingNothing -> OngoingActivityChipModel.Hidden
+                    is MediaRouterCastModel.DoingNothing -> OngoingActivityChipModel.Hidden()
                     is MediaRouterCastModel.Casting -> {
                         // A consequence of b/269975671 is that MediaRouter will mark a device as
                         // casting before casting has actually started. To alleviate this bug a bit,
@@ -127,9 +128,9 @@ constructor(
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden())
 
-    override val chip: StateFlow<OngoingActivityChipModel> =
+    private val internalChip: StateFlow<OngoingActivityChipModel> =
         combine(projectionChip, routerChip) { projection, router ->
                 logger.log(
                     TAG,
@@ -163,17 +164,24 @@ constructor(
                     router
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden())
+
+    private val hideChipDuringDialogTransitionHelper = ChipTransitionHelper(scope)
+
+    override val chip: StateFlow<OngoingActivityChipModel> =
+        hideChipDuringDialogTransitionHelper.createChipFlow(internalChip)
 
     /** Stops the currently active projection. */
-    private fun stopProjecting() {
-        logger.log(TAG, LogLevel.INFO, {}, { "Stop casting requested (projection)" })
+    private fun stopProjectingFromDialog() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop casting requested from dialog (projection)" })
+        hideChipDuringDialogTransitionHelper.onActivityStoppedFromDialog()
         mediaProjectionChipInteractor.stopProjecting()
     }
 
     /** Stops the currently active media route. */
-    private fun stopMediaRouterCasting() {
-        logger.log(TAG, LogLevel.INFO, {}, { "Stop casting requested (router)" })
+    private fun stopMediaRouterCastingFromDialog() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop casting requested from dialog (router)" })
+        hideChipDuringDialogTransitionHelper.onActivityStoppedFromDialog()
         mediaRouterChipInteractor.stopCasting()
     }
 
@@ -230,7 +238,7 @@ constructor(
         EndCastScreenToOtherDeviceDialogDelegate(
             endMediaProjectionDialogHelper,
             context,
-            stopAction = this::stopProjecting,
+            stopAction = this::stopProjectingFromDialog,
             state,
         )
 
@@ -239,7 +247,7 @@ constructor(
             endMediaProjectionDialogHelper,
             context,
             deviceName,
-            stopAction = this::stopMediaRouterCasting,
+            stopAction = this::stopMediaRouterCastingFromDialog,
         )
 
     companion object {

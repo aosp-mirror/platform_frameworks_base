@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel
 
+import android.content.DialogInterface
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.Cuj
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.chips.sharetoapp.ui.view.EndShareToAppDial
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.getStopActionFromDialog
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.util.time.fakeSystemClock
@@ -148,6 +150,31 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
             val icon = (latest as OngoingActivityChipModel.Shown).icon
             assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_present_to_all)
             assertThat(icon.contentDescription).isNotNull()
+        }
+
+    @Test
+    fun chip_shareStoppedFromDialog_chipImmediatelyHidden() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+
+            // WHEN the stop action on the dialog is clicked
+            val dialogStopAction =
+                getStopActionFromDialog(latest, chipView, mockShareDialog, kosmos)
+            dialogStopAction.onClick(mock<DialogInterface>(), 0)
+
+            // THEN the chip is immediately hidden...
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            // ...even though the repo still says it's projecting
+            assertThat(mediaProjectionRepo.mediaProjectionState.value)
+                .isInstanceOf(MediaProjectionState.Projecting::class.java)
+
+            // AND we specify no animation
+            assertThat((latest as OngoingActivityChipModel.Hidden).shouldAnimate).isFalse()
         }
 
     @Test

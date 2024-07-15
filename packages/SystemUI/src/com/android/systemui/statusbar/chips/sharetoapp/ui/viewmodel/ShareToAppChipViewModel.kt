@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProj
 import com.android.systemui.statusbar.chips.sharetoapp.ui.view.EndShareToAppDialogDelegate
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.ChipTransitionHelper
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.util.time.SystemClock
@@ -61,26 +62,46 @@ constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
-    override val chip: StateFlow<OngoingActivityChipModel> =
+    private val internalChip =
         mediaProjectionChipInteractor.projection
             .map { projectionModel ->
                 when (projectionModel) {
-                    is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Hidden
+                    is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Hidden()
                     is ProjectionChipModel.Projecting -> {
                         if (projectionModel.type != ProjectionChipModel.Type.SHARE_TO_APP) {
-                            OngoingActivityChipModel.Hidden
+                            OngoingActivityChipModel.Hidden()
                         } else {
                             createShareToAppChip(projectionModel)
                         }
                     }
                 }
             }
-            // See b/347726238.
-            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden)
+            // See b/347726238 for [SharingStarted.Lazily] reasoning.
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
+
+    private val chipTransitionHelper = ChipTransitionHelper(scope)
+
+    override val chip: StateFlow<OngoingActivityChipModel> =
+        chipTransitionHelper.createChipFlow(internalChip)
+
+    /**
+     * Notifies this class that the user just stopped a screen recording from the dialog that's
+     * shown when you tap the recording chip.
+     */
+    fun onRecordingStoppedFromDialog() {
+        // When a screen recording is active, share-to-app is also active (screen recording is just
+        // a special case of share-to-app, where the specific app receiving the share is System UI).
+        // When a screen recording is stopped, we immediately hide the screen recording chip in
+        // [com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.ScreenRecordChipViewModel].
+        // We *also* need to immediately hide the share-to-app chip so it doesn't briefly show.
+        // See b/350891338.
+        chipTransitionHelper.onActivityStoppedFromDialog()
+    }
 
     /** Stops the currently active projection. */
-    private fun stopProjecting() {
-        logger.log(TAG, LogLevel.INFO, {}, { "Stop sharing requested" })
+    private fun stopProjectingFromDialog() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop sharing requested from dialog" })
+        chipTransitionHelper.onActivityStoppedFromDialog()
         mediaProjectionChipInteractor.stopProjecting()
     }
 
@@ -113,7 +134,7 @@ constructor(
         EndShareToAppDialogDelegate(
             endMediaProjectionDialogHelper,
             context,
-            stopAction = this::stopProjecting,
+            stopAction = this::stopProjectingFromDialog,
             state,
         )
 
