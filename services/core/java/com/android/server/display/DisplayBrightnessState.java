@@ -16,7 +16,6 @@
 
 package com.android.server.display;
 
-import android.hardware.display.BrightnessInfo;
 import android.text.TextUtils;
 
 import com.android.server.display.brightness.BrightnessEvent;
@@ -51,8 +50,6 @@ public final class DisplayBrightnessState {
 
     private final boolean mIsUserInitiatedChange;
 
-    private @BrightnessInfo.BrightnessMaxReason int mBrightnessMaxReason;
-
     private DisplayBrightnessState(Builder builder) {
         mBrightness = builder.getBrightness();
         mHdrBrightness = builder.getHdrBrightness();
@@ -67,7 +64,6 @@ public final class DisplayBrightnessState {
         mBrightnessEvent = builder.getBrightnessEvent();
         mBrightnessAdjustmentFlag = builder.getBrightnessAdjustmentFlag();
         mIsUserInitiatedChange = builder.isUserInitiatedChange();
-        mBrightnessMaxReason = builder.getBrightnessMaxReason();
     }
 
     /**
@@ -163,13 +159,6 @@ public final class DisplayBrightnessState {
         return mIsUserInitiatedChange;
     }
 
-    /**
-     * Gets reason for max brightness restriction
-     */
-    public @BrightnessInfo.BrightnessMaxReason int getBrightnessMaxReason() {
-        return mBrightnessMaxReason;
-    }
-
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("DisplayBrightnessState:");
@@ -191,8 +180,6 @@ public final class DisplayBrightnessState {
                 .append(Objects.toString(mBrightnessEvent, "null"));
         stringBuilder.append("\n    mBrightnessAdjustmentFlag:").append(mBrightnessAdjustmentFlag);
         stringBuilder.append("\n    mIsUserInitiatedChange:").append(mIsUserInitiatedChange);
-        stringBuilder.append("\n    mBrightnessMaxReason:")
-                .append(BrightnessInfo.briMaxReasonToString(mBrightnessMaxReason));
         return stringBuilder.toString();
     }
 
@@ -225,8 +212,7 @@ public final class DisplayBrightnessState {
                     == otherState.shouldUpdateScreenBrightnessSetting()
                 && Objects.equals(mBrightnessEvent, otherState.getBrightnessEvent())
                 && mBrightnessAdjustmentFlag == otherState.getBrightnessAdjustmentFlag()
-                && mIsUserInitiatedChange == otherState.isUserInitiatedChange()
-                && mBrightnessMaxReason == otherState.getBrightnessMaxReason();
+                && mIsUserInitiatedChange == otherState.isUserInitiatedChange();
     }
 
     @Override
@@ -235,7 +221,7 @@ public final class DisplayBrightnessState {
                 mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness, mMinBrightness,
                 mCustomAnimationRate,
                 mShouldUpdateScreenBrightnessSetting, mBrightnessEvent, mBrightnessAdjustmentFlag,
-                mIsUserInitiatedChange, mBrightnessMaxReason);
+                mIsUserInitiatedChange);
     }
 
     /**
@@ -259,11 +245,12 @@ public final class DisplayBrightnessState {
         private float mMinBrightness;
         private float mCustomAnimationRate = CUSTOM_ANIMATION_RATE_NOT_SET;
         private boolean mShouldUpdateScreenBrightnessSetting;
+
         private BrightnessEvent mBrightnessEvent;
-        private int mBrightnessAdjustmentFlag = 0;
+
+        public int mBrightnessAdjustmentFlag = 0;
+
         private boolean mIsUserInitiatedChange;
-        private @BrightnessInfo.BrightnessMaxReason int mBrightnessMaxReason =
-                BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
 
         /**
          * Create a builder starting with the values from the specified {@link
@@ -287,7 +274,6 @@ public final class DisplayBrightnessState {
             builder.setBrightnessEvent(state.getBrightnessEvent());
             builder.setBrightnessAdjustmentFlag(state.getBrightnessAdjustmentFlag());
             builder.setIsUserInitiatedChange(state.isUserInitiatedChange());
-            builder.setBrightnessMaxReason(state.getBrightnessMaxReason());
             return builder;
         }
 
@@ -508,22 +494,6 @@ public final class DisplayBrightnessState {
          */
         public Builder setIsUserInitiatedChange(boolean isUserInitiatedChange) {
             mIsUserInitiatedChange = isUserInitiatedChange;
-            return this;
-        }
-
-        /**
-         * Gets reason for max brightness restriction
-         */
-        public @BrightnessInfo.BrightnessMaxReason int getBrightnessMaxReason() {
-            return mBrightnessMaxReason;
-        }
-
-        /**
-         * Sets reason for max brightness restriction
-         */
-        public Builder setBrightnessMaxReason(
-                @BrightnessInfo.BrightnessMaxReason int brightnessMaxReason) {
-            mBrightnessMaxReason = brightnessMaxReason;
             return this;
         }
     }
