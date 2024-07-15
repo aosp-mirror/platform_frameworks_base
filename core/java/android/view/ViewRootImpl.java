@@ -128,8 +128,8 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.text.flags.Flags.disableHandwritingInitiatorForIme;
-import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
+import static com.android.window.flags.Flags.enableCaptionCompatInsetForceConsumption;
 import static com.android.window.flags.Flags.insetsControlChangedItem;
 import static com.android.window.flags.Flags.insetsControlSeq;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
@@ -1373,9 +1373,6 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void setActivityConfigCallback(@Nullable ActivityConfigCallback callback) {
         mActivityConfigCallback = callback;
-        if (!activityWindowInfoFlag()) {
-            return;
-        }
         if (callback == null) {
             mPendingActivityWindowInfo = null;
             mLastReportedActivityWindowInfo = null;
@@ -3189,7 +3186,9 @@ public final class ViewRootImpl implements ViewParent,
         inOutParams.privateFlags &= ~PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
     }
 
-    private void controlInsetsForCompatibility(WindowManager.LayoutParams params) {
+    /** Updates the {@link InsetsType}s to hide or show based on layout params. */
+    @VisibleForTesting
+    public void controlInsetsForCompatibility(WindowManager.LayoutParams params) {
         final int sysUiVis = params.systemUiVisibility | params.subtreeSystemUiVisibility;
         final int flags = params.flags;
         final boolean matchParent = params.width == MATCH_PARENT && params.height == MATCH_PARENT;
@@ -3200,6 +3199,9 @@ public final class ViewRootImpl implements ViewParent,
                 || ((flags & FLAG_FULLSCREEN) != 0 && matchParent && nonAttachedAppWindow);
         final boolean navWasHiddenByFlags = (mTypesHiddenByFlags & Type.navigationBars()) != 0;
         final boolean navIsHiddenByFlags = (sysUiVis & SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
+        final boolean captionWasHiddenByFlags = (mTypesHiddenByFlags & Type.captionBar()) != 0;
+        final boolean captionIsHiddenByFlags = (sysUiVis & SYSTEM_UI_FLAG_FULLSCREEN) != 0
+                || ((flags & FLAG_FULLSCREEN) != 0 && matchParent && nonAttachedAppWindow);
 
         @InsetsType int typesToHide = 0;
         @InsetsType int typesToShow = 0;
@@ -3212,6 +3214,13 @@ public final class ViewRootImpl implements ViewParent,
             typesToHide |= Type.navigationBars();
         } else if (!navIsHiddenByFlags && navWasHiddenByFlags) {
             typesToShow |= Type.navigationBars();
+        }
+        if (captionIsHiddenByFlags && !captionWasHiddenByFlags
+                && enableCaptionCompatInsetForceConsumption()) {
+            typesToHide |= Type.captionBar();
+        } else if (!captionIsHiddenByFlags && captionWasHiddenByFlags
+                && enableCaptionCompatInsetForceConsumption()) {
+            typesToShow |= Type.captionBar();
         }
         if (typesToHide != 0) {
             getInsetsController().hide(typesToHide);
@@ -4424,6 +4433,8 @@ public final class ViewRootImpl implements ViewParent,
             }
             mFrameRateCategoryHighCount = mFrameRateCategoryHighCount > 0
                     ? mFrameRateCategoryHighCount - 1 : mFrameRateCategoryHighCount;
+            mFrameRateCategoryHighHintCount = mFrameRateCategoryHighHintCount > 0
+                    ? mFrameRateCategoryHighHintCount - 1 : mFrameRateCategoryHighHintCount;
             mFrameRateCategoryNormalCount = mFrameRateCategoryNormalCount > 0
                     ? mFrameRateCategoryNormalCount - 1 : mFrameRateCategoryNormalCount;
             mFrameRateCategoryLowCount = mFrameRateCategoryLowCount > 0
@@ -9345,7 +9356,7 @@ public final class ViewRootImpl implements ViewParent,
 
             onClientWindowFramesChanged(mTmpFrames);
 
-            if (activityWindowInfoFlag() && mPendingActivityWindowInfo != null) {
+            if (mPendingActivityWindowInfo != null) {
                 final ActivityWindowInfo outInfo = mRelayoutResult.activityWindowInfo;
                 if (outInfo != null) {
                     mPendingActivityWindowInfo.set(outInfo);

@@ -25,6 +25,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.settingslib.notification.data.repository.ZenModeRepository;
 import com.android.settingslib.notification.data.repository.ZenModeRepositoryImpl;
 import com.android.settingslib.notification.domain.interactor.NotificationsSoundPolicyInteractor;
+import com.android.settingslib.notification.modes.ZenModesBackend;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Application;
@@ -288,6 +289,7 @@ public interface NotificationsModule {
             @Background Handler handler
     ) {
         return new ZenModeRepositoryImpl(context, notificationManager,
+                ZenModesBackend.getInstance(context), context.getContentResolver(),
                 coroutineScope, coroutineContext, handler);
     }
 

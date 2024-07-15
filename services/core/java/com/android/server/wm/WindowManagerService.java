@@ -283,6 +283,7 @@ import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationAdapter;
 import android.view.ScrollCaptureResponse;
@@ -334,8 +335,8 @@ import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.protolog.LegacyProtoLogImpl;
-import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -7440,6 +7441,16 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            return mPolicy.getApplicationLaunchKeyboardShortcuts(deviceId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
     public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
         enforceRegisterWindowManagerListenersPermission("requestAppKeyboardShortcuts");
 
@@ -9299,7 +9310,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 isTrustedOverlay);
 
         final int sanitizedLpFlags =
-                (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE))
+                (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE
+                    | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH))
                 | LayoutParams.FLAG_NOT_TOUCH_MODAL;
         h.layoutParamsType = type;
         h.layoutParamsFlags = sanitizedLpFlags;

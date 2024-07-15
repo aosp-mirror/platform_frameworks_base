@@ -29,6 +29,7 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.KeyguardViewMediator
+import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -257,6 +258,10 @@ constructor(
 
     /** Set an alarm for */
     private fun setResetCanIgnoreAuthAlarm() {
+        if (!KeyguardWmStateRefactor.isEnabled) {
+            return
+        }
+
         val intent =
             Intent(DELAYED_KEYGUARD_ACTION).apply {
                 setPackage(context.packageName)

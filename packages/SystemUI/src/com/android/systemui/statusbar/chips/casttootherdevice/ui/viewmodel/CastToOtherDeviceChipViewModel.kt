@@ -16,13 +16,16 @@
 
 package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 
+import android.content.Context
 import androidx.annotation.DrawableRes
-import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.casttootherdevice.domain.interactor.MediaRouterChipInteractor
 import com.android.systemui.statusbar.chips.casttootherdevice.domain.model.MediaRouterCastModel
 import com.android.systemui.statusbar.chips.casttootherdevice.ui.view.EndCastScreenToOtherDeviceDialogDelegate
@@ -53,11 +56,12 @@ class CastToOtherDeviceChipViewModel
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
+    private val context: Context,
     private val mediaProjectionChipInteractor: MediaProjectionChipInteractor,
     private val mediaRouterChipInteractor: MediaRouterChipInteractor,
     private val systemClock: SystemClock,
-    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
+    @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
     /**
      * The cast chip to show, based only on MediaProjection API events.
@@ -115,7 +119,7 @@ constructor(
                         // This does mean that the audio-only casting chip will *never* show a
                         // timer, because audio-only casting never activates the MediaProjection
                         // APIs and those are the only cast APIs that show a timer.
-                        createIconOnlyCastChip()
+                        createIconOnlyCastChip(routerModel.deviceName)
                     }
                 }
             }
@@ -123,6 +127,16 @@ constructor(
 
     override val chip: StateFlow<OngoingActivityChipModel> =
         combine(projectionChip, routerChip) { projection, router ->
+                logger.log(
+                    TAG,
+                    LogLevel.INFO,
+                    {
+                        str1 = projection.logName
+                        str2 = router.logName
+                    },
+                    { "projectionChip=$str1 > routerChip=$str2" }
+                )
+
                 // A consequence of b/269975671 is that MediaRouter and MediaProjection APIs fire at
                 // different times when *screen* casting:
                 //
@@ -149,10 +163,13 @@ constructor(
 
     /** Stops the currently active projection. */
     private fun stopProjecting() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop casting requested (projection)" })
         mediaProjectionChipInteractor.stopProjecting()
     }
 
+    /** Stops the currently active media route. */
     private fun stopMediaRouterCasting() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop casting requested (router)" })
         mediaRouterChipInteractor.stopCasting()
     }
 
@@ -173,12 +190,13 @@ constructor(
             startTimeMs = systemClock.elapsedRealtime(),
             createDialogLaunchOnClickListener(
                 createCastScreenToOtherDeviceDialogDelegate(state),
-                dialogTransitionAnimator,
+                logger,
+                TAG,
             ),
         )
     }
 
-    private fun createIconOnlyCastChip(): OngoingActivityChipModel.Shown {
+    private fun createIconOnlyCastChip(deviceName: String?): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.IconOnly(
             icon =
                 Icon.Resource(
@@ -188,8 +206,9 @@ constructor(
                 ),
             colors = ColorsModel.Red,
             createDialogLaunchOnClickListener(
-                createGenericCastToOtherDeviceDialogDelegate(),
-                dialogTransitionAnimator,
+                createGenericCastToOtherDeviceDialogDelegate(deviceName),
+                logger,
+                TAG,
             ),
         )
     }
@@ -199,17 +218,21 @@ constructor(
     ) =
         EndCastScreenToOtherDeviceDialogDelegate(
             endMediaProjectionDialogHelper,
+            context,
             stopAction = this::stopProjecting,
             state,
         )
 
-    private fun createGenericCastToOtherDeviceDialogDelegate() =
+    private fun createGenericCastToOtherDeviceDialogDelegate(deviceName: String?) =
         EndGenericCastToOtherDeviceDialogDelegate(
             endMediaProjectionDialogHelper,
+            context,
+            deviceName,
             stopAction = this::stopMediaRouterCasting,
         )
 
     companion object {
         @DrawableRes val CAST_TO_OTHER_DEVICE_ICON = R.drawable.ic_cast_connected
+        private const val TAG = "CastToOtherVM"
     }
 }

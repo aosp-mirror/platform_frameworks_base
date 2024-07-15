@@ -436,8 +436,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Pozwala na zapis aplikacji w pamięci zewnętrznej niezależnie od wartości w pliku manifestu"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Wymuś zmianę rozmiaru okien aktywności"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Zezwalaj na zmianę rozmiaru wszystkich okien aktywności w trybie wielu okien niezależnie od ustawień w pliku manifestu"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Włącz dowolny rozmiar okien"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Włącz obsługę eksperymentalnej funkcji dowolnego rozmiaru okien"</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"Włącz dowolny rozmiar okien (starsza wersja)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Włącz obsługę eksperymentalnej funkcji dowolnego rozmiaru okien w starszej wersji"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Hasło kopii zapasowej"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Pełne kopie zapasowe na komputerze nie są obecnie chronione"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Dotknij, by zmienić lub usunąć hasło pełnych kopii zapasowych na komputerze."</string>

@@ -1174,7 +1174,6 @@ public class PipTransition extends PipTransitionController {
         }
 
         final Rect sourceBounds = pipTaskInfo.configuration.windowConfiguration.getBounds();
-        sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
         final PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getAnimator(pipTaskInfo, leash, sourceBounds, sourceBounds,
                         destinationBounds, sourceHintRect, TRANSITION_DIRECTION_TO_PIP,

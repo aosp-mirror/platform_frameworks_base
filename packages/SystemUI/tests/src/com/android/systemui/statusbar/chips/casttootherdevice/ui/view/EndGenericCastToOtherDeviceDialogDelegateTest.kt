@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.casttootherdevice.ui.view
 
 import android.content.DialogInterface
+import android.content.applicationContext
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -65,12 +66,30 @@ class EndGenericCastToOtherDeviceDialogDelegateTest : SysuiTestCase() {
     }
 
     @Test
-    fun message() {
-        createAndSetDelegate()
+    fun message_unknownDevice() {
+        createAndSetDelegate(deviceName = null)
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
-        verify(sysuiDialog).setMessage(R.string.cast_to_other_device_stop_dialog_message)
+        verify(sysuiDialog)
+            .setMessage(
+                context.getString(R.string.cast_to_other_device_stop_dialog_message_generic)
+            )
+    }
+
+    @Test
+    fun message_hasDevice() {
+        createAndSetDelegate(deviceName = "My Favorite Device")
+
+        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
+
+        verify(sysuiDialog)
+            .setMessage(
+                context.getString(
+                    R.string.cast_to_other_device_stop_dialog_message_generic_with_device,
+                    "My Favorite Device",
+                )
+            )
     }
 
     @Test
@@ -122,10 +141,12 @@ class EndGenericCastToOtherDeviceDialogDelegateTest : SysuiTestCase() {
             assertThat(kosmos.fakeMediaRouterRepository.lastStoppedDevice).isEqualTo(device)
         }
 
-    private fun createAndSetDelegate() {
+    private fun createAndSetDelegate(deviceName: String? = null) {
         underTest =
             EndGenericCastToOtherDeviceDialogDelegate(
                 kosmos.endMediaProjectionDialogHelper,
+                kosmos.applicationContext,
+                deviceName,
                 stopAction = kosmos.mediaRouterChipInteractor::stopCasting,
             )
     }

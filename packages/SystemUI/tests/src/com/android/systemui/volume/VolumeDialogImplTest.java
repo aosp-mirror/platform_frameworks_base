@@ -43,6 +43,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -55,6 +56,7 @@ import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -92,6 +94,8 @@ import com.android.systemui.volume.domain.interactor.VolumePanelNavigationIntera
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
+import com.google.common.collect.ImmutableList;
+
 import dagger.Lazy;
 
 import junit.framework.Assert;
@@ -107,6 +111,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @SmallTest
@@ -157,11 +162,12 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
             new CsdWarningDialog.Factory() {
-        @Override
-        public CsdWarningDialog create(int warningType, Runnable onCleanup) {
-            return mCsdWarningDialog;
-        }
-    };
+                @Override
+                public CsdWarningDialog create(int warningType, Runnable onCleanup,
+                        Optional<ImmutableList<Pair<String, Intent>>> actionIntents) {
+                    return mCsdWarningDialog;
+                }
+            };
     @Mock
     private VibratorHelper mVibratorHelper;
 

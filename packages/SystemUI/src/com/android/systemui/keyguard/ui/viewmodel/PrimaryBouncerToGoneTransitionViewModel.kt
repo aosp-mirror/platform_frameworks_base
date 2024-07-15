@@ -26,7 +26,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -54,7 +53,7 @@ constructor(
         animationFlow
             .setup(
                 duration = TO_GONE_DURATION,
-                edge = Edge.create(from = PRIMARY_BOUNCER, to = Scenes.Gone),
+                edge = Edge.INVALID,
             )
             .setupWithoutSceneContainer(
                 edge = Edge.create(from = PRIMARY_BOUNCER, to = GONE),

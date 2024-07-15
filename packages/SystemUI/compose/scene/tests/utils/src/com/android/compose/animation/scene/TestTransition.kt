@@ -19,13 +19,14 @@ package com.android.compose.animation.scene
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import kotlinx.coroutines.CoroutineScope
 import platform.test.motion.MotionTestRule
 import platform.test.motion.RecordedMotion
 import platform.test.motion.compose.ComposeRecordingSpec
@@ -95,20 +96,24 @@ fun ComposeContentTestRule.testTransition(
     builder: TransitionTestBuilder.() -> Unit,
 ) {
     testTransition(
-        from = fromScene,
+        state =
+            runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    fromScene,
+                    transitions { from(fromScene, to = toScene, builder = transition) }
+                )
+            },
         to = toScene,
-        transitionLayout = { currentScene, onChangeScene ->
+        transitionLayout = { state ->
             SceneTransitionLayout(
-                currentScene,
-                onChangeScene,
-                transitions { from(fromScene, to = toScene, builder = transition) },
+                state,
                 layoutModifier,
             ) {
                 scene(fromScene, content = fromSceneContent)
                 scene(toScene, content = toSceneContent)
             }
         },
-        builder,
+        builder = builder,
     )
 }
 
@@ -172,21 +177,19 @@ fun MotionTestRule<ComposeToolkit>.recordTransition(
     )
 }
 
-/**
- * Test the transition between two scenes of [transitionLayout][SceneTransitionLayout] at different
- * points in time.
- */
+/** Test the transition from [state] to [to]. */
 fun ComposeContentTestRule.testTransition(
-    from: SceneKey,
+    state: MutableSceneTransitionLayoutState,
     to: SceneKey,
-    transitionLayout:
-        @Composable
-        (
-            currentScene: SceneKey,
-            onChangeScene: (SceneKey) -> Unit,
-        ) -> Unit,
+    transitionLayout: @Composable (state: MutableSceneTransitionLayoutState) -> Unit,
     builder: TransitionTestBuilder.() -> Unit,
 ) {
+    val currentScene = state.transitionState.currentScene
+    check(currentScene != to) {
+        "The 'to' scene (${to.debugName}) should be different from the state current scene " +
+            "(${currentScene.debugName})"
+    }
+
     val test = transitionTest(builder)
     val assertionScope =
         object : TransitionTestAssertionScope {
@@ -198,8 +201,11 @@ fun ComposeContentTestRule.testTransition(
             }
         }
 
-    var currentScene by mutableStateOf(from)
-    setContent { transitionLayout(currentScene, { currentScene = it }) }
+    lateinit var coroutineScope: CoroutineScope
+    setContent {
+        coroutineScope = rememberCoroutineScope()
+        transitionLayout(state)
+    }
 
     // Wait for the UI to be idle then test the before state.
     waitForIdle()
@@ -209,14 +215,8 @@ fun ComposeContentTestRule.testTransition(
     mainClock.autoAdvance = false
 
     // Change the current scene.
-    currentScene = to
-
-    // Advance by a frame to trigger recomposition, which will start the transition (i.e. it will
-    // change the transitionState to be a Transition) in a LaunchedEffect.
-    mainClock.advanceTimeByFrame()
-
-    // Advance by another frame so that the animator we started gets its initial value and clock
-    // starting time. We are now at progress = 0f.
+    runOnUiThread { state.setTargetScene(to, coroutineScope) }
+    waitForIdle()
     mainClock.advanceTimeByFrame()
     waitForIdle()
 

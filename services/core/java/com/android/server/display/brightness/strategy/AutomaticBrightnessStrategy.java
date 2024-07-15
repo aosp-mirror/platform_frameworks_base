@@ -297,7 +297,6 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
                 /* isAutomaticBrightnessAdjusted = */ true);
         return new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
-                .setSdrBrightness(brightness)
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(getName())
                 .setIsSlowChange(mIsSlowChange)

@@ -53,8 +53,6 @@ import android.window.WindowTokenClient;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.window.flags.Flags;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -167,8 +165,6 @@ public class ClientTransactionListenerControllerTest {
 
     @Test
     public void testActivityWindowInfoChangedListener() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
-
         mController.registerActivityWindowInfoChangedListener(mActivityWindowInfoListener);
         final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
         activityWindowInfo.set(true /* isEmbedded */, new Rect(0, 0, 1000, 2000),

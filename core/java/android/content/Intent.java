@@ -20,7 +20,6 @@ import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_AC
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.security.Flags.FLAG_FRP_ENFORCEMENT;
-import static android.service.chooser.Flags.FLAG_ENABLE_SHARESHEET_METADATA_EXTRA;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -6252,7 +6251,6 @@ public class Intent implements Parcelable, Cloneable {
      * <p>e.g. When sharing a photo, metadata could inform the user that location data is included
      * in the photo they are sharing.</p>
      */
-    @FlaggedApi(FLAG_ENABLE_SHARESHEET_METADATA_EXTRA)
     public static final String EXTRA_METADATA_TEXT = "android.intent.extra.METADATA_TEXT";
 
     /**

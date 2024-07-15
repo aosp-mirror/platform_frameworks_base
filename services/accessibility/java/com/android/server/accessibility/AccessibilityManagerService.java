@@ -57,6 +57,7 @@ import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
+import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
@@ -2936,6 +2937,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (combinedGenericMotionEventSources != 0) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_INTERCEPT_GENERIC_MOTION_EVENTS;
             }
+            if (userState.isMouseKeysEnabled()) {
+                flags |= AccessibilityInputFilter.FLAG_FEATURE_MOUSE_KEYS;
+            }
             if (flags != 0) {
                 if (!mHasInputFilter) {
                     mHasInputFilter = true;
@@ -3216,6 +3220,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         somethingChanged |= readMagnificationCapabilitiesLocked(userState);
         somethingChanged |= readMagnificationFollowTypingLocked(userState);
         somethingChanged |= readAlwaysOnMagnificationLocked(userState);
+        somethingChanged |= readMouseKeysEnabledLocked(userState);
         return somethingChanged;
     }
 
@@ -5476,6 +5481,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mAlwaysOnMagnificationUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED);
 
+        private final Uri mMouseKeysUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_MOUSE_KEYS_ENABLED);
+
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -5524,6 +5532,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mMagnificationFollowTypingUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mAlwaysOnMagnificationUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mMouseKeysUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -5604,6 +5614,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     readMagnificationFollowTypingLocked(userState);
                 } else if (mAlwaysOnMagnificationUri.equals(uri)) {
                     readAlwaysOnMagnificationLocked(userState);
+                } else if (mMouseKeysUri.equals(uri)) {
+                    if (readMouseKeysEnabledLocked(userState)) {
+                        onUserStateChangedLocked(userState);
+                    }
                 }
             }
         }
@@ -5737,6 +5751,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (isAlwaysOnEnabled != userState.isAlwaysOnMagnificationEnabled()) {
             userState.setAlwaysOnMagnificationEnabled(isAlwaysOnEnabled);
             mMagnificationController.setAlwaysOnMagnificationEnabled(isAlwaysOnEnabled);
+            return true;
+        }
+        return false;
+    }
+
+    boolean readMouseKeysEnabledLocked(AccessibilityUserState userState) {
+        if (!keyboardA11yMouseKeys()) {
+            return false;
+        }
+        final boolean isMouseKeysEnabled =
+                Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MOUSE_KEYS_ENABLED, 0, userState.mUserId) == 1;
+        if (isMouseKeysEnabled != userState.isMouseKeysEnabled()) {
+            userState.setMouseKeysEnabled(isMouseKeysEnabled);
             return true;
         }
         return false;

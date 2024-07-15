@@ -103,8 +103,6 @@ import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
-import com.android.window.flags.Flags;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -1557,8 +1555,6 @@ public class SplitControllerTest {
 
     @Test
     public void testIsActivityEmbedded() {
-        mSetFlagRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
-
         assertFalse(mSplitController.isActivityEmbedded(mActivity));
 
         doReturn(true).when(mActivityWindowInfo).isEmbedded();
@@ -1568,8 +1564,6 @@ public class SplitControllerTest {
 
     @Test
     public void testGetEmbeddedActivityWindowInfo() {
-        mSetFlagRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
-
         final boolean isEmbedded = true;
         final Rect taskBounds = new Rect(0, 0, 1000, 2000);
         final Rect activityStackBounds = new Rect(0, 0, 500, 2000);
@@ -1584,8 +1578,6 @@ public class SplitControllerTest {
 
     @Test
     public void testSetEmbeddedActivityWindowInfoCallback() {
-        mSetFlagRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
-
         final ClientTransactionListenerController controller = ClientTransactionListenerController
                 .getInstance();
         spyOn(controller);

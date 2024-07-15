@@ -19,8 +19,10 @@ package com.android.systemui.statusbar.chips.casttootherdevice.ui.view
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.applicationContext
 import android.content.packageManager
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.Kosmos
@@ -68,21 +70,94 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
-        verify(sysuiDialog).setTitle(R.string.cast_screen_to_other_device_stop_dialog_title)
+        verify(sysuiDialog).setTitle(R.string.cast_to_other_device_stop_dialog_title)
     }
 
     @Test
-    fun message_entireScreen() {
-        createAndSetDelegate(ENTIRE_SCREEN)
+    fun message_entireScreen_unknownDevice() {
+        createAndSetDelegate(
+            MediaProjectionState.Projecting.EntireScreen(HOST_PACKAGE, hostDeviceName = null)
+        )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
         verify(sysuiDialog)
-            .setMessage(context.getString(R.string.cast_screen_to_other_device_stop_dialog_message))
+            .setMessage(
+                context.getString(R.string.cast_to_other_device_stop_dialog_message_entire_screen)
+            )
     }
 
     @Test
-    fun message_singleTask() {
+    fun message_entireScreen_hasDevice() {
+        createAndSetDelegate(
+            MediaProjectionState.Projecting.EntireScreen(
+                HOST_PACKAGE,
+                hostDeviceName = "My Favorite Device"
+            )
+        )
+
+        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
+
+        verify(sysuiDialog)
+            .setMessage(
+                context.getString(
+                    R.string.cast_to_other_device_stop_dialog_message_entire_screen_with_device,
+                    "My Favorite Device",
+                )
+            )
+    }
+
+    @Test
+    fun message_singleTask_unknownAppName_unknownDevice() {
+        val baseIntent =
+            Intent().apply { this.component = ComponentName("fake.task.package", "cls") }
+        whenever(kosmos.packageManager.getApplicationInfo(eq("fake.task.package"), any<Int>()))
+            .thenThrow(PackageManager.NameNotFoundException())
+
+        createAndSetDelegate(
+            MediaProjectionState.Projecting.SingleTask(
+                HOST_PACKAGE,
+                hostDeviceName = null,
+                createTask(taskId = 1, baseIntent = baseIntent)
+            ),
+        )
+
+        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
+
+        verify(sysuiDialog)
+            .setMessage(
+                context.getString(R.string.cast_to_other_device_stop_dialog_message_generic)
+            )
+    }
+
+    @Test
+    fun message_singleTask_unknownAppName_hasDevice() {
+        val baseIntent =
+            Intent().apply { this.component = ComponentName("fake.task.package", "cls") }
+        whenever(kosmos.packageManager.getApplicationInfo(eq("fake.task.package"), any<Int>()))
+            .thenThrow(PackageManager.NameNotFoundException())
+
+        createAndSetDelegate(
+            MediaProjectionState.Projecting.SingleTask(
+                HOST_PACKAGE,
+                hostDeviceName = "My Favorite Device",
+                createTask(taskId = 1, baseIntent = baseIntent)
+            ),
+        )
+
+        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
+
+        verify(sysuiDialog)
+            .setMessage(
+                context.getString(
+                    R.string.cast_to_other_device_stop_dialog_message_generic_with_device,
+                    "My Favorite Device",
+                )
+            )
+    }
+
+    @Test
+    fun message_singleTask_hasAppName_unknownDevice() {
         val baseIntent =
             Intent().apply { this.component = ComponentName("fake.task.package", "cls") }
         val appInfo = mock<ApplicationInfo>()
@@ -93,17 +168,49 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
         createAndSetDelegate(
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
+                hostDeviceName = null,
                 createTask(taskId = 1, baseIntent = baseIntent)
-            )
+            ),
         )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
-        // It'd be nice to use R.string.cast_screen_to_other_device_stop_dialog_message_specific_app
-        // directly, but it includes the <b> tags which aren't in the returned string.
-        val result = argumentCaptor<CharSequence>()
-        verify(sysuiDialog).setMessage(result.capture())
-        assertThat(result.firstValue.toString()).isEqualTo("You will stop casting Fake Package")
+        verify(sysuiDialog)
+            .setMessage(
+                context.getString(
+                    R.string.cast_to_other_device_stop_dialog_message_specific_app,
+                    "Fake Package",
+                )
+            )
+    }
+
+    @Test
+    fun message_singleTask_hasAppName_hasDevice() {
+        val baseIntent =
+            Intent().apply { this.component = ComponentName("fake.task.package", "cls") }
+        val appInfo = mock<ApplicationInfo>()
+        whenever(appInfo.loadLabel(kosmos.packageManager)).thenReturn("Fake Package")
+        whenever(kosmos.packageManager.getApplicationInfo(eq("fake.task.package"), any<Int>()))
+            .thenReturn(appInfo)
+
+        createAndSetDelegate(
+            MediaProjectionState.Projecting.SingleTask(
+                HOST_PACKAGE,
+                hostDeviceName = "My Favorite Device",
+                createTask(taskId = 1, baseIntent = baseIntent),
+            ),
+        )
+
+        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
+
+        verify(sysuiDialog)
+            .setMessage(
+                context.getString(
+                    R.string.cast_to_other_device_stop_dialog_message_specific_app_with_device,
+                    "Fake Package",
+                    "My Favorite Device",
+                )
+            )
     }
 
     @Test
@@ -144,6 +251,7 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
         underTest =
             EndCastScreenToOtherDeviceDialogDelegate(
                 kosmos.endMediaProjectionDialogHelper,
+                kosmos.applicationContext,
                 stopAction = kosmos.mediaProjectionChipInteractor::stopProjecting,
                 ProjectionChipModel.Projecting(
                     ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE,
@@ -154,8 +262,13 @@ class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
 
     companion object {
         private const val HOST_PACKAGE = "fake.host.package"
-        private val ENTIRE_SCREEN = MediaProjectionState.Projecting.EntireScreen(HOST_PACKAGE)
+        private val ENTIRE_SCREEN =
+            MediaProjectionState.Projecting.EntireScreen(HOST_PACKAGE, hostDeviceName = null)
         private val SINGLE_TASK =
-            MediaProjectionState.Projecting.SingleTask(HOST_PACKAGE, createTask(taskId = 1))
+            MediaProjectionState.Projecting.SingleTask(
+                HOST_PACKAGE,
+                hostDeviceName = null,
+                createTask(taskId = 1)
+            )
     }
 }

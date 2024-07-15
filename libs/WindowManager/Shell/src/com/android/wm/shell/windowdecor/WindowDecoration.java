@@ -19,6 +19,7 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.statusBars;
@@ -53,6 +54,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -105,7 +107,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * System-wide context. Only used to create context with overridden configurations.
      */
     final Context mContext;
-    final DisplayController mDisplayController;
+    final @NonNull DisplayController mDisplayController;
     final ShellTaskOrganizer mTaskOrganizer;
     final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
     final Supplier<SurfaceControl.Transaction> mSurfaceControlTransactionSupplier;
@@ -158,7 +160,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     WindowDecoration(
             Context context,
-            DisplayController displayController,
+            @NonNull DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
             @NonNull SurfaceControl taskSurface,
@@ -759,9 +761,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         void addOrUpdate(WindowContainerTransaction wct) {
-            wct.addInsetsSource(mToken, mOwner, INDEX, captionBar(), mFrame, mBoundingRects);
+            final @InsetsSource.Flags int captionSourceFlags =
+                    Flags.enableCaptionCompatInsetForceConsumption() ? FLAG_FORCE_CONSUMING : 0;
+            wct.addInsetsSource(mToken, mOwner, INDEX, captionBar(), mFrame, mBoundingRects,
+                    captionSourceFlags);
             wct.addInsetsSource(mToken, mOwner, INDEX, mandatorySystemGestures(), mFrame,
-                    mBoundingRects);
+                    mBoundingRects, 0 /* flags */);
         }
 
         void remove(WindowContainerTransaction wct) {

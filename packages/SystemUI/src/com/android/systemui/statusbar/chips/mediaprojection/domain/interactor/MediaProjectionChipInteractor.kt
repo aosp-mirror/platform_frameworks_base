@@ -71,8 +71,9 @@ constructor(
                             {
                                 str1 = type.name
                                 str2 = state.hostPackage
+                                str3 = state.hostDeviceName
                             },
-                            { "State: Projecting(type=$str1 hostPackage=$str2)" }
+                            { "State: Projecting(type=$str1 hostPackage=$str2 hostDevice=$str3)" }
                         )
                         ProjectionChipModel.Projecting(type, state)
                     }

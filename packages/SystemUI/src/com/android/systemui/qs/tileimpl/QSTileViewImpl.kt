@@ -93,6 +93,7 @@ constructor(
         @VisibleForTesting internal const val TILE_STATE_RES_PREFIX = "tile_states_"
         @VisibleForTesting internal const val LONG_PRESS_EFFECT_WIDTH_SCALE = 1.1f
         @VisibleForTesting internal const val LONG_PRESS_EFFECT_HEIGHT_SCALE = 1.2f
+        internal val EMPTY_RECT = Rect()
     }
 
     private val icon: QSIconViewImpl = QSIconViewImpl(context)
@@ -386,6 +387,7 @@ constructor(
             // The launch animation of a long-press effect did not reset the long-press effect so
             // we must do it here
             resetLongPressEffectProperties()
+            longPressEffect.resetState()
         }
         val actualHeight =
             if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
@@ -771,11 +773,14 @@ constructor(
         lastIconTint = icon.getColor(state)
 
         // Long-press effects
+        longPressEffect?.qsTile?.state?.handlesLongClick = state.handlesLongClick
         if (
             state.handlesLongClick &&
                 longPressEffect?.initializeEffect(longPressEffectDuration) == true
         ) {
             showRippleEffect = false
+            longPressEffect.qsTile?.state?.state = lastState // Store the tile's state
+            longPressEffect.resetState()
             initializeLongPressProperties(measuredHeight, measuredWidth)
         } else {
             // Long-press effects might have been enabled before but the new state does not
@@ -906,12 +911,13 @@ constructor(
     }
 
     override fun onActivityLaunchAnimationEnd() {
+        longPressEffect?.resetState()
         if (longPressEffect != null && !haveLongPressPropertiesBeenReset) {
             resetLongPressEffectProperties()
         }
     }
 
-    fun prepareForLaunch() {
+    private fun prepareForLaunch() {
         val startingHeight = initialLongPressProperties?.height?.toInt() ?: 0
         val startingWidth = initialLongPressProperties?.width?.toInt() ?: 0
         val deltaH = finalLongPressProperties?.height?.minus(startingHeight)?.toInt() ?: 0
@@ -922,7 +928,12 @@ constructor(
         paddingForLaunch.bottom = deltaH / 2
     }
 
-    override fun getPaddingForLaunchAnimation(): Rect = paddingForLaunch
+    override fun getPaddingForLaunchAnimation(): Rect =
+        if (longPressEffect?.state == QSLongPressEffect.State.LONG_CLICKED) {
+            paddingForLaunch
+        } else {
+            EMPTY_RECT
+        }
 
     fun updateLongPressEffectProperties(effectProgress: Float) {
         if (!isLongClickable || longPressEffect == null) return

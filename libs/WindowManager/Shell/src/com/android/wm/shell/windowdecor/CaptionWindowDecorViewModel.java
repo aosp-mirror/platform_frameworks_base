@@ -26,12 +26,20 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
+import android.hardware.input.InputManager;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.Display;
+import android.view.ISystemGestureExclusionListener;
+import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -45,39 +53,74 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 
 /**
  * View model for the window decoration with a caption and shadows. Works with
  * {@link CaptionWindowDecoration}.
  */
 public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
+    private static final String TAG = "CaptionWindowDecorViewModel";
+
     private final ShellTaskOrganizer mTaskOrganizer;
+    private final IWindowManager mWindowManager;
     private final Context mContext;
     private final Handler mMainHandler;
+    private final ShellExecutor mMainExecutor;
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final SyncTransactionQueue mSyncQueue;
     private final Transitions mTransitions;
+    private final Region mExclusionRegion = Region.obtain();
+    private final InputManager mInputManager;
     private TaskOperations mTaskOperations;
 
+    /**
+     * Whether to pilfer the next motion event to send cancellations to the windows below.
+     * Useful when the caption window is spy and the gesture should be handled by the system
+     * instead of by the app for their custom header content.
+     */
+    private boolean mShouldPilferCaptionEvents;
+
     private final SparseArray<CaptionWindowDecoration> mWindowDecorByTaskId = new SparseArray<>();
+
+    private final ISystemGestureExclusionListener mGestureExclusionListener =
+            new ISystemGestureExclusionListener.Stub() {
+                @Override
+                public void onSystemGestureExclusionChanged(int displayId,
+                        Region systemGestureExclusion, Region systemGestureExclusionUnrestricted) {
+                    if (mContext.getDisplayId() != displayId) {
+                        return;
+                    }
+                    mMainExecutor.execute(() -> {
+                        mExclusionRegion.set(systemGestureExclusion);
+                    });
+                }
+            };
 
     public CaptionWindowDecorViewModel(
             Context context,
             Handler mainHandler,
+            ShellExecutor shellExecutor,
             Choreographer mainChoreographer,
+            IWindowManager windowManager,
+            ShellInit shellInit,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             SyncTransactionQueue syncQueue,
             Transitions transitions) {
         mContext = context;
+        mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
+        mWindowManager = windowManager;
         mMainChoreographer = mainChoreographer;
         mTaskOrganizer = taskOrganizer;
         mDisplayController = displayController;
@@ -86,6 +129,18 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         mTransitions = transitions;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTaskOperations = new TaskOperations(null, mContext, mSyncQueue);
+        }
+        mInputManager = mContext.getSystemService(InputManager.class);
+
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
+        try {
+            mWindowManager.registerSystemGestureExclusionListener(mGestureExclusionListener,
+                    mContext.getDisplayId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to register window manager callbacks", e);
         }
     }
 
@@ -178,8 +233,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     private void setupCaptionColor(RunningTaskInfo taskInfo, CaptionWindowDecoration decoration) {
-        final int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
-        decoration.setCaptionColor(statusBarColor);
+        if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
+            decoration.setCaptionColor(Color.TRANSPARENT);
+        } else {
+            final int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
+            decoration.setCaptionColor(statusBarColor);
+        }
     }
 
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
@@ -300,6 +359,49 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                     wct.reorder(mTaskToken, true /* onTop */);
                     mSyncQueue.queue(wct);
                 }
+            }
+            final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+
+            final int actionMasked = e.getActionMasked();
+            final boolean isDown = actionMasked == MotionEvent.ACTION_DOWN;
+            final boolean isUpOrCancel = actionMasked == MotionEvent.ACTION_CANCEL
+                    || actionMasked == MotionEvent.ACTION_UP;
+            if (isDown) {
+                final boolean downInCustomizableCaptionRegion =
+                        decoration.checkTouchEventInCustomizableRegion(e);
+                final boolean downInExclusionRegion = mExclusionRegion.contains(
+                        (int) e.getRawX(), (int) e.getRawY());
+                final boolean isTransparentCaption =
+                        TaskInfoKt.isTransparentCaptionBarAppearance(decoration.mTaskInfo);
+                // MotionEvent's coordinates are relative to view, we want location in window
+                // to offset position relative to caption as a whole.
+                int[] viewLocation = new int[2];
+                v.getLocationInWindow(viewLocation);
+                final boolean isResizeEvent = decoration.shouldResizeListenerHandleEvent(e,
+                        new Point(viewLocation[0], viewLocation[1]));
+                // The caption window may be a spy window when the caption background is
+                // transparent, which means events will fall through to the app window. Make
+                // sure to cancel these events if they do not happen in the intersection of the
+                // customizable region and what the app reported as exclusion areas, because
+                // the drag-move or other caption gestures should take priority outside those
+                // regions.
+                mShouldPilferCaptionEvents = !(downInCustomizableCaptionRegion
+                        && downInExclusionRegion && isTransparentCaption) && !isResizeEvent;
+            }
+
+            if (!mShouldPilferCaptionEvents) {
+                // The event will be handled by a window below or pilfered by resize handler.
+                return false;
+            }
+            // Otherwise pilfer so that windows below receive cancellations for this gesture, and
+            // continue normal handling as a caption gesture.
+            if (mInputManager != null) {
+                // TODO(b/352127475): Only pilfer once per gesture
+                mInputManager.pilferPointers(v.getViewRootImpl().getInputToken());
+            }
+            if (isUpOrCancel) {
+                // Gesture is finished, reset state.
+                mShouldPilferCaptionEvents = false;
             }
             return mDragDetector.onMotionEvent(e);
         }

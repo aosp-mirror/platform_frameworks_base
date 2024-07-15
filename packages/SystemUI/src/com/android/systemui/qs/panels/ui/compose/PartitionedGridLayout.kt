@@ -122,6 +122,9 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
             onAddTile(it, CurrentTilesInteractor.POSITION_AT_END)
         }
+        val onDoubleTap: (TileSpec) -> Unit by rememberUpdatedState { tileSpec ->
+            viewModel.resize(tileSpec, !viewModel.isIconTile(tileSpec))
+        }
         val largeTileHeight = tileHeight()
         val iconTileHeight = tileHeight(showLabels)
         val tilePadding = dimensionResource(R.dimen.qs_tile_margin_vertical)
@@ -161,6 +164,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 tilePadding = tilePadding,
                 onAdd = onAddTile,
                 onRemove = onRemoveTile,
+                onDoubleTap = onDoubleTap,
                 isIconOnly = viewModel::isIconTile,
                 columns = columns,
                 showLabels = showLabels,
@@ -173,6 +177,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 tilePadding = tilePadding,
                 addTileToEnd = addTileToEnd,
                 onRemove = onRemoveTile,
+                onDoubleTap = onDoubleTap,
                 isIconOnly = viewModel::isIconTile,
                 showLabels = showLabels,
                 columns = columns,
@@ -203,6 +208,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         tilePadding: Dp,
         onAdd: (TileSpec, Int) -> Unit,
         onRemove: (TileSpec) -> Unit,
+        onDoubleTap: (TileSpec) -> Unit,
         isIconOnly: (TileSpec) -> Boolean,
         showLabels: Boolean,
         columns: Int,
@@ -224,6 +230,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                     tiles = largeTiles,
                     clickAction = ClickAction.REMOVE,
                     onClick = onRemove,
+                    onDoubleTap = onDoubleTap,
                     isIconOnly = { false },
                     dragAndDropState = dragAndDropState,
                     acceptDrops = { !isIconOnly(it) },
@@ -244,6 +251,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                     tiles = smallTiles,
                     clickAction = ClickAction.REMOVE,
                     onClick = onRemove,
+                    onDoubleTap = onDoubleTap,
                     isIconOnly = { true },
                     showLabels = showLabels,
                     dragAndDropState = dragAndDropState,
@@ -263,6 +271,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         tilePadding: Dp,
         addTileToEnd: (TileSpec) -> Unit,
         onRemove: (TileSpec) -> Unit,
+        onDoubleTap: (TileSpec) -> Unit,
         isIconOnly: (TileSpec) -> Boolean,
         showLabels: Boolean,
         columns: Int,
@@ -296,6 +305,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                     largeTiles,
                     ClickAction.ADD,
                     addTileToEnd,
+                    onDoubleTap,
                     isIconOnly,
                     dragAndDropState,
                     acceptDrops = { true },
@@ -308,6 +318,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                     smallTiles,
                     ClickAction.ADD,
                     addTileToEnd,
+                    onDoubleTap,
                     isIconOnly,
                     showLabels = showLabels,
                     dragAndDropState = dragAndDropState,
@@ -321,6 +332,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                     tilesCustom,
                     ClickAction.ADD,
                     addTileToEnd,
+                    onDoubleTap,
                     isIconOnly,
                     showLabels = showLabels,
                     dragAndDropState = dragAndDropState,

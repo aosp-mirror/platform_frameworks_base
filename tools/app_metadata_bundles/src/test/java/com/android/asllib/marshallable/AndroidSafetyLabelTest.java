@@ -16,12 +16,18 @@
 
 package com.android.asllib.marshallable;
 
+import static org.junit.Assert.assertThrows;
+
 import com.android.asllib.testutils.TestUtils;
+import com.android.asllib.util.MalformedXmlException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.w3c.dom.Element;
+
+import java.nio.file.Paths;
 
 @RunWith(JUnit4.class)
 public class AndroidSafetyLabelTest {
@@ -66,47 +72,49 @@ public class AndroidSafetyLabelTest {
         testOdToHrAndroidSafetyLabel(WITH_SAFETY_LABELS_FILE_NAME);
     }
 
-    /** Test for android safety label with system app safety label. */
-    @Test
-    public void testAndroidSafetyLabelWithSystemAppSafetyLabel() throws Exception {
-        System.out.println("starting testAndroidSafetyLabelWithSystemAppSafetyLabel.");
-        testHrToOdAndroidSafetyLabel(WITH_SYSTEM_APP_SAFETY_LABEL_FILE_NAME);
-        testOdToHrAndroidSafetyLabel(WITH_SYSTEM_APP_SAFETY_LABEL_FILE_NAME);
-    }
-
-    /** Test for android safety label with transparency info. */
-    @Test
-    public void testAndroidSafetyLabelWithTransparencyInfo() throws Exception {
-        System.out.println("starting testAndroidSafetyLabelWithTransparencyInfo.");
-        testHrToOdAndroidSafetyLabel(WITH_TRANSPARENCY_INFO_FILE_NAME);
-        testOdToHrAndroidSafetyLabel(WITH_TRANSPARENCY_INFO_FILE_NAME);
-    }
-
     private void hrToOdExpectException(String fileName) {
-        TestUtils.hrToOdExpectException(
-                new AndroidSafetyLabelFactory(), ANDROID_SAFETY_LABEL_HR_PATH, fileName);
+        assertThrows(
+                MalformedXmlException.class,
+                () -> {
+                    new AndroidSafetyLabelFactory()
+                            .createFromHrElement(
+                                    TestUtils.getElementFromResource(
+                                            Paths.get(ANDROID_SAFETY_LABEL_HR_PATH, fileName)));
+                });
     }
 
     private void odToHrExpectException(String fileName) {
-        TestUtils.odToHrExpectException(
-                new AndroidSafetyLabelFactory(), ANDROID_SAFETY_LABEL_OD_PATH, fileName);
+        assertThrows(
+                MalformedXmlException.class,
+                () -> {
+                    new AndroidSafetyLabelFactory()
+                            .createFromOdElement(
+                                    TestUtils.getElementFromResource(
+                                            Paths.get(ANDROID_SAFETY_LABEL_OD_PATH, fileName)));
+                });
     }
 
     private void testHrToOdAndroidSafetyLabel(String fileName) throws Exception {
-        TestUtils.testHrToOd(
-                TestUtils.document(),
-                new AndroidSafetyLabelFactory(),
-                ANDROID_SAFETY_LABEL_HR_PATH,
-                ANDROID_SAFETY_LABEL_OD_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        AndroidSafetyLabel asl =
+                new AndroidSafetyLabelFactory()
+                        .createFromHrElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(ANDROID_SAFETY_LABEL_HR_PATH, fileName)));
+        Element aslEle = asl.toOdDomElement(doc);
+        doc.appendChild(aslEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(ANDROID_SAFETY_LABEL_OD_PATH, fileName));
     }
 
     private void testOdToHrAndroidSafetyLabel(String fileName) throws Exception {
-        TestUtils.testOdToHr(
-                TestUtils.document(),
-                new AndroidSafetyLabelFactory(),
-                ANDROID_SAFETY_LABEL_OD_PATH,
-                ANDROID_SAFETY_LABEL_HR_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        AndroidSafetyLabel asl =
+                new AndroidSafetyLabelFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(ANDROID_SAFETY_LABEL_OD_PATH, fileName)));
+        Element aslEle = asl.toHrDomElement(doc);
+        doc.appendChild(aslEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(ANDROID_SAFETY_LABEL_HR_PATH, fileName));
     }
 }

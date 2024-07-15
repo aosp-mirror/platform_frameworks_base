@@ -17,6 +17,7 @@
 package com.android.systemui.mediaprojection.data.repository
 
 import android.app.ActivityManager.RunningTaskInfo
+import android.hardware.display.DisplayManager
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
 import android.os.Handler
@@ -35,18 +36,21 @@ import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
+@OptIn(ExperimentalCoroutinesApi::class)
 class MediaProjectionManagerRepository
 @Inject
 constructor(
     private val mediaProjectionManager: MediaProjectionManager,
+    private val displayManager: DisplayManager,
     @Main private val handler: Handler,
     @Application private val applicationScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
@@ -65,7 +69,11 @@ constructor(
     }
 
     override suspend fun stopProjecting() {
-        withContext(backgroundDispatcher) { mediaProjectionManager.stopActiveProjection() }
+        withContext(backgroundDispatcher) {
+            // TODO(b/332662551): Convert Logcat to LogBuffer.
+            Log.d(TAG, "Requesting MediaProjectionManager#stopActiveProjection")
+            mediaProjectionManager.stopActiveProjection()
+        }
     }
 
     override val mediaProjectionState: Flow<MediaProjectionState> =
@@ -74,12 +82,12 @@ constructor(
                     object : MediaProjectionManager.Callback() {
                         override fun onStart(info: MediaProjectionInfo?) {
                             Log.d(TAG, "MediaProjectionManager.Callback#onStart")
-                            trySendWithFailureLogging(MediaProjectionState.NotProjecting, TAG)
+                            trySendWithFailureLogging(CallbackEvent.OnStart, TAG)
                         }
 
                         override fun onStop(info: MediaProjectionInfo?) {
                             Log.d(TAG, "MediaProjectionManager.Callback#onStop")
-                            trySendWithFailureLogging(MediaProjectionState.NotProjecting, TAG)
+                            trySendWithFailureLogging(CallbackEvent.OnStop, TAG)
                         }
 
                         override fun onRecordingSessionSet(
@@ -87,13 +95,35 @@ constructor(
                             session: ContentRecordingSession?
                         ) {
                             Log.d(TAG, "MediaProjectionManager.Callback#onSessionStarted: $session")
-                            launch {
-                                trySendWithFailureLogging(stateForSession(info, session), TAG)
-                            }
+                            trySendWithFailureLogging(
+                                CallbackEvent.OnRecordingSessionSet(info, session),
+                                TAG,
+                            )
                         }
                     }
                 mediaProjectionManager.addCallback(callback, handler)
                 awaitClose { mediaProjectionManager.removeCallback(callback) }
+            }
+            // When we get an #onRecordingSessionSet event, we need to do some work in the
+            // background before emitting the right state value. But when we get an #onStop
+            // event, we immediately know what state value to emit.
+            //
+            // Without `mapLatest`, this could be a problem if an #onRecordingSessionSet event
+            // comes in and then an #onStop event comes in shortly afterwards (b/352483752):
+            // 1. #onRecordingSessionSet -> start some work in the background
+            // 2. #onStop -> immediately emit "Not Projecting"
+            // 3. onRecordingSessionSet work finishes -> emit "Projecting"
+            //
+            // At step 3, we *shouldn't* emit "Projecting" because #onStop was the last callback
+            // event we received, so we should be "Not Projecting". This `mapLatest` ensures
+            // that if an #onStop event comes in, we cancel any ongoing work for
+            // #onRecordingSessionSet and we don't emit "Projecting".
+            .mapLatest {
+                when (it) {
+                    is CallbackEvent.OnStart,
+                    is CallbackEvent.OnStop -> MediaProjectionState.NotProjecting
+                    is CallbackEvent.OnRecordingSessionSet -> stateForSession(it.info, it.session)
+                }
             }
             .stateIn(
                 scope = applicationScope,
@@ -110,14 +140,36 @@ constructor(
         }
 
         val hostPackage = info.packageName
+        val hostDeviceName =
+            withContext(backgroundDispatcher) {
+                // If the projection is to a different device, then the session's display ID should
+                // identify the display associated with that different device.
+                displayManager.getDisplay(session.virtualDisplayId)?.name
+            }
+
         if (session.contentToRecord == RECORD_CONTENT_DISPLAY || session.tokenToRecord == null) {
-            return MediaProjectionState.Projecting.EntireScreen(hostPackage)
+            return MediaProjectionState.Projecting.EntireScreen(hostPackage, hostDeviceName)
         }
         val matchingTask =
             tasksRepository.findRunningTaskFromWindowContainerToken(
                 checkNotNull(session.tokenToRecord)
-            ) ?: return MediaProjectionState.Projecting.EntireScreen(hostPackage)
-        return MediaProjectionState.Projecting.SingleTask(hostPackage, matchingTask)
+            ) ?: return MediaProjectionState.Projecting.EntireScreen(hostPackage, hostDeviceName)
+        return MediaProjectionState.Projecting.SingleTask(hostPackage, hostDeviceName, matchingTask)
+    }
+
+    /**
+     * Translates [MediaProjectionManager.Callback] events into objects so that we always maintain
+     * the correct callback ordering.
+     */
+    sealed interface CallbackEvent {
+        data object OnStart : CallbackEvent
+
+        data object OnStop : CallbackEvent
+
+        data class OnRecordingSessionSet(
+            val info: MediaProjectionInfo,
+            val session: ContentRecordingSession?,
+        ) : CallbackEvent
     }
 
     companion object {

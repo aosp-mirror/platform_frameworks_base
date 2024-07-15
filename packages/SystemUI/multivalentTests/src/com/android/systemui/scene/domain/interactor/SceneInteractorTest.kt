@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -63,7 +64,8 @@ class SceneInteractorTest : SysuiTestCase() {
 
     private val underTest = kosmos.sceneInteractor
 
-    init {
+    @Before
+    fun setUp() {
         // Init lazy Fixtures. Accessing them once makes sure that the singletons are initialized
         // and therefore starts to collect StateFlows eagerly (when there are any).
         kosmos.deviceUnlockedInteractor

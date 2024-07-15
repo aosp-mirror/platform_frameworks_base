@@ -202,7 +202,7 @@ final class InputMethodMenuController {
         attrs.setTitle("Select input method");
         w.setAttributes(attrs);
         mService.updateSystemUiLocked(userId);
-        mService.sendOnNavButtonFlagsChangedLocked();
+        mService.sendOnNavButtonFlagsChangedLocked(mService.getUserData(userId));
         mSwitchingDialog.show();
     }
 
@@ -242,7 +242,7 @@ final class InputMethodMenuController {
             // TODO(b/305849394): Make InputMethodMenuController multi-user aware
             final int userId = mService.getCurrentImeUserIdLocked();
             mService.updateSystemUiLocked(userId);
-            mService.sendOnNavButtonFlagsChangedLocked();
+            mService.sendOnNavButtonFlagsChangedToAllImesLocked();
             mDialogBuilder = null;
             mIms = null;
         }

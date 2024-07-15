@@ -1,7 +1,6 @@
 
 <pbundle_as_map name="transparency_info">
     <pbundle_as_map name="app_info">
-        <boolean name="aps_compliant" value="false"/>
         <string name="privacy_policy" value="www.example.com"/>
         <string-array name="first_party_endpoints" num="1">
             <item value="url1"/>
@@ -10,5 +9,8 @@
             <item value="url55"/>
             <item value="url56"/>
         </string-array>
+        <boolean name="aps_compliant" value="false"/>
+        <string name="developer_id" value="dev1"/>
+        <string name="application_id" value="app1"/>
     </pbundle_as_map>
 </pbundle_as_map>

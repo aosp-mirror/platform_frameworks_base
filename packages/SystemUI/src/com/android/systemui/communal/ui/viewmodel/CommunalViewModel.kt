@@ -233,7 +233,10 @@ constructor(
 
     override fun onOpenWidgetEditor(
         shouldOpenWidgetPickerOnStart: Boolean,
-    ) = communalInteractor.showWidgetEditor(selectedKey.value, shouldOpenWidgetPickerOnStart)
+    ) {
+        persistScrollPosition()
+        communalInteractor.showWidgetEditor(selectedKey.value, shouldOpenWidgetPickerOnStart)
+    }
 
     override fun onDismissCtaTile() {
         scope.launch {

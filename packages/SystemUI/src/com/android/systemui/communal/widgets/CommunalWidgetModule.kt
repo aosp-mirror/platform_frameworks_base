@@ -43,12 +43,6 @@ interface CommunalWidgetModule {
 
         @SysUISingleton
         @Provides
-        fun provideAppWidgetManager(@Application context: Context): Optional<AppWidgetManager> {
-            return Optional.ofNullable(AppWidgetManager.getInstance(context))
-        }
-
-        @SysUISingleton
-        @Provides
         fun provideCommunalAppWidgetHost(
             @Application context: Context,
             @Background backgroundScope: CoroutineScope,

@@ -90,7 +90,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.view.RemoteAnimationDefinition;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.ITaskFragmentOrganizer;
@@ -140,7 +139,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private IBinder mFragmentToken;
     private WindowContainerTransaction mTransaction;
     private WindowContainerToken mFragmentWindowToken;
-    private RemoteAnimationDefinition mDefinition;
     private IBinder mErrorToken;
     private Rect mTaskFragBounds;
 
@@ -169,7 +167,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mTransaction = new WindowContainerTransaction();
         mTransaction.setTaskFragmentOrganizer(mIOrganizer);
         mFragmentWindowToken = mTaskFragment.mRemoteToken.toWindowContainerToken();
-        mDefinition = new RemoteAnimationDefinition();
         mErrorToken = new Binder();
         final Rect displayBounds = mDisplayContent.getBounds();
         mTaskFragBounds = new Rect(displayBounds.left, displayBounds.top, displayBounds.centerX(),
@@ -576,17 +573,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         assertActivityReparentedToTaskTransaction(task.mTaskId, activity.intent, activity.token);
-    }
-
-    @Test
-    public void testRegisterRemoteAnimations() {
-        mController.registerRemoteAnimations(mIOrganizer, mDefinition);
-
-        assertEquals(mDefinition, mController.getRemoteAnimationDefinition(mIOrganizer));
-
-        mController.unregisterRemoteAnimations(mIOrganizer);
-
-        assertNull(mController.getRemoteAnimationDefinition(mIOrganizer));
     }
 
     @Test

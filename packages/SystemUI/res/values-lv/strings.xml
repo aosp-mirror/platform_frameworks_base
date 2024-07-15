@@ -103,8 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> konstatēja, ka tika veikts ekrānuzņēmums."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> un citas atvērtas lietotnes konstatēja, ka tika veikts ekrānuzņēmums."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Pievienot piezīmei"</string>
-    <!-- no translation found for backlinks_include_link (4562093591148248158) -->
-    <skip />
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Iekļaut saiti"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Ekrāna ierakstītājs"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekrāna ieraksta apstrāde"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Aktīvs paziņojums par ekrāna ierakstīšanas sesiju"</string>
@@ -196,8 +195,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ierīce atbloķēta ar seju. Nospiediet, lai turpinātu."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Seja atpazīta. Nospiediet, lai turpinātu."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Seja atpazīta. Lai turpinātu, nospiediet atbloķēšanas ikonu."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_sfps (2499213248903257928) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Ierīce atbloķēta pēc sejas. Pieskarieties, lai turpinātu."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentifikācija veikta"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Atcelt autentificēšanu"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Citas opcijas"</string>
@@ -478,8 +476,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Pievienot citus logrīkus"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Nospiediet un turiet, lai pielāgotu logrīkus."</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Pielāgot logrīkus"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Atbloķējiet, lai pielāgotu logrīkus"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Lietotnes ikona atspējotam logrīkam"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Tiek instalēta lietotnes ikona logrīkam."</string>
     <string name="edit_widget" msgid="9030848101135393954">"Rediģēt logrīku"</string>
@@ -802,7 +799,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Nav atrasti"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistēma"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Ievade"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Atvērtās"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Atvērtās lietotnes"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Pašreizējā"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"Tiek rādīti meklēšanas rezultāti"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"Tiek rādīti sistēmas īsinājumtaustiņi"</string>
@@ -1377,6 +1374,8 @@
     <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
     <skip />
     <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
     <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Atpakaļ"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Lai pārietu atpakaļ, ar trim pirkstiem velciet pa kreisi vai pa labi jebkurā vietā uz skārienpaliktņa"</string>

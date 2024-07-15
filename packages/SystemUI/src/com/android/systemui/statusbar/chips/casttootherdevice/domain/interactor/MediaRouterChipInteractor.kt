@@ -18,7 +18,10 @@ package com.android.systemui.statusbar.chips.casttootherdevice.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.mediarouter.data.repository.MediaRouterRepository
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.casttootherdevice.domain.model.MediaRouterCastModel
 import com.android.systemui.statusbar.policy.CastDevice
 import javax.inject.Inject
@@ -38,6 +41,7 @@ class MediaRouterChipInteractor
 constructor(
     @Application private val scope: CoroutineScope,
     private val mediaRouterRepository: MediaRouterRepository,
+    @StatusBarChipsLog private val logger: LogBuffer,
 ) {
     private val activeCastDevice: StateFlow<CastDevice?> =
         mediaRouterRepository.castDevices
@@ -49,8 +53,10 @@ constructor(
         activeCastDevice
             .map {
                 if (it != null) {
-                    MediaRouterCastModel.Casting
+                    logger.log(TAG, LogLevel.INFO, { str1 = it.name }, { "State: Casting($str1)" })
+                    MediaRouterCastModel.Casting(deviceName = it.name)
                 } else {
+                    logger.log(TAG, LogLevel.INFO, {}, { "State: DoingNothing" })
                     MediaRouterCastModel.DoingNothing
                 }
             }
@@ -59,5 +65,9 @@ constructor(
     /** Stops the currently active MediaRouter cast. */
     fun stopCasting() {
         activeCastDevice.value?.let { mediaRouterRepository.stopCasting(it) }
+    }
+
+    companion object {
+        private const val TAG = "MediaRouter"
     }
 }

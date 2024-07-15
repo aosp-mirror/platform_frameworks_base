@@ -24,10 +24,12 @@ import android.content.Intent
 import android.content.mockedContext
 import android.os.PowerManager
 import android.os.UserHandle
+import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.lockPatternUtils
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -78,6 +80,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
     private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
 
     @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testCanWakeDirectlyToGone_keyguardServiceEnabledThenDisabled() =
         testScope.runTest {
             val canWake by collectValues(underTest.canWakeDirectlyToGone)
@@ -114,6 +117,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testCanWakeDirectlyToGone_lockscreenDisabledThenEnabled() =
         testScope.runTest {
             val canWake by collectValues(underTest.canWakeDirectlyToGone)
@@ -178,6 +182,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testCanWakeDirectlyToGone_wakeAndUnlock() =
         testScope.runTest {
             val canWake by collectValues(underTest.canWakeDirectlyToGone)
@@ -201,6 +206,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testCanWakeDirectlyToGone_andSetsAlarm_ifPowerButtonDoesNotLockImmediately() =
         testScope.runTest {
             val canWake by collectValues(underTest.canWakeDirectlyToGone)
@@ -224,6 +230,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testSetsCanIgnoreAuth_andSetsAlarm_whenTimingOut() =
         testScope.runTest {
             val canWake by collectValues(underTest.canWakeDirectlyToGone)
@@ -267,6 +274,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testCancelsFirstAlarm_onWake_withSecondAlarmSet() =
         testScope.runTest {
             val canWake by collectValues(underTest.canWakeDirectlyToGone)

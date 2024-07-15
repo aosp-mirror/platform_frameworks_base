@@ -71,6 +71,8 @@ constructor(
     }
 
     private fun listenForOccludedToPrimaryBouncer() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
                 .filterRelevantKeyguardStateAnd { isBouncerShowing -> isBouncerShowing }

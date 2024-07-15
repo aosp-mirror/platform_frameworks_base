@@ -302,7 +302,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                 break;
             }
         }
-        if (pd == null || !pd.isHandlingDrag) {
+        if (pd == null || pd.activeDragCount <= 0 || !pd.isHandlingDrag) {
             // Not currently dragging
             return;
         }
@@ -333,9 +333,10 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
             mActiveDragDisplay = displayId;
             pd.isHandlingDrag = DragUtils.canHandleDrag(event);
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
-                    "Clip description: handlingDrag=%b itemCount=%d mimeTypes=%s",
+                    "Clip description: handlingDrag=%b itemCount=%d mimeTypes=%s flags=%s",
                     pd.isHandlingDrag, event.getClipData().getItemCount(),
-                    DragUtils.getMimeTypesConcatenated(description));
+                    DragUtils.getMimeTypesConcatenated(description),
+                    DragUtils.dragFlagsToString(event.getDragFlags()));
         }
 
         if (!pd.isHandlingDrag) {
