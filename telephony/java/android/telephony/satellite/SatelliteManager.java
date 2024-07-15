@@ -1526,6 +1526,12 @@ public final class SatelliteManager {
                         executor.execute(() -> Binder.withCleanCallingIdentity(() ->
                                 callback.onSatelliteModemStateChanged(state)));
                     }
+
+                    @Override
+                    public void onEmergencyModeChanged(boolean isEmergency) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                callback.onEmergencyModeChanged(isEmergency)));
+                    }
                 };
                 sSatelliteModemStateCallbackMap.put(callback, internalCallback);
                 return telephony.registerForSatelliteModemStateChanged(mSubId, internalCallback);
