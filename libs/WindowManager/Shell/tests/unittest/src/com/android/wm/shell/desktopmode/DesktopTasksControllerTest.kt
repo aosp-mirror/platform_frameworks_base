@@ -311,6 +311,31 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun isDesktopModeShowing_noTasks_returnsFalse() {
+    assertThat(controller.isDesktopModeShowing(displayId = 0)).isFalse()
+  }
+
+  @Test
+  fun isDesktopModeShowing_noTasksVisible_returnsFalse() {
+    val task1 = setUpFreeformTask()
+    val task2 = setUpFreeformTask()
+    markTaskHidden(task1)
+    markTaskHidden(task2)
+
+    assertThat(controller.isDesktopModeShowing(displayId = 0)).isFalse()
+  }
+
+  @Test
+  fun isDesktopModeShowing_tasksActiveAndVisible_returnsTrue() {
+    val task1 = setUpFreeformTask()
+    val task2 = setUpFreeformTask()
+    markTaskVisible(task1)
+    markTaskHidden(task2)
+
+    assertThat(controller.isDesktopModeShowing(displayId = 0)).isTrue()
+  }
+
+  @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun showDesktopApps_onSecondaryDisplay_desktopWallpaperEnabled_shouldNotShowWallpaper() {
     val homeTask = setUpHomeTask(SECOND_DISPLAY)
@@ -526,32 +551,32 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun getVisibleTaskCount_noTasks_returnsZero() {
-    assertThat(controller.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
+  fun visibleTaskCount_noTasks_returnsZero() {
+    assertThat(controller.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
   }
 
   @Test
-  fun getVisibleTaskCount_twoTasks_bothVisible_returnsTwo() {
+  fun visibleTaskCount_twoTasks_bothVisible_returnsTwo() {
     setUpHomeTask()
     setUpFreeformTask().also(::markTaskVisible)
     setUpFreeformTask().also(::markTaskVisible)
-    assertThat(controller.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(2)
+    assertThat(controller.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(2)
   }
 
   @Test
-  fun getVisibleTaskCount_twoTasks_oneVisible_returnsOne() {
+  fun visibleTaskCount_twoTasks_oneVisible_returnsOne() {
     setUpHomeTask()
     setUpFreeformTask().also(::markTaskVisible)
     setUpFreeformTask().also(::markTaskHidden)
-    assertThat(controller.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
+    assertThat(controller.visibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
   }
 
   @Test
-  fun getVisibleTaskCount_twoTasksVisibleOnDifferentDisplays_returnsOne() {
+  fun visibleTaskCount_twoTasksVisibleOnDifferentDisplays_returnsOne() {
     setUpHomeTask()
     setUpFreeformTask(DEFAULT_DISPLAY).also(::markTaskVisible)
     setUpFreeformTask(SECOND_DISPLAY).also(::markTaskVisible)
-    assertThat(controller.getVisibleTaskCount(SECOND_DISPLAY)).isEqualTo(1)
+    assertThat(controller.visibleTaskCount(SECOND_DISPLAY)).isEqualTo(1)
   }
 
   @Test
