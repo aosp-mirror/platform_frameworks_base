@@ -21,7 +21,7 @@ import android.content.Context
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.Flags
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.AccessibilityActionsViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.AccessibilityActionsViewModel
@@ -38,12 +38,13 @@ class AccessibilityActionsSection
 @Inject
 constructor(
     private val context: Context,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val accessibilityActionsViewModel: AccessibilityActionsViewModel,
 ) : KeyguardSection() {
     private var accessibilityActionsViewHandle: DisposableHandle? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!communalEnabled(context)) {
+        if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
         }
         val view = View(constraintLayout.context).apply { id = R.id.accessibility_actions_view }
@@ -51,7 +52,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!communalEnabled(context)) {
+        if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
         }
         accessibilityActionsViewHandle =
@@ -99,8 +100,4 @@ constructor(
         accessibilityActionsViewHandle = null
         constraintLayout.removeView(R.id.accessibility_actions_view)
     }
-}
-
-private fun communalEnabled(context: Context): Boolean {
-    return context.resources.getBoolean(R.bool.config_communalServiceEnabled) && Flags.communalHub()
 }

@@ -35,6 +35,7 @@ import com.android.systemui.biometrics.AuthController
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.ScreenLifecycle
@@ -136,6 +137,7 @@ data class TestMocksModule(
     @get:Provides val deviceEntryIconTransitions: Set<DeviceEntryIconTransition> = emptySet(),
     @get:Provides val communalInteractor: CommunalInteractor = mock(),
     @get:Provides val communalSceneInteractor: CommunalSceneInteractor = mock(),
+    @get:Provides val communalSettingsInteractor: CommunalSettingsInteractor = mock(),
     @get:Provides val sceneLogger: SceneLogger = mock(),
     @get:Provides val trustManager: TrustManager = mock(),
     @get:Provides val primaryBouncerInteractor: PrimaryBouncerInteractor = mock(),

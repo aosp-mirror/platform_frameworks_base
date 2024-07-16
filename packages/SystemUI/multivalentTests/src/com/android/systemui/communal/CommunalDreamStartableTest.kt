@@ -22,6 +22,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
+import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
@@ -61,9 +64,12 @@ class CommunalDreamStartableTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+
         underTest =
             CommunalDreamStartable(
                     powerInteractor = kosmos.powerInteractor,
+                    communalSettingsInteractor = kosmos.communalSettingsInteractor,
                     keyguardInteractor = kosmos.keyguardInteractor,
                     keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
                     dreamManager = dreamManager,
