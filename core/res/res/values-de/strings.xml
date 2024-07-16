@@ -1564,7 +1564,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"Konto hinzufügen"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Verlängern"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Verringern"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> berühren und halten."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> gedrückt halten."</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Zum Verlängern nach oben und zum Verringern nach unten schieben"</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Minuten verlängern"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Minuten verringern"</string>
@@ -1591,7 +1591,7 @@
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> konnte nicht gestartet werden."</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Teilen mit"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Mit <xliff:g id="APPLICATION_NAME">%s</xliff:g> teilen"</string>
-    <string name="content_description_sliding_handle" msgid="982510275422590757">"Schieberegler: Berühren und halten"</string>
+    <string name="content_description_sliding_handle" msgid="982510275422590757">"Schieberegler: Gedrückt halten"</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Zum Entsperren den Finger über den Bildschirm ziehen"</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Zur Startseite navigieren"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Nach oben navigieren"</string>
