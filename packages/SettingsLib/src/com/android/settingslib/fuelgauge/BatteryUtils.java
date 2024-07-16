@@ -83,6 +83,12 @@ public final class BatteryUtils {
         return userManager.isManagedProfile() && !userManager.isSystemUser();
     }
 
+    /** Returns true if current user is a private profile user. */
+    public static boolean isPrivateProfile(Context context) {
+        final UserManager userManager = context.getSystemService(UserManager.class);
+        return userManager.isPrivateProfile();
+    }
+
     private static Boolean sChargingStringV2Enabled = null;
 
     /** Returns {@code true} if the charging string v2 is enabled. */
