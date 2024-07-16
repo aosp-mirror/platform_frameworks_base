@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.os;
+package com.android.server.power.stats;
 
 import static android.os.BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE;
 
@@ -23,39 +23,262 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.os.AggregateBatteryConsumer;
 import android.os.BatteryConsumer;
 import android.os.BatteryUsageStats;
+import android.os.Process;
 import android.os.UidBatteryConsumer;
 import android.os.nano.BatteryUsageStatsAtomsProto;
 import android.os.nano.BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsage;
+import android.platform.test.ravenwood.RavenwoodRule;
+import android.util.StatsEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.am.BatteryStatsService;
+
 import com.google.protobuf.nano.InvalidProtocolBufferNanoException;
 
+import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 @SmallTest
-public class BatteryUsageStatsPulledTest {
+public class BatteryUsageStatsAtomTest {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private static final int UID_0 = 1000;
     private static final int UID_1 = 2000;
     private static final int UID_2 = 3000;
     private static final int UID_3 = 4000;
-    private static final int[] UID_USAGE_TIME_PROCESS_STATES = {
-            BatteryConsumer.PROCESS_STATE_FOREGROUND,
-            BatteryConsumer.PROCESS_STATE_BACKGROUND,
-            BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE
-    };
 
     @Test
-    public void testGetStatsProto() {
+    public void testAtom_BatteryUsageStatsPerUid() {
+        final BatteryUsageStats bus = buildBatteryUsageStats();
+        BatteryStatsService.FrameworkStatsLogger statsLogger =
+                mock(BatteryStatsService.FrameworkStatsLogger.class);
+
+        List<StatsEvent> actual = new ArrayList<>();
+        new BatteryStatsService.StatsPerUidLogger(statsLogger).logStats(bus, actual);
+
+        // Device-wide totals
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                Process.INVALID_UID,
+                BatteryConsumer.PROCESS_STATE_UNSPECIFIED,
+                0L,
+                "cpu",
+                30000.0f,
+                20100.0f,
+                20300L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                Process.INVALID_UID,
+                BatteryConsumer.PROCESS_STATE_UNSPECIFIED,
+                0L,
+                "camera",
+                30000.0f,
+                20150.0f,
+                0L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                Process.INVALID_UID,
+                BatteryConsumer.PROCESS_STATE_UNSPECIFIED,
+                0L,
+                "CustomConsumer1",
+                30000.0f,
+                20200.0f,
+                20400L
+        );
+
+        // Per-proc state estimates for UID_0
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_0,
+                BatteryConsumer.PROCESS_STATE_UNSPECIFIED,
+                0L,
+                "screen",
+                1650.0f,
+                300.0f,
+                0L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_0,
+                BatteryConsumer.PROCESS_STATE_UNSPECIFIED,
+                0L,
+                "cpu",
+                1650.0f,
+                400.0f,
+                600L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_0,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND,
+                1000L,
+                "cpu",
+                1650.0f,
+                9100.0f,
+                8100L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_0,
+                BatteryConsumer.PROCESS_STATE_BACKGROUND,
+                2000L,
+                "cpu",
+                1650.0f,
+                9200.0f,
+                8200L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_0,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE,
+                0L,
+                "cpu",
+                1650.0f,
+                9300.0f,
+                8400L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_0,
+                BatteryConsumer.PROCESS_STATE_CACHED,
+                0L,
+                "cpu",
+                1650.0f,
+                9400.0f,
+                0L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_0,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND,
+                1000L,
+                "CustomConsumer1",
+                1650.0f,
+                450.0f,
+                0L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_0,
+                BatteryConsumer.PROCESS_STATE_BACKGROUND,
+                2000L,
+                "CustomConsumer1",
+                1650.0f,
+                450.0f,
+                0L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_0,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND,
+                1000L,
+                "CustomConsumer2",
+                1650.0f,
+                500.0f,
+                800L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_0,
+                BatteryConsumer.PROCESS_STATE_BACKGROUND,
+                2000L,
+                "CustomConsumer2",
+                1650.0f,
+                500.0f,
+                800L
+        );
+
+        // Nothing for UID_1, because its power consumption is 0
+
+        // Only "screen" is populated for UID_2
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_2,
+                BatteryConsumer.PROCESS_STATE_UNSPECIFIED,
+                0L,
+                "screen",
+                766.0f,
+                766.0f,
+                0L
+        );
+
+        verifyNoMoreInteractions(statsLogger);
+    }
+
+    @Test
+    public void testAtom_BatteryUsageStatsAtomsProto() {
         final BatteryUsageStats bus = buildBatteryUsageStats();
         final byte[] bytes = bus.getStatsProto();
         BatteryUsageStatsAtomsProto proto;
@@ -68,9 +291,7 @@ public class BatteryUsageStatsPulledTest {
 
         assertEquals(bus.getStatsStartTimestamp(), proto.sessionStartMillis);
         assertEquals(bus.getStatsEndTimestamp(), proto.sessionEndMillis);
-        assertEquals(
-                bus.getStatsEndTimestamp() - bus.getStatsStartTimestamp(),
-                proto.sessionDurationMillis);
+        assertEquals(10000, proto.sessionDurationMillis);
         assertEquals(bus.getDischargePercentage(), proto.sessionDischargePercentage);
         assertEquals(bus.getDischargeDurationMs(), proto.dischargeDurationMillis);
 
@@ -90,8 +311,8 @@ public class BatteryUsageStatsPulledTest {
         final List<android.os.UidBatteryConsumer> uidConsumers = bus.getUidBatteryConsumers();
         uidConsumers.sort((a, b) -> a.getUid() - b.getUid());
 
-        final BatteryUsageStatsAtomsProto.UidBatteryConsumer[] uidConsumersProto
-                = proto.uidBatteryConsumers;
+        final BatteryUsageStatsAtomsProto.UidBatteryConsumer[] uidConsumersProto =
+                proto.uidBatteryConsumers;
         Arrays.sort(uidConsumersProto, (a, b) -> a.uid - b.uid);
 
         // UID_0 - After sorting, UID_0 should be in position 0 for both data structures
@@ -186,6 +407,12 @@ public class BatteryUsageStatsPulledTest {
         }
     }
 
+    private static final int[] UID_USAGE_TIME_PROCESS_STATES = {
+            BatteryConsumer.PROCESS_STATE_FOREGROUND,
+            BatteryConsumer.PROCESS_STATE_BACKGROUND,
+            BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE
+    };
+
     private void assertSameUidBatteryConsumer(
             android.os.UidBatteryConsumer uidConsumer,
             BatteryUsageStatsAtomsProto.UidBatteryConsumer uidConsumerProto,
@@ -195,10 +422,10 @@ public class BatteryUsageStatsPulledTest {
         assertEquals("Uid consumers had mismatched uids", uid, uidConsumer.getUid());
 
         assertEquals("For uid " + uid,
-                uidConsumer.getTimeInStateMs(android.os.UidBatteryConsumer.STATE_FOREGROUND),
+                uidConsumer.getTimeInProcessStateMs(BatteryConsumer.PROCESS_STATE_FOREGROUND),
                 uidConsumerProto.timeInForegroundMillis);
         assertEquals("For uid " + uid,
-                uidConsumer.getTimeInStateMs(android.os.UidBatteryConsumer.STATE_BACKGROUND),
+                uidConsumer.getTimeInProcessStateMs(BatteryConsumer.PROCESS_STATE_BACKGROUND),
                 uidConsumerProto.timeInBackgroundMillis);
         for (int processState : UID_USAGE_TIME_PROCESS_STATES) {
             final long timeInStateMillis = uidConsumer.getTimeInProcessStateMs(processState);
@@ -265,7 +492,9 @@ public class BatteryUsageStatsPulledTest {
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
                         .setDischargeDurationMs(1234)
-                        .setStatsStartTimestamp(1000);
+                        .setStatsStartTimestamp(1000)
+                        .setStatsEndTimestamp(20000)
+                        .setStatsDuration(10000);
         final UidBatteryConsumer.Builder uidBuilder = builder
                 .getOrCreateUidBatteryConsumerBuilder(UID_0)
                 .setPackageWithHighestDrain("myPackage0")
