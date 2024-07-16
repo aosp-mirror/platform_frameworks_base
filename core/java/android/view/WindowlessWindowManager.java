@@ -503,13 +503,13 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public boolean performHapticFeedback(int effectId, boolean always, boolean fromIme) {
+    public boolean performHapticFeedback(int effectId, int flags, int privFlags) {
         return false;
     }
 
     @Override
-    public void performHapticFeedbackAsync(int effectId, boolean always, boolean fromIme) {
-        performHapticFeedback(effectId, always, fromIme);
+    public void performHapticFeedbackAsync(int effectId, int flags, int privFlags) {
+        performHapticFeedback(effectId, flags, privFlags);
     }
 
     @Override
