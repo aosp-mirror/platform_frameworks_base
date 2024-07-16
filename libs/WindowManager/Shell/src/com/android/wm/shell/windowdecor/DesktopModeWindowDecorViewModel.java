@@ -31,6 +31,7 @@ import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowInsets.Type.statusBars;
 
+import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.compatui.AppCompatUtils.isTopActivityExemptFromDesktopWindowing;
@@ -499,6 +500,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 // App sometimes draws before the insets from WindowDecoration#relayout have
                 // been added, so they must be added here
+                mInteractionJankMonitor.begin(decoration.mTaskSurface, mContext,
+                        CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU);
                 mWindowDecorByTaskId.get(mTaskId).addCaptionInset(wct);
                 mDesktopTasksController.moveToDesktop(mTaskId, wct,
                         DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON);
