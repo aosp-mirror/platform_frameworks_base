@@ -517,7 +517,6 @@ private fun BoxScope.CommunalHubLazyGrid(
                 gridState = gridState,
                 contentListState = contentListState,
                 contentOffset = contentOffset,
-                updateDragPositionForRemove = updateDragPositionForRemove
             )
 
         // A full size box in background that listens to widget drops from the picker.
