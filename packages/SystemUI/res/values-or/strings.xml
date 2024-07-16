@@ -445,7 +445,7 @@
     <string name="guest_notification_app_name" msgid="2110425506754205509">"ଅତିଥି ମୋଡ"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"ଆପଣ ଅତିଥି ମୋଡରେ ଅଛନ୍ତି"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବା ଦ୍ୱାରା ଅତିଥି ମୋଡରୁ ବାହାରି ଯିବ ଏବଂ ବର୍ତ୍ତମାନର ଅତିଥି ସେସନରୁ ସମସ୍ତ ଆପ ଓ ଡାଟା ଡିଲିଟ ହୋଇଯିବ।"</string>
-    <string name="user_limit_reached_title" msgid="2429229448830346057">"ଉପଯୋଗକର୍ତ୍ତା ସୀମାରେ ପହଞ୍ଚିଛି"</string>
+    <string name="user_limit_reached_title" msgid="2429229448830346057">"ୟୁଜର ସୀମାରେ ପହଞ୍ଚିଛି"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{କେବଳ ଜଣେ ୟୁଜର ତିଆରି କରାଯାଇପାରିବ।}other{କେବଳ # ଜଣ ୟୁଜର ତିଆରି କରାଯାଇପାରିବ।}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"ୟୁଜରଙ୍କୁ ବାହାର କରିବେ?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"ଏହି ୟୁଜରଙ୍କ ସମସ୍ତ ଆପ୍‍ ଓ ଡାଟା ଡିଲିଟ୍‍ ହେବ।"</string>
