@@ -90,6 +90,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
     private val keyguardUpdateMonitor = kosmos.keyguardUpdateMonitor
     private val faceWakeUpTriggersConfig = kosmos.fakeFaceWakeUpTriggersConfig
     private val trustManager = kosmos.trustManager
+    private val deviceEntryFaceAuthStatusInteractor = kosmos.deviceEntryFaceAuthStatusInteractor
 
     @Before
     fun setup() {
@@ -112,6 +113,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
                 powerInteractor,
                 fakeBiometricSettingsRepository,
                 trustManager,
+                deviceEntryFaceAuthStatusInteractor,
             )
     }
 

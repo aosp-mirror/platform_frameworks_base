@@ -29,6 +29,8 @@ import static android.view.WindowInsets.Type.ime;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
 import static com.android.systemui.assist.AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS;
 import static com.android.systemui.navigationbar.views.NavigationBar.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
+import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_LONGPRESS;
+import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -38,6 +40,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -70,6 +73,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -161,6 +165,8 @@ public class NavigationBarTest extends SysuiTestCase {
     ButtonDispatcher mAccessibilityButton;
     @Mock
     ButtonDispatcher mImeSwitchButton;
+    @Mock
+    KeyButtonView mImeSwitchButtonView;
     @Mock
     ButtonDispatcher mBackButton;
     @Mock
@@ -430,6 +436,45 @@ public class NavigationBarTest extends SysuiTestCase {
                         /*action=*/MotionEvent.ACTION_MOVE,
                         0, 0, 0));
         assertThat(nextTouchEvent).isFalse();
+    }
+
+    @Test
+    public void testImeSwitcherClick() {
+        mNavigationBar.init();
+        mNavigationBar.onViewAttached();
+        mNavigationBar.onImeSwitcherClick(mImeSwitchButtonView);
+
+        verify(mUiEventLogger).log(NAVBAR_IME_SWITCHER_BUTTON_TAP);
+        verify(mUiEventLogger, never()).log(NAVBAR_IME_SWITCHER_BUTTON_LONGPRESS);
+        if (Flags.imeSwitcherRevamp()) {
+            verify(mInputMethodManager)
+                    .onImeSwitchButtonClickFromSystem(mNavigationBar.mDisplayId);
+            verify(mInputMethodManager, never()).showInputMethodPickerFromSystem(
+                    anyBoolean() /* showAuxiliarySubtypes */, anyInt() /* displayId */);
+        } else {
+            verify(mInputMethodManager, never())
+                    .onImeSwitchButtonClickFromSystem(anyInt() /* displayId */);
+            verify(mInputMethodManager).showInputMethodPickerFromSystem(
+                    true /* showAuxiliarySubtypes */, mNavigationBar.mDisplayId);
+        }
+    }
+
+    @Test
+    public void testImeSwitcherLongClick() {
+        mNavigationBar.init();
+        mNavigationBar.onViewAttached();
+        mNavigationBar.onImeSwitcherLongClick(mImeSwitchButtonView);
+
+        verify(mUiEventLogger, never()).log(NAVBAR_IME_SWITCHER_BUTTON_TAP);
+        if (Flags.imeSwitcherRevamp()) {
+            verify(mUiEventLogger).log(NAVBAR_IME_SWITCHER_BUTTON_LONGPRESS);
+            verify(mInputMethodManager).showInputMethodPickerFromSystem(
+                    true /* showAuxiliarySubtypes */, mNavigationBar.mDisplayId);
+        } else {
+            verify(mUiEventLogger, never()).log(NAVBAR_IME_SWITCHER_BUTTON_LONGPRESS);
+            verify(mInputMethodManager, never()).showInputMethodPickerFromSystem(
+                    anyBoolean() /* showAuxiliarySubtypes */, anyInt() /* displayId */);
+        }
     }
 
     @Test

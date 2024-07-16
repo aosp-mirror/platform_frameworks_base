@@ -272,7 +272,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private final SettingsObserver mSettingsObserver;
 
     // The doze screen brightness.
-    private final float mScreenBrightnessDozeConfig;
+    private float mScreenBrightnessDozeConfig;
 
     // True if auto-brightness should be used.
     private boolean mUseSoftwareAutoBrightnessConfig;
@@ -550,7 +550,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // DOZE AND DIM SETTINGS
         mScreenBrightnessDozeConfig = BrightnessUtils.clampAbsoluteBrightness(
-                pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE));
+                mDisplayDeviceConfig.getDefaultDozeBrightness());
         loadBrightnessRampRates();
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 R.bool.config_skipScreenOnBrightnessRamp);
@@ -932,6 +932,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             HighBrightnessModeMetadata hbmMetadata) {
         // All properties that depend on the associated DisplayDevice and the DDC must be
         // updated here.
+        mScreenBrightnessDozeConfig = BrightnessUtils.clampAbsoluteBrightness(
+                mDisplayDeviceConfig.getDefaultDozeBrightness());
         loadBrightnessRampRates();
         loadNitsRange(mContext.getResources());
         setUpAutoBrightness(mContext, mHandler);

@@ -18,16 +18,19 @@ package com.android.systemui.education.data.repository
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.education.dagger.ContextualEducationModule.EduDataStoreScope
 import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.shared.education.GestureType
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
@@ -55,6 +58,7 @@ constructor(
     companion object {
         const val SIGNAL_COUNT_SUFFIX = "_SIGNAL_COUNT"
         const val NUMBER_OF_EDU_SHOWN_SUFFIX = "_NUMBER_OF_EDU_SHOWN"
+        const val LAST_SHORTCUT_TRIGGERED_TIME_SUFFIX = "_LAST_SHORTCUT_TRIGGERED_TIME"
 
         const val DATASTORE_DIR = "education/USER%s_ContextualEducation"
     }
@@ -91,6 +95,10 @@ constructor(
         return GestureEduModel(
             signalCount = preferences[getSignalCountKey(gestureType)] ?: 0,
             educationShownCount = preferences[getEducationShownCountKey(gestureType)] ?: 0,
+            lastShortcutTriggeredTime =
+                preferences[getLastShortcutTriggeredTimeKey(gestureType)]?.let {
+                    Instant.ofEpochMilli(it)
+                },
         )
     }
 
@@ -103,6 +111,11 @@ constructor(
             val updatedModel = transform(currentModel)
             preferences[getSignalCountKey(gestureType)] = updatedModel.signalCount
             preferences[getEducationShownCountKey(gestureType)] = updatedModel.educationShownCount
+            updateTimeByInstant(
+                preferences,
+                updatedModel.lastShortcutTriggeredTime,
+                getLastShortcutTriggeredTimeKey(gestureType)
+            )
         }
     }
 
@@ -111,4 +124,19 @@ constructor(
 
     private fun getEducationShownCountKey(gestureType: GestureType): Preferences.Key<Int> =
         intPreferencesKey(gestureType.name + NUMBER_OF_EDU_SHOWN_SUFFIX)
+
+    private fun getLastShortcutTriggeredTimeKey(gestureType: GestureType): Preferences.Key<Long> =
+        longPreferencesKey(gestureType.name + LAST_SHORTCUT_TRIGGERED_TIME_SUFFIX)
+
+    private fun updateTimeByInstant(
+        preferences: MutablePreferences,
+        instant: Instant?,
+        key: Preferences.Key<Long>
+    ) {
+        if (instant != null) {
+            preferences[key] = instant.toEpochMilli()
+        } else {
+            preferences.remove(key)
+        }
+    }
 }

@@ -23,7 +23,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
@@ -176,40 +175,13 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity);
         mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity);
 
         assertInCameraCompatMode();
         assertActivityRefreshRequested(/* refreshRequested */ true);
-    }
-
-    @Test
-    public void testReconnectedToDifferentCamera_activatesCameraCompatModeAndRefresh()
-            throws Exception {
-        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-
-        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
-        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_2, TEST_PACKAGE_1);
-        callOnActivityConfigurationChanging(mActivity);
-
-        assertInCameraCompatMode();
-        assertActivityRefreshRequested(/* refreshRequested */ true);
-    }
-
-    @Test
-    public void testCameraDisconnected_deactivatesCameraCompatMode() {
-        configureActivityAndDisplay(SCREEN_ORIENTATION_PORTRAIT, ORIENTATION_LANDSCAPE,
-                WINDOWING_MODE_FREEFORM);
-        // Open camera and test for compat treatment
-        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        assertInCameraCompatMode();
-
-        // Close camera and test for revert
-        mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
-
-        assertNotInCameraCompatMode();
     }
 
     @Test

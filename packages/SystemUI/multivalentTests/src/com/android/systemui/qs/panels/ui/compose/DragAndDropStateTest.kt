@@ -82,6 +82,20 @@ class DragAndDropStateTest : SysuiTestCase() {
         TestEditTiles.forEach { assertThat(underTest.isMoving(it.tileSpec)).isFalse() }
     }
 
+    @Test
+    fun onMoveOutOfBounds_removeMovingTileFromCurrentList() {
+        val movingTileSpec = TestEditTiles[0].tileSpec
+
+        // Start the drag movement
+        underTest.onStarted(movingTileSpec)
+
+        // Move the tile outside of the list
+        underTest.movedOutOfBounds()
+
+        // Asserts the moving tile is not current
+        assertThat(listState.tiles.first { it.tileSpec == movingTileSpec }.isCurrent).isFalse()
+    }
+
     companion object {
         private fun createEditTile(tileSpec: String): EditTileViewModel {
             return EditTileViewModel(

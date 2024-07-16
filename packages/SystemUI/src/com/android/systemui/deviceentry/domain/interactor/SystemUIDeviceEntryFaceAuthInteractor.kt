@@ -90,6 +90,7 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val trustManager: TrustManager,
+    deviceEntryFaceAuthStatusInteractor: DeviceEntryFaceAuthStatusInteractor,
 ) : DeviceEntryFaceAuthInteractor {
 
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
@@ -276,9 +277,13 @@ constructor(
     }
 
     private val faceAuthenticationStatusOverride = MutableStateFlow<FaceAuthenticationStatus?>(null)
+
     /** Provide the status of face authentication */
     override val authenticationStatus =
-        merge(faceAuthenticationStatusOverride.filterNotNull(), repository.authenticationStatus)
+        merge(
+            faceAuthenticationStatusOverride.filterNotNull(),
+            deviceEntryFaceAuthStatusInteractor.authenticationStatus.filterNotNull(),
+        )
 
     /** Provide the status of face detection */
     override val detectionStatus = repository.detectionStatus

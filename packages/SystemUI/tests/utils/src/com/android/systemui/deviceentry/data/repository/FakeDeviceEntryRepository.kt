@@ -30,14 +30,8 @@ class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
     private val _isBypassEnabled = MutableStateFlow(false)
     override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled
 
-    var userPresentCount = 0
-
     override suspend fun isLockscreenEnabled(): Boolean {
         return isLockscreenEnabled
-    }
-
-    override suspend fun reportUserPresent() {
-        userPresentCount++
     }
 
     fun setLockscreenEnabled(isLockscreenEnabled: Boolean) {

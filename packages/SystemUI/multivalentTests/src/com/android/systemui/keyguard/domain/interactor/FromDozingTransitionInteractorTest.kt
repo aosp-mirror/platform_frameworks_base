@@ -123,7 +123,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR, Flags.FLAG_COMMUNAL_HUB)
     fun testTransitionToLockscreen_onPowerButtonPress_canDream_glanceableHubAvailable() =
         testScope.runTest {
             whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)

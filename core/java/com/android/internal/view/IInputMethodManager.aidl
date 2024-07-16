@@ -135,6 +135,19 @@ interface IInputMethodManager {
             + "android.Manifest.permission.TEST_INPUT_METHOD)")
     boolean isInputMethodPickerShownForTest();
 
+    /**
+     * Called when the IME switch button was clicked from the system. Depending on the number of
+     * enabled IME subtypes, this will either switch to the next IME/subtype, or show the input
+     * method picker dialog.
+     *
+     * @param displayId The ID of the display where the input method picker dialog should be shown.
+     * @param userId    The ID of the user that triggered the click.
+     */
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+    oneway void onImeSwitchButtonClickFromSystem(int displayId);
+
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     @nullable InputMethodSubtype getCurrentInputMethodSubtype(int userId);

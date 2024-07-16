@@ -4726,6 +4726,32 @@ public final class DisplayManagerService extends SystemService {
             DisplayManagerService.this.mDisplayModeDirector.requestDisplayModes(
                     token, displayId, modeIds);
         }
+
+        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @Override // Binder call
+        public float[] getDozeBrightnessSensorValueToBrightness(int displayId) {
+            getDozeBrightnessSensorValueToBrightness_enforcePermission();
+            DisplayDeviceConfig ddc =
+                    mDisplayDeviceConfigProvider.getDisplayDeviceConfig(displayId);
+            if (ddc == null) {
+                throw new IllegalArgumentException(
+                        "Display ID does not have a config: " + displayId);
+            }
+            return ddc.getDozeBrightnessSensorValueToBrightness();
+        }
+
+        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @Override // Binder call
+        public float getDefaultDozeBrightness(int displayId) {
+            getDefaultDozeBrightness_enforcePermission();
+            DisplayDeviceConfig ddc =
+                    mDisplayDeviceConfigProvider.getDisplayDeviceConfig(displayId);
+            if (ddc == null) {
+                throw new IllegalArgumentException(
+                        "Display ID does not have a config for doze-default: " + displayId);
+            }
+            return ddc.getDefaultDozeBrightness();
+        }
     }
 
     private static boolean isValidBrightness(float brightness) {
