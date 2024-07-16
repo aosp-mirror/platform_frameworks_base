@@ -76,6 +76,8 @@ class UdfpsShell @Inject constructor(
             simFingerDown()
         } else if (args.size == 1 && args[0] == "simFingerUp") {
             simFingerUp()
+        } else if (args.size == 2 && args[0] == "setIgnoreDisplayTouches") {
+            setIgnoreDisplayTouches(args[1].toBoolean())
         } else {
             invalidCommand(pw)
         }
@@ -160,6 +162,11 @@ class UdfpsShell @Inject constructor(
                 sensorBounds.exactCenterY(), MINOR, MAJOR)
         udfpsOverlayController?.debugOnTouch(upEvent)
         upEvent?.recycle()
+    }
+
+    @VisibleForTesting
+    fun setIgnoreDisplayTouches(ignoreTouches: Boolean) {
+        udfpsOverlayController?.debugSetIgnoreDisplayTouches(ignoreTouches)
     }
 
     private fun obtainMotionEvent(
