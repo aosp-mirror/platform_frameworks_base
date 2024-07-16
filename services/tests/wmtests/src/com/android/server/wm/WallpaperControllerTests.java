@@ -31,7 +31,6 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.window.flags.Flags.multiCrop;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -551,10 +550,9 @@ public class WallpaperControllerTests extends WindowTestsBase {
     }
 
     private static void makeWallpaperWindowShown(WindowState w) {
-        final WindowSurfaceController windowSurfaceController = mock(WindowSurfaceController.class);
-        w.mWinAnimator.mSurfaceController = windowSurfaceController;
         w.mWinAnimator.mLastAlpha = 1;
-        when(windowSurfaceController.getShown()).thenReturn(true);
+        spyOn(w.mWinAnimator);
+        doReturn(true).when(w.mWinAnimator).getShown();
     }
 
     private WindowState createWallpaperWindow(DisplayContent dc, int width, int height) {

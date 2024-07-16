@@ -46,6 +46,7 @@ flag {
 flag {
     namespace: "haptics"
     name: "vibration_xml_apis"
+    is_exported: true
     description: "Enabled System APIs for vibration effect XML parser and serializer"
     bug: "347273158"
     metadata {

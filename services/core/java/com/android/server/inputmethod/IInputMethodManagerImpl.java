@@ -138,6 +138,9 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         @PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
         boolean isInputMethodPickerShownForTest();
 
+        @PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
+        void onImeSwitchButtonClickFromSystem(int displayId);
+
         InputMethodSubtype getCurrentInputMethodSubtype(@UserIdInt int userId);
 
         void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes,
@@ -342,6 +345,14 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         super.isInputMethodPickerShownForTest_enforcePermission();
 
         return mCallback.isInputMethodPickerShownForTest();
+    }
+
+    @EnforcePermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @Override
+    public void onImeSwitchButtonClickFromSystem(int displayId) {
+        super.onImeSwitchButtonClickFromSystem_enforcePermission();
+
+        mCallback.onImeSwitchButtonClickFromSystem(displayId);
     }
 
     @Override

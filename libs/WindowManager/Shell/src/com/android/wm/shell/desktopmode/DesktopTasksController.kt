@@ -246,10 +246,12 @@ class DesktopTasksController(
         }
     }
 
-    /** Get number of tasks that are marked as visible */
-    fun getVisibleTaskCount(displayId: Int): Int {
-        return desktopModeTaskRepository.getVisibleTaskCount(displayId)
-    }
+    /** Gets number of visible tasks in [displayId]. */
+    fun visibleTaskCount(displayId: Int): Int =
+        desktopModeTaskRepository.visibleTaskCount(displayId)
+
+    /** Returns true if any tasks are visible in Desktop Mode. */
+    fun isDesktopModeShowing(displayId: Int): Boolean = visibleTaskCount(displayId) > 0
 
     /** Enter desktop by using the focused task in given `displayId` */
     fun moveFocusedTaskToDesktop(displayId: Int, transitionSource: DesktopModeTransitionSource) {
@@ -981,7 +983,7 @@ class DesktopTasksController(
             ProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: skip keyguard is locked")
             return null
         }
-        if (!desktopModeTaskRepository.isDesktopModeShowing(task.displayId)) {
+        if (!isDesktopModeShowing(task.displayId)) {
             ProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopTasksController: bring desktop tasks to front on transition" +
@@ -1012,7 +1014,7 @@ class DesktopTasksController(
         transition: IBinder
     ): WindowContainerTransaction? {
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: handleFullscreenTaskLaunch")
-        if (desktopModeTaskRepository.isDesktopModeShowing(task.displayId)) {
+        if (isDesktopModeShowing(task.displayId)) {
             ProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopTasksController: switch fullscreen task to freeform on transition" +
@@ -1045,14 +1047,12 @@ class DesktopTasksController(
 
     /** Handle task closing by removing wallpaper activity if it's the last active task */
     private fun handleTaskClosing(task: RunningTaskInfo): WindowContainerTransaction? {
-        val wct = if (
-            desktopModeTaskRepository.isOnlyVisibleNonClosingTask(task.taskId) &&
-                desktopModeTaskRepository.wallpaperActivityToken != null
-        ) {
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: handleTaskClosing")
+        val wct = WindowContainerTransaction()
+        if (desktopModeTaskRepository.isOnlyVisibleNonClosingTask(task.taskId)
+            && desktopModeTaskRepository.wallpaperActivityToken != null) {
             // Remove wallpaper activity when the last active task is removed
-            WindowContainerTransaction().also { wct -> removeWallpaperActivity(wct) }
-        } else {
-            null
+            removeWallpaperActivity(wct)
         }
         if (!desktopModeTaskRepository.addClosingTask(task.displayId, task.taskId)) {
             // Could happen if the task hasn't been removed from closing list after it disappeared
@@ -1062,7 +1062,12 @@ class DesktopTasksController(
                 task.taskId
             )
         }
-        return wct
+        // If a CLOSE or TO_BACK is triggered on a desktop task, remove the task.
+        if (Flags.enableDesktopWindowingBackNavigation() &&
+            desktopModeTaskRepository.isVisibleTask(task.taskId)) {
+            wct.removeTask(task.token)
+        }
+        return if (wct.isEmpty) null else wct
     }
 
     private fun addMoveToDesktopChanges(
@@ -1393,8 +1398,7 @@ class DesktopTasksController(
         onFinishCallback: Consumer<Boolean>
     ): Boolean {
         // TODO(b/320797628): Pass through which display we are dropping onto
-        val activeTasks = desktopModeTaskRepository.getActiveTasks(DEFAULT_DISPLAY)
-        if (!activeTasks.any { desktopModeTaskRepository.isVisibleTask(it) }) {
+        if (!isDesktopModeShowing(DEFAULT_DISPLAY)) {
             // Not currently in desktop mode, ignore the drop
             return false
         }
@@ -1553,8 +1557,8 @@ class DesktopTasksController(
             val result = IntArray(1)
             executeRemoteCallWithTaskPermission(
                 controller,
-                "getVisibleTaskCount",
-                { controller -> result[0] = controller.getVisibleTaskCount(displayId) },
+                "visibleTaskCount",
+                { controller -> result[0] = controller.visibleTaskCount(displayId) },
                 true /* blocking */
             )
             return result[0]

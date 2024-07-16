@@ -41,6 +41,7 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
@@ -118,11 +119,11 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
     @Mock
     lateinit var mDreamComplicationComponentFactory:
-            com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
+        com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
 
     @Mock
     lateinit var mDreamComplicationComponent:
-            com.android.systemui.dreams.complication.dagger.ComplicationComponent
+        com.android.systemui.dreams.complication.dagger.ComplicationComponent
 
     @Mock lateinit var mHideComplicationTouchHandler: HideComplicationTouchHandler
 
@@ -202,8 +203,12 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         whenever(mScrimManager.getCurrentController()).thenReturn(mScrimController)
         whenever(mLazyViewCapture.value).thenReturn(viewCaptureSpy)
         mWindowParams = WindowManager.LayoutParams()
-        mViewCaptureAwareWindowManager = ViewCaptureAwareWindowManager(mWindowManager,
-                mLazyViewCapture, isViewCaptureEnabled = false)
+        mViewCaptureAwareWindowManager =
+            ViewCaptureAwareWindowManager(
+                mWindowManager,
+                mLazyViewCapture,
+                isViewCaptureEnabled = false
+            )
         mService =
             DreamOverlayService(
                 mContext,
@@ -257,7 +262,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         mMainExecutor.runAllReady()
         verify(mUiEventLogger).log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_ENTER_START)
         verify(mUiEventLogger)
-                .log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START)
+            .log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START)
     }
 
     @Test
@@ -634,7 +639,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_COMMUNAL_HUB)
     @kotlin.Throws(RemoteException::class)
     fun testTransitionToGlanceableHub() =
         testScope.runTest {
@@ -658,7 +663,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_COMMUNAL_HUB)
     @Throws(RemoteException::class)
     fun testRedirectExit() =
         testScope.runTest {

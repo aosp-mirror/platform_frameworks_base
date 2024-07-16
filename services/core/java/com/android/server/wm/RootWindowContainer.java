@@ -667,7 +667,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     boolean reclaimSomeSurfaceMemory(WindowStateAnimator winAnimator, String operation,
             boolean secure) {
-        final WindowSurfaceController surfaceController = winAnimator.mSurfaceController;
+        final SurfaceControl surfaceControl = winAnimator.mSurfaceControl;
         boolean leakedSurface = false;
         boolean killedApps = false;
         EventLogTags.writeWmNoSurfaceMemory(winAnimator.mWin.toString(),
@@ -692,7 +692,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                             return;
                         }
                         final WindowStateAnimator wsa = w.mWinAnimator;
-                        if (wsa.mSurfaceController != null) {
+                        if (wsa.mSurfaceControl != null) {
                             pidCandidates.append(wsa.mSession.mPid, wsa.mSession.mPid);
                         }
                     }, false /* traverseTopToBottom */);
@@ -717,7 +717,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // app to request another one.
                 Slog.w(TAG_WM,
                         "Looks like we have reclaimed some memory, clearing surface for retry.");
-                if (surfaceController != null) {
+                if (surfaceControl != null) {
                     ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
                             "SURFACE RECOVER DESTROY: %s", winAnimator.mWin);
                     SurfaceControl.Transaction t = mWmService.mTransactionFactory.get();

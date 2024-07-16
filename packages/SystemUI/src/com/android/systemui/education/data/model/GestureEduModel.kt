@@ -16,11 +16,14 @@
 
 package com.android.systemui.education.data.model
 
+import java.time.Instant
+
 /**
  * Model to store education data related to each gesture (e.g. Back, Home, All Apps, Overview). Each
  * gesture stores its own model separately.
  */
 data class GestureEduModel(
-    val signalCount: Int,
-    val educationShownCount: Int,
+    val signalCount: Int = 0,
+    val educationShownCount: Int = 0,
+    val lastShortcutTriggeredTime: Instant? = null,
 )

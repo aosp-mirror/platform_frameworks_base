@@ -91,7 +91,11 @@ constructor(dumpManager: DumpManager,
     }
 
     /** Run or delay Runnable for given HeadsUpEntry */
-    fun update(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
+    fun update(entry: HeadsUpEntry?, runnable: Runnable?, label: String) {
+        if (runnable == null) {
+            log { "Runnable is NULL, stop update." }
+            return
+        }
         if (!NotificationThrottleHun.isEnabled) {
             runnable.run()
             return
@@ -147,7 +151,11 @@ constructor(dumpManager: DumpManager,
      * Run or ignore Runnable for given HeadsUpEntry. If entry was never shown, ignore and delete
      * all Runnables associated with that entry.
      */
-    fun delete(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
+    fun delete(entry: HeadsUpEntry?, runnable: Runnable?, label: String) {
+        if (runnable == null) {
+            log { "Runnable is NULL, stop delete." }
+            return
+        }
         if (!NotificationThrottleHun.isEnabled) {
             runnable.run()
             return

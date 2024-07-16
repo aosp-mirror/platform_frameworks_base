@@ -14,21 +14,33 @@
  * limitations under the License.
  */
 
-package android.view.accessibility.a11ychecker;
+package com.android.server.accessibility.a11ychecker;
+
+import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_APP_PACKAGE_NAME;
+import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_WINDOW_TITLE;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import java.util.List;
 
 final class MockAccessibilityNodeInfoBuilder {
-    static final String PACKAGE_NAME = "com.example.app";
     private final AccessibilityNodeInfo mMockNodeInfo = mock(AccessibilityNodeInfo.class);
 
     MockAccessibilityNodeInfoBuilder() {
-        when(mMockNodeInfo.getPackageName()).thenReturn(PACKAGE_NAME);
+        setPackageName(TEST_APP_PACKAGE_NAME);
+
+        AccessibilityWindowInfo windowInfo = new AccessibilityWindowInfo();
+        windowInfo.setTitle(TEST_WINDOW_TITLE);
+        when(mMockNodeInfo.getWindow()).thenReturn(windowInfo);
+    }
+
+    MockAccessibilityNodeInfoBuilder setPackageName(String packageName) {
+        when(mMockNodeInfo.getPackageName()).thenReturn(packageName);
+        return this;
     }
 
     MockAccessibilityNodeInfoBuilder setClassName(String className) {

@@ -68,7 +68,6 @@ import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.view.IInputMethodManager;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
-import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.pm.UserManagerInternal;
@@ -161,7 +160,7 @@ public class InputMethodManagerServiceTestBase {
                         .strictness(Strictness.LENIENT)
                         .spyStatic(InputMethodUtils.class)
                         .mockStatic(ServiceManager.class)
-                        .mockStatic(SystemServerInitThreadPool.class)
+                        .spyStatic(AdditionalSubtypeMapRepository.class)
                         .startMocking();
 
         mContext = spy(InstrumentationRegistry.getInstrumentation().getContext());
@@ -234,9 +233,8 @@ public class InputMethodManagerServiceTestBase {
         doNothing().when(() -> InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
                         any(PackageManager.class), anyList()));
 
-        // Used by lazy initializing draw IMS nav bar at InputMethodManagerService#systemRunning(),
-        // which is ok to be mocked out for now.
-        doReturn(null).when(() -> SystemServerInitThreadPool.submit(any(), anyString()));
+        // The background writer thread in AdditionalSubtypeMapRepository should be stubbed out.
+        doNothing().when(AdditionalSubtypeMapRepository::startWriterThread);
 
         mServiceThread =
                 new ServiceThread(

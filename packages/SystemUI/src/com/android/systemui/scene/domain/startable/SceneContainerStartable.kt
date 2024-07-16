@@ -665,7 +665,7 @@ constructor(
             keyguardEnabledInteractor.isKeyguardEnabled
                 .sample(
                     combine(
-                        deviceEntryInteractor.isInLockdown,
+                        deviceUnlockedInteractor.isInLockdown,
                         deviceEntryInteractor.isDeviceEntered,
                         ::Pair,
                     )
