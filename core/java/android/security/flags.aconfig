@@ -83,3 +83,10 @@ flag {
     description: "Add a dump capability for attestation_verification service"
     bug: "335498868"
 }
+
+flag {
+  name: "should_trust_manager_listen_for_primary_auth"
+  namespace: "biometrics"
+  description: "Causes TrustManagerService to listen for credential attempts and ignore reports from upstream"
+  bug: "323086607"
+}

@@ -25,7 +25,7 @@
      android:versionName="1.0">
 
     <!-- The backup/restore mechanism was introduced in API version 8 -->
-    <uses-sdk android:minSdkVersion="8"
+    <uses-sdk android:minSdkVersion="21"
          android:targetSdkVersion="8"/>
 
     <application android:label="Huge Backup"
