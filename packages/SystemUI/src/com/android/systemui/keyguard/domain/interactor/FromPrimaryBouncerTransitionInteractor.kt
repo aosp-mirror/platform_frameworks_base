@@ -98,7 +98,6 @@ constructor(
     }
 
     private fun listenForPrimaryBouncerToLockscreenHubOrOccluded() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
@@ -160,13 +159,11 @@ constructor(
     }
 
     private fun listenForPrimaryBouncerToAsleep() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch { listenForSleepTransition() }
     }
 
     private fun listenForPrimaryBouncerToDreamingLockscreenHosted() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
@@ -180,7 +177,6 @@ constructor(
     }
 
     private fun listenForPrimaryBouncerToGone() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // This is handled in KeyguardSecurityContainerController and

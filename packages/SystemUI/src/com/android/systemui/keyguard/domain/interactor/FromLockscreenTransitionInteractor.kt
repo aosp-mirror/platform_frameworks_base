@@ -348,7 +348,6 @@ constructor(
      * keyguard transition.
      */
     private fun listenForLockscreenToGlanceableHub() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return

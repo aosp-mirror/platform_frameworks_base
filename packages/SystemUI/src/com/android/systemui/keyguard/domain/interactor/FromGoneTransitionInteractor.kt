@@ -69,7 +69,7 @@ constructor(
     ) {
 
     override fun start() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        // KeyguardState.GONE does not exist with SceneContainerFlag enabled
         if (SceneContainerFlag.isEnabled) return
         listenForGoneToAodOrDozing()
         listenForGoneToDreaming()
@@ -100,21 +100,19 @@ constructor(
                     }
             }
 
-            if (!SceneContainerFlag.isEnabled) {
-                scope.launch {
-                    keyguardRepository.isKeyguardEnabled
-                        .filterRelevantKeyguardStateAnd { enabled -> enabled }
-                        .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
-                        .filter { reshow -> reshow }
-                        .collect {
-                            startTransitionTo(
-                                KeyguardState.LOCKSCREEN,
-                                ownerReason =
-                                    "Keyguard was re-enabled, and we weren't GONE when it " +
-                                        "was originally disabled"
-                            )
-                        }
-                }
+            scope.launch {
+                keyguardRepository.isKeyguardEnabled
+                    .filterRelevantKeyguardStateAnd { enabled -> enabled }
+                    .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
+                    .filter { reshow -> reshow }
+                    .collect {
+                        startTransitionTo(
+                            KeyguardState.LOCKSCREEN,
+                            ownerReason =
+                                "Keyguard was re-enabled, and we weren't GONE when it " +
+                                    "was originally disabled"
+                        )
+                    }
             }
         } else {
             scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
