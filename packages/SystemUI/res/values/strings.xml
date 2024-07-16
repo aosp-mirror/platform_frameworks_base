@@ -1093,6 +1093,12 @@
     <!-- Priority modes dialog settings shortcut button [CHAR LIMIT=15] -->
     <string name="zen_modes_dialog_settings">Settings</string>
 
+    <!-- Priority modes: label for an active mode [CHAR LIMIT=35] -->
+    <string name="zen_mode_on">On</string>
+
+    <!-- Priority modes: label for an inactive mode [CHAR LIMIT=35] -->
+    <string name="zen_mode_off">Off</string>
+
     <!-- Zen mode: Priority only introduction message on first use -->
     <string name="zen_priority_introduction">You won\'t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify. You\'ll still hear anything you choose to play including music, videos, and games.</string>
 
