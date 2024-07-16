@@ -166,9 +166,9 @@ public class DesktopModeLaunchParamsModifierTests extends
                 ACTIVITY_TYPE_STANDARD).setDisplay(display).build();
 
         final int desiredWidth =
-                (int) (DISPLAY_STABLE_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+                (int) (DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         final int desiredHeight =
-                (int) (DISPLAY_STABLE_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+                (int) (DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());

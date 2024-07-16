@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डिबग एपका लागि GPU का डिबग लेयर लोड गर्नुहोस्"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"भर्बोज भेन्डर लगिङ अन गर्नुहोस्"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"बग रिपोर्टहरूमा डिभाइस विशेषका विक्रेताका अतिरिक्त लगहरू समावेश गर्नुहोस्। यी लगमा निजी जानकारी समावेश हुन सक्छन्, यिनले ब्याट्रीको खपत बढाउन र/वा थप भण्डारण प्रयोग गर्न सक्छन्।"</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"एक दिनपछि अफ गर्नुहोस्"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"Verbose भेन्डर लगिङ अन्त्य भएको छ"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"एक दिनका लागि अन गरियो"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"थप एक दिनका लागि अन गर्नुहोस्"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"एक दिनपछि अफ हुन्छ"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"अनिश्चितकालीन रूपमा अन गरियो"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"विन्डो एनिमेसन स्केल"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"संक्रमण एनिमेसन स्केल"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"एनिमेसनको अवधि मापन"</string>

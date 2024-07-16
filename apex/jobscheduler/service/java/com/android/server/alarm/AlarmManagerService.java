@@ -120,6 +120,7 @@ import android.os.SystemProperties;
 import android.os.ThreadLocalWorkSource;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -1794,7 +1795,8 @@ public class AlarmManagerService extends SystemService {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mUseFrozenStateToDropListenerAlarms = Flags.useFrozenStateToDropListenerAlarms();
-        mStartUserBeforeScheduledAlarms = Flags.startUserBeforeScheduledAlarms();
+        mStartUserBeforeScheduledAlarms = Flags.startUserBeforeScheduledAlarms()
+                && UserManager.supportsMultipleUsers();
         if (mStartUserBeforeScheduledAlarms) {
             mUserWakeupStore = new UserWakeupStore();
             mUserWakeupStore.init();
@@ -3015,7 +3017,7 @@ public class AlarmManagerService extends SystemService {
                     mUseFrozenStateToDropListenerAlarms);
             pw.println();
             pw.print(Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS,
-                    mStartUserBeforeScheduledAlarms);
+                    Flags.startUserBeforeScheduledAlarms());
             pw.decreaseIndent();
             pw.println();
             pw.println();

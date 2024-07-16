@@ -126,31 +126,40 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"יש להקיש כדי להציג"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"שגיאה בשמירה של הקלטת המסך"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"שגיאה בהפעלה של הקלטת המסך"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <!-- no translation found for screenrecord_stop_dialog_title (8716193661764511095) -->
     <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <!-- no translation found for screenrecord_stop_dialog_message (6262768207331626817) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"‏ההקלטה של &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; תיפסק"</string>
-    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5995770227684523244) -->
     <skip />
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"הפסקת ההקלטה"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"שיתוף המסך מתבצע"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"להפסיק את שיתוף המסך?"</string>
+    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen_with_host_app (522823522115375414) -->
     <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen (5090115386271179270) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"‏השיתוף של &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; יופסק"</string>
-    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <!-- no translation found for share_to_app_stop_dialog_message_single_app_specific (5923772039347985172) -->
     <skip />
-    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"‏הפעלת Cast של המסך מתבצעת"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <!-- no translation found for share_to_app_stop_dialog_message_single_app_generic (6681016774654578261) -->
     <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"הפסקת השיתוף"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"‏הפעלת Cast של המסך מתבצעת"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"‏להפסיק את הפעלת ה-Cast?"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen_with_device (1474703115926205251) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"‏הפעלת ה-Cast‏ של &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; תיפסק"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen (8419219169553867625) -->
     <skip />
-    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app_with_device (2715934698604085519) -->
     <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (8616103075630934513) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic_with_device (9213582497852420203) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic (4100272100480415076) -->
+    <skip />
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"‏הפסקת ה-Cast"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"סגירה"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"בעיה במכשיר ההקלטה"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"מתבצע עיבוד של בעיית ההקלטה"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"התראה מתמשכת לסשן איסוף הבעיה"</string>
@@ -161,8 +170,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"שגיאה בשמירה של בעיית ההקלטה"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"שגיאה בהפעלה של בעיית ההקלטה"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"צפייה במסך מלא"</string>
-    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2717426731830851921">"כדי לצאת, מחליקים למטה מהחלק העליון של המסך"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"הבנתי"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"חזרה"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"בית"</string>
@@ -295,6 +303,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"שומר מסך"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"אתרנט"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"נא לא להפריע"</string>
+    <!-- no translation found for quick_settings_modes_label (5407025818652750501) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"אין מכשירים מותאמים זמינים"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"אפשר להקיש כדי להתחבר למכשיר או להתנתק ממנו"</string>
@@ -306,8 +316,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"נשמר"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ניתוק"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"הפעלה"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"הפעלה אוטומטית מחר"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"‏תכונות כמו \'שיתוף מהיר\' ו\'איפה המכשיר שלי\' משתמשות ב-Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"‏חיבור ה-Bluetooth יופעל מחר בבוקר"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"שיתוף האודיו"</string>
@@ -495,12 +504,13 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"צריך לבחור ווידג\'ט"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"הסרת הווידג\'ט"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"צריך למקם את הווידג\'ט שנבחר"</string>
-    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <!-- no translation found for communal_widget_picker_title (1953369090475731663) -->
     <skip />
-    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <!-- no translation found for communal_widget_picker_description (490515450110487871) -->
     <skip />
-    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
-    <skip />
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ווידג\'טים במסך הנעילה"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"כדי לפתוח אפליקציה באמצעות ווידג\'ט, עליך לאמת את זהותך. בנוסף, כדאי לזכור שכל אחד יכול לראות את הווידג\'טים גם כשהטאבלט שלך נעול. יכול להיות שחלק מהווידג\'טים לא נועדו למסך הנעילה ושלא בטוח להוסיף אותם לכאן."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"הבנתי"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"החלפת משתמש"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"תפריט במשיכה למטה"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בסשן הזה יימחקו."</string>
@@ -722,7 +732,8 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"ברירת מחדל"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"באופן אוטומטי"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ללא צליל או רטט"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ללא צליל או רטט ומופיעה למטה בקטע התראות השיחה"</string>
+    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
+    <skip />
     <string name="notification_channel_summary_default" msgid="777294388712200605">"ייתכן שיופעל צלצול או רטט בהתאם להגדרות במכשיר"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"ייתכן שיופעל צלצול או רטט בהתאם להגדרות במכשיר. שיחות מהאפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> מופיעות בבועות כברירת מחדל."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"אפשר לתת למערכת לקבוע אם ההתראה הזאת צריכה להיות מלווה בצליל או ברטט"</string>
@@ -779,6 +790,8 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"דפדוף למעלה"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"דפדוף למטה"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"מחיקה"</string>
+    <!-- no translation found for keyboard_key_esc (6230365950511411322) -->
+    <skip />
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"דף הבית"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"סיום"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"הוספה"</string>
@@ -966,8 +979,8 @@
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"מצב \'נא לא להפריע\' הופעל על ידי אפליקציה או על ידי כלל אוטומטי."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"אפליקציות שפועלות ברקע"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"אפשר להקיש לקבלת פרטים על צריכה של נתונים וסוללה"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"לכבות את חבילת הגלישה?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"‏לא תהיה לך גישה לנתונים או לאינטרנט באמצעות <xliff:g id="CARRIER">%s</xliff:g>. אינטרנט יהיה זמין רק באמצעות Wi-Fi."</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"לכבות את השימוש בחבילת הגלישה?"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"‏לא תהיה לך גישה לנתונים או לאינטרנט דרך <xliff:g id="CARRIER">%s</xliff:g>. אפשר יהיה לגשת לאינטרנט רק דרך Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"הספק שלך"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"לחזור אל <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"לא תתבצע החלפה אוטומטית של חבילת הגלישה על סמך זמינות"</string>
@@ -1361,22 +1374,18 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"מסך מפוצל"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"קלט"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"קיצורי דרך של אפליקציות"</string>
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"האפליקציה הנוכחית"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"נגישות"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"מקשי קיצור"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"קיצורי דרך לחיפוש"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"סמל הכיווץ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"סמל ההרחבה"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"או"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"תנועת חזרה"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"תנועת חזרה למסך הבית"</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"מקש הפעולה"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"סיום"</string>
+    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"מעולה!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"חזרה"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"כדי לחזור אחורה, מחליקים שמאלה או ימינה עם שלוש אצבעות בכל מקום על לוח המגע."</string>
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"לוח מגע שמראה שלוש אצבעות זזות ימינה ושמאלה"</string>
@@ -1385,4 +1394,6 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏רמה %1$d מתוך %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"שליטה במכשירים"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"גישה מהירה לממשק השליטה במכשירים כשומר מסך"</string>
+    <!-- no translation found for volume_undo_action (5815519725211877114) -->
+    <skip />
 </resources>

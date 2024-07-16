@@ -84,10 +84,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bubbla"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Hantera"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bubblan ignorerades."</string>
-    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
-    <skip />
-    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
-    <skip />
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"Bubblor"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"Visa bubblor"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"Tryck för att starta om appen och få en bättre vy"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Ändra appens bildformat i inställningarna"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Ändra bildformat"</string>
@@ -118,6 +116,8 @@
     <string name="float_button_text" msgid="9221657008391364581">"Svävande"</string>
     <string name="select_text" msgid="5139083974039906583">"Välj"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Skärmbild"</string>
+    <!-- no translation found for open_in_browser_text (9181692926376072904) -->
+    <skip />
     <string name="close_text" msgid="4986518933445178928">"Stäng"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Stäng menyn"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Öppna menyn"</string>

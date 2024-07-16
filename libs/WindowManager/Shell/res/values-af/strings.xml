@@ -118,6 +118,8 @@
     <string name="float_button_text" msgid="9221657008391364581">"Sweef"</string>
     <string name="select_text" msgid="5139083974039906583">"Kies"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Skermskoot"</string>
+    <!-- no translation found for open_in_browser_text (9181692926376072904) -->
+    <skip />
     <string name="close_text" msgid="4986518933445178928">"Maak toe"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Maak kieslys toe"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Maak kieslys oop"</string>

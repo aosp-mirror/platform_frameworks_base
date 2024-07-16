@@ -1003,7 +1003,6 @@ private fun WidgetContent(
                 .thenIf(viewModel.isEditMode) {
                     Modifier.semantics {
                         contentDescription = accessibilityLabel
-                        onClick(label = clickActionLabel, action = null)
                         val deleteAction =
                             CustomAccessibilityAction(removeWidgetActionLabel) {
                                 contentListState.onRemove(index)
@@ -1020,7 +1019,7 @@ private fun WidgetContent(
                                 true
                             }
 
-                        val actions = mutableListOf(deleteAction, selectWidgetAction)
+                        val actions = mutableListOf(selectWidgetAction, deleteAction)
 
                         if (selectedIndex != null && selectedIndex != index) {
                             actions.add(

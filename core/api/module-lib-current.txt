@@ -271,12 +271,12 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public boolean isUidRestrictedOnMeteredNetworks(int);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void notifyStatsProviderLimitReached();
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void notifyStatsProviderWarningReached();
-    method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void registerNetworkPolicyCallback(@Nullable java.util.concurrent.Executor, @NonNull android.net.NetworkPolicyManager.NetworkPolicyCallback);
-    method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void unregisterNetworkPolicyCallback(@NonNull android.net.NetworkPolicyManager.NetworkPolicyCallback);
+    method @Deprecated @FlaggedApi("android.net.platform.flags.deprecate_network_policy_callback") @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void registerNetworkPolicyCallback(@Nullable java.util.concurrent.Executor, @NonNull android.net.NetworkPolicyManager.NetworkPolicyCallback);
+    method @Deprecated @FlaggedApi("android.net.platform.flags.deprecate_network_policy_callback") @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void unregisterNetworkPolicyCallback(@NonNull android.net.NetworkPolicyManager.NetworkPolicyCallback);
   }
 
-  public static interface NetworkPolicyManager.NetworkPolicyCallback {
-    method public default void onUidBlockedReasonChanged(int, int);
+  @Deprecated @FlaggedApi("android.net.platform.flags.deprecate_network_policy_callback") public static interface NetworkPolicyManager.NetworkPolicyCallback {
+    method @Deprecated public default void onUidBlockedReasonChanged(int, int);
   }
 
   public class NetworkWatchlistManager {

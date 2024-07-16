@@ -25,7 +25,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.GONE
-import androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
@@ -184,7 +183,11 @@ constructor(
                     getDimen(ENHANCED_SMARTSPACE_HEIGHT)
             connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
             constrainWidth(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
-            constrainHeight(R.id.lockscreen_clock_view_large, MATCH_CONSTRAINT)
+
+            // The following two lines make lockscreen_clock_view_large is constrained to available
+            // height when it goes beyond constraints; otherwise, it use WRAP_CONTENT
+            constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
+            constrainMaxHeight(R.id.lockscreen_clock_view_large, 0)
             constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
                 R.id.lockscreen_clock_view,
