@@ -98,6 +98,8 @@ import android.view.WindowManager;
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -210,6 +212,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
+import kotlin.Lazy;
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
 
@@ -342,6 +345,8 @@ public class BubblesTest extends SysuiTestCase {
     private Icon mAppBubbleIcon;
     @Mock
     private Display mDefaultDisplay;
+    @Mock
+    private Lazy<ViewCapture> mLazyViewCapture;
 
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private ShadeInteractor mShadeInteractor;
@@ -407,7 +412,8 @@ public class BubblesTest extends SysuiTestCase {
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
                 mContext,
                 new FakeWindowRootViewComponent.Factory(mNotificationShadeWindowView),
-                mWindowManager,
+                new ViewCaptureAwareWindowManager(mWindowManager, mLazyViewCapture,
+                        /* isViewCaptureEnabled= */ false),
                 mActivityManager,
                 mDozeParameters,
                 mStatusBarStateController,
