@@ -3377,7 +3377,7 @@ class Task extends TaskFragment {
         // Whether the direct top activity is in size compat mode
         appCompatTaskInfo.topActivityInSizeCompat = isTopActivityVisible && top.inSizeCompatMode();
         if (appCompatTaskInfo.topActivityInSizeCompat
-                && mWmService.mLetterboxConfiguration.isTranslucentLetterboxingEnabled()) {
+                && mWmService.mAppCompatConfiguration.isTranslucentLetterboxingEnabled()) {
             // We hide the restart button in case of transparent activities.
             appCompatTaskInfo.topActivityInSizeCompat = top.fillsParent();
         }

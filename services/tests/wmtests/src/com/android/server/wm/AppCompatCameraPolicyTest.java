@@ -112,7 +112,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<DisplayRotationPolicyRobotTest> consumer) {
-        spyOn(mWm.mLetterboxConfiguration);
+        spyOn(mWm.mAppCompatConfiguration);
         final DisplayRotationPolicyRobotTest robot =
                 new DisplayRotationPolicyRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);
