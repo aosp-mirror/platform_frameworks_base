@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial.ui.view
+package com.android.systemui.touchpad.tutorial.ui.composable
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes

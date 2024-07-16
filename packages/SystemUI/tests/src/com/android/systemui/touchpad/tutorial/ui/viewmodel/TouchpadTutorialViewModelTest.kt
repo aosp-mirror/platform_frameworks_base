@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial.ui
+package com.android.systemui.touchpad.tutorial.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest

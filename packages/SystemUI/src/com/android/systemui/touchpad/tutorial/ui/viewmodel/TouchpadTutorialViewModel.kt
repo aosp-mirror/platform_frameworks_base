@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial.ui
+package com.android.systemui.touchpad.tutorial.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.android.systemui.touchpad.tutorial.domain.interactor.TouchpadGesturesInteractor
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import javax.inject.Inject
 
 class TouchpadTutorialViewModel(private val gesturesInteractor: TouchpadGesturesInteractor) :
     ViewModel() {
