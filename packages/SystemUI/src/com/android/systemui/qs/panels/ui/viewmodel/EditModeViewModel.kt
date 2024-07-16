@@ -151,12 +151,27 @@ constructor(
      * present, it will be moved to the new position.
      */
     fun addTile(tileSpec: TileSpec, position: Int = POSITION_AT_END) {
-        // Removing tile if it's already present to insert it at the new index.
-        if (currentTilesInteractor.currentTilesSpecs.contains(tileSpec)) {
-            removeTile(tileSpec)
+        val specs = currentTilesInteractor.currentTilesSpecs.toMutableList()
+        val currentPosition = specs.indexOf(tileSpec)
+
+        if (currentPosition != -1) {
+            // No operation needed if the element is already in the list at the right position
+            if (currentPosition == position) {
+                return
+            }
+            // Removing tile if it's present at a different position to insert it at the new index.
+            specs.removeAt(currentPosition)
         }
 
-        currentTilesInteractor.addTile(tileSpec, position)
+        if (position >= 0 && position < specs.size) {
+            specs.add(position, tileSpec)
+        } else {
+            specs.add(tileSpec)
+        }
+
+        // Setting the new tiles as one operation to avoid UI jank with tiles disappearing and
+        // reappearing
+        currentTilesInteractor.setTiles(specs)
     }
 
     /** Immediately removes [tileSpec] from the current tiles. */

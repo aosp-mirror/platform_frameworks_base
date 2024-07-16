@@ -256,8 +256,7 @@ public final class CameraStateMonitorTests extends WindowTestsBase {
         }
 
         @Override
-        public boolean onCameraClosed(@NonNull ActivityRecord cameraActivity,
-                @NonNull String cameraId) {
+        public boolean onCameraClosed(@NonNull String cameraId) {
             mOnCameraClosedCounter++;
             boolean returnValue = mOnCameraClosedReturnValue;
             // If false, return false only the first time, so it doesn't fall in the infinite retry

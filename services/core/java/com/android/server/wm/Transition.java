@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -1897,7 +1898,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
     }
 
-    private void overrideAnimationOptionsToInfoIfNecessary(@NonNull TransitionInfo info) {
+    @VisibleForTesting
+    void overrideAnimationOptionsToInfoIfNecessary(@NonNull TransitionInfo info) {
         if (mOverrideOptions == null) {
             return;
         }
@@ -1914,10 +1916,26 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     changes.get(i).setAnimationOptions(mOverrideOptions);
                     // TODO(b/295805497): Extract mBackgroundColor from AnimationOptions.
                     changes.get(i).setBackgroundColor(mOverrideOptions.getBackgroundColor());
+                } else if (shouldApplyAnimOptionsToEmbeddedTf(container.asTaskFragment())) {
+                    // We only override AnimationOptions because backgroundColor should be from
+                    // TaskFragmentAnimationParams.
+                    changes.get(i).setAnimationOptions(mOverrideOptions);
                 }
             }
         }
         updateActivityTargetForCrossProfileAnimation(info);
+    }
+
+    private boolean shouldApplyAnimOptionsToEmbeddedTf(@Nullable TaskFragment taskFragment) {
+        if (taskFragment == null || !taskFragment.isEmbedded()) {
+            return false;
+        }
+        if (taskFragment.getAnimationParams().hasOverrideAnimation()) {
+            // Always respect animation overrides from TaskFragmentAnimationParams.
+            return false;
+        }
+        // ActivityEmbedding animation adapter only support custom animation
+        return mOverrideOptions != null && mOverrideOptions.getType() == ANIM_CUSTOM;
     }
 
     /**
@@ -1929,8 +1947,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             return;
         }
         for (int i = 0; i < mTargets.size(); ++i) {
-            final ActivityRecord activity = mTargets.get(i).mContainer
-                    .asActivityRecord();
+            final ActivityRecord activity = mTargets.get(i).mContainer.asActivityRecord();
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (activity == null || change.getMode() != TRANSIT_OPEN) {
                 continue;
@@ -2126,6 +2143,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     }
 
     /**
+
+     * Wallpaper will set itself as target if it wants to keep itself visible without a target.
+     */
+    private static boolean wallpaperIsOwnTarget(WallpaperWindowToken wallpaper) {
+        final WindowState target =
+                wallpaper.getDisplayContent().mWallpaperController.getWallpaperTarget();
+        return target != null && target.isDescendantOf(wallpaper);
+    }
+
+    /**
      * Reset waitingToshow for all wallpapers, and commit the visibility of the visible ones
      */
     private void commitVisibleWallpapers(SurfaceControl.Transaction t) {
@@ -2133,8 +2160,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WallpaperWindowToken wallpaper = mParticipants.valueAt(i).asWallpaperToken();
             if (wallpaper != null) {
-                if (!wallpaper.isVisible() && wallpaper.isVisibleRequested()) {
+                if (!wallpaper.isVisible() && (wallpaper.isVisibleRequested()
+                        || (Flags.ensureWallpaperInTransitions() && showWallpaper))) {
                     wallpaper.commitVisibility(showWallpaper);
+                } else if (Flags.ensureWallpaperInTransitions() && wallpaper.isVisible()
+                        && !showWallpaper && !wallpaper.getDisplayContent().isKeyguardLocked()
+                        && !wallpaperIsOwnTarget(wallpaper)) {
+                    wallpaper.setVisibleRequested(false);
                 }
                 if (showWallpaper && Flags.ensureWallpaperInTransitions()
                         && wallpaper.isVisibleRequested()
@@ -2556,11 +2588,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (wc.asWindowState() != null) continue;
 
             final ChangeInfo changeInfo = changes.get(wc);
-            // Reject no-ops, unless wallpaper
-            if (!changeInfo.hasChanged()
-                    && (!Flags.ensureWallpaperInTransitions() || wc.asWallpaperToken() == null)) {
+            // Reject no-ops
+            if (!changeInfo.hasChanged()) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                        "  Rejecting as no-op: %s", wc);
+                        "  Rejecting as no-op: %s  vis: %b", wc, wc.isVisibleRequested());
                 continue;
             }
             targets.add(changeInfo);

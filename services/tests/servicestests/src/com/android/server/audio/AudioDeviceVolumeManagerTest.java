@@ -78,7 +78,7 @@ public class AudioDeviceVolumeManagerTest {
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSystemServer,
                 mSettingsAdapter, mAudioVolumeGroupHelper, mAudioPolicyMock,
                 mTestLooper.getLooper(), mock(AppOpsManager.class), mock(PermissionEnforcer.class),
-                mock(AudioServerPermissionProvider.class), r -> r.run()) {
+                mock(AudioServerPermissionProvider.class)) {
             @Override
             public int getDeviceForStream(int stream) {
                 return AudioSystem.DEVICE_OUT_SPEAKER;

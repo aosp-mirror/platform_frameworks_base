@@ -30,6 +30,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createToken
@@ -273,6 +274,7 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
                     applicationScope = kosmos.applicationCoroutineScope,
                     backgroundDispatcher = kosmos.testDispatcher,
                     mediaProjectionServiceHelper = fakeMediaProjectionManager.helper,
+                    logger = logcatLogBuffer("TestMediaProjection"),
                 )
 
             val state by collectLastValue(repoWithTimingControl.mediaProjectionState)

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package android.view.accessibility.a11ychecker;
+package com.android.server.accessibility.a11ychecker;
 
-import static android.view.accessibility.a11ychecker.MockAccessibilityNodeInfoBuilder.PACKAGE_NAME;
+import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_APP_PACKAGE_NAME;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityNodePathBuilderTest {
 
-    public static final String RESOURCE_ID_PREFIX = PACKAGE_NAME + ":id/";
+    public static final String RESOURCE_ID_PREFIX = TEST_APP_PACKAGE_NAME + ":id/";
 
     @Test
     public void createNodePath_pathWithResourceNames() {
@@ -55,11 +55,11 @@ public class AccessibilityNodePathBuilderTest {
                         .build();
 
         assertThat(AccessibilityNodePathBuilder.createNodePath(child))
-                .isEqualTo(PACKAGE_NAME + ":root_node/parent_node[1]/child_node[1]");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":root_node/parent_node[1]/child_node[1]");
         assertThat(AccessibilityNodePathBuilder.createNodePath(parent))
-                .isEqualTo(PACKAGE_NAME + ":root_node/parent_node[1]");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":root_node/parent_node[1]");
         assertThat(AccessibilityNodePathBuilder.createNodePath(root))
-                .isEqualTo(PACKAGE_NAME + ":root_node");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":root_node");
     }
 
     @Test
@@ -81,11 +81,11 @@ public class AccessibilityNodePathBuilderTest {
                         .build();
 
         assertThat(AccessibilityNodePathBuilder.createNodePath(child))
-                .isEqualTo(PACKAGE_NAME + ":FrameLayout/RecyclerView[1]/TextView[1]");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":FrameLayout/RecyclerView[1]/TextView[1]");
         assertThat(AccessibilityNodePathBuilder.createNodePath(parent))
-                .isEqualTo(PACKAGE_NAME + ":FrameLayout/RecyclerView[1]");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":FrameLayout/RecyclerView[1]");
         assertThat(AccessibilityNodePathBuilder.createNodePath(root))
-                .isEqualTo(PACKAGE_NAME + ":FrameLayout");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":FrameLayout");
     }
 
     @Test
@@ -105,11 +105,11 @@ public class AccessibilityNodePathBuilderTest {
                         .build();
 
         assertThat(AccessibilityNodePathBuilder.createNodePath(child1))
-                .isEqualTo(PACKAGE_NAME + ":FrameLayout/child1[1]");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":FrameLayout/child1[1]");
         assertThat(AccessibilityNodePathBuilder.createNodePath(child2))
-                .isEqualTo(PACKAGE_NAME + ":FrameLayout/TextView[2]");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":FrameLayout/TextView[2]");
         assertThat(AccessibilityNodePathBuilder.createNodePath(parent))
-                .isEqualTo(PACKAGE_NAME + ":FrameLayout");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":FrameLayout");
     }
 
     @Test
@@ -133,13 +133,13 @@ public class AccessibilityNodePathBuilderTest {
                         .build();
 
         assertThat(AccessibilityNodePathBuilder.createNodePath(child1))
-                .isEqualTo(PACKAGE_NAME + ":parentId/childId[1]");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":parentId/childId[1]");
         assertThat(AccessibilityNodePathBuilder.createNodePath(child2))
-                .isEqualTo(PACKAGE_NAME + ":parentId/child/Id/With/Slash[2]");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":parentId/child/Id/With/Slash[2]");
         assertThat(AccessibilityNodePathBuilder.createNodePath(child3))
-                .isEqualTo(PACKAGE_NAME + ":parentId/childIdWithoutPrefix[3]");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":parentId/childIdWithoutPrefix[3]");
         assertThat(AccessibilityNodePathBuilder.createNodePath(parent))
-                .isEqualTo(PACKAGE_NAME + ":parentId");
+                .isEqualTo(TEST_APP_PACKAGE_NAME + ":parentId");
     }
 
 }
