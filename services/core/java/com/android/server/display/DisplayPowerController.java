@@ -272,7 +272,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private final SettingsObserver mSettingsObserver;
 
     // The doze screen brightness.
-    private final float mScreenBrightnessDozeConfig;
+    private float mScreenBrightnessDozeConfig;
 
     // True if auto-brightness should be used.
     private boolean mUseSoftwareAutoBrightnessConfig;
@@ -550,7 +550,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // DOZE AND DIM SETTINGS
         mScreenBrightnessDozeConfig = BrightnessUtils.clampAbsoluteBrightness(
-                pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE));
+                mDisplayDeviceConfig.getDefaultDozeBrightness());
         loadBrightnessRampRates();
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 R.bool.config_skipScreenOnBrightnessRamp);
@@ -932,6 +932,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             HighBrightnessModeMetadata hbmMetadata) {
         // All properties that depend on the associated DisplayDevice and the DDC must be
         // updated here.
+        mScreenBrightnessDozeConfig = BrightnessUtils.clampAbsoluteBrightness(
+                mDisplayDeviceConfig.getDefaultDozeBrightness());
         loadBrightnessRampRates();
         loadNitsRange(mContext.getResources());
         setUpAutoBrightness(mContext, mHandler);
@@ -1580,7 +1582,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // brightness sources (such as an app override) are not saved to the setting, but should be
         // reflected in HBM calculations.
         mBrightnessRangeController.onBrightnessChanged(brightnessState, unthrottledBrightnessState,
-                clampedState.getBrightnessMaxReason());
+                mBrightnessClamperController.getBrightnessMaxReason());
 
         // Animate the screen brightness when the screen is on or dozing.
         // Skip the animation when the screen is off or suspended.
@@ -1783,7 +1785,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             if (userSetBrightnessChanged
                     || newEvent.getReason().getReason() != BrightnessReason.REASON_TEMPORARY) {
-                logBrightnessEvent(newEvent, unthrottledBrightnessState, clampedState);
+                logBrightnessEvent(newEvent, unthrottledBrightnessState);
             }
             if (mBrightnessEventRingBuffer != null) {
                 mBrightnessEventRingBuffer.append(newEvent);
@@ -1976,9 +1978,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         synchronized (mCachedBrightnessInfo) {
             float stateMax = state != null ? state.getMaxBrightness() : PowerManager.BRIGHTNESS_MAX;
             float stateMin = state != null ? state.getMinBrightness() : PowerManager.BRIGHTNESS_MAX;
-            @BrightnessInfo.BrightnessMaxReason int maxReason =
-                    state != null ? state.getBrightnessMaxReason()
-                            : BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
             final float minBrightness = Math.max(stateMin, Math.min(
                     mBrightnessRangeController.getCurrentBrightnessMin(), stateMax));
             final float maxBrightness = Math.min(
@@ -2005,7 +2004,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                             mBrightnessRangeController.getTransitionPoint());
             changed |=
                     mCachedBrightnessInfo.checkAndSetInt(mCachedBrightnessInfo.brightnessMaxReason,
-                            maxReason);
+                            mBrightnessClamperController.getBrightnessMaxReason());
             return changed;
         }
     }
@@ -2905,8 +2904,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         return FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED__ENTIRE_REASON__REASON_UNKNOWN;
     }
 
-    private void logBrightnessEvent(BrightnessEvent event, float unmodifiedBrightness,
-            DisplayBrightnessState brightnessState) {
+    private void logBrightnessEvent(BrightnessEvent event, float unmodifiedBrightness) {
         int modifier = event.getReason().getModifier();
         int flags = event.getFlags();
         // It's easier to check if the brightness is at maximum level using the brightness
@@ -2943,7 +2941,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     event.getHbmMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT,
                     event.getHbmMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR,
                     (modifier & BrightnessReason.MODIFIER_LOW_POWER) > 0,
-                    brightnessState.getBrightnessMaxReason(),
+                    mBrightnessClamperController.getBrightnessMaxReason(),
                     // TODO: (flc) add brightnessMinReason here too.
                     (modifier & BrightnessReason.MODIFIER_DIMMED) > 0,
                     event.isRbcEnabled(),

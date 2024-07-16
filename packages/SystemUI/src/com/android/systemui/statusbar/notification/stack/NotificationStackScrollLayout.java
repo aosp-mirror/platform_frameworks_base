@@ -3519,7 +3519,7 @@ public class NotificationStackScrollLayout
     // Only when scene container is enabled, mark that we are being dragged so that we start
     // dispatching the rest of the gesture to scene container.
     void startOverscrollAfterExpanding() {
-        SceneContainerFlag.isUnexpectedlyInLegacyMode();
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         getExpandHelper().finishExpanding();
         setIsBeingDragged(true);
     }
@@ -3527,7 +3527,7 @@ public class NotificationStackScrollLayout
     // Only when scene container is enabled, mark that we are being dragged so that we start
     // dispatching the rest of the gesture to scene container.
     void startDraggingOnHun() {
-        SceneContainerFlag.isUnexpectedlyInLegacyMode();
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         setIsBeingDragged(true);
     }
 

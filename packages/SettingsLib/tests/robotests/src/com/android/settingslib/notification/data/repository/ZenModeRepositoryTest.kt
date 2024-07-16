@@ -22,6 +22,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.database.ContentObserver
+import android.os.Parcelable
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.provider.Settings.Global
@@ -126,6 +127,26 @@ class ZenModeRepositoryTest {
         }
     }
 
+    @EnableFlags(android.app.Flags.FLAG_MODES_API, Flags.FLAG_VOLUME_PANEL_BROADCAST_FIX)
+    @Test
+    fun consolidatedPolicyChanges_repositoryEmitsFromExtras() {
+        testScope.runTest {
+            val values = mutableListOf<NotificationManager.Policy?>()
+            `when`(notificationManager.consolidatedNotificationPolicy).thenReturn(testPolicy1)
+            underTest.consolidatedNotificationPolicy
+                .onEach { values.add(it) }
+                .launchIn(backgroundScope)
+            runCurrent()
+
+            triggerIntent(
+                NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED,
+                extras = mapOf(NotificationManager.EXTRA_NOTIFICATION_POLICY to testPolicy2))
+            runCurrent()
+
+            assertThat(values).containsExactly(null, testPolicy1, testPolicy2).inOrder()
+        }
+    }
+
     @Test
     fun zenModeChanges_repositoryEmits() {
         testScope.runTest {
@@ -174,9 +195,13 @@ class ZenModeRepositoryTest {
         }
     }
 
-    private fun triggerIntent(action: String) {
+    private fun triggerIntent(action: String, extras: Map<String, Parcelable>? = null) {
         verify(context).registerReceiver(receiverCaptor.capture(), any(), any(), any())
-        receiverCaptor.value.onReceive(context, Intent(action))
+        val intent = Intent(action)
+        if (extras?.isNotEmpty() == true) {
+            extras.forEach { (key, value) -> intent.putExtra(key, value) }
+        }
+        receiverCaptor.value.onReceive(context, intent)
     }
 
     private fun triggerZenModeSettingUpdate() {

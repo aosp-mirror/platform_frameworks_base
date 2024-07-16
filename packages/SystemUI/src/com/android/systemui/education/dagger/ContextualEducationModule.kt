@@ -17,8 +17,12 @@
 package com.android.systemui.education.dagger
 
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.education.data.repository.ContextualEducationRepository
+import com.android.systemui.education.data.repository.ContextualEducationRepositoryImpl
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import java.time.Clock
 import javax.inject.Qualifier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +30,14 @@ import kotlinx.coroutines.SupervisorJob
 
 @Module
 interface ContextualEducationModule {
+    @Binds
+    fun bindContextualEducationRepository(
+        impl: ContextualEducationRepositoryImpl
+    ): ContextualEducationRepository
+
     @Qualifier annotation class EduDataStoreScope
+
+    @Qualifier annotation class EduClock
 
     companion object {
         @EduDataStoreScope
@@ -35,6 +46,12 @@ interface ContextualEducationModule {
             @Background bgDispatcher: CoroutineDispatcher
         ): CoroutineScope {
             return CoroutineScope(bgDispatcher + SupervisorJob())
+        }
+
+        @EduClock
+        @Provides
+        fun provideEduClock(): Clock {
+            return Clock.systemUTC()
         }
     }
 }

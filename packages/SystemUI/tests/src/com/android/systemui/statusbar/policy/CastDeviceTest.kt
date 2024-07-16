@@ -25,6 +25,7 @@ import android.media.MediaRouter
 import android.media.projection.MediaProjectionInfo
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.CastDevice.Companion.toCastDevice
 import com.google.common.truth.Truth.assertThat
@@ -40,6 +41,7 @@ import org.mockito.kotlin.whenever
 class CastDeviceTest : SysuiTestCase() {
     private val mockAppInfo =
         mock<ApplicationInfo>().apply { whenever(this.loadLabel(any())).thenReturn("") }
+    private val logger = CastControllerLogger(logcatLogBuffer("CastDeviceTest"))
 
     private val packageManager =
         mock<PackageManager>().apply {
@@ -322,7 +324,7 @@ class CastDeviceTest : SysuiTestCase() {
                 whenever(this.packageName).thenReturn("fake.package")
             }
 
-        val device = projection.toCastDevice(context, packageManager)
+        val device = projection.toCastDevice(context, packageManager, logger)
 
         assertThat(device.id).isEqualTo("fake.package")
     }
@@ -334,7 +336,7 @@ class CastDeviceTest : SysuiTestCase() {
                 whenever(this.packageName).thenReturn(HEADLESS_REMOTE_PACKAGE)
             }
 
-        val device = projection.toCastDevice(context, packageManager)
+        val device = projection.toCastDevice(context, packageManager, logger)
 
         assertThat(device.name).isEmpty()
     }
@@ -349,7 +351,7 @@ class CastDeviceTest : SysuiTestCase() {
         whenever(packageManager.getApplicationInfo(eq(NORMAL_PACKAGE), any<Int>()))
             .thenThrow(PackageManager.NameNotFoundException())
 
-        val device = projection.toCastDevice(context, packageManager)
+        val device = projection.toCastDevice(context, packageManager, logger)
 
         assertThat(device.name).isEqualTo(NORMAL_PACKAGE)
     }
@@ -366,7 +368,7 @@ class CastDeviceTest : SysuiTestCase() {
         whenever(packageManager.getApplicationInfo(eq(NORMAL_PACKAGE), any<Int>()))
             .thenReturn(appInfo)
 
-        val device = projection.toCastDevice(context, packageManager)
+        val device = projection.toCastDevice(context, packageManager, logger)
 
         assertThat(device.name).isEqualTo(NORMAL_PACKAGE)
     }
@@ -383,7 +385,7 @@ class CastDeviceTest : SysuiTestCase() {
         whenever(packageManager.getApplicationInfo(eq(NORMAL_PACKAGE), any<Int>()))
             .thenReturn(appInfo)
 
-        val device = projection.toCastDevice(context, packageManager)
+        val device = projection.toCastDevice(context, packageManager, logger)
 
         assertThat(device.name).isEqualTo("Valid App Name")
     }
@@ -392,7 +394,7 @@ class CastDeviceTest : SysuiTestCase() {
     fun projectionToCastDevice_descriptionIsCasting() {
         val projection = mockProjectionInfo()
 
-        val device = projection.toCastDevice(context, packageManager)
+        val device = projection.toCastDevice(context, packageManager, logger)
 
         assertThat(device.description).isEqualTo(context.getString(R.string.quick_settings_casting))
     }
@@ -401,7 +403,7 @@ class CastDeviceTest : SysuiTestCase() {
     fun projectionToCastDevice_stateIsConnected() {
         val projection = mockProjectionInfo()
 
-        val device = projection.toCastDevice(context, packageManager)
+        val device = projection.toCastDevice(context, packageManager, logger)
 
         assertThat(device.state).isEqualTo(CastDevice.CastState.Connected)
     }
@@ -410,7 +412,7 @@ class CastDeviceTest : SysuiTestCase() {
     fun projectionToCastDevice_tagIsProjection() {
         val projection = mockProjectionInfo()
 
-        val device = projection.toCastDevice(context, packageManager)
+        val device = projection.toCastDevice(context, packageManager, logger)
 
         assertThat(device.tag).isEqualTo(projection)
     }
@@ -419,7 +421,7 @@ class CastDeviceTest : SysuiTestCase() {
     fun projectionToCastDevice_originIsMediaProjection() {
         val projection = mockProjectionInfo()
 
-        val device = projection.toCastDevice(context, packageManager)
+        val device = projection.toCastDevice(context, packageManager, logger)
 
         assertThat(device.origin).isEqualTo(CastDevice.CastOrigin.MediaProjection)
     }

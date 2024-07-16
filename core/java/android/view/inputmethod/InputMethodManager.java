@@ -4354,6 +4354,19 @@ public final class InputMethodManager {
     }
 
     /**
+     * Called when the IME switch button was clicked from the system. This will show the input
+     * method picker dialog.
+     *
+     * @param displayId The ID of the display where the input method picker dialog should be shown.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void onImeSwitchButtonClickFromSystem(int displayId) {
+        IInputMethodManagerGlobalInvoker.onImeSwitchButtonClickFromSystem(displayId);
+    }
+
+    /**
      * A test API for CTS to check whether there are any pending IME visibility requests.
      *
      * @return {@code true} iff there are pending IME visibility requests.

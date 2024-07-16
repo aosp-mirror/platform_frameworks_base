@@ -1501,7 +1501,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (isDrawn()) {
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
                         "Orientation not waiting for draw in %s, surfaceController %s", this,
-                        winAnimator.mSurfaceController);
+                        winAnimator.mSurfaceControl);
                 setOrientationChanging(false);
                 mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
                         - mWmService.mDisplayFreezeTime);
@@ -2425,7 +2425,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         ProtoLog.v(WM_DEBUG_FOCUS, "Remove client=%x, surfaceController=%s Callers=%s",
                     System.identityHashCode(mClient.asBinder()),
-                    mWinAnimator.mSurfaceController,
+                    mWinAnimator.mSurfaceControl,
                     Debug.getCallers(5));
 
         final DisplayContent displayContent = getDisplayContent();
@@ -2436,10 +2436,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mOnBackInvokedCallbackInfo = null;
 
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                    "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b "
+                    "Remove %s: mSurfaceControl=%s mAnimatingExit=%b mRemoveOnExit=%b "
                             + "mHasSurface=%b surfaceShowing=%b animating=%b app-animation=%b "
                             + "mDisplayFrozen=%b callers=%s",
-                    this, mWinAnimator.mSurfaceController, mAnimatingExit, mRemoveOnExit,
+                    this, mWinAnimator.mSurfaceControl, mAnimatingExit, mRemoveOnExit,
                     mHasSurface, mWinAnimator.getShown(),
                     isAnimating(TRANSITION | PARENTS),
                     mActivityRecord != null && mActivityRecord.isAnimating(PARENTS | TRANSITION),
@@ -2616,7 +2616,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + isVisibleRequestedOrAdding() + " isVisible: " + (isVisible()
                     && mActivityRecord != null && mActivityRecord.isVisible()));
             if (!isVisibleRequestedOrAdding()) {
-                Slog.i(TAG_WM, "  mSurfaceController=" + mWinAnimator.mSurfaceController
+                Slog.i(TAG_WM, "  mSurfaceControl=" + mWinAnimator.mSurfaceControl
                         + " relayoutCalled=" + mRelayoutCalled
                         + " viewVis=" + mViewVisibility
                         + " policyVis=" + isVisibleByPolicy()
@@ -4457,7 +4457,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             for (int i = mChildren.size() - 1; i >= 0; --i) {
                 final WindowState c = mChildren.get(i);
-                if (c.mWinAnimator.mSurfaceController != null) {
+                if (c.mWinAnimator.mSurfaceControl != null) {
                     c.performShowLocked();
                     // It hadn't been shown, which means layout not performed on it, so now we
                     // want to make sure to do a layout.  If called from within the transaction
@@ -4914,7 +4914,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Slog.v(TAG, "Win " + this + ": isDrawn=" + isDrawn()
                     + ", animating=" + isAnimating(TRANSITION | PARENTS));
             if (!isDrawn()) {
-                Slog.v(TAG, "Not displayed: s=" + mWinAnimator.mSurfaceController
+                Slog.v(TAG, "Not displayed: s=" + mWinAnimator.mSurfaceControl
                         + " pv=" + isVisibleByPolicy()
                         + " mDrawState=" + mWinAnimator.mDrawState
                         + " ph=" + isParentWindowHidden()
@@ -5535,13 +5535,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // been defined and so we can use static layers and leave it that way.
             if (w.mAttrs.type == TYPE_APPLICATION_MEDIA) {
                 if (mWinAnimator.hasSurface()) {
-                    w.assignRelativeLayer(t, mWinAnimator.mSurfaceController.mSurfaceControl, -2);
+                    w.assignRelativeLayer(t, mWinAnimator.mSurfaceControl, -2);
                 } else {
                     w.assignLayer(t, -2);
                 }
             } else if (w.mAttrs.type == TYPE_APPLICATION_MEDIA_OVERLAY) {
                 if (mWinAnimator.hasSurface()) {
-                    w.assignRelativeLayer(t, mWinAnimator.mSurfaceController.mSurfaceControl, -1);
+                    w.assignRelativeLayer(t, mWinAnimator.mSurfaceControl, -1);
                 } else {
                     w.assignLayer(t, -1);
                 }
@@ -5717,7 +5717,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     SurfaceControl getClientViewRootSurface() {
-        return mWinAnimator.getSurfaceControl();
+        return mWinAnimator.mSurfaceControl;
     }
 
     /** Drops a buffer for this window's view-root from a transaction */
@@ -6117,11 +6117,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
             getPendingTransaction().setSecure(mSurfaceControl, isSecure);
         } else {
-            if (mWinAnimator.mSurfaceController == null
-                    || mWinAnimator.mSurfaceController.mSurfaceControl == null) {
+            if (mWinAnimator.mSurfaceControl == null) {
                 return;
             }
-            getPendingTransaction().setSecure(mWinAnimator.mSurfaceController.mSurfaceControl,
+            getPendingTransaction().setSecure(mWinAnimator.mSurfaceControl,
                     isSecure);
         }
         if (mDisplayContent != null) {

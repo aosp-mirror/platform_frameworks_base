@@ -21,6 +21,7 @@ import static android.hardware.display.DisplayManager.EventsMask;
 import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1221,6 +1222,32 @@ public final class DisplayManagerGlobal {
     public void requestDisplayModes(int displayId, @Nullable int[] modeIds) {
         try {
             mDm.requestDisplayModes(mToken, displayId, modeIds);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see DisplayManager#getDozeBrightnessSensorValueToBrightness
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @Nullable
+    public float[] getDozeBrightnessSensorValueToBrightness(int displayId) {
+        try {
+            return mDm.getDozeBrightnessSensorValueToBrightness(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see DisplayManager#getDefaultDozeBrightness
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @FloatRange(from = 0f, to = 1f)
+    public float getDefaultDozeBrightness(int displayId) {
+        try {
+            return mDm.getDefaultDozeBrightness(displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

@@ -105,7 +105,13 @@ constructor(
             .mapLatest(::determineSceneAfterTransition)
             .filterNotNull()
             .onEach { (nextScene, nextTransition) ->
-                communalSceneInteractor.changeScene(nextScene, nextTransition)
+                if (!communalSceneInteractor.isLaunchingWidget.value) {
+                    // When launching a widget, we don't want to animate the scene change or the
+                    // Communal Hub will reveal the wallpaper even though it shouldn't. Instead we
+                    // snap to the new scene as part of the launch animation, once the activity
+                    // launch is done, so we don't change scene here.
+                    communalSceneInteractor.changeScene(nextScene, nextTransition)
+                }
             }
             .launchIn(applicationScope)
 

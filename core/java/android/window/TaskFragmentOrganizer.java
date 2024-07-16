@@ -21,6 +21,7 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.window.ActivityWindowInfo.getActivityWindowInfo;
 
 import android.annotation.CallSuper;
 import android.annotation.FlaggedApi;
@@ -29,6 +30,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -38,6 +40,7 @@ import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -324,16 +327,15 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     }
 
     /**
-     * Checks if an activity organized by a {@link android.window.TaskFragmentOrganizer} and
+     * Checks if an activity is organized by a {@link android.window.TaskFragmentOrganizer} and
      * only occupies a portion of Task bounds.
+     *
+     * @see ActivityWindowInfo for additional window info.
      * @hide
      */
-    // TODO(b/287582673): cleanup
-    public boolean isActivityEmbedded(@NonNull IBinder activityToken) {
-        try {
-            return getController().isActivityEmbedded(activityToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+    public static boolean isActivityEmbedded(@NonNull Activity activity) {
+        Objects.requireNonNull(activity);
+        final ActivityWindowInfo activityWindowInfo = getActivityWindowInfo(activity);
+        return activityWindowInfo != null && activityWindowInfo.isEmbedded();
     }
 }

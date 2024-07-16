@@ -57,5 +57,6 @@ val Kosmos.deviceEntryFaceAuthInteractor by
             powerInteractor = powerInteractor,
             biometricSettingsRepository = biometricSettingsRepository,
             trustManager = trustManager,
+            deviceEntryFaceAuthStatusInteractor = deviceEntryFaceAuthStatusInteractor,
         )
     }

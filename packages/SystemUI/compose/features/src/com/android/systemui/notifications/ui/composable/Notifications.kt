@@ -198,6 +198,7 @@ fun SceneScope.SnoozeableHeadsUpNotificationSpace(
 
     LaunchedEffect(scrollableState.isScrollInProgress) {
         if (!scrollableState.isScrollInProgress && scrollOffset <= minScrollOffset) {
+            viewModel.setHeadsUpAnimatingAway(false)
             viewModel.snoozeHun()
         }
     }

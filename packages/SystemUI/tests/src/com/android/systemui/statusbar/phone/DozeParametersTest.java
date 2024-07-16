@@ -35,8 +35,8 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.Settings;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
@@ -53,6 +53,7 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.settings.FakeSettings;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -114,6 +115,7 @@ public class DozeParametersTest extends SysuiTestCase {
                 .thenReturn(mFoldAodAnimationController);
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
 
+        SecureSettings secureSettings = new FakeSettings();
         mDozeParameters = new DozeParameters(
             mContext,
             mHandler,
@@ -132,7 +134,7 @@ public class DozeParametersTest extends SysuiTestCase {
             mStatusBarStateController,
             mUserTracker,
             mDozeInteractor,
-            new FakeSettings()
+            secureSettings
         );
 
         verify(mBatteryController).addCallback(mBatteryStateChangeCallback.capture());

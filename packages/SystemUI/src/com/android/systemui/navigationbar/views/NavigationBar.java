@@ -40,6 +40,8 @@ import static com.android.systemui.navigationbar.NavBarHelper.transitionMode;
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import static com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen;
 import static com.android.systemui.shared.rotation.RotationButtonController.DEBUG_ROTATION;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_OPAQUE;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY;
@@ -48,8 +50,6 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_I
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
-import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_OPAQUE;
-import static com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG_WINDOW_STATE;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.dumpBarTransitions;
 import static com.android.systemui.util.Utils.isGesturalModeOnDefaultDisplay;
@@ -97,6 +97,7 @@ import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.Nullable;
@@ -117,17 +118,17 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.views.buttons.NavBarButtonClickLogger;
 import com.android.systemui.navigationbar.NavBarHelper;
 import com.android.systemui.navigationbar.NavigationBarComponent.NavigationBarScope;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.NavigationModeController.ModeChangedListener;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
+import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
 import com.android.systemui.navigationbar.views.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.views.buttons.DeadZone;
 import com.android.systemui.navigationbar.views.buttons.KeyButtonView;
+import com.android.systemui.navigationbar.views.buttons.NavBarButtonClickLogger;
 import com.android.systemui.navigationbar.views.buttons.NavbarOrientationTrackingLogger;
-import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
-import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
@@ -1348,6 +1349,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
         ButtonDispatcher imeSwitcherButton = mView.getImeSwitchButton();
         imeSwitcherButton.setOnClickListener(this::onImeSwitcherClick);
+        if (Flags.imeSwitcherRevamp()) {
+            imeSwitcherButton.setOnLongClickListener(this::onImeSwitcherLongClick);
+        }
 
         updateScreenPinningGestures();
     }
@@ -1501,12 +1505,29 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mCommandQueue.toggleRecentApps();
     }
 
-    private void onImeSwitcherClick(View v) {
+    @VisibleForTesting
+    void onImeSwitcherClick(View v) {
+        mNavBarButtonClickLogger.logImeSwitcherClick();
+        if (Flags.imeSwitcherRevamp()) {
+            mInputMethodManager.onImeSwitchButtonClickFromSystem(mDisplayId);
+        } else {
+            mInputMethodManager.showInputMethodPickerFromSystem(
+                    true /* showAuxiliarySubtypes */, mDisplayId);
+        }
+        mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);
+    }
+
+    @VisibleForTesting
+    boolean onImeSwitcherLongClick(View v) {
+        if (!Flags.imeSwitcherRevamp()) {
+            return false;
+        }
         mNavBarButtonClickLogger.logImeSwitcherClick();
         mInputMethodManager.showInputMethodPickerFromSystem(
                 true /* showAuxiliarySubtypes */, mDisplayId);
-        mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);
-    };
+        mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_LONGPRESS);
+        return true;
+    }
 
     private boolean onLongPressBackHome(View v) {
         return onLongPressNavigationButtons(v, R.id.back, R.id.home);
