@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.res.Configuration.ASSETS_SEQ_UNDEFINED;
 import static android.os.Build.VERSION_CODES.Q;
@@ -73,6 +74,7 @@ import android.os.LocaleList;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -111,6 +113,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowProcessController" : TAG_ATM;
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
+
+    /**
+     * The max number of processes which can be top scheduling group if there are non-top visible
+     * freeform activities run in the process.
+     */
+    private static final int MAX_NUM_PERCEPTIBLE_FREEFORM =
+            SystemProperties.getInt("persist.wm.max_num_perceptible_freeform", 1);
 
     private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 200;
     private static final long RAPID_ACTIVITY_LAUNCH_MS = 500;
@@ -318,6 +327,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     public static final int ACTIVITY_STATE_FLAG_HAS_RESUMED = 1 << 21;
     public static final int ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK = 1 << 22;
     public static final int ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN = 1 << 23;
+    public static final int ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM = 1 << 24;
     public static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
 
     /**
@@ -1229,6 +1239,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         ActivityRecord.State bestInvisibleState = DESTROYED;
         boolean allStoppingFinishing = true;
         boolean visible = false;
+        boolean hasResumedFreeform = false;
         int minTaskLayer = Integer.MAX_VALUE;
         int stateFlags = 0;
         final boolean wasResumed = hasResumedActivity();
@@ -1256,6 +1267,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                                     .processPriorityPolicyForMultiWindowMode()
                             && task.getAdjacentTask() != null) {
                         stateFlags |= ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN;
+                    } else if (windowingMode == WINDOWING_MODE_FREEFORM) {
+                        hasResumedFreeform = true;
                     }
                 }
                 if (minTaskLayer > 0) {
@@ -1289,6 +1302,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
 
+        if (hasResumedFreeform
+                && com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()
+                // Exclude task layer 1 because it is already the top most.
+                && minTaskLayer > 1 && minTaskLayer <= 1 + MAX_NUM_PERCEPTIBLE_FREEFORM) {
+            stateFlags |= ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM;
+        }
         stateFlags |= minTaskLayer & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
         if (visible) {
             stateFlags |= ACTIVITY_STATE_FLAG_IS_VISIBLE;
@@ -2120,6 +2139,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                     pw.print("R|");
                     if ((stateFlags & ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN) != 0) {
                         pw.print("RS|");
+                    }
+                    if ((stateFlags & ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0) {
+                        pw.print("PF|");
                     }
                 }
             } else if ((stateFlags & ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED) != 0) {
