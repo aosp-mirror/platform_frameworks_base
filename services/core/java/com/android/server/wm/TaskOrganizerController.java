@@ -57,7 +57,7 @@ import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;

@@ -16,15 +16,27 @@
 
 package com.android.asllib.marshallable;
 
+import static org.junit.Assert.assertThrows;
+
 import com.android.asllib.testutils.TestUtils;
+import com.android.asllib.util.MalformedXmlException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.nio.file.Paths;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 @RunWith(JUnit4.class)
 public class DataLabelsTest {
+    private static final long DEFAULT_VERSION = 2L;
+
     private static final String DATA_LABELS_HR_PATH = "com/android/asllib/datalabels/hr";
     private static final String DATA_LABELS_OD_PATH = "com/android/asllib/datalabels/od";
 
@@ -34,6 +46,10 @@ public class DataLabelsTest {
             "data-labels-accessed-invalid-bool.xml";
     private static final String COLLECTED_VALID_BOOL_FILE_NAME =
             "data-labels-collected-valid-bool.xml";
+    private static final String COLLECTED_EPHEMERAL_FILE_NAME =
+            "data-labels-collected-ephemeral.xml";
+    private static final String COLLECTED_EPHEMERAL_COLLISION_FILE_NAME =
+            "data-labels-collected-ephemeral-collision.xml";
     private static final String COLLECTED_INVALID_BOOL_FILE_NAME =
             "data-labels-collected-invalid-bool.xml";
     private static final String SHARED_VALID_BOOL_FILE_NAME = "data-labels-shared-valid-bool.xml";
@@ -69,27 +85,27 @@ public class DataLabelsTest {
         System.out.println("set up.");
     }
 
-    /** Test for data labels accessed valid bool. */
-    @Test
-    public void testDataLabelsAccessedValidBool() throws Exception {
-        System.out.println("starting testDataLabelsAccessedValidBool.");
-        testHrToOdDataLabels(ACCESSED_VALID_BOOL_FILE_NAME);
-        testOdToHrDataLabels(ACCESSED_VALID_BOOL_FILE_NAME);
-    }
-
-    /** Test for data labels accessed invalid bool. */
-    @Test
-    public void testDataLabelsAccessedInvalidBool() throws Exception {
-        System.out.println("starting testDataLabelsAccessedInvalidBool.");
-        hrToOdExpectException(ACCESSED_INVALID_BOOL_FILE_NAME);
-    }
-
     /** Test for data labels collected valid bool. */
     @Test
     public void testDataLabelsCollectedValidBool() throws Exception {
         System.out.println("starting testDataLabelsCollectedValidBool.");
         testHrToOdDataLabels(COLLECTED_VALID_BOOL_FILE_NAME);
         testOdToHrDataLabels(COLLECTED_VALID_BOOL_FILE_NAME);
+    }
+
+    /** Test for data labels collected ephemeral. */
+    @Test
+    public void testDataLabelsCollectedEphemeral() throws Exception {
+        System.out.println("starting testDataLabelsCollectedEphemeral.");
+        testHrToOdDataLabels(COLLECTED_EPHEMERAL_FILE_NAME);
+        testOdToHrDataLabels(COLLECTED_EPHEMERAL_FILE_NAME);
+    }
+
+    /** Test for data labels ephemeral collision. */
+    @Test
+    public void testDataLabelsCollectedEphemeralCollision() throws Exception {
+        System.out.println("starting testDataLabelsCollectedEphemeralCollision.");
+        hrToOdExpectException(COLLECTED_EPHEMERAL_COLLISION_FILE_NAME);
     }
 
     /** Test for data labels collected invalid bool. */
@@ -293,29 +309,43 @@ public class DataLabelsTest {
         odToHrExpectException(PERSONAL_EMPTY_PURPOSE_FILE_NAME);
     }
 
-    private void hrToOdExpectException(String fileName) {
-        TestUtils.hrToOdExpectException(new DataLabelsFactory(), DATA_LABELS_HR_PATH, fileName);
+    private void hrToOdExpectException(String fileName)
+            throws ParserConfigurationException, IOException, SAXException {
+        var ele = TestUtils.getElementFromResource(Paths.get(DATA_LABELS_HR_PATH, fileName));
+        assertThrows(
+                MalformedXmlException.class,
+                () -> new DataLabelsFactory().createFromHrElement(ele));
     }
 
-    private void odToHrExpectException(String fileName) {
-        TestUtils.odToHrExpectException(new DataLabelsFactory(), DATA_LABELS_OD_PATH, fileName);
+    private void odToHrExpectException(String fileName)
+            throws ParserConfigurationException, IOException, SAXException {
+        var ele = TestUtils.getElementFromResource(Paths.get(DATA_LABELS_OD_PATH, fileName));
+        assertThrows(
+                MalformedXmlException.class,
+                () -> new DataLabelsFactory().createFromOdElement(ele));
     }
 
     private void testHrToOdDataLabels(String fileName) throws Exception {
-        TestUtils.testHrToOd(
-                TestUtils.document(),
-                new DataLabelsFactory(),
-                DATA_LABELS_HR_PATH,
-                DATA_LABELS_OD_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        DataLabels dataLabels =
+                new DataLabelsFactory()
+                        .createFromHrElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(DATA_LABELS_HR_PATH, fileName)));
+        Element resultingEle = dataLabels.toOdDomElement(doc);
+        doc.appendChild(resultingEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(DATA_LABELS_OD_PATH, fileName));
     }
 
     private void testOdToHrDataLabels(String fileName) throws Exception {
-        TestUtils.testOdToHr(
-                TestUtils.document(),
-                new DataLabelsFactory(),
-                DATA_LABELS_OD_PATH,
-                DATA_LABELS_HR_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        DataLabels dataLabels =
+                new DataLabelsFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(DATA_LABELS_OD_PATH, fileName)));
+        Element resultingEle = dataLabels.toHrDomElement(doc);
+        doc.appendChild(resultingEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(DATA_LABELS_HR_PATH, fileName));
     }
 }

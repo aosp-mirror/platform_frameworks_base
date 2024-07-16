@@ -31,8 +31,8 @@ import android.app.IActivityManager;
 import android.app.UserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
-import android.content.ContentResolver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -233,6 +233,7 @@ public class BiometricService extends SystemService {
         private static final boolean DEFAULT_KEYGUARD_ENABLED = true;
         private static final boolean DEFAULT_APP_ENABLED = true;
         private static final boolean DEFAULT_ALWAYS_REQUIRE_CONFIRMATION = false;
+        private static final boolean DEFAULT_MANDATORY_BIOMETRICS_STATUS = false;
 
         // Some devices that shipped before S already have face-specific settings. Instead of
         // migrating, which is complicated, let's just keep using the existing settings.
@@ -253,6 +254,8 @@ public class BiometricService extends SystemService {
                 Settings.Secure.getUriFor(Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED);
         private final Uri BIOMETRIC_APP_ENABLED =
                 Settings.Secure.getUriFor(Settings.Secure.BIOMETRIC_APP_ENABLED);
+        private final Uri MANDATORY_BIOMETRICS_ENABLED =
+                Settings.Secure.getUriFor(Settings.Secure.MANDATORY_BIOMETRICS);
 
         private final ContentResolver mContentResolver;
         private final List<BiometricService.EnabledOnKeyguardCallback> mCallbacks;
@@ -260,6 +263,7 @@ public class BiometricService extends SystemService {
         private final Map<Integer, Boolean> mBiometricEnabledOnKeyguard = new HashMap<>();
         private final Map<Integer, Boolean> mBiometricEnabledForApps = new HashMap<>();
         private final Map<Integer, Boolean> mFaceAlwaysRequireConfirmation = new HashMap<>();
+        private final Map<Integer, Boolean> mMandatoryBiometricsEnabled = new HashMap<>();
 
         /**
          * Creates a content observer.
@@ -281,6 +285,9 @@ public class BiometricService extends SystemService {
             mUseLegacyFaceOnlySettings =
                     Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.Q
                     && hasFace && !hasFingerprint;
+            mMandatoryBiometricsEnabled.put(context.getUserId(), Settings.Secure.getIntForUser(
+                    mContentResolver, Settings.Secure.MANDATORY_BIOMETRICS,
+                    DEFAULT_MANDATORY_BIOMETRICS_STATUS ? 1 : 0, context.getUserId()) != 0);
 
             updateContentObserver();
         }
@@ -308,6 +315,10 @@ public class BiometricService extends SystemService {
                         UserHandle.USER_ALL);
             }
             mContentResolver.registerContentObserver(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
+                    false /* notifyForDescendants */,
+                    this /* observer */,
+                    UserHandle.USER_ALL);
+            mContentResolver.registerContentObserver(MANDATORY_BIOMETRICS_ENABLED,
                     false /* notifyForDescendants */,
                     this /* observer */,
                     UserHandle.USER_ALL);
@@ -353,6 +364,12 @@ public class BiometricService extends SystemService {
                         Settings.Secure.BIOMETRIC_APP_ENABLED,
                         DEFAULT_APP_ENABLED ? 1 : 0 /* default */,
                         userId) != 0);
+            } else if (MANDATORY_BIOMETRICS_ENABLED.equals(uri)) {
+                mMandatoryBiometricsEnabled.put(userId, Settings.Secure.getIntForUser(
+                        mContentResolver,
+                        Settings.Secure.MANDATORY_BIOMETRICS,
+                        DEFAULT_MANDATORY_BIOMETRICS_STATUS ? 1 : 0 /* default */,
+                        userId) != 0);
             }
         }
 
@@ -392,6 +409,11 @@ public class BiometricService extends SystemService {
                 default:
                     return false;
             }
+        }
+
+        public boolean getMandatoryBiometricsEnabledForUser(int userId) {
+            return mMandatoryBiometricsEnabled.getOrDefault(userId,
+                    DEFAULT_MANDATORY_BIOMETRICS_STATUS);
         }
 
         void notifyEnabledOnKeyguardCallbacks(int userId) {

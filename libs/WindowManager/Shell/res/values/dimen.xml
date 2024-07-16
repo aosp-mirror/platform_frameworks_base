@@ -459,6 +459,12 @@
          start of this area. -->
     <dimen name="desktop_mode_customizable_caption_margin_end">152dp</dimen>
 
+    <!-- The default minimum allowed window width when resizing a window in desktop mode. -->
+    <dimen name="desktop_mode_minimum_window_width">386dp</dimen>
+
+    <!-- The default minimum allowed window height when resizing a window in desktop mode. -->
+    <dimen name="desktop_mode_minimum_window_height">352dp</dimen>
+
     <!-- The width of the maximize menu in desktop mode. -->
     <dimen name="desktop_mode_maximize_menu_width">228dp</dimen>
 
@@ -476,6 +482,12 @@
 
     <!-- The radius of the layout outline around the maximize menu buttons. -->
     <dimen name="desktop_mode_maximize_menu_buttons_outline_radius">6dp</dimen>
+    <!-- The stroke width of the outline around the maximize menu buttons. -->
+    <dimen name="desktop_mode_maximize_menu_buttons_outline_stroke">1dp</dimen>
+    <!-- The radius of the inner fill of the maximize menu buttons. -->
+    <dimen name="desktop_mode_maximize_menu_buttons_fill_radius">4dp</dimen>
+    <!-- The padding between the outline and fill of the maximize menu buttons. -->
+    <dimen name="desktop_mode_maximize_menu_buttons_fill_padding">4dp</dimen>
 
     <!-- The corner radius of the maximize menu. -->
     <dimen name="desktop_mode_maximize_menu_corner_radius">8dp</dimen>
@@ -483,8 +495,15 @@
     <!-- The radius of the Maximize menu shadow. -->
     <dimen name="desktop_mode_maximize_menu_shadow_radius">8dp</dimen>
 
-    <!-- The width of the handle menu in desktop mode. -->
+    <!-- The width of the handle menu in desktop mode.  -->
     <dimen name="desktop_mode_handle_menu_width">216dp</dimen>
+
+    <!-- The maximum height of the handle menu in desktop mode. Four pills (52dp each) plus 2dp
+        spacing between them plus 4dp top padding. -->
+    <dimen name="desktop_mode_handle_menu_height">218dp</dimen>
+
+    <!-- The elevation set on the handle menu pills. -->
+    <dimen name="desktop_mode_handle_menu_pill_elevation">1dp</dimen>
 
     <!-- The height of the handle menu's "App Info" pill in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_app_info_pill_height">52dp</dimen>
@@ -495,17 +514,17 @@
     <!-- The height of the handle menu's "More Actions" pill in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_more_actions_pill_height">52dp</dimen>
 
-    <!-- The height of the handle menu in desktop mode. -->
-    <dimen name="desktop_mode_handle_menu_height">328dp</dimen>
+    <!-- The height of the handle menu's "Open in browser" pill in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_open_in_browser_pill_height">52dp</dimen>
+
+    <!-- The margin between pills of the handle menu in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_pill_spacing_margin">2dp</dimen>
 
     <!-- The top margin of the handle menu in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_margin_top">4dp</dimen>
 
     <!-- The start margin of the handle menu in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_margin_start">6dp</dimen>
-
-    <!-- The margin between pills of the handle menu in desktop mode. -->
-    <dimen name="desktop_mode_handle_menu_pill_spacing_margin">2dp</dimen>
 
     <!-- The radius of the caption menu corners. -->
     <dimen name="desktop_mode_handle_menu_corner_radius">26dp</dimen>

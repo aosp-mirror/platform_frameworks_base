@@ -30,6 +30,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamLogger;
 import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
@@ -82,9 +83,11 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
     private final Executor mMainExecutor;
     private final List<DreamOverlayStatusBarItemsProvider.StatusBarItem> mExtraStatusBarItems =
             new ArrayList<>();
+    private final CommunalSceneInteractor mCommunalSceneInteractor;
     private final DreamLogger mLogger;
 
     private boolean mIsAttached;
+    private boolean mCommunalVisible;
 
     // Whether dream entry animations are finished.
     private boolean mEntryAnimationsFinished = false;
@@ -140,6 +143,7 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
             DreamOverlayStateController dreamOverlayStateController,
             UserTracker userTracker,
             WifiInteractor wifiInteractor,
+            CommunalSceneInteractor communalSceneInteractor,
             @DreamLog LogBuffer logBuffer) {
         super(view);
         mResources = resources;
@@ -155,6 +159,7 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
         mDreamOverlayStateController = dreamOverlayStateController;
         mUserTracker = userTracker;
         mWifiInteractor = wifiInteractor;
+        mCommunalSceneInteractor = communalSceneInteractor;
         mLogger = new DreamLogger(logBuffer, TAG);
 
         // Register to receive show/hide updates for the system status bar. Our custom status bar
@@ -171,6 +176,12 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
                 mWifiInteractor.getWifiNetwork(),
                 network -> updateWifiUnavailableStatusIcon(
                         network instanceof WifiNetworkModel.Active));
+
+        collectFlow(
+                mView,
+                mCommunalSceneInteractor.isCommunalVisible(),
+                this::onCommunalVisibleChanged
+        );
 
         mNextAlarmController.addCallback(mNextAlarmCallback);
         updateAlarmStatusIcon();
@@ -230,9 +241,15 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
         mView.setTranslationY(translationY);
     }
 
+    private void onCommunalVisibleChanged(boolean visible) {
+        mCommunalVisible = visible;
+        updateVisibility();
+    }
+
     private boolean shouldShowStatusBar() {
-        return !mDreamOverlayStateController.isLowLightActive()
-                && !mStatusBarWindowStateController.windowIsShowing();
+        return (!mDreamOverlayStateController.isLowLightActive()
+                && !mStatusBarWindowStateController.windowIsShowing())
+                || mCommunalVisible;
     }
 
     @VisibleForTesting

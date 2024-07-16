@@ -29,6 +29,7 @@ import static com.android.internal.util.FrameworkStatsLog.UI_INTERACTION_FRAME_I
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -83,6 +84,7 @@ public class FrameTrackerTest {
     private ChoreographerWrapper mChoreographer;
     private StatsLogWrapper mStatsLog;
     private ArgumentCaptor<OnJankDataListener> mListenerCapture;
+    private SurfaceControl.OnJankDataListenerRegistration mJankStatsRegistration;
     private SurfaceControl mSurfaceControl;
     private FrameTracker.FrameTrackerListener mTrackerListener;
     private ArgumentCaptor<Runnable> mRunnableArgumentCaptor;
@@ -107,10 +109,11 @@ public class FrameTrackerTest {
         mSurfaceControlWrapper = mock(SurfaceControlWrapper.class);
 
         mListenerCapture = ArgumentCaptor.forClass(OnJankDataListener.class);
-        doNothing().when(mSurfaceControlWrapper).addJankStatsListener(
+        mJankStatsRegistration = mock(SurfaceControl.OnJankDataListenerRegistration.class);
+        doReturn(mJankStatsRegistration).when(mSurfaceControlWrapper).addJankStatsListener(
                 mListenerCapture.capture(), any());
-        doNothing().when(mSurfaceControlWrapper).removeJankStatsListener(
-                mListenerCapture.capture());
+        doNothing().when(mJankStatsRegistration).flush();
+        doNothing().when(mJankStatsRegistration).removeAfter(anyLong());
 
         mChoreographer = mock(ChoreographerWrapper.class);
         mStatsLog = mock(StatsLogWrapper.class);
@@ -483,7 +486,7 @@ public class FrameTrackerTest {
         // an extra frame to trigger finish
         sendFrame(tracker, JANK_NONE, 103L);
 
-        verify(mSurfaceControlWrapper).removeJankStatsListener(any());
+        verify(mJankStatsRegistration).removeAfter(anyLong());
         verify(mTrackerListener).triggerPerfetto(any());
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
@@ -520,7 +523,7 @@ public class FrameTrackerTest {
         // an extra frame to trigger finish
         sendFrame(tracker, JANK_NONE, 103L);
 
-        verify(mSurfaceControlWrapper).removeJankStatsListener(any());
+        verify(mJankStatsRegistration).removeAfter(anyLong());
         verify(mTrackerListener, never()).triggerPerfetto(any());
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
@@ -557,7 +560,7 @@ public class FrameTrackerTest {
         // janky frame, should be ignored, trigger finish
         sendFrame(tracker, JANK_APP_DEADLINE_MISSED, 103L);
 
-        verify(mSurfaceControlWrapper).removeJankStatsListener(any());
+        verify(mJankStatsRegistration).removeAfter(anyLong());
         verify(mTrackerListener, never()).triggerPerfetto(any());
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
@@ -589,7 +592,7 @@ public class FrameTrackerTest {
         tracker.end(FrameTracker.REASON_END_NORMAL);
         sendFrame(tracker, JANK_SURFACEFLINGER_DEADLINE_MISSED, 106L);
         sendFrame(tracker, JANK_SURFACEFLINGER_DEADLINE_MISSED, 107L);
-        verify(mSurfaceControlWrapper).removeJankStatsListener(any());
+        verify(mJankStatsRegistration).removeAfter(anyLong());
         verify(mTrackerListener).triggerPerfetto(any());
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
                 eq(42), /* displayId */

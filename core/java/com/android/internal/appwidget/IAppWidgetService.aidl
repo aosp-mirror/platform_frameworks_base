@@ -72,6 +72,7 @@ interface IAppWidgetService {
     boolean bindRemoteViewsService(String callingPackage, int appWidgetId, in Intent intent,
             IApplicationThread caller, IBinder token, IServiceConnection connection, long flags);
     void notifyProviderInheritance(in ComponentName[] componentNames);
+    int getMaxBitmapMemory();
 
     @UnsupportedAppUsage
     int[] getAppWidgetIds(in ComponentName providerComponent);

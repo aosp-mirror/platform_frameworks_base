@@ -60,7 +60,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.pipeline.shared.data.model.DefaultConnectionModel;
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository;
 import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.CastController.CastDevice;
+import com.android.systemui.statusbar.policy.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.DialogKt;
@@ -193,14 +193,13 @@ public class CastTile extends QSTileImpl<BooleanState> {
     // case where multiple devices were active :-/.
     private boolean willPopDialog() {
         List<CastDevice> activeDevices = getActiveDevices();
-        return activeDevices.isEmpty() || (activeDevices.get(0).tag instanceof RouteInfo);
+        return activeDevices.isEmpty() || (activeDevices.get(0).getTag() instanceof RouteInfo);
     }
 
     private List<CastDevice> getActiveDevices() {
         ArrayList<CastDevice> activeDevices = new ArrayList<>();
         for (CastDevice device : mController.getCastDevices()) {
-            if (device.state == CastDevice.STATE_CONNECTED
-                    || device.state == CastDevice.STATE_CONNECTING) {
+            if (device.isCasting()) {
                 activeDevices.add(device);
             }
         }
@@ -276,7 +275,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
         // We always choose the first device that's in the CONNECTED state in the case where
         // multiple devices are CONNECTED at the same time.
         for (CastDevice device : devices) {
-            if (device.state == CastDevice.STATE_CONNECTED) {
+            if (device.getState() == CastDevice.CastState.Connected) {
                 state.value = true;
                 state.secondaryLabel = getDeviceName(device);
                 state.stateDescription = state.stateDescription + ","
@@ -284,7 +283,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                         R.string.accessibility_cast_name, state.label);
                 connecting = false;
                 break;
-            } else if (device.state == CastDevice.STATE_CONNECTING) {
+            } else if (device.getState() == CastDevice.CastState.Connecting) {
                 connecting = true;
             }
         }
@@ -315,7 +314,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     }
 
     private String getDeviceName(CastDevice device) {
-        return device.name != null ? device.name
+        return device.getName() != null ? device.getName()
                 : mContext.getString(R.string.quick_settings_cast_device_default_name);
     }
 

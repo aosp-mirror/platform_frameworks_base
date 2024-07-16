@@ -254,7 +254,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
@@ -474,12 +474,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final DisplayPolicy mDisplayPolicy;
     private final DisplayRotation mDisplayRotation;
 
-    @Nullable
-    final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
-    @Nullable
-    final CameraStateMonitor mCameraStateMonitor;
-    @Nullable
-    final ActivityRefresher mActivityRefresher;
+    @NonNull
+    AppCompatCameraPolicy mAppCompatCameraPolicy;
 
     DisplayFrames mDisplayFrames;
     final DisplayUpdater mDisplayUpdater;
@@ -682,7 +678,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * the case of the IME moving to a SurfaceControlViewHost backed EmbeddedWindow
      */
     private InputTarget mLastImeInputTarget;
-
 
     /**
      * Tracks the windowToken of the input method input target and the corresponding
@@ -1189,6 +1184,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mDeviceStateController = deviceStateController;
 
+        mAppCompatCameraPolicy = new AppCompatCameraPolicy(mWmService, this);
         mDisplayPolicy = new DisplayPolicy(mWmService, this);
         mDisplayRotation = new DisplayRotation(mWmService, this, mDisplayInfo.address,
                 mDeviceStateController, root.getDisplayRotationCoordinator());
@@ -1229,25 +1225,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         onDisplayChanged(this);
         updateDisplayAreaOrganizers();
 
-        // Not checking DeviceConfig value here to allow enabling via DeviceConfig
-        // without the need to restart the device.
-        final boolean shouldCreateDisplayRotationCompatPolicy =
-                mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
-        if (shouldCreateDisplayRotationCompatPolicy) {
-            mCameraStateMonitor = new CameraStateMonitor(this, mWmService.mH);
-            mActivityRefresher = new ActivityRefresher(mWmService, mWmService.mH);
-            mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(
-                    this, mCameraStateMonitor, mActivityRefresher);
-
-            mCameraStateMonitor.startListeningToCameraState();
-        } else {
-            // These are to satisfy the `final` check.
-            mCameraStateMonitor = null;
-            mActivityRefresher = null;
-            mDisplayRotationCompatPolicy = null;
-        }
-
-
         mRotationReversionController = new DisplayRotationReversionController(this);
 
         mInputMonitor = new InputMonitor(mWmService, this);
@@ -1263,6 +1240,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 R.bool.config_defaultInTouchMode);
         mWmService.mInputManager.setInTouchMode(mInTouchMode, mWmService.MY_PID, mWmService.MY_UID,
                 /* hasPermission= */ true, mDisplayId);
+        mAppCompatCameraPolicy.start();
     }
 
     private void beginHoldScreenUpdate() {
@@ -1295,15 +1273,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mHoldScreenWakeLock.release();
             }
         }
-    }
-
-    /**
-     * @return The {@link DisplayRotationCompatPolicy} for this DisplayContent
-     */
-    // TODO(b/335387481) Allow access to DisplayRotationCompatPolicy only with getters
-    @Nullable
-    DisplayRotationCompatPolicy getDisplayRotationCompatPolicy() {
-        return mDisplayRotationCompatPolicy;
     }
 
     @Override
@@ -1785,6 +1754,82 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mDisplayRotation.updateOrientation(orientation, forceUpdate);
     }
 
+    @Nullable
+    private ActivityRecord getLastOrientationSourceApp() {
+        final WindowContainer<?> orientationSrc = getLastOrientationSource();
+        return orientationSrc != null ? orientationSrc.asActivityRecord() : null;
+    }
+
+    /**
+     * This is called when the display rotation is changed. If the current top activity which
+     * decides the display orientation is not opaque, all non-top visible activities with
+     * different fixed orientations will still keep their original appearances.
+     */
+    void applyFixedRotationForNonTopVisibleActivityIfNeeded() {
+        if (!mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
+            return;
+        }
+        final ActivityRecord orientationSrcApp = getLastOrientationSourceApp();
+        if (orientationSrcApp == null || orientationSrcApp.fillsParent()) {
+            return;
+        }
+        final int topOrientation = orientationSrcApp.getRequestedOrientation();
+        if (topOrientation == SCREEN_ORIENTATION_UNSPECIFIED) {
+            return;
+        }
+        forAllActivities(ar -> {
+            if (!ar.isVisibleRequested()) {
+                return true;
+            }
+            applyFixedRotationForNonTopVisibleActivityIfNeeded(ar, topOrientation);
+            return false;
+        }, true /* traverseTopToBottom */);
+    }
+
+    /**
+     * This is called when a non-top activity becomes visible. Such when moving a task which
+     * contains 2 activities with different fixed orientations, and if the top one is translucent,
+     * then the bottom one will apply the fixed rotation transform for its orientation.
+     */
+    void applyFixedRotationForNonTopVisibleActivityIfNeeded(@NonNull ActivityRecord ar) {
+        if (!mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
+            return;
+        }
+        final ActivityRecord orientationSrcApp = getLastOrientationSourceApp();
+        if (orientationSrcApp != null) {
+            applyFixedRotationForNonTopVisibleActivityIfNeeded(ar,
+                    orientationSrcApp.getRequestedOrientation());
+        }
+    }
+
+    /**
+     * If the given visible activity uses a different fixed orientation than the current top, the
+     * fixed rotation transform will be applied to respect its requested appearance.
+     */
+    private void applyFixedRotationForNonTopVisibleActivityIfNeeded(@NonNull ActivityRecord ar,
+            @ActivityInfo.ScreenOrientation int topOrientation) {
+        final int orientation = ar.getRequestedOrientation();
+        if (orientation == topOrientation || ar.inMultiWindowMode()
+                || ar.getRequestedConfigurationOrientation() == ORIENTATION_UNDEFINED) {
+            return;
+        }
+        final int displayRotation = getRotation();
+        final int rotation = ar.isVisible()
+                ? ar.getWindowConfiguration().getDisplayRotation()
+                : mDisplayRotation.rotationForOrientation(orientation, displayRotation);
+        if (rotation == displayRotation) {
+            return;
+        }
+        startFixedRotationTransform(ar, rotation);
+        final WindowState wallpaperTarget = mWallpaperController.getWallpaperTarget();
+        if (wallpaperTarget != null && wallpaperTarget.mActivityRecord == ar) {
+            final WindowState wp = mWallpaperController.getTopVisibleWallpaper();
+            if (wp != null) {
+                wp.mToken.linkFixedRotationTransform(ar);
+            }
+        }
+    }
+
     @Override
     boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
         // Do not consider children because if they are requested to be synced, they should be
@@ -1853,10 +1898,23 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return false;
         }
         if (r.hasFixedRotationTransform()) {
+            if (mWmService.mFlags.mRespectNonTopVisibleFixedOrientation
+                    && mFixedRotationLaunchingApp == null) {
+                // It could be finishing the previous top translucent activity, and the next fixed
+                // orientation activity becomes the current top.
+                setFixedRotationLaunchingAppUnchecked(r,
+                        r.getWindowConfiguration().getDisplayRotation());
+            }
             // It has been set and not yet finished.
             return true;
         }
-        if (!r.occludesParent() || r.isReportedDrawn()) {
+        if (mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
+            if (r.isReportedDrawn()) {
+                // It is late for a drawn app. Either this is already a stable state or it needs
+                // a rotation animation to handle the change.
+                return false;
+            }
+        } else if (!r.occludesParent() || r.isReportedDrawn()) {
             // While entering or leaving a translucent or floating activity (e.g. dialog style),
             // there is a visible activity in the background. Then it still needs rotation animation
             // to cover the activity configuration change.
@@ -2872,12 +2930,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
-        if (mDisplayRotationCompatPolicy != null) {
-            int compatOrientation = mDisplayRotationCompatPolicy.getOrientation();
-            if (compatOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                mLastOrientationSource = null;
-                return compatOrientation;
-            }
+        final int compatOrientation = mAppCompatCameraPolicy.getOrientation();
+        if (compatOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+            mLastOrientationSource = null;
+            return compatOrientation;
         }
 
         final int orientation = super.getOrientation();
@@ -3347,12 +3403,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         getPendingTransaction().apply();
         mWmService.mWindowPlacerLocked.requestTraversal();
 
-        if (mDisplayRotationCompatPolicy != null) {
-            mDisplayRotationCompatPolicy.dispose();
-        }
-        if (mCameraStateMonitor != null) {
-            mCameraStateMonitor.dispose();
-        }
+        mAppCompatCameraPolicy.dispose();
     }
 
     /** Returns true if a removal action is still being deferred. */
@@ -4031,12 +4082,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Transaction t = mWmService.mTransactionFactory.get();
         forAllWindows(w -> {
             final WindowStateAnimator wsa = w.mWinAnimator;
-            if (wsa.mSurfaceController == null) {
+            if (wsa.mSurfaceControl == null) {
                 return;
             }
             if (!mWmService.mSessions.contains(wsa.mSession)) {
                 Slog.w(TAG_WM, "LEAKED SURFACE (session doesn't exist): "
-                        + w + " surface=" + wsa.mSurfaceController
+                        + w + " surface=" + wsa.mSurfaceControl
                         + " token=" + w.mToken
                         + " pid=" + w.mSession.mPid
                         + " uid=" + w.mSession.mUid);
@@ -4045,7 +4096,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mTmpWindow = w;
             } else if (w.mActivityRecord != null && !w.mActivityRecord.isClientVisible()) {
                 Slog.w(TAG_WM, "LEAKED SURFACE (app token hidden): "
-                        + w + " surface=" + wsa.mSurfaceController
+                        + w + " surface=" + wsa.mSurfaceControl
                         + " token=" + w.mActivityRecord);
                 ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE LEAK DESTROY: %s", w);
                 wsa.destroySurface(t);
@@ -5025,9 +5076,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        if (!com.android.window.flags.Flags.removePrepareSurfaceInPlacement()) {
-            prepareSurfaces();
-        }
 
         // This should be called after the insets have been dispatched to clients and we have
         // committed finish drawing windows.
@@ -5719,15 +5767,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      */
     boolean supportsSystemDecorations() {
+        boolean forceDesktopModeOnDisplay = forceDesktopMode();
+
+        if (com.android.window.flags.Flags.rearDisplayDisableForceDesktopSystemDecorations()) {
+            // System decorations should not be forced on a rear display due to security policies.
+            forceDesktopModeOnDisplay =
+                    forceDesktopModeOnDisplay && ((mDisplay.getFlags() & Display.FLAG_REAR) == 0);
+        }
+
         return (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
                 || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
-                || forceDesktopMode())
+                || forceDesktopModeOnDisplay)
                 // VR virtual display will be used to run and render 2D app within a VR experience.
                 && mDisplayId != mWmService.mVr2dDisplayId
                 // Do not show system decorations on untrusted virtual display.
-                && isTrusted()
-                // No system decoration on rear display.
-                && (mDisplay.getFlags() & Display.FLAG_REAR) == 0;
+                && isTrusted();
     }
 
     /**
@@ -6958,7 +7012,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // In most cases this is a no-op if the activity doesn't have fixed rotation.
                 // Otherwise it could be from finishing recents animation while the display has
                 // different orientation.
-                r.finishFixedRotationTransform();
+                if (!mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
+                    r.finishFixedRotationTransform();
+                } else if (!r.isVisible()) {
+                    r.finishFixedRotationTransform();
+                }
                 return;
             }
             if (mFixedRotationLaunchingApp.hasFixedRotationTransform(r)) {
@@ -6973,7 +7031,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // E.g. activity A transferred starting window to B, only A will receive transition
                 // finished event. A doesn't have fixed rotation but B is the rotated launching app.
                 final Task task = r.getTask();
-                if (task == null || task != mFixedRotationLaunchingApp.getTask()) {
+                if (task != mFixedRotationLaunchingApp.getTask()
+                        // When closing a translucent task A (r.fillsParent() is false) to a
+                        // visible task B, because only A has visibility change, there is only A's
+                        // transition callback. Then it still needs to update orientation for B.
+                        && (!mWmService.mFlags.mRespectNonTopVisibleFixedOrientation
+                                || r.fillsParent())) {
                     // Different tasks won't be in one activity transition animation.
                     return;
                 }

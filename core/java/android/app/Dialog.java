@@ -565,7 +565,9 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @see View#findViewById(int)
      * @see Dialog#requireViewById(int)
      */
-    @Nullable
+    // Strictly speaking this should be marked as @Nullable but the nullability of the return value
+    // is deliberately left unspecified as idiomatically correct code can make assumptions either
+    // way based on local context, e.g. layout specification.
     public <T extends View> T findViewById(@IdRes int id) {
         return mWindow.findViewById(id);
     }

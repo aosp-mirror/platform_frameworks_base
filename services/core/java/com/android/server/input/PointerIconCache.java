@@ -16,7 +16,9 @@
 
 package com.android.server.input;
 
+import static android.view.PointerIcon.DEFAULT_POINTER_SCALE;
 import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_FILL_BLACK;
+import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_STROKE_WHITE;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -63,6 +65,11 @@ final class PointerIconCache {
     @GuardedBy("mLoadedPointerIconsByDisplayAndType")
     private @PointerIcon.PointerIconVectorStyleFill int mPointerIconFillStyle =
             POINTER_ICON_VECTOR_STYLE_FILL_BLACK;
+    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
+    private @PointerIcon.PointerIconVectorStyleStroke int mPointerIconStrokeStyle =
+            POINTER_ICON_VECTOR_STYLE_STROKE_WHITE;
+    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
+    private float mPointerIconScale = DEFAULT_POINTER_SCALE;
 
     private final DisplayManager.DisplayListener mDisplayListener =
             new DisplayManager.DisplayListener() {
@@ -117,6 +124,16 @@ final class PointerIconCache {
         mUiThreadHandler.post(() -> handleSetPointerFillStyle(fillStyle));
     }
 
+    /** Set the stroke style for vector pointer icons. */
+    public void setPointerStrokeStyle(@PointerIcon.PointerIconVectorStyleStroke int strokeStyle) {
+        mUiThreadHandler.post(() -> handleSetPointerStrokeStyle(strokeStyle));
+    }
+
+    /** Set the scale for vector pointer icons. */
+    public void setPointerScale(float scale) {
+        mUiThreadHandler.post(() -> handleSetPointerScale(scale));
+    }
+
     /**
      * Get a loaded system pointer icon. This will fetch the icon from the cache, or load it if
      * it isn't already cached.
@@ -136,8 +153,10 @@ final class PointerIconCache {
                 theme.setTo(context.getTheme());
                 theme.applyStyle(PointerIcon.vectorFillStyleToResource(mPointerIconFillStyle),
                         /* force= */ true);
+                theme.applyStyle(PointerIcon.vectorStrokeStyleToResource(mPointerIconStrokeStyle),
+                        /* force= */ true);
                 icon = PointerIcon.getLoadedSystemIcon(new ContextThemeWrapper(context, theme),
-                        type, mUseLargePointerIcons);
+                        type, mUseLargePointerIcons, mPointerIconScale);
                 iconsByType.put(type, icon);
             }
             return Objects.requireNonNull(icon);
@@ -209,6 +228,33 @@ final class PointerIconCache {
                 return;
             }
             mPointerIconFillStyle = fillStyle;
+            // Clear all cached icons on all displays.
+            mLoadedPointerIconsByDisplayAndType.clear();
+        }
+        mNative.reloadPointerIcons();
+    }
+
+    @android.annotation.UiThread
+    private void handleSetPointerStrokeStyle(
+            @PointerIcon.PointerIconVectorStyleStroke int strokeStyle) {
+        synchronized (mLoadedPointerIconsByDisplayAndType) {
+            if (mPointerIconStrokeStyle == strokeStyle) {
+                return;
+            }
+            mPointerIconStrokeStyle = strokeStyle;
+            // Clear all cached icons on all displays.
+            mLoadedPointerIconsByDisplayAndType.clear();
+        }
+        mNative.reloadPointerIcons();
+    }
+
+    @android.annotation.UiThread
+    private void handleSetPointerScale(float scale) {
+        synchronized (mLoadedPointerIconsByDisplayAndType) {
+            if (mPointerIconScale == scale) {
+                return;
+            }
+            mPointerIconScale = scale;
             // Clear all cached icons on all displays.
             mLoadedPointerIconsByDisplayAndType.clear();
         }

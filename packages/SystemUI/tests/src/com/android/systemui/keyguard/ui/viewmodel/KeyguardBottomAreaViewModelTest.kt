@@ -46,8 +46,8 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTouchHandlingInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
@@ -58,6 +58,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.pulsingGestureListener
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -178,7 +179,6 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
-                systemSettings = FakeSettings(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -211,8 +211,8 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
                 dumpManager = mock(),
                 userHandle = UserHandle.SYSTEM,
             )
-        val keyguardLongPressInteractor =
-            KeyguardLongPressInteractor(
+        val keyguardTouchHandlingInteractor =
+            KeyguardTouchHandlingInteractor(
                 appContext = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
@@ -221,6 +221,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
                 featureFlags = featureFlags,
                 broadcastDispatcher = broadcastDispatcher,
                 accessibilityManager = accessibilityManager,
+                pulsingGestureListener = kosmos.pulsingGestureListener,
             )
         underTest =
             KeyguardBottomAreaViewModel(
@@ -246,13 +247,13 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
                     ),
                 bottomAreaInteractor = KeyguardBottomAreaInteractor(repository = repository),
                 burnInHelperWrapper = burnInHelperWrapper,
-                longPressViewModel =
-                    KeyguardLongPressViewModel(
-                        interactor = keyguardLongPressInteractor,
+                keyguardTouchHandlingViewModel =
+                    KeyguardTouchHandlingViewModel(
+                        interactor = keyguardTouchHandlingInteractor,
                     ),
                 settingsMenuViewModel =
                     KeyguardSettingsMenuViewModel(
-                        interactor = keyguardLongPressInteractor,
+                        interactor = keyguardTouchHandlingInteractor,
                     ),
             )
     }

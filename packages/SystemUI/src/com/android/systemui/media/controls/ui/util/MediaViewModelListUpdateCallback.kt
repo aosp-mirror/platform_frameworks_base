@@ -24,7 +24,7 @@ class MediaViewModelListUpdateCallback(
     private val old: List<MediaCommonViewModel>,
     private val new: List<MediaCommonViewModel>,
     private val onAdded: (MediaCommonViewModel, Int) -> Unit,
-    private val onUpdated: (MediaCommonViewModel) -> Unit,
+    private val onUpdated: (MediaCommonViewModel, Int) -> Unit,
     private val onRemoved: (MediaCommonViewModel) -> Unit,
     private val onMoved: (MediaCommonViewModel, Int, Int) -> Unit,
 ) : ListUpdateCallback {
@@ -47,7 +47,7 @@ class MediaViewModelListUpdateCallback(
 
     override fun onChanged(position: Int, count: Int, payload: Any?) {
         for (i in position until position + count) {
-            onUpdated(new[i])
+            onUpdated(new[i], position)
         }
     }
 }

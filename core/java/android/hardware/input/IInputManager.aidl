@@ -32,6 +32,7 @@ import android.hardware.input.TouchCalibration;
 import android.os.CombinedVibration;
 import android.hardware.input.IInputSensorEventListener;
 import android.hardware.input.InputSensorInfo;
+import android.hardware.input.KeyGlyphMap;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
 import android.os.IBinder;
@@ -236,4 +237,6 @@ interface IInputManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)")
     void unregisterStickyModifierStateListener(IStickyModifierStateListener listener);
+
+    KeyGlyphMap getKeyGlyphMap(int deviceId);
 }

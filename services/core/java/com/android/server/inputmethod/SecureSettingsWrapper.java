@@ -20,10 +20,7 @@ import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManagerInternal;
 import android.content.ContentResolver;
-import android.content.Context;
-import android.content.pm.UserInfo;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -43,6 +40,32 @@ import com.android.server.pm.UserManagerInternal;
 final class SecureSettingsWrapper {
     @Nullable
     private static volatile ContentResolver sContentResolver = null;
+
+    private static volatile boolean sTestMode = false;
+
+    /**
+     * Can be called from unit tests to start the test mode, where a fake implementation will be
+     * used instead.
+     *
+     * <p>The fake implementation is just an {@link ArrayMap}. By default it is empty, and the data
+     * written can be read back later.</p>
+     */
+    @AnyThread
+    static void startTestMode() {
+        sTestMode = true;
+    }
+
+    /**
+     * Can be called from unit tests to end the test mode, where a fake implementation will be used
+     * instead.
+     */
+    @AnyThread
+    static void endTestMode() {
+        synchronized (sUserMap) {
+            sUserMap.clear();
+        }
+        sTestMode = false;
+    }
 
     /**
      * Not intended to be instantiated.
@@ -76,6 +99,52 @@ final class SecureSettingsWrapper {
 
         @AnyThread
         int getInt(String key, int defaultValue);
+    }
+
+    private static class FakeReaderWriterImpl implements ReaderWriter {
+        @GuardedBy("mNonPersistentKeyValues")
+        private final ArrayMap<String, String> mNonPersistentKeyValues = new ArrayMap<>();
+
+        @AnyThread
+        @Override
+        public void putString(String key, String value) {
+            synchronized (mNonPersistentKeyValues) {
+                mNonPersistentKeyValues.put(key, value);
+            }
+        }
+
+        @AnyThread
+        @Nullable
+        @Override
+        public String getString(String key, String defaultValue) {
+            synchronized (mNonPersistentKeyValues) {
+                if (mNonPersistentKeyValues.containsKey(key)) {
+                    final String result = mNonPersistentKeyValues.get(key);
+                    return result != null ? result : defaultValue;
+                }
+                return defaultValue;
+            }
+        }
+
+        @AnyThread
+        @Override
+        public void putInt(String key, int value) {
+            synchronized (mNonPersistentKeyValues) {
+                mNonPersistentKeyValues.put(key, String.valueOf(value));
+            }
+        }
+
+        @AnyThread
+        @Override
+        public int getInt(String key, int defaultValue) {
+            synchronized (mNonPersistentKeyValues) {
+                if (mNonPersistentKeyValues.containsKey(key)) {
+                    final String result = mNonPersistentKeyValues.get(key);
+                    return result != null ? Integer.parseInt(result) : defaultValue;
+                }
+                return defaultValue;
+            }
+        }
     }
 
     private static class UnlockedUserImpl implements ReaderWriter {
@@ -200,6 +269,9 @@ final class SecureSettingsWrapper {
 
     private static ReaderWriter createImpl(@NonNull UserManagerInternal userManagerInternal,
             @UserIdInt int userId) {
+        if (sTestMode) {
+            return new FakeReaderWriterImpl();
+        }
         return userManagerInternal.isUserUnlockingOrUnlocked(userId)
                 ? new UnlockedUserImpl(userId, sContentResolver)
                 : new LockedUserImpl(userId, sContentResolver);
@@ -234,6 +306,9 @@ final class SecureSettingsWrapper {
                 return readerWriter;
             }
         }
+        if (sTestMode) {
+            return putOrGet(userId, new FakeReaderWriterImpl());
+        }
         final UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);
         if (!userManagerInternal.exists(userId)) {
@@ -243,30 +318,13 @@ final class SecureSettingsWrapper {
     }
 
     /**
-     * Called when {@link InputMethodManagerService} is starting.
+     * Called when the system is starting.
      *
-     * @param context the {@link Context} to be used.
+     * @param contentResolver the {@link ContentResolver} to be used
      */
     @AnyThread
-    static void onStart(@NonNull Context context) {
-        sContentResolver = context.getContentResolver();
-
-        final int userId = LocalServices.getService(ActivityManagerInternal.class)
-                .getCurrentUserId();
-        final UserManagerInternal userManagerInternal =
-                LocalServices.getService(UserManagerInternal.class);
-        putOrGet(userId, createImpl(userManagerInternal, userId));
-
-        userManagerInternal.addUserLifecycleListener(
-                new UserManagerInternal.UserLifecycleListener() {
-                    @Override
-                    public void onUserRemoved(UserInfo user) {
-                        synchronized (sUserMap) {
-                            sUserMap.remove(userId);
-                        }
-                    }
-                }
-        );
+    static void setContentResolver(@NonNull ContentResolver contentResolver) {
+        sContentResolver = contentResolver;
     }
 
     /**
@@ -276,6 +334,10 @@ final class SecureSettingsWrapper {
      */
     @AnyThread
     static void onUserStarting(@UserIdInt int userId) {
+        if (sTestMode) {
+            putOrGet(userId, new FakeReaderWriterImpl());
+            return;
+        }
         putOrGet(userId, createImpl(LocalServices.getService(UserManagerInternal.class), userId));
     }
 
@@ -286,8 +348,24 @@ final class SecureSettingsWrapper {
      */
     @AnyThread
     static void onUserUnlocking(@UserIdInt int userId) {
+        if (sTestMode) {
+            putOrGet(userId, new FakeReaderWriterImpl());
+            return;
+        }
         final ReaderWriter readerWriter = new UnlockedUserImpl(userId, sContentResolver);
         putOrGet(userId, readerWriter);
+    }
+
+    /**
+     * Called when a user is being removed.
+     *
+     * @param userId the ID of the user whose storage is being removed.
+     */
+    @AnyThread
+    static void onUserRemoved(@UserIdInt int userId) {
+        synchronized (sUserMap) {
+            sUserMap.remove(userId);
+        }
     }
 
     /**

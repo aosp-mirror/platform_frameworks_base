@@ -25,7 +25,7 @@
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"ਆਪਣਾ ਪੈਟਰਨ ਦਾਖਲ ਕਰੋ"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ਪੈਟਰਨ ਬਣਾਓ"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"ਆਪਣਾ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰੋ"</string>
-    <string name="keyguard_enter_password" msgid="6483623792371009758">"ਪਾਸਵਰਡ ਦਾਖਲ ਕਰੋ"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"ਪਾਸਵਰਡ ਪਾਓ"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ਅਵੈਧ ਕਾਰਡ।"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ਚਾਰਜ ਹੋ ਗਿਆ"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ਬਿਨਾਂ ਤਾਰ ਤੋਂ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>

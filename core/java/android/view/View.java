@@ -22,6 +22,7 @@ import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
 import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
+import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
@@ -5510,6 +5511,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @FlaggedApi(FLAG_DELEGATE_UNHANDLED_DRAGS)
     public static final int DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG = 1 << 13;
+
+    /**
+     * Flag indicating that this drag will result in the caller activity's task to be hidden for the
+     * duration of the drag, this means that the source activity will not receive drag events for
+     * the current drag gesture. Only the current voice interaction service may use this flag.
+     * @hide
+     */
+    public static final int DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START = 1 << 14;
 
     /**
      * Vertical scroll factor cached by {@link #getVerticalScrollFactor}.
@@ -19630,7 +19639,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setLeft(int left) {
         if (left != mLeft) {
-            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
@@ -25584,6 +25592,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
                 mSizeBasedFrameRateCategoryAndReason = category | FRAME_RATE_CATEGORY_REASON_LARGE;
             }
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
         }
 
         onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
@@ -27534,7 +27543,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return a view with given ID if found, or {@code null} otherwise
      * @see View#requireViewById(int)
      */
-    @Nullable
+    // Strictly speaking this should be marked as @Nullable but the nullability of the return value
+    // is deliberately left unspecified as idiomatically correct code can make assumptions either
+    // way based on local context, e.g. layout specification.
     public final <T extends View> T findViewById(@IdRes int id) {
         if (id == NO_ID) {
             return null;
@@ -28627,20 +28638,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return false;
         }
 
-        final boolean always = (flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0;
-        boolean fromIme = false;
-        if (mAttachInfo.mViewRootImpl != null) {
-            fromIme = mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD;
+        int privFlags = 0;
+        if (mAttachInfo.mViewRootImpl != null
+                && mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD) {
+            privFlags = HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS;
         }
         if (Flags.useVibratorHapticFeedback()) {
             if (!mAttachInfo.canPerformHapticFeedback()) {
                 return false;
             }
-            getSystemVibrator().performHapticFeedback(
-                    feedbackConstant, always, "View#performHapticFeedback", fromIme);
+            getSystemVibrator().performHapticFeedback(feedbackConstant,
+                    "View#performHapticFeedback", flags, privFlags);
             return true;
         }
-        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, always, fromIme);
+        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, flags, privFlags);
     }
 
     private Vibrator getSystemVibrator() {
@@ -30607,7 +30618,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setPointerIcon(PointerIcon)} for mouse devices. Subclasses may override this to
      * customize the icon for the given pointer.
      *
-     * For example, the pointer icon for a stylus pointer can be resolved in the following way:
+     * For example, to always show the PointerIcon.TYPE_HANDWRITING icon for a stylus pointer,
+     * the event can be resolved in the following way:
      * <code><pre>
      * &#64;Override
      * public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
@@ -30617,7 +30629,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *             && (toolType == MotionEvent.TOOL_TYPE_STYLUS
      *                     || toolType == MotionEvent.TOOL_TYPE_ERASER)) {
      *         // Show this pointer icon only if this pointer is a stylus.
-     *         return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_WAIT);
+     *         return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_HANDWRITING);
      *     }
      *     // Use the default logic for determining the pointer icon for other non-stylus pointers,
      *     // like for the mouse cursor.
@@ -31674,7 +31686,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         interface Callbacks {
             void playSoundEffect(int effectId);
-            boolean performHapticFeedback(int effectId, boolean always, boolean fromIme);
+
+            boolean performHapticFeedback(int effectId,
+                    @HapticFeedbackConstants.Flags int flags,
+                    @HapticFeedbackConstants.PrivateFlags int privFlags);
         }
 
         /**
@@ -33896,10 +33911,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected int calculateFrameRateCategory() {
+        ViewRootImpl viewRootImpl = getViewRootImpl();
+        ViewParent parent = mParent;
+        boolean isInputMethodWindowType =
+                viewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD;
+
+        // boost frame rate when the position or the size changed.
+        if (((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
+                || mLastFrameTop != mTop)
+                && viewRootImpl.shouldCheckFrameRateCategory()
+                && parent instanceof View
+                && ((View) parent).mFrameContentVelocity <= 0
+                && !isInputMethodWindowType) {
+
+            return FRAME_RATE_CATEGORY_HIGH_HINT | FRAME_RATE_CATEGORY_REASON_BOOST;
+        }
         int category;
-        switch (getViewRootImpl().intermittentUpdateState()) {
-            case ViewRootImpl.INTERMITTENT_STATE_INTERMITTENT -> category =
-                    FRAME_RATE_CATEGORY_NORMAL | FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
+        switch (viewRootImpl.intermittentUpdateState()) {
+            case ViewRootImpl.INTERMITTENT_STATE_INTERMITTENT -> {
+                if (!sToolkitFrameRateBySizeReadOnlyFlagValue) {
+                    category = FRAME_RATE_CATEGORY_NORMAL;
+                } else {
+                    // The size based frame rate category can only be LOW or NORMAL. If the size
+                    // based frame rate category is LOW, we shouldn't vote for NORMAL for
+                    // intermittent.
+                    category = Math.min(
+                            mSizeBasedFrameRateCategoryAndReason & ~FRAME_RATE_CATEGORY_REASON_MASK,
+                            FRAME_RATE_CATEGORY_NORMAL);
+                }
+                category |= FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
+            }
             case ViewRootImpl.INTERMITTENT_STATE_NOT_INTERMITTENT ->
                     category = mSizeBasedFrameRateCategoryAndReason;
             default -> category = mLastFrameRateCategory;
@@ -33920,59 +33962,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         float velocity = mFrameContentVelocity;
         final float frameRate = mPreferredFrameRate;
-        ViewParent parent = mParent;
-        if (velocity <= 0 && Float.isNaN(frameRate)) {
-            // The most common case is when nothing is set, so this special case is called
-            // often.
-            if (mAttachInfo.mViewVelocityApi
-                    && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
-                    PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
-                    || mLastFrameTop != mTop)
-                    && viewRootImpl.shouldCheckFrameRate(false)
-                    && parent instanceof View
-                    && ((View) parent).mFrameContentVelocity <= 0) {
-                viewRootImpl.votePreferredFrameRate(MAX_FRAME_RATE, FRAME_RATE_COMPATIBILITY_GTE);
-            }
-            if (viewRootImpl.shouldCheckFrameRateCategory()) {
-                int frameRateCategory = calculateFrameRateCategory();
-                int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
-                int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
-                viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
-                mLastFrameRateCategory = frameRateCategory;
-            }
-            mLastFrameLeft = mLeft;
-            mLastFrameTop = mTop;
-            return;
-        }
-        if (viewRootImpl.shouldCheckFrameRate(frameRate > 0f)) {
+
+        if (viewRootImpl.shouldCheckFrameRate(frameRate > 0f)
+                && (frameRate > 0 || (mAttachInfo.mViewVelocityApi && velocity > 0f))) {
             float velocityFrameRate = 0f;
-            if (mAttachInfo.mViewVelocityApi) {
-                if (velocity < 0f
-                        && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
-                        PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
-                        || mLastFrameTop != mTop)
-                        && mParent instanceof View
-                        && ((View) mParent).mFrameContentVelocity <= 0
-                ) {
-                    // This current calculation is very simple. If something on the screen
-                    // moved, then it votes for the highest velocity.
-                    velocityFrameRate = MAX_FRAME_RATE;
-                } else if (velocity > 0f) {
-                    velocityFrameRate = convertVelocityToFrameRate(velocity);
-                }
+            if (mAttachInfo.mViewVelocityApi && velocity > 0f) {
+                velocityFrameRate = convertVelocityToFrameRate(velocity);
             }
-            if (velocityFrameRate > 0f || frameRate > 0f) {
-                int compatibility;
-                float frameRateToSet;
-                if (frameRate >= velocityFrameRate) {
-                    compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-                    frameRateToSet = frameRate;
-                } else {
-                    compatibility = FRAME_RATE_COMPATIBILITY_GTE;
-                    frameRateToSet = velocityFrameRate;
-                }
-                viewRootImpl.votePreferredFrameRate(frameRateToSet, compatibility);
+            int compatibility;
+            float frameRateToSet;
+            if (frameRate >= velocityFrameRate) {
+                compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+                frameRateToSet = frameRate;
+            } else {
+                compatibility = FRAME_RATE_COMPATIBILITY_GTE;
+                frameRateToSet = velocityFrameRate;
             }
+            viewRootImpl.votePreferredFrameRate(frameRateToSet, compatibility);
         }
 
         if (viewRootImpl.shouldCheckFrameRateCategory()) {

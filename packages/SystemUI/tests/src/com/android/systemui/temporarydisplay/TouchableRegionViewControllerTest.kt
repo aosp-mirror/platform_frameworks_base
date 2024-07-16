@@ -19,12 +19,14 @@ package com.android.systemui.temporarydisplay
 import android.graphics.Rect
 import android.view.View
 import android.view.ViewTreeObserver
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
@@ -32,6 +34,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class TouchableRegionViewControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var view: View

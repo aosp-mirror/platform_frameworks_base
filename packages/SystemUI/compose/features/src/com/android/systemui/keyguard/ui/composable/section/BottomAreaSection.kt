@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.DpSize
@@ -183,7 +184,7 @@ constructor(
         indicationController: KeyguardIndicationController,
         modifier: Modifier = Modifier,
     ) {
-        val (disposable, setDisposable) = mutableStateOf<DisposableHandle?>(null)
+        val (disposable, setDisposable) = remember { mutableStateOf<DisposableHandle?>(null) }
 
         AndroidView(
             factory = { context ->

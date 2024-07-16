@@ -24,6 +24,8 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +35,7 @@ import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
+import android.os.IBinder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -132,6 +135,7 @@ public final class IRadioServiceHidlImplTest {
     @Test
     public void addAnnouncementListener_forHidlImpl() {
         when(mHal2Mock.hasAnyModules()).thenReturn(true);
+
         ICloseHandle closeHandle = mHidlImpl.addAnnouncementListener(ENABLE_TYPES, mListenerMock);
 
         verify(mHal2Mock).addAnnouncementListener(ENABLE_TYPES, mListenerMock);
@@ -139,4 +143,15 @@ public final class IRadioServiceHidlImplTest {
                 .that(closeHandle).isEqualTo(mICloseHandle);
     }
 
+    @Test
+    public void addAnnouncementListener_withoutAnyModules() throws Exception {
+        when(mHal2Mock.hasAnyModules()).thenReturn(false);
+        IBinder binderMock = mock(IBinder.class);
+        when(mListenerMock.asBinder()).thenReturn(binderMock);
+
+        mHidlImpl.addAnnouncementListener(ENABLE_TYPES, mListenerMock);
+
+        verify(mHal2Mock, never()).addAnnouncementListener(ENABLE_TYPES, mListenerMock);
+        verify(binderMock).linkToDeath(any(), anyInt());
+    }
 }

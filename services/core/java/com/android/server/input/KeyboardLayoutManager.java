@@ -255,17 +255,6 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         }
     }
 
-    private static boolean isCompatibleLocale(Locale systemLocale, Locale keyboardLocale) {
-        // Different languages are never compatible
-        if (!systemLocale.getLanguage().equals(keyboardLocale.getLanguage())) {
-            return false;
-        }
-        // If both the system and the keyboard layout have a country specifier, they must be equal.
-        return TextUtils.isEmpty(systemLocale.getCountry())
-                || TextUtils.isEmpty(keyboardLocale.getCountry())
-                || systemLocale.getCountry().equals(keyboardLocale.getCountry());
-    }
-
     @MainThread
     private void updateKeyboardLayouts() {
         // Scan all input devices state for keyboard layouts that have been uninstalled.
@@ -953,21 +942,33 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
             return;
         }
 
+        List<String> layoutNames = new ArrayList<>();
+        for (String layoutDesc : config.getConfiguredLayouts()) {
+            KeyboardLayout kl = getKeyboardLayout(layoutDesc);
+            if (kl == null) {
+                // b/349033234: Weird state with stale keyboard layout configured.
+                // Possibly due to race condition between KCM providing package being removed and
+                // corresponding layouts being removed from Datastore and cache.
+                // {@see updateKeyboardLayouts()}
+                //
+                // Ideally notification will be correctly shown after the keyboard layouts are
+                // configured again with the new package state.
+                return;
+            }
+            layoutNames.add(kl.getLabel());
+        }
         showKeyboardLayoutNotification(
                 r.getString(
                         R.string.keyboard_layout_notification_selected_title,
                         inputDevice.getName()),
-                createConfiguredNotificationText(mContext, config.getConfiguredLayouts()),
+                createConfiguredNotificationText(mContext, layoutNames),
                 inputDevice);
     }
 
     @MainThread
     private String createConfiguredNotificationText(@NonNull Context context,
-            @NonNull Set<String> selectedLayouts) {
+            @NonNull List<String> layoutNames) {
         final Resources r = context.getResources();
-        List<String> layoutNames = new ArrayList<>();
-        selectedLayouts.forEach(
-                (layoutDesc) -> layoutNames.add(getKeyboardLayout(layoutDesc).getLabel()));
         Collections.sort(layoutNames);
         switch (layoutNames.size()) {
             case 1:

@@ -25,6 +25,7 @@ import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -32,7 +33,9 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 
@@ -152,18 +155,27 @@ public class BrightnessDialog extends Activity {
 
         Configuration configuration = getResources().getConfiguration();
         int orientation = configuration.orientation;
-        int screenWidth = getWindowManager().getDefaultDisplay().getWidth();
+        int windowWidth = getWindowAvailableWidth();
 
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             boolean shouldBeFullWidth = getIntent()
                     .getBooleanExtra(EXTRA_BRIGHTNESS_DIALOG_IS_FULL_WIDTH, false);
-            lp.width = (shouldBeFullWidth ? screenWidth : screenWidth / 2) - horizontalMargin * 2;
+            lp.width = (shouldBeFullWidth ? windowWidth : windowWidth / 2) - horizontalMargin * 2;
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            lp.width = screenWidth - horizontalMargin * 2;
+            lp.width = windowWidth - horizontalMargin * 2;
         }
 
         frame.setLayoutParams(lp);
+    }
 
+    private int getWindowAvailableWidth() {
+        final WindowMetrics metrics = getWindowManager().getCurrentWindowMetrics();
+        // Gets all excluding insets
+        final WindowInsets windowInsets = metrics.getWindowInsets();
+        Insets insets = windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.navigationBars()
+                | WindowInsets.Type.displayCutout());
+        int insetsWidth = insets.right + insets.left;
+        return metrics.getBounds().width() - insetsWidth;
     }
 
     @Override

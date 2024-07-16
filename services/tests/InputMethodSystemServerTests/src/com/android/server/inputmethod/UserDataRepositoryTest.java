@@ -18,22 +18,12 @@ package com.android.server.inputmethod;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import android.content.pm.UserInfo;
-import android.os.ConditionVariable;
-import android.os.Handler;
-import android.os.Looper;
 import android.platform.test.ravenwood.RavenwoodRule;
 
-import com.android.server.pm.UserManagerInternal;
-
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -51,19 +41,15 @@ public final class UserDataRepositoryTest {
             .setProvideMainThread(true).build();
 
     @Mock
-    private UserManagerInternal mMockUserManagerInternal;
-
-    @Mock
     private InputMethodManagerService mMockInputMethodManagerService;
-
-    private Handler mHandler;
 
     private IntFunction<InputMethodBindingController> mBindingControllerFactory;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mHandler = new Handler(Looper.getMainLooper());
+        SecureSettingsWrapper.startTestMode();
+
         mBindingControllerFactory = new IntFunction<InputMethodBindingController>() {
 
             @Override
@@ -73,53 +59,25 @@ public final class UserDataRepositoryTest {
         };
     }
 
-    @Test
-    public void testUserDataRepository_addsNewUserInfoOnUserCreatedEvent() {
-        // Create UserDataRepository and capture the user lifecycle listener
-        final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
-        final var bindingControllerFactorySpy = spy(mBindingControllerFactory);
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
-                bindingControllerFactorySpy);
-
-        verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
-        final var listener = captor.getValue();
-
-        // Assert that UserDataRepository is empty and then call onUserCreated
-        assertThat(collectUserData(repository)).isEmpty();
-        final var userInfo = new UserInfo();
-        userInfo.id = ANY_USER_ID;
-        listener.onUserCreated(userInfo, /* unused token */ new Object());
-        waitForIdle();
-
-        // Assert UserDataRepository contains the expected UserData
-        final var allUserData = collectUserData(repository);
-        assertThat(allUserData).hasSize(1);
-        assertThat(allUserData.get(0).mUserId).isEqualTo(ANY_USER_ID);
-
-        // Assert UserDataRepository called the InputMethodBindingController creator function.
-        verify(bindingControllerFactorySpy).apply(ANY_USER_ID);
-        assertThat(allUserData.get(0).mBindingController.mUserId).isEqualTo(ANY_USER_ID);
+    @After
+    public void tearDown() {
+        SecureSettingsWrapper.endTestMode();
     }
 
+    // TODO(b/352615651): Move this to end-to-end test.
     @Test
     public void testUserDataRepository_removesUserInfoOnUserRemovedEvent() {
-        // Create UserDataRepository and capture the user lifecycle listener
-        final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
+        // Create UserDataRepository
+        final var repository = new UserDataRepository(
                 userId -> new InputMethodBindingController(userId, mMockInputMethodManagerService));
 
-        verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
-        final var listener = captor.getValue();
-
         // Add one UserData ...
-        final var userInfo = new UserInfo();
-        userInfo.id = ANY_USER_ID;
-        listener.onUserCreated(userInfo, /* unused token */ new Object());
-        waitForIdle();
+        final var userData = repository.getOrCreate(ANY_USER_ID);
+        assertThat(userData.mUserId).isEqualTo(ANY_USER_ID);
+
         // ... and then call onUserRemoved
         assertThat(collectUserData(repository)).hasSize(1);
-        listener.onUserRemoved(userInfo);
-        waitForIdle();
+        repository.remove(ANY_USER_ID);
 
         // Assert UserDataRepository is now empty
         assertThat(collectUserData(repository)).isEmpty();
@@ -127,33 +85,23 @@ public final class UserDataRepositoryTest {
 
     @Test
     public void testGetOrCreate() {
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
-                mBindingControllerFactory);
+        final var repository = new UserDataRepository(mBindingControllerFactory);
 
-        synchronized (ImfLock.class) {
-            final var userData = repository.getOrCreate(ANY_USER_ID);
-            assertThat(userData.mUserId).isEqualTo(ANY_USER_ID);
-        }
+        final var userData = repository.getOrCreate(ANY_USER_ID);
+        assertThat(userData.mUserId).isEqualTo(ANY_USER_ID);
 
         final var allUserData = collectUserData(repository);
         assertThat(allUserData).hasSize(1);
         assertThat(allUserData.get(0).mUserId).isEqualTo(ANY_USER_ID);
 
         // Assert UserDataRepository called the InputMethodBindingController creator function.
-        assertThat(allUserData.get(0).mBindingController.mUserId).isEqualTo(ANY_USER_ID);
+        assertThat(allUserData.get(0).mBindingController.getUserId()).isEqualTo(ANY_USER_ID);
     }
 
-    private List<UserDataRepository.UserData> collectUserData(UserDataRepository repository) {
-        final var collected = new ArrayList<UserDataRepository.UserData>();
-        synchronized (ImfLock.class) {
-            repository.forAllUserData(userData -> collected.add(userData));
-        }
+    private List<UserData> collectUserData(UserDataRepository repository) {
+        final var collected = new ArrayList<UserData>();
+        repository.forAllUserData(userData -> collected.add(userData));
         return collected;
     }
 
-    private void waitForIdle() {
-        final var done = new ConditionVariable();
-        mHandler.post(done::open);
-        done.block();
-    }
 }

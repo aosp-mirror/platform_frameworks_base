@@ -21,8 +21,17 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.CurrentApp
+import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
+import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
+import com.android.systemui.keyboard.shortcut.shortcutHelperInputShortcutsSource
+import com.android.systemui.keyboard.shortcut.shortcutHelperMultiTaskingShortcutsSource
+import com.android.systemui.keyboard.shortcut.shortcutHelperSystemShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.keyboard.shortcut.shortcutHelperViewModel
+import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testDispatcher
@@ -33,6 +42,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -41,16 +51,31 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ShortcutHelperViewModelTest : SysuiTestCase() {
 
+    private val fakeSystemSource = FakeKeyboardShortcutGroupsSource()
+    private val fakeMultiTaskingSource = FakeKeyboardShortcutGroupsSource()
+    private val fakeCurrentAppsSource = FakeKeyboardShortcutGroupsSource()
+
     private val kosmos =
         Kosmos().also {
             it.testCase = this
             it.testDispatcher = UnconfinedTestDispatcher()
+            it.shortcutHelperSystemShortcutsSource = fakeSystemSource
+            it.shortcutHelperMultiTaskingShortcutsSource = fakeMultiTaskingSource
+            it.shortcutHelperAppCategoriesShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.shortcutHelperInputShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.shortcutHelperCurrentAppShortcutsSource = fakeCurrentAppsSource
         }
 
     private val testScope = kosmos.testScope
     private val testHelper = kosmos.shortcutHelperTestHelper
     private val sysUiState = kosmos.sysUiState
     private val viewModel = kosmos.shortcutHelperViewModel
+
+    @Before
+    fun setUp() {
+        fakeSystemSource.setGroups(TestShortcuts.systemGroups)
+        fakeMultiTaskingSource.setGroups(TestShortcuts.multitaskingGroups)
+    }
 
     @Test
     fun shouldShow_falseByDefault() =
@@ -98,6 +123,17 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
 
             testHelper.toggle(deviceId = 567)
             viewModel.onViewClosed()
+
+            assertThat(shouldShow).isFalse()
+        }
+
+    @Test
+    fun shouldShow_falseAfterCloseSystemDialogs() =
+        testScope.runTest {
+            val shouldShow by collectLastValue(viewModel.shouldShow)
+
+            testHelper.showFromActivity()
+            testHelper.hideThroughCloseSystemDialogs()
 
             assertThat(shouldShow).isFalse()
         }
@@ -151,5 +187,48 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             viewModel.onViewClosed()
 
             assertThat(sysUiState.isFlagEnabled(SYSUI_STATE_SHORTCUT_HELPER_SHOWING)).isFalse()
+        }
+
+    @Test
+    fun shortcutsUiState_inactiveByDefault() =
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            assertThat(uiState).isEqualTo(ShortcutsUiState.Inactive)
+        }
+
+    @Test
+    fun shortcutsUiState_featureActive_emitsActive() =
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+
+            assertThat(uiState).isInstanceOf(ShortcutsUiState.Active::class.java)
+        }
+
+    @Test
+    fun shortcutsUiState_featureActive_emitsActiveWithFirstCategorySelectedByDefault() =
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+
+            val activeUiState = uiState as ShortcutsUiState.Active
+            assertThat(activeUiState.defaultSelectedCategory)
+                .isEqualTo(activeUiState.shortcutCategories.first().type)
+        }
+
+    @Test
+    fun shortcutsUiState_featureActive_emitsActiveWithCurrentAppsCategorySelectedWhenPresent() =
+        testScope.runTest {
+            fakeCurrentAppsSource.setGroups(TestShortcuts.currentAppGroups)
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+
+            val activeUiState = uiState as ShortcutsUiState.Active
+            assertThat(activeUiState.defaultSelectedCategory)
+                .isEqualTo(CurrentApp(TestShortcuts.currentAppPackageName))
         }
 }

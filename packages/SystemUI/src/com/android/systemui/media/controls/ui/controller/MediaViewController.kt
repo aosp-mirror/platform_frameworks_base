@@ -103,6 +103,7 @@ constructor(
     lateinit var sizeChangedListener: () -> Unit
     lateinit var configurationChangeListener: () -> Unit
     lateinit var recsConfigurationChangeListener: (MediaViewController, TransitionLayout) -> Unit
+    var locationChangeListener: (Int) -> Unit = {}
     private var firstRefresh: Boolean = true
     @VisibleForTesting private var transitionLayout: TransitionLayout? = null
     private val layoutController = TransitionLayoutController()
@@ -119,7 +120,15 @@ constructor(
      * The ending location of the view where it ends when all animations and transitions have
      * finished
      */
-    @MediaLocation var currentEndLocation: Int = -1
+    @MediaLocation
+    var currentEndLocation: Int = -1
+        set(value) {
+            if (field != value) {
+                field = value
+                if (!mediaFlags.isSceneContainerEnabled()) return
+                locationChangeListener(value)
+            }
+        }
 
     /** The starting location of the view where it starts for all animations and transitions */
     @MediaLocation private var currentStartLocation: Int = -1
@@ -799,7 +808,7 @@ constructor(
     fun bindSeekBar(onSeek: () -> Unit, onBindSeekBar: (SeekBarViewModel) -> Unit) {
         if (!mediaFlags.isSceneContainerEnabled()) return
         seekBarViewModel.logSeek = onSeek
-        onBindSeekBar.invoke(seekBarViewModel)
+        onBindSeekBar(seekBarViewModel)
     }
 
     fun setUpTurbulenceNoise() {

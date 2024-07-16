@@ -18,8 +18,10 @@ package com.android.systemui.communal.ui.viewmodel
 
 import android.graphics.Color
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -29,14 +31,19 @@ import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToDreamingTransit
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 
 /** View model for transitions related to the communal hub. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -44,22 +51,25 @@ import kotlinx.coroutines.flow.merge
 class CommunalTransitionViewModel
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     communalColors: CommunalColors,
     glanceableHubToLockscreenTransitionViewModel: GlanceableHubToLockscreenTransitionViewModel,
     lockscreenToGlanceableHubTransitionViewModel: LockscreenToGlanceableHubTransitionViewModel,
     dreamToGlanceableHubTransitionViewModel: DreamingToGlanceableHubTransitionViewModel,
     glanceableHubToDreamTransitionViewModel: GlanceableHubToDreamingTransitionViewModel,
     communalInteractor: CommunalInteractor,
-    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    communalSceneInteractor: CommunalSceneInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor
 ) {
     // Show UMO on glanceable hub immediately on transition into glanceable hub
     private val showUmoFromOccludedToGlanceableHub: Flow<Boolean> =
         keyguardTransitionInteractor
-            .transition(Edge.create(from = KeyguardState.OCCLUDED))
+            .transition(
+                Edge.create(from = KeyguardState.OCCLUDED, to = KeyguardState.GLANCEABLE_HUB)
+            )
             .filter {
-                it.to == KeyguardState.GLANCEABLE_HUB &&
-                    (it.transitionState == TransitionState.STARTED ||
-                        it.transitionState == TransitionState.CANCELED)
+                (it.transitionState == TransitionState.STARTED ||
+                    it.transitionState == TransitionState.CANCELED)
             }
             .map { it.transitionState == TransitionState.STARTED }
 
@@ -82,15 +92,32 @@ constructor(
      * of UMO should be updated.
      */
     val isUmoOnCommunal: Flow<Boolean> =
-        merge(
-                lockscreenToGlanceableHubTransitionViewModel.showUmo,
-                glanceableHubToLockscreenTransitionViewModel.showUmo,
-                dreamToGlanceableHubTransitionViewModel.showUmo,
-                glanceableHubToDreamTransitionViewModel.showUmo,
-                showUmoFromOccludedToGlanceableHub,
-                showUmoFromGlanceableHubToOccluded,
+        anyOf(
+                communalSceneInteractor.isIdleOnCommunal,
+                allOf(
+                    // Only show UMO on the hub if the hub is at least partially visible. This
+                    // prevents
+                    // the UMO from being missing on the lock screen when going from the hub to lock
+                    // screen in some way other than through a direct transition, such as unlocking
+                    // from
+                    // the hub, then pressing power twice to go back to the lock screen.
+                    communalSceneInteractor.isCommunalVisible,
+                    merge(
+                            lockscreenToGlanceableHubTransitionViewModel.showUmo,
+                            glanceableHubToLockscreenTransitionViewModel.showUmo,
+                            dreamToGlanceableHubTransitionViewModel.showUmo,
+                            glanceableHubToDreamTransitionViewModel.showUmo,
+                            showUmoFromOccludedToGlanceableHub,
+                            showUmoFromGlanceableHubToOccluded,
+                        )
+                        .onStart { emit(false) }
+                )
             )
-            .distinctUntilChanged()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false
+            )
 
     /** Whether to show communal when exiting the occluded state. */
     val showCommunalFromOccluded: Flow<Boolean> = communalInteractor.showCommunalFromOccluded

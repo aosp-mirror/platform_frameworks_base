@@ -324,7 +324,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     fun showUdfpsOverlay_awake() =
         testScope.runTest {
             withReason(REASON_AUTH_KEYGUARD) {
-                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
                 powerRepository.updateWakefulness(
                     rawState = WakefulnessState.AWAKE,
                     lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -341,7 +340,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     fun showUdfpsOverlay_whileGoingToSleep() =
         testScope.runTest {
             withReasonSuspend(REASON_AUTH_KEYGUARD) {
-                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
                 keyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.OFF,
                     to = KeyguardState.GONE,
@@ -370,7 +368,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     fun showUdfpsOverlay_whileAsleep() =
         testScope.runTest {
             withReasonSuspend(REASON_AUTH_KEYGUARD) {
-                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
                 keyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.OFF,
                     to = KeyguardState.GONE,
@@ -399,7 +396,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     fun neverRemoveViewThatHasNotBeenAdded() =
         testScope.runTest {
             withReasonSuspend(REASON_AUTH_KEYGUARD) {
-                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
                 controllerOverlay.show(udfpsController, overlayParams)
                 val view = controllerOverlay.getTouchOverlay()
                 view?.let {
@@ -414,7 +410,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     fun showUdfpsOverlay_afterFinishedTransitioningToAOD() =
         testScope.runTest {
             withReasonSuspend(REASON_AUTH_KEYGUARD) {
-                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
                 keyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.OFF,
                     to = KeyguardState.GONE,
@@ -542,7 +537,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     fun addViewPending_layoutIsNotUpdated() =
         testScope.runTest {
             withReasonSuspend(REASON_AUTH_KEYGUARD) {
-                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
                 mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
 
                 // GIVEN going to sleep
@@ -580,7 +574,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     fun updateOverlayParams_viewLayoutUpdated() =
         testScope.runTest {
             withReasonSuspend(REASON_AUTH_KEYGUARD) {
-                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
                 powerRepository.updateWakefulness(
                     rawState = WakefulnessState.AWAKE,
                     lastWakeReason = WakeSleepReason.POWER_BUTTON,

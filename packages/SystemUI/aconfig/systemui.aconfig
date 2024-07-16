@@ -146,6 +146,16 @@ flag {
 }
 
 flag {
+   name: "notification_transparent_header_fix"
+   namespace: "systemui"
+   description: "fix the transparent group header issue for async header inflation."
+   bug: "340161724"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "pss_app_selector_abrupt_exit_fix"
    namespace: "systemui"
    description: "Fixes the app selector abruptly disappearing without an animation, when the"
@@ -214,6 +224,17 @@ flag {
         " before we discovered a resources threading issue, which we worked around by applying the"
         " same color as a tint to the background drawable of footer buttons."
     bug: "294830092"
+}
+
+flag {
+    name: "notification_group_hun_removal_animation_fix"
+    namespace: "systemui"
+    description: "Fix the lack of hun removal animation for group notifications"
+        "(not GROUP_ALERT_SUMMARY)"
+    bug: "343475993"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -421,10 +442,13 @@ flag {
 }
 
 flag {
-   name: "fast_unlock_transition"
+   name: "faster_unlock_transition"
    namespace: "systemui"
    description: "Faster wallpaper unlock transition"
    bug: "298186160"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -510,6 +534,16 @@ flag {
 }
 
 flag {
+    name: "use_volume_controller"
+    namespace: "systemui"
+    description: "Adds Volume Controller signals to the AudioRepository to update volume"
+    bug: "349348461"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "screenshot_action_dismiss_system_windows"
     namespace: "systemui"
     description: "Dismiss existing system windows when starting action from screenshot UI"
@@ -557,10 +591,13 @@ flag {
 }
 
 flag {
-    name: "screenshot_shelf_ui2"
+    name: "screenshot_save_image_exporter"
     namespace: "systemui"
-    description: "Use new shelf UI flow for screenshots"
-    bug: "329659738"
+    description: "Save all screenshots using ImageExporter"
+    bug: "352308052"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -790,13 +827,6 @@ flag {
 }
 
 flag {
-    name: "media_controls_refactor"
-    namespace: "systemui"
-    description: "Refactors media code to follow the recommended architecture"
-    bug: "326408371"
-}
-
-flag {
     name: "qs_tile_focus_state"
     namespace: "systemui"
     description: "enables new focus outline for qs tiles when focused on with physical keyboard"
@@ -864,6 +894,13 @@ flag {
 }
 
 flag {
+    name: "keyboard_touchpad_contextual_education"
+    namespace: "systemui"
+    description: "Allow showing education for physical keyboard and touchpad"
+    bug: "317496783"
+}
+
+flag {
   name: "dream_overlay_bouncer_swipe_direction_filtering"
   namespace: "systemui"
   description: "do not initiate bouncer swipe when the direction is opposite of the expansion"
@@ -878,16 +915,6 @@ flag {
     namespace: "systemui"
     description: "Pilfer at most once per input session"
     bug: "333596426"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    name: "shade_collapse_activity_launch_fix"
-    namespace: "systemui"
-    description: "Avoid collapsing the shade on activity launch if it is already collapsed, as this causes a flicker."
-    bug: "331591373"
     metadata {
       purpose: PURPOSE_BUGFIX
     }
@@ -1021,24 +1048,13 @@ flag {
 }
 
 flag {
-  name: "glanceable_hub_fullscreen_swipe"
+  name: "glanceable_hub_back_gesture"
   namespace: "systemui"
-  description: "Increase swipe area for gestures to bring in glanceable hub"
-  bug: "339665673"
-}
-
-flag {
-  name: "glanceable_hub_shortcut_button"
-  namespace: "systemui"
-  description: "Shows a button over the dream and lock screen to open the glanceable hub"
-  bug: "339667383"
-}
-
-flag {
-  name: "glanceable_hub_gesture_handle"
-  namespace: "systemui"
-  description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
-  bug: "339667383"
+  description: "Enables back gesture on the glanceable hub"
+  bug: "346331399"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -1049,27 +1065,20 @@ flag {
 }
 
 flag {
-  name: "glanceable_hub_animate_timer_activity_starts"
-  namespace: "systemui"
-  description: "Properly animates activity starts from live timers on the glanceable hub"
-  bug: "345741071"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "new_touchpad_gestures_tutorial"
-  namespace: "systemui"
-  description: "Enables new interactive tutorial for learning touchpad gestures"
-  bug: "309928033"
-}
-
-flag {
    name: "register_wallpaper_notifier_background"
    namespace: "systemui"
    description: "Decide whether to register wallpaper change broadcast receiver on background executor."
    bug: "327315860"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "enable_efficient_display_repository"
+   namespace: "systemui"
+   description: "Decide whether to use the new implementation of DisplayRepository that minimizes binder calls and background lock contention."
+   bug: "345472038"
    metadata {
      purpose: PURPOSE_BUGFIX
    }
@@ -1103,4 +1112,78 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+    name: "media_lockscreen_launch_animation"
+    namespace : "systemui"
+    description : "Enable the origin launch animation for UMO when opening on top of lockscreen."
+    bug : "346865769"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "expand_heads_up_on_inline_reply"
+  namespace: "systemui"
+  description: "Expands heads up notification when users clicks reply button and activate inline reply"
+  bug: "346976443"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "translucent_occluding_activity_fix"
+  namespace: "systemui"
+  description: "Fixes occlusion animation for transluent activities"
+  bug: "303010980"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+   namespace: "systemui"
+   name: "fetch_bookmarks_xml_keyboard_shortcuts"
+   description: "Fetches application launch keyboard shortcuts from system server rather than building a hardcoded list."
+   bug: "312452252"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+  namespace: "systemui"
+  name: "qs_register_setting_observer_on_bg_thread"
+  description: "Registers Quick Settings content providers on background thread"
+  bug: "351766769"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "sounddose_customization"
+  namespace: "systemui"
+  description: "Enables custom actions for sounddose notifications"
+  bug: "345227709"
+}
+
+flag {
+  namespace: "systemui"
+  name: "register_content_observers_async"
+  description: "Use new Async API to register content observers"
+  bug: "316922634"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "msdl_feedback"
+  namespace: "systemui"
+  description: "Enables MSDL feedback in SysUI surfaces."
+  bug: "352600066"
 }

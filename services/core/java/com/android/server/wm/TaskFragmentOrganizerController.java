@@ -46,7 +46,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
@@ -58,8 +57,8 @@ import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
@@ -146,13 +145,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         private final boolean mIsSystemOrganizer;
 
         /**
-         * {@link RemoteAnimationDefinition} for embedded activities transition animation that is
-         * organized by this organizer.
-         */
-        @Nullable
-        private RemoteAnimationDefinition mRemoteAnimationDefinition;
-
-        /**
          * Map from {@link TaskFragmentTransaction#getTransactionToken()} to the
          * {@link Transition#getSyncId()} that has been deferred. {@link TransitionController} will
          * wait until the organizer finished handling the {@link TaskFragmentTransaction}.
@@ -171,11 +163,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
         TaskFragmentOrganizerState(@NonNull ITaskFragmentOrganizer organizer, int pid, int uid,
                 boolean isSystemOrganizer) {
-            if (Flags.bundleClientTransactionFlag()) {
-                mAppThread = getAppThread(pid, uid);
-            } else {
-                mAppThread = null;
-            }
+            mAppThread = getAppThread(pid, uid);
             mOrganizer = organizer;
             mOrganizerPid = pid;
             mOrganizerUid = uid;
@@ -431,13 +419,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return;
             }
             try {
-                if (Flags.bundleClientTransactionFlag()) {
-                    // Dispatch through IApplicationThread to ensure the binder call is in order
-                    // with ClientTransaction.
-                    mAppThread.scheduleTaskFragmentTransaction(mOrganizer, transaction);
-                } else {
-                    mOrganizer.onTransactionReady(transaction);
-                }
+                // Dispatch through IApplicationThread to ensure the binder call is in order
+                // with ClientTransaction.
+                mAppThread.scheduleTaskFragmentTransaction(mOrganizer, transaction);
             } catch (RemoteException e) {
                 Slog.d(TAG, "Exception sending TaskFragmentTransaction", e);
                 return;
@@ -541,50 +525,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void registerRemoteAnimations(@NonNull ITaskFragmentOrganizer organizer,
-            @NonNull RemoteAnimationDefinition definition) {
-        final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
-        synchronized (mGlobalLock) {
-            ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
-                    "Register remote animations for organizer=%s uid=%d pid=%d",
-                    organizer.asBinder(), uid, pid);
-            final TaskFragmentOrganizerState organizerState =
-                    mTaskFragmentOrganizerState.get(organizer.asBinder());
-            if (organizerState == null) {
-                throw new IllegalStateException("The organizer hasn't been registered.");
-            }
-            if (organizerState.mRemoteAnimationDefinition != null) {
-                throw new IllegalStateException(
-                        "The organizer has already registered remote animations="
-                                + organizerState.mRemoteAnimationDefinition);
-            }
-
-            definition.setCallingPidUid(pid, uid);
-            organizerState.mRemoteAnimationDefinition = definition;
-        }
-    }
-
-    @Override
-    public void unregisterRemoteAnimations(@NonNull ITaskFragmentOrganizer organizer) {
-        final int pid = Binder.getCallingPid();
-        final long uid = Binder.getCallingUid();
-        synchronized (mGlobalLock) {
-            ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
-                    "Unregister remote animations for organizer=%s uid=%d pid=%d",
-                    organizer.asBinder(), uid, pid);
-            final TaskFragmentOrganizerState organizerState =
-                    mTaskFragmentOrganizerState.get(organizer.asBinder());
-            if (organizerState == null) {
-                Slog.e(TAG, "The organizer hasn't been registered.");
-                return;
-            }
-
-            organizerState.mRemoteAnimationDefinition = null;
-        }
-    }
-
-    @Override
     public void onTransactionHandled(@NonNull IBinder transactionToken,
             @NonNull WindowContainerTransaction wct,
             @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
@@ -622,25 +562,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
             mWindowOrganizerController.applyTaskFragmentTransactionLocked(wct, transitionType,
                     shouldApplyIndependently, remoteTransition);
-        }
-    }
-
-    /**
-     * Gets the {@link RemoteAnimationDefinition} set on the given organizer if exists. Returns
-     * {@code null} if it doesn't.
-     */
-    @Nullable
-    public RemoteAnimationDefinition getRemoteAnimationDefinition(
-            @NonNull ITaskFragmentOrganizer organizer) {
-        synchronized (mGlobalLock) {
-            final TaskFragmentOrganizerState organizerState =
-                    mTaskFragmentOrganizerState.get(organizer.asBinder());
-            if (organizerState == null) {
-                Slog.e(TAG, "TaskFragmentOrganizer has been unregistered or died when trying"
-                        + " to play animation on its organized windows.");
-                return null;
-            }
-            return organizerState.mRemoteAnimationDefinition;
         }
     }
 
@@ -1245,16 +1166,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                         event.mTaskFragmentToken);
             default:
                 throw new IllegalArgumentException("Unknown TaskFragmentEvent=" + event.mEventType);
-        }
-    }
-
-    @Override
-    public boolean isActivityEmbedded(IBinder activityToken) {
-        synchronized (mGlobalLock) {
-            final ActivityRecord activity = ActivityRecord.forTokenLocked(activityToken);
-            return activity != null
-                    ? activity.isEmbeddedInHostContainer()
-                    : false;
         }
     }
 

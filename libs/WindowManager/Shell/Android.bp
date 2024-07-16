@@ -88,7 +88,7 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--protolog-class com.android.internal.protolog.ProtoLog " +
         "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
         "--loggroups-jar $(location :wm_shell_protolog-groups) " +
         "--viewer-config-file-path /system_ext/etc/wmshell.protolog.pb " +
@@ -107,7 +107,7 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--protolog-class com.android.internal.protolog.ProtoLog " +
         "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
         "--loggroups-jar $(location :wm_shell_protolog-groups) " +
         "--viewer-config-type json " +
@@ -124,7 +124,7 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--protolog-class com.android.internal.protolog.ProtoLog " +
         "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
         "--loggroups-jar $(location :wm_shell_protolog-groups) " +
         "--viewer-config-type proto " +
@@ -190,6 +190,15 @@ java_library {
     ],
 }
 
+java_library {
+    name: "WindowManager-Shell-shared-desktopMode",
+
+    srcs: [
+        "shared/**/desktopmode/*.java",
+        "shared/**/desktopmode/*.kt",
+    ],
+}
+
 android_library {
     name: "WindowManager-Shell",
     srcs: [
@@ -215,7 +224,6 @@ android_library {
         "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
         "//frameworks/libs/systemui:iconloader_base",
         "com_android_wm_shell_flags_lib",
-        "com.android.window.flags.window-aconfig-java",
         "WindowManager-Shell-proto",
         "WindowManager-Shell-shared",
         "perfetto_trace_java_protos",
@@ -226,6 +234,10 @@ android_library {
         // Soong fails to automatically add this dependency because all the
         // *.kt sources are inside a filegroup.
         "kotlin-annotations",
+    ],
+    required: [
+        "wmshell.protolog.json.gz",
+        "wmshell.protolog.pb",
     ],
     kotlincflags: ["-Xjvm-default=all"],
     manifest: "AndroidManifest.xml",

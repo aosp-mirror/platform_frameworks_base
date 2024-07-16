@@ -210,4 +210,81 @@
             column="23"/>
     </issue>
 
+    <issue
+        id="FlaggedApi"
+        message="Method `NfcOemExtension()` is a flagged API and should be inside an `if (Flags.nfcOemExtension())` check (or annotate the surrounding method `NfcAdapter` with `@FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION) to transfer requirement to caller`)"
+        errorLine1="        mNfcOemExtension = new NfcOemExtension(mContext, this);"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
+            line="909"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Field `FLAG_SET_DEFAULT_TECH` is a flagged API and should be inside an `if (Flags.nfcSetDefaultDiscTech())` check (or annotate the surrounding method `setDiscoveryTechnology` with `@FlaggedApi(Flags.FLAG_NFC_SET_DEFAULT_DISC_TECH) to transfer requirement to caller`)"
+        errorLine1="                &amp;&amp; ((pollTechnology &amp; FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
+            line="1917"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Field `FLAG_SET_DEFAULT_TECH` is a flagged API and should be inside an `if (Flags.nfcSetDefaultDiscTech())` check (or annotate the surrounding method `setDiscoveryTechnology` with `@FlaggedApi(Flags.FLAG_NFC_SET_DEFAULT_DISC_TECH) to transfer requirement to caller`)"
+        errorLine1="                &amp;&amp; ((pollTechnology &amp; FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH"
+        errorLine2="                                                                ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
+            line="1917"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Field `FLAG_SET_DEFAULT_TECH` is a flagged API and should be inside an `if (Flags.nfcSetDefaultDiscTech())` check (or annotate the surrounding method `setDiscoveryTechnology` with `@FlaggedApi(Flags.FLAG_NFC_SET_DEFAULT_DISC_TECH) to transfer requirement to caller`)"
+        errorLine1="                || (listenTechnology &amp; FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH)) {"
+        errorLine2="                                       ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
+            line="1918"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Field `FLAG_SET_DEFAULT_TECH` is a flagged API and should be inside an `if (Flags.nfcSetDefaultDiscTech())` check (or annotate the surrounding method `setDiscoveryTechnology` with `@FlaggedApi(Flags.FLAG_NFC_SET_DEFAULT_DISC_TECH) to transfer requirement to caller`)"
+        errorLine1="                || (listenTechnology &amp; FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH)) {"
+        errorLine2="                                                                 ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
+            line="1918"
+            column="66"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Method `onVendorNciResponse()` is a flagged API and should be inside an `if (Flags.nfcVendorCmd())` check (or annotate the surrounding method `onVendorResponseReceived` with `@FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD) to transfer requirement to caller`)"
+        errorLine1="                    executor.execute(() -> callback.onVendorNciResponse(gid, oid, payload));"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcVendorNciCallbackListener.java"
+            line="88"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Method `onVendorNciNotification()` is a flagged API and should be inside an `if (Flags.nfcVendorCmd())` check (or annotate the surrounding method `onVendorNotificationReceived` with `@FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD) to transfer requirement to caller`)"
+        errorLine1="                    executor.execute(() -> callback.onVendorNciNotification(gid, oid, payload));"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcVendorNciCallbackListener.java"
+            line="106"
+            column="44"/>
+    </issue>
+
 </issues>

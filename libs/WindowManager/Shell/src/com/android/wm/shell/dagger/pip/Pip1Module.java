@@ -38,12 +38,10 @@ import com.android.wm.shell.common.pip.PipMediaController;
 import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
-import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.onehanded.OneHandedController;
-import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
@@ -79,7 +77,7 @@ import java.util.Optional;
 public abstract class Pip1Module {
     @WMSingleton
     @Provides
-    static Optional<Pip> providePip1(Context context,
+    static Optional<PipController.PipImpl> providePip1(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             ShellController shellController,
@@ -104,20 +102,16 @@ public abstract class Pip1Module {
             TabletopModeController pipTabletopController,
             Optional<OneHandedController> oneHandedController,
             @ShellMainThread ShellExecutor mainExecutor) {
-        if (PipUtils.isPip2ExperimentEnabled()) {
-            return Optional.empty();
-        } else {
-            return Optional.ofNullable(PipController.create(
-                    context, shellInit, shellCommandHandler, shellController,
-                    displayController, pipAnimationController, pipAppOpsListener,
-                    pipBoundsAlgorithm,
-                    pipKeepClearAlgorithm, pipBoundsState, pipDisplayLayoutState,
-                    pipMotionHelper, pipMediaController, phonePipMenuController, pipTaskOrganizer,
-                    pipTransitionState, pipTouchHandler, pipTransitionController,
-                    windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
-                    displayInsetsController, pipTabletopController, oneHandedController,
-                    mainExecutor));
-        }
+        return Optional.ofNullable(PipController.create(
+                context, shellInit, shellCommandHandler, shellController,
+                displayController, pipAnimationController, pipAppOpsListener,
+                pipBoundsAlgorithm,
+                pipKeepClearAlgorithm, pipBoundsState, pipDisplayLayoutState,
+                pipMotionHelper, pipMediaController, phonePipMenuController, pipTaskOrganizer,
+                pipTransitionState, pipTouchHandler, pipTransitionController,
+                windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
+                displayInsetsController, pipTabletopController, oneHandedController,
+                mainExecutor));
     }
 
     // Handler is used by Icon.loadDrawableAsync

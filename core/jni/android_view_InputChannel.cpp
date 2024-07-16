@@ -16,18 +16,22 @@
 
 #define LOG_TAG "InputChannel-JNI"
 
-#include "android-base/stringprintf.h"
-#include <nativehelper/JNIHelp.h>
-#include "nativehelper/scoped_utf_chars.h"
+#include "android_view_InputChannel.h"
+
 #include <android_runtime/AndroidRuntime.h>
 #include <binder/Parcel.h>
-#include <utils/Log.h>
+#include <com_android_input_flags.h>
 #include <input/InputTransport.h>
-#include "android_view_InputChannel.h"
+#include <nativehelper/JNIHelp.h>
+#include <utils/Log.h>
+
+#include "android-base/stringprintf.h"
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
-
 #include "core_jni_helpers.h"
+#include "nativehelper/scoped_utf_chars.h"
+
+namespace input_flags = com::android::input::flags;
 
 namespace android {
 
@@ -69,6 +73,9 @@ NativeInputChannel::~NativeInputChannel() {
 }
 
 void NativeInputChannel::setDisposeCallback(InputChannelObjDisposeCallback callback, void* data) {
+    if (input_flags::remove_input_channel_from_windowstate()) {
+        return;
+    }
     mDisposeCallback = callback;
     mDisposeData = data;
 }

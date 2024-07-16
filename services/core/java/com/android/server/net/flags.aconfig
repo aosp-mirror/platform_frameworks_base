@@ -17,3 +17,13 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "use_different_delays_for_background_chain"
+    namespace: "backstage_power"
+    description: "Grant longer grace periods for sensitive process-states before blocking network using the background chain"
+    bug: "323963467"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

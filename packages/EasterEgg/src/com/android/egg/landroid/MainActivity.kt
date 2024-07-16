@@ -17,6 +17,7 @@
 package com.android.egg.landroid
 
 import android.content.res.Resources
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -118,6 +119,26 @@ fun randomSeed(): Long {
         else -> Random.Default.nextLong().mod(10_000_000).toLong()
     }.absoluteValue
 }
+
+fun getDessertCode(): String =
+    when (Build.VERSION.SDK_INT) {
+        Build.VERSION_CODES.LOLLIPOP -> "LMP"
+        Build.VERSION_CODES.LOLLIPOP_MR1 -> "LM1"
+        Build.VERSION_CODES.M -> "MNC"
+        Build.VERSION_CODES.N -> "NYC"
+        Build.VERSION_CODES.N_MR1 -> "NM1"
+        Build.VERSION_CODES.O -> "OC"
+        Build.VERSION_CODES.P -> "PIE"
+        Build.VERSION_CODES.Q -> "QT"
+        Build.VERSION_CODES.R -> "RVC"
+        Build.VERSION_CODES.S -> "SC"
+        Build.VERSION_CODES.S_V2 -> "SC2"
+        Build.VERSION_CODES.TIRAMISU -> "TM"
+        Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> "UDC"
+        Build.VERSION_CODES.VANILLA_ICE_CREAM -> "VIC"
+        else -> Build.VERSION.RELEASE_OR_CODENAME.replace(Regex("[a-z]*"), "")
+    }
+
 
 val DEBUG_TEXT = mutableStateOf("Hello Universe")
 const val SHOW_DEBUG_TEXT = false
@@ -239,7 +260,8 @@ fun Telemetry(universe: VisibleUniverse) {
                 text =
                     (with(universe.star) {
                             listOf(
-                                "  STAR: $name (UDC-${universe.randomSeed % 100_000})",
+                                "  STAR: $name (${getDessertCode()}-" +
+                                    "${universe.randomSeed % 100_000})",
                                 " CLASS: ${cls.name}",
                                 "RADIUS: ${radius.toInt()}",
                                 "  MASS: %.3g".format(mass),

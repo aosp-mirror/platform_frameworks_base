@@ -48,7 +48,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;

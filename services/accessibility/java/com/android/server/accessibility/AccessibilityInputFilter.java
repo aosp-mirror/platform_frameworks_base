@@ -26,6 +26,7 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Region;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -158,6 +159,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     static final int FLAG_FEATURE_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP = 0x00001000;
 
+    /**
+     * Flag for enabling the Accessibility mouse key events feature.
+     *
+     * @see #setUserAndEnabledFeatures(int, int)
+     */
+    static final int FLAG_FEATURE_MOUSE_KEYS = 0x00002000;
+
     static final int FEATURES_AFFECTING_MOTION_EVENTS =
             FLAG_FEATURE_INJECT_MOTION_EVENTS
                     | FLAG_FEATURE_AUTOCLICK
@@ -188,6 +196,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private AutoclickController mAutoclickController;
 
     private KeyboardInterceptor mKeyboardInterceptor;
+
+    private MouseKeysInterceptor mMouseKeysInterceptor;
 
     private boolean mInstalled;
 
@@ -610,7 +620,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
     }
 
-    void notifyAccessibilityButtonClicked(int displayId) {
+    void notifyMagnificationShortcutTriggered(int displayId) {
         if (mMagnificationGestureHandler.size() != 0) {
             final MagnificationGestureHandler handler = mMagnificationGestureHandler.get(displayId);
             if (handler != null) {
@@ -733,6 +743,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             // default display.
             addFirstEventHandler(Display.DEFAULT_DISPLAY, mKeyboardInterceptor);
         }
+
+        if ((mEnabledFeatures & FLAG_FEATURE_MOUSE_KEYS) != 0) {
+            mMouseKeysInterceptor = new MouseKeysInterceptor(mAms,
+                    Looper.myLooper(),
+                    Display.DEFAULT_DISPLAY);
+            addFirstEventHandler(Display.DEFAULT_DISPLAY, mMouseKeysInterceptor);
+        }
     }
 
     /**
@@ -815,6 +832,11 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         if (mKeyboardInterceptor != null) {
             mKeyboardInterceptor.onDestroy();
             mKeyboardInterceptor = null;
+        }
+
+        if (mMouseKeysInterceptor != null) {
+            mMouseKeysInterceptor.onDestroy();
+            mMouseKeysInterceptor = null;
         }
     }
 
@@ -1087,21 +1109,15 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
     }
 
-    private boolean anyServiceWantsToObserveMotionEvent(MotionEvent event) {
-        // Disable SOURCE_TOUCHSCREEN generic event interception if any service is performing
-        // touch exploration.
-        if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)
-                && (mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
-            return false;
-        }
-        final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
-        return (mCombinedGenericMotionEventSources
-                        & mCombinedMotionEventObservedSources
-                        & eventSourceWithoutClass)
-                != 0;
-    }
-
     private boolean anyServiceWantsGenericMotionEvent(MotionEvent event) {
+        if (Flags.alwaysAllowObservingTouchEvents()) {
+            final boolean isTouchEvent = event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN);
+            if (isTouchEvent && !canShareGenericTouchEvent()) {
+                return false;
+            }
+            final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
+            return (mCombinedGenericMotionEventSources & eventSourceWithoutClass) != 0;
+        }
         // Disable SOURCE_TOUCHSCREEN generic event interception if any service is performing
         // touch exploration.
         if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)
@@ -1110,6 +1126,36 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
         final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
         return (mCombinedGenericMotionEventSources & eventSourceWithoutClass) != 0;
+    }
+
+    private boolean anyServiceWantsToObserveMotionEvent(MotionEvent event) {
+        if (Flags.alwaysAllowObservingTouchEvents()) {
+            final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
+            return (mCombinedMotionEventObservedSources & eventSourceWithoutClass) != 0;
+        }
+        // Disable SOURCE_TOUCHSCREEN generic event interception if any service is performing
+        // touch exploration.
+        if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)
+                && (mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
+            return false;
+        }
+        final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
+        return (mCombinedGenericMotionEventSources
+                & mCombinedMotionEventObservedSources
+                & eventSourceWithoutClass)
+                != 0;
+    }
+
+    private boolean canShareGenericTouchEvent() {
+        if ((mCombinedMotionEventObservedSources & InputDevice.SOURCE_TOUCHSCREEN) != 0) {
+            // Share touch events if a MotionEvent-observing service wants them.
+            return true;
+        }
+        if ((mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) == 0) {
+            // Share touch events if touch exploration is not enabled.
+            return true;
+        }
+        return false;
     }
 
     public void setCombinedGenericMotionEventSources(int sources) {

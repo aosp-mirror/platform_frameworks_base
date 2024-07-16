@@ -17,16 +17,21 @@
 package com.android.keyguard
 
 import android.content.Context
-import android.view.ViewGroup
-import com.android.systemui.res.R
+import android.view.View
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
+import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.StatusBarState.KEYGUARD
+import com.android.systemui.res.R
+import com.android.systemui.shared.R as sharedR
+import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.END
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.START
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.ViewIdToTranslate
+import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.unfold.SysUIUnfoldScope
-import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider
+import com.android.systemui.unfold.dagger.NaturalRotation
 import javax.inject.Inject
 
 /**
@@ -38,8 +43,10 @@ class KeyguardUnfoldTransition
 @Inject
 constructor(
     private val context: Context,
+    private val keyguardRootView: KeyguardRootView,
+    private val shadeWindowView: NotificationShadeWindowView,
     statusBarStateController: StatusBarStateController,
-    unfoldProgressProvider: NaturalRotationUnfoldProgressProvider,
+    @NaturalRotation unfoldProgressProvider: UnfoldTransitionProgressProvider,
 ) {
 
     /** Certain views only need to move if they are not currently centered */
@@ -50,27 +57,94 @@ constructor(
     private val filterKeyguard: () -> Boolean = { statusBarStateController.getState() == KEYGUARD }
 
     private val translateAnimator by lazy {
+        val smartSpaceViews = if (MigrateClocksToBlueprint.isEnabled) {
+            // Use scrollX instead of translationX as translation is already set by [AodBurnInLayer]
+            val scrollXTranslation = { view: View, translation: Float ->
+                view.scrollX = -translation.toInt()
+            }
+
+            setOf(
+                ViewIdToTranslate(
+                    viewId = sharedR.id.date_smartspace_view,
+                    direction = START,
+                    shouldBeAnimated = filterKeyguard,
+                    translateFunc = scrollXTranslation,
+                ),
+                ViewIdToTranslate(
+                    viewId = sharedR.id.bc_smartspace_view,
+                    direction = START,
+                    shouldBeAnimated = filterKeyguard,
+                    translateFunc = scrollXTranslation,
+                ),
+                ViewIdToTranslate(
+                    viewId = sharedR.id.weather_smartspace_view,
+                    direction = START,
+                    shouldBeAnimated = filterKeyguard,
+                    translateFunc = scrollXTranslation,
+                )
+            )
+        } else {
+            setOf(ViewIdToTranslate(
+                viewId = R.id.keyguard_status_area,
+                direction = START,
+                shouldBeAnimated = filterKeyguard,
+                translateFunc = { view, value ->
+                    (view as? KeyguardStatusAreaView)?.translateXFromUnfold = value
+                }
+            ))
+        }
+
         UnfoldConstantTranslateAnimator(
             viewsIdToTranslate =
                 setOf(
-                    ViewIdToTranslate(R.id.keyguard_status_area, START, filterKeyguard,
-                        { view, value ->
-                            (view as? KeyguardStatusAreaView)?.translateXFromUnfold = value
-                        }),
                     ViewIdToTranslate(
-                        R.id.lockscreen_clock_view_large, START, filterKeyguardAndSplitShadeOnly),
-                    ViewIdToTranslate(R.id.lockscreen_clock_view, START, filterKeyguard),
+                        viewId = R.id.lockscreen_clock_view_large,
+                        direction = START,
+                        shouldBeAnimated = filterKeyguardAndSplitShadeOnly
+                    ),
                     ViewIdToTranslate(
-                        R.id.notification_stack_scroller, END, filterKeyguardAndSplitShadeOnly),
-                    ViewIdToTranslate(R.id.start_button, START, filterKeyguard),
-                    ViewIdToTranslate(R.id.end_button, END, filterKeyguard)),
-            progressProvider = unfoldProgressProvider)
+                        viewId = R.id.lockscreen_clock_view,
+                        direction = START,
+                        shouldBeAnimated = filterKeyguard
+                    ),
+                    ViewIdToTranslate(
+                        viewId = R.id.notification_stack_scroller,
+                        direction = END,
+                        shouldBeAnimated = filterKeyguardAndSplitShadeOnly
+                    )
+                ) + smartSpaceViews,
+            progressProvider = unfoldProgressProvider
+        )
     }
 
-    /** Relies on the [parent] to locate views to translate. */
-    fun setup(parent: ViewGroup) {
+    private val shortcutButtonsAnimator by lazy {
+        UnfoldConstantTranslateAnimator(
+            viewsIdToTranslate =
+            setOf(
+                ViewIdToTranslate(
+                    viewId = R.id.start_button,
+                    direction = START,
+                    shouldBeAnimated = filterKeyguard
+                ),
+                ViewIdToTranslate(
+                    viewId = R.id.end_button,
+                    direction = END,
+                    shouldBeAnimated = filterKeyguard
+                )
+            ),
+            progressProvider = unfoldProgressProvider
+        )
+    }
+
+    /** Initializes the keyguard fold/unfold transition */
+    fun setup() {
         val translationMax =
             context.resources.getDimensionPixelSize(R.dimen.keyguard_unfold_translation_x).toFloat()
-        translateAnimator.init(parent, translationMax)
+
+        translateAnimator.init(shadeWindowView, translationMax)
+
+        // Use keyguard root view as there is another instance of start/end buttons with the same ID
+        // outside of the keyguard root view
+        shortcutButtonsAnimator.init(keyguardRootView, translationMax)
     }
 }

@@ -20,9 +20,9 @@ import android.hardware.display.AmbientDisplayConfiguration
 import android.os.PowerManager
 import android.provider.Settings.Secure.DOZE_DOUBLE_TAP_GESTURE
 import android.provider.Settings.Secure.DOZE_TAP_SCREEN_GESTURE
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dock.DockManager
@@ -49,7 +49,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class PulsingGestureListenerTest : SysuiTestCase() {

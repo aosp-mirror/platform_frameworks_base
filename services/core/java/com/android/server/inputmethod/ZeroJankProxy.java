@@ -254,7 +254,7 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
                 synchronized (ImfLock.class) {
                     ClientState cs = imms.getClientStateLocked(client);
                     if (cs != null) {
-                        imms.requestClientSessionLocked(cs);
+                        imms.requestClientSessionLocked(cs, userId);
                         imms.requestClientSessionForAccessibilityLocked(cs);
                     }
                 }
@@ -294,6 +294,12 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
     @Override
     public boolean isInputMethodPickerShownForTest() {
         return mInner.isInputMethodPickerShownForTest();
+    }
+
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @Override
+    public void onImeSwitchButtonClickFromSystem(int displayId) {
+        mInner.onImeSwitchButtonClickFromSystem(displayId);
     }
 
     @Override

@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.window.ActivityWindowInfo.getActivityWindowInfo;
 import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_OP_TYPE;
@@ -80,6 +81,7 @@ import android.window.ActivityWindowInfo;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOperation;
+import android.window.TaskFragmentOrganizer;
 import android.window.TaskFragmentParentInfo;
 import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
@@ -114,7 +116,6 @@ import java.util.function.BiConsumer;
 public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmentCallback,
         ActivityEmbeddingComponent, DividerPresenter.DragEventCallback {
     static final String TAG = "SplitController";
-    static final boolean ENABLE_SHELL_TRANSITIONS = true;
 
     // TODO(b/243518738): Move to WM Extensions if we have requirement of overlay without
     //  association. It's not set in WM Extensions nor Wm Jetpack library currently.
@@ -205,11 +206,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     /** Listener registered to {@link ClientTransactionListenerController}. */
     @GuardedBy("mLock")
-    @Nullable
+    @NonNull
     private final BiConsumer<IBinder, ActivityWindowInfo> mActivityWindowInfoListener =
-            Flags.activityWindowInfoFlag()
-                    ? this::onActivityWindowInfoChanged
-                    : null;
+            this::onActivityWindowInfoChanged;
 
     private final Handler mHandler;
     private final MainThreadExecutor mExecutor;
@@ -673,7 +672,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                         break;
                     case TYPE_TASK_FRAGMENT_VANISHED:
                         mPresenter.removeTaskFragmentInfo(info);
-                        onTaskFragmentVanished(wct, info);
+                        onTaskFragmentVanished(wct, info, taskId);
                         break;
                     case TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED:
                         onTaskFragmentParentInfoChanged(wct, taskId,
@@ -834,7 +833,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @VisibleForTesting
     @GuardedBy("mLock")
     void onTaskFragmentVanished(@NonNull WindowContainerTransaction wct,
-            @NonNull TaskFragmentInfo taskFragmentInfo) {
+            @NonNull TaskFragmentInfo taskFragmentInfo, int taskId) {
         final TaskFragmentContainer container = getContainer(taskFragmentInfo.getFragmentToken());
         if (container != null) {
             // Cleanup if the TaskFragment vanished is not requested by the organizer.
@@ -843,6 +842,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             updateContainersInTaskIfVisible(wct, container.getTaskId());
         }
         cleanupTaskFragment(taskFragmentInfo.getFragmentToken());
+        final TaskContainer taskContainer = getTaskContainer(taskId);
+        if (taskContainer != null) {
+            // Update the divider to clean up any decor surfaces.
+            updateDivider(wct, taskContainer, true /* isTaskFragmentVanished */);
+        }
     }
 
     /**
@@ -884,7 +888,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // The divider need to be updated even if shouldUpdateContainer is false, because the decor
         // surface may change in TaskFragmentParentInfo, which requires divider update but not
         // container update.
-        updateDivider(wct, taskContainer);
+        updateDivider(wct, taskContainer, false /* isTaskFragmentVanished */);
 
         // If the last direct activity of the host task is dismissed and there's an always-on-top
         // overlay container in the task, the overlay container should also be dismissed.
@@ -899,14 +903,23 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     void updateContainersInTaskIfVisible(@NonNull WindowContainerTransaction wct, int taskId) {
         final TaskContainer taskContainer = getTaskContainer(taskId);
-        if (taskContainer != null && taskContainer.isVisible()) {
+        if (taskContainer == null) {
+            return;
+        }
+
+        if (taskContainer.isVisible()) {
             updateContainersInTask(wct, taskContainer);
+        } else if (Flags.fixNoContainerUpdateWithoutResize()) {
+            // the TaskFragmentContainers need to be updated when the task becomes visible
+            taskContainer.mTaskFragmentContainersNeedsUpdate = true;
         }
     }
 
     @GuardedBy("mLock")
     private void updateContainersInTask(@NonNull WindowContainerTransaction wct,
             @NonNull TaskContainer taskContainer) {
+        taskContainer.mTaskFragmentContainersNeedsUpdate = false;
+
         // Update all TaskFragments in the Task. Make a copy of the list since some may be
         // removed on updating.
         final List<TaskFragmentContainer> containers = taskContainer.getTaskFragmentContainers();
@@ -2542,9 +2555,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return ActivityThread.currentActivityThread().getActivity(activityToken);
     }
 
-    @VisibleForTesting
     @Nullable
-    ActivityThread.ActivityClientRecord getActivityClientRecord(@NonNull Activity activity) {
+    private ActivityThread.ActivityClientRecord getActivityClientRecord(
+            @NonNull Activity activity) {
         return ActivityThread.currentActivityThread()
                 .getActivityClient(activity.getActivityToken());
     }
@@ -3081,22 +3094,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     @Override
     public boolean isActivityEmbedded(@NonNull Activity activity) {
-        Objects.requireNonNull(activity);
         synchronized (mLock) {
-            if (Flags.activityWindowInfoFlag()) {
-                final ActivityWindowInfo activityWindowInfo = getActivityWindowInfo(activity);
-                return activityWindowInfo != null && activityWindowInfo.isEmbedded();
-            }
-            return mPresenter.isActivityEmbedded(activity.getActivityToken());
+            return TaskFragmentOrganizer.isActivityEmbedded(activity);
         }
     }
 
     @Override
     public void setEmbeddedActivityWindowInfoCallback(@NonNull Executor executor,
             @NonNull Consumer<EmbeddedActivityWindowInfo> callback) {
-        if (!Flags.activityWindowInfoFlag()) {
-            return;
-        }
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
         synchronized (mLock) {
@@ -3110,9 +3115,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     public void clearEmbeddedActivityWindowInfoCallback() {
-        if (!Flags.activityWindowInfoFlag()) {
-            return;
-        }
         synchronized (mLock) {
             if (mEmbeddedActivityWindowInfoCallback == null) {
                 return;
@@ -3133,9 +3135,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @Nullable
     @Override
     public EmbeddedActivityWindowInfo getEmbeddedActivityWindowInfo(@NonNull Activity activity) {
-        if (!Flags.activityWindowInfoFlag()) {
-            return null;
-        }
         synchronized (mLock) {
             final ActivityWindowInfo activityWindowInfo = getActivityWindowInfo(activity);
             return activityWindowInfo != null
@@ -3164,15 +3163,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
             executor.execute(() -> callback.accept(info));
         }
-    }
-
-    @Nullable
-    private ActivityWindowInfo getActivityWindowInfo(@NonNull Activity activity) {
-        if (activity.isFinishing()) {
-            return null;
-        }
-        final ActivityThread.ActivityClientRecord record = getActivityClientRecord(activity);
-        return record != null ? record.getActivityWindowInfo() : null;
     }
 
     @NonNull
@@ -3257,12 +3247,15 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @GuardedBy("mLock")
-    void updateDivider(
-            @NonNull WindowContainerTransaction wct, @NonNull TaskContainer taskContainer) {
+    void updateDivider(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskContainer taskContainer, boolean isTaskFragmentVanished) {
         final DividerPresenter dividerPresenter = mDividerPresenters.get(taskContainer.getTaskId());
         final TaskFragmentParentInfo parentInfo = taskContainer.getTaskFragmentParentInfo();
-        dividerPresenter.updateDivider(
-                wct, parentInfo, taskContainer.getTopNonFinishingSplitContainer());
+        final SplitContainer topSplitContainer = taskContainer.getTopNonFinishingSplitContainer();
+        if (dividerPresenter != null) {
+            dividerPresenter.updateDivider(
+                    wct, parentInfo, topSplitContainer, isTaskFragmentVanished);
+        }
     }
 
     @Override
@@ -3292,6 +3285,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 final List<TaskFragmentContainer> containersToFinish = new ArrayList<>();
                 taskContainer.updateTopSplitContainerForDivider(
                         dividerPresenter, containersToFinish);
+                if (!containersToFinish.isEmpty()) {
+                    dividerPresenter.setHasContainersToFinish(true);
+                }
                 for (final TaskFragmentContainer container : containersToFinish) {
                     mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
                 }

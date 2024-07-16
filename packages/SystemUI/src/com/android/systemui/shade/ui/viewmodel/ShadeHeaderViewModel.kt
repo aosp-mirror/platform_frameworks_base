@@ -30,6 +30,9 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.SceneFamilies
+import com.android.systemui.scene.shared.model.TransitionKeys
 import com.android.systemui.shade.domain.interactor.PrivacyChipInteractor
 import com.android.systemui.shade.domain.interactor.ShadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -57,6 +60,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     context: Context,
     private val activityStarter: ActivityStarter,
+    private val sceneInteractor: SceneInteractor,
     shadeInteractor: ShadeInteractor,
     mobileIconsInteractor: MobileIconsInteractor,
     val mobileIconsViewModel: MobileIconsViewModel,
@@ -137,6 +141,15 @@ constructor(
     /** Notifies that the clock was clicked. */
     fun onClockClicked() {
         clockInteractor.launchClockActivity()
+    }
+
+    /** Notifies that the system icons container was clicked. */
+    fun onSystemIconContainerClicked() {
+        sceneInteractor.changeScene(
+            SceneFamilies.Home,
+            "ShadeHeaderViewModel.onSystemIconContainerClicked",
+            TransitionKeys.SlightlyFasterShadeCollapse,
+        )
     }
 
     /** Notifies that the shadeCarrierGroup was clicked. */

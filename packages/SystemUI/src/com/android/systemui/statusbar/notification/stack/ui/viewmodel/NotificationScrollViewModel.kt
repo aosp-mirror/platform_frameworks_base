@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 @SysUISingleton
@@ -69,10 +70,10 @@ constructor(
             ) { shadeExpansion, shadeMode, qsExpansion, transitionState, quickSettingsScene ->
                 when (transitionState) {
                     is ObservableTransitionState.Idle -> {
-                        if (transitionState.currentScene == Scenes.Lockscreen) {
-                            1f
-                        } else {
-                            shadeExpansion
+                        when (transitionState.currentScene) {
+                            Scenes.Lockscreen,
+                            Scenes.QuickSettings -> 1f
+                            else -> shadeExpansion
                         }
                     }
                     is ObservableTransitionState.Transition -> {
@@ -80,13 +81,19 @@ constructor(
                             (transitionState.fromScene in SceneFamilies.NotifShade &&
                                 transitionState.toScene == quickSettingsScene) ||
                                 (transitionState.fromScene in quickSettingsScene &&
-                                    transitionState.toScene in SceneFamilies.NotifShade)
+                                    transitionState.toScene in SceneFamilies.NotifShade) ||
+                                (transitionState.fromScene == Scenes.Lockscreen &&
+                                    transitionState.toScene in SceneFamilies.NotifShade) ||
+                                (transitionState.fromScene in SceneFamilies.NotifShade &&
+                                    transitionState.toScene == Scenes.Lockscreen)
                         ) {
                             1f
                         } else if (
                             shadeMode != ShadeMode.Split &&
-                                transitionState.fromScene in SceneFamilies.Home &&
-                                transitionState.toScene in quickSettingsScene
+                                (transitionState.fromScene in SceneFamilies.Home &&
+                                    transitionState.toScene == quickSettingsScene) ||
+                                (transitionState.fromScene == quickSettingsScene &&
+                                    transitionState.toScene in SceneFamilies.Home)
                         ) {
                             // during QS expansion, increase fraction at same rate as scrim alpha,
                             // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.
@@ -146,6 +153,7 @@ constructor(
 
     /** Receives the amount (px) that the stack should scroll due to internal expansion. */
     val syntheticScrollConsumer: (Float) -> Unit = stackAppearanceInteractor::setSyntheticScroll
+
     /**
      * Receives whether the current touch gesture is overscroll as it has already been consumed by
      * the stack.
@@ -155,8 +163,11 @@ constructor(
 
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =
-        sceneInteractor
-            .isCurrentSceneInFamily(SceneFamilies.NotifShade)
+        sceneInteractor.currentScene
+            .map {
+                sceneInteractor.isSceneInFamily(it, SceneFamilies.NotifShade) ||
+                    it == Scenes.Lockscreen
+            }
             .dumpWhileCollecting("isScrollable")
 
     /** Whether the notification stack is displayed in doze mode. */

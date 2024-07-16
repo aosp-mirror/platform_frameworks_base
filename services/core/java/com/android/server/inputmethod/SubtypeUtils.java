@@ -16,9 +16,11 @@
 
 package com.android.server.inputmethod;
 
+import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.LocaleList;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -100,7 +102,7 @@ final class SubtypeUtils {
         return subtypes;
     }
 
-    static boolean isValidSubtypeId(InputMethodInfo imi, int subtypeHashCode) {
+    static boolean isValidSubtypeHashCode(InputMethodInfo imi, int subtypeHashCode) {
         return getSubtypeIdFromHashCode(imi, subtypeHashCode) != NOT_A_SUBTYPE_ID;
     }
 
@@ -288,5 +290,55 @@ final class SubtypeUtils {
             }
         }
         return applicableSubtype;
+    }
+
+    /**
+     * Returns a {@link InputMethodSubtype} available in {@code imi} based on
+     * {@link Settings.Secure#SELECTED_INPUT_METHOD_SUBTYPE}.
+     *
+     * @param imi            {@link InputMethodInfo} to find out the current
+     *                       {@link InputMethodSubtype}
+     * @param settings       {@link InputMethodSettings} to be used to find out the current
+     *                       {@link InputMethodSubtype}
+     * @param currentSubtype the current value that will be used as fallback
+     * @return {@link InputMethodSubtype} to be used as the current {@link InputMethodSubtype}
+     */
+    @AnyThread
+    @Nullable
+    static InputMethodSubtype getCurrentInputMethodSubtype(
+            @NonNull InputMethodInfo imi, @NonNull InputMethodSettings settings,
+            @Nullable InputMethodSubtype currentSubtype) {
+        final int userId = settings.getUserId();
+        final int selectedSubtypeHashCode = SecureSettingsWrapper.getInt(
+                Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, NOT_A_SUBTYPE_ID, userId);
+        if (selectedSubtypeHashCode != NOT_A_SUBTYPE_ID && currentSubtype != null
+                && isValidSubtypeHashCode(imi, currentSubtype.hashCode())) {
+            return currentSubtype;
+        }
+
+        final int subtypeId = settings.getSelectedInputMethodSubtypeId(imi.getId());
+        if (subtypeId != NOT_A_SUBTYPE_ID) {
+            return imi.getSubtypeAt(subtypeId);
+        }
+
+        // If there are no selected subtypes, the framework will try to find the most applicable
+        // subtype from explicitly or implicitly enabled subtypes.
+        final List<InputMethodSubtype> subtypes = settings.getEnabledInputMethodSubtypeList(imi,
+                true);
+        if (subtypes.isEmpty()) {
+            return currentSubtype;
+        }
+        // If there is only one explicitly or implicitly enabled subtype,
+        // just returns it.
+        if (subtypes.size() == 1) {
+            return subtypes.get(0);
+        }
+        final String locale = SystemLocaleWrapper.get(userId).get(0).toString();
+        final var subtype = findLastResortApplicableSubtype(subtypes, SUBTYPE_MODE_KEYBOARD, locale,
+                true);
+        if (subtype != null) {
+            return subtype;
+        }
+        return findLastResortApplicableSubtype(subtypes, null, locale, true);
     }
 }

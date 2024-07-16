@@ -129,6 +129,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2630,13 +2631,17 @@ public final class InputMethodManager {
                 return false;
             }
             if (useDelegation) {
+                WeakReference<Executor> executorRef = new WeakReference<>(executor);
+                WeakReference<Consumer<Boolean>> callbackRef = new WeakReference<>(callback);
                 if (useCallback) {
                     IBooleanListener listener = new IBooleanListener.Stub() {
                         @Override
                         public void onResult(boolean value) {
-                            executor.execute(() -> {
-                                callback.accept(value);
-                            });
+                            Executor executor = executorRef.get();
+                            Consumer<Boolean> callback = callbackRef.get();
+                            if (executor != null && callback != null) {
+                                executor.execute(() -> callback.accept(value));
+                            }
                         }
                     };
                     if (!IInputMethodManagerGlobalInvoker.acceptStylusHandwritingDelegationAsync(
@@ -4346,6 +4351,20 @@ public final class InputMethodManager {
     @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     public boolean isInputMethodPickerShown() {
         return IInputMethodManagerGlobalInvoker.isInputMethodPickerShownForTest();
+    }
+
+    /**
+     * Called when the IME switch button was clicked from the system. Depending on the number of
+     * enabled IME subtypes, this will either switch to the next IME/subtype, or show the input
+     * method picker dialog.
+     *
+     * @param displayId The ID of the display where the input method picker dialog should be shown.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void onImeSwitchButtonClickFromSystem(int displayId) {
+        IInputMethodManagerGlobalInvoker.onImeSwitchButtonClickFromSystem(displayId);
     }
 
     /**

@@ -53,7 +53,7 @@ constructor(
     deviceEntryInteractor: DeviceEntryInteractor,
     communalInteractor: CommunalInteractor,
     shadeInteractor: ShadeInteractor,
-    val longPress: KeyguardLongPressViewModel,
+    val touchHandling: KeyguardTouchHandlingViewModel,
     val notifications: NotificationsPlaceholderViewModel,
 ) {
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =

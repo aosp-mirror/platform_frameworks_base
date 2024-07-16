@@ -61,6 +61,11 @@ public final class AutofillId implements Parcelable {
     }
 
     /** @hide */
+    public AutofillId(@NonNull AutofillId hostId, int virtualChildId, int sessionId) {
+        this(FLAG_IS_VIRTUAL_INT | FLAG_HAS_SESSION, hostId.mViewId, virtualChildId, sessionId);
+    }
+
+    /** @hide */
     @TestApi
     public AutofillId(@NonNull AutofillId hostId, long virtualChildId, int sessionId) {
         this(FLAG_IS_VIRTUAL_LONG | FLAG_HAS_SESSION, hostId.mViewId, virtualChildId, sessionId);
@@ -236,9 +241,9 @@ public final class AutofillId implements Parcelable {
     public String toString() {
         final StringBuilder builder = new StringBuilder().append(mViewId);
         if (isVirtualInt()) {
-            builder.append(':').append(mVirtualIntId);
+            builder.append(":i").append(mVirtualIntId);
         } else if (isVirtualLong()) {
-            builder.append(':').append(mVirtualLongId);
+            builder.append(":l").append(mVirtualLongId);
         }
 
         if (hasSession()) {

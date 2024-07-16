@@ -21,7 +21,6 @@ import androidx.compose.ui.geometry.isSpecified
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.Scene
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.TransitionState
@@ -33,7 +32,7 @@ internal class AnchoredTranslate(
 ) : PropertyTransformation<Offset> {
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: Scene,
+        scene: SceneKey,
         element: Element,
         sceneState: Element.SceneState,
         transition: TransitionState.Transition,
@@ -61,7 +60,7 @@ internal class AnchoredTranslate(
             anchorOffsetIn(transition.toScene) ?: throwException(transition.toScene)
         val offset = anchorToOffset - anchorFromOffset
 
-        return if (scene.key == transition.toScene) {
+        return if (scene == transition.toScene) {
             Offset(
                 value.x - offset.x,
                 value.y - offset.y,

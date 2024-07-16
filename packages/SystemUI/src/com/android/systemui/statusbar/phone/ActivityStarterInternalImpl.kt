@@ -40,8 +40,10 @@ class ActivityStarterInternalImpl @Inject constructor() : ActivityStarterInterna
         associatedView: View?,
         animationController: ActivityTransitionAnimator.Controller?,
         showOverLockscreen: Boolean,
+        skipLockscreenChecks: Boolean,
         fillInIntent: Intent?,
-        extraOptions: Bundle?
+        extraOptions: Bundle?,
+        customMessage: String?,
     ) {
         TODO("Not yet implemented b/308819693")
     }

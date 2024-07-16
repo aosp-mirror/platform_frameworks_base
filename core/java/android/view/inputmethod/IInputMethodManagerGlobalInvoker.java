@@ -29,9 +29,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.util.ExceptionUtils;
 import android.view.WindowManager;
 import android.window.ImeOnBackInvokedDispatcher;
 
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IBooleanListener;
 import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
@@ -48,6 +50,7 @@ import com.android.internal.view.IInputMethodManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -62,6 +65,10 @@ import java.util.function.Consumer;
  * a wrapper method in {@link InputMethodManagerGlobal} instead of making this class public.</p>
  */
 final class IInputMethodManagerGlobalInvoker {
+
+    /** The threshold in milliseconds for an {@link AndroidFuture} completion signal. */
+    private static final long TIMEOUT_MS = 10_000;
+
     @Nullable
     private static volatile IInputMethodManager sServiceCache = null;
 
@@ -458,6 +465,20 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    static void onImeSwitchButtonClickFromSystem(int displayId) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.onImeSwitchButtonClickFromSystem(displayId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
     @Nullable
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static InputMethodSubtype getCurrentInputMethodSubtype(@UserIdInt int userId) {
@@ -801,9 +822,13 @@ final class IInputMethodManagerGlobalInvoker {
             return;
         }
         try {
-            service.finishTrackingPendingImeVisibilityRequests();
+            final var completionSignal = new AndroidFuture<Void>();
+            service.finishTrackingPendingImeVisibilityRequests(completionSignal);
+            completionSignal.get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (Exception e) {
+            throw ExceptionUtils.propagate(e);
         }
     }
 

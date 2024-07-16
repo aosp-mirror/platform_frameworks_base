@@ -29,6 +29,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
@@ -63,6 +64,8 @@ public class AmbientState implements Dumpable {
      *  Used to read bouncer states.
      */
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private float mStackTop;
+    private float mStackCutoff;
     private int mScrollY;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
@@ -128,13 +131,13 @@ public class AmbientState implements Dumpable {
     /** Distance of top of notifications panel from top of screen. */
     private float mStackY = 0;
 
-    /** Height of notifications panel. */
+    /** Height of notifications panel interpolated by the expansion fraction. */
     private float mStackHeight = 0;
 
     /** Fraction of shade expansion. */
     private float mExpansionFraction;
 
-    /** Height of the notifications panel without top padding when expansion completes. */
+    /** Height of the notifications panel when expansion completes. */
     private float mStackEndHeight;
 
     /** Whether we are swiping up. */
@@ -173,8 +176,7 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @param stackEndHeight Height of the notifications panel without top padding
-     *                       when expansion completes.
+     * @see #getStackEndHeight()
      */
     public void setStackEndHeight(float stackEndHeight) {
         mStackEndHeight = stackEndHeight;
@@ -184,6 +186,7 @@ public class AmbientState implements Dumpable {
      * @param stackY Distance of top of notifications panel from top of screen.
      */
     public void setStackY(float stackY) {
+        SceneContainerFlag.assertInLegacyMode();
         mStackY = stackY;
     }
 
@@ -191,6 +194,7 @@ public class AmbientState implements Dumpable {
      * @return Distance of top of notifications panel from top of screen.
      */
     public float getStackY() {
+        SceneContainerFlag.assertInLegacyMode();
         return mStackY;
     }
 
@@ -252,14 +256,14 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @param stackHeight Height of notifications panel.
+     * @see #getStackHeight()
      */
     public void setStackHeight(float stackHeight) {
         mStackHeight = stackHeight;
     }
 
     /**
-     * @return Height of notifications panel.
+     * @return Height of notifications panel interpolated by the expansion fraction.
      */
     public float getStackHeight() {
         return mStackHeight;
@@ -344,6 +348,33 @@ public class AmbientState implements Dumpable {
      */
     public int getZDistanceBetweenElements() {
         return mZDistanceBetweenElements;
+    }
+
+    /** Y coordinate in view pixels of the top of the notification stack */
+    public float getStackTop() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mStackTop;
+    }
+
+    /** @see #getStackTop() */
+    public void setStackTop(float mStackTop) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        this.mStackTop = mStackTop;
+    }
+
+    /**
+     * Y coordinate in view pixels above which the bottom of the notification stack / shelf / footer
+     * must be.
+     */
+    public float getStackCutoff() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mStackCutoff;
+    }
+
+    /** @see #getStackCutoff() */
+    public void setStackCutoff(float stackCutoff) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        this.mStackCutoff = stackCutoff;
     }
 
     public int getScrollY() {
@@ -752,6 +783,8 @@ public class AmbientState implements Dumpable {
 
     @Override
     public void dump(PrintWriter pw, String[] args) {
+        pw.println("mStackTop=" + mStackTop);
+        pw.println("mStackCutoff" + mStackCutoff);
         pw.println("mTopPadding=" + mTopPadding);
         pw.println("mStackTopMargin=" + mStackTopMargin);
         pw.println("mStackTranslation=" + mStackTranslation);

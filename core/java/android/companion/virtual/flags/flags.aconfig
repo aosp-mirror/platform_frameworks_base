@@ -33,6 +33,20 @@ flag {
 
 flag {
      namespace: "virtual_devices"
+     name: "media_projection_keyguard_restrictions"
+     description: "Auto-stop MP when the device locks"
+     bug: "348335290"
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "virtual_display_insets"
+    description: "APIs for specifying virtual display insets (via cutout)"
+    bug: "350007135"
+}
+
+flag {
+     namespace: "virtual_devices"
      name: "metrics_collection"
      description: "Enable collection of VDM-related metrics"
      bug: "324842215"
@@ -41,9 +55,24 @@ flag {
 
 flag {
      namespace: "virtual_devices"
+     name: "activity_control_api"
+     description: "Enable APIs for fine grained activity policy, fallback and callbacks"
+     bug: "333443509"
+}
+
+flag {
+     namespace: "virtual_devices"
      name: "camera_device_awareness"
      description: "Enable device awareness in camera service"
      bug: "305170199"
+}
+
+flag {
+    name: "virtual_rotary"
+    is_exported: true
+    namespace: "virtual_devices"
+    description: "Enable virtual rotary input"
+    bug: "320328752"
 }
 
 flag {
@@ -73,4 +102,18 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "virtual_display_rotation_api"
+    description: "API for on-demand rotation of virtual displays"
+    bug: "291748430"
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "high_resolution_scroll"
+    description: "Enable high resolution scroll"
+    bug: "335160780"
 }

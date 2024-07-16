@@ -63,8 +63,8 @@ import java.util.concurrent.TimeUnit;
  * A class that allows the app to get the frame metrics from HardwareRendererObserver.
  * @hide
  */
-public class FrameTracker extends SurfaceControl.OnJankDataListener
-        implements HardwareRendererObserver.OnFrameMetricsAvailableListener {
+public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvailableListener,
+         SurfaceControl.OnJankDataListener {
     private static final String TAG = "FrameTracker";
 
     private static final long INVALID_ID = -1;
@@ -118,6 +118,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     public final boolean mSurfaceOnly;
 
     private SurfaceControl mSurfaceControl;
+    private SurfaceControl.OnJankDataListenerRegistration mJankDataListenerRegistration;
     private long mBeginVsyncId = INVALID_ID;
     private long mEndVsyncId = INVALID_ID;
     private boolean mMetricsFinalized;
@@ -316,7 +317,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, name, name, (int) mBeginVsyncId);
         markEvent("FT#beginVsync", mBeginVsyncId);
         markEvent("FT#layerId", mSurfaceControl.getLayerId());
-        mSurfaceControlWrapper.addJankStatsListener(this, mSurfaceControl);
+        mJankDataListenerRegistration =
+                mSurfaceControlWrapper.addJankStatsListener(this, mSurfaceControl);
         if (!mSurfaceOnly) {
             mRendererWrapper.addObserver(mObserver);
         }
@@ -342,6 +344,10 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             markEvent("FT#endVsync", mEndVsyncId);
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, name, (int) mBeginVsyncId);
 
+            if (mJankDataListenerRegistration != null) {
+                mJankDataListenerRegistration.removeAfter(mEndVsyncId);
+            }
+
             // We don't remove observer here,
             // will remove it when all the frame metrics in this duration are called back.
             // See onFrameMetricsAvailable for the logic of removing the observer.
@@ -358,6 +364,9 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                     // Send a flush jank data transaction.
                     if (mSurfaceControl != null && mSurfaceControl.isValid()) {
                         SurfaceControl.Transaction.sendSurfaceFlushJankData(mSurfaceControl);
+                        if (mJankDataListenerRegistration != null) {
+                            mJankDataListenerRegistration.flush();
+                        }
                     }
 
                     long delay;
@@ -680,7 +689,10 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     @VisibleForTesting
     @UiThread
     public void removeObservers() {
-        mSurfaceControlWrapper.removeJankStatsListener(this);
+        if (mJankDataListenerRegistration != null) {
+            mJankDataListenerRegistration.release();
+            mJankDataListenerRegistration = null;
+        }
         if (!mSurfaceOnly) {
             // HWUI part.
             mRendererWrapper.removeObserver(mObserver);
@@ -796,14 +808,10 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     }
 
     public static class SurfaceControlWrapper {
-
-        public void addJankStatsListener(SurfaceControl.OnJankDataListener listener,
-                SurfaceControl surfaceControl) {
-            SurfaceControl.addJankDataListener(listener, surfaceControl);
-        }
-
-        public void removeJankStatsListener(SurfaceControl.OnJankDataListener listener) {
-            SurfaceControl.removeJankDataListener(listener);
+        /** adds the jank listener to the given surface */
+        public SurfaceControl.OnJankDataListenerRegistration addJankStatsListener(
+                SurfaceControl.OnJankDataListener listener, SurfaceControl surfaceControl) {
+            return surfaceControl.addJankDataListener(listener);
         }
     }
 

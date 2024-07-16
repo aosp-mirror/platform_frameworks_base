@@ -16,8 +16,8 @@
 
 package com.android.keyguard
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.power.shared.model.ScreenPowerState
 import kotlinx.coroutines.cancelChildren
@@ -29,7 +29,7 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class KeyguardStatusViewControllerWithCoroutinesTest : KeyguardStatusViewControllerBaseTest() {

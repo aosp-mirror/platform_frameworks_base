@@ -93,6 +93,7 @@ constructor(
         @VisibleForTesting internal const val TILE_STATE_RES_PREFIX = "tile_states_"
         @VisibleForTesting internal const val LONG_PRESS_EFFECT_WIDTH_SCALE = 1.1f
         @VisibleForTesting internal const val LONG_PRESS_EFFECT_HEIGHT_SCALE = 1.2f
+        internal val EMPTY_RECT = Rect()
     }
 
     private val icon: QSIconViewImpl = QSIconViewImpl(context)
@@ -350,6 +351,10 @@ constructor(
 
         initialLongPressProperties?.width = width
         finalLongPressProperties?.width = LONG_PRESS_EFFECT_WIDTH_SCALE * width
+
+        val deltaW = (LONG_PRESS_EFFECT_WIDTH_SCALE - 1f) * width
+        paddingForLaunch.left = -deltaW.toInt() / 2
+        paddingForLaunch.right = deltaW.toInt() / 2
     }
 
     private fun maybeUpdateLongPressEffectHeight(height: Float) {
@@ -357,6 +362,10 @@ constructor(
 
         initialLongPressProperties?.height = height
         finalLongPressProperties?.height = LONG_PRESS_EFFECT_HEIGHT_SCALE * height
+
+        val deltaH = (LONG_PRESS_EFFECT_HEIGHT_SCALE - 1f) * height
+        paddingForLaunch.top = -deltaH.toInt() / 2
+        paddingForLaunch.bottom = deltaH.toInt() / 2
     }
 
     override fun onFocusChanged(gainFocus: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
@@ -378,6 +387,7 @@ constructor(
             // The launch animation of a long-press effect did not reset the long-press effect so
             // we must do it here
             resetLongPressEffectProperties()
+            longPressEffect.resetState()
         }
         val actualHeight =
             if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
@@ -432,12 +442,14 @@ constructor(
         longPressEffect?.callback =
             object : QSLongPressEffect.Callback {
 
-                override fun onPrepareForLaunch() {
-                    prepareForLaunch()
-                }
-
                 override fun onResetProperties() {
                     resetLongPressEffectProperties()
+                }
+
+                override fun onEffectFinishedReversing() {
+                    // The long-press effect properties finished at the same starting point.
+                    // This is the same as if the properties were reset
+                    haveLongPressPropertiesBeenReset = true
                 }
 
                 override fun onStartAnimator() {
@@ -761,11 +773,14 @@ constructor(
         lastIconTint = icon.getColor(state)
 
         // Long-press effects
+        longPressEffect?.qsTile?.state?.handlesLongClick = state.handlesLongClick
         if (
             state.handlesLongClick &&
                 longPressEffect?.initializeEffect(longPressEffectDuration) == true
         ) {
             showRippleEffect = false
+            longPressEffect.qsTile?.state?.state = lastState // Store the tile's state
+            longPressEffect.resetState()
             initializeLongPressProperties(measuredHeight, measuredWidth)
         } else {
             // Long-press effects might have been enabled before but the new state does not
@@ -896,12 +911,13 @@ constructor(
     }
 
     override fun onActivityLaunchAnimationEnd() {
+        longPressEffect?.resetState()
         if (longPressEffect != null && !haveLongPressPropertiesBeenReset) {
             resetLongPressEffectProperties()
         }
     }
 
-    fun prepareForLaunch() {
+    private fun prepareForLaunch() {
         val startingHeight = initialLongPressProperties?.height?.toInt() ?: 0
         val startingWidth = initialLongPressProperties?.width?.toInt() ?: 0
         val deltaH = finalLongPressProperties?.height?.minus(startingHeight)?.toInt() ?: 0
@@ -912,7 +928,12 @@ constructor(
         paddingForLaunch.bottom = deltaH / 2
     }
 
-    override fun getPaddingForLaunchAnimation(): Rect = paddingForLaunch
+    override fun getPaddingForLaunchAnimation(): Rect =
+        if (longPressEffect?.state == QSLongPressEffect.State.LONG_CLICKED) {
+            paddingForLaunch
+        } else {
+            EMPTY_RECT
+        }
 
     fun updateLongPressEffectProperties(effectProgress: Float) {
         if (!isLongClickable || longPressEffect == null) return
@@ -1043,6 +1064,7 @@ constructor(
                 getOverlayColorForState(Tile.STATE_ACTIVE),
                 Utils.getColorAttrDefaultColor(context, R.attr.onShadeActive),
             )
+        prepareForLaunch()
     }
 
     private fun changeCornerRadius(radius: Float) {

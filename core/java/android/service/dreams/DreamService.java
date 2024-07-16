@@ -19,6 +19,7 @@ package android.service.dreams;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.service.dreams.Flags.dreamHandlesBeingObscured;
+import static android.service.dreams.Flags.startAndStopDozingInBackground;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
@@ -182,6 +183,7 @@ public class DreamService extends Service implements Window.Callback {
 
     /**
      * The name of the dream manager service.
+     *
      * @hide
      */
     public static final String DREAM_SERVICE = "dreams";
@@ -222,12 +224,14 @@ public class DreamService extends Service implements Window.Callback {
 
     /**
      * Dream category for Low Light Dream
+     *
      * @hide
      */
     public static final int DREAM_CATEGORY_LOW_LIGHT = 1 << 0;
 
     /**
      * Dream category for Home Panel Dream
+     *
      * @hide
      */
     public static final int DREAM_CATEGORY_HOME_PANEL = 1 << 1;
@@ -295,7 +299,8 @@ public class DreamService extends Service implements Window.Callback {
         void init(Context context);
 
         /** Creates and returns the dream overlay connection */
-        DreamOverlayConnectionHandler createOverlayConnection(ComponentName overlayComponent);
+        DreamOverlayConnectionHandler createOverlayConnection(ComponentName overlayComponent,
+                Runnable onDisconnected);
 
         /** Returns the {@link DreamActivity} component */
         ComponentName getDreamActivityComponent();
@@ -333,16 +338,15 @@ public class DreamService extends Service implements Window.Callback {
 
         @Override
         public DreamOverlayConnectionHandler createOverlayConnection(
-                ComponentName overlayComponent) {
+                ComponentName overlayComponent,
+                Runnable onDisconnected) {
             final Resources resources = mContext.getResources();
 
             return new DreamOverlayConnectionHandler(
                     /* context= */ mContext,
                     Looper.getMainLooper(),
                     new Intent().setComponent(overlayComponent),
-                    resources.getInteger(R.integer.config_minDreamOverlayDurationMs),
-                    resources.getInteger(R.integer.config_dreamOverlayMaxReconnectAttempts),
-                    resources.getInteger(R.integer.config_dreamOverlayReconnectTimeoutMs));
+                    onDisconnected);
         }
 
         @Override
@@ -738,7 +742,9 @@ public class DreamService extends Service implements Window.Callback {
      * @see View#findViewById(int)
      * @see DreamService#requireViewById(int)
      */
-    @Nullable
+    // Strictly speaking this should be marked as @Nullable but the nullability of the return value
+    // is deliberately left unspecified as idiomatically correct code can make assumptions either
+    // way based on local context, e.g. layout specification.
     public <T extends View> T findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
     }
@@ -920,9 +926,16 @@ public class DreamService extends Service implements Window.Callback {
 
         if (mDozing) {
             try {
-                mDreamManager.startDozing(
+                if (startAndStopDozingInBackground()) {
+                    mDreamManager.startDozingOneway(
                         mDreamToken, mDozeScreenState, mDozeScreenStateReason,
                         mDozeScreenBrightness);
+                } else {
+                    mDreamManager.startDozing(
+                            mDreamToken, mDozeScreenState, mDozeScreenStateReason,
+                            mDozeScreenBrightness);
+                }
+
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -1176,7 +1189,8 @@ public class DreamService extends Service implements Window.Callback {
 
         // Connect to the overlay service if present.
         if (!mWindowless && overlayComponent != null) {
-            mOverlayConnection = mInjector.createOverlayConnection(overlayComponent);
+            mOverlayConnection = mInjector.createOverlayConnection(overlayComponent,
+                    this::finish);
 
             if (!mOverlayConnection.bind()) {
                 // Binding failed.
@@ -1246,7 +1260,11 @@ public class DreamService extends Service implements Window.Callback {
         try {
             // finishSelf will unbind the dream controller from the dream service. This will
             // trigger DreamService.this.onDestroy and DreamService.this will die.
-            mDreamManager.finishSelf(mDreamToken, true /*immediate*/);
+            if (startAndStopDozingInBackground()) {
+                mDreamManager.finishSelfOneway(mDreamToken, true /*immediate*/);
+            } else {
+                mDreamManager.finishSelf(mDreamToken, true /*immediate*/);
+            }
         } catch (RemoteException ex) {
             // system server died
         }
@@ -1389,7 +1407,8 @@ public class DreamService extends Service implements Window.Callback {
                         convertToComponentName(
                                 rawMetadata.getString(
                                         com.android.internal.R.styleable.Dream_settingsActivity),
-                                serviceInfo),
+                                serviceInfo,
+                                packageManager),
                         rawMetadata.getDrawable(
                                 com.android.internal.R.styleable.Dream_previewImage),
                         rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
@@ -1404,26 +1423,38 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     @Nullable
-    private static ComponentName convertToComponentName(@Nullable String flattenedString,
-            ServiceInfo serviceInfo) {
+    private static ComponentName convertToComponentName(
+            @Nullable String flattenedString,
+            ServiceInfo serviceInfo,
+            PackageManager packageManager) {
         if (flattenedString == null) {
             return null;
         }
 
-        if (!flattenedString.contains("/")) {
-            return new ComponentName(serviceInfo.packageName, flattenedString);
+        final ComponentName cn =
+                flattenedString.contains("/")
+                        ? ComponentName.unflattenFromString(flattenedString)
+                        : new ComponentName(serviceInfo.packageName, flattenedString);
+
+        if (cn == null) {
+            return null;
         }
 
         // Ensure that the component is from the same package as the dream service. If not,
         // treat the component as invalid and return null instead.
-        final ComponentName cn = ComponentName.unflattenFromString(flattenedString);
-        if (cn == null) return null;
         if (!cn.getPackageName().equals(serviceInfo.packageName)) {
             Log.w(TAG,
                     "Inconsistent package name in component: " + cn.getPackageName()
                             + ", should be: " + serviceInfo.packageName);
             return null;
         }
+
+        // Ensure that the activity exists. If not, treat the component as invalid and return null.
+        if (new Intent().setComponent(cn).resolveActivityInfo(packageManager, 0) == null) {
+            Log.w(TAG, "Dream settings activity not found: " + cn);
+            return null;
+        }
+
         return cn;
     }
 

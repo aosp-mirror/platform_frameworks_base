@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -49,6 +50,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.touch.scrim.ScrimController;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.FakeUserTracker;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shared.system.InputChannelCompat;
@@ -113,6 +115,9 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     LockPatternUtils mLockPatternUtils;
 
     @Mock
+    ActivityStarter mActivityStarter;
+
+    @Mock
     Region mRegion;
 
     @Captor
@@ -148,7 +153,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 mFlingAnimationUtilsClosing,
                 TOUCH_REGION,
                 MIN_BOUNCER_HEIGHT,
-                mUiEventLogger);
+                mUiEventLogger,
+                mActivityStarter);
 
         when(mScrimManager.getCurrentController()).thenReturn(mScrimController);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
@@ -397,7 +403,12 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 .isTrue();
         // We should not expand since the keyguard is not secure
         verify(mScrimController, never()).expand(any());
-        // Since we are swiping up, we should wake from dreams.
+
+        // Since we are swiping up, we should dismiss the keyguard and wake from dreams.
+        ArgumentCaptor<Runnable> dismissKeyguardRunnable = ArgumentCaptor.forClass(Runnable.class);
+        verify(mActivityStarter).executeRunnableDismissingKeyguard(
+                dismissKeyguardRunnable.capture(), isNull(), eq(true), eq(true), eq(false));
+        dismissKeyguardRunnable.getValue().run();
         verify(mCentralSurfaces).awakenDreams();
     }
 

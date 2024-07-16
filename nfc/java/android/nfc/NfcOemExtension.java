@@ -141,6 +141,34 @@ public final class NfcOemExtension {
         }
     }
 
+    /**
+     * Get the screen state from system and set it to current screen state.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void synchronizeScreenState() {
+        try {
+            NfcAdapter.sService.setScreenState();
+        } catch (RemoteException e) {
+            mAdapter.attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Check if the firmware needs updating.
+     *
+     * <p>If an update is needed, a firmware will be triggered when NFC is disabled.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void maybeTriggerFirmwareUpdate() {
+        try {
+            NfcAdapter.sService.checkFirmware();
+        } catch (RemoteException e) {
+            mAdapter.attemptDeadServiceRecovery(e);
+        }
+    }
+
     private final class NfcOemExtensionCallback extends INfcOemExtensionCallback.Stub {
         @Override
         public void onTagConnected(boolean connected, Tag tag) throws RemoteException {

@@ -44,8 +44,9 @@ public abstract class AudioManagerInternal {
      * Add the UID for a new assistant service
      *
      * @param uid UID of the newly available assistants
+     * @param owningUid UID of the actual assistant app, if {@code uid} is a isolated proc
      */
-    public abstract void addAssistantServiceUid(int uid);
+    public abstract void addAssistantServiceUid(int uid, int owningUid);
 
     /**
      * Remove the UID for an existing assistant service

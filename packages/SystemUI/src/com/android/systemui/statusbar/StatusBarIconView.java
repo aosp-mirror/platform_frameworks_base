@@ -69,7 +69,6 @@ import com.android.systemui.util.drawable.DrawableSize;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -148,11 +147,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     @VisibleForTesting float mScaleToFitNewIconSize = 1;
     private StatusBarIcon mIcon;
     @ViewDebug.ExportedProperty private String mSlot;
-    private Drawable mNumberBackground;
-    private Paint mNumberPain;
-    private int mNumberX;
-    private int mNumberY;
-    private String mNumberText;
     private StatusBarNotification mNotification;
     private final boolean mBlocked;
     private Configuration mConfiguration;
@@ -201,10 +195,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mDozer = new NotificationDozeHelper();
         mBlocked = blocked;
         mSlot = slot;
-        mNumberPain = new Paint();
-        mNumberPain.setTextAlign(Paint.Align.CENTER);
-        mNumberPain.setColor(context.getColor(R.drawable.notification_number_text_color));
-        mNumberPain.setAntiAlias(true);
         setNotification(sbn);
         setScaleType(ScaleType.CENTER);
         mConfiguration = new Configuration(context.getResources().getConfiguration());
@@ -410,8 +400,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 && mIcon.iconLevel == icon.iconLevel;
         final boolean visibilityEquals = mIcon != null
                 && mIcon.visible == icon.visible;
-        final boolean numberEquals = mIcon != null
-                && mIcon.number == icon.number;
         mIcon = icon.clone();
         setContentDescription(icon.contentDescription);
         if (!iconEquals) {
@@ -425,20 +413,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             setImageLevel(icon.iconLevel);
         }
 
-        if (!numberEquals) {
-            if (icon.number > 0 && getContext().getResources().getBoolean(
-                        R.bool.config_statusBarShowNumber)) {
-                if (mNumberBackground == null) {
-                    mNumberBackground = getContext().getResources().getDrawable(
-                            R.drawable.ic_notification_overlay);
-                }
-                placeNumber();
-            } else {
-                mNumberBackground = null;
-                mNumberText = null;
-            }
-            invalidate();
-        }
         if (!visibilityEquals) {
             setVisibility(icon.visible && !mBlocked ? VISIBLE : GONE);
         }
@@ -568,14 +542,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        if (mNumberBackground != null) {
-            placeNumber();
-        }
-    }
-
-    @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
         super.onRtlPropertiesChanged(layoutDirection);
         updateDrawable();
@@ -609,10 +575,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             canvas.restore();
         }
 
-        if (mNumberBackground != null) {
-            mNumberBackground.draw(canvas);
-            canvas.drawText(mNumberText, mNumberX, mNumberY, mNumberPain);
-        }
         if (mDotAppearAmount != 0.0f) {
             float radius;
             float alpha = Color.alpha(mDecorColor) / 255.f;
@@ -638,39 +600,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         super.debug(depth);
         Log.d("View", debugIndent(depth) + "slot=" + mSlot);
         Log.d("View", debugIndent(depth) + "icon=" + mIcon);
-    }
-
-    void placeNumber() {
-        final String str;
-        final int tooBig = getContext().getResources().getInteger(
-                android.R.integer.status_bar_notification_info_maxnum);
-        if (mIcon.number > tooBig) {
-            str = getContext().getResources().getString(
-                        android.R.string.status_bar_notification_info_overflow);
-        } else {
-            NumberFormat f = NumberFormat.getIntegerInstance();
-            str = f.format(mIcon.number);
-        }
-        mNumberText = str;
-
-        final int w = getWidth();
-        final int h = getHeight();
-        final Rect r = new Rect();
-        mNumberPain.getTextBounds(str, 0, str.length(), r);
-        final int tw = r.right - r.left;
-        final int th = r.bottom - r.top;
-        mNumberBackground.getPadding(r);
-        int dw = r.left + tw + r.right;
-        if (dw < mNumberBackground.getMinimumWidth()) {
-            dw = mNumberBackground.getMinimumWidth();
-        }
-        mNumberX = w-r.right-((dw-r.right-r.left)/2);
-        int dh = r.top + th + r.bottom;
-        if (dh < mNumberBackground.getMinimumWidth()) {
-            dh = mNumberBackground.getMinimumWidth();
-        }
-        mNumberY = h-r.bottom-((dh-r.top-th-r.bottom)/2);
-        mNumberBackground.setBounds(w-dw, h-dh, w, h);
     }
 
     @Override

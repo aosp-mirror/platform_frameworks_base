@@ -59,6 +59,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.view.OneShotPreDrawListener;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
@@ -68,7 +69,6 @@ import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -127,6 +127,7 @@ import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
+import com.android.systemui.statusbar.phone.HeadsUpNotificationViewControllerEmptyImpl;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -169,6 +170,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final HeadsUpManager mHeadsUpManager;
+    private HeadsUpTouchHelper mHeadsUpTouchHelper;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
     private final TunerService mTunerService;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -707,6 +709,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             NotificationVisibilityProvider visibilityProvider,
             NotificationWakeUpCoordinator wakeUpCoordinator,
             HeadsUpManager headsUpManager,
+            Provider<IStatusBarService> statusBarService,
             NotificationRoundnessManager notificationRoundnessManager,
             TunerService tunerService,
             DeviceProvisionedController deviceProvisionedController,
@@ -759,6 +762,14 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mVisibilityProvider = visibilityProvider;
         mWakeUpCoordinator = wakeUpCoordinator;
         mHeadsUpManager = headsUpManager;
+        if (SceneContainerFlag.isEnabled()) {
+            mHeadsUpTouchHelper = new HeadsUpTouchHelper(
+                    mHeadsUpManager,
+                    statusBarService.get(),
+                    getHeadsUpCallback(),
+                    new HeadsUpNotificationViewControllerEmptyImpl()
+            );
+        }
         mNotificationRoundnessManager = notificationRoundnessManager;
         mTunerService = tunerService;
         mDeviceProvisionedController = deviceProvisionedController;
@@ -993,6 +1004,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public int getRight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getRight();
     }
 
@@ -1004,6 +1016,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * @return the left of the view.
      */
     public int getLeft() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getLeft();
     }
 
@@ -1011,6 +1024,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * @return the top of the view.
      */
     public int getTop() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getTop();
     }
 
@@ -1018,6 +1032,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * @return the bottom of the view.
      */
     public int getBottom() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getBottom();
     }
 
@@ -1053,6 +1068,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public void setOverscrollTopChangedListener(
             OnOverscrollTopChangedListener listener) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setOverscrollTopChangedListener(listener);
     }
 
@@ -1146,6 +1162,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public int getIntrinsicContentHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getIntrinsicContentHeight();
     }
 
@@ -1178,6 +1195,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void goToFullShade(long delay) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.goToFullShade(delay);
     }
 
@@ -1203,6 +1221,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public float getX() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getX();
     }
 
@@ -1211,14 +1230,17 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public float getWidth() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getWidth();
     }
 
     public float getOpeningHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getOpeningHeight();
     }
 
     public float getBottomMostNotificationBottom() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getBottomMostNotificationBottom();
     }
 
@@ -1248,14 +1270,17 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setOnStackYChanged(Consumer<Boolean> onStackYChanged) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setOnStackYChanged(onStackYChanged);
     }
 
     public float getNotificationSquishinessFraction() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getNotificationSquishinessFraction();
     }
 
     public float calculateAppearFractionBypass() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.calculateAppearFractionBypass();
     }
 
@@ -1265,22 +1290,27 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public boolean isScrolledToBottom() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.isScrolledToBottom();
     }
 
     public int getNotGoneChildCount() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getNotGoneChildCount();
     }
 
     public float getIntrinsicPadding() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getIntrinsicPadding();
     }
 
     public float getLayoutMinHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getLayoutMinHeight();
     }
 
     public int getEmptyBottomMargin() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getEmptyBottomMargin();
     }
 
@@ -1293,6 +1323,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public float getEmptyShadeViewHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getEmptyShadeViewHeight();
     }
 
@@ -1320,7 +1351,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         updateAlpha();
     }
 
-    void setMaxAlphaFromView(float alpha) {
+    /**
+     * Max alpha from the containing view. Used by brightness slider as an example.
+     */
+    public void setMaxAlphaFromView(float alpha) {
         mMaxAlphaFromView = alpha;
         updateAlpha();
     }
@@ -1457,6 +1491,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public boolean isShowingEmptyShadeView() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.isEmptyShadeViewVisible();
     }
 
@@ -1585,6 +1620,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public ExpandableView getFirstChildNotGone() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getFirstChildNotGone();
     }
 
@@ -1602,10 +1638,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public View getTransientView(int i) {
         return mView.getTransientView(i);
-    }
-
-    public int getPositionInLinearLayout(ExpandableView row) {
-        return mView.getPositionInLinearLayout(row);
     }
 
     public NotificationStackScrollLayout getView() {
@@ -1700,6 +1732,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public boolean isLongPressInProgress() {
+        SceneContainerFlag.assertInLegacyMode();
         return mLongPressedView != null;
     }
 
@@ -1709,6 +1742,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * from the keyguard host to the quick settings one.
      */
     public int getFullShadeTransitionInset() {
+        SceneContainerFlag.assertInLegacyMode();
         MediaContainerView view = mKeyguardMediaController.getSinglePaneContainer();
         if (view == null || view.getHeight() == 0
                 || mStatusBarStateController.getState() != KEYGUARD) {
@@ -1747,6 +1781,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * Set a listener to when scrolling changes.
      */
     public void setOnScrollListener(Consumer<Integer> listener) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setOnScrollListener(listener);
     }
 
@@ -1994,6 +2029,14 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     && !mView.isExpandingNotification()) {
                 scrollWantsIt = mView.onInterceptTouchEventScroll(ev);
             }
+            boolean hunWantsIt = false;
+            if (shouldHeadsUpHandleTouch()) {
+                hunWantsIt = mHeadsUpTouchHelper.onInterceptTouchEvent(ev);
+                if (hunWantsIt) {
+                    mView.startDraggingOnHun();
+                    mHeadsUpManager.unpinAll(true);
+                }
+            }
             boolean swipeWantsIt = false;
             if (mLongPressedView == null && !mView.isBeingDragged()
                     && !mView.isExpandingNotification()
@@ -2023,7 +2066,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     && ev.getActionMasked() != MotionEvent.ACTION_DOWN) {
                 mJankMonitor.begin(mView, CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
             }
-            return swipeWantsIt || scrollWantsIt || expandWantsIt || longPressWantsIt;
+            return swipeWantsIt || scrollWantsIt || expandWantsIt || longPressWantsIt || hunWantsIt;
         }
 
         @Override
@@ -2075,6 +2118,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     && !expandingNotification && !mView.getDisallowScrollingInThisMotion()) {
                 scrollerWantsIt = mView.onScrollTouch(ev);
             }
+            boolean hunWantsIt = false;
+            if (shouldHeadsUpHandleTouch()) {
+                hunWantsIt = mHeadsUpTouchHelper.onTouchEvent(ev);
+            }
 
             // Check if we need to clear any snooze leavebehinds
             if (guts != null && !NotificationSwipeHelper.isTouchInView(ev, guts)
@@ -2095,7 +2142,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 mView.setCheckForLeaveBehind(true);
             }
             traceJankOnTouchEvent(ev.getActionMasked(), scrollerWantsIt);
-            return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || longPressWantsIt;
+            return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || longPressWantsIt
+                    || hunWantsIt;
         }
 
         private void traceJankOnTouchEvent(int action, boolean scrollerWantsIt) {
@@ -2121,6 +2169,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     }
                     break;
             }
+        }
+
+        private boolean shouldHeadsUpHandleTouch() {
+            return SceneContainerFlag.isEnabled() && mLongPressedView == null
+                    && !mSwipeHelper.isSwiping();
         }
     }
 

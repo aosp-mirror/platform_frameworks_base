@@ -44,6 +44,7 @@ import static com.android.providers.settings.SettingsState.isSystemSettingsKey;
 import static com.android.providers.settings.SettingsState.makeKey;
 
 import android.Manifest;
+import android.aconfigd.AconfigdFlagInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -1189,6 +1190,8 @@ public class SettingsProvider extends ContentProvider {
 
         synchronized (mLock) {
             if (getSyncDisabledModeConfigLocked() != SYNC_DISABLED_MODE_NONE) {
+                Slog.v(LOG_TAG, "did not write settings for prefix '"
+                                + prefix + "' because sync is disabled");
                 return SET_ALL_RESULT_DISABLED;
             }
             final int key = makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
@@ -1369,10 +1372,27 @@ public class SettingsProvider extends ContentProvider {
                 }
             }
 
+            Map<String, AconfigdFlagInfo> aconfigFlagInfos =
+                    settingsState.getAconfigDefaultFlags();
+
             for (int i = 0; i < nameCount; i++) {
                 String name = names.get(i);
                 Setting setting = settingsState.getSettingLocked(name);
-                if (prefix == null || setting.getName().startsWith(prefix)) {
+                if (prefix == null || name.startsWith(prefix)) {
+                    if (Flags.ignoreXmlForReadOnlyFlags()) {
+                        int slashIndex = name.indexOf("/");
+                        boolean validSlashIndex = slashIndex != -1
+                                && slashIndex != 0
+                                && slashIndex != name.length();
+                        if (validSlashIndex) {
+                            String flagName = name.substring(slashIndex + 1);
+                            AconfigdFlagInfo flagInfo = aconfigFlagInfos.get(flagName);
+                            if (flagInfo != null && !flagInfo.getIsReadWrite()) {
+                                continue;
+                            }
+                        }
+                    }
+
                     flagsToValues.put(setting.getName(), setting.getValue());
                 }
             }
@@ -2392,8 +2412,12 @@ public class SettingsProvider extends ContentProvider {
                 == PackageManager.PERMISSION_GRANTED;
         boolean isRoot = Binder.getCallingUid() == Process.ROOT_UID;
 
-        if (isRoot || hasWritePermission) {
+        if (isRoot) {
             return;
+        }
+
+        if (hasWritePermission) {
+            assertCallingUserDenyList(flags);
         } else if (hasAllowlistPermission) {
             for (String flag : flags) {
                 boolean namespaceAllowed = false;
@@ -2410,9 +2434,46 @@ public class SettingsProvider extends ContentProvider {
                         + "'; allowlist permission granted, but must add flag to the allowlist.");
                 }
             }
+            assertCallingUserDenyList(flags);
         } else {
             throw new SecurityException("Permission denial to mutate flag, must have root, "
                 + "WRITE_DEVICE_CONFIG, or WRITE_ALLOWLISTED_DEVICE_CONFIG");
+        }
+    }
+
+    // The check is added mainly for auto devices. On auto devices, it is possible that
+    // multiple users are visible simultaneously using visible background users.
+    // In such cases, it is desired that Non-current user (ex. visible background users) can
+    // only change settings for certain namespaces.
+    private void assertCallingUserDenyList(@NonNull Set<String> flags) {
+        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+            // enforce the deny list only on devices supporting visible background user.
+            return;
+        }
+
+        int callingUser = UserHandle.getCallingUserId();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            int currentUser = ActivityManager.getCurrentUser();
+            if (callingUser == currentUser) {
+                // enforce the deny list only if the caller is not current user. Currently only auto
+                // uses background visible user, and auto doesn't support profiles so profiles of
+                // current users is not checked here.
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        for (String flag : flags) {
+            for (String denylistedPrefix :
+                    NonWritableNamespacesForBackgroundUserPrefixes.DENYLIST) {
+                if (flag.startsWith(denylistedPrefix)) {
+                    throw new SecurityException("Permission denial for flag '" + flag
+                            + "' for background user " + callingUser + ". Namespace is added to "
+                            + "denylist.");
+                }
+            }
         }
     }
 

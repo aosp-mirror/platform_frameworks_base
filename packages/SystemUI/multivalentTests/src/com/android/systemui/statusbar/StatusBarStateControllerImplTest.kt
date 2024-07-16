@@ -38,11 +38,16 @@ import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.setTransition
+import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.mock
@@ -105,6 +110,7 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
                     { kosmos.shadeInteractor },
                     { kosmos.deviceUnlockedInteractor },
                     { kosmos.sceneInteractor },
+                    { kosmos.sceneContainerOcclusionInteractor },
                     { kosmos.keyguardClockInteractor },
                 ) {
                 override fun createDarkAnimator(): ObjectAnimator {
@@ -336,6 +342,47 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
         }
 
     @Test
+    @EnableSceneContainer
+    fun start_hydratesStatusBarState_whileOccluded() =
+        testScope.runTest {
+            var statusBarState = underTest.state
+            val listener =
+                object : StatusBarStateController.StateListener {
+                    override fun onStateChanged(newState: Int) {
+                        statusBarState = newState
+                    }
+                }
+            underTest.addCallback(listener)
+
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            val isOccluded by
+                collectLastValue(kosmos.sceneContainerOcclusionInteractor.invisibleDueToOcclusion)
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(
+                showWhenLockedActivityOnTop = true,
+                taskInfo = mock(),
+            )
+            runCurrent()
+            assertThat(isOccluded).isTrue()
+
+            // Call start to begin hydrating based on the scene framework:
+            underTest.start()
+
+            kosmos.sceneInteractor.changeScene(toScene = Scenes.Shade, loggingReason = "reason")
+            runCurrent()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
+
+            kosmos.sceneInteractor.changeScene(
+                toScene = Scenes.QuickSettings,
+                loggingReason = "reason"
+            )
+            runCurrent()
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
+            assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
+        }
+
+    @Test
     fun leaveOpenOnKeyguard_whenGone_isFalse() =
         testScope.runTest {
             underTest.start()
@@ -348,11 +395,15 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
             )
             assertThat(underTest.leaveOpenOnKeyguardHide()).isEqualTo(true)
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GONE,
-                testScope = testScope,
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Gone),
+                stateTransition =
+                    TransitionStep(
+                        from = KeyguardState.LOCKSCREEN,
+                        to = KeyguardState.GONE,
+                    )
             )
+
             assertThat(underTest.leaveOpenOnKeyguardHide()).isEqualTo(false)
         }
 }

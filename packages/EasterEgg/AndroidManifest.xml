@@ -33,7 +33,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:icon="@drawable/android14_patch_adaptive"
+        android:icon="@drawable/android15_patch_adaptive"
         android:label="@string/app_name">
 
         <!-- Android V easter egg: Daydream version of Landroid
@@ -41,7 +41,7 @@
         <service
             android:name=".landroid.DreamUniverse"
             android:exported="true"
-            android:icon="@drawable/android14_patch_adaptive"
+            android:icon="@drawable/android15_patch_adaptive"
             android:label="@string/v_egg_name"
             android:description="@string/dream_description"
             android:enabled="false"
@@ -62,7 +62,7 @@
             android:name=".landroid.MainActivity"
             android:exported="true"
             android:label="@string/u_egg_name"
-            android:icon="@drawable/android14_patch_adaptive"
+            android:icon="@drawable/android15_patch_adaptive"
             android:configChanges="orientation|screenLayout|screenSize|density"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
             <intent-filter>

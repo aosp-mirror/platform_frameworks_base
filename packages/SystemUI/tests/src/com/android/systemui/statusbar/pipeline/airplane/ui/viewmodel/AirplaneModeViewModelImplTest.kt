@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
@@ -33,12 +34,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+@RunWith(AndroidJUnit4::class)
 class AirplaneModeViewModelImplTest : SysuiTestCase() {
 
     private lateinit var underTest: AirplaneModeViewModelImpl

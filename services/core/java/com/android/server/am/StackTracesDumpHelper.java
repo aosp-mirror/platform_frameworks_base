@@ -47,6 +47,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -100,15 +102,17 @@ public class StackTracesDumpHelper {
     /**
      * @param subject the subject of the dumped traces
      * @param criticalEventSection the critical event log, passed as a string
+     * @param extraHeaders Optional, Extra headers added by the dumping method
      */
     public static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseBooleanArray lastPids,
             Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
-            String subject, String criticalEventSection, @NonNull Executor auxiliaryTaskExecutor,
+            String subject, String criticalEventSection,
+            LinkedHashMap<String, String> extraHeaders, @NonNull Executor auxiliaryTaskExecutor,
             AnrLatencyTracker latencyTracker) {
         return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePidsFuture,
                 logExceptionCreatingFile, null, subject, criticalEventSection,
-                /* memoryHeaders= */ null, auxiliaryTaskExecutor, null, latencyTracker);
+                extraHeaders, auxiliaryTaskExecutor, null, latencyTracker);
     }
 
     /**
@@ -119,7 +123,7 @@ public class StackTracesDumpHelper {
             ProcessCpuTracker processCpuTracker, SparseBooleanArray lastPids,
             Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
             AtomicLong firstPidEndOffset, String subject, String criticalEventSection,
-            String memoryHeaders, @NonNull Executor auxiliaryTaskExecutor,
+            LinkedHashMap<String, String> extraHeaders, @NonNull Executor auxiliaryTaskExecutor,
            Future<File> firstPidFilePromise, AnrLatencyTracker latencyTracker) {
         try {
 
@@ -159,11 +163,12 @@ public class StackTracesDumpHelper {
                 }
                 return null;
             }
+            boolean extraHeadersExist = extraHeaders != null && !extraHeaders.isEmpty();
 
-            if (subject != null || criticalEventSection != null || memoryHeaders != null) {
+            if (subject != null || criticalEventSection != null || extraHeadersExist) {
                 appendtoANRFile(tracesFile.getAbsolutePath(),
                         (subject != null ? "Subject: " + subject + "\n" : "")
-                        + (memoryHeaders != null ? memoryHeaders + "\n\n" : "")
+                        + (extraHeadersExist ? stringifyHeaders(extraHeaders) + "\n\n" : "")
                         + (criticalEventSection != null ? criticalEventSection : ""));
             }
 
@@ -612,6 +617,17 @@ public class StackTracesDumpHelper {
             Slog.w(TAG, "Interrupted while collecting " + logName , e);
         }
         return pids;
+    }
+
+    private static String stringifyHeaders(@NonNull LinkedHashMap<String, String> headers) {
+        StringBuilder headersString = new StringBuilder();
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            headersString.append(entry.getKey())
+                    .append(": ")
+                    .append(entry.getValue())
+                    .append("\n");
+        }
+        return headersString.toString();
     }
 
 }

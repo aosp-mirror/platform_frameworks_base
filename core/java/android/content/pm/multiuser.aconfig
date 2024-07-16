@@ -126,7 +126,7 @@ flag {
     description: "Talkback focus doesn't move to the 'If you change your Google Account picture…' after swiping next to move the focus from 'Choose a picture'"
     bug: "330835921"
     metadata {
-    	purpose: PURPOSE_BUGFIX
+        purpose: PURPOSE_BUGFIX
   }
 }
 
@@ -136,7 +136,7 @@ flag {
     description: "Talkback doesn't announce 'selected' after double tapping the button in the picture list in 'Choose a picture' page."
     bug: "330840549"
     metadata {
-    	purpose: PURPOSE_BUGFIX
+        purpose: PURPOSE_BUGFIX
   }
 }
 
@@ -146,7 +146,47 @@ flag {
     description: "Fix potential unexpected behavior due to concurrent file writing"
     bug: "339351031"
     metadata {
-    	purpose: PURPOSE_BUGFIX
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "fix_get_user_property_cache"
+    namespace: "multiuser"
+    description: "Cache is not optimised for getUserProperty for values below 0, eg. UserHandler.USER_NULL or UserHandle.USER_ALL"
+    bug: "350416200"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "cache_profile_parent"
+    namespace: "multiuser"
+    description: "Cache getProfileParent to avoid unnecessary binder calls"
+    bug: "350417399"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "cache_quiet_mode_state"
+    namespace: "multiuser"
+    description: "Optimise quiet mode state retrieval"
+    bug: "350420769"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "cache_user_serial_number"
+    namespace: "multiuser"
+    description: "Optimise user serial number retrieval"
+    bug: "340018451"
+    metadata {
+        purpose: PURPOSE_BUGFIX
   }
 }
 
@@ -273,6 +313,16 @@ flag {
   namespace: "profile_experiences"
   description: "Update the biometric prompt from generic Settings icon to private space icon"
   bug: "333528540"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "modify_private_space_secondary_unlock_setup_flow"
+  namespace: "profile_experiences"
+  description: "Updates to setting up secondary unlock factor from Settings for the first time"
+  bug: "332850595"
   metadata {
     purpose: PURPOSE_BUGFIX
   }

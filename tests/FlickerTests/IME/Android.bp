@@ -34,6 +34,11 @@ filegroup {
     srcs: ["src/**/Close*"],
 }
 
+filegroup {
+    name: "FlickerTestsIme2-src",
+    srcs: ["src/**/ShowImeOnAppStart*"],
+}
+
 android_test {
     name: "FlickerTestsIme",
     defaults: ["FlickerTestsDefault"],
@@ -77,9 +82,23 @@ android_test {
     defaults: ["FlickerTestsDefault"],
     manifest: "AndroidManifest.xml",
     test_config_template: "AndroidTestTemplate.xml",
+    srcs: [":FlickerTestsIme2-src"],
+    static_libs: [
+        "FlickerTestsBase",
+        "FlickerTestsImeCommon",
+    ],
+    data: ["trace_config/*"],
+}
+
+android_test {
+    name: "FlickerTestsIme3",
+    defaults: ["FlickerTestsDefault"],
+    manifest: "AndroidManifest.xml",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: ["src/**/*"],
     exclude_srcs: [
         ":FlickerTestsIme1-src",
+        ":FlickerTestsIme2-src",
         ":FlickerTestsImeCommon-src",
     ],
     static_libs: [

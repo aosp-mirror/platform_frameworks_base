@@ -762,6 +762,16 @@ public class Notification implements Parcelable
     @FlaggedApi(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
     public static final int FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY = 0x00010000;
 
+    /**
+     * Bit to be bitwise-ored into the {@link #flags} field that should be
+     * set by the system if this notification is silent.
+     *
+     * This flag is for internal use only; applications cannot set this flag directly.
+     * @hide
+     */
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
+    public static final int FLAG_SILENT = 1 << 17;  //0x00020000
+
     private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
             DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
@@ -784,7 +794,8 @@ public class Notification implements Parcelable
             FLAG_BUBBLE,
             FLAG_NO_DISMISS,
             FLAG_FSI_REQUESTED_BUT_DENIED,
-            FLAG_USER_INITIATED_JOB
+            FLAG_USER_INITIATED_JOB,
+            FLAG_SILENT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationFlags{};
@@ -1692,6 +1703,7 @@ public class Notification implements Parcelable
      *
      * @hide
      */
+    @Deprecated
     public static final String GROUP_KEY_SILENT = "silent";
 
     private int mGroupAlertBehavior = GROUP_ALERT_ALL;
@@ -2239,9 +2251,6 @@ public class Notification implements Parcelable
 
         private void visitUris(@NonNull Consumer<Uri> visitor) {
             visitIconUri(visitor, getIcon());
-            if (actionIntent != null) {
-                actionIntent.visitUris(visitor);
-            }
         }
 
         @Override
@@ -2957,21 +2966,6 @@ public class Notification implements Parcelable
             }
         }
 
-        // allPendingIntents should contain all associated intents after parcelling, but it may also
-        // contain intents added by the app to extras for their own purposes. We only care about
-        // checking the intents known and used by system_server, to avoid the confused deputy issue.
-        List<PendingIntent> pendingIntents = Arrays.asList(contentIntent, deleteIntent,
-                fullScreenIntent);
-        for (PendingIntent intent : pendingIntents) {
-            if (intent != null) {
-                intent.visitUris(visitor);
-            }
-        }
-
-        if (mBubbleMetadata != null) {
-            mBubbleMetadata.visitUris(visitor);
-        }
-
         if (extras != null) {
             visitIconUri(visitor, extras.getParcelable(EXTRA_LARGE_ICON_BIG, Icon.class));
             visitIconUri(visitor, extras.getParcelable(EXTRA_PICTURE_ICON, Icon.class));
@@ -3043,28 +3037,15 @@ public class Notification implements Parcelable
                 callPerson.visitUris(visitor);
             }
             visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
+        }
 
-            // Extras for MediaStyle.
-            PendingIntent deviceIntent = extras.getParcelable(EXTRA_MEDIA_REMOTE_INTENT,
-                    PendingIntent.class);
-            if (deviceIntent != null) {
-                deviceIntent.visitUris(visitor);
-            }
+        if (mBubbleMetadata != null) {
+            visitIconUri(visitor, mBubbleMetadata.getIcon());
+        }
 
-            if (extras.containsKey(WearableExtender.EXTRA_WEARABLE_EXTENSIONS)) {
-                WearableExtender extender = new WearableExtender(this);
-                extender.visitUris(visitor);
-            }
-
-            if (extras.containsKey(TvExtender.EXTRA_TV_EXTENDER)) {
-                TvExtender extender = new TvExtender(this);
-                extender.visitUris(visitor);
-            }
-
-            if (extras.containsKey(CarExtender.EXTRA_CAR_EXTENDER)) {
-                CarExtender extender = new CarExtender(this);
-                extender.visitUris(visitor);
-            }
+        if (extras != null && extras.containsKey(WearableExtender.EXTRA_WEARABLE_EXTENSIONS)) {
+            WearableExtender extender = new WearableExtender(this);
+            extender.visitUris(visitor);
         }
     }
 
@@ -4015,6 +3996,13 @@ public class Notification implements Parcelable
             }
         }
 
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            if ((flags & FLAG_SILENT) != 0) {
+                flagStrings.add("SILENT");
+                flags &= ~FLAG_SILENT;
+            }
+        }
+
         if (flagStrings.isEmpty()) {
             return "0";
         }
@@ -4151,6 +4139,17 @@ public class Notification implements Parcelable
      */
     public @GroupAlertBehavior int getGroupAlertBehavior() {
         return mGroupAlertBehavior;
+    }
+
+    /**
+     * Sets which type of notifications in a group are responsible for audibly alerting the
+     * user. See {@link #GROUP_ALERT_ALL}, {@link #GROUP_ALERT_CHILDREN},
+     * {@link #GROUP_ALERT_SUMMARY}.
+     * @param groupAlertBehavior
+     * @hide
+     */
+    public void setGroupAlertBehavior(@GroupAlertBehavior int groupAlertBehavior) {
+        mGroupAlertBehavior = groupAlertBehavior;
     }
 
     /**
@@ -4337,6 +4336,31 @@ public class Notification implements Parcelable
             }
         }
         return contextualActions;
+    }
+
+    /**
+     * Sets the FLAG_SILENT flag to mark the notification as silent and clears the group key.
+     * @hide
+     */
+    public void fixSilentGroup() {
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            if (GROUP_KEY_SILENT.equals(mGroupKey)) {
+                mGroupKey = null;
+                flags |= FLAG_SILENT;
+            }
+        }
+    }
+
+    /**
+     * @return whether this notification is silent. See {@link Builder#setSilent()}
+     * @hide
+     */
+    public boolean isSilent() {
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            return (flags & Notification.FLAG_SILENT) != 0;
+        } else {
+            return GROUP_KEY_SILENT.equals(getGroup()) && suppressAlertingDueToGrouping();
+        }
     }
 
     /**
@@ -4790,8 +4814,12 @@ public class Notification implements Parcelable
             mN.defaults &= ~DEFAULT_VIBRATE;
             setDefaults(mN.defaults);
 
-            if (TextUtils.isEmpty(mN.mGroupKey)) {
-                setGroup(GROUP_KEY_SILENT);
+            if (android.service.notification.Flags.notificationSilentFlag()) {
+                mN.flags |= FLAG_SILENT;
+            } else {
+                if (TextUtils.isEmpty(mN.mGroupKey)) {
+                    setGroup(GROUP_KEY_SILENT);
+                }
             }
             return this;
         }
@@ -5089,6 +5117,7 @@ public class Notification implements Parcelable
          * @see Notification#fullScreenIntent
          */
         @NonNull
+        @RequiresPermission(android.Manifest.permission.USE_FULL_SCREEN_INTENT)
         public Builder setFullScreenIntent(PendingIntent intent, boolean highPriority) {
             mN.fullScreenIntent = intent;
             setFlag(FLAG_HIGH_PRIORITY, highPriority);
@@ -6081,6 +6110,7 @@ public class Notification implements Parcelable
             bindProfileBadge(contentView, p);
             bindAlertedIcon(contentView, p);
             bindExpandButton(contentView, p);
+            bindCloseButton(contentView, p);
             mN.mUsesStandardHeader = true;
         }
 
@@ -6100,6 +6130,15 @@ public class Notification implements Parcelable
             }
             contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);
+        }
+
+        private void bindCloseButton(RemoteViews contentView, StandardTemplateParams p) {
+            // set default colors
+            int bgColor = getBackgroundColor(p);
+            int backgroundColor = Colors.flattenAlpha(getColors(p).getProtectionColor(), bgColor);
+            int foregroundColor = Colors.flattenAlpha(getPrimaryTextColor(p), backgroundColor);
+            contentView.setInt(R.id.close_button, "setForegroundColor", foregroundColor);
+            contentView.setInt(R.id.close_button, "setBackgroundColor", backgroundColor);
         }
 
         private void bindHeaderChronometerAndTime(RemoteViews contentView,
@@ -6253,6 +6292,7 @@ public class Notification implements Parcelable
                 if (appIconRes != 0) {
                     mN.mAppIcon = Icon.createWithResource(mContext, appIconRes);
                     contentView.setImageViewIcon(R.id.icon, mN.mAppIcon);
+                    contentView.setBoolean(R.id.icon, "setShouldShowAppIcon", true);
                     usingAppIcon = true;
                 } else {
                     Log.w(TAG, "bindSmallIcon: could not get the app icon");
@@ -10939,6 +10979,18 @@ public class Notification implements Parcelable
     }
 
     /**
+     * An object that can apply a rich ongoing notification style to a {@link Notification.Builder}
+     * object.
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public abstract static class RichOngoingStyle extends Notification.Style {
+        /**
+         * @hide
+         */
+        public RichOngoingStyle() {}
+    }
+
+    /**
      * Notification style for custom views that are decorated by the system
      *
      * <p>Instead of providing a notification that is completely custom, a developer can set this
@@ -11456,16 +11508,6 @@ public class Notification implements Parcelable
             out.writeInt(TextUtils.isEmpty(mShortcutId) ? 0 : 1);
             if (!TextUtils.isEmpty(mShortcutId)) {
                 out.writeString8(mShortcutId);
-            }
-        }
-
-        private void visitUris(@NonNull Consumer<Uri> visitor) {
-            visitIconUri(visitor, getIcon());
-            if (mPendingIntent != null) {
-                mPendingIntent.visitUris(visitor);
-            }
-            if (mDeleteIntent != null) {
-                mDeleteIntent.visitUris(visitor);
             }
         }
 
@@ -12667,9 +12709,6 @@ public class Notification implements Parcelable
         }
 
         private void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mDisplayIntent != null) {
-                mDisplayIntent.visitUris(visitor);
-            }
             for (Action action : mActions) {
                 action.visitUris(visitor);
             }
@@ -12829,12 +12868,6 @@ public class Notification implements Parcelable
             return mUnreadConversation;
         }
 
-        private void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mUnreadConversation != null) {
-                mUnreadConversation.visitUris(visitor);
-            }
-        }
-
         /**
          * A class which holds the unread messages from a conversation.
          */
@@ -12986,16 +13019,7 @@ public class Notification implements Parcelable
                         onRead,
                         participants, b.getLong(KEY_TIMESTAMP));
             }
-
-            private void visitUris(@NonNull Consumer<Uri> visitor) {
-                if (mReadPendingIntent != null) {
-                    mReadPendingIntent.visitUris(visitor);
-                }
-                if (mReplyPendingIntent != null) {
-                    mReplyPendingIntent.visitUris(visitor);
-                }
-            }
-        }
+        };
 
         /**
          * Builder class for {@link CarExtender.UnreadConversation} objects.
@@ -13317,15 +13341,6 @@ public class Notification implements Parcelable
          */
         public boolean isSuppressShowOverApps() {
             return mSuppressShowOverApps;
-        }
-
-        private void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mContentIntent != null) {
-                mContentIntent.visitUris(visitor);
-            }
-            if (mDeleteIntent != null) {
-                mDeleteIntent.visitUris(visitor);
-            }
         }
     }
 

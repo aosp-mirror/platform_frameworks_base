@@ -16,9 +16,9 @@
 package com.android.systemui.surfaceeffects.turbulencenoise
 
 import android.graphics.Color
-import android.testing.AndroidTestingRunner
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseController.Companion.AnimationState.EASE_IN
@@ -33,7 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class TurbulenceNoiseControllerTest : SysuiTestCase() {
     private val fakeSystemClock = FakeSystemClock()
     // FakeExecutor is needed to run animator.

@@ -87,7 +87,10 @@ constructor(
             setNegativeButton(R.string.cancel) { _, _ -> }
             setPositiveButton(R.string.qs_record_issue_start) { _, _ -> onStarted.run() }
         }
-        bgExecutor.execute { traceurMessageSender.bindToTraceur(dialog.context) }
+        bgExecutor.execute {
+            traceurMessageSender.onBoundToTraceur.add { traceurMessageSender.getTags() }
+            traceurMessageSender.bindToTraceur(dialog.context)
+        }
     }
 
     override fun createDialog(): SystemUIDialog = factory.create(this)

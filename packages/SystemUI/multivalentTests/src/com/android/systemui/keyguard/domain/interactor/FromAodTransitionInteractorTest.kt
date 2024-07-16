@@ -53,6 +53,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -299,6 +300,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
     fun testTransitionToOccluded_onWake() =
         testScope.runTest {
             kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(true)
             powerInteractor.setAwakeForTest()
             advanceTimeBy(100) // account for debouncing
 
@@ -312,6 +314,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.fakeKeyguardRepository.setKeyguardShowing(false)
             kosmos.fakeKeyguardRepository.setKeyguardDismissible(true)
+            kosmos.keyguardTransitionInteractor.startDismissKeyguardTransition()
             powerInteractor.setAwakeForTest()
             advanceTimeBy(100) // account for debouncing
 

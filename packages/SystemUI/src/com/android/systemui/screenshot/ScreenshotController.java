@@ -20,7 +20,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
 import static com.android.systemui.Flags.screenshotPrivateProfileAccessibilityAnnouncementFix;
-import static com.android.systemui.Flags.screenshotShelfUi2;
+import static com.android.systemui.Flags.screenshotSaveImageExporter;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
@@ -101,7 +101,7 @@ import javax.inject.Provider;
 /**
  * Controls the state and flow for screenshots.
  */
-public class ScreenshotController {
+public class ScreenshotController implements ScreenshotHandler {
     private static final String TAG = logTag(ScreenshotController.class);
 
     /**
@@ -191,7 +191,7 @@ public class ScreenshotController {
 
     private final WindowContext mContext;
     private final FeatureFlags mFlags;
-    private final ScreenshotViewProxy mViewProxy;
+    private final ScreenshotShelfViewProxy mViewProxy;
     private final ScreenshotNotificationsController mNotificationsController;
     private final ScreenshotSmartActions mScreenshotSmartActions;
     private final UiEventLogger mUiEventLogger;
@@ -231,13 +231,6 @@ public class ScreenshotController {
     private String mPackageName = "";
     private final BroadcastReceiver mCopyBroadcastReceiver;
 
-    // When false, the screenshot is taken without showing the ui. Note that this only applies to
-    // external displays, as on the default one the UI should **always** be shown.
-    // This is needed in case of screenshot during display mirroring, as adding another window to
-    // the external display makes mirroring stop.
-    // When there is a way to distinguish between displays that are mirroring or extending, this
-    // can be removed and we can directly show the ui only in the extended case.
-    private final Boolean mShowUIOnExternalDisplay;
     /** Tracks config changes that require re-creating UI */
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_ORIENTATION
@@ -253,7 +246,7 @@ public class ScreenshotController {
             Context context,
             WindowManager windowManager,
             FeatureFlags flags,
-            ScreenshotViewProxy.Factory viewProxyFactory,
+            ScreenshotShelfViewProxy.Factory viewProxyFactory,
             ScreenshotSmartActions screenshotSmartActions,
             ScreenshotNotificationsController.Factory screenshotNotificationsControllerFactory,
             UiEventLogger uiEventLogger,
@@ -273,8 +266,7 @@ public class ScreenshotController {
             MessageContainerController messageContainerController,
             Provider<ScreenshotSoundController> screenshotSoundController,
             AnnouncementResolver announcementResolver,
-            @Assisted Display display,
-            @Assisted boolean showUIOnExternalDisplay
+            @Assisted Display display
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsControllerFactory.create(
@@ -348,10 +340,10 @@ public class ScreenshotController {
         mBroadcastDispatcher.registerReceiver(mCopyBroadcastReceiver, new IntentFilter(
                         ClipboardOverlayController.COPY_OVERLAY_ACTION), null, null,
                 Context.RECEIVER_NOT_EXPORTED, ClipboardOverlayController.SELF_PERMISSION);
-        mShowUIOnExternalDisplay = showUIOnExternalDisplay;
     }
 
-    void handleScreenshot(ScreenshotData screenshot, Consumer<Uri> finisher,
+    @Override
+    public void handleScreenshot(ScreenshotData screenshot, Consumer<Uri> finisher,
             RequestCallback requestCallback) {
         Assert.isMainThread();
 
@@ -381,7 +373,7 @@ public class ScreenshotController {
             Log.w(TAG, "User setup not complete, displaying toast only");
             // User setup isn't complete, so we don't want to show any UI beyond a toast, as editing
             // and sharing shouldn't be exposed to the user.
-            saveScreenshotAndToast(screenshot.getUserHandle(), finisher);
+            saveScreenshotAndToast(screenshot, finisher);
             return;
         }
 
@@ -397,31 +389,23 @@ public class ScreenshotController {
 
         prepareViewForNewScreenshot(screenshot, oldPackageName);
 
-        if (!shouldShowUi()) {
-            saveScreenshotInWorkerThread(
-                    screenshot.getUserHandle(), finisher, this::logSuccessOnActionsReady,
-                    (ignored) -> {
-                    });
-            return;
-        }
-
         final UUID requestId;
-        if (screenshotShelfUi2()) {
-            requestId = mActionsController.setCurrentScreenshot(screenshot);
-            saveScreenshotInBackground(screenshot, requestId, finisher);
-
-            if (screenshot.getTaskId() >= 0) {
-                mAssistContentRequester.requestAssistContent(
-                        screenshot.getTaskId(),
-                        assistContent ->
-                                mActionsController.onAssistContent(requestId, assistContent));
-            } else {
-                mActionsController.onAssistContent(requestId, null);
+        requestId = mActionsController.setCurrentScreenshot(screenshot);
+        saveScreenshotInBackground(screenshot, requestId, finisher, result -> {
+            if (result.uri != null) {
+                ScreenshotSavedResult savedScreenshot = new ScreenshotSavedResult(
+                        result.uri, screenshot.getUserOrDefault(), result.timestamp);
+                mActionsController.setCompletedScreenshot(requestId, savedScreenshot);
             }
+        });
+
+        if (screenshot.getTaskId() >= 0) {
+            mAssistContentRequester.requestAssistContent(
+                    screenshot.getTaskId(),
+                    assistContent ->
+                            mActionsController.onAssistContent(requestId, assistContent));
         } else {
-            requestId = UUID.randomUUID(); // passed through but unused for legacy UI
-            saveScreenshotInWorkerThread(screenshot.getUserHandle(), finisher,
-                    this::showUiOnActionsReady, this::showUiOnQuickShareActionReady);
+            mActionsController.onAssistContent(requestId, null);
         }
 
         // The window is focusable by default
@@ -457,13 +441,6 @@ public class ScreenshotController {
         // ignore system bar insets for the purpose of window layout
         mWindow.getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> WindowInsets.CONSUMED);
-        if (!screenshotShelfUi2()) {
-            mScreenshotHandler.cancelTimeout(); // restarted after animation
-        }
-    }
-
-    private boolean shouldShowUi() {
-        return mDisplay.getDisplayId() == Display.DEFAULT_DISPLAY || mShowUIOnExternalDisplay;
     }
 
     void prepareViewForNewScreenshot(@NonNull ScreenshotData screenshot, String oldPackageName) {
@@ -500,9 +477,6 @@ public class ScreenshotController {
         }
 
         mViewProxy.setPackageName(mPackageName);
-
-        mViewProxy.updateOrientation(
-                mWindowManager.getCurrentWindowMetrics().getWindowInsets());
     }
 
     /**
@@ -514,11 +488,7 @@ public class ScreenshotController {
     }
 
     boolean isPendingSharedTransition() {
-        if (screenshotShelfUi2()) {
-            return mActionExecutor.isPendingSharedTransition();
-        } else {
-            return mViewProxy.isPendingSharedTransition();
-        }
+        return mActionExecutor.isPendingSharedTransition();
     }
 
     // Any cleanup needed when the service is being destroyed.
@@ -555,20 +525,13 @@ public class ScreenshotController {
         }
 
         mMessageContainerController.setView(mViewProxy.getView());
-        mViewProxy.setCallbacks(new ScreenshotView.ScreenshotViewCallback() {
+        mViewProxy.setCallbacks(new ScreenshotShelfViewProxy.ScreenshotViewCallback() {
             @Override
             public void onUserInteraction() {
                 if (DEBUG_INPUT) {
                     Log.d(TAG, "onUserInteraction");
                 }
                 mScreenshotHandler.resetTimeout();
-            }
-
-            @Override
-            public void onAction(Intent intent, UserHandle owner, boolean overrideTransition) {
-                Pair<ActivityOptions, ExitTransitionCoordinator> exit = createWindowTransition();
-                mActionIntentExecutor.launchIntentAsync(
-                        intent, owner, overrideTransition, exit.first, exit.second);
             }
 
             @Override
@@ -602,11 +565,7 @@ public class ScreenshotController {
                             if (mConfigChanges.applyNewConfig(mContext.getResources())) {
                                 // Hide the scroll chip until we know it's available in this
                                 // orientation
-                                if (screenshotShelfUi2()) {
-                                    mActionsController.onScrollChipInvalidated();
-                                } else {
-                                    mViewProxy.hideScrollChip();
-                                }
+                                mActionsController.onScrollChipInvalidated();
                                 // Delay scroll capture eval a bit to allow the underlying activity
                                 // to set up in the new orientation.
                                 mScreenshotHandler.postDelayed(
@@ -639,13 +598,8 @@ public class ScreenshotController {
                 (response) -> {
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION,
                             0, response.getPackageName());
-                    if (screenshotShelfUi2()) {
-                        mActionsController.onScrollChipReady(requestId,
-                                () -> onScrollButtonClicked(owner, response));
-                    } else {
-                        mViewProxy.showScrollChip(response.getPackageName(),
-                                () -> onScrollButtonClicked(owner, response));
-                    }
+                    mActionsController.onScrollChipReady(requestId,
+                            () -> onScrollButtonClicked(owner, response));
                     return Unit.INSTANCE;
                 }
         );
@@ -714,11 +668,9 @@ public class ScreenshotController {
         mWindowManager.addView(decorView, mWindowLayoutParams);
         decorView.requestApplyInsets();
 
-        if (screenshotShelfUi2()) {
-            ViewGroup layout = decorView.requireViewById(android.R.id.content);
-            layout.setClipChildren(false);
-            layout.setClipToPadding(false);
-        }
+        ViewGroup layout = decorView.requireViewById(android.R.id.content);
+        layout.setClipChildren(false);
+        layout.setClipToPadding(false);
     }
 
     void removeWindow() {
@@ -748,29 +700,40 @@ public class ScreenshotController {
      * Save the bitmap but don't show the normal screenshot UI.. just a toast (or notification on
      * failure).
      */
-    private void saveScreenshotAndToast(UserHandle owner, Consumer<Uri> finisher) {
+    private void saveScreenshotAndToast(ScreenshotData screenshot, Consumer<Uri> finisher) {
         // Play the shutter sound to notify that we've taken a screenshot
         playCameraSoundIfNeeded();
 
-        saveScreenshotInWorkerThread(
-                owner,
-                /* onComplete */ finisher,
-                /* actionsReadyListener */ imageData -> {
-                    if (DEBUG_CALLBACK) {
-                        Log.d(TAG, "returning URI to finisher (Consumer<URI>): " + imageData.uri);
-                    }
-                    finisher.accept(imageData.uri);
-                    if (imageData.uri == null) {
-                        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED, 0, mPackageName);
-                        mNotificationsController.notifyScreenshotError(
-                                R.string.screenshot_failed_to_save_text);
-                    } else {
-                        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED, 0, mPackageName);
-                        mScreenshotHandler.post(() -> Toast.makeText(mContext,
-                                R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show());
-                    }
-                },
-                null);
+        if (screenshotSaveImageExporter()) {
+            saveScreenshotInBackground(screenshot, UUID.randomUUID(), finisher, result -> {
+                if (result.uri != null) {
+                    mScreenshotHandler.post(() -> Toast.makeText(mContext,
+                            R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show());
+                }
+            });
+        } else {
+            saveScreenshotInWorkerThread(
+                    screenshot.getUserHandle(),
+                    /* onComplete */ finisher,
+                    /* actionsReadyListener */ imageData -> {
+                        if (DEBUG_CALLBACK) {
+                            Log.d(TAG,
+                                    "returning URI to finisher (Consumer<URI>): " + imageData.uri);
+                        }
+                        finisher.accept(imageData.uri);
+                        if (imageData.uri == null) {
+                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED, 0,
+                                    mPackageName);
+                            mNotificationsController.notifyScreenshotError(
+                                    R.string.screenshot_failed_to_save_text);
+                        } else {
+                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED, 0, mPackageName);
+                            mScreenshotHandler.post(() -> Toast.makeText(mContext,
+                                    R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show());
+                        }
+                    },
+                    null);
+        }
     }
 
     /**
@@ -843,8 +806,8 @@ public class ScreenshotController {
         mScreenshotHandler.cancelTimeout();
     }
 
-    private void saveScreenshotInBackground(
-            ScreenshotData screenshot, UUID requestId, Consumer<Uri> finisher) {
+    private void saveScreenshotInBackground(ScreenshotData screenshot, UUID requestId,
+            Consumer<Uri> finisher, Consumer<ImageExporter.Result> onResult) {
         ListenableFuture<ImageExporter.Result> future = mImageExporter.export(mBgExecutor,
                 requestId, screenshot.getBitmap(), screenshot.getUserOrDefault(),
                 mDisplay.getDisplayId());
@@ -853,10 +816,7 @@ public class ScreenshotController {
                 ImageExporter.Result result = future.get();
                 Log.d(TAG, "Saved screenshot: " + result);
                 logScreenshotResultStatus(result.uri, screenshot.getUserHandle());
-                if (result.uri != null) {
-                    mActionsController.setCompletedScreenshot(requestId, new ScreenshotSavedResult(
-                            result.uri, screenshot.getUserOrDefault(), result.timestamp));
-                }
+                onResult.accept(result);
                 if (DEBUG_CALLBACK) {
                     Log.d(TAG, "finished background processing, Calling (Consumer<Uri>) "
                             + "finisher.accept(\"" + result.uri + "\"");
@@ -899,62 +859,6 @@ public class ScreenshotController {
                 mScreenshotSmartActions, data,
                 mScreenshotNotificationSmartActionsProvider);
         mSaveInBgTask.execute();
-    }
-
-
-    /**
-     * Sets up the action shade and its entrance animation, once we get the screenshot URI.
-     */
-    private void showUiOnActionsReady(ScreenshotController.SavedImageData imageData) {
-        logSuccessOnActionsReady(imageData);
-        mScreenshotHandler.resetTimeout();
-
-        if (imageData.uri != null) {
-            if (DEBUG_UI) {
-                Log.d(TAG, "Showing UI actions");
-            }
-            if (!imageData.owner.equals(Process.myUserHandle())) {
-                Log.d(TAG, "Screenshot saved to user " + imageData.owner + " as "
-                        + imageData.uri);
-            }
-            mScreenshotHandler.post(() -> {
-                if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
-                    mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            mViewProxy.setChipIntents(imageData);
-                        }
-                    });
-                } else {
-                    mViewProxy.setChipIntents(imageData);
-                }
-            });
-        }
-    }
-
-    /**
-     * Sets up the action shade and its entrance animation, once we get the Quick Share action data.
-     */
-    private void showUiOnQuickShareActionReady(ScreenshotController.QuickShareData quickShareData) {
-        if (DEBUG_UI) {
-            Log.d(TAG, "Showing UI for Quick Share action");
-        }
-        if (quickShareData.quickShareAction != null) {
-            mScreenshotHandler.post(() -> {
-                if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
-                    mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            mViewProxy.addQuickShareChip(quickShareData.quickShareAction);
-                        }
-                    });
-                } else {
-                    mViewProxy.addQuickShareChip(quickShareData.quickShareAction);
-                }
-            });
-        }
     }
 
     /**
@@ -1052,9 +956,7 @@ public class ScreenshotController {
          * Creates an instance of the controller for that specific display.
          *
          * @param display                 display to capture
-         * @param showUIOnExternalDisplay Whether the UI should be shown if this is an external
-         *                                display.
          */
-        ScreenshotController create(Display display, boolean showUIOnExternalDisplay);
+        ScreenshotController create(Display display);
     }
 }

@@ -50,6 +50,7 @@ import com.android.server.wm.ActivityMetricsLaunchObserver;
 import com.android.server.wm.ActivityMetricsLaunchObserverRegistry;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -286,7 +287,7 @@ public final class ProfcollectForwardingService extends SystemService {
         if (randomNum < traceFrequency) {
             BackgroundThread.get().getThreadHandler().post(() -> {
                 try {
-                    mIProfcollect.trace_once("applaunch");
+                    mIProfcollect.trace_system("applaunch");
                 } catch (RemoteException e) {
                     Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                 }
@@ -326,7 +327,7 @@ public final class ProfcollectForwardingService extends SystemService {
             // Dex2oat could take a while before it starts. Add a short delay before start tracing.
             BackgroundThread.get().getThreadHandler().postDelayed(() -> {
                 try {
-                    mIProfcollect.trace_once("dex2oat");
+                    mIProfcollect.trace_system("dex2oat");
                 } catch (RemoteException e) {
                     Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                 }
@@ -378,10 +379,15 @@ public final class ProfcollectForwardingService extends SystemService {
             @Override
             public void onCameraOpened(String cameraId, String packageId) {
                 Log.d(LOG_TAG, "Received camera open event from: " + packageId);
-                // Skip face auth and Android System Intelligence, since they trigger way too
-                // often.
-                if (packageId.startsWith("client.pid")
-                        || packageId.equals("com.google.android.as")) {
+                // Skip face auth since it triggers way too often.
+                if (packageId.startsWith("client.pid")) {
+                    return;
+                }
+                // Additional vendor specific list of apps to skip.
+                String[] cameraSkipPackages =
+                    getContext().getResources().getStringArray(
+                        R.array.config_profcollectOnCameraOpenedSkipPackages);
+                if (Arrays.asList(cameraSkipPackages).contains(packageId)) {
                     return;
                 }
                 // Sample for a fraction of camera events.
@@ -392,14 +398,17 @@ public final class ProfcollectForwardingService extends SystemService {
                 if (randomNum >= traceFrequency) {
                     return;
                 }
-                // Wait for 1s before starting tracing.
+                // For a small percentage a traces, we collect the initialization behavior.
+                boolean traceInitialization = ThreadLocalRandom.current().nextInt(10) < 1;
+                int traceDelay = traceInitialization ? 0 : 1000;
+                String traceTag = traceInitialization ? "camera_init" : "camera";
                 BackgroundThread.get().getThreadHandler().postDelayed(() -> {
                     try {
-                        mIProfcollect.trace_once("camera");
+                        mIProfcollect.trace_process(traceTag, "android.hardware.camera.provider");
                     } catch (RemoteException e) {
                         Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                     }
-                }, 1000);
+                }, traceDelay);
             }
         }, null);
     }

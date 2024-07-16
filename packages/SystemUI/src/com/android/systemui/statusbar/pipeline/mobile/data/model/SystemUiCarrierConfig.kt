@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.model
 
 import android.os.PersistableBundle
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
+import android.telephony.CarrierConfigManager.KEY_SHOW_5G_SLICE_ICON_BOOL
 import android.telephony.CarrierConfigManager.KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,10 +67,16 @@ internal constructor(
     /** Flow tracking the [KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL] config */
     val showOperatorNameInStatusBar: StateFlow<Boolean> = showOperatorName.config
 
+    private val showNetworkSlice =
+        BooleanCarrierConfig(KEY_SHOW_5G_SLICE_ICON_BOOL, defaultConfig)
+    /** Flow tracking the [KEY_SHOW_5G_SLICE_ICON_BOOL] config */
+    val allowNetworkSliceIndicator: StateFlow<Boolean> = showNetworkSlice.config
+
     private val trackedConfigs =
         listOf(
             inflateSignalStrength,
             showOperatorName,
+            showNetworkSlice,
         )
 
     /** Ingest a new carrier config, and switch all of the tracked keys over to the new values */

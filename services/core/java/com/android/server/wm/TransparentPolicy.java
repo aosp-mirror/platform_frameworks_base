@@ -162,10 +162,6 @@ class TransparentPolicy {
         mTransparentPolicyState.clearInheritedCompatDisplayInsets();
     }
 
-    TransparentPolicyState getTransparentPolicyState() {
-        return mTransparentPolicyState;
-    }
-
     /**
      * In case of translucent activities, it consumes the {@link ActivityRecord} of the first opaque
      * activity beneath using the given consumer and returns {@code true}.
@@ -176,7 +172,7 @@ class TransparentPolicy {
 
     @NonNull
     Optional<ActivityRecord> getFirstOpaqueActivity() {
-        return isRunning() ? Optional.of(mTransparentPolicyState.mFirstOpaqueActivity)
+        return isRunning() ? Optional.ofNullable(mTransparentPolicyState.mFirstOpaqueActivity)
                 : Optional.empty();
     }
 
@@ -214,10 +210,6 @@ class TransparentPolicy {
         config.screenHeightDp = config.compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
         config.smallestScreenWidthDp = config.compatSmallestScreenWidthDp =
                 SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
-    }
-
-    private void inheritConfiguration(ActivityRecord firstOpaque) {
-        mTransparentPolicyState.inheritFromOpaque(firstOpaque);
     }
 
     /**
@@ -260,8 +252,9 @@ class TransparentPolicy {
 
         private void start(@NonNull ActivityRecord firstOpaqueActivity) {
             mFirstOpaqueActivity = firstOpaqueActivity;
-            mFirstOpaqueActivity.mTransparentPolicy
-                    .mDestroyListeners.add(mActivityRecord.mTransparentPolicy);
+            mFirstOpaqueActivity.mAppCompatController.getTransparentPolicy()
+                    .mDestroyListeners.add(mActivityRecord.mAppCompatController
+                            .getTransparentPolicy());
             inheritFromOpaque(firstOpaqueActivity);
             final WindowContainer<?> parent = mActivityRecord.getParent();
             mLetterboxConfigListener = WindowContainer.overrideConfigurationPropagation(
@@ -312,8 +305,9 @@ class TransparentPolicy {
             mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
             mInheritedCompatDisplayInsets = null;
             if (mFirstOpaqueActivity != null) {
-                mFirstOpaqueActivity.mTransparentPolicy
-                        .mDestroyListeners.remove(mActivityRecord.mTransparentPolicy);
+                mFirstOpaqueActivity.mAppCompatController.getTransparentPolicy()
+                        .mDestroyListeners.remove(mActivityRecord.mAppCompatController
+                                .getTransparentPolicy());
             }
             mFirstOpaqueActivity = null;
         }

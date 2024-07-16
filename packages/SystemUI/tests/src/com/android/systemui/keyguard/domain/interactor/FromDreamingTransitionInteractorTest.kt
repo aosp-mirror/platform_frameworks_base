@@ -48,6 +48,7 @@ import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,6 +56,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
@@ -78,6 +80,9 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
     fun setup() {
         underTest.start()
 
+        kosmos.fakeKeyguardRepository.setDreaming(true)
+        kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(true)
+
         // Transition to DOZING and set the power interactor asleep.
         powerInteractor.setAsleepForTest()
         runBlocking {
@@ -93,6 +98,7 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @Ignore("Until b/349837588 is fixed")
     fun testTransitionToOccluded_ifDreamEnds_occludingActivityOnTop() =
         testScope.runTest {
             kosmos.fakeKeyguardRepository.setDreaming(true)
@@ -152,6 +158,7 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
             reset(transitionRepository)
 
             kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = false)
+            kosmos.fakeKeyguardRepository.setDreaming(false)
             runCurrent()
 
             assertThat(transitionRepository)

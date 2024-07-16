@@ -21,5 +21,5 @@ import com.android.compose.animation.scene.TransitionBuilder
 fun TransitionBuilder.lockscreenToNotificationsShadeTransition(
     durationScale: Double = 1.0,
 ) {
-    toNotificationsShadeTransition(durationScale)
+    toNotificationsShadeTransition(durationScale = durationScale)
 }

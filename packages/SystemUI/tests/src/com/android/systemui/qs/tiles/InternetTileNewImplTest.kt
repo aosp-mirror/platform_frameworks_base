@@ -20,6 +20,7 @@ import android.os.Handler
 import android.service.quicksettings.Tile
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.res.R
@@ -54,12 +55,14 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
+@RunWith(AndroidJUnit4::class)
 class InternetTileNewImplTest : SysuiTestCase() {
     lateinit var underTest: InternetTileNewImpl
 

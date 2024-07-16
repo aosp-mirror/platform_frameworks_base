@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
-import android.annotation.DimenRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,11 +28,11 @@ import android.provider.DeviceConfig;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.wm.utils.DimenPxIntSupplier;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.function.Function;
-import java.util.function.IntSupplier;
 
 /** Reads letterbox configs from resources and controls their overrides at runtime. */
 final class LetterboxConfiguration {
@@ -307,34 +306,6 @@ final class LetterboxConfiguration {
 
     // Flags dynamically updated with {@link android.provider.DeviceConfig}.
     @NonNull private final SynchedDeviceConfig mDeviceConfig;
-
-    // Cached version of IntSupplier customised to evaluate new dimen in pixels
-    // when density changes
-    private static class DimenPxIntSupplier implements IntSupplier {
-
-        @NonNull
-        private final Context mContext;
-
-        private final int mResourceId;
-
-        private float mLastDensity = Float.MIN_VALUE;
-        private int mValue = 0;
-
-        private DimenPxIntSupplier(@NonNull Context context, @DimenRes int resourceId) {
-            mContext = context;
-            mResourceId = resourceId;
-        }
-
-        @Override
-        public int getAsInt() {
-            final float newDensity = mContext.getResources().getDisplayMetrics().density;
-            if (newDensity != mLastDensity) {
-                mLastDensity = newDensity;
-                mValue = mContext.getResources().getDimensionPixelSize(mResourceId);
-            }
-            return mValue;
-        }
-    }
 
     LetterboxConfiguration(@NonNull final Context systemUiContext) {
         this(systemUiContext, new LetterboxConfigurationPersister(

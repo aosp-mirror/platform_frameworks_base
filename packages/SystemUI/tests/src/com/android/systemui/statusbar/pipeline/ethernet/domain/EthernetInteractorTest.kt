@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.ethernet.domain
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions
 import com.android.systemui.res.R
@@ -28,8 +29,10 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class EthernetInteractorTest : SysuiTestCase() {
     private val connectivityRepository = FakeConnectivityRepository()
     private val underTest = EthernetInteractor(connectivityRepository)

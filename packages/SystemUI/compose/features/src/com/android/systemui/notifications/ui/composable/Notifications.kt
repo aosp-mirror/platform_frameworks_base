@@ -19,15 +19,23 @@ package com.android.systemui.notifications.ui.composable
 
 import android.util.Log
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -39,9 +47,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +60,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
@@ -57,17 +68,21 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
+import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.res.R
@@ -89,8 +104,10 @@ object Notifications {
     object Elements {
         val NotificationScrim = ElementKey("NotificationScrim")
         val NotificationStackPlaceholder = ElementKey("NotificationStackPlaceholder")
-        val HeadsUpNotificationPlaceholder = ElementKey("HeadsUpNotificationPlaceholder")
+        val HeadsUpNotificationPlaceholder =
+            ElementKey("HeadsUpNotificationPlaceholder", scenePicker = LowestZIndexScenePicker)
         val ShelfSpace = ElementKey("ShelfSpace")
+        val NotificationStackCutoffGuideline = ElementKey("NotificationStackCutoffGuideline")
     }
 
     // Expansion fraction thresholds (between 0-1f) at which the corresponding value should be
@@ -112,10 +129,10 @@ fun SceneScope.HeadsUpNotificationSpace(
     modifier: Modifier = Modifier,
     isPeekFromBottom: Boolean = false,
 ) {
-    Element(
-        Notifications.Elements.HeadsUpNotificationPlaceholder,
+    Box(
         modifier =
             modifier
+                .element(Notifications.Elements.HeadsUpNotificationPlaceholder)
                 .fillMaxWidth()
                 .notificationHeadsUpHeight(stackScrollView)
                 .debugBackground(viewModel, DEBUG_HUN_COLOR)
@@ -129,9 +146,89 @@ fun SceneScope.HeadsUpNotificationSpace(
                     // Note: boundsInWindow doesn't scroll off the screen
                     stackScrollView.setHeadsUpTop(boundsInWindow.top)
                 }
-    ) {
-        content {}
+    )
+}
+
+/**
+ * A version of [HeadsUpNotificationSpace] that can be swiped up off the top edge of the screen by
+ * the user. When swiped up, the heads up notification is snoozed.
+ */
+@Composable
+fun SceneScope.SnoozeableHeadsUpNotificationSpace(
+    stackScrollView: NotificationScrollView,
+    viewModel: NotificationsPlaceholderViewModel,
+) {
+    val context = LocalContext.current
+    val density = LocalDensity.current
+    val statusBarHeight = SystemBarUtils.getStatusBarHeight(context)
+    val headsUpPadding =
+        with(density) { dimensionResource(id = R.dimen.heads_up_status_bar_padding).roundToPx() }
+
+    val isHeadsUp by viewModel.isHeadsUpOrAnimatingAway.collectAsStateWithLifecycle(false)
+
+    var scrollOffset by remember { mutableFloatStateOf(0f) }
+    val minScrollOffset = -(statusBarHeight + headsUpPadding.toFloat())
+    val maxScrollOffset = 0f
+
+    val scrollableState = rememberScrollableState { delta ->
+        consumeDeltaWithinRange(
+            current = scrollOffset,
+            setCurrent = { scrollOffset = it },
+            min = minScrollOffset,
+            max = maxScrollOffset,
+            delta
+        )
     }
+
+    val nestedScrollConnection =
+        object : NestedScrollConnection {
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                if (
+                    velocityOrPositionalThresholdReached(scrollOffset, minScrollOffset, available.y)
+                ) {
+                    scrollableState.animateScrollBy(minScrollOffset, tween())
+                } else {
+                    scrollableState.animateScrollBy(-minScrollOffset, tween())
+                }
+                return available
+            }
+        }
+
+    LaunchedEffect(isHeadsUp) { scrollOffset = 0f }
+
+    LaunchedEffect(scrollableState.isScrollInProgress) {
+        if (!scrollableState.isScrollInProgress && scrollOffset <= minScrollOffset) {
+            viewModel.setHeadsUpAnimatingAway(false)
+            viewModel.snoozeHun()
+        }
+    }
+
+    HeadsUpNotificationSpace(
+        stackScrollView = stackScrollView,
+        viewModel = viewModel,
+        modifier =
+            Modifier.absoluteOffset {
+                    IntOffset(
+                        x = 0,
+                        y =
+                            calculateHeadsUpPlaceholderYOffset(
+                                scrollOffset.roundToInt(),
+                                minScrollOffset.roundToInt(),
+                                stackScrollView.topHeadsUpHeight
+                            )
+                    )
+                }
+                .thenIf(isHeadsUp) {
+                    Modifier.verticalNestedScrollToScene(
+                            bottomBehavior = NestedScrollBehavior.EdgeAlways
+                        )
+                        .nestedScroll(nestedScrollConnection)
+                        .scrollable(
+                            orientation = Orientation.Vertical,
+                            state = scrollableState,
+                        )
+                }
+    )
 }
 
 /** Adds the space where notification stack should appear in the scene. */
@@ -155,6 +252,11 @@ fun SceneScope.ConstrainedNotificationStack(
             viewModel = viewModel,
             modifier = Modifier.align(Alignment.TopCenter),
         )
+        NotificationStackCutoffGuideline(
+            stackScrollView = stackScrollView,
+            viewModel = viewModel,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 }
 
@@ -171,6 +273,7 @@ fun SceneScope.NotificationScrollingStack(
     shouldPunchHoleBehindScrim: Boolean,
     shouldFillMaxSize: Boolean = true,
     shouldReserveSpaceForNavBar: Boolean = true,
+    shouldIncludeHeadsUpSpace: Boolean = true,
     shadeMode: ShadeMode,
     modifier: Modifier = Modifier,
 ) {
@@ -187,8 +290,10 @@ fun SceneScope.NotificationScrollingStack(
         viewModel.isCurrentGestureOverscroll.collectAsStateWithLifecycle(false)
     val expansionFraction by viewModel.expandFraction.collectAsStateWithLifecycle(0f)
 
-    val navBarHeight =
-        with(density) { WindowInsets.systemBars.asPaddingValues().calculateBottomPadding().toPx() }
+    val topPadding = dimensionResource(id = R.dimen.notification_side_paddings)
+    val navBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+    val bottomPadding = if (shouldReserveSpaceForNavBar) navBarHeight else 0.dp
+
     val screenHeight = LocalRawScreenHeight.current
 
     /**
@@ -221,6 +326,8 @@ fun SceneScope.NotificationScrollingStack(
     // The height of the scrim visible on screen when it is in its resting (collapsed) state.
     val minVisibleScrimHeight: () -> Float = { screenHeight - maxScrimTop() }
 
+    val isClickable by viewModel.isClickable.collectAsStateWithLifecycle()
+
     // we are not scrolled to the top unless the scrim is at its maximum offset.
     LaunchedEffect(viewModel, scrimOffset) {
         snapshotFlow { scrimOffset.value >= 0f }
@@ -231,7 +338,7 @@ fun SceneScope.NotificationScrollingStack(
     // expanded, reset scrim offset.
     LaunchedEffect(stackHeight, scrimOffset) {
         snapshotFlow { stackHeight.intValue < minVisibleScrimHeight() && scrimOffset.value < 0f }
-            .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.snapTo(0f) }
+            .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.animateTo(0f, tween()) }
     }
 
     // if we receive scroll delta from NSSL, offset the scrim and placeholder accordingly.
@@ -316,6 +423,9 @@ fun SceneScope.NotificationScrollingStack(
                         )
                     )
                 }
+                .thenIf(isClickable) {
+                    Modifier.clickable(onClick = { viewModel.onEmptySpaceClicked() })
+                }
     ) {
         // Creates a cutout in the background scrim in the shape of the notifications scrim.
         // Only visible when notif scrim alpha < 1, during shade expansion.
@@ -351,15 +461,18 @@ fun SceneScope.NotificationScrollingStack(
                             Modifier.nestedScroll(scrimNestedScrollConnection)
                         }
                         .verticalScroll(scrollState)
+                        .padding(top = topPadding)
                         .fillMaxWidth()
                         .notificationStackHeight(
                             view = stackScrollView,
-                            padding = if (shouldReserveSpaceForNavBar) navBarHeight.toInt() else 0
+                            totalVerticalPadding = topPadding + bottomPadding,
                         )
                         .onSizeChanged { size -> stackHeight.intValue = size.height },
             )
         }
-        HeadsUpNotificationSpace(stackScrollView = stackScrollView, viewModel = viewModel)
+        if (shouldIncludeHeadsUpSpace) {
+            HeadsUpNotificationSpace(stackScrollView = stackScrollView, viewModel = viewModel)
+        }
     }
 }
 
@@ -395,16 +508,40 @@ fun SceneScope.NotificationShelfSpace(
     )
 }
 
+/**
+ * A 0 height horizontal spacer to be placed at the bottom-most position in the current scene, where
+ * the notification contents (stack, footer, shelf) should be drawn.
+ */
+@Composable
+fun SceneScope.NotificationStackCutoffGuideline(
+    stackScrollView: NotificationScrollView,
+    viewModel: NotificationsPlaceholderViewModel,
+    modifier: Modifier = Modifier,
+) {
+    Spacer(
+        modifier =
+            modifier
+                .element(key = Notifications.Elements.NotificationStackCutoffGuideline)
+                .fillMaxWidth()
+                .height(0.dp)
+                .onGloballyPositioned { coordinates ->
+                    val positionY = coordinates.positionInWindow().y
+                    debugLog(viewModel) { "STACK cutoff onGloballyPositioned: y=$positionY" }
+                    stackScrollView.setStackCutoff(positionY)
+                }
+    )
+}
+
 @Composable
 private fun SceneScope.NotificationPlaceholder(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
 ) {
-    Element(
-        Notifications.Elements.NotificationStackPlaceholder,
+    Box(
         modifier =
             modifier
+                .element(Notifications.Elements.NotificationStackPlaceholder)
                 .debugBackground(viewModel, DEBUG_STACK_COLOR)
                 .onSizeChanged { size -> debugLog(viewModel) { "STACK onSizeChanged: size=$size" } }
                 .onGloballyPositioned { coordinates: LayoutCoordinates ->
@@ -417,11 +554,8 @@ private fun SceneScope.NotificationPlaceholder(
                     }
                     // NOTE: positionInWindow.y scrolls off screen, but boundsInWindow.top will not
                     stackScrollView.setStackTop(positionInWindow.y)
-                    stackScrollView.setStackBottom(positionInWindow.y + coordinates.size.height)
                 }
-    ) {
-        content {}
-    }
+    )
 }
 
 private fun calculateCornerRadius(
@@ -440,6 +574,47 @@ private fun calculateCornerRadius(
     } else {
         scrimCornerRadius
     }
+}
+
+private fun calculateHeadsUpPlaceholderYOffset(
+    scrollOffset: Int,
+    minScrollOffset: Int,
+    topHeadsUpHeight: Int,
+): Int {
+    return -minScrollOffset +
+        (scrollOffset * (-minScrollOffset + topHeadsUpHeight) / -minScrollOffset)
+}
+
+private fun velocityOrPositionalThresholdReached(
+    scrollOffset: Float,
+    minScrollOffset: Float,
+    availableVelocityY: Float,
+): Boolean {
+    return availableVelocityY < HUN_SNOOZE_VELOCITY_THRESHOLD ||
+        (availableVelocityY <= 0f &&
+            scrollOffset < minScrollOffset * HUN_SNOOZE_POSITIONAL_THRESHOLD_FRACTION)
+}
+
+/**
+ * Takes a range, current value, and delta, and updates the current value by the delta, coercing the
+ * result within the given range. Returns how much of the delta was consumed.
+ */
+private fun consumeDeltaWithinRange(
+    current: Float,
+    setCurrent: (Float) -> Unit,
+    min: Float,
+    max: Float,
+    delta: Float
+): Float {
+    return if (delta < 0 && current > min) {
+        val remainder = (current + delta - min).coerceAtMost(0f)
+        setCurrent((current + delta).coerceAtLeast(min))
+        delta - remainder
+    } else if (delta > 0 && current < max) {
+        val remainder = (current + delta).coerceAtLeast(0f)
+        setCurrent((current + delta).coerceAtMost(max))
+        delta - remainder
+    } else 0f
 }
 
 private inline fun debugLog(
@@ -476,3 +651,5 @@ private const val TAG = "FlexiNotifs"
 private val DEBUG_STACK_COLOR = Color(1f, 0f, 0f, 0.2f)
 private val DEBUG_HUN_COLOR = Color(0f, 0f, 1f, 0.2f)
 private val DEBUG_BOX_COLOR = Color(0f, 1f, 0f, 0.2f)
+private const val HUN_SNOOZE_POSITIONAL_THRESHOLD_FRACTION = 0.25f
+private const val HUN_SNOOZE_VELOCITY_THRESHOLD = -70f

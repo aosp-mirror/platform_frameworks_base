@@ -1,8 +1,6 @@
 <data-labels>
-    <data-shared dataCategory="photo_video"
-        dataType="photos"
+    <data-shared dataType="photo_video_data_type_photos"
         purposes="analytics" />
-    <data-shared dataCategory="photo_video"
-        dataType="videos"
+    <data-shared dataType="photo_video_data_type_videos"
         purposes="analytics" />
 </data-labels>

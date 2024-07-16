@@ -24,6 +24,7 @@ import android.media.AudioDeviceAttributes
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.media.AudioManager.MuteAwaitConnectionCallback.EVENT_CONNECTION
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.media.DeviceIconUtil
 import com.android.settingslib.media.LocalMediaManager
@@ -35,6 +36,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.never
@@ -45,6 +47,7 @@ import org.mockito.MockitoAnnotations
 
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
     private lateinit var muteAwaitConnectionManager: MediaMuteAwaitConnectionManager
     @Mock

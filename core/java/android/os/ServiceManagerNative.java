@@ -50,7 +50,7 @@ public final class ServiceManagerNative {
 class ServiceManagerProxy implements IServiceManager {
     public ServiceManagerProxy(IBinder remote) {
         mRemote = remote;
-        mServiceManager = IServiceManager.Stub.asInterface(remote);
+        mServiceManager = IServiceManager.Stub.asInterface(this.getNativeServiceManager());
     }
 
     public IBinder asBinder() {
@@ -128,4 +128,6 @@ class ServiceManagerProxy implements IServiceManager {
     private IBinder mRemote;
 
     private IServiceManager mServiceManager;
+
+    private native IBinder getNativeServiceManager();
 }

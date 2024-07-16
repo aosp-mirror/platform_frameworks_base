@@ -1,17 +1,12 @@
 <data-labels>
-    <data-shared dataCategory="actions_in_app"
-        dataType="user_interaction"
+    <data-shared dataType="actions_in_app_data_type_user_interaction"
         purposes="analytics" />
-    <data-shared dataCategory="actions_in_app"
-        dataType="in_app_search_history"
+    <data-shared dataType="actions_in_app_data_type_in_app_search_history"
         purposes="analytics" />
-    <data-shared dataCategory="actions_in_app"
-        dataType="installed_apps"
+    <data-shared dataType="actions_in_app_data_type_installed_apps"
         purposes="analytics" />
-    <data-shared dataCategory="actions_in_app"
-        dataType="user_generated_content"
+    <data-shared dataType="actions_in_app_data_type_user_generated_content"
         purposes="analytics" />
-    <data-shared dataCategory="actions_in_app"
-        dataType="other"
+    <data-shared dataType="actions_in_app_data_type_other"
         purposes="analytics" />
 </data-labels>

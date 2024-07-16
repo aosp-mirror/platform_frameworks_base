@@ -471,7 +471,7 @@ class QSTileViewImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun onPrepareForLaunch_paddingForLaunchAnimationIsConfigured() {
+    fun getPaddingForLaunchAnimation_onLongClickedState_paddingForLaunchAnimationIsConfigured() {
         val startingWidth = 100
         val startingHeight = 50
         val deltaWidth = (QSTileViewImpl.LONG_PRESS_EFFECT_WIDTH_SCALE - 1f) * startingWidth
@@ -480,8 +480,8 @@ class QSTileViewImplTest : SysuiTestCase() {
         // GIVEN that long-press effect properties are initialized
         tileView.initializeLongPressProperties(startingHeight, startingWidth)
 
-        // WHEN the tile is preparing for the launch animation
-        tileView.prepareForLaunch()
+        // WHEN the long-press effect has ended in the long-click state
+        kosmos.qsLongPressEffect.setState(QSLongPressEffect.State.LONG_CLICKED)
 
         // THE animation padding corresponds to the tile's growth due to the effect
         val padding = tileView.getPaddingForLaunchAnimation()
@@ -494,6 +494,22 @@ class QSTileViewImplTest : SysuiTestCase() {
                     deltaHeight.toInt() / 2,
                 )
             )
+    }
+
+    @Test
+    fun getPaddingForLaunchAnimation_notInLongClickState_paddingForLaunchAnimationIsEmpty() {
+        val startingWidth = 100
+        val startingHeight = 50
+
+        // GIVEN that long-press effect properties are initialized
+        tileView.initializeLongPressProperties(startingHeight, startingWidth)
+
+        // WHEN the long-press effect has ended in the click state
+        kosmos.qsLongPressEffect.setState(QSLongPressEffect.State.CLICKED)
+
+        // THE animation padding is empty
+        val padding = tileView.getPaddingForLaunchAnimation()
+        assertThat(padding.isEmpty).isTrue()
     }
 
     @Test

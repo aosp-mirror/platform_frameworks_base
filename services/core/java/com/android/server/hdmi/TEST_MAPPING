@@ -30,5 +30,25 @@
         }
       ]
     }
+  ],
+  // Postsubmit tests for TV devices
+  "tv-postsubmit": [
+    {
+      "name": "HdmiCecTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "include-filter": "android.hardware.hdmi"
+        }
+      ],
+      "file_patterns": [
+        "(/|^)DeviceFeature[^/]*", "(/|^)Hdmi[^/]*"
+      ]
+    }
   ]
 }

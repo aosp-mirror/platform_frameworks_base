@@ -40,8 +40,8 @@ flag {
 flag {
     name: "enable_windowing_edge_drag_resize"
     namespace: "lse_desktop_experience"
-    description: "Enables edge drag resizing for all input sources"
-    bug: "323383067"
+    description: "Enables edge drag resizing for stylus input (cursor is enabled by default)"
+    bug: "337782092"
 }
 
 flag {
@@ -112,4 +112,74 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Introduces a new observer in shell to track the task stack."
     bug: "341932484"
+}
+
+flag {
+    name: "enable_desktop_windowing_size_constraints"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable min/max window size constraints when resizing a window in desktop windowing mode"
+    bug: "327589741"
+}
+
+flag {
+    name: "enable_caption_compat_inset_force_consumption"
+    namespace: "lse_desktop_experience"
+    description: "Enables force-consumption of caption bar insets for immersive apps in freeform"
+    bug: "316231589"
+}
+
+flag {
+    name: "show_desktop_windowing_dev_option"
+    namespace: "lse_desktop_experience"
+    description: "Whether to show developer option for enabling desktop windowing mode"
+    bug: "348193756"
+}
+
+flag {
+    name: "enable_desktop_windowing_app_to_web"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable the app-to-web feature and show the open in browser button in the header menu"
+    bug: "349695493"
+}
+
+flag {
+    name: "enable_windowing_transition_handlers_observers"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable desktop windowing transition handler and observer instead of task listeners."
+    bug: "332682201"
+}
+
+flag {
+    name: "enable_caption_compat_inset_conversion"
+    namespace: "lse_desktop_experience"
+    description: "Enables compatibility mitigation for apps that don't support caption insets well"
+    bug: "316231589"
+}
+
+flag {
+    name: "enable_desktop_windowing_multi_instance_features"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable multi-instance support in desktop windowing."
+    bug: "336289597"
+}
+
+flag {
+    name: "enable_desktop_windowing_back_navigation"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable back navigation treatment in desktop windowing."
+    bug: "350421096"
+}
+
+flag {
+    name: "enable_desktop_windowing_app_handle_education"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing app handle education"
+    bug: "348208342"
+}
+
+flag {
+    name: "enable_compat_ui_visibility_status"
+    namespace: "lse_desktop_experience"
+    description: "Enables the tracking of the status for compat ui elements."
+    bug: "350953004"
 }

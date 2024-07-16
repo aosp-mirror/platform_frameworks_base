@@ -28,10 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
+import com.android.compose.animation.scene.UserAction.Resolved
 
 /**
  * [SceneTransitionLayout] is a container that automatically animates its content whenever its state
@@ -48,7 +51,6 @@ import androidx.compose.ui.unit.IntSize
  * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
  *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
  * @param scenes the configuration of the different scenes of this layout.
- * @see updateSceneTransitionLayoutState
  */
 @Composable
 fun SceneTransitionLayout(
@@ -66,56 +68,6 @@ fun SceneTransitionLayout(
         swipeDetector,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
-        scenes,
-    )
-}
-
-/**
- * [SceneTransitionLayout] is a container that automatically animates its content whenever
- * [currentScene] changes, using the transitions defined in [transitions].
- *
- * Note: You should use [androidx.compose.animation.AnimatedContent] instead of
- * [SceneTransitionLayout] if it fits your need. Use [SceneTransitionLayout] over AnimatedContent if
- * you need support for swipe gestures, shared elements or transitions defined declaratively outside
- * UI code.
- *
- * @param currentScene the current scene
- * @param onChangeScene a mutator that should set [currentScene] to the given scene when called.
- *   This is called when the user commits a transition to a new scene because of a [UserAction], for
- *   instance by triggering back navigation or by swiping to a new scene.
- * @param transitions the definition of the transitions used to animate a change of scene.
- * @param swipeSourceDetector the source detector used to detect which source a swipe is started
- *   from, if any.
- * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
- *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
- * @param scenes the configuration of the different scenes of this layout.
- */
-@Composable
-fun SceneTransitionLayout(
-    currentScene: SceneKey,
-    onChangeScene: (SceneKey) -> Unit,
-    transitions: SceneTransitions,
-    modifier: Modifier = Modifier,
-    swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
-    swipeDetector: SwipeDetector = DefaultSwipeDetector,
-    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
-    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
-    scenes: SceneTransitionLayoutScope.() -> Unit,
-) {
-    val state =
-        updateSceneTransitionLayoutState(
-            currentScene,
-            onChangeScene,
-            transitions,
-            enableInterruptions = enableInterruptions,
-        )
-
-    SceneTransitionLayout(
-        state,
-        modifier,
-        swipeSourceDetector,
-        swipeDetector,
-        transitionInterceptionThreshold,
         scenes,
     )
 }
@@ -395,34 +347,71 @@ interface ElementBoxScope {
 @Stable @ElementDsl interface MovableElementContentScope : BaseSceneScope, ElementBoxScope
 
 /** An action performed by the user. */
-sealed interface UserAction {
+sealed class UserAction {
     infix fun to(scene: SceneKey): Pair<UserAction, UserActionResult> {
         return this to UserActionResult(toScene = scene)
     }
+
+    /** Resolve this into a [Resolved] user action given [layoutDirection]. */
+    internal abstract fun resolve(layoutDirection: LayoutDirection): Resolved
+
+    /** A resolved [UserAction] that does not depend on the layout direction. */
+    internal sealed class Resolved
 }
 
 /** The user navigated back, either using a gesture or by triggering a KEYCODE_BACK event. */
-data object Back : UserAction
+data object Back : UserAction() {
+    override fun resolve(layoutDirection: LayoutDirection): Resolved = Resolved
+
+    internal object Resolved : UserAction.Resolved()
+}
 
 /** The user swiped on the container. */
 data class Swipe(
     val direction: SwipeDirection,
     val pointerCount: Int = 1,
     val fromSource: SwipeSource? = null,
-) : UserAction {
+) : UserAction() {
     companion object {
         val Left = Swipe(SwipeDirection.Left)
         val Up = Swipe(SwipeDirection.Up)
         val Right = Swipe(SwipeDirection.Right)
         val Down = Swipe(SwipeDirection.Down)
+        val Start = Swipe(SwipeDirection.Start)
+        val End = Swipe(SwipeDirection.End)
     }
+
+    override fun resolve(layoutDirection: LayoutDirection): UserAction.Resolved {
+        return Resolved(
+            direction = direction.resolve(layoutDirection),
+            pointerCount = pointerCount,
+            fromSource = fromSource?.resolve(layoutDirection),
+        )
+    }
+
+    /** A resolved [Swipe] that does not depend on the layout direction. */
+    internal data class Resolved(
+        val direction: SwipeDirection.Resolved,
+        val pointerCount: Int,
+        val fromSource: SwipeSource.Resolved?,
+    ) : UserAction.Resolved()
 }
 
-enum class SwipeDirection(val orientation: Orientation) {
-    Up(Orientation.Vertical),
-    Down(Orientation.Vertical),
-    Left(Orientation.Horizontal),
-    Right(Orientation.Horizontal),
+enum class SwipeDirection(internal val resolve: (LayoutDirection) -> Resolved) {
+    Up(resolve = { Resolved.Up }),
+    Down(resolve = { Resolved.Down }),
+    Left(resolve = { Resolved.Left }),
+    Right(resolve = { Resolved.Right }),
+    Start(resolve = { if (it == LayoutDirection.Ltr) Resolved.Left else Resolved.Right }),
+    End(resolve = { if (it == LayoutDirection.Ltr) Resolved.Right else Resolved.Left });
+
+    /** A resolved [SwipeDirection] that does not depend on the layout direction. */
+    internal enum class Resolved(val orientation: Orientation) {
+        Up(Orientation.Vertical),
+        Down(Orientation.Vertical),
+        Left(Orientation.Horizontal),
+        Right(Orientation.Horizontal),
+    }
 }
 
 /**
@@ -437,6 +426,16 @@ interface SwipeSource {
     override fun equals(other: Any?): Boolean
 
     override fun hashCode(): Int
+
+    /** Resolve this into a [Resolved] swipe source given [layoutDirection]. */
+    fun resolve(layoutDirection: LayoutDirection): Resolved
+
+    /** A resolved [SwipeSource] that does not depend on the layout direction. */
+    interface Resolved {
+        override fun equals(other: Any?): Boolean
+
+        override fun hashCode(): Int
+    }
 }
 
 interface SwipeSourceDetector {
@@ -459,9 +458,16 @@ data class UserActionResult(
 
     /** The key of the transition that should be used. */
     val transitionKey: TransitionKey? = null,
+
+    /**
+     * If `true`, the swipe will be committed and we will settle to [toScene] if only if the user
+     * swiped at least the swipe distance, i.e. the transition progress was already equal to or
+     * bigger than 100% when the user released their finger. `
+     */
+    val requiresFullDistanceSwipe: Boolean = false,
 )
 
-interface UserActionDistance {
+fun interface UserActionDistance {
     /**
      * Return the **absolute** distance of the user action given the size of the scene we are
      * animating from and the [orientation].
@@ -504,11 +510,13 @@ internal fun SceneTransitionLayoutForTesting(
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
     val coroutineScope = rememberCoroutineScope()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
                 state = state as BaseSceneTransitionLayoutState,
                 density = density,
+                layoutDirection = layoutDirection,
                 swipeSourceDetector = swipeSourceDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
                 builder = scenes,
@@ -519,7 +527,7 @@ internal fun SceneTransitionLayoutForTesting(
 
     // TODO(b/317014852): Move this into the SideEffect {} again once STLImpl.scenes is not a
     // SnapshotStateMap anymore.
-    layoutImpl.updateScenes(scenes)
+    layoutImpl.updateScenes(scenes, layoutDirection)
 
     SideEffect {
         if (state != layoutImpl.state) {
@@ -530,6 +538,7 @@ internal fun SceneTransitionLayoutForTesting(
         }
 
         layoutImpl.density = density
+        layoutImpl.layoutDirection = layoutDirection
         layoutImpl.swipeSourceDetector = swipeSourceDetector
         layoutImpl.transitionInterceptionThreshold = transitionInterceptionThreshold
     }

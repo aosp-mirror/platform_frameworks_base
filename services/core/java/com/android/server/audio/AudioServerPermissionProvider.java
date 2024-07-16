@@ -16,16 +16,27 @@
 
 package com.android.server.audio;
 
+import static android.Manifest.permission.ACCESS_ULTRASOUND;
+import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.CALL_AUDIO_INTERCEPTION;
+import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.CAPTURE_AUDIO_OUTPUT;
+import static android.Manifest.permission.CAPTURE_MEDIA_OUTPUT;
+import static android.Manifest.permission.CAPTURE_TUNER_AUDIO_INPUT;
+import static android.Manifest.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT;
 import static android.Manifest.permission.MODIFY_AUDIO_ROUTING;
+import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS;
+import static android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS;
 import static android.Manifest.permission.MODIFY_PHONE_STATE;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.media.permission.INativePermissionController;
@@ -51,11 +62,25 @@ public class AudioServerPermissionProvider {
 
     static final String[] MONITORED_PERMS = new String[PermissionEnum.ENUM_SIZE];
 
+    static final byte[] HDS_PERMS = new byte[] {PermissionEnum.CAPTURE_AUDIO_HOTWORD,
+            PermissionEnum.CAPTURE_AUDIO_OUTPUT, PermissionEnum.RECORD_AUDIO};
+
     static {
-        MONITORED_PERMS[PermissionEnum.MODIFY_AUDIO_ROUTING] = MODIFY_AUDIO_ROUTING;
-        MONITORED_PERMS[PermissionEnum.MODIFY_PHONE_STATE] = MODIFY_PHONE_STATE;
         MONITORED_PERMS[PermissionEnum.RECORD_AUDIO] = RECORD_AUDIO;
+        MONITORED_PERMS[PermissionEnum.MODIFY_AUDIO_ROUTING] = MODIFY_AUDIO_ROUTING;
+        MONITORED_PERMS[PermissionEnum.MODIFY_AUDIO_SETTINGS] = MODIFY_AUDIO_SETTINGS;
+        MONITORED_PERMS[PermissionEnum.MODIFY_PHONE_STATE] = MODIFY_PHONE_STATE;
+        MONITORED_PERMS[PermissionEnum.MODIFY_DEFAULT_AUDIO_EFFECTS] = MODIFY_DEFAULT_AUDIO_EFFECTS;
+        MONITORED_PERMS[PermissionEnum.WRITE_SECURE_SETTINGS] = WRITE_SECURE_SETTINGS;
         MONITORED_PERMS[PermissionEnum.CALL_AUDIO_INTERCEPTION] = CALL_AUDIO_INTERCEPTION;
+        MONITORED_PERMS[PermissionEnum.ACCESS_ULTRASOUND] = ACCESS_ULTRASOUND;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_AUDIO_OUTPUT] = CAPTURE_AUDIO_OUTPUT;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_MEDIA_OUTPUT] = CAPTURE_MEDIA_OUTPUT;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_AUDIO_HOTWORD] = CAPTURE_AUDIO_HOTWORD;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_TUNER_AUDIO_INPUT] = CAPTURE_TUNER_AUDIO_INPUT;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_VOICE_COMMUNICATION_OUTPUT] =
+                CAPTURE_VOICE_COMMUNICATION_OUTPUT;
+        MONITORED_PERMS[PermissionEnum.BLUETOOTH_CONNECT] = BLUETOOTH_CONNECT;
     }
 
     private final Object mLock = new Object();
@@ -67,12 +92,16 @@ public class AudioServerPermissionProvider {
 
     @GuardedBy("mLock")
     private final Map<Integer, Set<String>> mPackageMap;
+
     // Values are sorted
     @GuardedBy("mLock")
     private final int[][] mPermMap = new int[PermissionEnum.ENUM_SIZE][];
 
     @GuardedBy("mLock")
     private boolean mIsUpdateDeferred = true;
+
+    @GuardedBy("mLock")
+    private int mHdsUid = -1;
 
     /**
      * @param appInfos - PackageState for all apps on the device, used to populate init state
@@ -103,7 +132,7 @@ public class AudioServerPermissionProvider {
             try {
                 for (byte i = 0; i < PermissionEnum.ENUM_SIZE; i++) {
                     if (mIsUpdateDeferred) {
-                        mPermMap[i] = getUidsHoldingPerm(MONITORED_PERMS[i]);
+                        mPermMap[i] = getUidsHoldingPerm(i);
                     }
                     mDest.populatePermissionState(i, mPermMap[i]);
                 }
@@ -163,7 +192,7 @@ public class AudioServerPermissionProvider {
             }
             try {
                 for (byte i = 0; i < PermissionEnum.ENUM_SIZE; i++) {
-                    var newPerms = getUidsHoldingPerm(MONITORED_PERMS[i]);
+                    var newPerms = getUidsHoldingPerm(i);
                     if (!Arrays.equals(newPerms, mPermMap[i])) {
                         mPermMap[i] = newPerms;
                         mDest.populatePermissionState(i, newPerms);
@@ -176,6 +205,77 @@ public class AudioServerPermissionProvider {
                 mIsUpdateDeferred = true;
             }
         }
+    }
+
+    public void setIsolatedServiceUid(int uid, int owningUid) {
+        synchronized (mLock) {
+            if (mHdsUid == uid) return;
+            var packageNameSet = mPackageMap.get(owningUid);
+            if (packageNameSet == null) return;
+            var packageName = packageNameSet.iterator().next();
+            onModifyPackageState(uid, packageName, /* isRemove= */ false);
+            // permissions
+            mHdsUid = uid;
+            if (mDest == null) {
+                mIsUpdateDeferred = true;
+                return;
+            }
+            try {
+                for (byte perm : HDS_PERMS) {
+                    int[] newPerms = new int[mPermMap[perm].length + 1];
+                    System.arraycopy(mPermMap[perm], 0, newPerms, 0, mPermMap[perm].length);
+                    newPerms[newPerms.length - 1] = mHdsUid;
+                    Arrays.sort(newPerms);
+                    mPermMap[perm] = newPerms;
+                    mDest.populatePermissionState(perm, newPerms);
+                }
+            } catch (RemoteException e) {
+                // We will re-init the state when the service comes back up
+                mDest = null;
+                // We didn't necessarily finish
+                mIsUpdateDeferred = true;
+            }
+        }
+    }
+
+    public void clearIsolatedServiceUid(int uid) {
+        synchronized (mLock) {
+            if (mHdsUid != uid) return;
+            var packageNameSet = mPackageMap.get(uid);
+            if (packageNameSet == null) return;
+            var packageName = packageNameSet.iterator().next();
+            onModifyPackageState(uid, packageName, /* isRemove= */ true);
+            // permissions
+            if (mDest == null) {
+                mIsUpdateDeferred = true;
+                return;
+            }
+            try {
+                for (byte perm : HDS_PERMS) {
+                    int[] newPerms = new int[mPermMap[perm].length - 1];
+                    int ind = Arrays.binarySearch(mPermMap[perm], uid);
+                    if (ind < 0) continue;
+                    System.arraycopy(mPermMap[perm], 0, newPerms, 0, ind);
+                    System.arraycopy(mPermMap[perm], ind + 1, newPerms, ind,
+                            mPermMap[perm].length - ind - 1);
+                    mPermMap[perm] = newPerms;
+                    mDest.populatePermissionState(perm, newPerms);
+                }
+            } catch (RemoteException e) {
+                // We will re-init the state when the service comes back up
+                mDest = null;
+                // We didn't necessarily finish
+                mIsUpdateDeferred = true;
+            }
+            mHdsUid = -1;
+        }
+    }
+
+    private boolean isSpecialHdsPermission(int perm) {
+        for (var hdsPerm : HDS_PERMS) {
+            if (perm == hdsPerm) return true;
+        }
+        return false;
     }
 
     /** Called when full syncing package state to audioserver. */
@@ -202,15 +302,18 @@ public class AudioServerPermissionProvider {
 
     @GuardedBy("mLock")
     /** Return all uids (not app-ids) which currently hold a given permission. Not app-op aware */
-    private int[] getUidsHoldingPerm(String perm) {
+    private int[] getUidsHoldingPerm(int perm) {
         IntArray acc = new IntArray();
         for (int userId : mUserIdSupplier.get()) {
             for (int appId : mPackageMap.keySet()) {
                 int uid = UserHandle.getUid(userId, appId);
-                if (mPermissionPredicate.test(uid, perm)) {
+                if (mPermissionPredicate.test(uid, MONITORED_PERMS[perm])) {
                     acc.add(uid);
                 }
             }
+        }
+        if (isSpecialHdsPermission(perm) && mHdsUid != -1) {
+            acc.add(mHdsUid);
         }
         var unwrapped = acc.toArray();
         Arrays.sort(unwrapped);

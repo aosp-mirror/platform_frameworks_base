@@ -21,6 +21,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
@@ -28,11 +29,9 @@ import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
-import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
 
 import static junit.framework.Assert.assertEquals;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.annotation.NonNull;
@@ -99,9 +98,8 @@ public class ViewFrameRateTest {
     }
 
     @Test
-    @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
-            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
-    public void frameRateChangesWhenContentMoves() throws Throwable {
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY)
+    public void highHintWhenContentMoves() throws Throwable {
         if (!ViewProperties.vrr_enabled().orElse(true)) {
             return;
         }
@@ -109,16 +107,57 @@ public class ViewFrameRateTest {
         mActivityRule.runOnUiThread(() -> {
             mMovingView.offsetLeftAndRight(100);
             runAfterDraw(() -> {
-                if (toolkitFrameRateVelocityMappingReadOnly()) {
-                    float frameRate = mViewRoot.getLastPreferredFrameRate();
-                    assertTrue(frameRate > 0);
-                } else {
-                    assertEquals(FRAME_RATE_CATEGORY_HIGH,
-                            mViewRoot.getLastPreferredFrameRateCategory());
-                }
+                assertEquals(FRAME_RATE_CATEGORY_HIGH_HINT,
+                        mViewRoot.getLastPreferredFrameRateCategory());
             });
         });
         waitForAfterDraw();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY)
+    public void inputMethodWithContentMoves() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        // update the window type to TYPE_INPUT_METHOD
+        int windowType = mViewRoot.mWindowAttributes.type;
+        final WindowManager.LayoutParams attrs = mViewRoot.mWindowAttributes;
+        attrs.type = TYPE_INPUT_METHOD;
+        instrumentation.runOnMainSync(() -> {
+            attrs.width = 1;
+            attrs.height = 1;
+            mViewRoot.setLayoutParams(attrs, false);
+        });
+        instrumentation.waitForIdleSync();
+
+        final WindowManager.LayoutParams newAttrs = mViewRoot.mWindowAttributes;
+        assertTrue(newAttrs.type == TYPE_INPUT_METHOD);
+
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.offsetLeftAndRight(100);
+            runAfterDraw(() -> {
+                int expected = toolkitFrameRateBySizeReadOnly()
+                        ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
+                float frameRate = mViewRoot.getLastPreferredFrameRate();
+                // frame rate shouldn't be boost with TYPE_INPUT_METHOD window type
+                assertTrue(frameRate == 0);
+                assertEquals(expected,
+                        mViewRoot.getLastPreferredFrameRateCategory());
+            });
+        });
+        waitForAfterDraw();
+
+        // Reset the window type back to the original one.
+        newAttrs.type = windowType;
+        instrumentation.runOnMainSync(() -> {
+            mViewRoot.setLayoutParams(newAttrs, false);
+        });
+        instrumentation.waitForIdleSync();
+        assertTrue(mViewRoot.mWindowAttributes.type == windowType);
     }
 
     @UiThreadTest
@@ -128,40 +167,118 @@ public class ViewFrameRateTest {
         assertEquals(0f, mViewRoot.getLastPreferredFrameRate(), 0f);
     }
 
+
     @Test
-    @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
-    public void frameBoostDisable() throws Throwable {
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY)
+    public void highHintWhenActionMove() throws Throwable {
         if (!ViewProperties.vrr_enabled().orElse(true)) {
             return;
         }
-        mActivityRule.runOnUiThread(() -> {
-            long now = SystemClock.uptimeMillis();
-            MotionEvent down = MotionEvent.obtain(
-                    /* downTime */ now,
-                    /* eventTime */ now,
-                    /* action */ MotionEvent.ACTION_DOWN,
-                    /* x */ 0f,
-                    /* y */ 0f,
-                    /* metaState */ 0
-            );
-            mActivity.dispatchTouchEvent(down);
-            mMovingView.offsetLeftAndRight(10);
-        });
-        mActivityRule.runOnUiThread(() -> {
-            mMovingView.invalidate();
-        });
 
         mActivityRule.runOnUiThread(() -> {
-            assertFalse(mViewRoot.getIsTouchBoosting());
-            assertFalse(mViewRoot.getIsFrameRateBoosting());
+            mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_LOW);
+            ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            mMovingView.setLayoutParams(layoutParams);
+            mMovingView.setOnClickListener((v) -> {});
         });
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> assertEquals(FRAME_RATE_CATEGORY_LOW,
+                mViewRoot.getLastPreferredFrameRateCategory()));
+
+        int[] position = new int[2];
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.getLocationOnScreen(position);
+            position[0] += mMovingView.getWidth() / 2;
+            position[1] += mMovingView.getHeight() / 2;
+        });
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        long now = SystemClock.uptimeMillis();
+        MotionEvent down = MotionEvent.obtain(
+                now, // downTime
+                now, // eventTime
+                MotionEvent.ACTION_DOWN, // action
+                position[0], // x
+                position[1], // y
+                0 // metaState
+        );
+        down.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        instrumentation.sendPointerSync(down);
+
+        now = SystemClock.uptimeMillis();
+        MotionEvent move = MotionEvent.obtain(
+                now, // downTime
+                now, // eventTime
+                MotionEvent.ACTION_MOVE, // action
+                position[0], // x
+                position[1], // y
+                0 // metaState
+        );
+        move.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        instrumentation.sendPointerSync(move);
+
+        // Should continue to enable touch boost.
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.offsetLeftAndRight(10);
+            assertTrue(mViewRoot.getIsTouchBoosting());
+        });
+
+        down.recycle();
+        move.recycle();
+    }
+
+    // When the size of a View is changed, we should boost the frame rate.
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY)
+    public void highHintWhenSizeChanged() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+        waitForFrameRateCategoryToSettle();
+        assertEquals(FRAME_RATE_CATEGORY_LOW,
+                        mViewRoot.getLastPreferredFrameRateCategory());
+
+        int width = mMovingView.getWidth();
+        int height = mMovingView.getHeight();
+
+        ViewGroup.LayoutParams params = mMovingView.getLayoutParams();
+        params.width = width * 2;
+        params.height = height * 2;
+
+        // frame rate category should be HIGH_HINT when the size is changed
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.setLayoutParams(params);
+            runAfterDraw(() -> {
+                assertTrue(mMovingView.getWidth() > width);
+                assertTrue(mMovingView.getHeight() > height);
+                assertEquals(FRAME_RATE_CATEGORY_HIGH_HINT,
+                        mViewRoot.getLastPreferredFrameRateCategory());
+            });
+        });
+        waitForAfterDraw();
+
+        // set it back to the original size
+        params.width = width;
+        params.height = height;
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.setLayoutParams(params);
+            runAfterDraw(() -> {
+                assertEquals(width, mMovingView.getWidth());
+                assertEquals(height, mMovingView.getHeight());
+                assertEquals(FRAME_RATE_CATEGORY_HIGH_HINT,
+                        mViewRoot.getLastPreferredFrameRateCategory());
+            });
+        });
+        waitForAfterDraw();
     }
 
     @Test
     @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
             FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
-    public void lowVelocity60() throws Throwable {
+    public void lowVelocity80() throws Throwable {
         if (!ViewProperties.vrr_enabled().orElse(true)) {
             return;
         }
@@ -676,6 +793,12 @@ public class ViewFrameRateTest {
         down.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         instrumentation.sendPointerSync(down);
         assertEquals(FRAME_RATE_CATEGORY_HIGH_HINT, mViewRoot.getLastPreferredFrameRateCategory());
+
+        // Should still be boost with position changed
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.offsetLeftAndRight(10);
+            assertTrue(mViewRoot.getIsTouchBoosting());
+        });
     }
 
     @LargeTest

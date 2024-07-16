@@ -25,7 +25,7 @@
     android:paddingBottom="@dimen/nav_content_padding"
     android:id="@+id/vertical">
 
-    <com.android.systemui.navigationbar.buttons.NearestTouchFrame
+    <com.android.systemui.navigationbar.views.buttons.NearestTouchFrame
         android:id="@+id/nav_buttons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -33,7 +33,7 @@
         android:clipToPadding="false"
         systemui:isVertical="true">
 
-        <com.android.systemui.navigationbar.buttons.ReverseLinearLayout
+        <com.android.systemui.navigationbar.views.buttons.ReverseLinearLayout
             android:id="@+id/ends_group"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -41,7 +41,7 @@
             android:clipToPadding="false"
             android:clipChildren="false" />
 
-        <com.android.systemui.navigationbar.buttons.ReverseLinearLayout
+        <com.android.systemui.navigationbar.views.buttons.ReverseLinearLayout
             android:id="@+id/center_group"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -50,6 +50,6 @@
             android:clipToPadding="false"
             android:clipChildren="false" />
 
-    </com.android.systemui.navigationbar.buttons.NearestTouchFrame>
+    </com.android.systemui.navigationbar.views.buttons.NearestTouchFrame>
 
 </FrameLayout>

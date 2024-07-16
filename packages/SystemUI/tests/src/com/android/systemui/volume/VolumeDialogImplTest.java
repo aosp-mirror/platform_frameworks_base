@@ -35,6 +35,7 @@ import static org.junit.Assume.assumeNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -54,6 +56,7 @@ import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -86,10 +89,12 @@ import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.volume.domain.interactor.VolumeDialogInteractor;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
-import com.android.systemui.volume.ui.binder.VolumeDialogMenuIconBinder;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
+
+import com.google.common.collect.ImmutableList;
 
 import dagger.Lazy;
 
@@ -106,6 +111,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @SmallTest
@@ -150,17 +156,18 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Mock
     private VolumeNavigator mVolumeNavigator;
     @Mock
-    private VolumeDialogMenuIconBinder mVolumeDialogMenuIconBinder;
-    @Mock
     private VolumePanelFlag mVolumePanelFlag;
+    @Mock
+    private VolumeDialogInteractor mVolumeDialogInteractor;
 
     private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
             new CsdWarningDialog.Factory() {
-        @Override
-        public CsdWarningDialog create(int warningType, Runnable onCleanup) {
-            return mCsdWarningDialog;
-        }
-    };
+                @Override
+                public CsdWarningDialog create(int warningType, Runnable onCleanup,
+                        Optional<ImmutableList<Pair<String, Intent>>> actionIntents) {
+                    return mCsdWarningDialog;
+                }
+            };
     @Mock
     private VibratorHelper mVibratorHelper;
 
@@ -217,8 +224,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mDumpManager,
                 mLazySecureSettings,
                 mVibratorHelper,
-                mVolumeDialogMenuIconBinder,
-                new FakeSystemClock());
+                new FakeSystemClock(),
+                mVolumeDialogInteractor);
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
@@ -776,6 +783,15 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         boolean foundDnDIcon = findDndIconAmongVolumeRows();
         assertFalse(foundDnDIcon);
+    }
+
+    @Test
+    public void testInteractor_onShow() {
+        mDialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processAllMessages();
+
+        verify(mVolumeDialogInteractor, atLeastOnce()).onDialogShown();
+        verify(mVolumeDialogInteractor, atLeastOnce()).onDialogDismissed(); // dismiss by timeout
     }
 
     /**

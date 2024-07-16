@@ -37,7 +37,6 @@ import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import java.util.concurrent.atomic.AtomicBoolean
@@ -60,7 +59,6 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     val qsSceneAdapter: QSSceneAdapter,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
-    val notifications: NotificationsPlaceholderViewModel,
     val brightnessMirrorViewModel: BrightnessMirrorViewModel,
     val mediaCarouselInteractor: MediaCarouselInteractor,
     shadeInteractor: ShadeInteractor,

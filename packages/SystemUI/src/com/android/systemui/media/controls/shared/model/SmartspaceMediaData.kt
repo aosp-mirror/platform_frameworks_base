@@ -48,6 +48,8 @@ data class SmartspaceMediaData(
     val instanceId: InstanceId? = null,
     /** The timestamp in milliseconds indicating when the card should be removed */
     val expiryTimeMs: Long = 0L,
+    /** If recommendation card was visible to user, used for logging. */
+    var isImpressed: Boolean = false,
 ) {
     /**
      * Indicates if all the data is valid.

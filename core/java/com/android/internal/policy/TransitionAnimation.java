@@ -75,10 +75,11 @@ import java.util.List;
 /** @hide */
 public class TransitionAnimation {
     public static final int WALLPAPER_TRANSITION_NONE = 0;
-    public static final int WALLPAPER_TRANSITION_OPEN = 1;
-    public static final int WALLPAPER_TRANSITION_CLOSE = 2;
-    public static final int WALLPAPER_TRANSITION_INTRA_OPEN = 3;
-    public static final int WALLPAPER_TRANSITION_INTRA_CLOSE = 4;
+    public static final int WALLPAPER_TRANSITION_CHANGE = 1;
+    public static final int WALLPAPER_TRANSITION_OPEN = 2;
+    public static final int WALLPAPER_TRANSITION_CLOSE = 3;
+    public static final int WALLPAPER_TRANSITION_INTRA_OPEN = 4;
+    public static final int WALLPAPER_TRANSITION_INTRA_CLOSE = 5;
 
     // These are the possible states for the enter/exit activities during a thumbnail transition
     private static final int THUMBNAIL_TRANSITION_ENTER_SCALE_UP = 0;

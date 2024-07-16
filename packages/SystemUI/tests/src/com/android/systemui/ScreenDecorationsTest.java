@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -60,7 +61,6 @@ import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.os.Handler;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.PathParser;
@@ -77,6 +77,7 @@ import android.view.WindowMetrics;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -120,7 +121,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RunWithLooper
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class ScreenDecorationsTest extends SysuiTestCase {
 
@@ -1179,6 +1180,24 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         doReturn(false).when(mScreenDecorations).hasOverlays();
         mScreenDecorations.onConfigChanged(new Configuration());
         assertThat(mScreenDecorations.mIsRegistered, is(false));
+    }
+
+    @Test
+    public void testUpdateOverlayProviderViews_PendingConfigChange() {
+        final DecorProvider cutout = new CutoutDecorProviderImpl(BOUNDS_POSITION_TOP);
+        spyOn(cutout);
+        doNothing().when(cutout).onReloadResAndMeasure(any(), anyInt(), anyInt(), anyInt(), any());
+        mMockCutoutList.add(cutout);
+        mScreenDecorations.start();
+        doCallRealMethod().when(mScreenDecorations).updateOverlayProviderViews(any());
+
+        mScreenDecorations.mPendingConfigChange = true;
+        mScreenDecorations.updateOverlayProviderViews(null /* filterIds */);
+        verify(cutout, never()).onReloadResAndMeasure(any(), anyInt(), anyInt(), anyInt(), any());
+
+        mScreenDecorations.mPendingConfigChange = false;
+        mScreenDecorations.updateOverlayProviderViews(null /* filterIds */);
+        verify(cutout).onReloadResAndMeasure(any(), anyInt(), anyInt(), anyInt(), any());
     }
 
     @Test

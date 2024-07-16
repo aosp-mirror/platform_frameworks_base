@@ -27,6 +27,7 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnPreDrawListener
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.SysuiTestCase
@@ -54,6 +55,7 @@ import java.util.Optional
 import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.mock
@@ -64,6 +66,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var shadeViewController: ShadeViewController

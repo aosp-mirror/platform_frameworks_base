@@ -50,7 +50,6 @@ import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
-import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -270,8 +269,7 @@ public class InputMethodManagerServiceWindowGainedFocusTest
 
     @Test
     public void startInputOrWindowGainedFocus_localeHintsOverride() throws RemoteException {
-        doReturn(mMockVdmInternal).when(
-                () -> LocalServices.getService(VirtualDeviceManagerInternal.class));
+        addLocalServiceMock(VirtualDeviceManagerInternal.class, mMockVdmInternal);
         LocaleList overrideLocale = LocaleList.forLanguageTags("zh-CN");
         doReturn(overrideLocale).when(mMockVdmInternal).getPreferredLocaleListForUid(anyInt());
         mockHasImeFocusAndRestoreImeVisibility(false /* restoreImeVisibility */);

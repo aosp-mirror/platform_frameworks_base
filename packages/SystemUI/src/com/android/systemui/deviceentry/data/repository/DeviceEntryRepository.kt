@@ -78,10 +78,6 @@ constructor(
                 SharingStarted.Eagerly,
                 initialValue = keyguardBypassController.bypassEnabled,
             )
-
-    companion object {
-        private const val TAG = "DeviceEntryRepositoryImpl"
-    }
 }
 
 @Module

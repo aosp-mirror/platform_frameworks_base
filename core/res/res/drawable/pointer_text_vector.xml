@@ -22,6 +22,6 @@
         android:fillColor="?attr/pointerIconVectorFill"
         android:pathData="M12 3c-.551 0-1 .448-1 1v14a1.001 1.001 0 0 0 2 0V4c0-.552-.449-1-1-1" />
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="?attr/pointerIconVectorStroke"
         android:pathData="M12 2c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2s2-.897 2-2V4c0-1.103-.897-2-2-2m1 16a1.001 1.001 0 0 1-2 0V4a1.001 1.001 0 0 1 2 0z" />
 </vector>

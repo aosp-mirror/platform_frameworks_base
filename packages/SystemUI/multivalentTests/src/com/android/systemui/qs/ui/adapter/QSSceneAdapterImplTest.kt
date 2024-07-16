@@ -38,7 +38,6 @@ import com.android.systemui.qs.dagger.QSSceneComponent
 import com.android.systemui.settings.brightness.MirrorController
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -558,7 +557,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
     fun dispatchSplitShade() =
         testScope.runTest {
             val shadeRepository = kosmos.fakeShadeRepository
-            shadeRepository.setShadeMode(ShadeMode.Single)
+            shadeRepository.setShadeLayoutWide(false)
             val qsImpl by collectLastValue(underTest.qsImpl)
 
             underTest.inflate(context)
@@ -566,7 +565,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
 
             verify(qsImpl!!).setInSplitShade(false)
 
-            shadeRepository.setShadeMode(ShadeMode.Split)
+            shadeRepository.setShadeLayoutWide(true)
             runCurrent()
             verify(qsImpl!!).setInSplitShade(true)
         }

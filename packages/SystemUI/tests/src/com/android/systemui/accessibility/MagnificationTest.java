@@ -84,7 +84,7 @@ public class MagnificationTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
 
     private CommandQueue mCommandQueue;
-    private Magnification mMagnification;
+    private MagnificationImpl mMagnification;
     private OverviewProxyListener mOverviewProxyListener;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
@@ -124,11 +124,12 @@ public class MagnificationTest extends SysuiTestCase {
         when(mWindowMagnificationController.isActivated()).thenReturn(true);
 
         mCommandQueue = new CommandQueue(getContext(), mDisplayTracker);
-        mMagnification = new Magnification(getContext(),
+        mMagnification = new MagnificationImpl(getContext(),
                 getContext().getMainThreadHandler(), mContext.getMainExecutor(),
                 mCommandQueue, mModeSwitchesController,
                 mSysUiState, mOverviewProxyService, mSecureSettings, mDisplayTracker,
-                getContext().getSystemService(DisplayManager.class), mA11yLogger, mIWindowManager);
+                getContext().getSystemService(DisplayManager.class), mA11yLogger, mIWindowManager,
+                getContext().getSystemService(AccessibilityManager.class));
         mMagnification.mWindowMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mWindowMagnificationController);
         mMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(

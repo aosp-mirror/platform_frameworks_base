@@ -37,7 +37,6 @@ import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
-import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 
@@ -192,7 +191,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         mDividerView.setInteractive(interactive, hideHandle, from);
     }
 
-    View getDividerView() {
+    DividerView getDividerView() {
         return mDividerView;
     }
 
