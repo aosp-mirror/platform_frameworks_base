@@ -1015,7 +1015,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // Called directly from UserManagerService. Do not block the calling thread.
             final int userId = user.id;
             AdditionalSubtypeMapRepository.onUserCreated(userId);
-            initializeUsersAsync(new int[userId]);
+            initializeUsersAsync(new int[]{ userId });
         }
 
         @Override
