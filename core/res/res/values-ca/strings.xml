@@ -1412,10 +1412,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Selecciona per desactivar la depuració sense fil."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"S\'ha activat el mode Agent de prova"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Si vols desactivar el mode Agent de prova, restableix les dades de fàbrica."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Configuració de la compilació HSUM incorrecta"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"L\'estat del mode d\'usuari del sistema sense interfície gràfica d\'aquest dispositiu és diferent de la configuració de la seva compilació. Restableix les dades de fàbrica del dispositiu."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"S\'ha activat la consola de sèrie"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Afecta el rendiment. Per desactivar-la, comprova el bootloader."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"L\'MTE experimental s\'ha activat"</string>
@@ -1760,12 +1758,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"S\'han mantingut premudes les tecles de volum. S\'ha activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"S\'han mantingut premudes les tecles de volum. S\'ha desactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Deixa anar les tecles de volum. Per activar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, torna a mantenir premudes totes dues tecles de volum durant 3 segons."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Tria una funció"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Tria una funció"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Tria una funció"</string>
     <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"La funció s\'obrirà la pròxima vegada que toquis el botó d\'accessibilitat"</string>
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"La funció s\'obrirà la pròxima vegada que utilitzis aquesta drecera. Llisca cap amunt amb 2 dits des de la part inferior de la pantalla i aixeca\'ls ràpidament."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"La funció s\'obrirà la pròxima vegada que utilitzis aquesta drecera. Llisca cap amunt amb 3 dits des de la part inferior de la pantalla i aixeca\'ls ràpidament."</string>
@@ -1891,8 +1886,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"El PIN és massa curt. Ha de tenir quatre dígits com a mínim."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Torna-ho a provar més tard"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Mode de pantalla completa"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Per sortir, llisca cap avall des de la part superior de la pantalla"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entesos"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gira per a una millor visualització"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Obre <xliff:g id="NAME">%s</xliff:g> en pantalla completa per a una millor visualització"</string>
@@ -2444,4 +2438,22 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Canvia d\'usuari"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Silencia"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Toca per silenciar el so"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
+    <skip />
 </resources>
