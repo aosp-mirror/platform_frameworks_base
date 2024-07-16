@@ -36,6 +36,7 @@ import com.android.systemui.ambient.touch.dagger.BouncerSwipeModule
 import com.android.systemui.ambient.touch.scrim.ScrimController
 import com.android.systemui.ambient.touch.scrim.ScrimManager
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeExpansionChangeEvent
@@ -49,11 +50,14 @@ import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /** Monitor for tracking touches on the DreamOverlay to bring up the bouncer. */
 class BouncerSwipeTouchHandler
 @Inject
 constructor(
+    scope: CoroutineScope,
     private val scrimManager: ScrimManager,
     private val centralSurfaces: Optional<CentralSurfaces>,
     private val notificationShadeWindowController: NotificationShadeWindowController,
@@ -61,6 +65,7 @@ constructor(
     private val velocityTrackerFactory: VelocityTrackerFactory,
     private val lockPatternUtils: LockPatternUtils,
     private val userTracker: UserTracker,
+    private val communalViewModel: CommunalViewModel,
     @param:Named(BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_OPENING)
     private val flingAnimationUtils: FlingAnimationUtils,
     @param:Named(BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_CLOSING)
@@ -96,6 +101,10 @@ constructor(
 
             currentScrimController = controller
         }
+
+    /** Determines whether the touch handler should process touches in fullscreen swiping mode */
+    private var touchAvailable = false
+
     private val onGestureListener: GestureDetector.OnGestureListener =
         object : SimpleOnGestureListener() {
             override fun onScroll(
@@ -107,7 +116,9 @@ constructor(
                 if (capture == null) {
                     capture =
                         if (Flags.dreamOverlayBouncerSwipeDirectionFiltering()) {
-                            (abs(distanceY.toDouble()) > abs(distanceX.toDouble()) && distanceY > 0)
+                            (abs(distanceY.toDouble()) > abs(distanceX.toDouble()) &&
+                                distanceY > 0) &&
+                                if (Flags.hubmodeFullscreenVerticalSwipe()) touchAvailable else true
                         } else {
                             // If the user scrolling favors a vertical direction, begin capturing
                             // scrolls.
@@ -163,6 +174,21 @@ constructor(
             }
         }
 
+    init {
+        if (Flags.hubmodeFullscreenVerticalSwipe()) {
+            scope.launch {
+                communalViewModel.glanceableTouchAvailable.collect {
+                    onGlanceableTouchAvailable(it)
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    fun onGlanceableTouchAvailable(available: Boolean) {
+        touchAvailable = available
+    }
+
     private fun setPanelExpansion(expansion: Float) {
         currentExpansion = expansion
         val event =
@@ -191,6 +217,12 @@ constructor(
         val minAllowableBottom = Math.round(height * (1 - minBouncerZoneScreenPercentage))
         val normalRegion =
             Rect(0, Math.round(height * (1 - bouncerZoneScreenPercentage)), width, height)
+
+        if (Flags.hubmodeFullscreenVerticalSwipe()) {
+            region.op(bounds, Region.Op.UNION)
+            exclusionRect?.apply { region.op(this, Region.Op.DIFFERENCE) }
+        }
+
         if (exclusionRect != null) {
             val lowestBottom =
                 min(max(0.0, exclusionRect.bottom.toDouble()), minAllowableBottom.toDouble())
@@ -233,6 +265,9 @@ constructor(
         when (motionEvent.action) {
             MotionEvent.ACTION_CANCEL,
             MotionEvent.ACTION_UP -> {
+                if (Flags.hubmodeFullscreenVerticalSwipe() && capture == true) {
+                    communalViewModel.onResetTouchState()
+                }
                 touchSession?.apply { pop() }
                 // If we are not capturing any input, there is no need to consider animating to
                 // finish transition.

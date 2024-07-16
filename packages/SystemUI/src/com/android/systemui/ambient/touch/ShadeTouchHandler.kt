@@ -21,15 +21,20 @@ import android.graphics.Region
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.InputEvent
 import android.view.MotionEvent
+import androidx.annotation.VisibleForTesting
+import com.android.systemui.Flags
 import com.android.systemui.ambient.touch.TouchHandler.TouchSession
 import com.android.systemui.ambient.touch.dagger.ShadeModule
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.abs
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * [ShadeTouchHandler] is responsible for handling swipe down gestures over dream to bring down the
@@ -38,9 +43,11 @@ import kotlin.math.abs
 class ShadeTouchHandler
 @Inject
 constructor(
+    scope: CoroutineScope,
     private val surfaces: Optional<CentralSurfaces>,
     private val shadeViewController: ShadeViewController,
     private val dreamManager: DreamManager,
+    private val communalViewModel: CommunalViewModel,
     private val communalSettingsInteractor: CommunalSettingsInteractor,
     @param:Named(ShadeModule.NOTIFICATION_SHADE_GESTURE_INITIATION_HEIGHT)
     private val initiationHeight: Int
@@ -49,6 +56,24 @@ constructor(
      * Tracks whether or not we are capturing a given touch. Will be null before and after a touch.
      */
     private var capture: Boolean? = null
+
+    /** Determines whether the touch handler should process touches in fullscreen swiping mode */
+    private var touchAvailable = false
+
+    init {
+        if (Flags.hubmodeFullscreenVerticalSwipe()) {
+            scope.launch {
+                communalViewModel.glanceableTouchAvailable.collect {
+                    onGlanceableTouchAvailable(it)
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    fun onGlanceableTouchAvailable(available: Boolean) {
+        touchAvailable = available
+    }
 
     override fun onSessionStart(session: TouchSession) {
         if (surfaces.isEmpty) {
@@ -62,6 +87,9 @@ constructor(
                     sendTouchEvent(ev)
                 }
                 if (ev.action == MotionEvent.ACTION_UP || ev.action == MotionEvent.ACTION_CANCEL) {
+                    if (capture == true) {
+                        communalViewModel.onResetTouchState()
+                    }
                     session.pop()
                 }
             }
@@ -77,7 +105,9 @@ constructor(
                     if (capture == null) {
                         // Only capture swipes that are going downwards.
                         capture =
-                            abs(distanceY.toDouble()) > abs(distanceX.toDouble()) && distanceY < 0
+                            abs(distanceY.toDouble()) > abs(distanceX.toDouble()) &&
+                                distanceY < 0 &&
+                                if (Flags.hubmodeFullscreenVerticalSwipe()) touchAvailable else true
                         if (capture == true) {
                             // Send the initial touches over, as the input listener has already
                             // processed these touches.
@@ -112,7 +142,14 @@ constructor(
         }
     }
 
-    override fun getTouchInitiationRegion(bounds: Rect, region: Region, exclusionRect: Rect) {
+    override fun getTouchInitiationRegion(bounds: Rect, region: Region, exclusionRect: Rect?) {
+        // If fullscreen swipe, use entire space minus exclusion region
+        if (Flags.hubmodeFullscreenVerticalSwipe()) {
+            region.op(bounds, Region.Op.UNION)
+
+            exclusionRect?.apply { region.op(this, Region.Op.DIFFERENCE) }
+        }
+
         val outBounds = Rect(bounds)
         outBounds.inset(0, 0, 0, outBounds.height() - initiationHeight)
         region.op(outBounds, Region.Op.UNION)

@@ -39,6 +39,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.Flags
 import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
@@ -294,24 +295,37 @@ constructor(
                     }
 
                 containerView.systemGestureExclusionRects =
-                    listOf(
-                        // Only allow swipe up to bouncer and swipe down to shade in the very
-                        // top/bottom to avoid conflicting with widgets in the hub grid.
-                        Rect(
-                            insets.left,
-                            topEdgeSwipeRegionWidth,
-                            containerView.right - insets.right,
-                            containerView.bottom - bottomEdgeSwipeRegionWidth
-                        ),
-                        // Disable back gestures on the left side of the screen, to avoid
-                        // conflicting with scene transitions.
-                        Rect(
-                            0,
-                            0,
-                            insets.right,
-                            containerView.bottom,
+                    if (Flags.hubmodeFullscreenVerticalSwipe()) {
+                        listOf(
+                            // Disable back gestures on the left side of the screen, to avoid
+                            // conflicting with scene transitions.
+                            Rect(
+                                0,
+                                0,
+                                insets.right,
+                                containerView.bottom,
+                            )
                         )
-                    )
+                    } else {
+                        listOf(
+                            // Only allow swipe up to bouncer and swipe down to shade in the very
+                            // top/bottom to avoid conflicting with widgets in the hub grid.
+                            Rect(
+                                insets.left,
+                                topEdgeSwipeRegionWidth,
+                                containerView.right - insets.right,
+                                containerView.bottom - bottomEdgeSwipeRegionWidth
+                            ),
+                            // Disable back gestures on the left side of the screen, to avoid
+                            // conflicting with scene transitions.
+                            Rect(
+                                0,
+                                0,
+                                insets.right,
+                                containerView.bottom,
+                            )
+                        )
+                    }
             }
         }
 
