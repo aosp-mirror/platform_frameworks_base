@@ -110,8 +110,8 @@ import static android.service.notification.Adjustment.TYPE_PROMOTION;
 import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
 import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.Flags.notificationForceGrouping;
-import static android.service.notification.Flags.redactSensitiveNotificationsFromUntrustedListeners;
 import static android.service.notification.Flags.redactSensitiveNotificationsBigTextStyle;
+import static android.service.notification.Flags.redactSensitiveNotificationsFromUntrustedListeners;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
@@ -248,7 +248,6 @@ import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.drawable.Icon;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
@@ -373,7 +372,6 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.BackgroundActivityStartCallback;
 import com.android.server.wm.WindowManagerInternal;
 
-import java.util.function.BiPredicate;
 import libcore.io.IoUtils;
 
 import org.json.JSONException;
@@ -4634,29 +4632,28 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public List<String> getPackagesBypassingDnd(int userId,
-                                                    boolean includeConversationChannels) {
+                boolean includeConversationChannels) {
             checkCallerIsSystem();
 
             final ArraySet<String> packageNames = new ArraySet<>();
 
-            for (int user : mUm.getProfileIds(userId, false)) {
-                List<PackageInfo> pkgs = mPackageManagerClient.getInstalledPackagesAsUser(0, user);
-                for (PackageInfo pi : pkgs) {
-                    String pkg = pi.packageName;
-                    // If any NotificationChannel for this package is bypassing, the
-                    // package is considered bypassing.
-                    for (NotificationChannel channel : getNotificationChannelsBypassingDnd(pkg,
-                            pi.applicationInfo.uid).getList()) {
-                        // Skips non-demoted conversation channels.
-                        if (!includeConversationChannels
-                                && !TextUtils.isEmpty(channel.getConversationId())
-                                && !channel.isDemoted()) {
-                            continue;
-                        }
-                        packageNames.add(pkg);
+            List<PackageInfo> pkgs = mPackageManagerClient.getInstalledPackagesAsUser(0, userId);
+            for (PackageInfo pi : pkgs) {
+                String pkg = pi.packageName;
+                // If any NotificationChannel for this package is bypassing, the
+                // package is considered bypassing.
+                for (NotificationChannel channel : getNotificationChannelsBypassingDnd(pkg,
+                        pi.applicationInfo.uid).getList()) {
+                    // Skips non-demoted conversation channels.
+                    if (!includeConversationChannels
+                            && !TextUtils.isEmpty(channel.getConversationId())
+                            && !channel.isDemoted()) {
+                        continue;
                     }
+                    packageNames.add(pkg);
                 }
             }
+
             return new ArrayList<String>(packageNames);
         }
 

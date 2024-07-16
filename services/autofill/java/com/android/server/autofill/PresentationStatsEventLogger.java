@@ -846,7 +846,6 @@ public final class PresentationStatsEventLogger {
                 mCallingAppUid,
                 event.mIsCredentialRequest,
                 event.mWebviewRequestedCredential,
-                event.mFilteredFillabaleViewCount,
                 event.mViewFillableTotalCount,
                 event.mViewFillFailureCount,
                 event.mFocusedId,
@@ -859,7 +858,8 @@ public final class PresentationStatsEventLogger {
                 event.mSuggestionPresentedLastTimestampMs,
                 event.mFocusedVirtualAutofillId,
                 event.mFieldFirstLength,
-                event.mFieldLastLength);
+                event.mFieldLastLength,
+                event.mFilteredFillabaleViewCount);
         mEventInternal = Optional.empty();
     }
 

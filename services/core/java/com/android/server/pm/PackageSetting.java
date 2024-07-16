@@ -234,6 +234,22 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @Nullable
     private byte[] mRestrictUpdateHash;
 
+    // This is the copy of the same data stored in AndroidPackage. It is not null if the
+    // AndroidPackage is deleted in cases of DELETE_KEEP_DATA. When AndroidPackage is not null,
+    // the field will be null, and the getter method will return the data from AndroidPackage
+    // instead.
+    @Nullable
+    private String[] mSplitNames;
+
+    // This is the copy of the same data stored in AndroidPackage. It is not null if the
+    // AndroidPackage is deleted in cases of DELETE_KEEP_DATA. When AndroidPackage is not null,
+    // the field will be null, and the getter method will return the data from AndroidPackage
+    // instead.
+    @Nullable
+    private int[] mSplitRevisionCodes;
+
+    private int mBaseRevisionCode;
+
     /**
      * Snapshot support.
      */
@@ -578,6 +594,62 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return getBoolean(Booleans.DEBUGGABLE);
     }
 
+    /**
+     * @see AndroidPackage#getBaseRevisionCode
+     */
+    public PackageSetting setBaseRevisionCode(int value) {
+        mBaseRevisionCode = value;
+        onChanged();
+        return this;
+    }
+
+    /**
+     * @see AndroidPackage#getBaseRevisionCode
+     */
+    public int getBaseRevisionCode() {
+        return mBaseRevisionCode;
+    }
+
+    /**
+     * @see AndroidPackage#getSplitNames
+     */
+    public PackageSetting setSplitNames(String[] value) {
+        mSplitNames = value;
+        onChanged();
+        return this;
+    }
+
+    /**
+     * @see AndroidPackage#getSplitNames
+     */
+    @NonNull
+    public String[] getSplitNames() {
+        if (pkg != null) {
+            return pkg.getSplitNames();
+        }
+        return mSplitNames == null ? EmptyArray.STRING : mSplitNames;
+    }
+
+    /**
+     * @see AndroidPackage#getSplitRevisionCodes
+     */
+    public PackageSetting setSplitRevisionCodes(int[] value) {
+        mSplitRevisionCodes = value;
+        onChanged();
+        return this;
+    }
+
+    /**
+     * @see AndroidPackage#getSplitRevisionCodes
+     */
+    @NonNull
+    public int[] getSplitRevisionCodes() {
+        if (pkg != null) {
+            return pkg.getSplitRevisionCodes();
+        }
+        return mSplitRevisionCodes == null ? EmptyArray.INT : mSplitRevisionCodes;
+    }
+
     @Override
     public String toString() {
         return "PackageSetting{"
@@ -739,6 +811,11 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         mTargetSdkVersion = other.mTargetSdkVersion;
         mRestrictUpdateHash = other.mRestrictUpdateHash == null
                 ? null : other.mRestrictUpdateHash.clone();
+        mBaseRevisionCode = other.mBaseRevisionCode;
+        mSplitNames = other.mSplitNames != null
+                ? Arrays.copyOf(other.mSplitNames, other.mSplitNames.length) : null;
+        mSplitRevisionCodes = other.mSplitRevisionCodes != null
+                ? Arrays.copyOf(other.mSplitRevisionCodes, other.mSplitRevisionCodes.length) : null;
 
         usesSdkLibraries = other.usesSdkLibraries != null
                 ? Arrays.copyOf(other.usesSdkLibraries,

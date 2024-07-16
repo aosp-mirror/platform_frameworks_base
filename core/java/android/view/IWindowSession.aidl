@@ -140,13 +140,13 @@ interface IWindowSession {
             int seqId);
 
     @UnsupportedAppUsage
-    boolean performHapticFeedback(int effectId, boolean always, boolean fromIme);
+    boolean performHapticFeedback(int effectId, int flags, int privFlags);
 
     /**
      * Called by attached views to perform predefined haptic feedback without requiring VIBRATE
      * permission.
      */
-    oneway void performHapticFeedbackAsync(int effectId, boolean always, boolean fromIme);
+    oneway void performHapticFeedbackAsync(int effectId, int flags, int privFlags);
 
     /**
      * Initiate the drag operation itself
