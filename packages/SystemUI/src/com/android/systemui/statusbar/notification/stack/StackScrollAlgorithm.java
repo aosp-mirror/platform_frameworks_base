@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static androidx.core.math.MathUtils.clamp;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -899,11 +901,33 @@ public class StackScrollAlgorithm {
                     if (shouldHunBeVisibleWhenScrolled(row.mustStayOnScreen(),
                             childState.headsUpIsVisible, row.showingPulsing(),
                             ambientState.isOnKeyguard(), row.getEntry().isStickyAndNotDemoted())) {
+                        // the height of this child before clamping it to the top
+                        float unmodifiedChildHeight = childState.height;
                         clampHunToTop(
                                 /* headsUpTop = */ headsUpTranslation,
                                 /* collapsedHeight = */ row.getCollapsedHeight(),
                                 /* viewState = */ childState
                         );
+                        float baseZ = ambientState.getBaseZHeight();
+                        if (headsUpTranslation < ambientState.getStackTop()) {
+                            // HUN displayed above the stack top, it needs a fix shadow
+                            childState.setZTranslation(baseZ + mPinnedZTranslationExtra);
+                        } else {
+                            // HUN displayed within the stack, add a shadow if it overlaps with
+                            // other elements.
+                            //
+                            // Views stack vertically from the top. Add the HUN's original height
+                            // (before clamping) to the stack top, to determine the starting
+                            // point for the remaining content.
+                            float scrollingContentTop =
+                                    ambientState.getStackTop() + unmodifiedChildHeight;
+                            updateZTranslationForHunInStack(
+                                    /* scrollingContentTop = */ scrollingContentTop,
+                                    /* scrollingContentTopPadding = */ mGapHeight,
+                                    /* baseZ = */ baseZ,
+                                    /* viewState = */ childState
+                            );
+                        }
                         if (isTopEntry && row.isAboveShelf()) {
                             clampHunToMaxTranslation(
                                     /* headsUpTop =  */ headsUpTranslation,
@@ -1040,8 +1064,30 @@ public class StackScrollAlgorithm {
         // Transition from collapsed pinned state to fully expanded state
         // when the pinned HUN approaches its actual location (when scrolling back to top).
         final float distToRealY = newTranslation - viewState.getYTranslation();
-        viewState.height = (int) Math.max(viewState.height - distToRealY, collapsedHeight);
+        final float availableHeight = viewState.height - distToRealY;
+
         viewState.setYTranslation(newTranslation);
+        viewState.height = (int) Math.max(availableHeight, collapsedHeight);
+    }
+
+    @VisibleForTesting
+    void updateZTranslationForHunInStack(float scrollingContentTop,
+            float scrollingContentTopPadding, float baseZ, ExpandableViewState viewState) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        float hunBottom = viewState.getYTranslation() + viewState.height;
+        float overlap = Math.max(0f, hunBottom - scrollingContentTop);
+
+        float shadowFraction = 1f;
+        if (scrollingContentTopPadding > 0f) {
+            // scrollingContentTopPadding makes a gap between the bottom of the HUN and the top
+            // of the scrolling content. Use this to animate to the full shadow.
+            shadowFraction = clamp(overlap / scrollingContentTopPadding, 0f, 1f);
+        }
+
+        if (overlap > 0.0f) {
+            // add a shadow to this HUN, because it overlaps with the scrolling stack
+            viewState.setZTranslation(baseZ + shadowFraction * mPinnedZTranslationExtra);
+        }
     }
 
     // Pin HUN to bottom of expanded QS
@@ -1151,53 +1197,65 @@ public class StackScrollAlgorithm {
         ExpandableViewState childViewState = child.getViewState();
         float baseZ = ambientState.getBaseZHeight();
 
-        if (child.mustStayOnScreen() && !childViewState.headsUpIsVisible
-                && !ambientState.isDozingAndNotPulsing(child)
-                && childViewState.getYTranslation() < ambientState.getTopPadding()
-                + ambientState.getStackTranslation()) {
-
-            if (childrenOnTop != 0.0f) {
-                // To elevate the later HUN over previous HUN when multiple HUNs exist
-                childrenOnTop++;
-            } else {
-                // Handles HUN shadow when Shade is opened, and AmbientState.mScrollY > 0
-                // Calculate the HUN's z-value based on its overlapping fraction with QQS Panel.
-                // When scrolling down shade to make HUN back to in-position in Notification Panel,
-                // The overlapping fraction goes to 0, and shadows hides gradually.
-                float overlap = ambientState.getTopPadding()
-                        + ambientState.getStackTranslation() - childViewState.getYTranslation();
-                // To prevent over-shadow during HUN entry
-                childrenOnTop += Math.min(
-                        1.0f,
-                        overlap / childViewState.height
-                );
-            }
-            childViewState.setZTranslation(baseZ
-                    + childrenOnTop * mPinnedZTranslationExtra);
-        } else if (isTopHun) {
-            // In case this is a new view that has never been measured before, we don't want to
-            // elevate if we are currently expanded more than the notification
-            int shelfHeight = ambientState.getShelf() == null ? 0 :
-                    ambientState.getShelf().getIntrinsicHeight();
-            float shelfStart = ambientState.getInnerHeight()
-                    - shelfHeight + ambientState.getTopPadding()
-                    + ambientState.getStackTranslation();
-            float notificationEnd = childViewState.getYTranslation() + child.getIntrinsicHeight()
-                    + mPaddingBetweenElements;
-            if (shelfStart > notificationEnd) {
-                // When the notification doesn't overlap with Notification Shelf, there's no shadow
-                childViewState.setZTranslation(baseZ);
-            } else {
-                // Give shadow to the notification if it overlaps with Notification Shelf
-                float factor = (notificationEnd - shelfStart) / shelfHeight;
-                if (Float.isNaN(factor)) { // Avoid problems when the above is 0/0.
-                    factor = 1.0f;
-                }
-                factor = Math.min(factor, 1.0f);
-                childViewState.setZTranslation(baseZ + factor * mPinnedZTranslationExtra);
-            }
-        } else {
+        if (SceneContainerFlag.isEnabled()) {
+            // SceneContainer flags off this logic, and just sets the baseZ because:
+            // - there are no overlapping HUNs anymore, no need for multiplying their shadows
+            // - shadows for HUNs overlapping with the stack are now set from updateHeadsUpStates
+            // - shadows for HUNs overlapping with the shelf are NOT set anymore, because it only
+            // happens on AOD/Pulsing, where they're displayed on a black background so a shadow
+            // wouldn't be visible.
             childViewState.setZTranslation(baseZ);
+        } else {
+            if (child.mustStayOnScreen() && !childViewState.headsUpIsVisible
+                    && !ambientState.isDozingAndNotPulsing(child)
+                    && childViewState.getYTranslation() < ambientState.getTopPadding()
+                    + ambientState.getStackTranslation()) {
+
+                if (childrenOnTop != 0.0f) {
+                    // To elevate the later HUN over previous HUN when multiple HUNs exist
+                    childrenOnTop++;
+                } else {
+                    // Handles HUN shadow when Shade is opened, and AmbientState.mScrollY > 0
+                    // Calculate the HUN's z-value based on its overlapping fraction with QQS Panel.
+                    // When scrolling down shade to make HUN back to in-position in Notif Panel,
+                    // The overlapping fraction goes to 0, and shadows hides gradually.
+                    float overlap = ambientState.getTopPadding()
+                            + ambientState.getStackTranslation() - childViewState.getYTranslation();
+                    // To prevent over-shadow during HUN entry
+                    childrenOnTop += Math.min(
+                            1.0f,
+                            overlap / childViewState.height
+                    );
+                }
+                childViewState.setZTranslation(baseZ
+                        + childrenOnTop * mPinnedZTranslationExtra);
+            } else if (isTopHun) {
+                // In case this is a new view that has never been measured before, we don't want to
+                // elevate if we are currently expanded more than the notification
+                int shelfHeight = ambientState.getShelf() == null ? 0 :
+                        ambientState.getShelf().getIntrinsicHeight();
+                float shelfStart = ambientState.getInnerHeight()
+                        - shelfHeight + ambientState.getTopPadding()
+                        + ambientState.getStackTranslation();
+                float notificationEnd =
+                        childViewState.getYTranslation() + child.getIntrinsicHeight()
+                                + mPaddingBetweenElements;
+                if (shelfStart > notificationEnd) {
+                    // When the notification doesn't overlap with Notification Shelf,
+                    // there's no shadow
+                    childViewState.setZTranslation(baseZ);
+                } else {
+                    // Give shadow to the notification if it overlaps with Notification Shelf
+                    float factor = (notificationEnd - shelfStart) / shelfHeight;
+                    if (Float.isNaN(factor)) { // Avoid problems when the above is 0/0.
+                        factor = 1.0f;
+                    }
+                    factor = Math.min(factor, 1.0f);
+                    childViewState.setZTranslation(baseZ + factor * mPinnedZTranslationExtra);
+                }
+            } else {
+                childViewState.setZTranslation(baseZ);
+            }
         }
 
         // While HUN is showing and Shade is closed: headerVisibleAmount stays 0, shadow stays.
