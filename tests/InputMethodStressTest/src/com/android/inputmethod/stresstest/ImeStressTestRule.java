@@ -18,10 +18,10 @@ package com.android.inputmethod.stresstest;
 
 import android.app.Instrumentation;
 import android.os.RemoteException;
-import android.support.test.uiautomator.UiDevice;
 
 import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
