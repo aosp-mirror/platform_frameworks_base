@@ -46,20 +46,6 @@
             </intent-filter>
         </provider>
 
-        <provider android:name="com.android.settingslib.spa.slice.SpaSliceProvider"
-            android:authorities="com.android.spa.gallery.slice.provider"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.app.slice.category.SLICE" />
-            </intent-filter>
-        </provider>
-
-        <receiver
-            android:name="com.android.settingslib.spa.slice.SpaSliceBroadcastReceiver"
-            android:exported="false">
-        </receiver>
-
         <activity
             android:name="com.android.settingslib.spa.debug.BlankActivity"
             android:exported="true">

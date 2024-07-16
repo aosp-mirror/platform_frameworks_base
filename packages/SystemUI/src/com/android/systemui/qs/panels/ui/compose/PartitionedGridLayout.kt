@@ -305,9 +305,9 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                     largeTiles,
                     ClickAction.ADD,
                     addTileToEnd,
-                    onDoubleTap,
                     isIconOnly,
                     dragAndDropState,
+                    onDoubleTap = onDoubleTap,
                     acceptDrops = { true },
                     onDrop = onDrop,
                 )
@@ -318,10 +318,10 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                     smallTiles,
                     ClickAction.ADD,
                     addTileToEnd,
-                    onDoubleTap,
                     isIconOnly,
+                    dragAndDropState,
+                    onDoubleTap = onDoubleTap,
                     showLabels = showLabels,
-                    dragAndDropState = dragAndDropState,
                     acceptDrops = { true },
                     onDrop = onDrop,
                 )
@@ -332,10 +332,10 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                     tilesCustom,
                     ClickAction.ADD,
                     addTileToEnd,
-                    onDoubleTap,
                     isIconOnly,
+                    dragAndDropState,
+                    onDoubleTap = onDoubleTap,
                     showLabels = showLabels,
-                    dragAndDropState = dragAndDropState,
                     acceptDrops = { true },
                     onDrop = onDrop,
                 )
@@ -370,11 +370,6 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         ) {
             content()
         }
-    }
-
-    private fun gridHeight(nTiles: Int, tileHeight: Dp, columns: Int, padding: Dp): Dp {
-        val rows = (nTiles + columns - 1) / columns
-        return ((tileHeight + padding) * rows) - padding
     }
 
     /** Fill up the rest of the row if it's not complete. */

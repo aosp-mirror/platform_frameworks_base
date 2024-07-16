@@ -98,7 +98,9 @@ private class SwipeToSceneNode(
 
     /** Whether swipe should be enabled in the given [orientation]. */
     private fun Scene.shouldEnableSwipes(orientation: Orientation): Boolean {
-        return userActions.keys.any { it is Swipe && it.direction.orientation == orientation }
+        return userActions.keys.any {
+            it is Swipe.Resolved && it.direction.orientation == orientation
+        }
     }
 
     private fun startDragImmediately(startedPosition: Offset): Boolean {

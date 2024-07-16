@@ -119,7 +119,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
     ): UiObject2? {
         if (
             wmHelper.getWindow(innerHelper)?.windowingMode !=
-                WindowingMode.WINDOWING_MODE_FREEFORM.value
+            WindowingMode.WINDOWING_MODE_FREEFORM.value
         )
             error("expected a freeform window with caption but window is not in freeform mode")
         val captions =
@@ -147,7 +147,17 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         val endX = startX + horizontalChange
 
         // drag the specified corner of the window to the end coordinate.
-        device.drag(startX, startY, endX, endY, 100)
+        dragWindow(startX, startY, endX, endY, wmHelper, device)
+    }
+
+    /** Drag a window from a source coordinate to a destination coordinate. */
+    fun dragWindow(
+        startX: Int, startY: Int,
+        endX: Int, endY: Int,
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice
+    ) {
+        device.drag(startX, startY, endX, endY, /* steps= */ 100)
         wmHelper
             .StateSyncBuilder()
             .withAppTransitionIdle()

@@ -19,12 +19,15 @@ package com.android.wm.shell.compatui.impl
 import com.android.wm.shell.compatui.api.CompatUIEvent
 import com.android.wm.shell.compatui.api.CompatUIHandler
 import com.android.wm.shell.compatui.api.CompatUIInfo
+import com.android.wm.shell.compatui.api.CompatUIRepository
 import java.util.function.Consumer
 
 /**
  * Default implementation of {@link CompatUIHandler} to handle CompatUI components
  */
-class DefaultCompatUIHandler : CompatUIHandler {
+class DefaultCompatUIHandler(
+    private val compatUIRepository: CompatUIRepository
+) : CompatUIHandler {
 
     private var compatUIEventSender: Consumer<CompatUIEvent>? = null
     override fun onCompatInfoChanged(compatUIInfo: CompatUIInfo) {

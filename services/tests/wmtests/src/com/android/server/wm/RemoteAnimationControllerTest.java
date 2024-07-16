@@ -43,8 +43,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -758,12 +756,9 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         // Simulating win1 has shown IME and being IME layering/input target
         mDisplayContent.setImeLayeringTarget(win1);
         mDisplayContent.setImeInputTarget(win1);
-        mImeWindow.mWinAnimator.mSurfaceController = mock(WindowSurfaceController.class);
         mImeWindow.mWinAnimator.hide(mDisplayContent.getPendingTransaction(), "test");
         spyOn(mDisplayContent);
-        doReturn(true).when(mImeWindow.mWinAnimator.mSurfaceController).hasSurface();
-        doReturn(true).when(mImeWindow.mWinAnimator.mSurfaceController)
-                .prepareToShowInTransaction(any(), anyFloat());
+        mImeWindow.mWinAnimator.mSurfaceControl = mock(SurfaceControl.class);
         makeWindowVisibleAndDrawn(mImeWindow);
         assertTrue(mImeWindow.isOnScreen());
         assertFalse(mImeWindow.isParentWindowHidden());

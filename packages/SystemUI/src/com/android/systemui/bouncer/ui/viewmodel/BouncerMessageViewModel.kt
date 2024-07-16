@@ -32,7 +32,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.BiometricMessageInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason
 import com.android.systemui.deviceentry.shared.model.FaceFailureMessage
 import com.android.systemui.deviceentry.shared.model.FaceLockoutMessage
@@ -75,7 +75,7 @@ class BouncerMessageViewModel(
     private val clock: SystemClock,
     private val biometricMessageInteractor: BiometricMessageInteractor,
     private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
-    private val deviceEntryInteractor: DeviceEntryInteractor,
+    private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val fingerprintInteractor: DeviceEntryFingerprintAuthInteractor,
     flags: ComposeBouncerFlags,
 ) {
@@ -119,7 +119,7 @@ class BouncerMessageViewModel(
                         }
                     } else if (authMethod.isSecure) {
                         combine(
-                            deviceEntryInteractor.deviceEntryRestrictionReason,
+                            deviceUnlockedInteractor.deviceEntryRestrictionReason,
                             lockoutMessage,
                             fingerprintInteractor.isFingerprintCurrentlyAllowedOnBouncer,
                             resetToDefault,
@@ -413,7 +413,7 @@ object BouncerMessageViewModelModule {
         clock: SystemClock,
         biometricMessageInteractor: BiometricMessageInteractor,
         faceAuthInteractor: DeviceEntryFaceAuthInteractor,
-        deviceEntryInteractor: DeviceEntryInteractor,
+        deviceUnlockedInteractor: DeviceUnlockedInteractor,
         fingerprintInteractor: DeviceEntryFingerprintAuthInteractor,
         flags: ComposeBouncerFlags,
         userSwitcherViewModel: UserSwitcherViewModel,
@@ -427,7 +427,7 @@ object BouncerMessageViewModelModule {
             clock = clock,
             biometricMessageInteractor = biometricMessageInteractor,
             faceAuthInteractor = faceAuthInteractor,
-            deviceEntryInteractor = deviceEntryInteractor,
+            deviceUnlockedInteractor = deviceUnlockedInteractor,
             fingerprintInteractor = fingerprintInteractor,
             flags = flags,
             selectedUser = userSwitcherViewModel.selectedUser,

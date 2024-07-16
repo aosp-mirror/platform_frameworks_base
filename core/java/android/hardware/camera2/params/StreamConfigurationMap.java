@@ -747,6 +747,10 @@ public final class StreamConfigurationMap {
      * {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}.
      * </p>
      *
+     * <p>This function returns an empty array if
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO}
+     * is not supported.</p>
+     *
      * @return an array of supported high speed video recording sizes
      * @see #getHighSpeedVideoFpsRangesFor(Size)
      * @see CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO
@@ -835,6 +839,10 @@ public final class StreamConfigurationMap {
      * rate than the display refresh rate. Both 30fps and 60fps preview rate will not be
      * supported for the same recording rate.</li>
      * </p>
+     *
+     * <p>This function returns an empty array if
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO}
+     * is not supported.</p>
      *
      * @return an array of supported high speed video recording FPS ranges The upper bound of
      *         returned ranges is guaranteed to be larger or equal to 120.

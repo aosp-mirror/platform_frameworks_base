@@ -65,6 +65,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -184,7 +185,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private GlobalSettings mGlobalSettings;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private ConnectivityManager.NetworkCallback mConnectivityManagerNetworkCallback;
-    private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mWindowManager;
     private ToastFactory mToastFactory;
     private SignalDrawable mSignalDrawable;
     private SignalDrawable mSecondarySignalDrawable; // For the secondary mobile data sub in DSDS
@@ -246,7 +247,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             @Main Handler handler, @Main Executor mainExecutor,
             BroadcastDispatcher broadcastDispatcher, KeyguardUpdateMonitor keyguardUpdateMonitor,
             GlobalSettings globalSettings, KeyguardStateController keyguardStateController,
-            WindowManager windowManager, ToastFactory toastFactory,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager, ToastFactory toastFactory,
             @Background Handler workerHandler,
             CarrierConfigTracker carrierConfigTracker,
             LocationController locationController,
@@ -278,7 +279,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mAccessPointController = accessPointController;
         mWifiIconInjector = new WifiUtils.InternetIconInjector(mContext);
         mConnectivityManagerNetworkCallback = new DataConnectivityListener();
-        mWindowManager = windowManager;
+        mWindowManager = viewCaptureAwareWindowManager;
         mToastFactory = toastFactory;
         mSignalDrawable = new SignalDrawable(mContext);
         mSecondarySignalDrawable = new SignalDrawable(mContext);

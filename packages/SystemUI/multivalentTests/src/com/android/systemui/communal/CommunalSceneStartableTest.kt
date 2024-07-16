@@ -16,9 +16,11 @@
 
 package com.android.systemui.communal
 
+import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
@@ -60,6 +62,7 @@ import org.mockito.kotlin.whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableFlags(FLAG_COMMUNAL_HUB)
 class CommunalSceneStartableTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 
@@ -98,7 +101,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun keyguardGoesAway_forceBlankScene() =
+    fun keyguardGoesAway_whenLaunchingWidget_doNotForceBlankScene() =
         with(kosmos) {
             testScope.runTest {
                 val scene by collectLastValue(communalSceneInteractor.currentScene)
@@ -106,6 +109,27 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                 communalSceneInteractor.changeScene(CommunalScenes.Communal)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)
 
+                communalSceneInteractor.setIsLaunchingWidget(true)
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = KeyguardState.GONE,
+                    testScope = this
+                )
+
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+            }
+        }
+
+    @Test
+    fun keyguardGoesAway_whenNotLaunchingWidget_forceBlankScene() =
+        with(kosmos) {
+            testScope.runTest {
+                val scene by collectLastValue(communalSceneInteractor.currentScene)
+
+                communalSceneInteractor.changeScene(CommunalScenes.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                communalSceneInteractor.setIsLaunchingWidget(false)
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.PRIMARY_BOUNCER,
                     to = KeyguardState.GONE,

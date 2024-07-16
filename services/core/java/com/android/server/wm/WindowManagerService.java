@@ -2570,7 +2570,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // surface, let the client use that, but don't create new surface at this
                         // point.
                         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: getSurface");
-                        winAnimator.mSurfaceController.getSurfaceControl(outSurfaceControl);
+                        winAnimator.getSurfaceControl(outSurfaceControl);
                         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     } else {
                         if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Releasing surface in: " + win);
@@ -2766,15 +2766,15 @@ public class WindowManagerService extends IWindowManager.Stub
             result |= RELAYOUT_RES_SURFACE_CHANGED;
         }
 
-        WindowSurfaceController surfaceController;
+        SurfaceControl surfaceControl;
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "createSurfaceControl");
-            surfaceController = winAnimator.createSurfaceLocked();
+            surfaceControl = winAnimator.createSurfaceLocked();
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        if (surfaceController != null) {
-            surfaceController.getSurfaceControl(outSurfaceControl);
+        if (surfaceControl != null) {
+            winAnimator.getSurfaceControl(outSurfaceControl);
             ProtoLog.i(WM_SHOW_TRANSACTIONS, "OUT SURFACE %s: copied", outSurfaceControl);
 
         } else {
@@ -6773,11 +6773,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (windowState == null) {
                 return false;
             }
-            WindowSurfaceController surfaceController = windowState.mWinAnimator.mSurfaceController;
-            if (surfaceController == null) {
+            final SurfaceControl surfaceControl = windowState.mWinAnimator.mSurfaceControl;
+            if (surfaceControl == null) {
                 return false;
             }
-            return surfaceController.clearWindowContentFrameStats();
+            return surfaceControl.clearContentFrameStats();
         }
     }
 
@@ -6792,15 +6792,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (windowState == null) {
                 return null;
             }
-            WindowSurfaceController surfaceController = windowState.mWinAnimator.mSurfaceController;
-            if (surfaceController == null) {
+            final SurfaceControl surfaceControl = windowState.mWinAnimator.mSurfaceControl;
+            if (surfaceControl == null) {
                 return null;
             }
             if (mTempWindowRenderStats == null) {
                 mTempWindowRenderStats = new WindowContentFrameStats();
             }
             WindowContentFrameStats stats = mTempWindowRenderStats;
-            if (!surfaceController.getWindowContentFrameStats(stats)) {
+            if (!surfaceControl.getContentFrameStats(stats)) {
                 return null;
             }
             return stats;

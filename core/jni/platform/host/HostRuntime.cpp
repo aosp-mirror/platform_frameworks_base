@@ -104,6 +104,7 @@ extern int register_android_view_KeyCharacterMap(JNIEnv* env);
 extern int register_android_view_KeyEvent(JNIEnv* env);
 extern int register_android_view_InputDevice(JNIEnv* env);
 extern int register_android_view_MotionEvent(JNIEnv* env);
+extern int register_android_view_Surface(JNIEnv* env);
 extern int register_android_view_ThreadedRenderer(JNIEnv* env);
 extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
 extern int register_android_view_VelocityTracker(JNIEnv* env);
@@ -151,6 +152,7 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.view.KeyEvent", REG_JNI(register_android_view_KeyEvent)},
         {"android.view.InputDevice", REG_JNI(register_android_view_InputDevice)},
         {"android.view.MotionEvent", REG_JNI(register_android_view_MotionEvent)},
+        {"android.view.Surface", REG_JNI(register_android_view_Surface)},
         {"android.view.VelocityTracker", REG_JNI(register_android_view_VelocityTracker)},
         {"com.android.internal.util.VirtualRefBasePtr",
          REG_JNI(register_com_android_internal_util_VirtualRefBasePtr)},
