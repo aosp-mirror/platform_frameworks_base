@@ -46,6 +46,7 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DelegateTransitionAnimatorController;
@@ -71,7 +72,7 @@ public class StatusBarWindowController {
     private static final boolean DEBUG = false;
 
     private final Context mContext;
-    private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mWindowManager;
     private final IWindowManager mIWindowManager;
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
     private int mBarHeight = -1;
@@ -91,14 +92,14 @@ public class StatusBarWindowController {
     public StatusBarWindowController(
             Context context,
             @StatusBarWindowModule.InternalWindowView StatusBarWindowView statusBarWindowView,
-            WindowManager windowManager,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             IWindowManager iWindowManager,
             StatusBarContentInsetsProvider contentInsetsProvider,
             FragmentService fragmentService,
             @Main Resources resources,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider) {
         mContext = context;
-        mWindowManager = windowManager;
+        mWindowManager = viewCaptureAwareWindowManager;
         mIWindowManager = iWindowManager;
         mContentInsetsProvider = contentInsetsProvider;
         mStatusBarWindowView = statusBarWindowView;
