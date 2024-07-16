@@ -734,6 +734,8 @@ public class AudioService extends IAudioService.Stub
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
+    private final Executor mAudioServerLifecycleExecutor;
+
     private IMediaProjectionManager mProjectionService; // to validate projection token
 
     /** Interface for UserManagerService. */
@@ -1052,7 +1054,8 @@ public class AudioService extends IAudioService.Stub
                               audioserverPermissions() ?
                                 initializeAudioServerPermissionProvider(
                                     context, audioPolicyFacade, audioserverLifecycleExecutor) :
-                                    null
+                                    null,
+                              audioserverLifecycleExecutor
                               );
         }
 
@@ -1138,13 +1141,16 @@ public class AudioService extends IAudioService.Stub
      *               {@link AudioSystemThread} is created as the messaging thread instead.
      * @param appOps {@link AppOpsManager} system service
      * @param enforcer Used for permission enforcing
+     * @param permissionProvider Used to push permissions to audioserver
+     * @param audioserverLifecycleExecutor Used for tasks managing audioserver lifecycle
      */
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public AudioService(Context context, AudioSystemAdapter audioSystem,
             SystemServerAdapter systemServer, SettingsAdapter settings,
             AudioVolumeGroupHelperBase audioVolumeGroupHelper, AudioPolicyFacade audioPolicy,
             @Nullable Looper looper, AppOpsManager appOps, @NonNull PermissionEnforcer enforcer,
-            /* @NonNull */ AudioServerPermissionProvider permissionProvider) {
+            /* @NonNull */ AudioServerPermissionProvider permissionProvider,
+            Executor audioserverLifecycleExecutor) {
         super(enforcer);
         sLifecycleLogger.enqueue(new EventLogger.StringEvent("AudioService()"));
         mContext = context;
@@ -1152,6 +1158,7 @@ public class AudioService extends IAudioService.Stub
         mAppOps = appOps;
 
         mPermissionProvider = permissionProvider;
+        mAudioServerLifecycleExecutor = audioserverLifecycleExecutor;
 
         mAudioSystem = audioSystem;
         mSystemServer = systemServer;
@@ -1162,6 +1169,34 @@ public class AudioService extends IAudioService.Stub
 
         mBroadcastHandlerThread = new HandlerThread("AudioService Broadcast");
         mBroadcastHandlerThread.start();
+
+        // Listen to permission invalidations for the PermissionProvider
+        if (audioserverPermissions()) {
+            final Handler broadcastHandler = mBroadcastHandlerThread.getThreadHandler();
+            mAudioSystem.listenForSystemPropertyChange(PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    new Runnable() {
+                        // Roughly chosen to be long enough to suppress the autocork behavior
+                        // of the permission cache (50ms), and longer than the task could reasonably
+                        // take, even with many packages and users, while not introducing visible
+                        // permission leaks - since the app needs to restart, and trigger an action
+                        // which requires permissions from audioserver before this delay.
+                        // For RECORD_AUDIO, we are additionally protected by appops.
+                        final long UPDATE_DELAY_MS = 110;
+                        final AtomicLong scheduledUpdateTimestamp = new AtomicLong(0);
+                        @Override
+                        public void run() {
+                            var currentTime = SystemClock.uptimeMillis();
+                            if (currentTime > scheduledUpdateTimestamp.get()) {
+                                scheduledUpdateTimestamp.set(currentTime + UPDATE_DELAY_MS);
+                                broadcastHandler.postAtTime( () ->
+                                        mAudioServerLifecycleExecutor.execute(mPermissionProvider
+                                            ::onPermissionStateChanged),
+                                        currentTime + UPDATE_DELAY_MS
+                                    );
+                            }
+                        }
+            });
+        }
 
         mDeviceBroker = new AudioDeviceBroker(mContext, this, mAudioSystem);
 
@@ -11971,29 +12006,6 @@ public class AudioService extends IAudioService.Stub
         audioPolicy.registerOnStartTask(() -> {
             provider.onServiceStart(audioPolicy.getPermissionController());
         });
-
-        // Set up event listeners
-        // Must be kept in sync with PermissionManager
-        Runnable cacheSysPropHandler = new Runnable() {
-            private AtomicReference<SystemProperties.Handle> mHandle = new AtomicReference();
-            private AtomicLong mNonce = new AtomicLong();
-            @Override
-            public void run() {
-                if (mHandle.get() == null) {
-                    // Cache the handle
-                    mHandle.compareAndSet(null, SystemProperties.find(
-                            PermissionManager.CACHE_KEY_PACKAGE_INFO));
-                }
-                long nonce;
-                SystemProperties.Handle ref;
-                if ((ref = mHandle.get()) != null && (nonce = ref.getLong(0)) != 0 &&
-                        mNonce.getAndSet(nonce) != nonce) {
-                    audioserverExecutor.execute(() -> provider.onPermissionStateChanged());
-                }
-            }
-        };
-
-        SystemProperties.addChangeCallback(cacheSysPropHandler);
 
         IntentFilter packageUpdateFilter = new IntentFilter();
         packageUpdateFilter.addAction(ACTION_PACKAGE_ADDED);
