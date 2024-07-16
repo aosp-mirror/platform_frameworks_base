@@ -114,6 +114,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     @Nullable
     private BackNavigationInfo mBackNavigationInfo;
+    private boolean mReceivedNullNavigationInfo = false;
     private final IActivityTaskManager mActivityTaskManager;
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -424,7 +425,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mThresholdCrossed = true;
         // There was no focus window when calling startBackNavigation, still pilfer pointers so
         // the next focus window won't receive motion events.
-        if (mBackNavigationInfo == null) {
+        if (mBackNavigationInfo == null && mReceivedNullNavigationInfo) {
             tryPilferPointers();
             return;
         }
@@ -547,6 +548,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Received backNavigationInfo:%s", backNavigationInfo);
         if (backNavigationInfo == null) {
             ProtoLog.e(WM_SHELL_BACK_PREVIEW, "Received BackNavigationInfo is null.");
+            mReceivedNullNavigationInfo = true;
             cancelLatencyTracking();
             tryPilferPointers();
             return;
@@ -902,6 +904,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mPointersPilfered = false;
         mShellBackAnimationRegistry.resetDefaultCrossActivity();
         cancelLatencyTracking();
+        mReceivedNullNavigationInfo = false;
         if (mBackNavigationInfo != null) {
             mPreviousNavigationType = mBackNavigationInfo.getType();
             mBackNavigationInfo.onBackNavigationFinished(triggerBack);
