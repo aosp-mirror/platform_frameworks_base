@@ -1490,6 +1490,13 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+java_aconfig_library {
+    name: "backstage_power_flags_lib-host",
+    aconfig_declarations: "backstage_power_flags",
+    host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Dropbox data
 aconfig_declarations {
     name: "dropbox_flags",
