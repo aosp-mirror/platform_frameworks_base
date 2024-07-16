@@ -25,6 +25,7 @@ import android.database.ContentObserver
 import android.os.Parcelable
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings.Global
 import androidx.test.filters.SmallTest
 import com.android.settingslib.flags.Flags
@@ -39,6 +40,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -55,6 +57,8 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 @SmallTest
 class ZenModeRepositoryTest {
+    @get:Rule val setFlagsRule = SetFlagsRule()
+
     @Mock private lateinit var context: Context
 
     @Mock private lateinit var notificationManager: NotificationManager

@@ -29,6 +29,7 @@ import com.android.systemui.authentication.domain.interactor.authenticationInter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pattern
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pin
+import com.android.systemui.biometrics.FaceHelpMessageDebouncer
 import com.android.systemui.biometrics.data.repository.FaceSensorInfo
 import com.android.systemui.biometrics.data.repository.fakeFacePropertyRepository
 import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
@@ -75,11 +76,16 @@ class BouncerMessageViewModelTest : SysuiTestCase() {
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
     private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
     private lateinit var underTest: BouncerMessageViewModel
+    private val ignoreHelpMessageId = 1
 
     @Before
     fun setUp() {
         kosmos.fakeUserRepository.setUserInfos(listOf(PRIMARY_USER))
         kosmos.fakeComposeBouncerFlags.composeBouncerEnabled = true
+        overrideResource(
+            R.array.config_face_acquire_device_entry_ignorelist,
+            intArrayOf(ignoreHelpMessageId)
+        )
         underTest = kosmos.bouncerMessageViewModel
         overrideResource(R.string.kg_trust_agent_disabled, "Trust agent is unavailable")
         kosmos.fakeSystemPropertiesHelper.set(
@@ -379,7 +385,15 @@ class BouncerMessageViewModelTest : SysuiTestCase() {
             runCurrent()
 
             kosmos.fakeDeviceEntryFaceAuthRepository.setAuthenticationStatus(
-                HelpFaceAuthenticationStatus(1, "some helpful message")
+                HelpFaceAuthenticationStatus(0, "some helpful message", 0)
+            )
+            runCurrent()
+            kosmos.fakeDeviceEntryFaceAuthRepository.setAuthenticationStatus(
+                HelpFaceAuthenticationStatus(
+                    0,
+                    "some helpful message",
+                    FaceHelpMessageDebouncer.DEFAULT_WINDOW_MS
+                )
             )
             runCurrent()
             assertThat(bouncerMessage?.text).isEqualTo("Enter PIN")

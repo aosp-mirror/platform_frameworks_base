@@ -89,8 +89,8 @@ final class DefaultImeVisibilityApplier {
     void performShowIme(IBinder showInputToken, @NonNull ImeTracker.Token statsToken,
             @InputMethod.ShowFlags int showFlags, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason, @UserIdInt int userId) {
-        final var bindingController = mService.getInputMethodBindingController(userId);
         final var userData = mService.getUserData(userId);
+        final var bindingController = userData.mBindingController;
         final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         if (curMethod != null) {
             if (DEBUG) {
@@ -128,9 +128,9 @@ final class DefaultImeVisibilityApplier {
     void performHideIme(IBinder hideInputToken, @NonNull ImeTracker.Token statsToken,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
             @UserIdInt int userId) {
-        final var bindingController = mService.getInputMethodBindingController(userId);
-        final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         final var userData = mService.getUserData(userId);
+        final var bindingController = userData.mBindingController;
+        final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         if (curMethod != null) {
             // The IME will report its visible state again after the following message finally
             // delivered to the IME process as an IPC.  Hence the inconsistency between
@@ -171,8 +171,8 @@ final class DefaultImeVisibilityApplier {
     void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
             @ImeVisibilityStateComputer.VisibilityState int state,
             @SoftInputShowHideReason int reason, @UserIdInt int userId) {
-        final var bindingController = mService.getInputMethodBindingController(userId);
         final var userData = mService.getUserData(userId);
+        final var bindingController = userData.mBindingController;
         final int displayIdToShowIme = bindingController.getDisplayIdToShowIme();
         switch (state) {
             case STATE_SHOW_IME:

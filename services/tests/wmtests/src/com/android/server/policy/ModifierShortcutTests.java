@@ -97,6 +97,7 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
             mPhoneWindowManager.assertLaunchCategory(category);
         }
 
+        mPhoneWindowManager.overrideRoleManager();
         for (int i = 0; i < ROLE_SHORTCUTS.size(); i++) {
             final int keyCode = ROLE_SHORTCUTS.keyAt(i);
             final String role = ROLE_SHORTCUTS.valueAt(i);

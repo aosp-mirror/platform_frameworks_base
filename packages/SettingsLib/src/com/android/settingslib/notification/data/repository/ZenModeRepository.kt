@@ -16,6 +16,7 @@
 
 package com.android.settingslib.notification.data.repository
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.NotificationManager.EXTRA_NOTIFICATION_POLICY
 import android.content.BroadcastReceiver
@@ -58,6 +59,7 @@ interface ZenModeRepository {
     val modes: Flow<List<ZenMode>>
 }
 
+@SuppressLint("SharedFlowCreation")
 class ZenModeRepositoryImpl(
     private val context: Context,
     private val notificationManager: NotificationManager,
@@ -100,12 +102,11 @@ class ZenModeRepositoryImpl(
             }
             .let {
                 if (Flags.volumePanelBroadcastFix()) {
+                    // Share the flow to avoid having multiple broadcasts.
                     it.flowOn(backgroundCoroutineContext)
+                        .shareIn(started = SharingStarted.WhileSubscribed(), scope = scope)
                 } else {
-                    it.shareIn(
-                        started = SharingStarted.WhileSubscribed(),
-                        scope = scope,
-                    )
+                    it.shareIn(started = SharingStarted.WhileSubscribed(), scope = scope)
                 }
             }
     }

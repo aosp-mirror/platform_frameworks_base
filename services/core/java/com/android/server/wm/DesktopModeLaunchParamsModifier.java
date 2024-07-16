@@ -164,17 +164,16 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
     private void calculateAndCentreInitialBounds(Task task,
             LaunchParamsController.LaunchParams outParams) {
         // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
-        final Rect stableBounds = new Rect();
-        task.getDisplayArea().getStableRect(stableBounds);
+        final Rect screenBounds = task.getDisplayArea().getBounds();
         // The desired dimensions that a fully resizable window should take when initially entering
         // desktop mode. Calculated as a percentage of the available display area as defined by the
         // DESKTOP_MODE_INITIAL_BOUNDS_SCALE.
-        final int desiredWidth = (int) (stableBounds.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
-        final int desiredHeight = (int) (stableBounds.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth = (int) (screenBounds.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight = (int) (screenBounds.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         outParams.mBounds.right = desiredWidth;
         outParams.mBounds.bottom = desiredHeight;
-        outParams.mBounds.offset(stableBounds.centerX() - outParams.mBounds.centerX(),
-                stableBounds.centerY() - outParams.mBounds.centerY());
+        outParams.mBounds.offset(screenBounds.centerX() - outParams.mBounds.centerX(),
+                screenBounds.centerY() - outParams.mBounds.centerY());
     }
 
     private void initLogBuilder(Task task, ActivityRecord activity) {

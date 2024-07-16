@@ -91,6 +91,7 @@ import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.util.concurrency.BackPanelUiThread;
 import com.android.systemui.util.concurrency.UiThreadContext;
@@ -297,6 +298,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private Date mTmpLogDate = new Date();
 
     private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
 
     private final NavigationEdgeBackPlugin.BackCallback mBackCallback =
             new NavigationEdgeBackPlugin.BackCallback() {
@@ -423,7 +425,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             Optional<DesktopMode> desktopModeOptional,
             FalsingManager falsingManager,
             Provider<BackGestureTfClassifierProvider> backGestureTfClassifierProviderProvider,
-            Provider<LightBarController> lightBarControllerProvider) {
+            Provider<LightBarController> lightBarControllerProvider,
+            NotificationShadeWindowController notificationShadeWindowController) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mUiThreadContext = uiThreadContext;
@@ -479,6 +482,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 this::onNavigationSettingsChanged);
 
         updateCurrentUserResources();
+        mNotificationShadeWindowController = notificationShadeWindowController;
     }
 
     public void setStateChangeCallback(Runnable callback) {
@@ -1297,6 +1301,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mBackAnimation.setPilferPointerCallback(() -> {
             pilferPointers();
         });
+        mBackAnimation.setTopUiRequestCallback(
+                (requestTopUi, tag) -> mUiThreadContext.getExecutor().execute(() ->
+                        mNotificationShadeWindowController.setRequestTopUi(requestTopUi, tag)));
         updateBackAnimationThresholds();
         if (mLightBarControllerProvider.get() != null) {
             mBackAnimation.setStatusBarCustomizer((appearance) -> {
@@ -1333,6 +1340,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         private final Provider<BackGestureTfClassifierProvider>
                 mBackGestureTfClassifierProviderProvider;
         private final Provider<LightBarController> mLightBarControllerProvider;
+        private final NotificationShadeWindowController mNotificationShadeWindowController;
 
         @Inject
         public Factory(OverviewProxyService overviewProxyService,
@@ -1353,7 +1361,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         FalsingManager falsingManager,
                         Provider<BackGestureTfClassifierProvider>
                                 backGestureTfClassifierProviderProvider,
-                        Provider<LightBarController> lightBarControllerProvider) {
+                Provider<LightBarController> lightBarControllerProvider,
+                NotificationShadeWindowController notificationShadeWindowController) {
             mOverviewProxyService = overviewProxyService;
             mSysUiState = sysUiState;
             mPluginManager = pluginManager;
@@ -1372,6 +1381,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mFalsingManager = falsingManager;
             mBackGestureTfClassifierProviderProvider = backGestureTfClassifierProviderProvider;
             mLightBarControllerProvider = lightBarControllerProvider;
+            mNotificationShadeWindowController = notificationShadeWindowController;
         }
 
         /** Construct a {@link EdgeBackGestureHandler}. */
@@ -1396,7 +1406,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                             mDesktopModeOptional,
                             mFalsingManager,
                             mBackGestureTfClassifierProviderProvider,
-                            mLightBarControllerProvider));
+                            mLightBarControllerProvider,
+                            mNotificationShadeWindowController));
         }
     }
 

@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"အမှားရှာအက်ပ်များအတွက် GPU အမှားရှာအလွှာများ ဖွင့်ခွင့်ပြုသည်"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"အကျယ်ရှင်းလင်းချက်ပံ့ပိုးသူ မှတ်တမ်းဖွင့်ရန်"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ချွတ်ယွင်းမှု အစီရင်ခံချက်တွင် စက်ပစ္စည်းအလိုက် ထုတ်လုပ်သူမှတ်တမ်းများကို ထည့်သွင်းခြင်းဖြင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များ ပါဝင်ခြင်း၊ ဘက်ထရီပိုသုံးခြင်း နှင့်/သို့မဟုတ် သိုလှောင်ခန်းပိုသုံးခြင်းတို့ ဖြစ်စေနိုင်သည်။"</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"တစ်ရက်ကြာပြီးနောက် ပိတ်ရန်"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"အကျယ်ချဲ့ရှင်းပြသည့် ထုတ်လုပ်သူမှတ်တမ်း ပြီးသွားပါပြီ"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"တစ်ရက်စာ ဖွင့်ထားသည်"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"နောက်ထပ်တစ်ရက် ဖွင့်ရန်"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"တစ်ရက်ကြာပြီးနောက် ပိတ်မည်"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"အကန့်အသတ်မရှိ ဖွင့်ထားသည်"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"လှုပ်ရှားသက်ဝင်ပုံစကေး"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"သက်ဝင်အသွင်ပြောင်းခြင်း"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"လှုပ်ရှားမှုကြာချိန်စကေး"</string>

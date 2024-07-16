@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.devicestate.DeviceState;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.feature.flags.FeatureFlags;
 import android.hardware.devicestate.feature.flags.FeatureFlagsImpl;
 import android.os.Handler;
@@ -614,7 +615,11 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                     && isBootCompleted
                     && !mFoldSettingProvider.shouldStayAwakeOnFold();
         } else {
-            return mDeviceStatesOnWhichToSelectiveSleep.get(pendingState.getIdentifier())
+            return currentState.getIdentifier()
+                    != DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER
+                    && pendingState.getIdentifier()
+                    != DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER
+                    && mDeviceStatesOnWhichToSelectiveSleep.get(pendingState.getIdentifier())
                     && !mDeviceStatesOnWhichToSelectiveSleep.get(currentState.getIdentifier())
                     && isInteractive
                     && isBootCompleted

@@ -56,6 +56,11 @@
     <item msgid="5376619709702103243">"آف ہے"</item>
     <item msgid="4875147066469902392">"آن ہے"</item>
   </string-array>
+  <string-array name="tile_states_modes">
+    <item msgid="7764936419245199023">"دستیاب نہیں ہے"</item>
+    <item msgid="2004750556637773692">"آف ہے"</item>
+    <item msgid="8968530753931637871">"آن ہے"</item>
+  </string-array>
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"دستیاب نہیں ہے"</item>
     <item msgid="5044688398303285224">"آف ہے"</item>

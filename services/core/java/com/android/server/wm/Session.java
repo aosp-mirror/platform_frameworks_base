@@ -324,19 +324,19 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public boolean performHapticFeedback(int effectId, boolean always, boolean fromIme) {
+    public boolean performHapticFeedback(int effectId, int flags, int privFlags) {
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mService.mPolicy.performHapticFeedback(mUid, mPackageName,
-                        effectId, always, null, fromIme);
+            return mService.mPolicy.performHapticFeedback(mUid, mPackageName, effectId, null, flags,
+                    privFlags);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override
-    public void performHapticFeedbackAsync(int effectId, boolean always, boolean fromIme) {
-        performHapticFeedback(effectId, always, fromIme);
+    public void performHapticFeedbackAsync(int effectId, int flags, int privFlags) {
+        performHapticFeedback(effectId, flags, privFlags);
     }
 
     /* Drag/drop */

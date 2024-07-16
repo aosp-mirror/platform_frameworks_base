@@ -233,7 +233,7 @@ constructor(
             Log.wtf(TAG, "Unsupported modifiers remaining: $remainingModifiers")
             return null
         }
-        if (info.keycode != 0) {
+        if (info.keycode != 0 || info.baseCharacter > Char.MIN_VALUE) {
             keys += toShortcutKey(keyCharacterMap, info.keycode, info.baseCharacter) ?: return null
         }
         if (keys.isEmpty()) {
@@ -253,7 +253,7 @@ constructor(
             return ShortcutKey.Icon(iconResId)
         }
         if (baseCharacter > Char.MIN_VALUE) {
-            return ShortcutKey.Text(baseCharacter.toString())
+            return ShortcutKey.Text(baseCharacter.uppercase())
         }
         val specialKeyLabel = ShortcutHelperKeys.specialKeyLabels[keyCode]
         if (specialKeyLabel != null) {

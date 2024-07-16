@@ -33,7 +33,9 @@ import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.andSceneContainer
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -143,6 +145,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         whenever(keyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(PIN)
 
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
         if (!SceneContainerFlag.isEnabled) {
             mSetFlagsRule.disableFlags(
                 Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR,

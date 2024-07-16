@@ -177,13 +177,16 @@ public class TimeToLiveHelper {
             if (ACTION.equals(action)) {
                 String timeoutKey = null;
                 synchronized (mLock) {
-                    Pair<Long, String> earliest = mKeys.first();
-                    String key = intent.getStringExtra(EXTRA_KEY);
-                    if (!earliest.second.equals(key)) {
-                        Slog.wtf(TAG, "Alarm triggered but wasn't the earliest we were tracking");
+                    if (!mKeys.isEmpty()) {
+                        Pair<Long, String> earliest = mKeys.first();
+                        String key = intent.getStringExtra(EXTRA_KEY);
+                        if (!earliest.second.equals(key)) {
+                            Slog.wtf(TAG,
+                                    "Alarm triggered but wasn't the earliest we were tracking");
+                        }
+                        removeMatchingEntry(key);
+                        timeoutKey = earliest.second;
                     }
-                    removeMatchingEntry(key);
-                    timeoutKey = earliest.second;
                 }
                 mNm.timeoutNotification(timeoutKey);
             }

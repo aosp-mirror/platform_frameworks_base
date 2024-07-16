@@ -1412,10 +1412,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Selecione para desativar a depuração sem fios."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Modo de estrutura de teste ativado"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Efetue uma reposição de dados de fábrica para desativar o Modo de estrutura de teste."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Configuração da compilação do modo de utilizador do sistema sem interface incorreta"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"O estado do modo de utilizador do sistema sem interface deste dispositivo difere da respetiva configuração da compilação. Faça uma reposição de fábrica do dispositivo."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Consola de série ativada"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"O desempenho é afetado. Para desativar, selecione o carregador de arranque."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"MTE experimental ativada"</string>
@@ -1760,12 +1758,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas do volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Solte as teclas de volume. Para ativar o serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, prima sem soltar ambas as teclas de volume novamente durante 3 segundos."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Escolha uma funcionalidade"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Escolha uma funcionalidade"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Escolha uma funcionalidade"</string>
     <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"A funcionalidade vai ser aberta da próxima vez que tocar no botão Acessibilidade"</string>
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"A funcionalidade vai ser aberta da próxima vez que usar este atalho. Deslize com 2 dedos a partir da parte inferior do ecrã e solte rapidamente."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"A funcionalidade vai ser aberta da próxima vez que usar este atalho. Deslize para cima com 3 dedos a partir da parte inferior do ecrã e solte rapidamente."</string>
@@ -1891,8 +1886,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"O PIN é demasiado pequeno. Deve ter, no mínimo, 4 dígitos."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Tente mais tarde"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização de ecrã inteiro"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Para sair, deslize rapidamente para baixo a partir da parte superior do ecrã"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rode para uma melhor visualização"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Abra <xliff:g id="NAME">%s</xliff:g> em ecrã inteiro para uma melhor visualização"</string>
@@ -2444,4 +2438,13 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Mudar de utilizador"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Desativar som"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Toque para desativar o som"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Navegador"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Contactos"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Email"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Música"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Calendário"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculadora"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplicações"</string>
 </resources>

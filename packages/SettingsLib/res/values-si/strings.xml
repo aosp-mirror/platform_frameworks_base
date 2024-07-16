@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"නිදොසීමේ යෙදුම්වලට GPU නිදොසීමේ ස්තර පූරණයට ඉඩ දෙ."</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"verbose vendor පිරීම සබල කරන්න"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"පුද්ගලික තොරතුරු අන්තර්ගත විය හැකි, වැඩි බැටරි බලයක් භාවිත කිරීමට සහ/හෝ වැඩි ගබඩා ඉඩක් භාවිත කිරීමට හැකි අමතර උපාංග නිශ්චිත විකුණුම්කරු ලොග, දෝෂ වාර්තාවල අඩංගු වේ."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"එක දිනකට පසු අබල කරන්න"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"වචන බහුලකමේ විකුණුම්කරු ලොග් කිරීම නිමා වී ඇත"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"එක් දිනක් සඳහා සබල කර ඇත"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"තවත් එක් දිනක් සඳහා සබල කරන්න"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"දිනකට පසු අබල කරයි"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"දින නියමයක් නොමැතිව සබල කර ඇත"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"කවුළු සජීවිකරණ පරිමාණය"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"සංක්‍රමණ සජීවන පරිමාණය"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"සජීවක කාල පරාස පරිමාණය"</string>

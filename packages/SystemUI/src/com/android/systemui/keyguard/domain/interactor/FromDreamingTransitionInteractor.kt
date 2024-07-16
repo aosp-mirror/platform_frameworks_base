@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.Flags.communalHub
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -58,6 +58,7 @@ constructor(
     @Main mainDispatcher: CoroutineDispatcher,
     keyguardInteractor: KeyguardInteractor,
     private val glanceableHubTransitions: GlanceableHubTransitions,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
@@ -95,7 +96,7 @@ constructor(
     }
 
     private fun listenForDreamingToGlanceableHub() {
-        if (!communalHub()) return
+        if (!communalSettingsInteractor.isCommunalFlagEnabled()) return
         // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch("$TAG#listenForDreamingToGlanceableHub", mainDispatcher) {

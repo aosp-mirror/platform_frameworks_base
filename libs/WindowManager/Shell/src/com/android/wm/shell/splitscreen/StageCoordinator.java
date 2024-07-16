@@ -3573,7 +3573,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         pw.println(innerPrefix + "mDividerVisible=" + mDividerVisible);
         pw.println(innerPrefix + "isSplitActive=" + isSplitActive());
         pw.println(innerPrefix + "isSplitVisible=" + isSplitScreenVisible());
-        pw.println(innerPrefix + "isLeftRightSplit=" + mSplitLayout.isLeftRightSplit());
+        pw.println(innerPrefix + "isLeftRightSplit="
+                + (mSplitLayout != null ? mSplitLayout.isLeftRightSplit() : "null"));
         pw.println(innerPrefix + "MainStage");
         pw.println(childPrefix + "stagePosition=" + splitPositionToString(getMainStagePosition()));
         pw.println(childPrefix + "isActive=" + mMainStage.isActive());
@@ -3585,7 +3586,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSideStage.dump(pw, childPrefix);
         pw.println(innerPrefix + "SideStageListener");
         mSideStageListener.dump(pw, childPrefix);
-        mSplitLayout.dump(pw, childPrefix);
+        if (mSplitLayout != null) {
+            mSplitLayout.dump(pw, childPrefix);
+        }
         if (!mPausingTasks.isEmpty()) {
             pw.println(childPrefix + "mPausingTasks=" + mPausingTasks);
         }
