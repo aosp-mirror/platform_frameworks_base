@@ -325,6 +325,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final String TAG_MIME_TYPE = "mime-type";
     private static final String TAG_ARCHIVE_STATE = "archive-state";
     private static final String TAG_ARCHIVE_ACTIVITY_INFO = "archive-activity-info";
+    private static final String TAG_SPLIT_VERSION = "split-version";
 
     public static final String ATTR_NAME = "name";
     public static final String ATTR_PACKAGE = "package";
@@ -3261,6 +3262,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         if (pkg.isLoading()) {
             serializer.attributeBoolean(null, "isLoading", true);
         }
+        if (pkg.getBaseRevisionCode() != 0) {
+            serializer.attributeInt(null, "baseRevisionCode", pkg.getBaseRevisionCode());
+        }
         serializer.attributeFloat(null, "loadingProgress", pkg.getLoadingProgress());
         serializer.attributeLongHex(null, "loadingCompletedTime", pkg.getLoadingCompletedTime());
 
@@ -3289,7 +3293,12 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         writeUpgradeKeySetsLPr(serializer, pkg.getKeySetData());
         writeKeySetAliasesLPr(serializer, pkg.getKeySetData());
         writeMimeGroupLPr(serializer, pkg.getMimeGroups());
-
+        // If getPkg is not NULL, these values are from the getPkg. And these values are preserved
+        // for the downgrade check for DELETE_KEEP_DATA and archived app cases. If the getPkg is
+        // not NULL, we don't need to preserve it.
+        if (pkg.getPkg() == null) {
+            writeSplitVersionsLPr(serializer, pkg.getSplitNames(), pkg.getSplitRevisionCodes());
+        }
         serializer.endTag(null, "package");
     }
 
@@ -4071,6 +4080,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         byte[] restrictUpdateHash = null;
         boolean isScannedAsStoppedSystemApp = false;
         boolean isSdkLibrary = false;
+        int baseRevisionCode = 0;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -4116,6 +4126,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             appMetadataFilePath = parser.getAttributeValue(null, "appMetadataFilePath");
             appMetadataSource = parser.getAttributeInt(null, "appMetadataSource",
                     PackageManager.APP_METADATA_SOURCE_UNKNOWN);
+            baseRevisionCode = parser.getAttributeInt(null, "baseRevisionCode", 0);
 
             isScannedAsStoppedSystemApp = parser.getAttributeBoolean(null,
                 "scannedAsStoppedSystemApp", false);
@@ -4269,6 +4280,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setAppMetadataFilePath(appMetadataFilePath)
                     .setAppMetadataSource(appMetadataSource)
                     .setTargetSdkVersion(targetSdkVersion)
+                    .setBaseRevisionCode(baseRevisionCode)
                     .setRestrictUpdateHash(restrictUpdateHash)
                     .setScannedAsStoppedSystemApp(isScannedAsStoppedSystemApp);
             // Handle legacy string here for single-user mode
@@ -4374,6 +4386,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     readUsesStaticLibLPw(parser, packageSetting);
                 } else if (tagName.equals(TAG_USES_SDK_LIB)) {
                     readUsesSdkLibLPw(parser, packageSetting);
+                } else if (tagName.equals(TAG_SPLIT_VERSION)) {
+                    readSplitVersionsLPw(parser, packageSetting);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <package>: " + parser.getName());
@@ -4467,6 +4481,37 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             }
 
             serializer.endTag(null, TAG_MIME_GROUP);
+        }
+    }
+
+    private void readSplitVersionsLPw(TypedXmlPullParser parser, PackageSetting outPs)
+            throws IOException, XmlPullParserException {
+        String splitName = parser.getAttributeValue(null, ATTR_NAME);
+        int splitRevision = parser.getAttributeInt(null, ATTR_VERSION, -1);
+        if (splitName != null && splitRevision >= 0) {
+            outPs.setSplitNames(ArrayUtils.appendElement(String.class,
+                    outPs.getSplitNames(), splitName));
+            outPs.setSplitRevisionCodes(ArrayUtils.appendInt(
+                    outPs.getSplitRevisionCodes(), splitRevision));
+        }
+
+        XmlUtils.skipCurrentTag(parser);
+    }
+
+    private void writeSplitVersionsLPr(TypedXmlSerializer serializer, String[] splitNames,
+            int[] splitRevisionCodes) throws IOException {
+        if (ArrayUtils.isEmpty(splitNames) || ArrayUtils.isEmpty(splitRevisionCodes)
+                || splitNames.length != splitRevisionCodes.length) {
+            return;
+        }
+        final int libLength = splitNames.length;
+        for (int i = 0; i < libLength; i++) {
+            final String splitName = splitNames[i];
+            final int splitRevision = splitRevisionCodes[i];
+            serializer.startTag(null, TAG_SPLIT_VERSION);
+            serializer.attribute(null, ATTR_NAME, splitName);
+            serializer.attributeInt(null, ATTR_VERSION, splitRevision);
+            serializer.endTag(null, TAG_SPLIT_VERSION);
         }
     }
 
