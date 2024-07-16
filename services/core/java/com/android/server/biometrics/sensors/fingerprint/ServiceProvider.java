@@ -135,6 +135,8 @@ public interface ServiceProvider extends
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 
+    void setIgnoreDisplayTouches(long requestId, int sensorId, boolean ignoreTouches);
+
     void onPowerPressed();
 
     // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR

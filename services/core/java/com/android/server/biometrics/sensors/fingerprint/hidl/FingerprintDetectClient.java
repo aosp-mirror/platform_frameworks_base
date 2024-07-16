@@ -141,6 +141,11 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
     }
 
     @Override
+    public void setIgnoreDisplayTouches(boolean shouldIgnore) {
+        // Unsupported in HIDL.
+    }
+
+    @Override
     public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> hardwareAuthToken) {
         getLogger().logOnAuthenticated(getContext(), getOperationContext(),

@@ -202,6 +202,9 @@ interface IFingerprintService {
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void onUdfpsUiEvent(int event, long requestId, int sensorId);
 
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    void setIgnoreDisplayTouches(long requestId, int sensorId, boolean ignoreTouches);
+
     // Sets the controller for managing the UDFPS overlay.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void setUdfpsOverlayController(in IUdfpsOverlayController controller);
