@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package android.view
+package com.android.systemui.keyboard.shortcut.extensions
 
-import com.android.systemui.kosmos.Kosmos
-import org.mockito.Mockito.mock
+import android.view.KeyboardShortcutGroup
+import android.view.KeyboardShortcutInfo
 
-val Kosmos.mockWindowManager: WindowManager by Kosmos.Fixture { mock(WindowManager::class.java) }
-
-var Kosmos.windowManager: WindowManager by Kosmos.Fixture { mockWindowManager }
+fun KeyboardShortcutGroup.copy(
+    label: CharSequence = getLabel(),
+    items: List<KeyboardShortcutInfo> = getItems(),
+    isSystemGroup: Boolean = isSystemGroup(),
+    packageName: CharSequence? = getPackageName(),
+) = KeyboardShortcutGroup(label, items, isSystemGroup).also { it.packageName = packageName }
