@@ -66,6 +66,7 @@ import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogDataType;
 import com.android.internal.protolog.common.LogLevel;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -100,6 +101,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     );
     @Nullable
     private final ProtoLogViewerConfigReader mViewerConfigReader;
+    @Nullable
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
     private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
     private final Runnable mCacheUpdater;
