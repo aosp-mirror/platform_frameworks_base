@@ -235,6 +235,10 @@ android_library {
         // *.kt sources are inside a filegroup.
         "kotlin-annotations",
     ],
+    required: [
+        "wmshell.protolog.json.gz",
+        "wmshell.protolog.pb",
+    ],
     kotlincflags: ["-Xjvm-default=all"],
     manifest: "AndroidManifest.xml",
     plugins: ["dagger2-compiler"],
