@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डीबग ऐप के लिए जीपीयू डीबग लेयर लोड करने दें"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"वर्बोस वेंडर लॉगिंग चालू करें"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"गड़बड़ियों की रिपोर्ट में डिवाइस से जुड़े अतिरिक्त वेंडर लॉग शामिल करें. इन लॉग में निजी जानकारी, बैटरी का ज़्यादा इस्तेमाल, और/या डिवाइस का स्टोरेज ज़्यादा इस्तेमाल करने की जानकारी हो सकती है."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"एक दिन बाद बंद करें"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"वर्बोस वेंडर लॉगिंग खत्म हो चुका है"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"एक दिन के लिए चालू किया गया"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"एक और दिन के लिए चालू करें"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"एक दिन के बाद बंद होगा"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"अनिश्चित समय के लिए चालू किया गया"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"विंडो ऐनिमेशन स्‍केल"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ट्रांज़िशन ऐनिमेशन स्‍केल"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ऐनिमेटर ड्यूरेशन स्केल"</string>
