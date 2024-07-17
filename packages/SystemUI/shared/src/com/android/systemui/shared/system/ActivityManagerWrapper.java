@@ -344,7 +344,7 @@ public class ActivityManagerWrapper {
      * Shows a voice session identified by {@code token}
      * @return true if the session was shown, false otherwise
      */
-    public boolean showVoiceSession(@NonNull IBinder token, @NonNull Bundle args, int flags,
+    public boolean showVoiceSession(IBinder token, @NonNull Bundle args, int flags,
             @Nullable String attributionTag) {
         IVoiceInteractionManagerService service = IVoiceInteractionManagerService.Stub.asInterface(
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
