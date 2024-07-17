@@ -874,6 +874,13 @@ public final class AutofillManager {
         @Nullable View autofillClientFindViewByAccessibilityIdTraversal(int viewId, int windowId);
 
         /**
+         * Finds all the autofillable views on the screen.
+         *
+         * @return The list of views that are autofillable.
+         */
+        List<View> autofillClientFindAutofillableViewsByTraversal();
+
+        /**
          * Runs the specified action on the UI thread.
          */
         void autofillClientRunOnUiThread(Runnable action);

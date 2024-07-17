@@ -39,6 +39,7 @@ import android.view.WindowManagerGlobal;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * A controller to manage the autofill requests for the {@link Activity}.
@@ -490,6 +491,22 @@ public final class AutofillClientController implements AutofillManager.AutofillC
                                 autofillIds[viewNum].getViewId());
                     }
                 }
+            }
+        }
+        return views;
+    }
+
+    @Override
+    public List<View> autofillClientFindAutofillableViewsByTraversal() {
+        final ArrayList<View> views = new ArrayList<>();
+        final ArrayList<ViewRootImpl> roots =
+                WindowManagerGlobal.getInstance().getRootViews(mActivity.getActivityToken());
+
+        for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
+            final View rootView = roots.get(rootNum).getView();
+
+            if (rootView != null) {
+                rootView.findAutofillableViewsByTraversal(views);
             }
         }
         return views;
