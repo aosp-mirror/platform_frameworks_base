@@ -62,18 +62,22 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     override fun to(
         to: SceneKey,
         key: TransitionKey?,
+        preview: (TransitionBuilder.() -> Unit)?,
+        reversePreview: (TransitionBuilder.() -> Unit)?,
         builder: TransitionBuilder.() -> Unit
     ): TransitionSpec {
-        return transition(from = null, to = to, key = key, builder)
+        return transition(from = null, to = to, key = key, preview, reversePreview, builder)
     }
 
     override fun from(
         from: SceneKey,
         to: SceneKey?,
         key: TransitionKey?,
+        preview: (TransitionBuilder.() -> Unit)?,
+        reversePreview: (TransitionBuilder.() -> Unit)?,
         builder: TransitionBuilder.() -> Unit
     ): TransitionSpec {
-        return transition(from = from, to = to, key = key, builder)
+        return transition(from = from, to = to, key = key, preview, reversePreview, builder)
     }
 
     override fun overscroll(
@@ -103,9 +107,11 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
         from: SceneKey?,
         to: SceneKey?,
         key: TransitionKey?,
+        preview: (TransitionBuilder.() -> Unit)?,
+        reversePreview: (TransitionBuilder.() -> Unit)?,
         builder: TransitionBuilder.() -> Unit,
     ): TransitionSpec {
-        fun transformationSpec(): TransformationSpecImpl {
+        fun transformationSpec(builder: TransitionBuilder.() -> Unit): TransformationSpecImpl {
             val impl = TransitionBuilderImpl().apply(builder)
             return TransformationSpecImpl(
                 progressSpec = impl.spec,
@@ -115,7 +121,18 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
             )
         }
 
-        val spec = TransitionSpecImpl(key, from, to, ::transformationSpec)
+        val previewTransformationSpec = preview?.let { { transformationSpec(it) } }
+        val reversePreviewTransformationSpec = reversePreview?.let { { transformationSpec(it) } }
+        val transformationSpec = { transformationSpec(builder) }
+        val spec =
+            TransitionSpecImpl(
+                key,
+                from,
+                to,
+                previewTransformationSpec,
+                reversePreviewTransformationSpec,
+                transformationSpec
+            )
         transitionSpecs.add(spec)
         return spec
     }

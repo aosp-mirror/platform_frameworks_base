@@ -2185,4 +2185,165 @@ class ElementTest {
         rule.onNode(isElement(TestElements.Foo, SceneA)).assertIsNotDisplayed()
         rule.onNode(isElement(TestElements.Foo, SceneB)).assertPositionInRootIsEqualTo(40.dp, 60.dp)
     }
+
+    @Test
+    fun previewInterpolation_previewStage() {
+        val exiting1 = ElementKey("exiting1")
+        val exiting2 = ElementKey("exiting2")
+        val exiting3 = ElementKey("exiting3")
+        val entering1 = ElementKey("entering1")
+        val entering2 = ElementKey("entering2")
+        val entering3 = ElementKey("entering3")
+
+        val layoutImpl =
+            testPreviewTransformation(
+                from = SceneB,
+                to = SceneA,
+                exitingElements = listOf(exiting1, exiting2, exiting3),
+                enteringElements = listOf(entering1, entering2, entering3),
+                preview = {
+                    scaleDraw(exiting1, scaleX = 0.8f, scaleY = 0.8f)
+                    translate(exiting2, x = 20.dp)
+                    scaleDraw(entering1, scaleX = 0f, scaleY = 0f)
+                    translate(entering2, y = 30.dp)
+                },
+                transition = {
+                    translate(exiting2, x = 30.dp)
+                    scaleSize(exiting3, width = 0.8f, height = 0.8f)
+                    scaleDraw(entering1, scaleX = 0.5f, scaleY = 0.5f)
+                    scaleSize(entering3, width = 0.2f, height = 0.2f)
+                },
+                previewProgress = 0.5f,
+                progress = 0f,
+                isInPreviewStage = true
+            )
+
+        // verify that preview transition for exiting elements is halfway played from
+        // current-scene-value -> preview-target-value
+        val exiting1InB = layoutImpl.elements.getValue(exiting1).sceneStates.getValue(SceneB)
+        // e.g. exiting1 is half scaled...
+        assertThat(exiting1InB.lastScale).isEqualTo(Scale(0.9f, 0.9f, Offset.Unspecified))
+        // ...and exiting2 is halfway translated from 0.dp to 20.dp...
+        rule.onNode(isElement(exiting2)).assertPositionInRootIsEqualTo(10.dp, 0.dp)
+        // ...whereas exiting3 remains in its original size because it is only affected by the
+        // second phase of the transition
+        rule.onNode(isElement(exiting3)).assertSizeIsEqualTo(100.dp, 100.dp)
+
+        // verify that preview transition for entering elements is halfway played from
+        // preview-target-value -> transition-target-value (or target-scene-value if no
+        // transition-target-value defined).
+        val entering1InA = layoutImpl.elements.getValue(entering1).sceneStates.getValue(SceneA)
+        // e.g. entering1 is half scaled between 0f and 0.5f -> 0.25f...
+        assertThat(entering1InA.lastScale).isEqualTo(Scale(0.25f, 0.25f, Offset.Unspecified))
+        // ...and entering2 is half way translated between 30.dp and 0.dp
+        rule.onNode(isElement(entering2)).assertPositionInRootIsEqualTo(0.dp, 15.dp)
+        // ...and entering3 is still at its start size of 0.2f * 100.dp, because it is unaffected
+        // by the preview phase
+        rule.onNode(isElement(entering3)).assertSizeIsEqualTo(20.dp, 20.dp)
+    }
+
+    @Test
+    fun previewInterpolation_transitionStage() {
+        val exiting1 = ElementKey("exiting1")
+        val exiting2 = ElementKey("exiting2")
+        val exiting3 = ElementKey("exiting3")
+        val entering1 = ElementKey("entering1")
+        val entering2 = ElementKey("entering2")
+        val entering3 = ElementKey("entering3")
+
+        val layoutImpl =
+            testPreviewTransformation(
+                from = SceneB,
+                to = SceneA,
+                exitingElements = listOf(exiting1, exiting2, exiting3),
+                enteringElements = listOf(entering1, entering2, entering3),
+                preview = {
+                    scaleDraw(exiting1, scaleX = 0.8f, scaleY = 0.8f)
+                    translate(exiting2, x = 20.dp)
+                    scaleDraw(entering1, scaleX = 0f, scaleY = 0f)
+                    translate(entering2, y = 30.dp)
+                },
+                transition = {
+                    translate(exiting2, x = 30.dp)
+                    scaleSize(exiting3, width = 0.8f, height = 0.8f)
+                    scaleDraw(entering1, scaleX = 0.5f, scaleY = 0.5f)
+                    scaleSize(entering3, width = 0.2f, height = 0.2f)
+                },
+                previewProgress = 0.5f,
+                progress = 0.5f,
+                isInPreviewStage = false
+            )
+
+        // verify that exiting elements remain in the preview-end state if no further transition is
+        // defined for them in the second stage
+        val exiting1InB = layoutImpl.elements.getValue(exiting1).sceneStates.getValue(SceneB)
+        // i.e. exiting1 remains half scaled
+        assertThat(exiting1InB.lastScale).isEqualTo(Scale(0.9f, 0.9f, Offset.Unspecified))
+        // in case there is an additional transition defined for the second stage, verify that the
+        // animation is seamlessly taken over from the preview-end-state, e.g. the translation of
+        // exiting2 is at 10.dp after the preview phase. After half of the second phase, it
+        // should be half-way between 10.dp and the target-value of 30.dp -> 20.dp
+        rule.onNode(isElement(exiting2)).assertPositionInRootIsEqualTo(20.dp, 0.dp)
+        // if the element is only modified by the second phase transition, verify it's in the middle
+        // of start-scene-state and target-scene-state, i.e. exiting3 is halfway between 100.dp and
+        // 80.dp
+        rule.onNode(isElement(exiting3)).assertSizeIsEqualTo(90.dp, 90.dp)
+
+        // verify that entering elements animate seamlessly to their target state
+        val entering1InA = layoutImpl.elements.getValue(entering1).sceneStates.getValue(SceneA)
+        // e.g. entering1, which was scaled from 0f to 0.25f during the preview phase, should now be
+        // half way scaled between 0.25f and its target-state of 1f -> 0.625f
+        assertThat(entering1InA.lastScale).isEqualTo(Scale(0.625f, 0.625f, Offset.Unspecified))
+        // entering2, which was translated from y=30.dp to y=15.dp should now be half way
+        // between 15.dp and its target state of 0.dp...
+        rule.onNode(isElement(entering2)).assertPositionInRootIsEqualTo(0.dp, 7.5.dp)
+        // entering3, which isn't affected by the preview transformation should be half scaled
+        // between start size (20.dp) and target size (100.dp) -> 60.dp
+        rule.onNode(isElement(entering3)).assertSizeIsEqualTo(60.dp, 60.dp)
+    }
+
+    private fun testPreviewTransformation(
+        from: SceneKey,
+        to: SceneKey,
+        exitingElements: List<ElementKey> = listOf(),
+        enteringElements: List<ElementKey> = listOf(),
+        preview: (TransitionBuilder.() -> Unit)? = null,
+        transition: TransitionBuilder.() -> Unit,
+        progress: Float = 0f,
+        previewProgress: Float = 0.5f,
+        isInPreviewStage: Boolean = true
+    ): SceneTransitionLayoutImpl {
+        val state =
+            rule.runOnIdle {
+                MutableSceneTransitionLayoutStateImpl(
+                    from,
+                    transitions { from(from, to = to, preview = preview, builder = transition) }
+                )
+            }
+
+        @Composable
+        fun SceneScope.Foo(elementKey: ElementKey) {
+            Box(Modifier.element(elementKey).size(100.dp))
+        }
+
+        lateinit var layoutImpl: SceneTransitionLayoutImpl
+        rule.setContent {
+            SceneTransitionLayoutForTesting(state, onLayoutImpl = { layoutImpl = it }) {
+                scene(from) { Box { exitingElements.forEach { Foo(it) } } }
+                scene(to) { Box { enteringElements.forEach { Foo(it) } } }
+            }
+        }
+
+        val bToA =
+            transition(
+                from = from,
+                to = to,
+                progress = { progress },
+                previewProgress = { previewProgress },
+                isInPreviewStage = { isInPreviewStage }
+            )
+        rule.runOnUiThread { state.startTransition(bToA) }
+        rule.waitForIdle()
+        return layoutImpl
+    }
 }

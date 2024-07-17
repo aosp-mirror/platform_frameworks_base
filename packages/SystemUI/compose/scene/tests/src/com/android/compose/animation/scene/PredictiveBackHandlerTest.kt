@@ -80,6 +80,56 @@ class PredictiveBackHandlerTest {
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasProgress(0.4f)
+        assertThat(transition).isNotInPreviewStage()
+
+        // Cancel it.
+        rule.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
+        rule.waitForIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+        assertThat(layoutState.transitionState).isIdle()
+
+        // Start again and commit it.
+        rule.runOnUiThread {
+            dispatcher.dispatchOnBackStarted(backEvent())
+            dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
+            dispatcher.onBackPressed()
+        }
+        rule.waitForIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
+        assertThat(layoutState.transitionState).isIdle()
+    }
+
+    @Test
+    fun testPredictiveBackWithPreview() {
+        val layoutState =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    SceneA,
+                    transitions = transitions { from(SceneA, to = SceneB, preview = {}) }
+                )
+            }
+        rule.setContent {
+            SceneTransitionLayout(layoutState) {
+                scene(SceneA, mapOf(Back to SceneB)) { Box(Modifier.fillMaxSize()) }
+                scene(SceneB) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+
+        // Start back.
+        val dispatcher = rule.activity.onBackPressedDispatcher
+        rule.runOnUiThread {
+            dispatcher.dispatchOnBackStarted(backEvent())
+            dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
+        }
+
+        val transition = assertThat(layoutState.transitionState).isTransition()
+        assertThat(transition).hasFromScene(SceneA)
+        assertThat(transition).hasToScene(SceneB)
+        assertThat(transition).hasPreviewProgress(0.4f)
+        assertThat(transition).hasProgress(0f)
+        assertThat(transition).isInPreviewStage()
 
         // Cancel it.
         rule.runOnUiThread { dispatcher.dispatchOnBackCancelled() }

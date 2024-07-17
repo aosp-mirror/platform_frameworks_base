@@ -168,7 +168,14 @@ class TransitionDslTest {
     @Test
     fun defaultReversed() {
         val transitions = transitions {
-            from(TestScenes.SceneA, to = TestScenes.SceneB) {
+            from(
+                TestScenes.SceneA,
+                to = TestScenes.SceneB,
+                preview = { fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) } },
+                reversePreview = {
+                    fractionRange(start = 0.5f, end = 0.6f) { fade(TestElements.Foo) }
+                }
+            ) {
                 spec = tween(500)
                 fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) }
                 timestampRange(startMillis = 100, endMillis = 300) { fade(TestElements.Foo) }
@@ -177,17 +184,24 @@ class TransitionDslTest {
 
         // Fetch the transition from B to A, which will automatically reverse the transition from A
         // to B we defined.
-        val transformations =
-            transitions
-                .transitionSpec(from = TestScenes.SceneB, to = TestScenes.SceneA, key = null)
-                .transformationSpec()
-                .transformations
+        val transitionSpec =
+            transitions.transitionSpec(from = TestScenes.SceneB, to = TestScenes.SceneA, key = null)
+
+        val transformations = transitionSpec.transformationSpec().transformations
 
         assertThat(transformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
             .containsExactly(
                 TransformationRange(start = 1f - 0.8f, end = 1f - 0.1f),
                 TransformationRange(start = 1f - 300 / 500f, end = 1f - 100 / 500f),
+            )
+
+        val previewTransformations = transitionSpec.previewTransformationSpec()?.transformations
+
+        assertThat(previewTransformations)
+            .comparingElementsUsing(TRANSFORMATION_RANGE)
+            .containsExactly(
+                TransformationRange(start = 0.5f, end = 0.6f),
             )
     }
 
