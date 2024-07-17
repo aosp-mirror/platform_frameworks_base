@@ -80,6 +80,7 @@ constructor(
                     1f - it
                 }
             },
+            onFinish = { 1f },
         )
 
     /** Bouncer container alpha */
