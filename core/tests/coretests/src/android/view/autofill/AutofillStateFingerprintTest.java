@@ -38,6 +38,9 @@ public class AutofillStateFingerprintTest {
 
     private static final int MAGIC_AUTOFILL_NUMBER = 1000;
 
+    private AutofillStateFingerprint mAutofillStateFingerprint =
+            AutofillStateFingerprint.createInstance();
+
     @Test
     public void testSameFingerprintsForTextView() throws Exception {
         TextView tv = new TextView(sContext);
@@ -87,13 +90,13 @@ public class AutofillStateFingerprintTest {
     }
 
     private void assertIdsEqual(View v1, View v2) {
-        assertEquals(AutofillStateFingerprint.getEphemeralFingerprintId(v1),
-                AutofillStateFingerprint.getEphemeralFingerprintId(v2));
+        assertEquals(mAutofillStateFingerprint.getEphemeralFingerprintId(v1, 0),
+                mAutofillStateFingerprint.getEphemeralFingerprintId(v2, 0));
     }
 
     private void assertIdsNotEqual(View v1, View v2) {
-        assertNotEquals(AutofillStateFingerprint.getEphemeralFingerprintId(v1),
-                AutofillStateFingerprint.getEphemeralFingerprintId(v2));
+        assertNotEquals(mAutofillStateFingerprint.getEphemeralFingerprintId(v1, 0),
+                mAutofillStateFingerprint.getEphemeralFingerprintId(v2, 0));
     }
 
     private void fillViewProperties(View view) {

@@ -29,6 +29,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,11 @@ public final class AutofillStateFingerprint {
 
     private static final String TAG = "AutofillStateFingerprint";
 
-    static AutofillStateFingerprint createInstance() {
+    /**
+     * Returns an instance of this class
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static AutofillStateFingerprint createInstance() {
         return new AutofillStateFingerprint();
     }
 
@@ -92,11 +97,13 @@ public final class AutofillStateFingerprint {
             if (sDebug) {
                 Log.d(TAG, "Autofillable views count prior to auth:" + autofillableViews.size());
             }
-            ArrayList<Integer> hashes = getFingerprintIds(autofillableViews);
-            for (int i = 0; i < hashes.size(); i++) {
-                View view = autofillableViews.get(i);
+//            ArrayList<Integer> hashes = getFingerprintIds(autofillableViews);
+
+            ArrayMap<Integer, View> hashes = getFingerprintIds(autofillableViews);
+            for (Map.Entry<Integer, View> entry : hashes.entrySet()) {
+                View view = entry.getValue();
                 if (view != null) {
-                    mHashToAutofillIdMap.put(hashes.get(i), view.getAutofillId());
+                    mHashToAutofillIdMap.put(entry.getKey(), view.getAutofillId());
                 } else {
                     if (sDebug) {
                         Log.d(TAG, "Encountered null view");
@@ -114,7 +121,7 @@ public final class AutofillStateFingerprint {
             for (int i = 0; i < autofillIdsArr.length; i++) {
                 View view = views[i];
                 if (view != null) {
-                    int id = getEphemeralFingerprintId(view);
+                    int id = getEphemeralFingerprintId(view, 0 /* position irrelevant */);
                     AutofillId autofillId = view.getAutofillId();
                     autofillId.setSessionId(mSessionId);
                     mHashToAutofillIdMap.put(id, autofillId);
@@ -159,14 +166,14 @@ public final class AutofillStateFingerprint {
             dumpCurrentState();
         }
         // For the autofillable views, compute their hashes
-        ArrayList<Integer> currentHashes = getFingerprintIds(currentAutofillableViews);
+        ArrayMap<Integer, View> currentHashes = getFingerprintIds(currentAutofillableViews);
 
         // For the computed hashes, try to look for the old fingerprints.
         // If match found, update the new autofill ids of those views
         Map<AutofillId, View> oldFailedIdsToCurrentViewMap = new HashMap<>();
-        for (int i = 0; i < currentAutofillableViews.size(); i++) {
-            View view = currentAutofillableViews.get(i);
-            int currentHash = currentHashes.get(i);
+        for (Map.Entry<Integer, View> entry : currentHashes.entrySet()) {
+            View view = entry.getValue();
+            int currentHash = entry.getKey();
             AutofillId currentAutofillId = view.getAutofillId();
             currentAutofillId.setSessionId(mSessionId);
             if (mHashToAutofillIdMap.containsKey(currentHash)) {
@@ -219,19 +226,51 @@ public final class AutofillStateFingerprint {
     /**
      * Retrieves fingerprint hashes for the views
      */
-    ArrayList<Integer> getFingerprintIds(@NonNull List<View> views) {
-        ArrayList<Integer> ids = new ArrayList(views.size());
-        for (int i = 0; i < views.size(); i++) {
-            ids.add(getEphemeralFingerprintId(views.get(i)));
+    ArrayMap<Integer, View> getFingerprintIds(@NonNull List<View> views) {
+        ArrayMap<Integer, View> map = new ArrayMap<>();
+        if (mUseRelativePosition) {
+            Collections.sort(views, (View v1, View v2) -> {
+                int[] posV1 = v1.getLocationOnScreen();
+                int[] posV2 = v2.getLocationOnScreen();
+
+                int compare = posV1[0] - posV2[0]; // x coordinate
+                if (compare != 0) {
+                    return compare;
+                }
+                compare = posV1[1] - posV2[1]; // y coordinate
+                if (compare != 0) {
+                    return compare;
+                }
+                // Sort on vertical
+                compare = compareTop(v1, v2);
+                if (compare != 0) {
+                    return compare;
+                }
+                compare = compareBottom(v1, v2);
+                if (compare != 0) {
+                    return compare;
+                }
+                compare = compareLeft(v1, v2);
+                if (compare != 0) {
+                    return compare;
+                }
+                return compareRight(v1, v2);
+                // Note that if compareRight also returned 0, that means both the views have exact
+                // same location, so just treat them as equal
+            });
         }
-        return ids;
+        for (int i = 0; i < views.size(); i++) {
+            View view = views.get(i);
+            map.put(getEphemeralFingerprintId(view, i), view);
+        }
+        return map;
     }
 
     /**
      * Returns fingerprint hash for the view.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    public static int getEphemeralFingerprintId(View v) {
+    public int getEphemeralFingerprintId(View v, int position) {
         if (v == null) return -1;
         int inputType = Integer.MIN_VALUE;
         int imeOptions = Integer.MIN_VALUE;
@@ -268,6 +307,9 @@ public final class AutofillStateFingerprint {
         int hash = Objects.hash(visibility, inputType, imeOptions, isSingleLine, hints,
                 contentDesc, tooltip, autofillType, Arrays.deepHashCode(autofillHints),
                 paddingBottom, paddingTop, paddingRight, paddingLeft);
+        if (mUseRelativePosition) {
+            hash = Objects.hash(hash, position);
+        }
         if (sDebug) {
             Log.d(TAG, "Hash: " + hash + " for AutofillId:" + v.getAutofillId()
                     + " visibility:" + visibility
@@ -285,8 +327,26 @@ public final class AutofillStateFingerprint {
                     + " paddingRight:" + paddingRight
                     + " paddingTop:" + paddingTop
                     + " paddingBottom:" + paddingBottom
+                    + " mUseRelativePosition" + mUseRelativePosition
+                    + " position:" + position
             );
         }
         return hash;
+    }
+
+    private int compareTop(View v1, View v2) {
+        return v1.getTop() - v2.getTop();
+    }
+
+    private int compareBottom(View v1, View v2) {
+        return v1.getBottom() - v2.getBottom();
+    }
+
+    private int compareLeft(View v1, View v2) {
+        return v1.getLeft() - v2.getLeft();
+    }
+
+    private int compareRight(View v1, View v2) {
+        return v1.getRight() - v2.getRight();
     }
 }
