@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
@@ -30,6 +32,9 @@ import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
+
+import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -186,16 +191,6 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
         });
     }
 
-    /**
-     * Runs a test scenario providing a Robot.
-     */
-    void runTestScenario(@NonNull Consumer<AppCompatCameraPolicyRobotTest> consumer) {
-        spyOn(mWm.mAppCompatConfiguration);
-        final AppCompatCameraPolicyRobotTest robot =
-                new AppCompatCameraPolicyRobotTest(mWm, mAtm, mSupervisor);
-        consumer.accept(robot);
-    }
-
     @Test
     public void testIsCameraCompatTreatmentActive_whenTreatmentForTopActivityIsEnabled() {
         runTestScenario((robot) -> {
@@ -220,6 +215,58 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
         });
     }
 
+    @Test
+    @EnableCompatChanges(OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA)
+    public void testShouldOverrideMinAspectRatioForCamera_whenCameraIsNotRunning() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a)-> {
+                robot.conf().enableCameraCompatTreatmentAtBuildTime(/* enabled= */ true);
+                a.createActivityWithComponentInNewTaskAndDisplay();
+                a.setTopActivityCameraActive(/* active */ false);
+            });
+
+            robot.checkShouldOverrideMinAspectRatioForCamera(/* active */ false);
+        });
+    }
+
+    @Test
+    @DisableCompatChanges(OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA)
+    public void testShouldOverrideMinAspectRatioForCamera_whenCameraIsRunning_overrideDisabled() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a)-> {
+                robot.conf().enableCameraCompatTreatmentAtBuildTime(/* enabled= */ true);
+                a.createActivityWithComponentInNewTaskAndDisplay();
+                a.setTopActivityCameraActive(/* active */ true);
+            });
+
+            robot.checkShouldOverrideMinAspectRatioForCamera(/* active */ false);
+        });
+    }
+
+    @Test
+    @EnableCompatChanges(OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA)
+    public void testShouldOverrideMinAspectRatioForCamera_whenCameraIsRunning_overrideEnabled() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a)-> {
+                robot.conf().enableCameraCompatTreatmentAtBuildTime(/* enabled= */ true);
+                a.createActivityWithComponentInNewTaskAndDisplay();
+                a.setTopActivityCameraActive(/* active */ true);
+            });
+
+            robot.checkShouldOverrideMinAspectRatioForCamera(/* active */ true);
+        });
+    }
+
+    /**
+     * Runs a test scenario providing a Robot.
+     */
+    void runTestScenario(@NonNull Consumer<AppCompatCameraPolicyRobotTest> consumer) {
+        final AppCompatCameraPolicyRobotTest robot =
+                new AppCompatCameraPolicyRobotTest(mWm, mAtm, mSupervisor);
+        consumer.accept(robot);
+    }
+
+
     private static class AppCompatCameraPolicyRobotTest extends AppCompatRobotBase {
         AppCompatCameraPolicyRobotTest(@NonNull WindowManagerService wm,
                 @NonNull ActivityTaskManagerService atm,
@@ -230,7 +277,14 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
         @Override
         void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
             super.onPostDisplayContentCreation(displayContent);
+
             spyOn(displayContent.mAppCompatCameraPolicy);
+            if (displayContent.mAppCompatCameraPolicy.mDisplayRotationCompatPolicy != null) {
+                spyOn(displayContent.mAppCompatCameraPolicy.mDisplayRotationCompatPolicy);
+            }
+            if (displayContent.mAppCompatCameraPolicy.mCameraCompatFreeformPolicy != null) {
+                spyOn(displayContent.mAppCompatCameraPolicy.mCameraCompatFreeformPolicy);
+            }
         }
 
         void checkTopActivityHasDisplayRotationCompatPolicy(boolean exists) {
@@ -266,6 +320,11 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
         void checkIsCameraCompatTreatmentActiveForTopActivity(boolean active) {
             assertEquals(getTopAppCompatCameraPolicy()
                     .isTreatmentEnabledForActivity(activity().top()), active);
+        }
+
+        void checkShouldOverrideMinAspectRatioForCamera(boolean expected) {
+            assertEquals(getTopAppCompatCameraPolicy()
+                    .shouldOverrideMinAspectRatioForCamera(activity().top()), expected);
         }
 
         // TODO(b/350460645): Create Desktop Windowing Robot to reuse common functionalities.
