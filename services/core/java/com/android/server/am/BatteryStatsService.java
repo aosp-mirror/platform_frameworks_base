@@ -636,6 +636,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 BatteryConsumer.POWER_COMPONENT_CPU,
                 Flags.streamlinedBatteryStats());
 
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_SCREEN,
+                Flags.streamlinedMiscBatteryStats());
         mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                 Flags.streamlinedConnectivityBatteryStats());
         mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
