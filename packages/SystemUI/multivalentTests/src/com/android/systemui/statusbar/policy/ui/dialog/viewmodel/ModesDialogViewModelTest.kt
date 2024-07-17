@@ -128,4 +128,37 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                 assertThat(this.enabled).isEqualTo(false)
             }
         }
+
+    @Test
+    fun onClick_togglesTileState() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tiles)
+
+            val modeId = "id"
+            repository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setId(modeId)
+                        .setName("Test")
+                        .setManualInvocationAllowed(true)
+                        .build()
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles?.size).isEqualTo(1)
+            assertThat(tiles?.elementAt(0)?.enabled).isFalse()
+
+            // Trigger onClick
+            tiles?.first()?.onClick?.let { it() }
+            runCurrent()
+
+            assertThat(tiles?.first()?.enabled).isTrue()
+
+            // Trigger onClick
+            tiles?.first()?.onClick?.let { it() }
+            runCurrent()
+
+            assertThat(tiles?.first()?.enabled).isFalse()
+        }
 }

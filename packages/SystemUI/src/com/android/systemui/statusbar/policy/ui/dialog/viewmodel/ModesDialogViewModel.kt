@@ -63,7 +63,12 @@ constructor(
                         //  "ON: Do Not Disturb, Until Mon 08:09"; see DndTile.
                         contentDescription = "",
                         onClick = {
-                            // TODO(b/346519570): Toggle mode.
+                            if (mode.isActive) {
+                                zenModeInteractor.deactivateMode(mode)
+                            } else {
+                                // TODO(b/346519570): Handle duration for DND mode.
+                                zenModeInteractor.activateMode(mode)
+                            }
                         },
                         onLongClick = {
                             // TODO(b/346519570): Open settings page for mode.

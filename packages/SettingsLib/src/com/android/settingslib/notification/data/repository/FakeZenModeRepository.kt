@@ -20,6 +20,7 @@ import android.app.NotificationManager
 import android.provider.Settings
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.settingslib.notification.modes.ZenMode
+import java.time.Duration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -61,6 +62,20 @@ class FakeZenModeRepository : ZenModeRepository {
 
     fun removeMode(id: String) {
         mutableModesFlow.value = mutableModesFlow.value.filter { it.id != id }
+    }
+
+    override fun activateMode(zenMode: ZenMode, duration: Duration?) {
+        activateMode(zenMode.id)
+    }
+
+    override fun deactivateMode(zenMode: ZenMode) {
+        deactivateMode(zenMode.id)
+    }
+
+    fun activateMode(id: String) {
+        val oldMode = mutableModesFlow.value.find { it.id == id } ?: return
+        removeMode(id)
+        mutableModesFlow.value += TestModeBuilder(oldMode).setActive(true).build()
     }
 
     fun deactivateMode(id: String) {
