@@ -462,7 +462,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             @Nullable WindowContainerToken ignoreTaskToken) {
         List<ActivityManager.RunningTaskInfo> tasks = mActivityTaskManager.getTasks(2,
                 false /* filterOnlyVisibleRecents */);
-        for (int i = tasks.size() - 1; i >= 0; i--) {
+        for (int i = 0; i < tasks.size(); i++) {
             final ActivityManager.RunningTaskInfo task = tasks.get(i);
             if (task.token.equals(ignoreTaskToken)) {
                 continue;
