@@ -1265,20 +1265,20 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             mTranslationForFullShadeTransition = qsTranslation;
             updateQsFrameTranslation();
             float currentTranslation = mQsFrame.getTranslationY();
-            int clipTop = mEnableClipping
-                    ? (int) (top - currentTranslation - mQsFrame.getTop()) : 0;
-            int clipBottom = mEnableClipping
-                    ? (int) (bottom - currentTranslation - mQsFrame.getTop()) : 0;
+            int clipTop = (int) (top - currentTranslation - mQsFrame.getTop());
+            int clipBottom = (int) (bottom - currentTranslation - mQsFrame.getTop());
             mVisible = qsVisible;
             mQs.setQsVisible(qsVisible);
-            mQs.setFancyClipping(
-                    mDisplayLeftInset,
-                    clipTop,
-                    mDisplayRightInset,
-                    clipBottom,
-                    radius,
-                    qsVisible && !mSplitShadeEnabled,
-                    mIsFullWidth);
+            if (mEnableClipping) {
+                mQs.setFancyClipping(
+                        mDisplayLeftInset,
+                        clipTop,
+                        mDisplayRightInset,
+                        clipBottom,
+                        radius,
+                        qsVisible && !mSplitShadeEnabled,
+                        mIsFullWidth);
+            }
 
         }
 
