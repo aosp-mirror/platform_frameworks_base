@@ -169,7 +169,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         mController = controller;
         final Bundle outSavedState = new Bundle();
         if (Flags.aeBackStackRestore()) {
-            outSavedState.setClassLoader(TaskContainer.class.getClassLoader());
+            outSavedState.setClassLoader(ParcelableTaskContainerData.class.getClassLoader());
             registerOrganizer(false /* isSystemOrganizer */, outSavedState);
         } else {
             registerOrganizer();
