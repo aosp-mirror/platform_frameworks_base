@@ -44,6 +44,7 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class ModesTile
 @Inject
@@ -91,8 +92,8 @@ constructor(
 
     override fun newTileState() = BooleanState()
 
-    override fun handleClick(expandable: Expandable?) {
-        // TODO(b/346519570) open dialog
+    override fun handleClick(expandable: Expandable?) = runBlocking {
+        userActionInteractor.handleClick(expandable)
     }
 
     override fun getLongClickIntent(): Intent = userActionInteractor.longClickIntent
@@ -107,6 +108,7 @@ constructor(
                 label = tileLabel
                 secondaryLabel = tileState.secondaryLabel
                 contentDescription = tileState.contentDescription
+                forceExpandIcon = true
             }
         }
     }
