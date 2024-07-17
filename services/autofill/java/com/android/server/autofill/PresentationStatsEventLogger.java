@@ -71,6 +71,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 
 import com.android.internal.util.FrameworkStatsLog;
 
@@ -244,7 +245,15 @@ public final class PresentationStatsEventLogger {
             Slog.e(TAG, "Failed to start new event because already have active event.");
             return;
         }
+        Slog.d(TAG, "Started new PresentationStatsEvent");
         mEventInternal = Optional.of(new PresentationStatsEventInternal());
+    }
+
+    /**
+     * Test use only, returns a copy of the events object
+     */
+    Optional<PresentationStatsEventInternal> getInternalEvent() {
+        return mEventInternal;
     }
 
     /**
@@ -339,10 +348,16 @@ public final class PresentationStatsEventLogger {
         });
     }
 
-    public void maybeSetCountShown(int datasets) {
+    /**
+     * This is called when a dataset is shown to the user. Will set the count shown,
+     * related timestamps and presentation reason.
+     */
+    public void logWhenDatasetShown(int datasets) {
         mEventInternal.ifPresent(
                 event -> {
+                    maybeSetSuggestionPresentedTimestampMs();
                     event.mCountShown = datasets;
+                    event.mNoPresentationReason = NOT_SHOWN_REASON_ANY_SHOWN;
                 });
     }
 
@@ -405,7 +420,12 @@ public final class PresentationStatsEventLogger {
 
     public void maybeSetDisplayPresentationType(@UiType int uiType) {
         mEventInternal.ifPresent(event -> {
-            event.mDisplayPresentationType = getDisplayPresentationType(uiType);
+            // There are cases in which another UI type will show up after selects a dataset
+            // such as with Inline after Fill Dialog. Set as the first presentation type only.
+            if (event.mDisplayPresentationType
+                    == AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__UNKNOWN_AUTOFILL_DISPLAY_PRESENTATION_TYPE) {
+                event.mDisplayPresentationType = getDisplayPresentationType(uiType);
+            }
         });
     }
 
@@ -430,9 +450,12 @@ public final class PresentationStatsEventLogger {
     }
 
     public void maybeSetSuggestionSentTimestampMs(int timestamp) {
-        mEventInternal.ifPresent(event -> {
-            event.mSuggestionSentTimestampMs = timestamp;
-        });
+        mEventInternal.ifPresent(
+                event -> {
+                    if (event.mSuggestionSentTimestampMs == DEFAULT_VALUE_INT) {
+                        event.mSuggestionSentTimestampMs = timestamp;
+                    }
+                });
     }
 
     public void maybeSetSuggestionSentTimestampMs() {
@@ -481,8 +504,6 @@ public final class PresentationStatsEventLogger {
 
     public void maybeSetInlinePresentationAndSuggestionHostUid(Context context, int userId) {
         mEventInternal.ifPresent(event -> {
-            event.mDisplayPresentationType =
-                    AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
             String imeString = Settings.Secure.getStringForUser(context.getContentResolver(),
                     Settings.Secure.DEFAULT_INPUT_METHOD, userId);
             if (TextUtils.isEmpty(imeString)) {
@@ -602,40 +623,56 @@ public final class PresentationStatsEventLogger {
     }
 
     /**
+     * Sets the field length whenever the text changes. Will keep track of the first
+     * and last modification lengths.
+     */
+    public void updateTextFieldLength(AutofillValue value) {
+        mEventInternal.ifPresent(event -> {
+            if (value == null || !value.isText()) {
+                return;
+            }
+
+            int length = value.getTextValue().length();
+
+            if (event.mFieldFirstLength == DEFAULT_VALUE_INT) {
+                event.mFieldFirstLength = length;
+            }
+            event.mFieldLastLength = length;
+        });
+    }
+
+    /**
      * Set various timestamps whenever the ViewState is modified
      *
      * <p>If the ViewState contains ViewState.STATE_AUTOFILLED, sets field_autofilled_timestamp_ms
      * else, set field_first_modified_timestamp_ms (if unset) and field_last_modified_timestamp_ms
      */
-    public void onFieldTextUpdated(ViewState state, int length) {
+    public void onFieldTextUpdated(ViewState state, AutofillValue value) {
         mEventInternal.ifPresent(event -> {
-                    int timestamp = getElapsedTime();
-                    // Focused id should be set before this is called
-                    if (state == null || state.id == null || state.id.getViewId() != event.mFocusedId) {
-                        // if these don't match, the currently field different than before
-                        Slog.w(
-                                TAG,
-                                "Bad view state for: " + event.mFocusedId);
-                        return;
-                    }
+            int timestamp = getElapsedTime();
+            // Focused id should be set before this is called
+            if (state == null || state.id == null || state.id.getViewId() != event.mFocusedId) {
+                // if these don't match, the currently field different than before
+                Slog.w(
+                        TAG,
+                        "Bad view state for: " + event.mFocusedId + ", state: " + state);
+                return;
+            }
 
-                    // Text changed because filling into form, just log Autofill timestamp
-                    if ((state.getState() & ViewState.STATE_AUTOFILLED) != 0) {
-                        event.mAutofilledTimestampMs = timestamp;
-                        return;
-                    }
+            updateTextFieldLength(value);
 
-                    // Set length variables
-                    if (event.mFieldFirstLength == DEFAULT_VALUE_INT) {
-                        event.mFieldFirstLength = length;
-                    }
-                    event.mFieldLastLength = length;
+            // Text changed because filling into form, just log Autofill timestamp
+            if ((state.getState() & ViewState.STATE_AUTOFILLED) != 0) {
+                event.mAutofilledTimestampMs = timestamp;
+                return;
+            }
 
-                    // Set timestamp variables
-                    if (event.mFieldModifiedFirstTimestampMs == DEFAULT_VALUE_INT) {
-                        event.mFieldModifiedFirstTimestampMs = timestamp;
-                    }
-                    event.mFieldModifiedLastTimestampMs = timestamp;
+
+            // Set timestamp variables
+            if (event.mFieldModifiedFirstTimestampMs == DEFAULT_VALUE_INT) {
+                event.mFieldModifiedFirstTimestampMs = timestamp;
+            }
+            event.mFieldModifiedLastTimestampMs = timestamp;
         });
     }
 
@@ -796,7 +833,10 @@ public final class PresentationStatsEventLogger {
         });
     }
 
-    public void logAndEndEvent() {
+    /**
+     * Finish and log the event.
+     */
+    public void logAndEndEvent(String caller) {
         if (!mEventInternal.isPresent()) {
             Slog.w(TAG, "Shouldn't be logging AutofillPresentationEventReported again for same "
                     + "event");
@@ -804,7 +844,8 @@ public final class PresentationStatsEventLogger {
         }
         PresentationStatsEventInternal event = mEventInternal.get();
         if (sVerbose) {
-            Slog.v(TAG, "Log AutofillPresentationEventReported:"
+            Slog.v(TAG, "(" + caller + ") "
+                    + "Log AutofillPresentationEventReported:"
                     + " requestId=" + event.mRequestId
                     + " sessionId=" + mSessionId
                     + " mNoPresentationEventReason=" + event.mNoPresentationReason
@@ -926,7 +967,7 @@ public final class PresentationStatsEventLogger {
         mEventInternal = Optional.empty();
     }
 
-    private static final class PresentationStatsEventInternal {
+    static final class PresentationStatsEventInternal {
         int mRequestId;
         @NotShownReason int mNoPresentationReason = NOT_SHOWN_REASON_UNKNOWN;
         boolean mIsDatasetAvailable;

@@ -461,9 +461,9 @@ public final class AutoFillUI {
                         }
 
                         @Override
-                        public void onShown() {
+                        public void onShown(int datasetsShown) {
                             if (mCallback != null) {
-                                mCallback.onShown(UI_TYPE_DIALOG, response.getDatasets().size());
+                                mCallback.onShown(UI_TYPE_DIALOG, datasetsShown);
                             }
                         }
 
