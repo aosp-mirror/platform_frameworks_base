@@ -45,7 +45,7 @@ import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
-import com.android.systemui.communal.ui.compose.Dimensions.SlideOffsetY
+import com.android.systemui.communal.ui.compose.Dimensions.Companion.SlideOffsetY
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors

@@ -126,31 +126,27 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Dotaknite se za ogled."</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Napaka pri shranjevanju posnetka zaslona"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Napaka pri začenjanju snemanja zaslona"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
-    <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Ustavili boste snemanje aplikacije &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Želite ustaviti snemanje?"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"Trenutno snemate celotni zaslon"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Trenutno snemate aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Ustavi snemanje"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Deljenje zaslona"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
-    <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Ustavili boste deljenje aplikacije &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
-    <skip />
-    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"Predvajanje vsebine zaslona"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
-    <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Ustavili boste predvajanje aplikacije &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
-    <skip />
-    <!-- no translation found for close_dialog_button (4749497706540104133) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Želite ustaviti deljenje zaslona?"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Trenutno delite celotni zaslon z aplikacijo <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Trenutno delite celotni zaslon z eno od aplikacij"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Trenutno delite aplikacijo <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Trenutno delite eno od aplikacij"</string>
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Ustavi deljenje"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Predvajanje vsebine zaslona"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Želite ustaviti predvajanje?"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"Trenutno predvajate celotni zaslon v napravi <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"Trenutno predvajate celotni zaslon v napravi v bližini"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"Trenutno predvajate aplikacijo <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> v napravi <xliff:g id="DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"Trenutno predvajate aplikacijo <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> v napravi v bližini"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"Trenutno predvajate v napravi <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"Trenutno predvajate v napravi v bližini"</string>
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Ustavi predvajanje"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"Zapri"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Snemalnik težav"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Obdelovanje posnetka težave"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Obvestilo o aktivni dejavnosti za sejo zbiranja težav"</string>
@@ -161,8 +157,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Napaka pri shranjevanju posnetka težave"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Napaka pri zagonu snemanja težave"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Vklopljen je celozaslonski način."</string>
-    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2717426731830851921">"Če želite zapreti, povlecite navzdol z vrha zaslona"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Razumem"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Nazaj"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Začetni zaslon"</string>
@@ -295,6 +290,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Ohranjeval. zaslona"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ne moti"</string>
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Prednostni načini"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Na voljo ni nobene seznanjene naprave"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Dotaknite se za vzpostavitev ali prekinitev povezave z napravo"</string>
@@ -306,8 +302,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Shranjeno"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"prekinitev povezave"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktiviranje"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Samodejno vklopi jutri"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Funkcije, kot sta Hitro deljenje in Poišči mojo napravo, uporabljajo Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth se bo vklopil jutri zjutraj"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Deli zvok"</string>
@@ -495,12 +490,11 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"izberite pripomoček"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"odstranitev pripomočka"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"postavitev izbranega pripomočka"</string>
-    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
-    <skip />
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"Pripomočki na zaklenjenem zaslonu"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Pripomočki na zaklenjenem zaslonu so vidni vsem, tudi če je tablica zaklenjena."</string>
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Pripomočki na zaklenjenem zaslonu"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Če želite aplikacijo odpreti s pripomočkom, morate potrditi, da ste to vi. Upoštevajte tudi, da si jih lahko ogledajo vsi, tudi ko je tablični računalnik zaklenjen. Nekateri pripomočki morda niso predvideni za uporabo na zaklenjenem zaslonu, zato jih tukaj morda ni varno dodati."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Razumem"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Preklop med uporabniki"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"spustni meni"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Vse aplikacije in podatki v tej seji bodo izbrisani."</string>
@@ -722,7 +716,8 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Privzeto"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Samodejno"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brez zvočnega opozarjanja ali vibriranja."</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brez zvočnega opozarjanja ali vibriranja, prikaz nižje v razdelku Pogovor."</string>
+    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
+    <skip />
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev naprave."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev naprave. Pogovori v aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> so privzeto prikazani v oblačkih."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Naj sistem določi, ali ob prejemu tega obvestila naprava predvaja zvok ali zavibrira"</string>
@@ -779,6 +774,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Stran gor"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Stran dol"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Izbriši"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Začetek"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Konec"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Vstavi"</string>
@@ -1361,22 +1357,18 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Razdeljen zaslon"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Vnos"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Bližnjice do aplikacij"</string>
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Trenutna aplikacija"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Dostopnost"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Bližnjične tipke"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Bližnjice za iskanje"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona za strnitev"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona za razširitev"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ali"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Poteza za pomik nazaj"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Poteza za začetni zaslon"</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Gumb za dejanje"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Končano"</string>
+    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Odlično!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Nazaj"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Za pomik nazaj povlecite levo ali desno s tremi prsti kjer koli na sledilni ploščici."</string>
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Sledilna ploščica s tremi prsti, ki se premikajo desno in levo"</string>
@@ -1385,4 +1377,5 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Stopnja %1$d od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrolniki za dom"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Hiter dostop do kontrolnikov za dom na ohranjevalniku zaslona"</string>
+    <string name="volume_undo_action" msgid="5815519725211877114">"Razveljavi"</string>
 </resources>

@@ -33,6 +33,7 @@ import android.media.AudioAttributes;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibratorFrequencyProfile;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -519,17 +520,15 @@ public abstract class Vibrator {
      *
      * @param constant the ID for the haptic feedback. This should be one of the constants defined
      *          in {@link HapticFeedbackConstants}.
-     * @param always {@code true} if the haptic feedback should be played regardless of the user
-     *          vibration intensity settings applicable to the corresponding vibration.
-     *          {@code false} if the vibration for the haptic feedback should respect the applicable
-     *          vibration intensity settings.
      * @param reason the reason for this haptic feedback.
-     * @param fromIme the haptic feedback is performed from an IME.
+     * @param flags Additional flags as per {@link HapticFeedbackConstants}.
+     * @param privFlags Additional private flags as per {@link HapticFeedbackConstants}.
      *
      * @hide
      */
-    public void performHapticFeedback(int constant, boolean always, String reason,
-            boolean fromIme) {
+    public void performHapticFeedback(int constant, String reason,
+            @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
         Log.w(TAG, "performHapticFeedback is not supported");
     }
 

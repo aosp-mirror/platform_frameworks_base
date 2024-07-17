@@ -18,6 +18,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -37,6 +38,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.testKosmos
 import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.whenever
@@ -124,7 +126,50 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
     fun areNotificationsVisible_splitShadeTrue_true() =
         with(kosmos) {
             testScope.runTest {
-                val areNotificationsVisible by collectLastValue(underTest.areNotificationsVisible)
+                val areNotificationsVisible by
+                    collectLastValue(underTest.areNotificationsVisible(Scenes.Lockscreen))
+                shadeRepository.setShadeLayoutWide(true)
+                fakeKeyguardClockRepository.setClockSize(ClockSize.LARGE)
+
+                assertThat(areNotificationsVisible).isTrue()
+            }
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun areNotificationsVisible_dualShadeWideOnLockscreen_true() =
+        with(kosmos) {
+            testScope.runTest {
+                val areNotificationsVisible by
+                    collectLastValue(underTest.areNotificationsVisible(Scenes.Lockscreen))
+                shadeRepository.setShadeLayoutWide(true)
+                fakeKeyguardClockRepository.setClockSize(ClockSize.LARGE)
+
+                assertThat(areNotificationsVisible).isTrue()
+            }
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun areNotificationsVisible_dualShadeWideOnNotificationsShade_false() =
+        with(kosmos) {
+            testScope.runTest {
+                val areNotificationsVisible by
+                    collectLastValue(underTest.areNotificationsVisible(Scenes.NotificationsShade))
+                shadeRepository.setShadeLayoutWide(true)
+                fakeKeyguardClockRepository.setClockSize(ClockSize.LARGE)
+
+                assertThat(areNotificationsVisible).isFalse()
+            }
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun areNotificationsVisible_dualShadeWideOnQuickSettingsShade_true() =
+        with(kosmos) {
+            testScope.runTest {
+                val areNotificationsVisible by
+                    collectLastValue(underTest.areNotificationsVisible(Scenes.QuickSettingsShade))
                 shadeRepository.setShadeLayoutWide(true)
                 fakeKeyguardClockRepository.setClockSize(ClockSize.LARGE)
 
@@ -137,7 +182,8 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
     fun areNotificationsVisible_withSmallClock_true() =
         with(kosmos) {
             testScope.runTest {
-                val areNotificationsVisible by collectLastValue(underTest.areNotificationsVisible)
+                val areNotificationsVisible by
+                    collectLastValue(underTest.areNotificationsVisible(Scenes.Lockscreen))
                 fakeKeyguardClockRepository.setClockSize(ClockSize.SMALL)
                 assertThat(areNotificationsVisible).isTrue()
             }
@@ -148,7 +194,8 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
     fun areNotificationsVisible_withLargeClock_false() =
         with(kosmos) {
             testScope.runTest {
-                val areNotificationsVisible by collectLastValue(underTest.areNotificationsVisible)
+                val areNotificationsVisible by
+                    collectLastValue(underTest.areNotificationsVisible(Scenes.Lockscreen))
                 fakeKeyguardClockRepository.setClockSize(ClockSize.LARGE)
                 assertThat(areNotificationsVisible).isFalse()
             }

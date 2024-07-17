@@ -48,6 +48,9 @@ class DragAndDropState(
     val sourceSpec: MutableState<TileSpec?>,
     private val listState: EditTileListState
 ) {
+    val dragInProgress: Boolean
+        get() = sourceSpec.value != null
+
     /** Returns index of the dragged tile if it's present in the list. Returns -1 if not. */
     fun currentPosition(): Int {
         return sourceSpec.value?.let { listState.indexOf(it) } ?: -1
@@ -63,6 +66,12 @@ class DragAndDropState(
 
     fun onMoved(targetSpec: TileSpec) {
         sourceSpec.value?.let { listState.move(it, targetSpec) }
+    }
+
+    fun movedOutOfBounds() {
+        // Removing the tiles from the current tile grid if it moves out of bounds. This clears
+        // the spacer and makes it apparent that dropping the tile at that point would remove it.
+        sourceSpec.value?.let { listState.removeFromCurrent(it) }
     }
 
     fun onDrop() {
@@ -112,6 +121,42 @@ fun Modifier.dragAndDropTile(
 }
 
 /**
+ * Registers a composable as a [DragAndDropTarget] to receive drop events. Use this outside the tile
+ * grid to catch out of bounds drops.
+ *
+ * @param dragAndDropState The [DragAndDropState] using the tiles list
+ * @param onDrop Action to be executed when a [TileSpec] is dropped on the composable
+ */
+@Composable
+fun Modifier.dragAndDropRemoveZone(
+    dragAndDropState: DragAndDropState,
+    onDrop: (TileSpec) -> Unit,
+): Modifier {
+    val target =
+        remember(dragAndDropState) {
+            object : DragAndDropTarget {
+                override fun onDrop(event: DragAndDropEvent): Boolean {
+                    return dragAndDropState.sourceSpec.value?.let {
+                        onDrop(it)
+                        dragAndDropState.onDrop()
+                        true
+                    } ?: false
+                }
+
+                override fun onEntered(event: DragAndDropEvent) {
+                    dragAndDropState.movedOutOfBounds()
+                }
+            }
+        }
+    return dragAndDropTarget(
+        shouldStartDragAndDrop = { event ->
+            event.mimeTypes().contains(QsDragAndDrop.TILESPEC_MIME_TYPE)
+        },
+        target = target,
+    )
+}
+
+/**
  * Registers a tile list as a [DragAndDropTarget] to receive drop events. Use this on list
  * containers to catch drops outside of tiles.
  *
@@ -128,6 +173,10 @@ fun Modifier.dragAndDropTileList(
     val target =
         remember(dragAndDropState) {
             object : DragAndDropTarget {
+                override fun onEnded(event: DragAndDropEvent) {
+                    dragAndDropState.onDrop()
+                }
+
                 override fun onDrop(event: DragAndDropEvent): Boolean {
                     return dragAndDropState.sourceSpec.value?.let {
                         onDrop(it, dragAndDropState.currentPosition())

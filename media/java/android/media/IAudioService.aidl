@@ -762,14 +762,14 @@ interface IAudioService {
 
     void unregisterLoudnessCodecUpdatesDispatcher(in ILoudnessCodecUpdatesDispatcher dispatcher);
 
-    oneway void startLoudnessCodecUpdates(int sessionId);
+    void startLoudnessCodecUpdates(int sessionId);
 
-    oneway void stopLoudnessCodecUpdates(int sessionId);
+    void stopLoudnessCodecUpdates(int sessionId);
 
-    oneway void addLoudnessCodecInfo(int sessionId, int mediaCodecHash,
+    void addLoudnessCodecInfo(int sessionId, int mediaCodecHash,
             in LoudnessCodecInfo codecInfo);
 
-    oneway void removeLoudnessCodecInfo(int sessionId, in LoudnessCodecInfo codecInfo);
+    void removeLoudnessCodecInfo(int sessionId, in LoudnessCodecInfo codecInfo);
 
     PersistableBundle getLoudnessParams(in LoudnessCodecInfo codecInfo);
 

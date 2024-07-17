@@ -46,6 +46,18 @@ class EditTileListState(tiles: List<EditTileViewModel>) {
         tiles.apply { add(toIndex, removeAt(fromIndex).copy(isCurrent = isMovingToCurrent)) }
     }
 
+    /**
+     * Sets the [TileSpec] as a non-current tile. Use this when a tile is dragged out of the current
+     * tile grid.
+     */
+    fun removeFromCurrent(tileSpec: TileSpec) {
+        val fromIndex = indexOf(tileSpec)
+        if (fromIndex >= 0 && fromIndex < tiles.size) {
+            // Mark the moving tile as non-current
+            tiles[fromIndex] = tiles[fromIndex].copy(isCurrent = false)
+        }
+    }
+
     fun indexOf(tileSpec: TileSpec): Int {
         return tiles.indexOfFirst { it.tileSpec == tileSpec }
     }

@@ -1669,6 +1669,46 @@ public final class DisplayManager {
     }
 
     /**
+     * Gets the mapping between the doze brightness sensor values and brightness values. The doze
+     * brightness sensor is a light sensor used to determine the brightness while the device is
+     * dozing. Light sensor values are typically integers in the rage of 0-4. The returned values
+     * are between {@link PowerManager#BRIGHTNESS_MIN} and {@link PowerManager#BRIGHTNESS_MAX}, or
+     * -1 meaning that the current brightness should be kept.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS}
+     * permission.
+     * </p>
+     *
+     * @param displayId The ID of the display
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @Nullable
+    public float[] getDozeBrightnessSensorValueToBrightness(int displayId) {
+        return mGlobal.getDozeBrightnessSensorValueToBrightness(displayId);
+    }
+
+    /**
+     * Gets the default doze brightness.
+     * The returned values are between {@link PowerManager#BRIGHTNESS_MIN} and
+     * {@link PowerManager#BRIGHTNESS_MAX}.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS}
+     * permission.
+     * </p>
+     *
+     * @param displayId The ID of the display
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @FloatRange(from = 0f, to = 1f)
+    public float getDefaultDozeBrightness(int displayId) {
+        return mGlobal.getDefaultDozeBrightness(displayId);
+    }
+
+    /**
      * Listens for changes in available display devices.
      */
     public interface DisplayListener {

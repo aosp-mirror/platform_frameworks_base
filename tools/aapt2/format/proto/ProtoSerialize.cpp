@@ -426,6 +426,7 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
           pb_config_value->mutable_config()->set_product(config_value->product);
           SerializeValueToPb(*config_value->value, pb_config_value->mutable_value(),
                              source_pool.get());
+          pb_config_value->set_flag_status((uint32_t)config_value->flag_status);
         }
       }
     }

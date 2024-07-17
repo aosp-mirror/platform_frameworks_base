@@ -16,7 +16,9 @@
 
 package com.android.settingslib.notification.data.repository
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
+import android.app.NotificationManager.EXTRA_NOTIFICATION_POLICY
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
@@ -57,6 +59,7 @@ interface ZenModeRepository {
     val modes: Flow<List<ZenMode>>
 }
 
+@SuppressLint("SharedFlowCreation")
 class ZenModeRepositoryImpl(
     private val context: Context,
     private val notificationManager: NotificationManager,
@@ -74,7 +77,7 @@ class ZenModeRepositoryImpl(
                 val receiver =
                     object : BroadcastReceiver() {
                         override fun onReceive(context: Context?, intent: Intent?) {
-                            intent?.action?.let { action -> launch { send(action) } }
+                            intent?.let { launch { send(it) } }
                         }
                     }
 
@@ -99,12 +102,11 @@ class ZenModeRepositoryImpl(
             }
             .let {
                 if (Flags.volumePanelBroadcastFix()) {
+                    // Share the flow to avoid having multiple broadcasts.
                     it.flowOn(backgroundCoroutineContext)
+                        .shareIn(started = SharingStarted.WhileSubscribed(), scope = scope)
                 } else {
-                    it.shareIn(
-                        started = SharingStarted.WhileSubscribed(),
-                        scope = scope,
-                    )
+                    it.shareIn(started = SharingStarted.WhileSubscribed(), scope = scope)
                 }
             }
     }
@@ -112,7 +114,9 @@ class ZenModeRepositoryImpl(
     override val consolidatedNotificationPolicy: StateFlow<NotificationManager.Policy?> by lazy {
         if (Flags.volumePanelBroadcastFix() && android.app.Flags.modesApi())
             flowFromBroadcast(NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED) {
-                notificationManager.consolidatedNotificationPolicy
+                // If available, get the value from extras to avoid a potential binder call.
+                it?.extras?.getParcelable(EXTRA_NOTIFICATION_POLICY)
+                    ?: notificationManager.consolidatedNotificationPolicy
             }
         else
             flowFromBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED) {
@@ -126,11 +130,11 @@ class ZenModeRepositoryImpl(
         }
     }
 
-    private fun <T> flowFromBroadcast(intentAction: String, mapper: () -> T) =
+    private fun <T> flowFromBroadcast(intentAction: String, mapper: (Intent?) -> T) =
         notificationBroadcasts
-            .filter { intentAction == it }
-            .map { mapper() }
-            .onStart { emit(mapper()) }
+            .filter { intentAction == it.action }
+            .map { mapper(it) }
+            .onStart { emit(mapper(null)) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 

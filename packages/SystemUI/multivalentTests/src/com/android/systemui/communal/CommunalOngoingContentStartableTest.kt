@@ -24,6 +24,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.fakeCommunalSmartspaceRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalEnabled
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -48,20 +49,19 @@ class CommunalOngoingContentStartableTest : SysuiTestCase() {
 
     private val mediaRepository = kosmos.fakeCommunalMediaRepository
     private val smartspaceRepository = kosmos.fakeCommunalSmartspaceRepository
-    private val featureFlags =
-        kosmos.fakeFeatureFlagsClassic.apply { set(Flags.COMMUNAL_SERVICE_ENABLED, true) }
 
     private lateinit var underTest: CommunalOngoingContentStartable
 
     @Before
     fun setUp() {
+        kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
         underTest =
             CommunalOngoingContentStartable(
                 bgScope = kosmos.applicationCoroutineScope,
                 communalInteractor = kosmos.communalInteractor,
                 communalMediaRepository = mediaRepository,
+                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 communalSmartspaceRepository = smartspaceRepository,
-                featureFlags = featureFlags,
             )
     }
 

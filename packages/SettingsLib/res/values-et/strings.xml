@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"GPU silumise kihtide laadimise lubamine silumisrakendustele"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Luba paljusõnaline logimine"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Veaaruannetesse kaasatakse täiendavad seadmepõhised teenusepakkuja logid, mis võivad sisaldada privaatset teavet, kasutada rohkem akut ja/või salvestusruumi."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"Keela ühe päeva pärast"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"Tootja paljusõnaline logimine on lõppenud"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"Lubatud üheks päevaks"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"Luba veel üheks päevaks"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"Keelatakse ühe päeva pärast"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Lubatud määramata ajaks"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Akna animatsioonimastaap"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Ülemineku animatsioonimastaap"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animaatori kestuse mastaap"</string>

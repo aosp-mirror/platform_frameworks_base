@@ -15,6 +15,7 @@
  */
 
 package com.android.server;
+import static android.crashrecovery.flags.Flags.refactorCrashrecovery;
 import static android.service.watchdog.ExplicitHealthCheckService.EXTRA_HEALTH_CHECK_PASSED_PACKAGE;
 import static android.service.watchdog.ExplicitHealthCheckService.EXTRA_REQUESTED_PACKAGES;
 import static android.service.watchdog.ExplicitHealthCheckService.EXTRA_SUPPORTED_PACKAGES;
@@ -41,7 +42,6 @@ import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -363,22 +363,34 @@ class ExplicitHealthCheckController {
     @GuardedBy("mLock")
     @Nullable
     private ServiceInfo getServiceInfoLocked() {
-        final String packageName =
-                mContext.getPackageManager().getServicesSystemSharedLibraryPackageName();
-        if (packageName == null) {
-            Slog.w(TAG, "no external services package!");
-            return null;
-        }
+        if (refactorCrashrecovery()) {
+            final Intent intent = new Intent(ExplicitHealthCheckService.SERVICE_INTERFACE);
+            final ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent,
+                    PackageManager.GET_SERVICES | PackageManager.GET_META_DATA
+                            |  PackageManager.MATCH_SYSTEM_ONLY);
+            if (resolveInfo == null || resolveInfo.serviceInfo == null) {
+                Slog.w(TAG, "No valid components found.");
+                return null;
+            }
+            return resolveInfo.serviceInfo;
+        } else {
+            final String packageName =
+                    mContext.getPackageManager().getServicesSystemSharedLibraryPackageName();
+            if (packageName == null) {
+                Slog.w(TAG, "no external services package!");
+                return null;
+            }
 
-        final Intent intent = new Intent(ExplicitHealthCheckService.SERVICE_INTERFACE);
-        intent.setPackage(packageName);
-        final ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent,
-                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
-        if (resolveInfo == null || resolveInfo.serviceInfo == null) {
-            Slog.w(TAG, "No valid components found.");
-            return null;
+            final Intent intent = new Intent(ExplicitHealthCheckService.SERVICE_INTERFACE);
+            intent.setPackage(packageName);
+            final ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent,
+                    PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
+            if (resolveInfo == null || resolveInfo.serviceInfo == null) {
+                Slog.w(TAG, "No valid components found.");
+                return null;
+            }
+            return resolveInfo.serviceInfo;
         }
-        return resolveInfo.serviceInfo;
     }
 
     @GuardedBy("mLock")

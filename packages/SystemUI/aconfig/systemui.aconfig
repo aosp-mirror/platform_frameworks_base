@@ -1187,3 +1187,13 @@ flag {
   description: "Enables MSDL feedback in SysUI surfaces."
   bug: "352600066"
 }
+
+flag {
+   name: "sim_pin_race_condition_on_restart"
+   namespace: "systemui"
+   description: "The SIM PIN screen may be shown incorrectly on reboot"
+   bug: "351426938"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}

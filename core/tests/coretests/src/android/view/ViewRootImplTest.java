@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.util.SequenceUtils.getInitSeq;
+import static android.view.HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING;
 import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
@@ -494,8 +495,8 @@ public class ViewRootImplTest {
                 0, displayInfo, new DisplayAdjustments());
         ViewRootImpl viewRootImpl = new ViewRootImpl(sContext, display);
 
-        boolean result = viewRootImpl.performHapticFeedback(
-                HapticFeedbackConstants.CONTEXT_CLICK, true, false /* fromIme */);
+        boolean result = viewRootImpl.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK,
+                FLAG_IGNORE_GLOBAL_SETTING, 0 /* privFlags */);
 
         assertThat(result).isFalse();
     }

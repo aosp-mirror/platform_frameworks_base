@@ -2870,7 +2870,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void cameraCompatFreeformFlagEnabled_cameraCompatFreeformPolicyNotNull() {
         doReturn(true).when(() ->
-                DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
+                DesktopModeHelper.canEnterDesktopMode(any()));
 
         assertTrue(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
@@ -2879,7 +2879,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void cameraCompatFreeformFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
         doReturn(true).when(() ->
-                DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
+                DesktopModeHelper.canEnterDesktopMode(any()));
 
         assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }

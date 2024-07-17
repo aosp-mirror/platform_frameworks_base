@@ -834,7 +834,7 @@ public class NotificationStackScrollLayout
             y = (int) mAmbientState.getStackCutoff();
             drawDebugInfo(canvas, y, Color.MAGENTA, /* label= */ "getStackCutoff() = " + y);
 
-            y = (int) mScrollViewFields.getHeadsUpTop();
+            y = (int) mAmbientState.getHeadsUpTop();
             drawDebugInfo(canvas, y, Color.GREEN, /* label= */ "getHeadsUpTop() = " + y);
 
             y += getTopHeadsUpHeight();
@@ -1222,7 +1222,12 @@ public class NotificationStackScrollLayout
 
     @Override
     public void setHeadsUpTop(float headsUpTop) {
-        mScrollViewFields.setHeadsUpTop(headsUpTop);
+        mAmbientState.setHeadsUpTop(headsUpTop);
+    }
+
+    @Override
+    public void setHeadsUpBottom(float headsUpBottom) {
+        mAmbientState.setHeadsUpBottom(headsUpBottom);
     }
 
     @Override
@@ -3519,7 +3524,7 @@ public class NotificationStackScrollLayout
     // Only when scene container is enabled, mark that we are being dragged so that we start
     // dispatching the rest of the gesture to scene container.
     void startOverscrollAfterExpanding() {
-        SceneContainerFlag.isUnexpectedlyInLegacyMode();
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         getExpandHelper().finishExpanding();
         setIsBeingDragged(true);
     }
@@ -3527,7 +3532,7 @@ public class NotificationStackScrollLayout
     // Only when scene container is enabled, mark that we are being dragged so that we start
     // dispatching the rest of the gesture to scene container.
     void startDraggingOnHun() {
-        SceneContainerFlag.isUnexpectedlyInLegacyMode();
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         setIsBeingDragged(true);
     }
 
@@ -4894,6 +4899,7 @@ public class NotificationStackScrollLayout
      * @param bottomBarHeight the height of the bar on the bottom
      */
     public void setHeadsUpBoundaries(int height, int bottomBarHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mAmbientState.setMaxHeadsUpTranslation(height - bottomBarHeight);
         mStackScrollAlgorithm.setHeadsUpAppearHeightBottom(height);
         mStateAnimator.setHeadsUpAppearHeightBottom(height);

@@ -25,9 +25,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler.TouchSession
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
+import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shared.system.InputChannelCompat
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth
 import java.util.Optional
 import org.junit.Before
@@ -45,6 +49,8 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ShadeTouchHandlerTest : SysuiTestCase() {
+    private var kosmos = testKosmos()
+
     private var mCentralSurfaces = mock<CentralSurfaces>()
     private var mShadeViewController = mock<ShadeViewController>()
     private var mDreamManager = mock<DreamManager>()
@@ -62,6 +68,7 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
                 Optional.of(mCentralSurfaces),
                 mShadeViewController,
                 mDreamManager,
+                kosmos.communalSettingsInteractor,
                 TOUCH_HEIGHT
             )
     }
@@ -86,6 +93,8 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
     fun testSwipeDown_communalEnabled_sentToCentralSurfaces() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+
         swipe(Direction.DOWN)
 
         // Both motion events are sent for central surfaces to process.
@@ -117,6 +126,8 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
     fun testSwipeUp_communalEnabled_touchesNotSent() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+
         swipe(Direction.UP)
 
         // Motion events are not sent for central surfaces to process as the swipe is going in the
