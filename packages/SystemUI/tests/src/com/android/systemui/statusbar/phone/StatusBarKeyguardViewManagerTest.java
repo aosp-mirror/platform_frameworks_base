@@ -116,6 +116,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -176,6 +177,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private ViewRootImpl mViewRootImpl;
     @Mock
     private WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Captor
     private ArgumentCaptor<OnBackInvokedCallback> mBackCallbackCaptor;
     @Captor
@@ -223,7 +226,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mAlternateBouncerInteractor,
                         mUdfpsOverlayInteractor,
                         mActivityStarter,
-                        mock(KeyguardTransitionInteractor.class),
+                        mKeyguardTransitionInteractor,
                         StandardTestDispatcher(null, null),
                         () -> mock(WindowManagerLockscreenVisibilityInteractor.class),
                         () -> mock(KeyguardDismissActionInteractor.class),
@@ -1062,6 +1065,22 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false);
         verify(mCentralSurfaces).hideKeyguard();
         verify(mPrimaryBouncerInteractor).show(true);
+    }
+
+    @Test
+    @DisableSceneContainer
+    @EnableFlags(Flags.FLAG_SIM_PIN_RACE_CONDITION_ON_RESTART)
+    public void testShowBouncerOrKeyguard_showsKeyguardIfShowBouncerReturnsFalse() {
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
+                KeyguardSecurityModel.SecurityMode.SimPin);
+        when(mPrimaryBouncerInteractor.show(true)).thenReturn(false);
+        when(mKeyguardTransitionInteractor.getTransitionState().getValue().getTo())
+                .thenReturn(KeyguardState.LOCKSCREEN);
+
+        reset(mCentralSurfaces);
+        mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false);
+        verify(mPrimaryBouncerInteractor).show(true);
+        verify(mCentralSurfaces).showKeyguard();
     }
 
     @Test
