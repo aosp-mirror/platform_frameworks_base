@@ -22,9 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.PointerInputModifierNode
+import androidx.compose.ui.node.TraversableNode
+import androidx.compose.ui.node.findNearestAncestor
 import androidx.compose.ui.unit.IntSize
 
 /**
@@ -53,7 +56,7 @@ private class SwipeToSceneNode(
     draggableHandler: DraggableHandlerImpl,
     swipeDetector: SwipeDetector,
 ) : DelegatingNode(), PointerInputModifierNode {
-    private val delegate =
+    private val multiPointerDraggableNode =
         delegate(
             MultiPointerDraggableNode(
                 orientation = draggableHandler.orientation,
@@ -74,21 +77,25 @@ private class SwipeToSceneNode(
                 // Make sure to update the delegate orientation. Note that this will automatically
                 // reset the underlying pointer input handler, so previous gestures will be
                 // cancelled.
-                delegate.orientation = value.orientation
+                multiPointerDraggableNode.orientation = value.orientation
             }
         }
+
+    override fun onAttach() {
+        delegate(ScrollBehaviorOwnerNode(draggableHandler.nestedScrollKey))
+    }
 
     override fun onPointerEvent(
         pointerEvent: PointerEvent,
         pass: PointerEventPass,
         bounds: IntSize,
-    ) = delegate.onPointerEvent(pointerEvent, pass, bounds)
+    ) = multiPointerDraggableNode.onPointerEvent(pointerEvent, pass, bounds)
 
-    override fun onCancelPointerInput() = delegate.onCancelPointerInput()
+    override fun onCancelPointerInput() = multiPointerDraggableNode.onCancelPointerInput()
 
     private fun enabled(): Boolean {
         return draggableHandler.isDrivingTransition ||
-            currentScene().shouldEnableSwipes(delegate.orientation)
+            currentScene().shouldEnableSwipes(multiPointerDraggableNode.orientation)
     }
 
     private fun currentScene(): Scene {
@@ -116,5 +123,41 @@ private class SwipeToSceneNode(
                 Orientation.Horizontal -> Orientation.Vertical
             }
         return currentScene().shouldEnableSwipes(oppositeOrientation)
+    }
+}
+
+/** Find the [ScrollBehaviorOwner] for the current orientation. */
+internal fun DelegatableNode.requireScrollBehaviorOwner(
+    draggableHandler: DraggableHandlerImpl
+): ScrollBehaviorOwner {
+    val ancestorNode =
+        checkNotNull(findNearestAncestor(draggableHandler.nestedScrollKey)) {
+            "This should never happen! Couldn't find a ScrollBehaviorOwner. " +
+                "Are we inside an SceneTransitionLayout?"
+        }
+    return ancestorNode as ScrollBehaviorOwner
+}
+
+internal fun interface ScrollBehaviorOwner {
+    fun updateScrollBehaviors(
+        topOrLeftBehavior: NestedScrollBehavior,
+        bottomOrRightBehavior: NestedScrollBehavior,
+        isExternalOverscrollGesture: () -> Boolean,
+    )
+}
+
+/**
+ * We need a node that receives the desired behavior.
+ *
+ * TODO(b/353234530) move this logic into [SwipeToSceneNode]
+ */
+private class ScrollBehaviorOwnerNode(override val traverseKey: Any) :
+    Modifier.Node(), TraversableNode, ScrollBehaviorOwner {
+    override fun updateScrollBehaviors(
+        topOrLeftBehavior: NestedScrollBehavior,
+        bottomOrRightBehavior: NestedScrollBehavior,
+        isExternalOverscrollGesture: () -> Boolean
+    ) {
+        // This method will be used to update the desired behavior in a following CL.
     }
 }

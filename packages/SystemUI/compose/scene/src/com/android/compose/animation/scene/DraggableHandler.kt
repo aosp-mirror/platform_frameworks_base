@@ -64,6 +64,7 @@ internal class DraggableHandlerImpl(
     internal val orientation: Orientation,
     internal val coroutineScope: CoroutineScope,
 ) : DraggableHandler {
+    internal val nestedScrollKey = Any()
     /** The [DraggableHandler] can only have one active [DragController] at a time. */
     private var dragController: DragControllerImpl? = null
 
