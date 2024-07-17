@@ -870,6 +870,13 @@ flag {
 }
 
 flag {
+    name: "qs_ui_refactor_compose_fragment"
+    namespace: "systemui"
+    description: "Uses a different QS fragment in NPVC that uses the new compose UI and recommended architecture. This flag depends on qs_ui_refactor flag."
+    bug: "325099249"
+}
+
+flag {
   name: "remove_dream_overlay_hide_on_touch"
   namespace: "systemui"
   description: "Removes logic to hide the dream overlay on user interaction, as it conflicts with various transitions"

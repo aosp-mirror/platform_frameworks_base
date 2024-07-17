@@ -20,11 +20,11 @@ import com.android.systemui.Flags
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
-/** Helper for reading or using the new QS UI flag state. */
+/** Helper for reading or using the new QS UI in NPVC flag state. */
 @Suppress("NOTHING_TO_INLINE")
-object NewQsUI {
+object QSComposeFragment {
     /** The aconfig flag name */
-    const val FLAG_NAME = Flags.FLAG_QS_UI_REFACTOR
+    const val FLAG_NAME = Flags.FLAG_QS_UI_REFACTOR_COMPOSE_FRAGMENT
 
     /** A token used for dependency declaration */
     val token: FlagToken
@@ -33,7 +33,7 @@ object NewQsUI {
     /** Is the refactor enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.qsUiRefactor()
+        get() = Flags.qsUiRefactorComposeFragment() && NewQsUI.isEnabled
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the
