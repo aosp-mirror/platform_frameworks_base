@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -359,6 +360,39 @@ public class MediaProjectionManagerServiceTest {
 
         // But this is a new projection.
         assertThat(secondProjection).isNotEqualTo(projection);
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testReuseProjection_keyguardNotLocked_startConsentDialog()
+            throws NameNotFoundException {
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        projection.start(mIMediaProjectionCallback);
+
+        doNothing().when(mContext).startActivityAsUser(any(), any());
+        doReturn(false).when(mKeyguardManager).isKeyguardLocked();
+
+        MediaProjectionManagerService.BinderService mediaProjectionBinderService =
+                mService.new BinderService(mContext);
+        mediaProjectionBinderService.requestConsentForInvalidProjection(projection);
+
+        verify(mContext).startActivityAsUser(any(), any());
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testReuseProjection_keyguardLocked_noConsentDialog() throws NameNotFoundException {
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        projection.start(mIMediaProjectionCallback);
+
+        doReturn(true).when(mKeyguardManager).isKeyguardLocked();
+        MediaProjectionManagerService.BinderService mediaProjectionBinderService =
+                mService.new BinderService(mContext);
+        mediaProjectionBinderService.requestConsentForInvalidProjection(projection);
+
+        verify(mContext, never()).startActivityAsUser(any(), any());
     }
 
     @EnableFlags(android.companion.virtualdevice.flags
