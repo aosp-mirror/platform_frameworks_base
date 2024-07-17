@@ -309,7 +309,14 @@ void XMLCALL XmlPullParser::EndCdataSectionHandler(void* user_data) {
 }
 
 std::optional<StringPiece> FindAttribute(const XmlPullParser* parser, StringPiece name) {
-  auto iter = parser->FindAttribute("", name);
+  return FindAttribute(parser, "", name);
+}
+
+std::optional<android::StringPiece> FindAttribute(const XmlPullParser* parser,
+                                                  android::StringPiece namespace_uri,
+                                                  android::StringPiece name) {
+  auto iter = parser->FindAttribute(namespace_uri, name);
+
   if (iter != parser->end_attributes()) {
     return StringPiece(util::TrimWhitespace(iter->value));
   }

@@ -16,7 +16,6 @@
 
 package android.inputmethodservice;
 
-import static android.view.inputmethod.Flags.predictiveBackIme;
 import static android.inputmethodservice.InputMethodServiceProto.CANDIDATES_VIEW_STARTED;
 import static android.inputmethodservice.InputMethodServiceProto.CANDIDATES_VISIBILITY;
 import static android.inputmethodservice.InputMethodServiceProto.CONFIGURATION;
@@ -57,6 +56,7 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
 import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
 import static android.view.inputmethod.Flags.ctrlShiftShortcut;
+import static android.view.inputmethod.Flags.predictiveBackIme;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -101,7 +101,6 @@ import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.InputType;
 import android.text.Layout;
@@ -4348,7 +4347,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @hide
      */
     final void onImeSwitchButtonClickFromClient() {
-        mPrivOps.onImeSwitchButtonClickFromClient(getDisplayId(), UserHandle.myUserId());
+        mPrivOps.onImeSwitchButtonClickFromClient(getDisplayId());
     }
 
     /**

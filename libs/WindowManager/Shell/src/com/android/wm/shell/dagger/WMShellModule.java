@@ -573,8 +573,9 @@ public abstract class WMShellModule {
     @Provides
     static EnterDesktopTaskTransitionHandler provideEnterDesktopModeTaskTransitionHandler(
             Transitions transitions,
-            Optional<DesktopTasksLimiter> desktopTasksLimiter) {
-        return new EnterDesktopTaskTransitionHandler(transitions);
+            Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            InteractionJankMonitor interactionJankMonitor) {
+        return new EnterDesktopTaskTransitionHandler(transitions, interactionJankMonitor);
     }
 
     @WMSingleton

@@ -2443,4 +2443,22 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Wissel gebruiker"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Demp"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Tik om klank te demp"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
+    <skip />
 </resources>

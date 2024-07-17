@@ -21,8 +21,11 @@ import android.view.InputDevice.SOURCE_MOUSE
 import android.view.MotionEvent
 import android.view.MotionEvent.CLASSIFICATION_NONE
 import android.view.MotionEvent.TOOL_TYPE_FINGER
+import java.lang.reflect.Method
+import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 
 fun motionEvent(
     action: Int,
@@ -37,12 +40,31 @@ fun motionEvent(
     val event =
         MotionEvent.obtain(/* downTime= */ 0, /* eventTime= */ 0, action, x, y, /* metaState= */ 0)
     event.source = source
-    return spy<MotionEvent>(event) {
-        on { getToolType(0) } doReturn toolType
-        on { getPointerCount() } doReturn pointerCount
-        axisValues.forEach { (key, value) -> on { getAxisValue(key) } doReturn value }
-        on { getClassification() } doReturn classification
-    }
+    val spy =
+        spy<MotionEvent>(event) {
+            on { getToolType(0) } doReturn toolType
+            on { getPointerCount() } doReturn pointerCount
+            axisValues.forEach { (key, value) -> on { getAxisValue(key) } doReturn value }
+            on { getClassification() } doReturn classification
+        }
+    ensureFinalizeIsNotCalledTwice(spy)
+    return spy
+}
+
+private fun ensureFinalizeIsNotCalledTwice(spy: MotionEvent) {
+    // Spy in mockito will create copy of the spied object, copying all its field etc. Here it means
+    // we create copy of MotionEvent and its mNativePtr, so we have two separate objects of type
+    // MotionEvents with the same mNativePtr. That breaks because MotionEvent has custom finalize()
+    // method which goes to native code and tries to delete the reference from mNativePtr. It works
+    // first time but second time reference is already deleted and it breaks. That's why we have to
+    // avoid calling finalize twice
+    doNothing().whenever(spy).finalizeUsingReflection()
+}
+
+private fun MotionEvent.finalizeUsingReflection() {
+    val finalizeMethod: Method = MotionEvent::class.java.getDeclaredMethod("finalize")
+    finalizeMethod.isAccessible = true
+    finalizeMethod.invoke(this)
 }
 
 fun touchpadEvent(

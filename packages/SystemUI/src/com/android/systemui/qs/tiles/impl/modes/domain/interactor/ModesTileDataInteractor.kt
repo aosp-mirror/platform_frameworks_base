@@ -38,9 +38,14 @@ class ModesTileDataInteractor @Inject constructor(val zenModeRepository: ZenMode
     override fun tileData(
         user: UserHandle,
         triggers: Flow<DataUpdateTrigger>
-    ): Flow<ModesTileModel> {
-        return zenModeActive.map { ModesTileModel(isActivated = it) }
-    }
+    ): Flow<ModesTileModel> = tileData()
+
+    /**
+     * An adapted version of the base class' [tileData] method for use in an old-style tile.
+     *
+     * TODO(b/299909989): Remove after the transition.
+     */
+    fun tileData() = zenModeActive.map { ModesTileModel(isActivated = it) }
 
     override fun availability(user: UserHandle): Flow<Boolean> = flowOf(Flags.modesUi())
 }

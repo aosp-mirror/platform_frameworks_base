@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏ڈیبگ ایپس کیلئے GPU ڈیبگ پرتوں کو لوڈ کرنے دیں"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"وربوس وینڈر لاگنگ فعال کریں"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"اضافی آلہ کے مخصوص وینڈر لاگز کو بگ رپورٹس میں شامل کریں، جن میں نجی معلومات، بیٹری کا زیادہ استعمال اور/یا اسٹوریج کا زیادہ استعمال شامل ہوسکتے ہیں۔"</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"ایک دن کے بعد غیر فعال کریں"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"وربوس وینڈر لاگنگ بند ہو گیا ہے"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"ایک دن کے لئے فعال ہو گیا"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"ایک اور دن کے لئے فعال کریں"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"ایک دن کے بعد غیر فعال ہو جائے گا"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"غیر معینہ مدت کے لئے فعال کر دیا گیا"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ونڈو اینیمیشن اسکیل"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ٹرانزیشن اینیمیشن اسکیل"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"اینیمیٹر دورانیے کا اسکیل"</string>

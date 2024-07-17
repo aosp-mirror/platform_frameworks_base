@@ -270,8 +270,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean performHapticFeedback(int uid, String packageName, int effectId,
-            boolean always, String reason, boolean fromIme) {
+    public boolean performHapticFeedback(int uid, String packageName, int effectId, String reason,
+            int flags, int privFlags) {
         return false;
     }
 

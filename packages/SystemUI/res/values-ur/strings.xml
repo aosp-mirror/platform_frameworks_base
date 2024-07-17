@@ -126,31 +126,27 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"دیکھنے کے لیے تھپتھپائیں"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"اسکرین ریکارڈنگ محفوظ کرنے میں خرابی"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"اسکرین ریکارڈنگ شروع کرنے میں خرابی"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
-    <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"‏آپ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو ریکارڈ نہیں کر پائیں گے"</string>
-    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"ریکارڈنگ روکیں؟"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"آپ فی الحال اپنی پوری اسکرین ریکارڈ کر رہے ہیں"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"آپ فی الحال <xliff:g id="APP_NAME">%1$s</xliff:g> ریکارڈ کر رہے ہیں"</string>
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"ریکارڈنگ روکیں"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"اسکرین کا اشتراک ہو رہا ہے"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
-    <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"‏آپ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کا اشتراک نہیں کر پائیں گے"</string>
-    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
-    <skip />
-    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"اسکرین کاسٹ ہو رہی ہے"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
-    <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"‏آپ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو کاسٹ نہیں کر پائیں گے"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
-    <skip />
-    <!-- no translation found for close_dialog_button (4749497706540104133) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"اسکرین کا اشتراک روکیں؟"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"آپ فی الحال <xliff:g id="HOST_APP_NAME">%1$s</xliff:g> کے ساتھ اپنی پوری اسکرین کا اشتراک کر رہے ہیں"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"آپ فی الحال ایک ایپ کے ساتھ اپنی پوری اسکرین کا اشتراک کر رہے ہیں"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"آپ فی الحال <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> کا اشتراک کر رہے ہیں"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"آپ فی الحال ایک ایپ کا اشتراک کر رہے ہیں"</string>
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"اشتراک کرنا روکیں"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"اسکرین کاسٹ ہو رہی ہے"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"کاسٹ کرنا بند کریں؟"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"آپ فی الحال اپنی پوری اسکرین کو <xliff:g id="DEVICE_NAME">%1$s</xliff:g> پر کاسٹ کر رہے ہیں"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"آپ فی الحال اپنی پوری اسکرین کو ایک قریبی آلہ پر کاسٹ کر رہے ہیں"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"آپ فی الحال <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> کو <xliff:g id="DEVICE_NAME">%2$s</xliff:g> پر کاسٹ کر رہے ہیں"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"آپ فی الحال <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> کو ایک قریبی آلہ پر کاسٹ کر رہے ہیں"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"آپ فی الحال <xliff:g id="DEVICE_NAME">%1$s</xliff:g> پر کاسٹ کر رہے ہیں"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"آپ فی الحال ایک قریبی آلہ پر کاسٹ کر رہے ہیں"</string>
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"کاسٹ کرنا بند کریں"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"بند کریں"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"ایشو ریکارڈر"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"ایشو ریکارڈنگ پروسیس ہو رہی ہے"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"ایشو کلیکشن سیشن کے لیے جاری اطلاع"</string>
@@ -161,8 +157,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"ایشو ریکارڈنگ محفوظ کرنے میں خرابی"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"ایشو ریکارڈنگ شروع کرنے میں خرابی"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"فُل اسکرین میں دیکھ رہے ہیں"</string>
-    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2717426731830851921">"باہر نکلنے کے لیے اپنی اسکرین کے اوپری حصے سے نیچے کی طرف سوائپ کریں"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"سمجھ آ گئی"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"واپس جائیں"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ہوم"</string>
@@ -295,6 +290,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"اسکرین سیور"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ایتھرنیٹ"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ڈسٹرب نہ کریں"</string>
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"ترجیحی وضع"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"بلوٹوتھ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"کوئی جوڑا بنائے ہوئے آلات دستیاب نہیں ہیں"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"کسی آلے کو منسلک یا غیر منسلک کرنے کے لیے تھپتھپائیں"</string>
@@ -306,8 +302,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"محفوظ ہے"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"غیر منسلک کریں"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"فعال کریں"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"خودکار طور پر کل آن کریں"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"فوری اشتراک اور \'میرا آلہ ڈھونڈیں\' جیسی خصوصیات بلوٹوتھ کا استعمال کرتی ہیں"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"بلوٹوتھ کل صبح آن ہو جائے گا"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"آڈیو کا اشتراک کریں"</string>
@@ -495,12 +490,11 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"ویجیٹ منتخب کریں"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ویجیٹ ہٹائیں"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"منتخب ویجیٹ رکھیں"</string>
-    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
-    <skip />
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"مقفل اسکرین کے ویجیٹس"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"کوئی بھی آپ کی مقفل اسکرین پر ویجیٹ دیکھ سکتا ہے اگرچہ آپ کا ٹیبلیٹ مقفل ہو۔"</string>
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"مقفل اسکرین کے ویجیٹس"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ویجیٹ کے ذریعے ایپ کھولنے کے لیے آپ کو تصدیق کرنی ہوگی کہ یہ آپ ہی ہیں۔ نیز، ذہن میں رکھیں کہ کوئی بھی انہیں دیکھ سکتا ہے، یہاں تک کہ جب آپ کا ٹیبلیٹ مقفل ہو۔ ہو سکتا ہے کچھ ویجٹس آپ کی لاک اسکرین کے لیے نہ بنائے گئے ہوں اور یہاں شامل کرنا غیر محفوظ ہو سکتا ہے۔"</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"سمجھ آ گئی"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"صارف سوئچ کریں"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"پل ڈاؤن مینیو"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"اس سیشن میں موجود سبھی ایپس اور ڈیٹا کو حذف کر دیا جائے گا۔"</string>
@@ -726,7 +720,8 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"ڈیفالٹ"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"خودکار"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"کوئی آواز یا وائبریشن نہیں"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"کوئی آواز یا وائبریشن نہیں اور گفتگو کے سیکشن میں نیچے ظاہر ہوتا ہے"</string>
+    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
+    <skip />
     <string name="notification_channel_summary_default" msgid="777294388712200605">"آلے کی ترتیبات کی بنیاد پر وائبریٹ یا گھنٹی بج سکتی ہے"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"آلے کی ترتیبات بنیاد پر وائبریٹ یا گھنٹی بج سکتی ہے۔ بذریعہ ڈیفالٹ <xliff:g id="APP_NAME">%1$s</xliff:g> بلبلہ سے گفتگوئیں۔"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"سسٹم کو اس بات کا تعین کرنے دیں کہ آیا اس اطلاع کی آواز ہو یا وائبریٹ ہونا چاہیے"</string>
@@ -783,6 +778,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -1365,22 +1361,18 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"اسپلٹ اسکرین"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ان پٹ"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ایپ شارٹ کٹس"</string>
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"موجودہ ایپ"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ایکسیسبیلٹی"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"کی بورڈ شارٹ کٹس"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"تلاش کے شارٹ کٹس"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"آئیکن سکیڑیں"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"آئیکن پھیلائیں"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"یا"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"پیچھے جانے کا اشارہ"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ہوم کا اشارہ"</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ایکشن کلید"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ہو گیا"</string>
+    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"بہترین!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"واپس جائیں"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"واپس جانے کے لیے، ٹچ پیڈ پر کہیں بھی تین انگلیوں کی مدد سے دائیں یا بائیں سوائپ کریں۔"</string>
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"ٹچ پیڈ دائیں اور بائیں حرکت کرتی ہوئی تین انگلیاں دکھا رہا ہے"</string>
@@ -1389,4 +1381,5 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏%2$d میں سے ‎%1$d کا لیول"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ہوم کنٹرولز"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"اسکرین سیور کے بطور اپنے ہوم کنٹرولز تک فوری رسائی حاصل کریں"</string>
+    <string name="volume_undo_action" msgid="5815519725211877114">"کالعدم کریں"</string>
 </resources>

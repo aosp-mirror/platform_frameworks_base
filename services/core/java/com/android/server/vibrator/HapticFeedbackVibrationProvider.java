@@ -186,13 +186,13 @@ public final class HapticFeedbackVibrationProvider {
      *
      * @param effectId the haptic feedback effect ID whose respective vibration attributes we want
      *      to get.
-     * @param bypassVibrationIntensitySetting {@code true} if the returned attribute should bypass
-     *      vibration intensity settings. {@code false} otherwise.
-     * @param fromIme the haptic feedback is performed from an IME.
+     * @param flags Additional flags as per {@link HapticFeedbackConstants}.
+     * @param privFlags Additional private flags as per {@link HapticFeedbackConstants}.
      * @return the {@link VibrationAttributes} that should be used for the provided haptic feedback.
      */
-    public VibrationAttributes getVibrationAttributesForHapticFeedback(
-            int effectId, boolean bypassVibrationIntensitySetting, boolean fromIme) {
+    public VibrationAttributes getVibrationAttributesForHapticFeedback(int effectId,
+            @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
         VibrationAttributes attrs;
         switch (effectId) {
             case HapticFeedbackConstants.EDGE_SQUEEZE:
@@ -208,7 +208,7 @@ public final class HapticFeedbackVibrationProvider {
                 break;
             case HapticFeedbackConstants.KEYBOARD_TAP:
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
-                attrs = createKeyboardVibrationAttributes(fromIme);
+                attrs = createKeyboardVibrationAttributes(privFlags);
                 break;
             case HapticFeedbackConstants.BIOMETRIC_CONFIRM:
             case HapticFeedbackConstants.BIOMETRIC_REJECT:
@@ -218,18 +218,23 @@ public final class HapticFeedbackVibrationProvider {
                 attrs = TOUCH_VIBRATION_ATTRIBUTES;
         }
 
-        int flags = 0;
+        int vibFlags = 0;
+        boolean fromIme =
+                (privFlags & HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS) != 0;
+        boolean bypassVibrationIntensitySetting =
+                (flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0;
         if (bypassVibrationIntensitySetting) {
-            flags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
+            vibFlags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
         }
         if (shouldBypassInterruptionPolicy(effectId)) {
-            flags |= VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
+            vibFlags |= VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
         }
         if (shouldBypassIntensityScale(effectId, fromIme)) {
-            flags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
+            vibFlags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
         }
 
-        return flags == 0 ? attrs : new VibrationAttributes.Builder(attrs).setFlags(flags).build();
+        return vibFlags == 0 ? attrs : new VibrationAttributes.Builder(attrs)
+                .setFlags(vibFlags).build();
     }
 
     /**
@@ -373,12 +378,16 @@ public final class HapticFeedbackVibrationProvider {
         return false;
     }
 
-    private VibrationAttributes createKeyboardVibrationAttributes(boolean fromIme) {
-        // Use touch attribute when the keyboard category is disable or it's not from an IME.
-        if (!Flags.keyboardCategoryEnabled() || !fromIme) {
+    private VibrationAttributes createKeyboardVibrationAttributes(
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
+        // Use touch attribute when the keyboard category is disable.
+        if (!Flags.keyboardCategoryEnabled()) {
             return TOUCH_VIBRATION_ATTRIBUTES;
         }
-
+        // Use touch attribute when the haptic is not apply to IME.
+        if ((privFlags & HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS) == 0) {
+            return TOUCH_VIBRATION_ATTRIBUTES;
+        }
         return new VibrationAttributes.Builder(TOUCH_VIBRATION_ATTRIBUTES)
                 .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
                 .build();

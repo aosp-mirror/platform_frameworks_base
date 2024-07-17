@@ -2437,4 +2437,13 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Switch user"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Mute"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Tap to mute sound"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Browser"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Contacts"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Email"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Music"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Calendar"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculator"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Applications"</string>
 </resources>

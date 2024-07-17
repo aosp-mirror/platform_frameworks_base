@@ -27543,7 +27543,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return a view with given ID if found, or {@code null} otherwise
      * @see View#requireViewById(int)
      */
-    /* TODO(b/347672184): Re-add @Nullable */
+    // Strictly speaking this should be marked as @Nullable but the nullability of the return value
+    // is deliberately left unspecified as idiomatically correct code can make assumptions either
+    // way based on local context, e.g. layout specification.
     public final <T extends View> T findViewById(@IdRes int id) {
         if (id == NO_ID) {
             return null;
@@ -28636,20 +28638,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return false;
         }
 
-        final boolean always = (flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0;
-        boolean fromIme = false;
-        if (mAttachInfo.mViewRootImpl != null) {
-            fromIme = mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD;
+        int privFlags = 0;
+        if (mAttachInfo.mViewRootImpl != null
+                && mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD) {
+            privFlags = HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS;
         }
         if (Flags.useVibratorHapticFeedback()) {
             if (!mAttachInfo.canPerformHapticFeedback()) {
                 return false;
             }
-            getSystemVibrator().performHapticFeedback(
-                    feedbackConstant, always, "View#performHapticFeedback", fromIme);
+            getSystemVibrator().performHapticFeedback(feedbackConstant,
+                    "View#performHapticFeedback", flags, privFlags);
             return true;
         }
-        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, always, fromIme);
+        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, flags, privFlags);
     }
 
     private Vibrator getSystemVibrator() {
@@ -31684,7 +31686,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         interface Callbacks {
             void playSoundEffect(int effectId);
-            boolean performHapticFeedback(int effectId, boolean always, boolean fromIme);
+
+            boolean performHapticFeedback(int effectId,
+                    @HapticFeedbackConstants.Flags int flags,
+                    @HapticFeedbackConstants.PrivateFlags int privFlags);
         }
 
         /**

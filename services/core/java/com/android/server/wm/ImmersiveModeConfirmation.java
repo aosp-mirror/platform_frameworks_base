@@ -408,9 +408,8 @@ public class ImmersiveModeConfirmation {
             final boolean intersectsTopCutout = topDisplayCutout.intersects(
                     width - (windowWidth / 2), 0,
                     width + (windowWidth / 2), topDisplayCutout.bottom);
-            if (mClingWindow != null &&
-                    (windowWidth < 0 || (width > 0 && intersectsTopCutout))) {
-                final View iconView = mClingWindow.findViewById(R.id.immersive_cling_icon);
+            if (windowWidth < 0 || (width > 0 && intersectsTopCutout)) {
+                final View iconView = findViewById(R.id.immersive_cling_icon);
                 RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)
                         iconView.getLayoutParams();
                 lp.topMargin = topDisplayCutout.bottom;
