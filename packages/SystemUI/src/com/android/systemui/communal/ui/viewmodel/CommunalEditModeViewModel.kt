@@ -82,10 +82,10 @@ constructor(
         communalSceneInteractor.editModeState.map { it == EditModeState.SHOWING }
 
     val showDisclaimer: Flow<Boolean> =
-        allOf(isCommunalContentVisible, not(communalPrefsInteractor.isDisclaimerDismissed))
+        allOf(isCommunalContentVisible, not(communalInteractor.isDisclaimerDismissed))
 
     fun onDisclaimerDismissed() {
-        communalPrefsInteractor.setDisclaimerDismissed()
+        communalInteractor.setDisclaimerDismissed()
     }
 
     /**
