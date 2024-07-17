@@ -1326,6 +1326,22 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun handleRequest_freeformTask_relaunchActiveTask_taskBecomesUndefined() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+    val freeformTask = setUpFreeformTask()
+    markTaskHidden(freeformTask)
+
+    val wct =
+      controller.handleRequest(Binder(), createTransition(freeformTask))
+
+    // Should become undefined as the TDA is set to fullscreen. It will inherit from the TDA.
+    assertNotNull(wct, "should handle request")
+    assertThat(wct.changes[freeformTask.token.asBinder()]?.windowingMode)
+      .isEqualTo(WINDOWING_MODE_UNDEFINED)
+  }
+
+  @Test
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun handleRequest_freeformTask_desktopWallpaperDisabled_freeformNotVisible_reorderedToTop() {
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
