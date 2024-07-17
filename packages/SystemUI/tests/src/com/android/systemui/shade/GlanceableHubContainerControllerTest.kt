@@ -48,7 +48,12 @@ import com.android.systemui.communal.ui.compose.CommunalContent
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -67,13 +72,13 @@ import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyFloat
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidTestingRunner::class)
@@ -87,11 +92,11 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             testDispatcher = UnconfinedTestDispatcher()
         }
 
-    @Mock private lateinit var communalViewModel: CommunalViewModel
-    @Mock private lateinit var powerManager: PowerManager
-    @Mock private lateinit var touchMonitor: TouchMonitor
-    @Mock private lateinit var communalColors: CommunalColors
-    @Mock private lateinit var communalContent: CommunalContent
+    private var communalViewModel = mock<CommunalViewModel>()
+    private var powerManager = mock<PowerManager>()
+    private var touchMonitor = mock<TouchMonitor>()
+    private var communalColors = mock<CommunalColors>()
+    private var communalContent = mock<CommunalContent>()
     private lateinit var ambientTouchComponentFactory: AmbientTouchComponent.Factory
 
     private lateinit var parentView: FrameLayout
@@ -103,8 +108,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
         communalRepository = kosmos.fakeCommunalSceneRepository
 
         ambientTouchComponentFactory =
@@ -124,6 +127,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     communalInteractor,
                     communalViewModel,
                     keyguardInteractor,
+                    kosmos.keyguardTransitionInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
@@ -167,6 +171,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         communalInteractor,
                         communalViewModel,
                         keyguardInteractor,
+                        kosmos.keyguardTransitionInteractor,
                         shadeInteractor,
                         powerManager,
                         communalColors,
@@ -192,6 +197,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     communalInteractor,
                     communalViewModel,
                     keyguardInteractor,
+                    kosmos.keyguardTransitionInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
@@ -212,6 +218,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     communalInteractor,
                     communalViewModel,
                     keyguardInteractor,
+                    kosmos.keyguardTransitionInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
@@ -235,12 +242,15 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun lifecycle_resumedAfterCommunalShows() {
-        // Communal is open.
-        goToScene(CommunalScenes.Communal)
+    fun lifecycle_resumedAfterCommunalShows() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
 
-        assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.RESUMED)
-    }
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.RESUMED)
+            }
+        }
 
     @Test
     fun lifecycle_startedAfterCommunalCloses() =
@@ -282,6 +292,43 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
                 // Bouncer is visible.
                 fakeKeyguardBouncerRepository.setAlternateVisible(true)
+                testableLooper.processAllMessages()
+
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.STARTED)
+            }
+        }
+
+    @Test
+    fun lifecycle_startedWhenEditActivityShowing() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Edit activity is showing.
+                communalInteractor.setEditActivityShowing(true)
+                testableLooper.processAllMessages()
+
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.STARTED)
+            }
+        }
+
+    @Test
+    fun lifecycle_startedWhenEditModeTransitionStarted() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Leaving edit mode to return to the hub.
+                fakeKeyguardTransitionRepository.sendTransitionStep(
+                    TransitionStep(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.GLANCEABLE_HUB,
+                        value = 1.0f,
+                        transitionState = TransitionState.RUNNING
+                    )
+                )
                 testableLooper.processAllMessages()
 
                 assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.STARTED)
@@ -486,14 +533,70 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             testScope.runTest {
                 // Communal is closed.
                 goToScene(CommunalScenes.Blank)
-                `when`(
+                whenever(
                         notificationStackScrollLayoutController.isBelowLastNotification(
-                            anyFloat(),
-                            anyFloat()
+                            any(),
+                            any()
                         )
                     )
                     .thenReturn(false)
                 assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+            }
+        }
+
+    @Test
+    fun onTouchEvent_hubOpen_touchesDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Touch event is sent to the container view.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                verify(containerView).onTouchEvent(any())
+            }
+        }
+
+    @Test
+    fun onTouchEvent_editActivityShowing_touchesConsumedButNotDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Transitioning to or from edit mode.
+                communalInteractor.setEditActivityShowing(true)
+                testableLooper.processAllMessages()
+
+                // onTouchEvent returns true to consume the touch, but it is not sent to the
+                // container view.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                verify(containerView, never()).onTouchEvent(any())
+            }
+        }
+
+    @Test
+    fun onTouchEvent_editModeTransitionStarted_touchesConsumedButNotDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Leaving edit mode to return to the hub.
+                fakeKeyguardTransitionRepository.sendTransitionStep(
+                    TransitionStep(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.GLANCEABLE_HUB,
+                        value = 1.0f,
+                        transitionState = TransitionState.RUNNING
+                    )
+                )
+                testableLooper.processAllMessages()
+
+                // onTouchEvent returns true to consume the touch, but it is not sent to the
+                // container view.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                verify(containerView, never()).onTouchEvent(any())
             }
         }
 
@@ -515,8 +618,21 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         testableLooper.processAllMessages()
     }
 
-    private fun goToScene(scene: SceneKey) {
+    private suspend fun goToScene(scene: SceneKey) {
         communalRepository.changeScene(scene)
+        if (scene == CommunalScenes.Communal) {
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                kosmos.testScope
+            )
+        } else {
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.LOCKSCREEN,
+                kosmos.testScope
+            )
+        }
         testableLooper.processAllMessages()
     }
 
