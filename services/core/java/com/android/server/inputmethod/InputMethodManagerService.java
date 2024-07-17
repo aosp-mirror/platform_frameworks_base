@@ -1114,11 +1114,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
                     userId, AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO);
             InputMethodSettingsRepository.put(userId, newSettings);
-            if (mCurrentUserId == userId) {
+            if (!mConcurrentMultiUserModeEnabled) {
                 // We need to rebuild IMEs.
                 postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */, userId);
                 updateInputMethodsFromSettingsLocked(true /* enabledChanged */, userId);
-            } else if (mConcurrentMultiUserModeEnabled) {
+            } else {
+                // TODO(b/352758479): Stop relying on initializeVisibleBackgroundUserLocked()
                 initializeVisibleBackgroundUserLocked(userId);
             }
         }
