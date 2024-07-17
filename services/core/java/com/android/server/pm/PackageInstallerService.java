@@ -693,13 +693,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         params.appLabel = TextUtils.trimToSize(params.appLabel,
                 PackageItemInfo.MAX_SAFE_LABEL_LENGTH);
 
-        // Validate installer package name.
+        // Validate requested installer package name.
         if (params.installerPackageName != null && !isValidPackageName(
                 params.installerPackageName)) {
             params.installerPackageName = null;
         }
 
-        var requestedInstallerPackageName =
+        // Validate installer package name.
+        if (installerPackageName != null && !isValidPackageName(installerPackageName)) {
+            installerPackageName = null;
+        }
+
+        String requestedInstallerPackageName =
                 params.installerPackageName != null ? params.installerPackageName
                         : installerPackageName;
 
