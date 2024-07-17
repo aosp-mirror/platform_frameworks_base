@@ -102,7 +102,6 @@ import android.util.StatsEvent;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.Clock;
@@ -1192,7 +1191,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                     .setMinConsumedPowerThreshold(minConsumedPowerThreshold)
                                     .build();
                     bus = getBatteryUsageStats(List.of(query)).get(0);
-                    return new StatsPerUidLogger(new FrameworkStatsLogger()).logStats(bus, data);
+                    return StatsPerUidLogger.logStats(bus, data);
                 }
                 default:
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
@@ -1205,35 +1204,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public static class FrameworkStatsLogger {
-        /**
-         * Wrapper for the FrameworkStatsLog.buildStatsEvent method that makes it easier
-         * for mocking.
-         */
-        @VisibleForTesting
-        public StatsEvent buildStatsEvent(long sessionStartTs, long sessionEndTs,
-                long sessionDuration, int sessionDischargePercentage, long sessionDischargeDuration,
-                int uid, @BatteryConsumer.ProcessState int processState, long timeInStateMillis,
-                String powerComponentName, float totalConsumedPowerMah, float powerComponentMah,
-                long powerComponentDurationMillis) {
-            return FrameworkStatsLog.buildStatsEvent(
-                    FrameworkStatsLog.BATTERY_USAGE_STATS_PER_UID,
-                    sessionStartTs,
-                    sessionEndTs,
-                    sessionDuration,
-                    sessionDischargePercentage,
-                    sessionDischargeDuration,
-                    uid,
-                    processState,
-                    timeInStateMillis,
-                    powerComponentName,
-                    totalConsumedPowerMah,
-                    powerComponentMah,
-                    powerComponentDurationMillis);
-        }
-    }
-
-    public static class StatsPerUidLogger {
+    private static class StatsPerUidLogger {
 
         private static final int STATSD_METRIC_MAX_DIMENSIONS_COUNT = 3000;
 
@@ -1253,18 +1224,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 long dischargeDuration) {}
         ;
 
-        private final FrameworkStatsLogger mFrameworkStatsLogger;
-
-        public StatsPerUidLogger(FrameworkStatsLogger frameworkStatsLogger) {
-            mFrameworkStatsLogger = frameworkStatsLogger;
-        }
-
-        /**
-         * Generates StatsEvents for the supplied battery usage stats and adds them to
-         * the supplied list.
-         */
-        @VisibleForTesting
-        public int logStats(BatteryUsageStats bus, List<StatsEvent> data) {
+        static int logStats(BatteryUsageStats bus, List<StatsEvent> data) {
             final SessionInfo sessionInfo =
                     new SessionInfo(
                             bus.getStatsStartTimestamp(),
@@ -1380,7 +1340,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return StatsManager.PULL_SUCCESS;
         }
 
-        private boolean addStatsForPredefinedComponent(
+        private static boolean addStatsForPredefinedComponent(
                 List<StatsEvent> data,
                 SessionInfo sessionInfo,
                 int uid,
@@ -1420,7 +1380,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     powerComponentDurationMillis);
         }
 
-        private boolean addStatsForCustomComponent(
+        private static boolean addStatsForCustomComponent(
                 List<StatsEvent> data,
                 SessionInfo sessionInfo,
                 int uid,
@@ -1462,7 +1422,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
          * Returns true on success and false if reached max atoms capacity and no more atoms should
          * be added
          */
-        private boolean addStatsAtom(
+        private static boolean addStatsAtom(
                 List<StatsEvent> data,
                 SessionInfo sessionInfo,
                 int uid,
@@ -1472,7 +1432,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 float totalConsumedPowerMah,
                 float powerComponentMah,
                 long powerComponentDurationMillis) {
-            data.add(mFrameworkStatsLogger.buildStatsEvent(
+            data.add(
+                    FrameworkStatsLog.buildStatsEvent(
+                            FrameworkStatsLog.BATTERY_USAGE_STATS_PER_UID,
                             sessionInfo.startTs(),
                             sessionInfo.endTs(),
                             sessionInfo.duration(),
