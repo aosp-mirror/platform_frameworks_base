@@ -24,7 +24,8 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 
 final class InputMethodSettingsRepository {
-    @GuardedBy("ImfLock.class")
+    // TODO(b/352594784): Should we user other lock primitives?
+    @GuardedBy("sPerUserMap")
     @NonNull
     private static final SparseArray<InputMethodSettings> sPerUserMap = new SparseArray<>();
 
@@ -35,23 +36,28 @@ final class InputMethodSettingsRepository {
     }
 
     @NonNull
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     static InputMethodSettings get(@UserIdInt int userId) {
-        final InputMethodSettings obj = sPerUserMap.get(userId);
+        final InputMethodSettings obj;
+        synchronized (sPerUserMap) {
+            obj = sPerUserMap.get(userId);
+        }
         if (obj != null) {
             return obj;
         }
         return InputMethodSettings.createEmptyMap(userId);
     }
 
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     static void put(@UserIdInt int userId, @NonNull InputMethodSettings obj) {
-        sPerUserMap.put(userId, obj);
+        synchronized (sPerUserMap) {
+            sPerUserMap.put(userId, obj);
+        }
     }
 
     @AnyThread
     static void remove(@UserIdInt int userId) {
-        synchronized (ImfLock.class) {
+        synchronized (sPerUserMap) {
             sPerUserMap.remove(userId);
         }
     }
