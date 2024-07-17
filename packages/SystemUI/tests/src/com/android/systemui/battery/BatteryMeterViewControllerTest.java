@@ -36,7 +36,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -77,9 +76,6 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
 
         when(mBatteryMeterView.getContext()).thenReturn(mContext);
         when(mBatteryMeterView.getResources()).thenReturn(mContext.getResources());
-
-        mContext.getOrCreateTestableResources().addOverride(
-                R.bool.flag_battery_shield_icon, false);
     }
 
     @Test
@@ -134,26 +130,6 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
         mController.onViewAttached();
 
         verify(mTunerService, never()).addTunable(any(), any());
-    }
-
-    @Test
-    public void shieldFlagDisabled_viewNotified() {
-        mContext.getOrCreateTestableResources().addOverride(
-                R.bool.flag_battery_shield_icon, false);
-
-        initController();
-
-        verify(mBatteryMeterView).setDisplayShieldEnabled(false);
-    }
-
-    @Test
-    public void shieldFlagEnabled_viewNotified() {
-        mContext.getOrCreateTestableResources().addOverride(
-                R.bool.flag_battery_shield_icon, true);
-
-        initController();
-
-        verify(mBatteryMeterView).setDisplayShieldEnabled(true);
     }
 
     private void initController() {
