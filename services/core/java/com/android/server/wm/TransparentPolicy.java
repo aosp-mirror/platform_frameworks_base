@@ -73,10 +73,10 @@ class TransparentPolicy {
     private final TransparentPolicyState mTransparentPolicyState;
 
     TransparentPolicy(@NonNull ActivityRecord activityRecord,
-            @NonNull LetterboxConfiguration letterboxConfiguration) {
+            @NonNull AppCompatConfiguration appCompatConfiguration) {
         mActivityRecord = activityRecord;
         mIsTranslucentLetterboxingEnabledSupplier =
-                letterboxConfiguration::isTranslucentLetterboxingEnabled;
+                appCompatConfiguration::isTranslucentLetterboxingEnabled;
         mTransparentPolicyState = new TransparentPolicyState(activityRecord);
     }
 

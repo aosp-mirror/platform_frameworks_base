@@ -120,10 +120,10 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_W
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
@@ -1054,7 +1054,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mAnimationsDisabled = false;
     boolean mPointerLocationEnabled = false;
 
-    final LetterboxConfiguration mLetterboxConfiguration;
+    final AppCompatConfiguration mAppCompatConfiguration;
 
     private boolean mIsIgnoreOrientationRequestDisabled;
 
@@ -1294,7 +1294,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     | WindowInsets.Type.navigationBars();
         }
 
-        mLetterboxConfiguration = new LetterboxConfiguration(
+        mAppCompatConfiguration = new AppCompatConfiguration(
                 // Using SysUI context to have access to Material colors extracted from Wallpaper.
                 ActivityThread.currentActivityThread().getSystemUiContext());
 
@@ -4441,7 +4441,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     boolean isIgnoreOrientationRequestDisabled() {
         return mIsIgnoreOrientationRequestDisabled
-                || !mLetterboxConfiguration.isIgnoreOrientationRequestAllowed();
+                || !mAppCompatConfiguration.isIgnoreOrientationRequestAllowed();
     }
 
     @Override
@@ -9992,7 +9992,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public int getLetterboxBackgroundColorInArgb() {
-        return mLetterboxConfiguration.getLetterboxBackgroundColor().toArgb();
+        return mAppCompatConfiguration.getLetterboxBackgroundColor().toArgb();
     }
 
     /**
@@ -10000,8 +10000,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public boolean isLetterboxBackgroundMultiColored() {
-        @LetterboxConfiguration.LetterboxBackgroundType int letterboxBackgroundType =
-                mLetterboxConfiguration.getLetterboxBackgroundType();
+        @AppCompatConfiguration.LetterboxBackgroundType int letterboxBackgroundType =
+                mAppCompatConfiguration.getLetterboxBackgroundType();
         switch (letterboxBackgroundType) {
             case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING:
             case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND:
