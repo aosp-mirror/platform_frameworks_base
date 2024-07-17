@@ -219,6 +219,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     static final String TAG = "InputMethodManagerService";
     public static final String PROTO_ARG = "--proto";
 
+    /**
+     * Timeout in milliseconds in {@link #systemRunning()} to make sure that users are initialized
+     * in {@link Lifecycle#initializeUsersAsync(int[])}.
+     */
+    @DurationMillisLong
+    private static final long SYSTEM_READY_USER_INIT_TIMEOUT = 3000;
+
     @Retention(SOURCE)
     @IntDef({ShellCommandResult.SUCCESS, ShellCommandResult.FAILURE})
     private @interface ShellCommandResult {
@@ -1035,7 +1042,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // Called directly from UserManagerService. Do not block the calling thread.
             final int userId = user.id;
             SecureSettingsWrapper.onUserRemoved(userId);
-            AdditionalSubtypeMapRepository.remove(userId, mService.mIoHandler);
+            AdditionalSubtypeMapRepository.remove(userId);
             InputMethodSettingsRepository.remove(userId);
             mService.mUserDataRepository.remove(userId);
         }
@@ -1066,39 +1073,31 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         @AnyThread
         private void initializeUsersAsync(@UserIdInt int[] userIds) {
+            Slog.d(TAG, "Schedule initialization for users=" + Arrays.toString(userIds));
             mService.mIoHandler.post(() -> {
                 final var service = mService;
                 final var context = service.mContext;
                 final var userManagerInternal = service.mUserManagerInternal;
 
-                // We first create InputMethodMap for each user without loading AdditionalSubtypes.
-                final int numUsers = userIds.length;
-                final InputMethodMap[] rawMethodMaps = new InputMethodMap[numUsers];
-                for (int i = 0; i < numUsers; ++i) {
-                    final int userId = userIds[i];
-                    rawMethodMaps[i] = InputMethodManagerService.queryInputMethodServicesInternal(
-                            context, userId, AdditionalSubtypeMap.EMPTY_MAP,
+                for (int userId : userIds) {
+                    Slog.d(TAG, "Start initialization for user=" + userId);
+                    final var additionalSubtypeMap =
+                            AdditionalSubtypeMapRepository.ensureInitializedAndGet(userId);
+                    final var settings = InputMethodManagerService.queryInputMethodServicesInternal(
+                            context, userId, additionalSubtypeMap,
                             DirectBootAwareness.AUTO).getMethodMap();
+                    InputMethodSettingsRepository.put(userId,
+                            InputMethodSettings.create(settings, userId));
+
                     final int profileParentId = userManagerInternal.getProfileParentId(userId);
                     final boolean value =
                             InputMethodDrawsNavBarResourceMonitor.evaluate(context,
                                     profileParentId);
                     final var userData = mService.getUserData(userId);
                     userData.mImeDrawsNavBar.set(value);
-                }
 
-                // Then create full InputMethodMap for each user. Note that
-                // AdditionalSubtypeMapRepository#get() and InputMethodSettingsRepository#put()
-                // need to be called with ImfLock held (b/352387655).
-                // TODO(b/343601565): Avoid ImfLock after fixing b/352387655.
-                synchronized (ImfLock.class) {
-                    for (int i = 0; i < numUsers; ++i) {
-                        final int userId = userIds[i];
-                        final var map = AdditionalSubtypeMapRepository.get(userId);
-                        final var methodMap = rawMethodMaps[i].applyAdditionalSubtypes(map);
-                        final var settings = InputMethodSettings.create(methodMap, userId);
-                        InputMethodSettingsRepository.put(userId, settings);
-                    }
+                    userData.mBackgroundLoadLatch.countDown();
+                    Slog.d(TAG, "Complete initialization for user=" + userId);
                 }
             });
         }
@@ -1345,10 +1344,42 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
+    private void waitForUserInitialization() {
+        final int[] userIds = mUserManagerInternal.getUserIds();
+        final long deadlineNanos = SystemClock.elapsedRealtimeNanos()
+                + TimeUnit.MILLISECONDS.toNanos(SYSTEM_READY_USER_INIT_TIMEOUT);
+        boolean interrupted = false;
+        try {
+            for (int userId : userIds) {
+                final var latch = getUserData(userId).mBackgroundLoadLatch;
+                boolean awaitResult;
+                while (true) {
+                    try {
+                        final long remainingNanos =
+                                Math.max(deadlineNanos - SystemClock.elapsedRealtimeNanos(), 0);
+                        awaitResult = latch.await(remainingNanos, TimeUnit.NANOSECONDS);
+                        break;
+                    } catch (InterruptedException ignored) {
+                        interrupted = true;
+                    }
+                }
+                if (!awaitResult) {
+                    Slog.w(TAG, "Timed out for user#" + userId + " to be initialized");
+                }
+            }
+        } finally {
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
     /**
      * TODO(b/32343335): The entire systemRunning() method needs to be revisited.
      */
     public void systemRunning() {
+        waitForUserInitialization();
+
         synchronized (ImfLock.class) {
             if (DEBUG) {
                 Slog.d(TAG, "--- systemReady");
