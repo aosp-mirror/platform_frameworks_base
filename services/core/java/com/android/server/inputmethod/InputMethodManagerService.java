@@ -702,24 +702,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             super(true);
         }
 
-        @GuardedBy("ImfLock.class")
-        private boolean isChangingPackagesOfCurrentUserLocked() {
-            final int userId = getChangingUserId();
-            final boolean retval = userId == mCurrentUserId;
-            if (DEBUG) {
-                if (!retval) {
-                    Slog.d(TAG, "--- ignore this call back from a background user: " + userId);
-                }
-            }
-            return retval;
-        }
-
         @Override
         public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
             synchronized (ImfLock.class) {
-                if (!isChangingPackagesOfCurrentUserLocked()) {
-                    return false;
-                }
                 final int userId = getChangingUserId();
                 final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
                 String curInputMethodId = settings.getSelectedInputMethod();
