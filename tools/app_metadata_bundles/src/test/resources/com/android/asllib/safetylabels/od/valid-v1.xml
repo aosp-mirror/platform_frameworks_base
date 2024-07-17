@@ -1,0 +1,9 @@
+<pbundle_as_map name="safety_labels">
+    <pbundle_as_map name="security_labels">
+        <boolean name="is_data_deletable" value="true" />
+        <boolean name="is_data_encrypted" value="false" />
+    </pbundle_as_map>
+    <pbundle_as_map name="third_party_verification">
+        <string name="url" value="www.example.com"/>
+    </pbundle_as_map>
+</pbundle_as_map>
