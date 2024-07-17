@@ -497,8 +497,7 @@ private fun SceneScope.SplitShade(
                                     .sysuiResTag("expanded_qs_scroll_view")
                                     .weight(1f)
                                     .thenIf(!isCustomizerShowing) {
-                                        Modifier.verticalNestedScrollToScene()
-                                            .verticalScroll(
+                                        Modifier.verticalScroll(
                                                 quickSettingsScrollState,
                                                 enabled = isScrollable
                                             )

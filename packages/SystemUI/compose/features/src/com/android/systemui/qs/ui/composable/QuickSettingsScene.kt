@@ -305,8 +305,7 @@ private fun SceneScope.QuickSettingsScene(
                     if (isCustomizerShowing) {
                         Modifier.fillMaxHeight().align(Alignment.TopCenter)
                     } else {
-                        Modifier.verticalNestedScrollToScene()
-                            .verticalScroll(
+                        Modifier.verticalScroll(
                                 scrollState,
                                 enabled = isScrollable,
                             )
