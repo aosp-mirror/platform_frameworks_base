@@ -134,10 +134,15 @@ static jlong nativeOpen(JNIEnv* env, jclass clazz, jstring pathStr, jint openFla
     String8 label(labelChars);
     env->ReleaseStringUTFChars(labelStr, labelChars);
 
+    errno = 0;
     sqlite3* db;
     int err = sqlite3_open_v2(path.c_str(), &db, sqliteFlags, NULL);
     if (err != SQLITE_OK) {
-        throw_sqlite3_exception_errcode(env, err, "Could not open database");
+        if (errno == 0) {
+            throw_sqlite3_exception(env, db, "could not open database");
+        } else {
+            throw_sqlite3_exception(env, db, strerror(errno));
+        }
         return 0;
     }
 

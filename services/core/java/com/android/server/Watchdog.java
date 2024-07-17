@@ -74,6 +74,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -991,6 +992,9 @@ public class Watchdog implements Dumpable {
             FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED, subject);
         }
 
+        final LinkedHashMap headersMap =
+                com.android.server.am.Flags.enableDropboxWatchdogHeaders()
+                ? new LinkedHashMap<>(Collections.singletonMap("Watchdog-Type", dropboxTag)) : null;
         long anrTime = SystemClock.uptimeMillis();
         StringBuilder report = new StringBuilder();
         report.append(ResourcePressureUtil.currentPsiState());
@@ -998,8 +1002,9 @@ public class Watchdog implements Dumpable {
         StringWriter tracesFileException = new StringWriter();
         final File stack = StackTracesDumpHelper.dumpStackTraces(
                 pids, processCpuTracker, new SparseBooleanArray(),
-                CompletableFuture.completedFuture(getInterestingNativePids()), tracesFileException,
-                subject, criticalEvents, Runnable::run, /* latencyTracker= */null);
+                CompletableFuture.completedFuture(getInterestingNativePids()),
+                tracesFileException, subject, criticalEvents, headersMap,
+                Runnable::run, /* latencyTracker= */null);
         // Give some extra time to make sure the stack traces get written.
         // The system's been hanging for a whlie, another second or two won't hurt much.
         SystemClock.sleep(5000);
@@ -1011,6 +1016,7 @@ public class Watchdog implements Dumpable {
             // Trigger the kernel to dump all blocked threads, and backtraces on all CPUs to the
             // kernel log
             doSysRq('w');
+            doSysRq('m');
             doSysRq('l');
         }
 

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
+import com.android.systemui.statusbar.notification.collection.NotificationClassificationFlag
 import com.android.systemui.statusbar.notification.collection.PipelineDumpable
 import com.android.systemui.statusbar.notification.collection.PipelineDumper
 import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
@@ -45,6 +46,7 @@ constructor(
     hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
     hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
     keyguardCoordinator: KeyguardCoordinator,
+    unseenKeyguardCoordinator: OriginalUnseenKeyguardCoordinator,
     rankingCoordinator: RankingCoordinator,
     colorizedFgsCoordinator: ColorizedFgsCoordinator,
     deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
@@ -69,6 +71,7 @@ constructor(
     dismissibilityCoordinator: DismissibilityCoordinator,
     dreamCoordinator: DreamCoordinator,
     statsLoggerCoordinator: NotificationStatsLoggerCoordinator,
+    bundleCoordinator: BundleCoordinator,
 ) : NotifCoordinators {
 
     private val mCoreCoordinators: MutableList<CoreCoordinator> = ArrayList()
@@ -84,6 +87,7 @@ constructor(
         mCoordinators.add(hideLocallyDismissedNotifsCoordinator)
         mCoordinators.add(hideNotifsForOtherUsersCoordinator)
         mCoordinators.add(keyguardCoordinator)
+        mCoordinators.add(unseenKeyguardCoordinator)
         mCoordinators.add(rankingCoordinator)
         mCoordinators.add(colorizedFgsCoordinator)
         mCoordinators.add(deviceProvisionedCoordinator)
@@ -117,11 +121,11 @@ constructor(
 
         // Manually add Ordered Sections
         if (NotificationMinimalismPrototype.V2.isEnabled) {
-            mOrderedSections.add(keyguardCoordinator.topOngoingSectioner) // Top Ongoing
+            mOrderedSections.add(unseenKeyguardCoordinator.topOngoingSectioner) // Top Ongoing
         }
         mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
         if (NotificationMinimalismPrototype.V2.isEnabled) {
-            mOrderedSections.add(keyguardCoordinator.topUnseenSectioner) // Top Unseen
+            mOrderedSections.add(unseenKeyguardCoordinator.topUnseenSectioner) // Top Unseen
         }
         mOrderedSections.add(colorizedFgsCoordinator.sectioner) // ForegroundService
         if (PriorityPeopleSection.isEnabled) {
@@ -132,6 +136,12 @@ constructor(
             mOrderedSections.add(conversationCoordinator.peopleSilentSectioner) // People Silent
         }
         mOrderedSections.add(rankingCoordinator.alertingSectioner) // Alerting
+        if (NotificationClassificationFlag.isEnabled) {
+            mOrderedSections.add(bundleCoordinator.newsSectioner)
+            mOrderedSections.add(bundleCoordinator.socialSectioner)
+            mOrderedSections.add(bundleCoordinator.recsSectioner)
+            mOrderedSections.add(bundleCoordinator.promoSectioner)
+        }
         mOrderedSections.add(rankingCoordinator.silentSectioner) // Silent
         mOrderedSections.add(rankingCoordinator.minimizedSectioner) // Minimized
 

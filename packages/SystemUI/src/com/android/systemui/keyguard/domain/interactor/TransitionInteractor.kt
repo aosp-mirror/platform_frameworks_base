@@ -25,6 +25,7 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
@@ -57,6 +58,8 @@ sealed class TransitionInteractor(
 ) {
     val name = this::class.simpleName ?: "UnknownTransitionInteractor"
     abstract val transitionRepository: KeyguardTransitionRepository
+    abstract val internalTransitionInteractor: InternalKeyguardTransitionInteractor
+
     abstract fun start()
 
     /* Use background dispatcher for all [KeyguardTransitionInteractor] flows. Necessary because
@@ -79,14 +82,15 @@ sealed class TransitionInteractor(
         // a bugreport.
         ownerReason: String = "",
     ): UUID? {
-        if (fromState != transitionInteractor.currentTransitionInfoInternal.value.to) {
+        toState.checkValidState()
+        if (fromState != internalTransitionInteractor.currentTransitionInfoInternal.value.to) {
             Log.e(
                 name,
                 "Ignoring startTransition: This interactor asked to transition from " +
                     "$fromState -> $toState, but we last transitioned to " +
-                    "${transitionInteractor.currentTransitionInfoInternal.value.to}, not " +
-                    "$fromState. This should never happen - check currentTransitionInfoInternal " +
-                    "or use filterRelevantKeyguardState before starting transitions."
+                    "${internalTransitionInteractor.currentTransitionInfoInternal.value.to}, not" +
+                    " $fromState. This should never happen - check currentTransitionInfoInternal" +
+                    " or use filterRelevantKeyguardState before starting transitions."
             )
 
             if (fromState == transitionInteractor.finishedKeyguardState.replayCache.last()) {
@@ -164,6 +168,7 @@ sealed class TransitionInteractor(
      */
     @Deprecated("Will be merged into maybeStartTransitionToOccludedOrInsecureCamera")
     suspend fun maybeHandleInsecurePowerGesture(): Boolean {
+        if (SceneContainerFlag.isEnabled) return false
         if (keyguardOcclusionInteractor.shouldTransitionFromPowerButtonGesture()) {
             if (keyguardInteractor.isKeyguardDismissible.value) {
                 startTransitionTo(
@@ -238,12 +243,11 @@ sealed class TransitionInteractor(
      * Whether we're in the KeyguardState relevant to this From*TransitionInteractor (which we know
      * from [fromState]).
      *
-     * This uses [KeyguardTransitionInteractor.currentTransitionInfoInternal], which is more up to
-     * date than [startedKeyguardState] as it does not wait for the emission of the first STARTED
-     * step.
+     * This uses [currentTransitionInfoInternal], which is more up to date than
+     * [startedKeyguardState] as it does not wait for the emission of the first STARTED step.
      */
     fun inOrTransitioningToRelevantKeyguardState(): Boolean {
-        return transitionInteractor.currentTransitionInfoInternal.value.to == fromState
+        return internalTransitionInteractor.currentTransitionInfoInternal.value.to == fromState
     }
 
     /**

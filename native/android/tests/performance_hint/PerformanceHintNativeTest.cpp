@@ -159,6 +159,10 @@ TEST_F(PerformanceHintTest, TestSession) {
     int result = APerformanceHint_updateTargetWorkDuration(session, targetDurationNanos);
     EXPECT_EQ(0, result);
 
+    // subsequent call with same target should be ignored but return no error
+    result = APerformanceHint_updateTargetWorkDuration(session, targetDurationNanos);
+    EXPECT_EQ(0, result);
+
     usleep(2); // Sleep for longer than preferredUpdateRateNanos.
     int64_t actualDurationNanos = 20;
     std::vector<int64_t> actualDurations;

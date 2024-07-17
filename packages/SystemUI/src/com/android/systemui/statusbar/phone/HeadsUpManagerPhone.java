@@ -104,6 +104,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private boolean mIsExpanded;
     private int mStatusBarState;
     private AnimationStateHandler mAnimationStateHandler;
+
     private int mHeadsUpInset;
 
     // Used for determining the region for touch interaction
@@ -158,7 +159,6 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         mGroupMembershipManager = groupMembershipManager;
         mVisualStabilityProvider = visualStabilityProvider;
         mAvalancheController = avalancheController;
-
         updateResources();
         configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
             @Override
@@ -171,10 +171,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
                 updateResources();
             }
         });
-        if (!NotificationsHeadsUpRefactor.isEnabled()) {
-            javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(),
+        javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(),
                     this::onShadeOrQsExpanded);
-        }
     }
 
     public void setAnimationStateHandler(AnimationStateHandler handler) {
@@ -202,6 +200,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
      * Gets the touchable region needed for heads up notifications. Returns null if no touchable
      * region is required (ie: no heads up notification currently exists).
      */
+    // TODO(b/347007367): With scene container enabled this method may report outdated regions
     @Override
     public @Nullable Region getTouchableRegion() {
         NotificationEntry topEntry = getTopEntry();
@@ -268,10 +267,9 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     }
 
     private void onShadeOrQsExpanded(Boolean isExpanded) {
-        NotificationsHeadsUpRefactor.assertInLegacyMode();
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
-            if (isExpanded) {
+            if (!NotificationsHeadsUpRefactor.isEnabled() && isExpanded) {
                 mHeadsUpAnimatingAway.setValue(false);
             }
         }

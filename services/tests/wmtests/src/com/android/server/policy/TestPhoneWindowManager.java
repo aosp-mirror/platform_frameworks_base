@@ -568,6 +568,12 @@ class TestPhoneWindowManager {
         doReturn(isShowing).when(mKeyguardServiceDelegate).isShowing();
     }
 
+    void overrideRoleManager() {
+        doReturn(mContext).when(mContext).createContextAsUser(any(), anyInt());
+        doReturn(mRoleManager).when(mContext).getSystemService(eq(RoleManager.class));
+        doReturn(mPackageManager).when(mContext).getPackageManager();
+    }
+
     void setupAssistForLaunch() {
         doNothing().when(mPhoneWindowManager).sendCloseSystemWindows();
         doReturn(true).when(mPhoneWindowManager).isUserSetupComplete();
@@ -709,7 +715,7 @@ class TestPhoneWindowManager {
             throw new AssertionError("failed to assert " + category, t);
         }
         // Reset verifier for next call.
-        Mockito.reset(mContext);
+        Mockito.clearInvocations(mContext);
     }
 
     void assertLaunchRole(String role) {
@@ -719,10 +725,10 @@ class TestPhoneWindowManager {
             verify(mContext).startActivityAsUser(intentCaptor.capture(), any());
             switch (role) {
                 case RoleManager.ROLE_BROWSER:
-                    Assert.assertEquals(intentCaptor.getValue(), mBrowserIntent);
+                    Assert.assertEquals(mBrowserIntent, intentCaptor.getValue());
                     break;
                 case RoleManager.ROLE_SMS:
-                    Assert.assertEquals(intentCaptor.getValue(), mSmsIntent);
+                    Assert.assertEquals(mSmsIntent, intentCaptor.getValue());
                     break;
                 default:
                     throw new AssertionError("Role " + role + " not supported in tests.");
@@ -731,7 +737,7 @@ class TestPhoneWindowManager {
             throw new AssertionError("failed to assert " + role, t);
         }
         // Reset verifier for next call.
-        Mockito.reset(mContext);
+        Mockito.clearInvocations(mContext);
     }
 
 

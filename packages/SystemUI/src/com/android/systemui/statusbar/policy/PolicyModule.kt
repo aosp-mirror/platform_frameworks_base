@@ -29,8 +29,10 @@ import com.android.systemui.qs.tiles.DndTile
 import com.android.systemui.qs.tiles.FlashlightTile
 import com.android.systemui.qs.tiles.LocationTile
 import com.android.systemui.qs.tiles.MicrophoneToggleTile
+import com.android.systemui.qs.tiles.ModesTile
 import com.android.systemui.qs.tiles.UiModeNightTile
 import com.android.systemui.qs.tiles.WorkModeTile
+import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.impl.alarm.domain.AlarmTileMapper
 import com.android.systemui.qs.tiles.impl.alarm.domain.interactor.AlarmTileDataInteractor
@@ -44,6 +46,10 @@ import com.android.systemui.qs.tiles.impl.location.domain.LocationTileMapper
 import com.android.systemui.qs.tiles.impl.location.domain.interactor.LocationTileDataInteractor
 import com.android.systemui.qs.tiles.impl.location.domain.interactor.LocationTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.location.domain.model.LocationTileModel
+import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileDataInteractor
+import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
+import com.android.systemui.qs.tiles.impl.modes.ui.ModesTileMapper
 import com.android.systemui.qs.tiles.impl.sensorprivacy.SensorPrivacyToggleTileDataInteractor
 import com.android.systemui.qs.tiles.impl.sensorprivacy.domain.SensorPrivacyToggleTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.sensorprivacy.domain.model.SensorPrivacyToggleTileModel
@@ -74,11 +80,52 @@ interface PolicyModule {
     /** Inject DndTile into tileMap in QSModule */
     @Binds @IntoMap @StringKey(DndTile.TILE_SPEC) fun bindDndTile(dndTile: DndTile): QSTileImpl<*>
 
+    /** Inject ModesTile into tileMap in QSModule */
+    @Binds
+    @IntoMap
+    @StringKey(ModesTile.TILE_SPEC)
+    fun bindModesTile(modesTile: ModesTile): QSTileImpl<*>
+
     /** Inject WorkModeTile into tileMap in QSModule */
     @Binds
     @IntoMap
     @StringKey(WorkModeTile.TILE_SPEC)
     fun bindWorkModeTile(workModeTile: WorkModeTile): QSTileImpl<*>
+
+    @Binds
+    @IntoMap
+    @StringKey(FLASHLIGHT_TILE_SPEC)
+    fun provideAirplaneModeAvailabilityInteractor(
+        impl: FlashlightTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(LOCATION_TILE_SPEC)
+    fun provideLocationAvailabilityInteractor(
+        impl: LocationTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(ALARM_TILE_SPEC)
+    fun provideAlarmAvailabilityInteractor(
+        impl: AlarmTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(UIMODENIGHT_TILE_SPEC)
+    fun provideUiModeNightAvailabilityInteractor(
+        impl: UiModeNightTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(WORK_MODE_TILE_SPEC)
+    fun provideWorkModeAvailabilityInteractor(
+        impl: WorkModeTileDataInteractor
+    ): QSTileAvailabilityInteractor
 
     companion object {
         const val FLASHLIGHT_TILE_SPEC = "flashlight"
@@ -89,6 +136,7 @@ interface PolicyModule {
         const val CAMERA_TOGGLE_TILE_SPEC = "cameratoggle"
         const val MIC_TOGGLE_TILE_SPEC = "mictoggle"
         const val DND_TILE_SPEC = "dnd"
+        const val MODES_TILE_SPEC = "modes"
 
         /** Inject flashlight config */
         @Provides
@@ -287,6 +335,15 @@ interface PolicyModule {
                 mapper.create(SensorPrivacyTileResources.CameraPrivacyTileResources),
             )
 
+        @Provides
+        @IntoMap
+        @StringKey(CAMERA_TOGGLE_TILE_SPEC)
+        fun provideCameraToggleAvailabilityInteractor(
+            factory: SensorPrivacyToggleTileDataInteractor.Factory
+        ): QSTileAvailabilityInteractor {
+            return factory.create(CAMERA)
+        }
+
         /** Inject microphone toggle config */
         @Provides
         @IntoMap
@@ -320,6 +377,15 @@ interface PolicyModule {
                 mapper.create(SensorPrivacyTileResources.MicrophonePrivacyTileResources),
             )
 
+        @Provides
+        @IntoMap
+        @StringKey(MIC_TOGGLE_TILE_SPEC)
+        fun provideMicToggleModeAvailabilityInteractor(
+            factory: SensorPrivacyToggleTileDataInteractor.Factory
+        ): QSTileAvailabilityInteractor {
+            return factory.create(MICROPHONE)
+        }
+
         /** Inject microphone toggle config */
         @Provides
         @IntoMap
@@ -333,6 +399,37 @@ interface PolicyModule {
                         labelRes = R.string.quick_settings_dnd_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(MODES_TILE_SPEC)
+        fun provideModesTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(MODES_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_dnd_icon_off,
+                        labelRes = R.string.quick_settings_modes_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        /** Inject ModesTile into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(MODES_TILE_SPEC)
+        fun provideModesTileViewModel(
+            factory: QSTileViewModelFactory.Static<ModesTileModel>,
+            mapper: ModesTileMapper,
+            stateInteractor: ModesTileDataInteractor,
+            userActionInteractor: ModesTileUserActionInteractor
+        ): QSTileViewModel =
+            factory.create(
+                TileSpec.create(MODES_TILE_SPEC),
+                userActionInteractor,
+                stateInteractor,
+                mapper,
             )
     }
 

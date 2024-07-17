@@ -22,11 +22,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.content.Context;
@@ -36,9 +38,12 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.provider.Settings;
 import android.util.Pair;
 
 import com.android.settingslib.widget.AdaptiveIcon;
+
+import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -561,5 +566,78 @@ public class BluetoothUtilsTest {
         when(mBluetoothDevice.isConnected()).thenReturn(true);
 
         assertThat(BluetoothUtils.isAvailableHearingDevice(mCachedBluetoothDevice)).isEqualTo(true);
+    }
+
+    @Test
+    public void getGroupId_getCsipProfileId() {
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(1);
+
+        assertThat(BluetoothUtils.getGroupId(mCachedBluetoothDevice)).isEqualTo(1);
+    }
+
+    @Test
+    public void getGroupId_getLeAudioProfileId() {
+        when(mCachedBluetoothDevice.getGroupId())
+                .thenReturn(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        LeAudioProfile leAudio = mock(LeAudioProfile.class);
+        when(leAudio.getGroupId(mBluetoothDevice)).thenReturn(1);
+        when(mCachedBluetoothDevice.getProfiles()).thenReturn(ImmutableList.of(leAudio));
+
+        assertThat(BluetoothUtils.getGroupId(mCachedBluetoothDevice)).isEqualTo(1);
+    }
+
+    @Test
+    public void getSecondaryDeviceForBroadcast_errorState_returnNull() {
+        assertThat(BluetoothUtils.getSecondaryDeviceForBroadcast(mContext, mLocalBluetoothManager))
+                .isNull();
+    }
+
+    @Test
+    public void getSecondaryDeviceForBroadcast_noSecondary_returnNull() {
+        Settings.Secure.putInt(
+                mContext.getContentResolver(),
+                BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
+                1);
+        CachedBluetoothDeviceManager deviceManager = mock(CachedBluetoothDeviceManager.class);
+        when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(deviceManager);
+        when(deviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedBluetoothDevice);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(1);
+        BluetoothLeBroadcastReceiveState state = mock(BluetoothLeBroadcastReceiveState.class);
+        when(mAssistant.getAllSources(mBluetoothDevice)).thenReturn(ImmutableList.of(state));
+        when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(mBluetoothDevice));
+
+        assertThat(BluetoothUtils.getSecondaryDeviceForBroadcast(mContext, mLocalBluetoothManager))
+                .isNull();
+    }
+
+    @Test
+    public void getSecondaryDeviceForBroadcast_returnCorrectDevice() {
+        Settings.Secure.putInt(
+                mContext.getContentResolver(),
+                BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
+                1);
+        CachedBluetoothDeviceManager deviceManager = mock(CachedBluetoothDeviceManager.class);
+        when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(deviceManager);
+        CachedBluetoothDevice cachedBluetoothDevice = mock(CachedBluetoothDevice.class);
+        BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
+        when(cachedBluetoothDevice.getDevice()).thenReturn(bluetoothDevice);
+        when(cachedBluetoothDevice.getGroupId()).thenReturn(1);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(2);
+        when(deviceManager.findDevice(bluetoothDevice)).thenReturn(cachedBluetoothDevice);
+        when(deviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedBluetoothDevice);
+        BluetoothLeBroadcastReceiveState state = mock(BluetoothLeBroadcastReceiveState.class);
+        List<Long> bisSyncState = new ArrayList<>();
+        bisSyncState.add(1L);
+        when(state.getBisSyncState()).thenReturn(bisSyncState);
+        when(mAssistant.getAllSources(any(BluetoothDevice.class)))
+                .thenReturn(ImmutableList.of(state));
+        when(mAssistant.getAllConnectedDevices())
+                .thenReturn(ImmutableList.of(mBluetoothDevice, bluetoothDevice));
+
+        assertThat(BluetoothUtils.getSecondaryDeviceForBroadcast(mContext, mLocalBluetoothManager))
+                .isEqualTo(mCachedBluetoothDevice);
     }
 }

@@ -31,7 +31,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.setSceneTransition
-import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -75,7 +74,6 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
                 dismissInteractor = dismissInteractorWithDependencies.interactor,
                 applicationScope = testScope.backgroundScope,
-                sceneInteractor = kosmos.sceneInteractor,
             )
     }
 

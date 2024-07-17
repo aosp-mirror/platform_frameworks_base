@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.policy
 
 import android.app.Notification
+import android.os.Handler
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -59,6 +60,9 @@ class AvalancheControllerTest : SysuiTestCase() {
     // For creating TestableHeadsUpManager
     @Mock private val mAccessibilityMgr: AccessibilityManagerWrapper? = null
     private val mUiEventLoggerFake = UiEventLoggerFake()
+
+    @Mock private lateinit var mBgHandler: Handler
+
     private val mLogger = Mockito.spy(HeadsUpManagerLogger(logcatLogBuffer()))
     private val mGlobalSettings = FakeGlobalSettings()
     private val mSystemClock = FakeSystemClock()
@@ -78,7 +82,7 @@ class AvalancheControllerTest : SysuiTestCase() {
 
         // Initialize AvalancheController and TestableHeadsUpManager during setUp instead of
         // declaration, where mocks are null
-        mAvalancheController = AvalancheController(dumpManager, mUiEventLoggerFake)
+        mAvalancheController = AvalancheController(dumpManager, mUiEventLoggerFake, mBgHandler)
 
         testableHeadsUpManager =
             TestableHeadsUpManager(

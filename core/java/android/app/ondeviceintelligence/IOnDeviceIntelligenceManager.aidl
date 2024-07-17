@@ -24,6 +24,8 @@
  import android.os.Bundle;
  import android.app.ondeviceintelligence.Feature;
  import android.app.ondeviceintelligence.FeatureDetails;
+ import android.app.ondeviceintelligence.InferenceInfo;
+ import java.util.List;
  import android.app.ondeviceintelligence.IDownloadCallback;
  import android.app.ondeviceintelligence.IListFeaturesCallback;
  import android.app.ondeviceintelligence.IFeatureCallback;
@@ -72,4 +74,6 @@ interface IOnDeviceIntelligenceManager {
                     in IStreamingResponseCallback streamingCallback) = 8;
 
       String getRemoteServicePackageName() = 9;
+
+      List<InferenceInfo> getLatestInferenceInfo(long startTimeEpochMillis) = 10;
  }

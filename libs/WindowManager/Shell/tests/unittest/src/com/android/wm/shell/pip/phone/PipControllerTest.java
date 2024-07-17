@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 
 import static java.lang.Integer.MAX_VALUE;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -232,27 +231,6 @@ public class PipControllerTest extends ShellTestCase {
                 mMockTaskStackListener, mMockPipParamsChangedForwarder,
                 mMockDisplayInsetsController, mMockTabletopModeController,
                 mMockOneHandedController, mMockExecutor));
-    }
-
-    @Test
-    public void onActivityHidden_isLastPipComponentName_clearLastPipComponent() {
-        final ComponentName component1 = new ComponentName(mContext, "component1");
-        when(mMockPipBoundsState.getLastPipComponentName()).thenReturn(component1);
-
-        mPipController.mPinnedTaskListener.onActivityHidden(component1);
-
-        verify(mMockPipBoundsState).setLastPipComponentName(null);
-    }
-
-    @Test
-    public void onActivityHidden_isNotLastPipComponentName_lastPipComponentNotCleared() {
-        final ComponentName component1 = new ComponentName(mContext, "component1");
-        final ComponentName component2 = new ComponentName(mContext, "component2");
-        when(mMockPipBoundsState.getLastPipComponentName()).thenReturn(component1);
-
-        mPipController.mPinnedTaskListener.onActivityHidden(component2);
-
-        verify(mMockPipBoundsState, never()).setLastPipComponentName(null);
     }
 
     @Test

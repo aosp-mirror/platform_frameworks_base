@@ -28,6 +28,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.os.Handler;
 import android.testing.TestableLooper;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -58,14 +59,16 @@ public class LightBarTransitionsControllerTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private Handler mBgHandler;
 
     private LightBarTransitionsController mLightBarTransitionsController;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mLightBarTransitionsController = new LightBarTransitionsController(mContext, mApplier,
-                new CommandQueue(mContext, new FakeDisplayTracker(mContext)),
+        mLightBarTransitionsController = new LightBarTransitionsController(mContext,
+                mBgHandler, mApplier, new CommandQueue(mContext, new FakeDisplayTracker(mContext)),
                 mKeyguardStateController, mStatusBarStateController);
     }
 

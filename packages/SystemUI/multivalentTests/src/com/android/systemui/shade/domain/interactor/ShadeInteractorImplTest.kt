@@ -19,6 +19,8 @@ package com.android.systemui.shade.domain.interactor
 import android.app.StatusBarManager.DISABLE2_NONE
 import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
 import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -37,7 +39,10 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
+import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.shadeTestUtil
+import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
 import com.android.systemui.statusbar.phone.dozeParameters
@@ -451,5 +456,45 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
             )
             val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
             assertThat(isShadeTouchable).isTrue()
+        }
+
+    @Test
+    @DisableFlags(DualShade.FLAG_NAME)
+    fun legacyShadeMode_narrowScreen_singleShade() =
+        testScope.runTest {
+            val shadeMode by collectLastValue(underTest.shadeMode)
+            kosmos.shadeRepository.setShadeLayoutWide(false)
+
+            assertThat(shadeMode).isEqualTo(ShadeMode.Single)
+        }
+
+    @Test
+    @DisableFlags(DualShade.FLAG_NAME)
+    fun legacyShadeMode_wideScreen_splitShade() =
+        testScope.runTest {
+            val shadeMode by collectLastValue(underTest.shadeMode)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+
+            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun shadeMode_wideScreen_isDual() =
+        testScope.runTest {
+            val shadeMode by collectLastValue(underTest.shadeMode)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+
+            assertThat(shadeMode).isEqualTo(ShadeMode.Dual)
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun shadeMode_narrowScreen_isDual() =
+        testScope.runTest {
+            val shadeMode by collectLastValue(underTest.shadeMode)
+            kosmos.shadeRepository.setShadeLayoutWide(false)
+
+            assertThat(shadeMode).isEqualTo(ShadeMode.Dual)
         }
 }

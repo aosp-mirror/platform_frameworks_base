@@ -81,16 +81,20 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
         orientation: Orientation,
         builder: OverscrollBuilder.() -> Unit
     ): OverscrollSpec {
-        fun transformationSpec(): TransformationSpecImpl {
-            val impl = OverscrollBuilderImpl().apply(builder)
-            return TransformationSpecImpl(
-                progressSpec = snap(),
-                swipeSpec = null,
-                distance = impl.distance,
-                transformations = impl.transformations,
+        val impl = OverscrollBuilderImpl().apply(builder)
+        val spec =
+            OverscrollSpecImpl(
+                scene = scene,
+                orientation = orientation,
+                transformationSpec =
+                    TransformationSpecImpl(
+                        progressSpec = snap(),
+                        swipeSpec = null,
+                        distance = impl.distance,
+                        transformations = impl.transformations,
+                    ),
+                progressConverter = impl.progressConverter
             )
-        }
-        val spec = OverscrollSpecImpl(scene, orientation, transformationSpec())
         transitionOverscrollSpecs.add(spec)
         return spec
     }
@@ -231,6 +235,8 @@ internal class TransitionBuilderImpl : BaseTransitionBuilderImpl(), TransitionBu
 }
 
 internal open class OverscrollBuilderImpl : BaseTransitionBuilderImpl(), OverscrollBuilder {
+    override var progressConverter: (Float) -> Float = { it }
+
     override fun translate(
         matcher: ElementMatcher,
         x: OverscrollScope.() -> Float,

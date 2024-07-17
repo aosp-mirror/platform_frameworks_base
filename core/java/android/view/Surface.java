@@ -422,7 +422,7 @@ public class Surface implements Parcelable {
     /**
      * Free all server-side state associated with this surface and
      * release this object's reference.  This method can only be
-     * called from the process that created the service.
+     * called from the process that created the surface.
      * @hide
      */
     @UnsupportedAppUsage

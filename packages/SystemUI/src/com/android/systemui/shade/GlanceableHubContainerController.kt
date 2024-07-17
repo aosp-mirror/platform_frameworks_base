@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.content.Context
+import android.graphics.Insets
 import android.graphics.Rect
 import android.os.PowerManager
 import android.os.SystemClock
@@ -25,6 +26,7 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
@@ -37,7 +39,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.Flags.glanceableHubFullscreenSwipe
+import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.communal.dagger.Communal
@@ -48,8 +50,6 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -151,8 +151,6 @@ constructor(
     /**
      * True if either the primary or alternate bouncer are open, meaning the hub should not receive
      * any touch input.
-     *
-     * Tracks [KeyguardTransitionInteractor.isFinishedInState] for [KeyguardState.isBouncerState].
      */
     private var anyBouncerShowing = false
 
@@ -264,15 +262,33 @@ constructor(
             // Run when the touch handling lifecycle is RESUMED, meaning the hub is visible and not
             // occluded.
             lifecycleRegistry.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val exclusionRect =
-                    Rect(
-                        0,
-                        topEdgeSwipeRegionWidth,
-                        containerView.right,
-                        containerView.bottom - bottomEdgeSwipeRegionWidth
-                    )
+                // Avoid adding exclusion to right/left edges to allow back gestures.
+                val insets =
+                    if (glanceableHubBackGesture()) {
+                        containerView.rootWindowInsets.getInsets(WindowInsets.Type.systemGestures())
+                    } else {
+                        Insets.NONE
+                    }
 
-                containerView.systemGestureExclusionRects = listOf(exclusionRect)
+                containerView.systemGestureExclusionRects =
+                    listOf(
+                        // Only allow swipe up to bouncer and swipe down to shade in the very
+                        // top/bottom to avoid conflicting with widgets in the hub grid.
+                        Rect(
+                            insets.left,
+                            topEdgeSwipeRegionWidth,
+                            containerView.right - insets.right,
+                            containerView.bottom - bottomEdgeSwipeRegionWidth
+                        ),
+                        // Disable back gestures on the left side of the screen, to avoid
+                        // conflicting with scene transitions.
+                        Rect(
+                            0,
+                            0,
+                            insets.right,
+                            containerView.bottom,
+                        )
+                    )
             }
         }
 
@@ -309,13 +325,9 @@ constructor(
         )
         collectFlow(containerView, keyguardInteractor.isDreaming, { isDreaming = it })
 
-        if (glanceableHubFullscreenSwipe()) {
-            communalContainerWrapper = CommunalWrapper(containerView.context)
-            communalContainerWrapper?.addView(communalContainerView)
-            return communalContainerWrapper!!
-        } else {
-            return containerView
-        }
+        communalContainerWrapper = CommunalWrapper(containerView.context)
+        communalContainerWrapper?.addView(communalContainerView)
+        return communalContainerWrapper!!
     }
 
     /**
@@ -371,8 +383,7 @@ constructor(
         // and the touch is within the horizontal notification band on the screen, do not process
         // the touch.
         if (
-            glanceableHubFullscreenSwipe() &&
-                !hubShowing &&
+            !hubShowing &&
                 !notificationStackScrollLayoutController.isBelowLastNotification(ev.x, ev.y)
         ) {
             return false
@@ -389,17 +400,7 @@ constructor(
         val hubOccluded = anyBouncerShowing || shadeShowing
 
         if (isDown && !hubOccluded) {
-            if (glanceableHubFullscreenSwipe()) {
-                isTrackingHubTouch = true
-            } else {
-                val x = ev.rawX
-                val inOpeningSwipeRegion: Boolean = x >= view.width - rightEdgeSwipeRegionWidth
-                if (inOpeningSwipeRegion || hubShowing) {
-                    // Steal touch events when the hub is open, or if the touch started in the
-                    // opening gesture region.
-                    isTrackingHubTouch = true
-                }
-            }
+            isTrackingHubTouch = true
         }
 
         if (isTrackingHubTouch) {
@@ -419,20 +420,12 @@ constructor(
     private fun dispatchTouchEvent(view: View, ev: MotionEvent): Boolean {
         try {
             var handled = false
-            if (glanceableHubFullscreenSwipe()) {
-                communalContainerWrapper?.dispatchTouchEvent(ev) {
-                    if (it) {
-                        handled = true
-                    }
+            communalContainerWrapper?.dispatchTouchEvent(ev) {
+                if (it) {
+                    handled = true
                 }
-                return handled || hubShowing
-            } else {
-                view.dispatchTouchEvent(ev)
-                // Return true regardless of dispatch result as some touches at the start of a
-                // gesture
-                // may return false from dispatchTouchEvent.
-                return true
             }
+            return handled || hubShowing
         } finally {
             powerManager.userActivity(
                 SystemClock.uptimeMillis(),

@@ -16,15 +16,15 @@
 
 package com.android.keyguard
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import android.testing.AndroidTestingRunner
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class BouncerPanelExpansionCalculatorTest : SysuiTestCase() {
     @Test

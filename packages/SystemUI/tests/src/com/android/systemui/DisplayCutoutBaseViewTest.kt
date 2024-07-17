@@ -23,11 +23,11 @@ import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Region
-import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.view.DisplayCutout
 import android.view.DisplayInfo
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.never
 import com.android.internal.R
@@ -42,7 +42,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class DisplayCutoutBaseViewTest : SysuiTestCase() {
 

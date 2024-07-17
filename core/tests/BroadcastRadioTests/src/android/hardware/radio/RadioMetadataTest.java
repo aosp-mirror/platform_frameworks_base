@@ -470,6 +470,20 @@ public final class RadioMetadataTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void equals_forMetadataWithDifferentContents_returnsFalse() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+        RadioMetadata metadata1 = mBuilder
+                .putStringArray(RadioMetadata.METADATA_KEY_UFIDS, UFIDS_VALUE)
+                .build();
+        RadioMetadata metadata2 = mBuilder
+                .putStringArray(RadioMetadata.METADATA_KEY_UFIDS, new String[]{"ufid3", "ufid2"})
+                .build();
+
+        mExpect.withMessage("Metadata with the same contents")
+                .that(metadata1).isNotEqualTo(metadata2);
+    }
+
+    @Test
     public void describeContents_forMetadata() {
         RadioMetadata metadata = mBuilder.build();
 
@@ -552,5 +566,26 @@ public final class RadioMetadataTest extends ExtendedRadioMockitoTestCase {
         mExpect.withMessage("Bitmap with resizing")
                 .that(metadata.getBitmap(RadioMetadata.METADATA_KEY_ICON))
                 .isEqualTo(bitmapResized);
+    }
+
+    @Test
+    public void toString_containsMetadataValues() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+        RadioMetadata metadataExpected = mBuilder
+                .putInt(RadioMetadata.METADATA_KEY_RDS_PI, INT_KEY_VALUE)
+                .putString(RadioMetadata.METADATA_KEY_ARTIST, ARTIST_KEY_VALUE)
+                .putStringArray(RadioMetadata.METADATA_KEY_UFIDS, UFIDS_VALUE)
+                .build();
+
+        String metadateString = metadataExpected.toString();
+
+        mExpect.withMessage("RDS PI value in converted sting for metadata")
+                .that(metadateString).contains(Integer.toString(INT_KEY_VALUE));
+        mExpect.withMessage("Artist value in converted sting for metadata")
+                .that(metadateString).contains(ARTIST_KEY_VALUE);
+        for (int i = 0; i < UFIDS_VALUE.length; i++) {
+            mExpect.withMessage("UFIDs[%s] value in converted sting for metadata", i)
+                    .that(metadateString).contains(UFIDS_VALUE[i]);
+        }
     }
 }

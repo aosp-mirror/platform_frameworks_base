@@ -71,7 +71,7 @@
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
     <item msgid="3961868665260627524">"অক্ষম কৰক"</item>
     <item msgid="2505973306504851132">"বৰ্ণৰ ষ্ট্ৰীঙেৰে পূৰ কৰক"</item>
-    <item msgid="5883011000629613855">"কেৱল হেডাৰ এৰক"</item>
+    <item msgid="5883011000629613855">"কেৱল হে’ডাৰ এৰক"</item>
     <item msgid="1051534112762023603">"সম্পূৰ্ণকৈ আঁতৰাওক"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
@@ -276,8 +276,8 @@
   </string-array>
   <string-array name="usb_configuration_titles">
     <item msgid="3358668781763928157">"চাৰ্জ কৰি থকা হৈছে"</item>
-    <item msgid="7804797564616858506">"এমটিপি (মিডিয়া ট্ৰান্সফাৰ প্ৰ’ট’কল)"</item>
-    <item msgid="910925519184248772">"পিটিপি (পিকচাৰ ট্ৰান্সফাৰ প্ৰ’ট’কল)"</item>
+    <item msgid="7804797564616858506">"এমটিপি (মিডিয়া ট্ৰান্সফাৰ প্ৰ্ৰ\'টকল)"</item>
+    <item msgid="910925519184248772">"পিটিপি (পিকচাৰ ট্ৰান্সফাৰ প্ৰ্ৰ\'টকল)"</item>
     <item msgid="3825132913289380004">"RNDIS (USB ইথাৰনেট)"</item>
     <item msgid="8828567335701536560">"ধ্বনিৰ উৎস"</item>
     <item msgid="8688681727755534982">"এমআইডিআই"</item>

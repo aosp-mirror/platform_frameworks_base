@@ -18,6 +18,8 @@ package com.android.systemui.screenrecord;
 
 import static android.os.Process.myUid;
 
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertFalse;
@@ -69,10 +71,6 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-/**
- * Tests for exception handling and  bitmap configuration in adding smart actions to Screenshot
- * Notification.
- */
 public class RecordingControllerTest extends SysuiTestCase {
 
     private static final int TEST_USER_ID = 12345;
@@ -146,6 +144,7 @@ public class RecordingControllerTest extends SysuiTestCase {
                 mFeatureFlags,
                 () -> mDevicePolicyResolver,
                 mUserTracker,
+                new RecordingControllerLogger(logcatLogBuffer("RecordingControllerTest")),
                 mMediaProjectionMetricsLogger,
                 mScreenCaptureDisabledDialogDelegate,
                 mScreenRecordDialogFactory,

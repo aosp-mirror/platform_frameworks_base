@@ -15,8 +15,8 @@ package com.android.systemui.statusbar.policy
 
 import android.app.StatusBarManager
 import android.content.res.Configuration
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 
 import com.android.systemui.res.R
@@ -35,7 +35,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class RemoteInputQuickSettingsDisablerTest : SysuiTestCase() {
 

@@ -119,6 +119,8 @@ import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.BatteryManager;
+import android.os.BatteryProperty;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.BatteryStatsManager;
@@ -243,6 +245,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -769,6 +772,7 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.FULL_BATTERY_CAPACITY:
                     case FrameworkStatsLog.BATTERY_VOLTAGE:
                     case FrameworkStatsLog.BATTERY_CYCLE_COUNT:
+                    case FrameworkStatsLog.BATTERY_HEALTH:
                         synchronized (mHealthHalLock) {
                             return pullHealthHalLocked(atomTag, data);
                         }
@@ -999,6 +1003,7 @@ public class StatsPullAtomService extends SystemService {
         registerFullBatteryCapacity();
         registerBatteryVoltage();
         registerBatteryCycleCount();
+        registerBatteryHealth();
         registerSettingsStats();
         registerInstalledIncrementalPackages();
         registerKeystoreStorageStats();
@@ -1278,7 +1283,7 @@ public class StatsPullAtomService extends SystemService {
             }
             case FrameworkStatsLog.PROXY_BYTES_TRANSFER_BY_FG_BG: {
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTemplate(
-                        new NetworkTemplate.Builder(MATCH_PROXY).build(),  /*includeTags=*/true);
+                        new NetworkTemplate.Builder(MATCH_PROXY).build(),  /*includeTags=*/false);
                 if (stats != null) {
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
                             new int[]{TRANSPORT_BLUETOOTH},
@@ -1537,6 +1542,11 @@ public class StatsPullAtomService extends SystemService {
         final long bucketDuration = Settings.Global.getLong(mContext.getContentResolver(),
                 NETSTATS_UID_BUCKET_DURATION, NETSTATS_UID_DEFAULT_BUCKET_DURATION_MS);
 
+        // Set startTime before boot so that NetworkStats includes at least one full bucket.
+        // Set endTime in the future so that NetworkStats includes everything in the active bucket.
+        final long startTime = currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration;
+        final long endTime = currentTimeInMillis + bucketDuration;
+
         // TODO (b/156313635): This is short-term hack to allow perfd gets updated networkStats
         //  history when query in every second in order to show realtime statistics. However,
         //  this is not a good long-term solution since NetworkStatsService will make frequent
@@ -1547,9 +1557,7 @@ public class StatsPullAtomService extends SystemService {
         }
 
         final android.app.usage.NetworkStats queryNonTaggedStats =
-                getNetworkStatsManager().querySummary(
-                        template, currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration,
-                        currentTimeInMillis);
+                getNetworkStatsManager().querySummary(template, startTime, endTime);
 
         final NetworkStats nonTaggedStats =
                 NetworkStatsUtils.fromPublicNetworkStats(queryNonTaggedStats);
@@ -1557,9 +1565,7 @@ public class StatsPullAtomService extends SystemService {
         if (!includeTags) return nonTaggedStats;
 
         final android.app.usage.NetworkStats queryTaggedStats =
-                getNetworkStatsManager().queryTaggedSummary(template,
-                        currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration,
-                        currentTimeInMillis);
+                getNetworkStatsManager().queryTaggedSummary(template, startTime, endTime);
         final NetworkStats taggedStats =
                 NetworkStatsUtils.fromPublicNetworkStats(queryTaggedStats);
         queryTaggedStats.close();
@@ -4365,7 +4371,15 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
-    int pullHealthHalLocked(int atomTag, List<StatsEvent> pulledData) {
+    private void registerBatteryHealth() {
+        int tagId = FrameworkStatsLog.BATTERY_HEALTH;
+        mStatsManager.setPullAtomCallback(tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR, mStatsCallbackImpl);
+    }
+
+    @GuardedBy("mHealthHalLock")
+    private int pullHealthHalLocked(int atomTag, List<StatsEvent> pulledData) {
         if (mHealthService == null) {
             return StatsManager.PULL_SKIP;
         }
@@ -4396,6 +4410,44 @@ public class StatsPullAtomService extends SystemService {
             case FrameworkStatsLog.BATTERY_CYCLE_COUNT:
                 pulledValue = healthInfo.batteryCycleCount;
                 break;
+            case FrameworkStatsLog.BATTERY_HEALTH:
+                android.hardware.health.BatteryHealthData bhd;
+                try {
+                    bhd = mHealthService.getBatteryHealthData();
+                } catch (RemoteException | IllegalStateException e) {
+                    return StatsManager.PULL_SKIP;
+                }
+                if (bhd == null) {
+                    return StatsManager.PULL_SKIP;
+                }
+
+                StatsEvent batteryHealthEvent;
+                try {
+                    BatteryProperty chargeStatusProperty = new BatteryProperty();
+                    BatteryProperty chargePolicyProperty = new BatteryProperty();
+
+                    if (0 > mHealthService.getProperty(
+                                BatteryManager.BATTERY_PROPERTY_STATUS, chargeStatusProperty)) {
+                        return StatsManager.PULL_SKIP;
+                    }
+                    if (0 > mHealthService.getProperty(
+                                BatteryManager.BATTERY_PROPERTY_CHARGING_POLICY,
+                                chargePolicyProperty)) {
+                        return StatsManager.PULL_SKIP;
+                    }
+                    int chargeStatus = (int) chargeStatusProperty.getLong();
+                    int chargePolicy = (int) chargePolicyProperty.getLong();
+                    batteryHealthEvent = BatteryHealthUtility.buildStatsEvent(
+                            atomTag, bhd, chargeStatus, chargePolicy);
+                    pulledData.add(batteryHealthEvent);
+
+                    return StatsManager.PULL_SUCCESS;
+                } catch (RemoteException | IllegalStateException e) {
+                    Slog.e(TAG, "Failed to add pulled data", e);
+                } catch (NoSuchAlgorithmException e) {
+                    Slog.e(TAG, "Could not find message digest algorithm", e);
+                }
+                return StatsManager.PULL_SKIP;
             default:
                 return StatsManager.PULL_SKIP;
         }

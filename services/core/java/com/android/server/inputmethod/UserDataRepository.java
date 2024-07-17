@@ -16,90 +16,68 @@
 
 package com.android.server.inputmethod;
 
+import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.content.pm.UserInfo;
-import android.os.Handler;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.pm.UserManagerInternal;
 
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
 final class UserDataRepository {
 
-    @GuardedBy("ImfLock.class")
+    private final ReentrantReadWriteLock mUserDataLock = new ReentrantReadWriteLock();
+
+    @GuardedBy("mUserDataLock")
     private final SparseArray<UserData> mUserData = new SparseArray<>();
 
     private final IntFunction<InputMethodBindingController> mBindingControllerFactory;
 
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     @NonNull
     UserData getOrCreate(@UserIdInt int userId) {
-        UserData userData = mUserData.get(userId);
-        if (userData == null) {
-            userData = new UserData(userId, mBindingControllerFactory.apply(userId));
-            mUserData.put(userId, userData);
+        mUserDataLock.writeLock().lock();
+        try {
+            UserData userData = mUserData.get(userId);
+            if (userData == null) {
+                userData = new UserData(userId, mBindingControllerFactory.apply(userId));
+                mUserData.put(userId, userData);
+            }
+            return userData;
+        } finally {
+            mUserDataLock.writeLock().unlock();
         }
-        return userData;
     }
 
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     void forAllUserData(Consumer<UserData> consumer) {
-        for (int i = 0; i < mUserData.size(); i++) {
-            consumer.accept(mUserData.valueAt(i));
+        final SparseArray<UserData> copiedArray;
+        mUserDataLock.readLock().lock();
+        try {
+            copiedArray = mUserData.clone();
+        } finally {
+            mUserDataLock.readLock().unlock();
+        }
+        for (int i = 0; i < copiedArray.size(); i++) {
+            consumer.accept(copiedArray.valueAt(i));
         }
     }
 
-    UserDataRepository(@NonNull Handler handler, @NonNull UserManagerInternal userManagerInternal,
+    UserDataRepository(
             @NonNull IntFunction<InputMethodBindingController> bindingControllerFactory) {
         mBindingControllerFactory = bindingControllerFactory;
-        userManagerInternal.addUserLifecycleListener(
-                new UserManagerInternal.UserLifecycleListener() {
-                    @Override
-                    public void onUserRemoved(UserInfo user) {
-                        final int userId = user.id;
-                        handler.post(() -> {
-                            synchronized (ImfLock.class) {
-                                mUserData.remove(userId);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onUserCreated(UserInfo user, Object unusedToken) {
-                        final int userId = user.id;
-                        handler.post(() -> {
-                            synchronized (ImfLock.class) {
-                                getOrCreate(userId);
-                            }
-                        });
-                    }
-                });
     }
 
-    /** Placeholder for all IMMS user specific fields */
-    static final class UserData {
-        @UserIdInt
-        final int mUserId;
-
-        @NonNull
-        final InputMethodBindingController mBindingController;
-
-        /**
-         * Intended to be instantiated only from this file.
-         */
-        private UserData(@UserIdInt int userId,
-                @NonNull InputMethodBindingController bindingController) {
-            mUserId = userId;
-            mBindingController = bindingController;
-        }
-
-        @Override
-        public String toString() {
-            return "UserData{" + "mUserId=" + mUserId + '}';
+    @AnyThread
+    void remove(@UserIdInt int userId) {
+        mUserDataLock.writeLock().lock();
+        try {
+            mUserData.remove(userId);
+        } finally {
+            mUserDataLock.writeLock().unlock();
         }
     }
 }

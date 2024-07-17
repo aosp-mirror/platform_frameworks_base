@@ -15,6 +15,7 @@
  */
 package com.android.systemui.flags
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -27,6 +28,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -35,6 +37,7 @@ import org.mockito.MockitoAnnotations
  * Be careful with the {FeatureFlagsReleaseRestarter} in this test. It has a call to System.exit()!
  */
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ScreenIdleConditionTest : SysuiTestCase() {
     private lateinit var condition: ScreenIdleCondition
 

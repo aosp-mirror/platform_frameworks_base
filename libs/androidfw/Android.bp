@@ -212,6 +212,7 @@ cc_test {
         "tests/AttributeResolution_test.cpp",
         "tests/BigBuffer_test.cpp",
         "tests/ByteBucketArray_test.cpp",
+        "tests/CombinedIterator_test.cpp",
         "tests/Config_test.cpp",
         "tests/ConfigDescription_test.cpp",
         "tests/ConfigLocale_test.cpp",
@@ -267,6 +268,7 @@ cc_test {
 cc_benchmark {
     name: "libandroidfw_benchmarks",
     defaults: ["libandroidfw_defaults"],
+    test_config: "tests/AndroidTest_Benchmarks.xml",
     srcs: [
         // Helpers/infra for benchmarking.
         "tests/BenchMain.cpp",
@@ -282,7 +284,11 @@ cc_benchmark {
         "tests/Theme_bench.cpp",
     ],
     shared_libs: common_test_libs,
-    data: ["tests/data/**/*.apk"],
+    data: [
+        "tests/data/**/*.apk",
+        ":FrameworkResourcesSparseTestApp",
+        ":FrameworkResourcesNotSparseTestApp",
+    ],
 }
 
 cc_library {

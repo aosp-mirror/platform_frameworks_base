@@ -46,6 +46,7 @@ package android {
     field public static final String REMAP_MODIFIER_KEYS = "android.permission.REMAP_MODIFIER_KEYS";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String REQUEST_UNIQUE_ID_ATTESTATION = "android.permission.REQUEST_UNIQUE_ID_ATTESTATION";
+    field public static final String RESERVED_FOR_TESTING_SIGNATURE = "android.permission.RESERVED_FOR_TESTING_SIGNATURE";
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
     field public static final String REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL = "android.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL";
     field public static final String SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS = "android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS";
@@ -281,6 +282,7 @@ package android.app {
     field public static final String OPSTR_ACTIVITY_RECOGNITION = "android:activity_recognition";
     field public static final String OPSTR_ACTIVITY_RECOGNITION_SOURCE = "android:activity_recognition_source";
     field public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
+    field @FlaggedApi("android.service.notification.redact_sensitive_notifications_from_untrusted_listeners") public static final String OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS = "android:receive_sensitive_notifications";
     field public static final String OPSTR_RECORD_AUDIO_HOTWORD = "android:record_audio_hotword";
     field public static final String OPSTR_RESERVED_FOR_TESTING = "android:reserved_for_testing";
     field public static final String OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER = "android:use_icc_auth_with_device_identifier";
@@ -377,6 +379,10 @@ package android.app {
     method public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
     method public void setUserVisibleTaskShown(boolean);
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String NEWS_ID = "android.app.news";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String PROMOTIONS_ID = "android.app.promotions";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String RECS_ID = "android.app.recs";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String SOCIAL_MEDIA_ID = "android.app.social";
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {
@@ -1790,8 +1796,10 @@ package android.hardware.input {
   public class InputSettings {
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_bounce_keys_flag") public static int getAccessibilityBounceKeysThreshold(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_slow_keys_flag") public static int getAccessibilitySlowKeysThreshold(@NonNull android.content.Context);
+    method @FlaggedApi("com.android.hardware.input.keyboard_a11y_mouse_keys") public static boolean isAccessibilityMouseKeysEnabled(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_sticky_keys_flag") public static boolean isAccessibilityStickyKeysEnabled(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_bounce_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityBounceKeysThreshold(@NonNull android.content.Context, int);
+    method @FlaggedApi("com.android.hardware.input.keyboard_a11y_mouse_keys") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityMouseKeysEnabled(@NonNull android.content.Context, boolean);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_slow_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilitySlowKeysThreshold(@NonNull android.content.Context, int);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_sticky_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityStickyKeysEnabled(@NonNull android.content.Context, boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void setMaximumObscuringOpacityForTouch(@NonNull android.content.Context, @FloatRange(from=0, to=1) float);
@@ -1976,6 +1984,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public float getRs2Value();
     method public int getStreamMinVolumeInt(int);
     method @NonNull public java.util.Map<java.lang.Integer,java.lang.Boolean> getSurroundFormats();
+    method @NonNull public android.media.VolumePolicy getVolumePolicy();
     method public boolean hasRegisteredDynamicPolicy();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public boolean isCsdEnabled();
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE, android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED}) public boolean isFullVolumeDevice();
@@ -2065,6 +2074,20 @@ package android.media {
   public final class PlaybackParams implements android.os.Parcelable {
     method public int getAudioStretchMode();
     method public android.media.PlaybackParams setAudioStretchMode(int);
+  }
+
+  public final class VolumePolicy implements android.os.Parcelable {
+    ctor public VolumePolicy(boolean, boolean, boolean, int);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int A11Y_MODE_INDEPENDENT_A11Y_VOLUME = 1; // 0x1
+    field public static final int A11Y_MODE_MEDIA_A11Y_VOLUME = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.VolumePolicy> CREATOR;
+    field @NonNull public static final android.media.VolumePolicy DEFAULT;
+    field public final boolean doNotDisturbWhenSilent;
+    field public final int vibrateToSilentDebounce;
+    field public final boolean volumeDownToEnterSilent;
+    field public final boolean volumeUpToExitSilent;
   }
 
   public static final class VolumeShaper.Configuration.Builder {
@@ -2602,6 +2625,18 @@ package android.os {
 
 }
 
+package android.os.connectivity {
+
+  public final class CellularBatteryStats implements android.os.Parcelable {
+    ctor @FlaggedApi("com.android.server.power.optimization.streamlined_connectivity_battery_stats") public CellularBatteryStats(long, long, long, long, long, long, long, long, long, long, @NonNull long[], @NonNull long[], @NonNull long[], long);
+  }
+
+  public final class WifiBatteryStats implements android.os.Parcelable {
+    ctor @FlaggedApi("com.android.server.power.optimization.streamlined_connectivity_battery_stats") public WifiBatteryStats(long, long, long, long, long, long, long, long, long, long, long, long, long, @NonNull long[], @NonNull long[], @NonNull long[], long);
+  }
+
+}
+
 package android.os.health {
 
   public class HealthKeys {
@@ -2755,21 +2790,18 @@ package android.os.vibrator {
 
 package android.os.vibrator.persistence {
 
-  public class ParsedVibration {
-    method @NonNull public java.util.List<android.os.VibrationEffect> getVibrationEffects();
-    method @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
+  @FlaggedApi("android.os.vibrator.vibration_xml_apis") public final class ParsedVibration {
+    ctor public ParsedVibration(@NonNull java.util.List<android.os.VibrationEffect>);
   }
 
-  public final class VibrationXmlParser {
-    method @Nullable public static android.os.vibrator.persistence.ParsedVibration parseDocument(@NonNull java.io.Reader) throws java.io.IOException;
-    method @Nullable public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.Reader) throws java.io.IOException;
+  public static final class VibrationXmlParser.ParseFailedException extends java.io.IOException {
   }
 
   public final class VibrationXmlSerializer {
-    method public static void serialize(@NonNull android.os.VibrationEffect, @NonNull java.io.Writer) throws java.io.IOException, android.os.vibrator.persistence.VibrationXmlSerializer.SerializationFailedException;
+    method public static void serialize(@NonNull android.os.VibrationEffect, @NonNull java.io.Writer) throws java.io.IOException;
   }
 
-  public static final class VibrationXmlSerializer.SerializationFailedException extends java.lang.RuntimeException {
+  public static final class VibrationXmlSerializer.SerializationFailedException extends java.io.IOException {
   }
 
 }

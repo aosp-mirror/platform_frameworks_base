@@ -184,7 +184,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final InputManager mInputManager;
     @NonNull private final UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     @NonNull private final SelectedUserInteractor mSelectedUserInteractor;
-    @NonNull private final FpsUnlockTracker mFpsUnlockTracker;
     private final boolean mIgnoreRefreshRate;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
 
@@ -271,6 +270,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         @Override
         public void showUdfpsOverlay(long requestId, int sensorId, int reason,
                 @NonNull IUdfpsOverlayControllerCallback callback) {
+            mUdfpsOverlayInteractor.setRequestId(requestId);
             mFgExecutor.execute(() -> UdfpsController.this.showUdfpsOverlay(
                     new UdfpsControllerOverlay(
                         mContext,
@@ -404,6 +404,15 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     new CancellationSignal(),
                     handler::post,
                     authenticationCallback);
+        }
+
+        /**
+         * Debug to run setIgnoreDisplayTouches
+         */
+        public void debugSetIgnoreDisplayTouches(boolean ignoreTouch) {
+            final long requestId = (mOverlay != null) ? mOverlay.getRequestId() : 0L;
+            UdfpsController.this.mFingerprintManager.setIgnoreDisplayTouches(
+                    requestId, mSensorProps.sensorId, ignoreTouch);
         }
     }
 
@@ -559,7 +568,12 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 Log.w(TAG, "onTouch down received without a preceding up");
             }
             mActivePointerId = MotionEvent.INVALID_POINTER_ID;
-            mOnFingerDown = false;
+
+            // It's possible on some devices to get duplicate touches from both doze and the
+            // normal touch listener. Don't reset the down in this case to avoid duplicate downs
+            if (!mIsAodInterruptActive) {
+                mOnFingerDown = false;
+            }
         } else if (!DeviceEntryUdfpsRefactor.isEnabled()) {
             if ((mLockscreenShadeTransitionController.getQSDragProgress() != 0f
                     && !mAlternateBouncerInteractor.isVisibleState())
@@ -712,7 +726,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor,
             @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate,
             @NonNull SelectedUserInteractor selectedUserInteractor,
-            @NonNull FpsUnlockTracker fpsUnlockTracker,
             @NonNull KeyguardTransitionInteractor keyguardTransitionInteractor,
             Lazy<DeviceEntryUdfpsTouchOverlayViewModel> deviceEntryUdfpsTouchOverlayViewModel,
             Lazy<DefaultUdfpsTouchOverlayViewModel> defaultUdfpsTouchOverlayViewModel,
@@ -765,8 +778,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mInputManager = inputManager;
         mUdfpsKeyguardAccessibilityDelegate = udfpsKeyguardAccessibilityDelegate;
         mSelectedUserInteractor = selectedUserInteractor;
-        mFpsUnlockTracker = fpsUnlockTracker;
-        mFpsUnlockTracker.startTracking();
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
 
         mTouchProcessor = singlePointerTouchProcessor;
@@ -1066,9 +1077,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         }
         if (isOptical()) {
             mLatencyTracker.onActionStart(ACTION_UDFPS_ILLUMINATE);
-        }
-        if (getBiometricSessionType() == SESSION_KEYGUARD) {
-            mFpsUnlockTracker.onUiReadyStage();
         }
         // Refresh screen timeout and boost process priority if possible.
         mPowerManager.userActivity(mSystemClock.uptimeMillis(),

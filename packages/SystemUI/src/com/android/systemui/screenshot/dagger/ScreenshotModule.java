@@ -16,23 +16,18 @@
 
 package com.android.systemui.screenshot.dagger;
 
-import static com.android.systemui.Flags.screenshotShelfUi2;
-
 import android.app.Service;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.screenshot.ImageCapture;
 import com.android.systemui.screenshot.ImageCaptureImpl;
-import com.android.systemui.screenshot.LegacyScreenshotViewProxy;
 import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
-import com.android.systemui.screenshot.ScreenshotShelfViewProxy;
 import com.android.systemui.screenshot.ScreenshotSoundController;
 import com.android.systemui.screenshot.ScreenshotSoundControllerImpl;
 import com.android.systemui.screenshot.ScreenshotSoundProvider;
 import com.android.systemui.screenshot.ScreenshotSoundProviderImpl;
-import com.android.systemui.screenshot.ScreenshotViewProxy;
 import com.android.systemui.screenshot.TakeScreenshotExecutor;
 import com.android.systemui.screenshot.TakeScreenshotExecutorImpl;
 import com.android.systemui.screenshot.TakeScreenshotService;
@@ -94,16 +89,5 @@ public abstract class ScreenshotModule {
     static ScreenshotViewModel providesScreenshotViewModel(
             AccessibilityManager accessibilityManager) {
         return new ScreenshotViewModel(accessibilityManager);
-    }
-
-    @Provides
-    static ScreenshotViewProxy.Factory providesScreenshotViewProxyFactory(
-            ScreenshotShelfViewProxy.Factory shelfScreenshotViewProxyFactory,
-            LegacyScreenshotViewProxy.Factory legacyScreenshotViewProxyFactory) {
-        if (screenshotShelfUi2()) {
-            return shelfScreenshotViewProxyFactory;
-        } else {
-            return legacyScreenshotViewProxyFactory;
-        }
     }
 }

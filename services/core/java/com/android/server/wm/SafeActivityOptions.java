@@ -140,7 +140,9 @@ public class SafeActivityOptions {
     }
 
     private ActivityOptions cloneLaunchingOptions(ActivityOptions options) {
-        return options == null ? null : ActivityOptions.makeBasic()
+        if (options == null) return null;
+
+        final ActivityOptions cloneOptions = ActivityOptions.makeBasic()
                 .setLaunchTaskDisplayArea(options.getLaunchTaskDisplayArea())
                 .setLaunchDisplayId(options.getLaunchDisplayId())
                 .setCallerDisplayId(options.getCallerDisplayId())
@@ -150,6 +152,8 @@ public class SafeActivityOptions {
                 .setPendingIntentCreatorBackgroundActivityStartMode(
                         options.getPendingIntentCreatorBackgroundActivityStartMode())
                 .setRemoteTransition(options.getRemoteTransition());
+        cloneOptions.setLaunchWindowingMode(options.getLaunchWindowingMode());
+        return cloneOptions;
     }
 
     /**
@@ -438,7 +442,10 @@ public class SafeActivityOptions {
         return taskDisplayArea;
     }
 
-    private boolean isAssistant(ActivityTaskManagerService atmService, int callingUid) {
+    /**
+     * Returns whether the given UID caller is the assistant.
+     */
+    public static boolean isAssistant(ActivityTaskManagerService atmService, int callingUid) {
         if (atmService.mActiveVoiceInteractionServiceComponent == null) {
             return false;
         }

@@ -355,6 +355,9 @@
     <!-- the padding of the expand icon in the notification header -->
     <dimen name="notification_expand_button_icon_padding">2dp</dimen>
 
+    <!-- the size of the notification close button -->
+    <dimen name="notification_close_button_size">16dp</dimen>
+
     <!-- Vertical margin for the headerless notification content, when content has 1 line -->
     <!-- 16 * 2 (margins) + 24 (1 line) = 56 (notification) -->
     <dimen name="notification_headerless_margin_oneline">16dp</dimen>
@@ -619,6 +622,9 @@
 
     <!-- width of the border of the magnification thumbnail -->
     <dimen name="accessibility_magnification_thumbnail_container_stroke_width">4dp</dimen>
+
+    <!-- The distance from the edge within which the gesture is considered to be at the edge -->
+    <dimen name="accessibility_fullscreen_magnification_gesture_edge_slop">12dp</dimen>
 
     <!-- The padding ratio of the Accessibility icon foreground drawable -->
     <item name="accessibility_icon_foreground_padding_ratio" type="dimen">21.88%</item>

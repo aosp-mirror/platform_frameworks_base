@@ -19,6 +19,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.platform.test.annotations.EnableFlags
+import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.SceneKey
@@ -43,7 +44,6 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
@@ -61,6 +61,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
+@RunWithLooper
 @EnableSceneContainer
 class LockscreenSceneViewModelTest : SysuiTestCase() {
 
@@ -180,13 +181,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                 }
             )
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
-            kosmos.shadeRepository.setShadeMode(
-                if (isSingleShade) {
-                    ShadeMode.Single
-                } else {
-                    ShadeMode.Split
-                }
-            )
+            kosmos.shadeRepository.setShadeLayoutWide(!isSingleShade)
             kosmos.setCommunalAvailable(isCommunalAvailable)
             kosmos.fakePowerRepository.updateWakefulness(
                 rawState =
@@ -265,8 +260,8 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = kosmos.deviceEntryInteractor,
             communalInteractor = kosmos.communalInteractor,
-            longPress =
-                KeyguardLongPressViewModel(
+            touchHandling =
+                KeyguardTouchHandlingViewModel(
                     interactor = mock(),
                 ),
             notifications = kosmos.notificationsPlaceholderViewModel,

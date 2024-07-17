@@ -48,6 +48,7 @@ import com.android.internal.R;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
+import com.android.systemui.Flags;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -426,7 +427,11 @@ public class DozeSensors {
         }
 
         if (!anyListening) {
-            mSecureSettings.unregisterContentObserverSync(mSettingsObserver);
+            if (Flags.registerContentObserversAsync()) {
+                mSecureSettings.unregisterContentObserverAsync(mSettingsObserver);
+            } else {
+                mSecureSettings.unregisterContentObserverSync(mSettingsObserver);
+            }
         } else if (!mSettingRegistered) {
             for (TriggerSensor s : mTriggerSensors) {
                 s.registerSettingsObserver(mSettingsObserver);
@@ -750,8 +755,13 @@ public class DozeSensors {
 
         public void registerSettingsObserver(ContentObserver settingsObserver) {
             if (mConfigured && !TextUtils.isEmpty(mSetting)) {
-                mSecureSettings.registerContentObserverForUserSync(
-                        mSetting, mSettingsObserver, UserHandle.USER_ALL);
+                if (Flags.registerContentObserversAsync()) {
+                    mSecureSettings.registerContentObserverForUserAsync(
+                            mSetting, mSettingsObserver, UserHandle.USER_ALL);
+                } else {
+                    mSecureSettings.registerContentObserverForUserSync(
+                            mSetting, mSettingsObserver, UserHandle.USER_ALL);
+                }
             }
         }
 

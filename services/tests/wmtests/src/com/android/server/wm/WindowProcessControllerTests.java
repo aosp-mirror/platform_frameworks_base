@@ -340,54 +340,33 @@ public class WindowProcessControllerTests extends WindowTestsBase {
     public void testComputeOomAdjFromActivities() {
         final ActivityRecord activity = createActivityRecord(mWpc);
         activity.setVisibleRequested(true);
-        final int[] callbackResult = { 0 };
-        final int visible = 1;
-        final int paused = 2;
-        final int stopping = 4;
-        final int other = 8;
-        final WindowProcessController.ComputeOomAdjCallback callback =
-                new WindowProcessController.ComputeOomAdjCallback() {
-            @Override
-            public void onVisibleActivity() {
-                callbackResult[0] |= visible;
-            }
-
-            @Override
-            public void onPausedActivity() {
-                callbackResult[0] |= paused;
-            }
-
-            @Override
-            public void onStoppingActivity(boolean finishing) {
-                callbackResult[0] |= stopping;
-            }
-
-            @Override
-            public void onOtherActivity() {
-                callbackResult[0] |= other;
-            }
-        };
 
         // onStartActivity should refresh the state immediately.
         mWpc.onStartActivity(0 /* topProcessState */, activity.info);
-        assertEquals(1 /* minTaskLayer */, mWpc.computeOomAdjFromActivities(callback));
-        assertEquals(visible, callbackResult[0]);
+        int flags = mWpc.getActivityStateFlags();
+        assertEquals(1 /* minTaskLayer */,
+                flags & WindowProcessController.ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER);
+        final int visibleFlags = WindowProcessController.ACTIVITY_STATE_FLAG_IS_VISIBLE
+                | WindowProcessController.ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE
+                | WindowProcessController.ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK;
+        assertEquals(visibleFlags,
+                flags & ~WindowProcessController.ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER);
 
-        callbackResult[0] = 0;
         activity.setVisibleRequested(false);
         activity.setState(PAUSED, "test");
-        mWpc.computeOomAdjFromActivities(callback);
-        assertEquals(paused, callbackResult[0]);
+        final int exclusiveFlags = WindowProcessController.ACTIVITY_STATE_FLAG_IS_VISIBLE
+                | WindowProcessController.ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED
+                | WindowProcessController.ACTIVITY_STATE_FLAG_IS_STOPPING;
+        flags = mWpc.getActivityStateFlags() & exclusiveFlags;
+        assertEquals(WindowProcessController.ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED, flags);
 
-        callbackResult[0] = 0;
         activity.setState(STOPPING, "test");
-        mWpc.computeOomAdjFromActivities(callback);
-        assertEquals(stopping, callbackResult[0]);
+        flags = mWpc.getActivityStateFlags() & exclusiveFlags;
+        assertEquals(WindowProcessController.ACTIVITY_STATE_FLAG_IS_STOPPING, flags);
 
-        callbackResult[0] = 0;
         activity.setState(STOPPED, "test");
-        mWpc.computeOomAdjFromActivities(callback);
-        assertEquals(other, callbackResult[0]);
+        flags = mWpc.getActivityStateFlags() & exclusiveFlags;
+        assertEquals(0, flags);
     }
 
     @Test

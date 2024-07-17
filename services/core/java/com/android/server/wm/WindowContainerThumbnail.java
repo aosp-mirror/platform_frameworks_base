@@ -39,7 +39,7 @@ import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 

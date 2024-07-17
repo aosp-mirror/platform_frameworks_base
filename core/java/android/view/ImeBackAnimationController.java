@@ -27,6 +27,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.graphics.Insets;
 import android.util.Log;
 import android.view.animation.BackGestureInterpolator;
@@ -137,9 +138,10 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
     @Override
     public void onBackInvoked() {
         if (!isBackAnimationAllowed() || !mIsPreCommitAnimationInProgress) {
-            // play regular hide animation if back-animation is not allowed or if insets control has
-            // been cancelled by the system (this can happen in split screen for example)
-            mInsetsController.hide(ime());
+            // play regular hide animation if predictive back-animation is not allowed or if insets
+            // control has been cancelled by the system. This can happen in multi-window mode for
+            // example (i.e. split-screen or activity-embedding)
+            notifyHideIme();
             return;
         }
         startPostCommitAnim(/*hideIme*/ true);
@@ -209,6 +211,11 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
         if (triggerBack) {
             mInsetsController.setPredictiveBackImeHideAnimInProgress(true);
             notifyHideIme();
+            // requesting IME as invisible during post-commit
+            mInsetsController.setRequestedVisibleTypes(0, ime());
+            // Changes the animation state. This also notifies RootView of changed insets, which
+            // causes it to reset its scrollY to 0f (animated) if it was panned
+            mInsetsController.onAnimationStateChanged(ime(), /*running*/ true);
         }
         if (mStartRootScrollY != 0 && !triggerBack) {
             // This causes RootView to update its scroll back to the panned position
@@ -228,12 +235,6 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
         // the IME away
         mInsetsController.getHost().getInputMethodManager()
                 .notifyImeHidden(mInsetsController.getHost().getWindowToken(), statsToken);
-
-        // requesting IME as invisible during post-commit
-        mInsetsController.setRequestedVisibleTypes(0, ime());
-        // Changes the animation state. This also notifies RootView of changed insets, which causes
-        // it to reset its scrollY to 0f (animated) if it was panned
-        mInsetsController.onAnimationStateChanged(ime(), /*running*/ true);
     }
 
     private void reset() {
@@ -254,8 +255,18 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
     }
 
     private boolean isBackAnimationAllowed() {
-        // back animation is allowed in all cases except when softInputMode is adjust_resize AND
-        // there is no app-registered WindowInsetsAnimationCallback AND edge-to-edge is not enabled.
+
+        if (mViewRoot.mContext.getResources().getConfiguration().windowConfiguration
+                .getWindowingMode() == WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW) {
+            // TODO(b/346726115) enable predictive back animation in multi-window mode in
+            //  DisplayImeController
+            return false;
+        }
+
+        // otherwise, the predictive back animation is allowed in all cases except when
+        // 1. softInputMode is adjust_resize AND
+        // 2. there is no app-registered WindowInsetsAnimationCallback AND
+        // 3. edge-to-edge is not enabled.
         return (mViewRoot.mWindowAttributes.softInputMode & SOFT_INPUT_MASK_ADJUST)
                 != SOFT_INPUT_ADJUST_RESIZE
                 || (mViewRoot.mView != null && mViewRoot.mView.hasWindowInsetsAnimationCallback())

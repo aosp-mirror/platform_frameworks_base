@@ -261,8 +261,8 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
     }
 
     @Override
-    ActivityRecord getTopFullscreenActivity(Task source) {
-        return source.getTopFullscreenActivity();
+    WindowState getTopFullscreenWindow(Task source) {
+        return source.getTopFullscreenMainWindow(true /* includeStartingApp */);
     }
 
     @Override

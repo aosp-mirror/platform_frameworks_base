@@ -16,11 +16,15 @@
 
 package com.android.settingslib.fuelgauge;
 
+import static android.provider.Settings.Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED;
+import static android.provider.Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED;
+
 import static com.android.settingslib.fuelgauge.BatterySaverLogging.ACTION_SAVER_STATE_MANUAL_UPDATE;
 import static com.android.settingslib.fuelgauge.BatterySaverLogging.EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED;
 import static com.android.settingslib.fuelgauge.BatterySaverLogging.EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED_REASON;
 import static com.android.settingslib.fuelgauge.BatterySaverLogging.SaverManualEnabledReason;
 
+import android.app.KeyguardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +36,10 @@ import android.provider.Settings.Secure;
 import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Slog;
+
+import androidx.core.util.Function;
+
+import com.android.settingslib.flags.Flags;
 
 /**
  * Utilities related to battery saver.
@@ -125,6 +133,19 @@ public class BatterySaverUtils {
             Log.d(TAG, "Battery saver turning " + (enable ? "ON" : "OFF") + ", reason: " + reason);
         }
         final ContentResolver cr = context.getContentResolver();
+        final PowerManager powerManager = context.getSystemService(PowerManager.class);
+
+        if (Flags.extremePowerLowStateVulnerability()) {
+            var keyguardManager = context.getSystemService(KeyguardManager.class);
+            if (enable
+                    && needFirstTimeWarning
+                    && keyguardManager != null
+                    && keyguardManager.isDeviceLocked()) {
+                var result = powerManager.setPowerSaveModeEnabled(true);
+                Log.d(TAG, "Device is locked, setPowerSaveModeEnabled by default. " + result);
+                return result;
+            }
+        }
 
         final Bundle confirmationExtras = new Bundle(1);
         confirmationExtras.putBoolean(EXTRA_CONFIRM_TEXT_ONLY, false);
@@ -136,7 +157,7 @@ public class BatterySaverUtils {
             setBatterySaverConfirmationAcknowledged(context);
         }
 
-        if (context.getSystemService(PowerManager.class).setPowerSaveModeEnabled(enable)) {
+        if (powerManager.setPowerSaveModeEnabled(enable)) {
             if (enable) {
                 final int count =
                         Secure.getInt(cr, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, 0) + 1;
@@ -173,15 +194,23 @@ public class BatterySaverUtils {
      * @see #EXTRA_POWER_SAVE_MODE_TRIGGER_LEVEL
      */
     public static boolean maybeShowBatterySaverConfirmation(Context context, Bundle extras) {
-        if (Secure.getInt(context.getContentResolver(),
-                Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 0) != 0
-                && Secure.getInt(context.getContentResolver(),
-                Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED, 0) != 0) {
+        if (isBatterySaverConfirmationHasBeenShowedBefore(context)) {
             // Already shown.
             return false;
         }
         sendSystemUiBroadcast(context, ACTION_SHOW_START_SAVER_CONFIRMATION, extras);
         return true;
+    }
+
+    /**
+     * Returns {@code true} if the battery saver confirmation warning has been acknowledged by the
+     * user in the past before.
+     */
+    public static boolean isBatterySaverConfirmationHasBeenShowedBefore(Context context) {
+        Function<String, Integer> secureGetInt =
+                key -> Secure.getInt(context.getContentResolver(), key, /* def= */ 0);
+        return secureGetInt.apply(LOW_POWER_WARNING_ACKNOWLEDGED) != 0
+                && secureGetInt.apply(EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED) != 0;
     }
 
     private static void recordBatterySaverEnabledReason(Context context, boolean enable,

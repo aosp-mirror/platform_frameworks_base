@@ -161,7 +161,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ரத்துசெய்"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"இணைத்தலானது உங்கள் தொடர்புகள், அழைப்பு வரலாறுக்கான அணுகலை வழங்குகிறது."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> உடன் இணைய முடியவில்லை."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"தவறான பின் அல்லது கடவுச்சொல் காரணமாக <xliff:g id="DEVICE_NAME">%1$s</xliff:g> உடன் இணைக்க முடியவில்லை."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"தவறான பின் அல்லது கடவுச்சாவி காரணமாக <xliff:g id="DEVICE_NAME">%1$s</xliff:g> உடன் இணைக்க முடியவில்லை."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> உடன் இணைக்க முடியவில்லை."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> இணைப்பதை நிராகரித்தது."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"கணினி"</string>
@@ -237,7 +237,7 @@
     <string name="choose_profile" msgid="343803890897657450">"சுயவிவரத்தைத் தேர்வு செய்க"</string>
     <string name="category_personal" msgid="6236798763159385225">"தனிப்பட்டவை"</string>
     <string name="category_work" msgid="4014193632325996115">"பணியிடம்"</string>
-    <string name="category_private" msgid="4244892185452788977">"தனிப்பட்டவை"</string>
+    <string name="category_private" msgid="4244892185452788977">"இரகசியமானவை"</string>
     <string name="category_clone" msgid="1554511758987195974">"குளோன்"</string>
     <string name="development_settings_title" msgid="140296922921597393">"டெவெலப்பர் விருப்பங்கள்"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"டெவெலப்பர் விருப்பங்களை இயக்கு"</string>
@@ -408,6 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"பிழைத்திருத்த ஆப்ஸிற்கு, GPU பிழைத்திருத்த லேயர்களை ஏற்றுவதற்கு அனுமதி"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"வெர்போஸ் வெண்டார் பதிவை இயக்கு"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"பிழை அறிக்கைகளில் சாதனம் சார்ந்த கூடுதல் வெண்டார் பதிவுகளைச் சேர்க்கவும். அவற்றில் தனிப்பட்ட தகவல்கள், அதிக பேட்டரி உபயோகம் மற்றும்/அல்லது அதிக சேமிப்பிட உபயோகம் குறித்த தகவல்கள் இருக்கக்கூடும்."</string>
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"ஒரு நாளுக்குப் பிறகு முடக்கு"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"விற்பனையாளரின் அதிவிவரப் பதிவு முடிந்துவிட்டது"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"ஒரு நாளுக்கு இயக்கப்பட்டுள்ளது"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"இன்னும் ஒரு நாள் இயக்கு"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"ஒரு நாளுக்குப் பிறகு முடக்கப்படும்"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"காலவரம்பின்றி இயக்கப்பட்டுள்ளது"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"சாளர அனிமேஷன் வேகம்"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"அனிமேஷன் மாற்றத்தின் வேகம்"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"அனிமேட்டர் கால அளவு"</string>
@@ -424,8 +430,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், எல்லா ஆப்ஸையும் வெளிப்புறச் சேமிப்பிடத்தில் எழுத அனுமதிக்கும்"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"செயல்பாடுகளை அளவுமாறக்கூடியதாக அமை"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், பல சாளரத்திற்கு எல்லா செயல்பாடுகளையும் அளவுமாறக்கூடியதாக அமை."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"குறிப்பிட்ட வடிவமில்லாத சாளரங்களை இயக்கு"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"சாளரங்களை அளவுமாற்ற மற்றும் எங்கும் நகர்த்த அனுமதிக்கும் பரிசோதனைக்குரிய அம்சத்திற்கான ஆதரவை இயக்கு."</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"குறிப்பிட்ட வடிவமில்லாத சாளரத்தை இயக்குதல் (லெகஸி)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"பரிசோதனைக்குரிய, குறிப்பிட்ட வடிவமில்லாத பழைய சாளரங்களுக்கான ஆதரவை இயக்குதல்."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"டெஸ்க்டாப் காப்புப்பிரதி கடவுச்சொல்"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"டெஸ்க்டாப்பின் முழு காப்புப்பிரதிகள் தற்போது பாதுகாக்கப்படவில்லை"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"டெஸ்க்டாப்பின் முழுக் காப்புப் பிரதிகளுக்கான கடவுச்சொல்லை மாற்ற அல்லது அகற்ற, தட்டவும்"</string>
@@ -557,6 +563,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"அலாரங்கள் &amp; நினைவூட்டல்கள்"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"அலாரங்களை அமைக்கவும் குறிப்பிட்ட கால இடைவெளியில் செயல்களைத் திட்டமிடவும் இந்த ஆப்ஸை அனுமதிக்கும். இது ஆப்ஸ் பின்னணியில் இயங்குவதை அனுமதிக்கும், இதற்காக அதிக பேட்டரியைப் பயன்படுத்தக்கூடும்.\n\nஇந்த அனுமதி முடக்கப்பட்டிருந்தால் இந்த ஆப்ஸ் மூலம் திட்டமிடப்பட்ட ஏற்கெனவே அமைத்த அலாரங்களும் நேர அடிப்படையிலான நிகழ்வுகளும் வேலை செய்யாது."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"திட்டமிடல், அலாரம், நினைவூட்டல், கடிகாரம்"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"தொந்தரவு செய்யாதே"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ஆன் செய்"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"தொந்தரவு செய்ய வேண்டாம் என்பதை ஆன் செய்யும்"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ஒருபோதும் வேண்டாம்"</string>
@@ -569,6 +576,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"கால அளவு"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ஒவ்வொரு முறையும் கேள்"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"ஆஃப் செய்யும் வரை"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(பெயர் இல்லை)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"சற்றுமுன்"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"இந்த மொபைல்"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"இந்த டேப்லெட்"</string>

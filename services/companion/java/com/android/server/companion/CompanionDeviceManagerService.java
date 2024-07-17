@@ -532,7 +532,8 @@ public class CompanionDeviceManagerService extends SystemService {
                 String packageName, int userId) {
             startObservingDevicePresence_enforcePermission();
 
-            mDevicePresenceProcessor.startObservingDevicePresence(request, packageName, userId);
+            mDevicePresenceProcessor.startObservingDevicePresence(
+                    request, packageName, userId, /* enforcePermissions */ true);
         }
 
         @Override
@@ -541,7 +542,8 @@ public class CompanionDeviceManagerService extends SystemService {
                 String packageName, int userId) {
             stopObservingDevicePresence_enforcePermission();
 
-            mDevicePresenceProcessor.stopObservingDevicePresence(request, packageName, userId);
+            mDevicePresenceProcessor.stopObservingDevicePresence(
+                    request, packageName, userId, /* enforcePermissions */ true);
         }
 
         @Override

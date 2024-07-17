@@ -24,8 +24,10 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.Idle
@@ -47,6 +49,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -60,6 +63,14 @@ class SceneInteractorTest : SysuiTestCase() {
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
 
     private val underTest = kosmos.sceneInteractor
+
+    @Before
+    fun setUp() {
+        // Init lazy Fixtures. Accessing them once makes sure that the singletons are initialized
+        // and therefore starts to collect StateFlows eagerly (when there are any).
+        kosmos.deviceUnlockedInteractor
+        kosmos.keyguardEnabledInteractor
+    }
 
     @Test
     fun allSceneKeys() {
@@ -449,5 +460,17 @@ class SceneInteractorTest : SysuiTestCase() {
             )
             progress.value = 0.9f
             assertThat(transitionValue).isEqualTo(0f)
+        }
+
+    @Test
+    fun changeScene_toGone_whenKeyguardDisabled_doesNotThrow() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
+
+            underTest.changeScene(Scenes.Gone, "")
+
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
         }
 }

@@ -16,20 +16,16 @@
 
 package com.android.server.inputmethod;
 
+import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.content.Context;
-import android.content.pm.UserInfo;
-import android.os.Handler;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.inputmethod.DirectBootAwareness;
-import com.android.server.LocalServices;
-import com.android.server.pm.UserManagerInternal;
 
 final class InputMethodSettingsRepository {
-    @GuardedBy("ImfLock.class")
+    // TODO(b/352594784): Should we user other lock primitives?
+    @GuardedBy("sPerUserMap")
     @NonNull
     private static final SparseArray<InputMethodSettings> sPerUserMap = new SparseArray<>();
 
@@ -40,47 +36,29 @@ final class InputMethodSettingsRepository {
     }
 
     @NonNull
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     static InputMethodSettings get(@UserIdInt int userId) {
-        final InputMethodSettings obj = sPerUserMap.get(userId);
+        final InputMethodSettings obj;
+        synchronized (sPerUserMap) {
+            obj = sPerUserMap.get(userId);
+        }
         if (obj != null) {
             return obj;
         }
         return InputMethodSettings.createEmptyMap(userId);
     }
 
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     static void put(@UserIdInt int userId, @NonNull InputMethodSettings obj) {
-        sPerUserMap.put(userId, obj);
+        synchronized (sPerUserMap) {
+            sPerUserMap.put(userId, obj);
+        }
     }
 
-    static void initialize(@NonNull Handler handler, @NonNull Context context) {
-        final UserManagerInternal userManagerInternal =
-                LocalServices.getService(UserManagerInternal.class);
-        handler.post(() -> {
-            userManagerInternal.addUserLifecycleListener(
-                    new UserManagerInternal.UserLifecycleListener() {
-                        @Override
-                        public void onUserRemoved(UserInfo user) {
-                            final int userId = user.id;
-                            handler.post(() -> {
-                                synchronized (ImfLock.class) {
-                                    sPerUserMap.remove(userId);
-                                }
-                            });
-                        }
-                    });
-            synchronized (ImfLock.class) {
-                for (int userId : userManagerInternal.getUserIds()) {
-                    final InputMethodSettings settings =
-                            InputMethodManagerService.queryInputMethodServicesInternal(
-                                    context,
-                                    userId,
-                                    AdditionalSubtypeMapRepository.get(userId),
-                                    DirectBootAwareness.AUTO);
-                    sPerUserMap.put(userId, settings);
-                }
-            }
-        });
+    @AnyThread
+    static void remove(@UserIdInt int userId) {
+        synchronized (sPerUserMap) {
+            sPerUserMap.remove(userId);
+        }
     }
 }

@@ -29,6 +29,7 @@ import android.window.TransitionInfo.Change
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
@@ -42,7 +43,6 @@ import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_CANCEL_D
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TransitionHandler
-import com.android.wm.shell.util.KtProtoLog
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator.Companion.DRAG_FREEFORM_SCALE
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
@@ -114,7 +114,7 @@ class DragToDesktopTransitionHandler(
         dragToDesktopAnimator: MoveToDesktopAnimator,
     ) {
         if (inProgress) {
-            KtProtoLog.v(
+            ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                 "DragToDesktop: Drag to desktop transition already in progress."
             )
@@ -599,7 +599,7 @@ class DragToDesktopTransitionHandler(
     ) {
         val state = transitionState ?: return
         if (aborted && state.startTransitionToken == transition) {
-            KtProtoLog.v(
+            ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                 "DragToDesktop: onTransitionConsumed() start transition aborted"
             )

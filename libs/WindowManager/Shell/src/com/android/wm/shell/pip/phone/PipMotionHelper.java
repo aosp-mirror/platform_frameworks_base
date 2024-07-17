@@ -34,7 +34,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Debug;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.common.FloatingContentCoordinator;

@@ -17,6 +17,7 @@
 package androidx.window.extensions.layout;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_FLAT;
 import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
@@ -41,6 +42,7 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiContext;
+import androidx.annotation.VisibleForTesting;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
@@ -137,6 +139,10 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             if (!context.isUiContext()) {
                 throw new IllegalArgumentException("Context must be a UI Context, which should be"
                         + " an Activity, WindowContext or InputMethodService");
+            }
+            if (context.getAssociatedDisplayId() == INVALID_DISPLAY) {
+                Log.w(TAG, "The registered Context is a UI Context but not associated with any"
+                        + " display. This Context may not receive any WindowLayoutInfo update");
             }
             mFoldingFeatureProducer.getData((features) -> {
                 WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, features);
@@ -257,7 +263,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         }
     }
 
-    private void onDisplayFeaturesChanged(List<CommonFoldingFeature> storedFeatures) {
+    @VisibleForTesting
+    void onDisplayFeaturesChanged(List<CommonFoldingFeature> storedFeatures) {
         synchronized (mLock) {
             mLastReportedFoldingFeatures.clear();
             mLastReportedFoldingFeatures.addAll(storedFeatures);
@@ -409,9 +416,10 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      * @return true if the display features should be reported for the UI Context, false otherwise.
      */
     private boolean shouldReportDisplayFeatures(@NonNull @UiContext Context context) {
-        int displayId = context.getDisplay().getDisplayId();
+        int displayId = context.getAssociatedDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
-            // Display features are not supported on secondary displays.
+            // Display features are not supported on secondary displays or the context is not
+            // associated with any display.
             return false;
         }
 

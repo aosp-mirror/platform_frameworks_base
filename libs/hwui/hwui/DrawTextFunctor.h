@@ -17,7 +17,6 @@
 #include <SkFontMetrics.h>
 #include <SkRRect.h>
 #include <SkTextBlob.h>
-#include <com_android_graphics_hwui_flags.h>
 
 #include "../utils/Color.h"
 #include "Canvas.h"
@@ -30,7 +29,19 @@
 #include "hwui/PaintFilter.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
 
+#ifdef __ANDROID__
+#include <com_android_graphics_hwui_flags.h>
 namespace flags = com::android::graphics::hwui::flags;
+#else
+namespace flags {
+constexpr bool high_contrast_text_luminance() {
+    return false;
+}
+constexpr bool high_contrast_text_small_text_rect() {
+    return false;
+}
+}  // namespace flags
+#endif
 
 namespace android {
 

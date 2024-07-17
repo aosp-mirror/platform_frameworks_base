@@ -17,6 +17,7 @@
 package com.android.server.broadcastradio;
 
 import android.text.TextUtils;
+import android.util.IndentingPrintWriter;
 import android.util.LocalLog;
 import android.util.Log;
 
@@ -54,7 +55,7 @@ public final class RadioEventLogger {
      * Dump broadcast radio service event
      * @param pw Indenting print writer for dump
      */
-    public void dump(android.util.IndentingPrintWriter pw) {
+    public void dump(IndentingPrintWriter pw) {
         mEventLogger.dump(pw);
     }
 }

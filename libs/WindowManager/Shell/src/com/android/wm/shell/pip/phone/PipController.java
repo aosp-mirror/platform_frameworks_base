@@ -59,7 +59,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
@@ -367,22 +367,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     false /* fromRotation */, fromImeAdjustment, false /* fromShelfAdjustment */,
                     null /* windowContainerTransaction */);
         }
-
-        @Override
-        public void onActivityHidden(ComponentName componentName) {
-            if (componentName.equals(mPipBoundsState.getLastPipComponentName())) {
-                // The activity was removed, we don't want to restore to the reentry state
-                // saved for this component anymore.
-                mPipBoundsState.setLastPipComponentName(null);
-            }
-        }
     }
 
     /**
      * Instantiates {@link PipController}, returns {@code null} if the feature not supported.
      */
     @Nullable
-    public static Pip create(Context context,
+    public static PipImpl create(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             ShellController shellController,
@@ -1185,7 +1176,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     /**
      * The interface for calls from outside the Shell, within the host process.
      */
-    private class PipImpl implements Pip {
+    public class PipImpl implements Pip {
         @Override
         public void expandPip() {
             mMainExecutor.execute(() -> {

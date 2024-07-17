@@ -16,7 +16,6 @@
 
 package com.android.compose.animation.scene
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -34,6 +33,7 @@ import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachReversed
 import com.android.compose.ui.util.lerp
@@ -46,6 +46,7 @@ internal typealias MovableElementContent = @Composable (@Composable () -> Unit) 
 internal class SceneTransitionLayoutImpl(
     internal val state: BaseSceneTransitionLayoutState,
     internal var density: Density,
+    internal var layoutDirection: LayoutDirection,
     internal var swipeSourceDetector: SwipeSourceDetector,
     internal var transitionInterceptionThreshold: Float,
     builder: SceneTransitionLayoutScope.() -> Unit,
@@ -115,7 +116,7 @@ internal class SceneTransitionLayoutImpl(
         private set
 
     init {
-        updateScenes(builder)
+        updateScenes(builder, layoutDirection)
 
         // DraggableHandlerImpl must wait for the scenes to be initialized, in order to access the
         // current scene (required for SwipeTransition).
@@ -148,7 +149,10 @@ internal class SceneTransitionLayoutImpl(
         return scenes[key] ?: error("Scene $key is not configured")
     }
 
-    internal fun updateScenes(builder: SceneTransitionLayoutScope.() -> Unit) {
+    internal fun updateScenes(
+        builder: SceneTransitionLayoutScope.() -> Unit,
+        layoutDirection: LayoutDirection,
+    ) {
         // Keep a reference of the current scenes. After processing [builder], the scenes that were
         // not configured will be removed.
         val scenesToRemove = scenes.keys.toMutableSet()
@@ -164,11 +168,13 @@ internal class SceneTransitionLayoutImpl(
                 ) {
                     scenesToRemove.remove(key)
 
+                    val resolvedUserActions =
+                        userActions.mapKeys { it.key.resolve(layoutDirection) }
                     val scene = scenes[key]
                     if (scene != null) {
                         // Update an existing scene.
                         scene.content = content
-                        scene.userActions = userActions
+                        scene.userActions = resolvedUserActions
                         scene.zIndex = zIndex
                     } else {
                         // New scene.
@@ -177,7 +183,7 @@ internal class SceneTransitionLayoutImpl(
                                 key,
                                 this@SceneTransitionLayoutImpl,
                                 content,
-                                userActions,
+                                resolvedUserActions,
                                 zIndex,
                             )
                     }
@@ -213,16 +219,9 @@ internal class SceneTransitionLayoutImpl(
 
     @Composable
     private fun BackHandler() {
-        val targetSceneForBackOrNull =
-            scene(state.transitionState.currentScene).userActions[Back]?.toScene
-        BackHandler(enabled = targetSceneForBackOrNull != null) {
-            targetSceneForBackOrNull?.let { targetSceneForBack ->
-                // TODO(b/290184746): Handle predictive back and use result.distance if specified.
-                if (state.canChangeScene(targetSceneForBack)) {
-                    with(state) { coroutineScope.onChangeScene(targetSceneForBack) }
-                }
-            }
-        }
+        val targetSceneForBack =
+            scene(state.transitionState.currentScene).userActions[Back.Resolved]?.toScene
+        PredictiveBackHandler(state, coroutineScope, targetSceneForBack)
     }
 
     private fun scenesToCompose(): List<Scene> {
@@ -293,7 +292,15 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
                 width = fromSize.width
                 height = fromSize.height
             } else {
-                val size = lerp(fromSize, toSize, transition.progress)
+                val overscrollSpec = transition.currentOverscrollSpec
+                val progress =
+                    when {
+                        overscrollSpec == null -> transition.progress
+                        overscrollSpec.scene == transition.toScene -> 1f
+                        else -> 0f
+                    }
+
+                val size = lerp(fromSize, toSize, progress)
                 width = size.width.coerceAtLeast(0)
                 height = size.height.coerceAtLeast(0)
             }

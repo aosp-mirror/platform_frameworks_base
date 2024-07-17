@@ -130,8 +130,8 @@ public final class SessionConfiguration implements Parcelable {
      * Create a new {@link SessionConfiguration} with sessionType and output configurations.
      *
      * <p>The SessionConfiguration objects created by this constructor can be used by
-     * {@link CameraDeviceSetup.isSessionConfigurationSupported} and {@link
-     * CameraDeviceSetup.getSessionCharacteristics} to query a camera device's feature
+     * {@link CameraDeviceSetup#isSessionConfigurationSupported} and {@link
+     * CameraDeviceSetup#getSessionCharacteristics} to query a camera device's feature
      * combination support and session specific characteristics. For the SessionConfiguration
      * object to be used to create a capture session, {@link #setStateCallback} must be called to
      * specify the state callback function, and any incomplete OutputConfigurations must be

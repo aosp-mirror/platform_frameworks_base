@@ -51,10 +51,8 @@ java_sdk_library {
 
 java_library {
     name: "android.test.mock.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-java"],
     srcs: [":android-test-mock-sources"],
-    visibility: [
-        "//frameworks/base",
-    ],
 }
 
 android_ravenwood_test {

@@ -113,7 +113,9 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new IdlePowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new CustomEnergyConsumerPowerCalculator(mPowerProfile));
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_ANY)) {
+                    mPowerCalculators.add(new CustomEnergyConsumerPowerCalculator(mPowerProfile));
+                }
                 mPowerCalculators.add(new UserPowerCalculator());
 
                 if (!com.android.server.power.optimization.Flags.disableSystemServicePowerAttr()) {

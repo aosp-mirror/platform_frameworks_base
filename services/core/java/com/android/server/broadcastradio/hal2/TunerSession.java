@@ -31,6 +31,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.MutableBoolean;
 import android.util.MutableInt;
 
@@ -324,9 +325,7 @@ final class TunerSession extends ITuner.Stub {
         try {
             isConfigFlagSet(flag);
             return true;
-        } catch (IllegalStateException ex) {
-            return true;
-        } catch (UnsupportedOperationException ex) {
+        } catch (IllegalStateException | UnsupportedOperationException ex) {
             return false;
         }
     }
@@ -389,7 +388,7 @@ final class TunerSession extends ITuner.Stub {
         }
     }
 
-    void dumpInfo(android.util.IndentingPrintWriter pw) {
+    void dumpInfo(IndentingPrintWriter pw) {
         pw.printf("TunerSession\n");
         pw.increaseIndent();
         pw.printf("HIDL HAL Session: %s\n", mHwSession);

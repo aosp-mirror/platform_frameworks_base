@@ -23,7 +23,6 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -349,18 +348,6 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public int relayoutLegacy(IWindow window, WindowManager.LayoutParams inAttrs,
-            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
-            int lastSyncSeqId, ClientWindowFrames outFrames,
-            MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
-            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
-            Bundle outSyncSeqIdBundle) {
-        return relayoutInner(window, inAttrs, requestedWidth, requestedHeight, viewFlags, flags,
-                seq, lastSyncSeqId, outFrames, outMergedConfiguration, outSurfaceControl,
-                outInsetsState, outActiveControls);
-    }
-
-    @Override
     public int relayout(IWindow window, WindowManager.LayoutParams inAttrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
             int lastSyncSeqId, WindowRelayoutResult outRelayoutResult) {
@@ -516,13 +503,13 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public boolean performHapticFeedback(int effectId, boolean always, boolean fromIme) {
+    public boolean performHapticFeedback(int effectId, int flags, int privFlags) {
         return false;
     }
 
     @Override
-    public void performHapticFeedbackAsync(int effectId, boolean always, boolean fromIme) {
-        performHapticFeedback(effectId, always, fromIme);
+    public void performHapticFeedbackAsync(int effectId, int flags, int privFlags) {
+        performHapticFeedback(effectId, flags, privFlags);
     }
 
     @Override

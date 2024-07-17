@@ -74,6 +74,18 @@ public abstract class UsageStatsManagerInternal {
     public abstract void reportEvent(String packageName, @UserIdInt int userId, int eventType);
 
     /**
+     * Reports an event to the UsageStatsManager for all users. <br/>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then this event will be added to a queue and processed once the device is unlocked.</em>
+     *
+     * @param packageName The package for which this event occurred.
+     * @param eventType The event that occurred. Valid values can be found at
+     * {@link UsageEvents}
+     */
+    public abstract void reportEventForAllUsers(String packageName, int eventType);
+
+    /**
      * Reports a configuration change to the UsageStatsManager. <br/>
      * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
      * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),

@@ -19,9 +19,6 @@ package android.app.servertransaction;
 import static android.app.WindowConfiguration.areConfigurationsEqualForDisplay;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.window.flags.Flags.activityWindowInfoFlag;
-import static com.android.window.flags.Flags.bundleClientTransactionFlag;
-
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
@@ -103,9 +100,6 @@ public class ClientTransactionListenerController {
      */
     public void registerActivityWindowInfoChangedListener(
             @NonNull BiConsumer<IBinder, ActivityWindowInfo> listener) {
-        if (!activityWindowInfoFlag()) {
-            return;
-        }
         synchronized (mLock) {
             mActivityWindowInfoChangedListeners.add(listener);
         }
@@ -117,9 +111,6 @@ public class ClientTransactionListenerController {
      */
     public void unregisterActivityWindowInfoChangedListener(
             @NonNull BiConsumer<IBinder, ActivityWindowInfo> listener) {
-        if (!activityWindowInfoFlag()) {
-            return;
-        }
         synchronized (mLock) {
             mActivityWindowInfoChangedListeners.remove(listener);
         }
@@ -131,9 +122,6 @@ public class ClientTransactionListenerController {
      */
     public void onActivityWindowInfoChanged(@NonNull IBinder activityToken,
             @NonNull ActivityWindowInfo activityWindowInfo) {
-        if (!activityWindowInfoFlag()) {
-            return;
-        }
         final Object[] activityWindowInfoChangedListeners;
         synchronized (mLock) {
             if (mActivityWindowInfoChangedListeners.isEmpty()) {
@@ -196,7 +184,7 @@ public class ClientTransactionListenerController {
 
     /** Called before updating the Configuration of the given {@code context}. */
     public void onContextConfigurationPreChanged(@NonNull Context context) {
-        if (!bundleClientTransactionFlag() || ActivityThread.isSystem()) {
+        if (ActivityThread.isSystem()) {
             // Not enable for system server.
             return;
         }
@@ -212,7 +200,7 @@ public class ClientTransactionListenerController {
 
     /** Called after updating the Configuration of the given {@code context}. */
     public void onContextConfigurationPostChanged(@NonNull Context context) {
-        if (!bundleClientTransactionFlag() || ActivityThread.isSystem()) {
+        if (ActivityThread.isSystem()) {
             // Not enable for system server.
             return;
         }

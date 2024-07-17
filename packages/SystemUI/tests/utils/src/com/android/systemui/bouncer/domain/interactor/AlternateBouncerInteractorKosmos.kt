@@ -20,6 +20,7 @@ import com.android.keyguard.keyguardUpdateMonitor
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
@@ -28,6 +29,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.statusbar.policy.keyguardStateController
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.systemClock
 
 val Kosmos.alternateBouncerInteractor: AlternateBouncerInteractor by
@@ -47,3 +49,24 @@ val Kosmos.alternateBouncerInteractor: AlternateBouncerInteractor by
             sceneInteractor = { sceneInteractor },
         )
     }
+
+fun Kosmos.givenCanShowAlternateBouncer() {
+    this.givenAlternateBouncerSupported()
+    this.keyguardBouncerRepository.setPrimaryShow(false)
+    this.biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
+    this.biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
+    whenever(this.keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(false)
+    whenever(this.keyguardStateController.isUnlocked).thenReturn(false)
+}
+
+fun Kosmos.givenAlternateBouncerSupported() {
+    if (DeviceEntryUdfpsRefactor.isEnabled) {
+        this.fingerprintPropertyRepository.supportsUdfps()
+    } else {
+        this.keyguardBouncerRepository.setAlternateBouncerUIAvailable(true)
+    }
+}
+
+fun Kosmos.givenCannotShowAlternateBouncer() {
+    this.biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
+}

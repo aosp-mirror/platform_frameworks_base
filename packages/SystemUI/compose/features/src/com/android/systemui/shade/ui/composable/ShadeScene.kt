@@ -34,9 +34,11 @@ import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -51,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
@@ -60,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.UserAction
@@ -82,6 +86,7 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
+import com.android.systemui.notifications.ui.composable.NotificationStackCutoffGuideline
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.composable.BrightnessMirror
 import com.android.systemui.qs.ui.composable.QSMediaMeasurePolicy
@@ -95,6 +100,7 @@ import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
@@ -115,7 +121,7 @@ object Shade {
     object Dimensions {
         val ScrimCornerSize = 32.dp
         val HorizontalPadding = 16.dp
-        const val ScrimOverscrollLimit = 100f
+        val ScrimOverscrollLimit = 32.dp
         const val ScrimVisibilityThreshold = 5f
     }
 
@@ -136,6 +142,7 @@ constructor(
     private val shadeSession: SaveableSession,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
     private val viewModel: ShadeSceneViewModel,
+    private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
@@ -155,6 +162,7 @@ constructor(
         ShadeScene(
             notificationStackScrollView.get(),
             viewModel = viewModel,
+            notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
@@ -175,6 +183,7 @@ constructor(
 private fun SceneScope.ShadeScene(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneViewModel,
+    notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
@@ -189,6 +198,7 @@ private fun SceneScope.ShadeScene(
             SingleShade(
                 notificationStackScrollView = notificationStackScrollView,
                 viewModel = viewModel,
+                notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
                 createTintedIconManager = createTintedIconManager,
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
@@ -201,6 +211,7 @@ private fun SceneScope.ShadeScene(
             SplitShade(
                 notificationStackScrollView = notificationStackScrollView,
                 viewModel = viewModel,
+                notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
                 createTintedIconManager = createTintedIconManager,
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
@@ -217,6 +228,7 @@ private fun SceneScope.ShadeScene(
 private fun SceneScope.SingleShade(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneViewModel,
+    notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
@@ -246,6 +258,8 @@ private fun SceneScope.SingleShade(
             LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Compact
     val mediaOffset by
         animateSceneDpAsState(value = InQQS, key = MediaLandscapeTopOffset, canOverflow = false)
+
+    val navBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
     Box(
         modifier =
@@ -328,7 +342,7 @@ private fun SceneScope.SingleShade(
                         NotificationScrollingStack(
                             shadeSession = shadeSession,
                             stackScrollView = notificationStackScrollView,
-                            viewModel = viewModel.notifications,
+                            viewModel = notificationsPlaceholderViewModel,
                             maxScrimTop = { maxNotifScrimTop.value },
                             shadeMode = ShadeMode.Single,
                             shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
@@ -350,6 +364,22 @@ private fun SceneScope.SingleShade(
                 notificationsPlaceable.placeRelative(x = 0, y = maxNotifScrimTop.value.roundToInt())
             }
         }
+        Box(
+            modifier =
+                Modifier.align(Alignment.BottomCenter)
+                    .height(navBarHeight)
+                    .pointerInteropFilter { true }
+                    .verticalNestedScrollToScene(
+                        topBehavior = NestedScrollBehavior.EdgeAlways,
+                        isExternalOverscrollGesture = { false }
+                    )
+        ) {
+            NotificationStackCutoffGuideline(
+                stackScrollView = notificationStackScrollView,
+                viewModel = notificationsPlaceholderViewModel,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+        }
     }
 }
 
@@ -357,6 +387,7 @@ private fun SceneScope.SingleShade(
 private fun SceneScope.SplitShade(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneViewModel,
+    notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
@@ -424,8 +455,10 @@ private fun SceneScope.SplitShade(
             label = "alphaAnimationBrightnessMirrorContentHiding",
         )
 
-    viewModel.notifications.setAlphaForBrightnessMirror(contentAlpha)
-    DisposableEffect(Unit) { onDispose { viewModel.notifications.setAlphaForBrightnessMirror(1f) } }
+    notificationsPlaceholderViewModel.setAlphaForBrightnessMirror(contentAlpha)
+    DisposableEffect(Unit) {
+        onDispose { notificationsPlaceholderViewModel.setAlphaForBrightnessMirror(1f) }
+    }
 
     val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
 
@@ -467,9 +500,9 @@ private fun SceneScope.SplitShade(
                     BrightnessMirror(
                         viewModel = viewModel.brightnessMirrorViewModel,
                         qsSceneAdapter = viewModel.qsSceneAdapter,
-                        // Need to remove the offset of the header height, as the mirror uses
-                        // the position of the Brightness slider in the window
-                        modifier = Modifier.offset(y = -ShadeHeader.Dimensions.CollapsedHeight)
+                        // Need to use the offset measured from the container as the header
+                        // has to be accounted for
+                        measureFromContainer = true
                     )
                     Column(
                         verticalArrangement = Arrangement.Top,
@@ -481,8 +514,7 @@ private fun SceneScope.SplitShade(
                                     .sysuiResTag("expanded_qs_scroll_view")
                                     .weight(1f)
                                     .thenIf(!isCustomizerShowing) {
-                                        Modifier.verticalNestedScrollToScene()
-                                            .verticalScroll(
+                                        Modifier.verticalScroll(
                                                 quickSettingsScrollState,
                                                 enabled = isScrollable
                                             )
@@ -526,9 +558,10 @@ private fun SceneScope.SplitShade(
                 NotificationScrollingStack(
                     shadeSession = shadeSession,
                     stackScrollView = notificationStackScrollView,
-                    viewModel = viewModel.notifications,
+                    viewModel = notificationsPlaceholderViewModel,
                     maxScrimTop = { 0f },
                     shouldPunchHoleBehindScrim = false,
+                    shouldReserveSpaceForNavBar = false,
                     shadeMode = ShadeMode.Split,
                     modifier =
                         Modifier.weight(1f)
@@ -538,5 +571,10 @@ private fun SceneScope.SplitShade(
                 )
             }
         }
+        NotificationStackCutoffGuideline(
+            stackScrollView = notificationStackScrollView,
+            viewModel = notificationsPlaceholderViewModel,
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
+        )
     }
 }

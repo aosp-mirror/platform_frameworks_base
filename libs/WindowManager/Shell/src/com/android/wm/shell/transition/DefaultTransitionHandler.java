@@ -19,6 +19,7 @@ package com.android.wm.shell.transition;
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
 import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_NONE;
+import static android.app.ActivityOptions.ANIM_FROM_STYLE;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
@@ -40,6 +41,7 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECI
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_OWNER_THUMBNAIL;
 import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_WORK_THUMBNAIL;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
@@ -53,6 +55,7 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
+import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_CHANGE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_CLOSE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_INTRA_CLOSE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_INTRA_OPEN;
@@ -61,6 +64,7 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionTypeFromInfo;
+import static com.android.wm.shell.transition.TransitionAnimationHelper.isCoveredByOpaqueFullscreenChange;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
 
 import android.animation.Animator;
@@ -102,7 +106,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.TransitionAnimation;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -351,6 +355,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 continue;
             }
             final boolean isTask = change.getTaskInfo() != null;
+            final boolean isFreeform = isTask && change.getTaskInfo().isFreeform();
             final int mode = change.getMode();
             boolean isSeamlessDisplayChange = false;
 
@@ -457,6 +462,16 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             final int layer = zSplitLine + numChanges - i;
                             startTransaction.setLayer(change.getLeash(), layer);
                         }
+                    } else if (!isCoveredByOpaqueFullscreenChange(info, change)
+                            && isFreeform
+                            && TransitionUtil.isOpeningMode(type)
+                            && change.getMode() == TRANSIT_TO_BACK) {
+                        // Reparent the minimize-change to the root task so the minimizing Task
+                        // isn't shown in front of other Tasks.
+                        mRootTDAOrganizer.reparentToDisplayArea(
+                                change.getTaskInfo().displayId,
+                                change.getLeash(),
+                                startTransaction);
                     } else if (isOnlyTranslucent && TransitionUtil.isOpeningType(info.getType())
                                 && TransitionUtil.isClosingType(mode)) {
                         // If there is a closing translucent task in an OPENING transition, we will
@@ -517,7 +532,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     animRelOffset.y = Math.max(animRelOffset.y, change.getEndRelOffset().y);
                 }
 
-                if (change.getActivityComponent() != null && !isActivityLevel) {
+                if (change.getActivityComponent() != null && !isActivityLevel
+                        && !mRotator.isRotated(change)) {
                     // At this point, this is an independent activity change in a non-activity
                     // transition. This means that an activity transition got erroneously combined
                     // with another ongoing transition. This then means that the animation root may
@@ -943,12 +959,15 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     private static int getWallpaperTransitType(TransitionInfo info) {
+        boolean hasWallpaper = false;
         boolean hasOpenWallpaper = false;
         boolean hasCloseWallpaper = false;
 
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
-            if ((change.getFlags() & FLAG_SHOW_WALLPAPER) != 0) {
+            if ((change.getFlags() & FLAG_SHOW_WALLPAPER) != 0
+                    || (change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
+                hasWallpaper = true;
                 if (TransitionUtil.isOpeningType(change.getMode())) {
                     hasOpenWallpaper = true;
                 } else if (TransitionUtil.isClosingType(change.getMode())) {
@@ -964,6 +983,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             return WALLPAPER_TRANSITION_OPEN;
         } else if (hasCloseWallpaper) {
             return WALLPAPER_TRANSITION_CLOSE;
+        } else if (hasWallpaper) {
+            return WALLPAPER_TRANSITION_CHANGE;
         } else {
             return WALLPAPER_TRANSITION_NONE;
         }
@@ -978,7 +999,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final int animType = options.getType();
         return animType == ANIM_CUSTOM || animType == ANIM_SCALE_UP
                 || animType == ANIM_THUMBNAIL_SCALE_UP || animType == ANIM_THUMBNAIL_SCALE_DOWN
-                || animType == ANIM_CLIP_REVEAL || animType == ANIM_OPEN_CROSS_PROFILE_APPS;
+                || animType == ANIM_CLIP_REVEAL || animType == ANIM_OPEN_CROSS_PROFILE_APPS
+                || animType == ANIM_FROM_STYLE;
     }
 
     private static void applyTransformation(long time, SurfaceControl.Transaction t,

@@ -14051,6 +14051,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public void autofill(AutofillValue value) {
+        if (android.view.autofill.Helper.sVerbose) {
+            Log.v(LOG_TAG, "autofill() called on textview for id:" + getAutofillId());
+        }
         if (!isTextAutofillable()) {
             Log.w(LOG_TAG, "cannot autofill non-editable TextView: " + this);
             return;

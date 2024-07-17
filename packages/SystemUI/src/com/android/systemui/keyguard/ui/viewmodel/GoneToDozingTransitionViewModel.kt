@@ -60,6 +60,14 @@ constructor(
             onFinish = { 1f },
         )
 
+    val notificationAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = 500.milliseconds,
+            onStep = { 1f - it },
+            // Needs to be 1f in order for HUNs to appear on AOD
+            onFinish = { 1f },
+        )
+
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)
 

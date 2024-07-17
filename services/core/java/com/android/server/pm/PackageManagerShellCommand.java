@@ -121,6 +121,8 @@ import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.art.ArtManagerLocal;
+import com.android.server.art.ReasonMapping;
+import com.android.server.art.model.DexoptParams;
 import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.PermissionAllowlist;
@@ -3589,6 +3591,14 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--package-source":
                     sessionParams.setPackageSource(Integer.parseInt(getNextArg()));
                     break;
+                case "--dexopt-compiler-filter":
+                    sessionParams.dexoptCompilerFilter = getNextArgRequired();
+                    // An early check that throws IllegalArgumentException if the compiler filter is
+                    // invalid.
+                    new DexoptParams.Builder(ReasonMapping.REASON_INSTALL)
+                            .setCompilerFilter(sessionParams.dexoptCompilerFilter)
+                            .build();
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -4735,6 +4745,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
         pw.println("       [--apex] [--non-staged] [--force-non-staged]");
         pw.println("       [--staged-ready-timeout TIMEOUT] [--ignore-dexopt-profile]");
+        pw.println("       [--dexopt-compiler-filter FILTER]");
         pw.println("       [PATH [SPLIT...]|-]");
         pw.println("    Install an application.  Must provide the apk data to install, either as");
         pw.println("    file path(s) or '-' to read from stdin.  Options are:");
@@ -4781,13 +4792,19 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("          milliseconds for pre-reboot verification to complete when");
         pw.println("          performing staged install. This flag is used to alter the waiting");
         pw.println("          time. You can skip the waiting time by specifying a TIMEOUT of '0'");
-        pw.println("      --ignore-dexopt-profile: If set, all profiles are ignored by dexopt");
+        pw.println("      --ignore-dexopt-profile: if set, all profiles are ignored by dexopt");
         pw.println("          during the installation, including the profile in the DM file and");
         pw.println("          the profile embedded in the APK file. If an invalid profile is");
         pw.println("          provided during installation, no warning will be reported by `adb");
         pw.println("          install`.");
         pw.println("          This option does not affect later dexopt operations (e.g.,");
         pw.println("          background dexopt and manual `pm compile` invocations).");
+        pw.println("      --dexopt-compiler-filter: the target compiler filter for dexopt during");
+        pw.println("          the installation. The filter actually used may be different.");
+        pw.println("          Valid values: one of the values documented in");
+        pw.println("          https://source.android.com/docs/core/runtime/configure"
+                + "#compiler_filters");
+        pw.println("          or 'skip'");
         pw.println("");
         pw.println("  install-existing [--user USER_ID|all|current]");
         pw.println("       [--instant] [--full] [--wait] [--restrict-permissions] PACKAGE");

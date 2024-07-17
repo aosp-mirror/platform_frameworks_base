@@ -17,6 +17,7 @@
 package com.android.wm.shell.pip;
 
 import static android.util.RotationUtils.rotateBounds;
+import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
@@ -37,9 +38,10 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
@@ -619,22 +621,19 @@ public class PipAnimationController {
                 // This is done for entering case only.
                 if (isInPipDirection(direction)) {
                     final float aspectRatio = endValue.width() / (float) endValue.height();
-                    if ((startValue.width() / (float) startValue.height()) > aspectRatio) {
-                        // use the full height.
-                        adjustedSourceRectHint.set(0, 0,
-                                (int) (startValue.height() * aspectRatio), startValue.height());
-                        adjustedSourceRectHint.offset(
-                                (startValue.width() - adjustedSourceRectHint.width()) / 2, 0);
-                    } else {
-                        // use the full width.
-                        adjustedSourceRectHint.set(0, 0,
-                                startValue.width(), (int) (startValue.width() / aspectRatio));
-                        adjustedSourceRectHint.offset(
-                                0, (startValue.height() - adjustedSourceRectHint.height()) / 2);
-                    }
+                    adjustedSourceRectHint.set(PipUtils.getEnterPipWithOverlaySrcRectHint(
+                            startValue, aspectRatio));
                 }
             } else {
                 adjustedSourceRectHint.set(sourceRectHint);
+                if (isInPipDirection(direction)
+                        && rotationDelta == ROTATION_0
+                        && taskInfo.displayCutoutInsets != null) {
+                    // TODO: this is to special case the issues on Foldable device
+                    // with display cutout. This aligns with what's in SwipePipToHomeAnimator.
+                    adjustedSourceRectHint.offset(taskInfo.displayCutoutInsets.left,
+                            taskInfo.displayCutoutInsets.top);
+                }
             }
             final Rect sourceHintRectInsets = new Rect();
             if (!adjustedSourceRectHint.isEmpty()) {

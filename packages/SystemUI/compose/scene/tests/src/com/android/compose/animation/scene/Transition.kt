@@ -37,8 +37,11 @@ fun transition(
     bouncingScene: SceneKey? = null,
     orientation: Orientation = Orientation.Horizontal,
     onFinish: ((TransitionState.Transition) -> Job)? = null,
+    replacedTransition: TransitionState.Transition? = null,
 ): TransitionState.Transition {
-    return object : TransitionState.Transition(from, to), TransitionState.HasOverscrollProperties {
+    return object :
+        TransitionState.Transition(from, to, replacedTransition),
+        TransitionState.HasOverscrollProperties {
         override val currentScene: SceneKey
             get() = current()
 

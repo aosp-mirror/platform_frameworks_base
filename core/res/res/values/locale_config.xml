@@ -14,6 +14,11 @@
      limitations under the License.
 -->
 
+<!--
+     ICU Version: 75.1
+     CLDR Data Version: 45
+-->
+
 <resources>
 
     <string-array translatable="false" name="supported_locales">
@@ -88,6 +93,11 @@
         <item>bem-ZM</item> <!-- Bemba (Zambia) -->
         <item>bez-TZ</item> <!-- Bena (Tanzania) -->
         <item>bg-BG</item> <!-- Bulgarian (Bulgaria) -->
+        <item>bgc-IN</item> <!-- Haryanvi (India) -->
+        <item>bgc-IN-u-nu-latn</item> <!-- Haryanvi (India, Western Digits) -->
+        <item>bho-IN</item> <!-- Bhojpuri (India) -->
+        <item>bho-IN-u-nu-latn</item> <!-- Bhojpuri (India, Western Digits) -->
+        <item>blo-BJ</item> <!-- Anii (Benin) -->
         <item>bm-ML</item> <!-- Bambara (Mali) -->
         <item>bn-BD</item> <!-- Bangla (Bangladesh) -->
         <item>bn-BD-u-nu-latn</item> <!-- Bangla (Bangladesh, Western Digits) -->
@@ -108,6 +118,7 @@
         <item>cgg-UG</item> <!-- Chiga (Uganda) -->
         <item>chr-US</item> <!-- Cherokee (United States) -->
         <item>cs-CZ</item> <!-- Czech (Czechia) -->
+        <item>csw-CA</item> <!-- Swampy Cree (Canada) -->
         <item>cv-RU</item> <!-- Chuvash (Russia) -->
         <item>cy-GB</item> <!-- Welsh (United Kingdom) -->
         <item>da-DK</item> <!-- Danish (Denmark) -->
@@ -170,6 +181,7 @@
         <item>en-GU</item> <!-- English (Guam) -->
         <item>en-GY</item> <!-- English (Guyana) -->
         <item>en-HK</item> <!-- English (Hong Kong) -->
+        <item>en-ID</item> <!-- English (Indonesia) -->
         <item>en-IE</item> <!-- English (Ireland) -->
         <item>en-IL</item> <!-- English (Israel) -->
         <item>en-IM</item> <!-- English (Isle of Man) -->
@@ -237,6 +249,7 @@
         <item>en-ZA</item> <!-- English (South Africa) -->
         <item>en-ZM</item> <!-- English (Zambia) -->
         <item>en-ZW</item> <!-- English (Zimbabwe) -->
+        <item>eo-001</item> <!-- Esperanto (world) -->
         <item>es-AR</item> <!-- Spanish (Argentina) -->
         <item>es-BO</item> <!-- Spanish (Bolivia) -->
         <item>es-BR</item> <!-- Spanish (Brazil) -->
@@ -381,6 +394,7 @@
         <item>hu-HU</item> <!-- Hungarian (Hungary) -->
         <item>hy-AM</item> <!-- Armenian (Armenia) -->
         <item>ia-001</item> <!-- Interlingua (world) -->
+        <item>ie-EE</item> <!-- Interlingue (Estonia) -->
         <item>ig-NG</item> <!-- Igbo (Nigeria) -->
         <item>ii-CN</item> <!-- Sichuan Yi (China) -->
         <item>in-ID</item> <!-- Indonesian (Indonesia) -->
@@ -408,6 +422,7 @@
         <item>kln-KE</item> <!-- Kalenjin (Kenya) -->
         <item>km-KH</item> <!-- Khmer (Cambodia) -->
         <item>kn-IN</item> <!-- Kannada (India) -->
+        <item>ko-CN</item> <!-- Korean (China) -->
         <item>ko-KP</item> <!-- Korean (North Korea) -->
         <item>ko-KR</item> <!-- Korean (South Korea) -->
         <item>kok-IN</item> <!-- Konkani (India) -->
@@ -417,12 +432,19 @@
         <item>ksb-TZ</item> <!-- Shambala (Tanzania) -->
         <item>ksf-CM</item> <!-- Bafia (Cameroon) -->
         <item>ksh-DE</item> <!-- Colognian (Germany) -->
+        <item>ku-TR</item> <!-- Kurdish (Türkiye) -->
         <item>kw-GB</item> <!-- Cornish (United Kingdom) -->
+        <item>kxv-Deva-IN</item> <!-- Kuvi (Devanagari, India) -->
+        <item>kxv-Latn-IN</item> <!-- Kuvi (Latin, India) -->
+        <item>kxv-Orya-IN</item> <!-- Kuvi (Odia, India) -->
+        <item>kxv-Telu-IN</item> <!-- Kuvi (Telugu, India) -->
         <item>ky-KG</item> <!-- Kyrgyz (Kyrgyzstan) -->
         <item>lag-TZ</item> <!-- Langi (Tanzania) -->
         <item>lb-LU</item> <!-- Luxembourgish (Luxembourg) -->
         <item>lg-UG</item> <!-- Ganda (Uganda) -->
+        <item>lij-IT</item> <!-- Ligurian (Italy) -->
         <item>lkt-US</item> <!-- Lakota (United States) -->
+        <item>lmo-IT</item> <!-- Lombard (Italy) -->
         <item>ln-AO</item> <!-- Lingala (Angola) -->
         <item>ln-CD</item> <!-- Lingala (Congo - Kinshasa) -->
         <item>ln-CF</item> <!-- Lingala (Central African Republic) -->
@@ -462,6 +484,8 @@
         <item>nb-NO</item> <!-- Norwegian Bokmål (Norway) -->
         <item>nb-SJ</item> <!-- Norwegian Bokmål (Svalbard & Jan Mayen) -->
         <item>nd-ZW</item> <!-- North Ndebele (Zimbabwe) -->
+        <item>nds-DE</item> <!-- Low German (Germany) -->
+        <item>nds-NL</item> <!-- Low German (Netherlands) -->
         <item>ne-IN</item> <!-- Nepali (India) -->
         <item>ne-IN-u-nu-latn</item> <!-- Nepali (India, Western Digits) -->
         <item>ne-NP</item> <!-- Nepali (Nepal) -->
@@ -475,8 +499,12 @@
         <item>nl-SX</item> <!-- Dutch (Sint Maarten) -->
         <item>nn-NO</item> <!-- Norwegian Nynorsk (Norway) -->
         <item>nnh-CM</item> <!-- Ngiemboon (Cameroon) -->
+        <item>nqo-GN</item> <!-- N’Ko (Guinea) -->
+        <item>nqo-GN-u-nu-latn</item> <!-- N’Ko (Guinea, Western Digits) -->
         <item>nus-SS</item> <!-- Nuer (South Sudan) -->
         <item>nyn-UG</item> <!-- Nyankole (Uganda) -->
+        <item>oc-ES</item> <!-- Occitan (Spain) -->
+        <item>oc-FR</item> <!-- Occitan (France) -->
         <item>om-ET</item> <!-- Oromo (Ethiopia) -->
         <item>om-KE</item> <!-- Oromo (Kenya) -->
         <item>or-IN</item> <!-- Odia (India) -->
@@ -487,6 +515,7 @@
         <item>pa-Guru-IN</item> <!-- Punjabi (Gurmukhi, India) -->
         <item>pcm-NG</item> <!-- Nigerian Pidgin (Nigeria) -->
         <item>pl-PL</item> <!-- Polish (Poland) -->
+        <item>prg-PL</item> <!-- Prussian (Poland) -->
         <item>ps-AF</item> <!-- Pashto (Afghanistan) -->
         <item>ps-AF-u-nu-latn</item> <!-- Pashto (Afghanistan, Western Digits) -->
         <item>ps-PK</item> <!-- Pashto (Pakistan) -->
@@ -566,6 +595,9 @@
         <item>sw-KE</item> <!-- Swahili (Kenya) -->
         <item>sw-TZ</item> <!-- Swahili (Tanzania) -->
         <item>sw-UG</item> <!-- Swahili (Uganda) -->
+        <item>syr-IQ</item> <!-- Syriac (Iraq) -->
+        <item>syr-SY</item> <!-- Syriac (Syria) -->
+        <item>szl-PL</item> <!-- Silesian (Poland) -->
         <item>ta-IN</item> <!-- Tamil (India) -->
         <item>ta-LK</item> <!-- Tamil (Sri Lanka) -->
         <item>ta-MY</item> <!-- Tamil (Malaysia) -->
@@ -580,7 +612,7 @@
         <item>tk-TM</item> <!-- Turkmen (Turkmenistan) -->
         <item>to-TO</item> <!-- Tongan (Tonga) -->
         <item>tr-CY</item> <!-- Turkish (Cyprus) -->
-        <item>tr-TR</item> <!-- Turkish (Turkey) -->
+        <item>tr-TR</item> <!-- Turkish (Türkiye) -->
         <item>tt-RU</item> <!-- Tatar (Russia) -->
         <item>twq-NE</item> <!-- Tasawaq (Niger) -->
         <item>tzm-MA</item> <!-- Central Atlas Tamazight (Morocco) -->
@@ -594,11 +626,14 @@
         <item>uz-Arab-AF-u-nu-latn</item> <!-- Uzbek (Arabic, Afghanistan, Western Digits) -->
         <item>uz-Cyrl-UZ</item> <!-- Uzbek (Cyrillic, Uzbekistan) -->
         <item>uz-Latn-UZ</item> <!-- Uzbek (Latin, Uzbekistan) -->
+        <item>vec-IT</item> <!-- Venetian (Italy) -->
         <item>vi-VN</item> <!-- Vietnamese (Vietnam) -->
+        <item>vmw-MZ</item> <!-- Makhuwa (Mozambique) -->
         <item>vun-TZ</item> <!-- Vunjo (Tanzania) -->
         <item>wae-CH</item> <!-- Walser (Switzerland) -->
         <item>wo-SN</item> <!-- Wolof (Senegal) -->
         <item>xh-ZA</item> <!-- Xhosa (South Africa) -->
+        <item>xnr-IN</item> <!-- Kangri (India) -->
         <item>xog-UG</item> <!-- Soga (Uganda) -->
         <item>yav-CM</item> <!-- Yangben (Cameroon) -->
         <item>yo-BJ</item> <!-- Yoruba (Benin) -->
@@ -608,6 +643,7 @@
         <item>yrl-VE</item> <!-- Nheengatu (Venezuela) -->
         <item>yue-Hans-CN</item> <!-- Cantonese (Simplified, China) -->
         <item>yue-Hant-HK</item> <!-- Cantonese (Traditional, Hong Kong) -->
+        <item>za-CN</item> <!-- Zhuang (China) -->
         <item>zgh-MA</item> <!-- Standard Moroccan Tamazight (Morocco) -->
         <item>zh-Hans-CN</item> <!-- Chinese (Simplified, China) -->
         <item>zh-Hans-HK</item> <!-- Chinese (Simplified, Hong Kong) -->

@@ -18,8 +18,8 @@ package com.android.systemui.unfold.util
 import android.content.ContentResolver
 import android.database.ContentObserver
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.FakeUnfoldTransitionProvider
@@ -35,7 +35,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper
 class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {

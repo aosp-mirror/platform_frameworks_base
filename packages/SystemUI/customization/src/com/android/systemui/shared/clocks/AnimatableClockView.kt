@@ -531,8 +531,10 @@ constructor(
         moveFraction: Float,
     ) {
         val isMovingToCenter = if (isLayoutRtl) clockMoveDirection < 0 else clockMoveDirection > 0
+        // The sign of moveAmountDeltaForDigit is already set here
+        // we can interpret (left - clockStartLeft) as (destinationPosition - originPosition)
+        // so we no longer need to multiply direct sign to moveAmountDeltaForDigit
         val currentMoveAmount = left - clockStartLeft
-        val digitOffsetDirection = if (isLayoutRtl) -1 else 1
         for (i in 0 until NUM_DIGITS) {
             val digitFraction =
                 getDigitFraction(
@@ -542,7 +544,7 @@ constructor(
                 )
             val moveAmountForDigit = currentMoveAmount * digitFraction
             val moveAmountDeltaForDigit = moveAmountForDigit - currentMoveAmount
-            glyphOffsets[i] = digitOffsetDirection * moveAmountDeltaForDigit
+            glyphOffsets[i] = moveAmountDeltaForDigit
         }
         invalidate()
     }
@@ -580,6 +582,17 @@ constructor(
             }
         }
         invalidate()
+    }
+
+    override fun onRtlPropertiesChanged(layoutDirection: Int) {
+        if (migratedClocks) {
+            if (layoutDirection == LAYOUT_DIRECTION_RTL) {
+                textAlignment = TEXT_ALIGNMENT_TEXT_END
+            } else {
+                textAlignment = TEXT_ALIGNMENT_TEXT_START
+            }
+        }
+        super.onRtlPropertiesChanged(layoutDirection)
     }
 
     private fun getDigitFraction(digit: Int, isMovingToCenter: Boolean, fraction: Float): Float {

@@ -16,10 +16,10 @@
 
 package com.android.systemui.communal.domain.interactor
 
-import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
@@ -28,7 +28,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
-import com.android.systemui.communal.data.repository.CommunalPrefsRepository
+import com.android.systemui.communal.data.repository.CommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
@@ -38,6 +38,7 @@ import com.android.systemui.communal.shared.model.CommunalContentSize.HALF
 import com.android.systemui.communal.shared.model.CommunalContentSize.THIRD
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
@@ -59,7 +60,6 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.emitOnStart
@@ -81,7 +81,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -98,9 +97,9 @@ constructor(
     @Background val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
     private val widgetRepository: CommunalWidgetRepository,
-    private val communalPrefsRepository: CommunalPrefsRepository,
+    private val communalPrefsInteractor: CommunalPrefsInteractor,
     private val mediaRepository: CommunalMediaRepository,
-    smartspaceRepository: SmartspaceRepository,
+    private val smartspaceRepository: CommunalSmartspaceRepository,
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     communalSettingsInteractor: CommunalSettingsInteractor,
@@ -307,6 +306,7 @@ constructor(
         preselectedKey: String? = null,
         shouldOpenWidgetPickerOnStart: Boolean = false,
     ) {
+        communalSceneInteractor.setEditModeState(EditModeState.STARTING)
         editWidgetsActivityStarter.startActivity(preselectedKey, shouldOpenWidgetPickerOnStart)
     }
 
@@ -323,7 +323,7 @@ constructor(
     }
 
     /** Dismiss the CTA tile from the hub in view mode. */
-    suspend fun dismissCtaTile() = communalPrefsRepository.setCtaDismissedForCurrentUser()
+    suspend fun dismissCtaTile() = communalPrefsInteractor.setCtaDismissed()
 
     /** Add a widget at the specified position. */
     fun addWidget(
@@ -385,32 +385,23 @@ constructor(
         combine(
             widgetRepository.communalWidgets
                 .map { filterWidgetsByExistingUsers(it) }
-                .combine(communalSettingsInteractor.allowedByDevicePolicyForWorkProfile) {
+                .combine(communalSettingsInteractor.workProfileUserDisallowedByDevicePolicy) {
                     // exclude widgets under work profile if not allowed by device policy
                     widgets,
-                    allowedForWorkProfile ->
-                    filterWidgetsAllowedByDevicePolicy(widgets, allowedForWorkProfile)
+                    disallowedByPolicyUser ->
+                    filterWidgetsAllowedByDevicePolicy(widgets, disallowedByPolicyUser)
                 },
-            communalSettingsInteractor.communalWidgetCategories,
             updateOnWorkProfileBroadcastReceived,
-        ) { widgets, allowedCategories, _ ->
+        ) { widgets, _ ->
             widgets.map { widget ->
                 when (widget) {
                     is CommunalWidgetContentModel.Available -> {
-                        if (widget.providerInfo.widgetCategory and allowedCategories != 0) {
-                            // At least one category this widget specified is allowed, so show it
-                            WidgetContent.Widget(
-                                appWidgetId = widget.appWidgetId,
-                                providerInfo = widget.providerInfo,
-                                appWidgetHost = appWidgetHost,
-                                inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
-                            )
-                        } else {
-                            WidgetContent.DisabledWidget(
-                                appWidgetId = widget.appWidgetId,
-                                providerInfo = widget.providerInfo,
-                            )
-                        }
+                        WidgetContent.Widget(
+                            appWidgetId = widget.appWidgetId,
+                            providerInfo = widget.providerInfo,
+                            appWidgetHost = appWidgetHost,
+                            inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
+                        )
                     }
                     is CommunalWidgetContentModel.Pending -> {
                         WidgetContent.PendingWidget(
@@ -426,13 +417,11 @@ constructor(
     /** Filter widgets based on whether their associated profile is allowed by device policy. */
     private fun filterWidgetsAllowedByDevicePolicy(
         list: List<CommunalWidgetContentModel>,
-        allowedByDevicePolicyForWorkProfile: Boolean
+        disallowedByDevicePolicyUser: UserInfo?
     ): List<CommunalWidgetContentModel> =
-        if (allowedByDevicePolicyForWorkProfile) {
+        if (disallowedByDevicePolicyUser == null) {
             list
         } else {
-            // Get associated work profile for the currently selected user.
-            val workProfile = userTracker.userProfiles.find { it.isManagedProfile }
             list.filter { model ->
                 val uid =
                     when (model) {
@@ -440,26 +429,13 @@ constructor(
                             model.providerInfo.profile.identifier
                         is CommunalWidgetContentModel.Pending -> model.user.identifier
                     }
-                uid != workProfile?.id
-            }
-        }
-
-    /** A flow of available smartspace targets. Currently only showing timers. */
-    private val smartspaceTargets: Flow<List<SmartspaceTarget>> =
-        if (!smartspaceRepository.isSmartspaceRemoteViewsEnabled) {
-            flowOf(emptyList())
-        } else {
-            smartspaceRepository.communalSmartspaceTargets.map { targets ->
-                targets.filter { target ->
-                    target.featureType == SmartspaceTarget.FEATURE_TIMER &&
-                        target.remoteViews != null
-                }
+                uid != disallowedByDevicePolicyUser.id
             }
         }
 
     /** CTA tile to be displayed in the glanceable hub (view mode). */
     val ctaTileContent: Flow<List<CommunalContentModel.CtaTileInViewMode>> =
-        communalPrefsRepository.isCtaDismissed.map { isDismissed ->
+        communalPrefsInteractor.isCtaDismissed.map { isDismissed ->
             if (isDismissed) emptyList() else listOf(CommunalContentModel.CtaTileInViewMode())
         }
 
@@ -481,16 +457,16 @@ constructor(
      * sized dynamically.
      */
     fun getOngoingContent(mediaHostVisible: Boolean): Flow<List<CommunalContentModel.Ongoing>> =
-        combine(smartspaceTargets, mediaRepository.mediaModel) { smartspace, media ->
+        combine(smartspaceRepository.timers, mediaRepository.mediaModel) { timers, media ->
                 val ongoingContent = mutableListOf<CommunalContentModel.Ongoing>()
 
-                // Add smartspace
+                // Add smartspace timers
                 ongoingContent.addAll(
-                    smartspace.map { target ->
+                    timers.map { timer ->
                         CommunalContentModel.Smartspace(
-                            smartspaceTargetId = target.smartspaceTargetId,
-                            remoteViews = target.remoteViews!!,
-                            createdTimestampMillis = target.creationTimeMillis,
+                            smartspaceTargetId = timer.smartspaceTargetId,
+                            remoteViews = timer.remoteViews,
+                            createdTimestampMillis = timer.createdTimestampMillis,
                         )
                     }
                 )
@@ -565,4 +541,29 @@ constructor(
             )
         }
     }
+
+    /**
+     * {@link #setScrollPosition} persists the current communal grid scroll position (to volatile
+     * memory) so that the next presentation of the grid (either as glanceable hub or edit mode) can
+     * restore position.
+     */
+    fun setScrollPosition(firstVisibleItemIndex: Int, firstVisibleItemOffset: Int) {
+        _firstVisibleItemIndex = firstVisibleItemIndex
+        _firstVisibleItemOffset = firstVisibleItemOffset
+    }
+
+    fun resetScrollPosition() {
+        _firstVisibleItemIndex = 0
+        _firstVisibleItemOffset = 0
+    }
+
+    val firstVisibleItemIndex: Int
+        get() = _firstVisibleItemIndex
+
+    private var _firstVisibleItemIndex: Int = 0
+
+    val firstVisibleItemOffset: Int
+        get() = _firstVisibleItemOffset
+
+    private var _firstVisibleItemOffset: Int = 0
 }

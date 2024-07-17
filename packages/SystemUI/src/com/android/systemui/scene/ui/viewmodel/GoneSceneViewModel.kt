@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene.ui.viewmodel
 
+import androidx.compose.ui.Alignment
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
@@ -24,6 +25,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.SceneFamilies
+import com.android.systemui.scene.shared.model.TransitionKeys.OpenBottomShade
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -39,7 +41,7 @@ class GoneSceneViewModel
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    shadeInteractor: ShadeInteractor,
+    private val shadeInteractor: ShadeInteractor,
 ) {
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         shadeInteractor.shadeMode
@@ -62,23 +64,38 @@ constructor(
                     // TODO(b/338577208): Remove this once we add Dual Shade invocation zones.
                     shadeMode is ShadeMode.Dual
             ) {
-                put(
-                    Swipe(
-                        pointerCount = 2,
-                        fromSource = Edge.Top,
-                        direction = SwipeDirection.Down,
-                    ),
-                    UserActionResult(SceneFamilies.QuickSettings)
-                )
+                if (shadeInteractor.shadeAlignment == Alignment.BottomEnd) {
+                    put(
+                        Swipe(
+                            pointerCount = 2,
+                            fromSource = Edge.Bottom,
+                            direction = SwipeDirection.Up,
+                        ),
+                        UserActionResult(SceneFamilies.QuickSettings, OpenBottomShade)
+                    )
+                } else {
+                    put(
+                        Swipe(
+                            pointerCount = 2,
+                            fromSource = Edge.Top,
+                            direction = SwipeDirection.Down,
+                        ),
+                        UserActionResult(SceneFamilies.QuickSettings)
+                    )
+                }
             }
 
-            put(
-                Swipe(direction = SwipeDirection.Down),
-                UserActionResult(
-                    SceneFamilies.NotifShade,
-                    ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
+            if (shadeInteractor.shadeAlignment == Alignment.BottomEnd) {
+                put(Swipe.Up, UserActionResult(SceneFamilies.NotifShade, OpenBottomShade))
+            } else {
+                put(
+                    Swipe.Down,
+                    UserActionResult(
+                        SceneFamilies.NotifShade,
+                        ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
+                    )
                 )
-            )
+            }
         }
     }
 }

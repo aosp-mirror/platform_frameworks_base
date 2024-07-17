@@ -280,9 +280,9 @@ class AssetManager2 {
 
    private:
     SelectedValue(uint8_t value_type, Res_value::data_type value_data, ApkAssetsCookie cookie,
-                  uint32_t type_flags, uint32_t resid, const ResTable_config& config) :
+                  uint32_t type_flags, uint32_t resid, ResTable_config config) :
                   cookie(cookie), data(value_data), type(value_type), flags(type_flags),
-                  resid(resid), config(config) {};
+                  resid(resid), config(std::move(config)) {}
   };
 
   // Retrieves the best matching resource value with ID `resid`.

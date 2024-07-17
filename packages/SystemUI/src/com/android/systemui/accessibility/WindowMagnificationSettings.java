@@ -55,7 +55,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
-import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -90,7 +89,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
     private SeekBarWithIconButtonsView mZoomSeekbar;
     private LinearLayout mAllowDiagonalScrollingView;
-    private TextView mAllowDiagonalScrollingTitle;
     private Switch mAllowDiagonalScrollingSwitch;
     private LinearLayout mPanelView;
     private LinearLayout mSettingView;
@@ -98,7 +96,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private ImageButton mMediumButton;
     private ImageButton mLargeButton;
     private Button mDoneButton;
-    private TextView mSizeTitle;
     private Button mEditButton;
     private ImageButton mFullScreenButton;
     private int mLastSelectedButtonIndex = MagnificationSize.NONE;
@@ -522,11 +519,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mMediumButton = mSettingView.findViewById(R.id.magnifier_medium_button);
         mLargeButton = mSettingView.findViewById(R.id.magnifier_large_button);
         mDoneButton = mSettingView.findViewById(R.id.magnifier_done_button);
-        mSizeTitle = mSettingView.findViewById(R.id.magnifier_size_title);
         mEditButton = mSettingView.findViewById(R.id.magnifier_edit_button);
         mFullScreenButton = mSettingView.findViewById(R.id.magnifier_full_button);
-        mAllowDiagonalScrollingTitle =
-                mSettingView.findViewById(R.id.magnifier_horizontal_lock_title);
 
         mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_slider);
         mZoomSeekbar.setMax((int) (mZoomSeekbar.getChangeMagnitude()
@@ -550,8 +544,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mDoneButton.setOnClickListener(mButtonClickListener);
         mFullScreenButton.setOnClickListener(mButtonClickListener);
         mEditButton.setOnClickListener(mButtonClickListener);
-        mSizeTitle.setSelected(true);
-        mAllowDiagonalScrollingTitle.setSelected(true);
 
         mSettingView.setOnApplyWindowInsetsListener((v, insets) -> {
             // Adds a pending post check to avoiding redundant calculation because this callback
@@ -578,6 +570,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             // CONFIG_FONT_SCALE: font size change
             // CONFIG_LOCALE: language change
             // CONFIG_DENSITY: display size change
+            mParams.width = getPanelWidth(mContext);
             mParams.accessibilityTitle = getAccessibilityWindowTitle(mContext);
 
             boolean showSettingPanelAfterConfigChange = mIsVisible;
@@ -660,9 +653,22 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mCallback.onEditMagnifierSizeMode(enable);
     }
 
-    private static LayoutParams createLayoutParams(Context context) {
+    private int getPanelWidth(Context context) {
+        // The magnification settings panel width is limited to the minimum of
+        //     1. display width
+        //     2. panel done button width + left and right padding
+        // So we can directly calculate the proper panel width at runtime
+        int displayWidth = mWindowManager.getCurrentWindowMetrics().getBounds().width();
+        int contentWidth = context.getResources()
+                .getDimensionPixelSize(R.dimen.magnification_setting_button_done_width);
+        int padding = context.getResources()
+                .getDimensionPixelSize(R.dimen.magnification_setting_background_padding);
+        return Math.min(displayWidth, contentWidth + 2 * padding);
+    }
+
+    private LayoutParams createLayoutParams(Context context) {
         final LayoutParams params = new LayoutParams(
-                LayoutParams.WRAP_CONTENT,
+                getPanelWidth(context),
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 LayoutParams.FLAG_NOT_FOCUSABLE,

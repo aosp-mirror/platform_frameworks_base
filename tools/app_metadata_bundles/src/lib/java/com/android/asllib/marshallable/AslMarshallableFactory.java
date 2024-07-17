@@ -16,17 +16,11 @@
 
 package com.android.asllib.marshallable;
 
-import com.android.asllib.util.MalformedXmlException;
-
-import org.w3c.dom.Element;
-
-import java.util.List;
-
 public interface AslMarshallableFactory<T extends AslMarshallable> {
 
     /** Creates an {@link AslMarshallableFactory} from human-readable DOM elements */
-    T createFromHrElements(List<Element> elements) throws MalformedXmlException;
+    // T createFromHrElements(List<Element> elements) throws MalformedXmlException;
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
-    T createFromOdElements(List<Element> elements) throws MalformedXmlException;
+    // T createFromOdElements(List<Element> elements) throws MalformedXmlException;
 }

@@ -58,10 +58,13 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
+import android.app.AlarmManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatsManager;
 import android.app.admin.DevicePolicyEventLogger;
@@ -147,6 +150,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.SetScreenLockDialogActivity;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.DumpUtils;
@@ -322,6 +327,12 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private static final long PRIVATE_SPACE_AUTO_LOCK_INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
 
+    /**
+     * The time duration (in milliseconds) of the window length for the auto-lock message alarm
+     */
+    private static final long PRIVATE_SPACE_AUTO_LOCK_INACTIVITY_ALARM_WINDOW_MS =
+            TimeUnit.SECONDS.toMillis(55);
+
     // Tron counters
     private static final String TRON_GUEST_CREATED = "users_guest_created";
     private static final String TRON_USER_CREATED = "users_user_created";
@@ -329,6 +340,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private final Context mContext;
     private final PackageManagerService mPm;
+
 
     /**
      * Lock for packages. If using with {@link #mUsersLock}, {@link #mPackagesLock} should be
@@ -552,8 +564,15 @@ public class UserManagerService extends IUserManager.Stub {
 
     private KeyguardManager.KeyguardLockedStateListener mKeyguardLockedStateListener;
 
-    /** Token to identify and remove already scheduled private space auto-lock messages */
-    private static final Object PRIVATE_SPACE_AUTO_LOCK_MESSAGE_TOKEN = new Object();
+    /**
+     * {@link android.app.AlarmManager.OnAlarmListener} to schedule an alarm to enable
+     * auto-locking private space after screen timeout
+     */
+    private PrivateSpaceAutoLockTimer mPrivateSpaceAutoLockTimer;
+
+    /** Tag representing the alarm manager timer for auto-locking private space */
+    private static final String PRIVATE_SPACE_AUTO_LOCK_TIMER_TAG = "PrivateSpaceAutoLockTimer";
+
 
     /** Content observer to get callbacks for privte space autolock settings changes */
     private final SettingsObserver mPrivateSpaceAutoLockSettingsObserver;
@@ -604,22 +623,28 @@ public class UserManagerService extends IUserManager.Stub {
         public void onReceive(Context context, Intent intent) {
             if (isAutoLockForPrivateSpaceEnabled()) {
                 if (ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                    Slog.d(LOG_TAG, "SCREEN_OFF broadcast received");
-                    maybeScheduleMessageToAutoLockPrivateSpace();
+                    maybeScheduleAlarmToAutoLockPrivateSpace();
                 } else if (ACTION_SCREEN_ON.equals(intent.getAction())) {
                     Slog.d(LOG_TAG, "SCREEN_ON broadcast received, "
-                            + "removing queued message to auto-lock private space");
-                    // Remove any queued messages since the device is interactive again
-                    mHandler.removeCallbacksAndMessages(PRIVATE_SPACE_AUTO_LOCK_MESSAGE_TOKEN);
+                            + "removing pending alarms to auto-lock private space");
+                    // Remove any pending alarm since the device is interactive again
+                    cancelPendingAutoLockAlarms();
                 }
             }
         }
     };
 
+    private void cancelPendingAutoLockAlarms() {
+        final AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
+        if (alarmManager != null && mPrivateSpaceAutoLockTimer != null) {
+            alarmManager.cancel(mPrivateSpaceAutoLockTimer);
+        }
+    }
+
     @VisibleForTesting
-    void maybeScheduleMessageToAutoLockPrivateSpace() {
+    void maybeScheduleAlarmToAutoLockPrivateSpace() {
         // No action needed if auto-lock on inactivity not selected
-        int privateSpaceAutoLockPreference =
+        final int privateSpaceAutoLockPreference =
                 Settings.Secure.getIntForUser(mContext.getContentResolver(),
                         Settings.Secure.PRIVATE_SPACE_AUTO_LOCK,
                         Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_DEVICE_RESTART,
@@ -632,26 +657,65 @@ public class UserManagerService extends IUserManager.Stub {
         }
         int privateProfileUserId = getPrivateProfileUserId();
         if (privateProfileUserId != UserHandle.USER_NULL) {
-            scheduleMessageToAutoLockPrivateSpace(privateProfileUserId,
-                    PRIVATE_SPACE_AUTO_LOCK_MESSAGE_TOKEN,
+            if (isQuietModeEnabled(privateProfileUserId)) {
+                Slogf.d(LOG_TAG, "Not scheduling auto-lock alarm for %d, "
+                        + "quiet mode already enabled", privateProfileUserId);
+                return;
+            }
+            scheduleAlarmToAutoLockPrivateSpace(privateProfileUserId,
                     PRIVATE_SPACE_AUTO_LOCK_INACTIVITY_TIMEOUT_MS);
         }
     }
 
     @VisibleForTesting
-    void scheduleMessageToAutoLockPrivateSpace(int userId, Object token,
-            long delayInMillis) {
-        Slog.i(LOG_TAG, "Scheduling auto-lock message");
-        mHandler.postDelayed(() -> {
+    void scheduleAlarmToAutoLockPrivateSpace(int userId, long delayInMillis) {
+        final AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
+        if (alarmManager == null) {
+            Slog.e(LOG_TAG, "AlarmManager not available, cannot schedule auto-lock alarm");
+            return;
+        }
+        initPrivateSpaceAutoLockTimer(userId);
+        final long alarmWindowStartTime = SystemClock.elapsedRealtime() + delayInMillis;
+        alarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                alarmWindowStartTime,
+                PRIVATE_SPACE_AUTO_LOCK_INACTIVITY_ALARM_WINDOW_MS,
+                PRIVATE_SPACE_AUTO_LOCK_TIMER_TAG,
+                new HandlerExecutor(mHandler),
+                mPrivateSpaceAutoLockTimer);
+    }
+
+    private void initPrivateSpaceAutoLockTimer(int userId) {
+        cancelPendingAutoLockAlarms();
+        if (mPrivateSpaceAutoLockTimer == null
+                || mPrivateSpaceAutoLockTimer.getUserId() != userId) {
+            mPrivateSpaceAutoLockTimer = new PrivateSpaceAutoLockTimer(userId);
+        }
+    }
+
+    private class PrivateSpaceAutoLockTimer implements AlarmManager.OnAlarmListener {
+
+        private final int mUserId;
+
+        PrivateSpaceAutoLockTimer(int userId) {
+            mUserId = userId;
+        }
+
+        int getUserId() {
+            return mUserId;
+        }
+
+        @Override
+        public void onAlarm() {
             final PowerManager powerManager = mContext.getSystemService(PowerManager.class);
             if (powerManager != null && !powerManager.isInteractive()) {
-                Slog.i(LOG_TAG, "Auto-locking private space with user-id " + userId);
-                setQuietModeEnabledAsync(userId, true,
+                Slog.i(LOG_TAG, "Auto-locking private space with user-id " + mUserId);
+                setQuietModeEnabledAsync(mUserId, true,
                         /* target */ null, mContext.getPackageName());
             } else {
-                Slog.i(LOG_TAG, "Device is interactive, skipping auto-lock");
+                Slog.i(LOG_TAG, "Device is interactive, skipping auto-lock for profile user "
+                        + mUserId);
             }
-        }, token, delayInMillis);
+        }
     }
 
     @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
@@ -697,7 +761,7 @@ public class UserManagerService extends IUserManager.Stub {
             // Unregister device inactivity broadcasts
             if (mIsDeviceInactivityBroadcastReceiverRegistered) {
                 Slog.i(LOG_TAG, "Removing device inactivity broadcast receivers");
-                mHandler.removeCallbacksAndMessages(PRIVATE_SPACE_AUTO_LOCK_MESSAGE_TOKEN);
+                cancelPendingAutoLockAlarms();
                 mContext.unregisterReceiver(mDeviceInactivityBroadcastReceiver);
                 mIsDeviceInactivityBroadcastReceiverRegistered = false;
             }
@@ -1070,6 +1134,12 @@ public class UserManagerService extends IUserManager.Stub {
         if (isAutoLockingPrivateSpaceOnRestartsEnabled()) {
             autoLockPrivateSpace();
         }
+
+        showHsumNotificationIfNeeded();
+
+        if (Flags.addUiForSoundsFromBackgroundUsers()) {
+            new BackgroundUserSoundNotifier(mContext);
+        }
     }
 
     private boolean isAutoLockingPrivateSpaceOnRestartsEnabled() {
@@ -1104,6 +1174,30 @@ public class UserManagerService extends IUserManager.Stub {
         } else {
             Slogf.w(LOG_TAG, "Cannot start Communal Profile because there isn't one");
         }
+    }
+
+    /** Marks the user as slated for deletion during boot if necessary. **/
+    @GuardedBy("mUsersLock")
+    private void markUserForRemovalIfNecessaryLU(UserInfo ui) {
+        if (!ui.isEphemeral()) {
+            // User should be ephemeral to be marked for removal.
+            return;
+        }
+        if (ui.preCreated) {
+            // Avoid marking pre-created users for removal.
+            return;
+        }
+        if (ui.lastLoggedInTime == 0 && ui.isGuest() && Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_guestUserAutoCreated)) {
+            // Avoid marking auto-created but not-yet-logged-in guest user for removal. Because a
+            // new one will be created anyway, and this one doesn't have any personal data in it yet
+            // due to not being logged in.
+            return;
+        }
+        // Mark the user for removal.
+        addRemovingUserIdLocked(ui.id);
+        ui.partial = true;
+        ui.flags |= UserInfo.FLAG_DISABLED;
     }
 
     /* Prunes out any partially created or partially removed users. */
@@ -1831,6 +1925,7 @@ public class UserManagerService extends IUserManager.Stub {
                 Slog.i(LOG_TAG, "Quiet mode is already " + enableQuietMode);
                 return;
             }
+            UserManager.invalidateQuietModeEnabledCache();
             profile.flags ^= UserInfo.FLAG_QUIET_MODE;
             profileUserData = getUserDataLU(profile.id);
         }
@@ -4163,6 +4258,48 @@ public class UserManagerService extends IUserManager.Stub {
         mUpdatingSystemUserMode = true;
     }
 
+    /**
+     * If the device's actual HSUM status differs from that which is defined by its build
+     * configuration, warn the user. Ignores HSUM emulated status, since that isn't relevant.
+     *
+     * The goal is to inform dogfooders that they need to factory reset the device to align their
+     * device with its build configuration.
+     */
+    private void showHsumNotificationIfNeeded() {
+        if (RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER == isHeadlessSystemUserMode()) {
+            // Actual state does match the configuration. Great!
+            return;
+        }
+        if (Build.isDebuggable()
+                && !TextUtils.isEmpty(SystemProperties.get(SYSTEM_USER_MODE_EMULATION_PROPERTY))) {
+            // Ignore any device that has been playing around with HSUM emulation.
+            return;
+        }
+        Slogf.w(LOG_TAG, "Posting warning that device's HSUM status doesn't match the build's.");
+
+        final String title = mContext
+                .getString(R.string.wrong_hsum_configuration_notification_title);
+        final String message = mContext
+                .getString(R.string.wrong_hsum_configuration_notification_message);
+
+        final Notification notification =
+                new Notification.Builder(mContext, SystemNotificationChannels.DEVELOPER)
+                        .setSmallIcon(R.drawable.stat_sys_adb)
+                        .setWhen(0)
+                        .setOngoing(true)
+                        .setTicker(title)
+                        .setDefaults(0)
+                        .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(message)
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .build();
+
+        final NotificationManager notificationManager =
+                mContext.getSystemService(NotificationManager.class);
+        notificationManager.notifyAsUser(
+                null, SystemMessage.NOTE_WRONG_HSUM_STATUS, notification, UserHandle.ALL);
+    }
 
     private ResilientAtomicFile getUserListFile() {
         File tempBackup = new File(mUserListFile.getParent(), mUserListFile.getName() + ".backup");
@@ -4228,13 +4365,7 @@ public class UserManagerService extends IUserManager.Stub {
                                             || mNextSerialNumber <= userData.info.id) {
                                         mNextSerialNumber = userData.info.id + 1;
                                     }
-                                    if (userData.info.isEphemeral() && !userData.info.preCreated
-                                            && userData.info.id != UserHandle.USER_SYSTEM) {
-                                        // Mark ephemeral user as slated for deletion.
-                                        addRemovingUserIdLocked(userData.info.id);
-                                        userData.info.partial = true;
-                                        userData.info.flags |= UserInfo.FLAG_DISABLED;
-                                    }
+                                    markUserForRemovalIfNecessaryLU(userData.info);
                                 }
                             }
                         } else if (name.equals(TAG_GUEST_RESTRICTIONS)) {
@@ -5918,9 +6049,11 @@ public class UserManagerService extends IUserManager.Stub {
         return userData;
     }
 
+    /** For testing only! Directly, unnaturally removes userId from list of users. */
     @VisibleForTesting
     void removeUserInfo(@UserIdInt int userId) {
         synchronized (mUsersLock) {
+            UserManager.invalidateUserSerialNumberCache();
             mUsers.remove(userId);
         }
     }
@@ -6346,6 +6479,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         // Remove this user from the list
         synchronized (mUsersLock) {
+            UserManager.invalidateUserSerialNumberCache();
             mUsers.remove(userId);
             mIsUserManaged.delete(userId);
         }

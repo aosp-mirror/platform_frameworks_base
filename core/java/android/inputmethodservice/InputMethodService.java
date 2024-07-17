@@ -16,7 +16,6 @@
 
 package android.inputmethodservice;
 
-import static android.view.inputmethod.Flags.predictiveBackIme;
 import static android.inputmethodservice.InputMethodServiceProto.CANDIDATES_VIEW_STARTED;
 import static android.inputmethodservice.InputMethodServiceProto.CANDIDATES_VISIBILITY;
 import static android.inputmethodservice.InputMethodServiceProto.CONFIGURATION;
@@ -57,6 +56,7 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
 import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
 import static android.view.inputmethod.Flags.ctrlShiftShortcut;
+import static android.view.inputmethod.Flags.predictiveBackIme;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -401,10 +401,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private long mStylusHwSessionsTimeout = STYLUS_HANDWRITING_IDLE_TIMEOUT_MS;
     private Runnable mStylusWindowIdleTimeoutRunnable;
     private long mStylusWindowIdleTimeoutForTest;
-    /**
-     * Tracks last {@link MotionEvent#getToolType(int)} used for {@link MotionEvent#ACTION_DOWN}.
-     **/
-    private int mLastUsedToolType;
+
     /**
      * Tracks the ctrl+shift shortcut
      **/
@@ -1368,7 +1365,6 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private void updateEditorToolTypeInternal(int toolType) {
         if (Flags.useHandwritingListenerForTooltype()) {
-            mLastUsedToolType = toolType;
             if (mInputEditorInfo != null) {
                 mInputEditorInfo.setInitialToolType(toolType);
             }
@@ -3385,9 +3381,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 null /* icProto */);
         mInputStarted = true;
         mStartedInputConnection = ic;
-        if (Flags.useHandwritingListenerForTooltype()) {
-            editorInfo.setInitialToolType(mLastUsedToolType);
-        }
         mInputEditorInfo = editorInfo;
         initialize();
         mInlineSuggestionSessionController.notifyOnStartInput(
@@ -4345,6 +4338,17 @@ public class InputMethodService extends AbstractInputMethodService {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     public final boolean isImeNavigationBarShownForTesting() {
         return mNavigationBarController.isShown();
+    }
+
+    /**
+     * Called when the IME switch button was clicked from the client. Depending on the number of
+     * enabled IME subtypes, this will either switch to the next IME/subtype, or show the input
+     * method picker dialog.
+     *
+     * @hide
+     */
+    final void onImeSwitchButtonClickFromClient() {
+        mPrivOps.onImeSwitchButtonClickFromClient(getDisplayId());
     }
 
     /**

@@ -79,6 +79,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.security.GateKeeper;
 import android.security.KeyStoreAuthorization;
@@ -118,6 +121,8 @@ public class BiometricServiceTest {
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final String TEST_PACKAGE_NAME = "test_package";
     private static final long TEST_REQUEST_ID = 44;
@@ -1503,6 +1508,75 @@ public class BiometricServiceTest {
         // Lockout is not considered an error for BiometricManager#canAuthenticate
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
                 invokeCanAuthenticate(mBiometricService, Authenticators.BIOMETRIC_STRONG));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testCanAuthenticate_whenMandatoryBiometricsRequested()
+            throws Exception {
+        mBiometricService = new BiometricService(mContext, mInjector, mBiometricHandlerProvider);
+        mBiometricService.onStart();
+
+        when(mTrustManager.isInSignificantPlace()).thenReturn(false);
+        when(mBiometricService.mSettingObserver.getMandatoryBiometricsEnabledForUser(anyInt()))
+                .thenReturn(true);
+
+        setupAuthForOnly(TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS));
+
+        when(mTrustManager.isInSignificantPlace()).thenReturn(true);
+
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testCanAuthenticate_whenMandatoryBiometricsAndStrongAuthenticatorsRequested()
+            throws Exception {
+        mBiometricService = new BiometricService(mContext, mInjector, mBiometricHandlerProvider);
+        mBiometricService.onStart();
+
+        when(mTrustManager.isInSignificantPlace()).thenReturn(false);
+        when(mBiometricService.mSettingObserver.getMandatoryBiometricsEnabledForUser(anyInt()))
+                .thenReturn(true);
+
+        setupAuthForOnly(TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS
+                        | Authenticators.BIOMETRIC_STRONG));
+
+        when(mTrustManager.isInSignificantPlace()).thenReturn(true);
+
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS
+                        | Authenticators.BIOMETRIC_STRONG));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testCanAuthenticate_whenMandatoryBiometricsRequestedAndDeviceCredentialAvailable()
+            throws Exception {
+        mBiometricService = new BiometricService(mContext, mInjector, mBiometricHandlerProvider);
+        mBiometricService.onStart();
+
+        when(mTrustManager.isInSignificantPlace()).thenReturn(false);
+        when(mBiometricService.mSettingObserver.getMandatoryBiometricsEnabledForUser(anyInt()))
+                .thenReturn(true);
+
+        setupAuthForOnly(TYPE_CREDENTIAL, Authenticators.DEVICE_CREDENTIAL);
+
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS));
+
+        when(mTrustManager.isInSignificantPlace()).thenReturn(true);
+
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS
+                        | Authenticators.DEVICE_CREDENTIAL));
     }
 
     @Test

@@ -25,6 +25,8 @@ import static android.service.notification.NotificationListenerService.NOTIFICAT
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 
+import static androidx.test.ext.truth.content.IntentSubject.assertThat;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING;
 import static com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR;
@@ -57,6 +59,7 @@ import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -83,6 +86,7 @@ import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.testing.TestableLooper;
+import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
@@ -180,6 +184,7 @@ import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
+import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -212,6 +217,9 @@ import platform.test.runner.parameterized.Parameters;
 @RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class BubblesTest extends SysuiTestCase {
+
+    private static final String TAG = "BubblesTest";
+
     @Mock
     private CommonNotifCollection mCommonNotifCollection;
     @Mock
@@ -236,8 +244,6 @@ public class BubblesTest extends SysuiTestCase {
     private KeyguardViewMediator mKeyguardViewMediator;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
-    @Mock
-    private FloatingContentCoordinator mFloatingContentCoordinator;
     @Mock
     private BubbleDataRepository mDataRepository;
     @Mock
@@ -368,6 +374,7 @@ public class BubblesTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        PhysicsAnimatorTestUtils.prepareForTest();
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             doReturn(true).when(mTransitions).isRegistered();
@@ -471,7 +478,9 @@ public class BubblesTest extends SysuiTestCase {
                         mock(AvalancheProvider.class),
                         mock(SystemSettings.class),
                         mock(PackageManager.class),
-                        Optional.of(mock(Bubbles.class))
+                        Optional.of(mock(Bubbles.class)),
+                        mContext,
+                        mock(NotificationManager.class)
                         );
         interruptionDecisionProvider.start();
 
@@ -488,7 +497,7 @@ public class BubblesTest extends SysuiTestCase {
                 mShellCommandHandler,
                 mShellController,
                 mBubbleData,
-                mFloatingContentCoordinator,
+                new FloatingContentCoordinator(),
                 mDataRepository,
                 mStatusBarService,
                 mWindowManager,
@@ -565,11 +574,31 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         ArrayList<Bubble> bubbles = new ArrayList<>(mBubbleData.getBubbles());
         for (int i = 0; i < bubbles.size(); i++) {
             mBubbleController.removeBubble(bubbles.get(i).getKey(),
                     Bubbles.DISMISS_NO_LONGER_BUBBLE);
+        }
+        mTestableLooper.processAllMessages();
+
+        // check that no animations are running before finishing the test to make sure that the
+        // state gets cleaned up correctly between tests.
+        int retryCount = 0;
+        while (PhysicsAnimatorTestUtils.isAnyAnimationRunning() && retryCount <= 10) {
+            Log.d(
+                    TAG,
+                    String.format("waiting for animations to complete. attempt %d", retryCount));
+            // post a message to the looper and wait for it to be processed
+            mTestableLooper.runWithLooper(() -> {});
+            retryCount++;
+        }
+        mTestableLooper.processAllMessages();
+        if (PhysicsAnimatorTestUtils.isAnyAnimationRunning()) {
+            Log.d(TAG, "finished waiting for animations to complete but animations are still "
+                    + "running");
+        } else {
+            Log.d(TAG, "no animations are running");
         }
     }
 
@@ -2017,6 +2046,31 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShowOrHideAppBubble_updateExistedBubbleInOverflow_updateIntentInBubble() {
+        String appBubbleKey = Bubble.getAppBubbleKeyForApp(mAppBubbleIntent.getPackage(), mUser0);
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+        // Collapse the stack so we don't need to wait for the dismiss animation in the test
+        mBubbleController.collapseStack();
+        // Dismiss the app bubble so it's in the overflow
+        mBubbleController.dismissBubble(appBubbleKey, Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNotNull();
+
+        // Modify the intent to include new extras.
+        Intent newAppBubbleIntent = new Intent(mContext, BubblesTestActivity.class)
+                .setPackage(mContext.getPackageName())
+                .putExtra("hello", "world");
+
+        // Calling this while collapsed will re-add and expand the app bubble
+        mBubbleController.showOrHideAppBubble(newAppBubbleIntent, mUser0, mAppBubbleIcon);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(appBubbleKey);
+        assertThat(mBubbleController.isStackExpanded()).isTrue();
+        assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
+        assertThat(mBubbleData.getBubbles().get(0).getAppBubbleIntent()).extras().string(
+                "hello").isEqualTo("world");
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNull();
+    }
+
+    @Test
     public void testCreateBubbleFromOngoingNotification() {
         NotificationEntry notif = new NotificationEntryBuilder()
                 .setFlag(mContext, Notification.FLAG_ONGOING_EVENT, true)
@@ -2248,7 +2302,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 0);
         // Drag first bubble to dismiss
         mBubbleController.startBubbleDrag(mBubbleEntry.getKey());
-        mBubbleController.dragBubbleToDismiss(mBubbleEntry.getKey());
+        mBubbleController.dragBubbleToDismiss(mBubbleEntry.getKey(), System.currentTimeMillis());
         // Second bubble is selected and expanded
         assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry2.getKey());
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
@@ -2272,7 +2326,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 0);
         // Drag second bubble to dismiss
         mBubbleController.startBubbleDrag(mBubbleEntry2.getKey());
-        mBubbleController.dragBubbleToDismiss(mBubbleEntry2.getKey());
+        mBubbleController.dragBubbleToDismiss(mBubbleEntry2.getKey(), System.currentTimeMillis());
         // First bubble remains selected and expanded
         assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry.getKey());
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();

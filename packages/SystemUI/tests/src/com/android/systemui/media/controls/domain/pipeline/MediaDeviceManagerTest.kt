@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothLeBroadcastMetadata
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.TestStubDrawable
 import android.media.MediaRoute2Info
 import android.media.MediaRouter2Manager
 import android.media.RoutingSessionInfo
@@ -30,6 +31,7 @@ import android.media.session.MediaSession
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.RequiresFlagsDisabled
+import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -89,6 +91,11 @@ private const val NORMAL_APP_NAME = "NORMAL_APP_NAME"
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 public class MediaDeviceManagerTest : SysuiTestCase() {
+
+    private companion object {
+        val OTHER_DEVICE_ICON_STUB = TestStubDrawable()
+    }
+
     @get:Rule val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
     private lateinit var manager: MediaDeviceManager
@@ -155,6 +162,11 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
             MediaTestUtils.emptyMediaData.copy(packageName = PACKAGE, token = session.sessionToken)
         whenever(controllerFactory.create(session.sessionToken)).thenReturn(controller)
         setupLeAudioConfiguration(false)
+
+        context.orCreateTestableResources.addOverride(
+            R.drawable.ic_media_home_devices,
+            OTHER_DEVICE_ICON_STUB
+        )
     }
 
     @After
@@ -414,6 +426,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         assertThat(data.name).isEqualTo(REMOTE_DEVICE_NAME)
     }
 
+    @RequiresFlagsDisabled(FLAG_USE_PLAYBACK_INFO_FOR_ROUTING_CONTROLS)
     @Test
     fun onMediaDataLoaded_withRemotePlaybackInfo_noMatchingRoutingSession_setsDisabledDevice() {
         // GIVEN that MR2Manager returns null for routing session
@@ -429,6 +442,24 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         assertThat(data.name).isNull()
     }
 
+    @RequiresFlagsEnabled(FLAG_USE_PLAYBACK_INFO_FOR_ROUTING_CONTROLS)
+    @Test
+    fun onMediaDataLoaded_withRemotePlaybackInfo_noMatchingRoutingSession_returnsOtherDevice() {
+        // GIVEN that MR2Manager returns null for routing session
+        whenever(playbackInfo.playbackType).thenReturn(PlaybackInfo.PLAYBACK_TYPE_REMOTE)
+        whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
+        // WHEN a notification is added
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        // THEN the device is disabled and name and icon are set to "OTHER DEVICE".
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isFalse()
+        assertThat(data.name).isEqualTo(context.getString(R.string.media_seamless_other_device))
+        assertThat(data.icon).isEqualTo(OTHER_DEVICE_ICON_STUB)
+    }
+
+    @RequiresFlagsDisabled(FLAG_USE_PLAYBACK_INFO_FOR_ROUTING_CONTROLS)
     @Test
     fun onSelectedDeviceStateChanged_withRemotePlaybackInfo_noMatchingRoutingSession_setsDisabledDevice() {
         // GIVEN a notif is added
@@ -449,7 +480,30 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         assertThat(data.enabled).isFalse()
         assertThat(data.name).isNull()
     }
+    @RequiresFlagsEnabled(FLAG_USE_PLAYBACK_INFO_FOR_ROUTING_CONTROLS)
+    @Test
+    fun onSelectedDeviceStateChanged_withRemotePlaybackInfo_noMatchingRoutingSession_returnOtherDevice() {
+        // GIVEN a notif is added
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        reset(listener)
+        // AND MR2Manager returns null for routing session
+        whenever(playbackInfo.playbackType).thenReturn(PlaybackInfo.PLAYBACK_TYPE_REMOTE)
+        whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
+        // WHEN the selected device changes state
+        val deviceCallback = captureCallback()
+        deviceCallback.onSelectedDeviceStateChanged(device, 1)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        // THEN the device is disabled and name and icon are set to "OTHER DEVICE".
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isFalse()
+        assertThat(data.name).isEqualTo(context.getString(R.string.media_seamless_other_device))
+        assertThat(data.icon).isEqualTo(OTHER_DEVICE_ICON_STUB)
+    }
 
+    @RequiresFlagsDisabled(FLAG_USE_PLAYBACK_INFO_FOR_ROUTING_CONTROLS)
     @Test
     fun onDeviceListUpdate_withRemotePlaybackInfo_noMatchingRoutingSession_setsDisabledDevice() {
         // GIVEN a notif is added
@@ -469,6 +523,29 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
         assertThat(data.name).isNull()
+    }
+
+    @RequiresFlagsEnabled(FLAG_USE_PLAYBACK_INFO_FOR_ROUTING_CONTROLS)
+    @Test
+    fun onDeviceListUpdate_withRemotePlaybackInfo_noMatchingRoutingSession_returnsOtherDevice() {
+        // GIVEN a notif is added
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        reset(listener)
+        // GIVEN that MR2Manager returns null for routing session
+        whenever(playbackInfo.playbackType).thenReturn(PlaybackInfo.PLAYBACK_TYPE_REMOTE)
+        whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
+        // WHEN the selected device changes state
+        val deviceCallback = captureCallback()
+        deviceCallback.onDeviceListUpdate(mutableListOf(device))
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        // THEN device is disabled and name and icon are set to "OTHER DEVICE".
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isFalse()
+        assertThat(data.name).isEqualTo(context.getString(R.string.media_seamless_other_device))
+        assertThat(data.icon).isEqualTo(OTHER_DEVICE_ICON_STUB)
     }
 
     // With the flag enabled, MediaDeviceManager no longer gathers device name information directly.

@@ -23,12 +23,12 @@ import android.view.WindowManager.TRANSIT_TO_BACK
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
 import androidx.annotation.VisibleForTesting
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup
-import com.android.wm.shell.shared.DesktopModeStatus
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionObserver
-import com.android.wm.shell.util.KtProtoLog
 
 /**
  * Limits the number of tasks shown in Desktop Mode.
@@ -42,9 +42,12 @@ class DesktopTasksLimiter (
         private val shellTaskOrganizer: ShellTaskOrganizer,
 ) {
     private val minimizeTransitionObserver = MinimizeTransitionObserver()
+    @VisibleForTesting
+    val leftoverMinimizedTasksRemover = LeftoverMinimizedTasksRemover()
 
     init {
         transitions.registerObserver(minimizeTransitionObserver)
+        taskRepository.addActiveTaskListener(leftoverMinimizedTasksRemover)
     }
 
     private data class TaskDetails (val displayId: Int, val taskId: Int)
@@ -68,7 +71,7 @@ class DesktopTasksLimiter (
             if (!taskRepository.isActiveTask(taskToMinimize.taskId)) return
 
             if (!isTaskReorderedToBackOrInvisible(info, taskToMinimize)) {
-                KtProtoLog.v(
+                ProtoLog.v(
                         ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                         "DesktopTasksLimiter: task %d is not reordered to back nor invis",
                         taskToMinimize.taskId)
@@ -106,10 +109,39 @@ class DesktopTasksLimiter (
         }
 
         override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {
-            KtProtoLog.v(
+            ProtoLog.v(
                     ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "DesktopTasksLimiter: transition %s finished", transition)
             mPendingTransitionTokensAndTasks.remove(transition)
+        }
+    }
+
+    @VisibleForTesting
+    inner class LeftoverMinimizedTasksRemover : DesktopModeTaskRepository.ActiveTasksListener {
+        override fun onActiveTasksChanged(displayId: Int) {
+            val wct = WindowContainerTransaction()
+            removeLeftoverMinimizedTasks(displayId, wct)
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+
+        fun removeLeftoverMinimizedTasks(displayId: Int, wct: WindowContainerTransaction) {
+            if (taskRepository
+                .getActiveNonMinimizedTasksOrderedFrontToBack(displayId).isNotEmpty()) {
+                return
+            }
+            val remainingMinimizedTasks = taskRepository.getMinimizedTasks(displayId)
+            if (remainingMinimizedTasks.isEmpty()) {
+                return
+            }
+            ProtoLog.v(
+                ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                "DesktopTasksLimiter: removing leftover minimized tasks: $remainingMinimizedTasks")
+            remainingMinimizedTasks.forEach { taskIdToRemove ->
+                val taskToRemove = shellTaskOrganizer.getRunningTaskInfo(taskIdToRemove)
+                if (taskToRemove != null) {
+                    wct.removeTask(taskToRemove.token)
+                }
+            }
         }
     }
 
@@ -118,7 +150,7 @@ class DesktopTasksLimiter (
      * finished so we don't minimize the task if the transition fails.
      */
     private fun markTaskMinimized(displayId: Int, taskId: Int) {
-        KtProtoLog.v(
+        ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                 "DesktopTasksLimiter: marking %d as minimized", taskId)
         taskRepository.minimizeTask(displayId, taskId)
@@ -137,7 +169,7 @@ class DesktopTasksLimiter (
             wct: WindowContainerTransaction,
             newFrontTaskInfo: RunningTaskInfo,
     ): RunningTaskInfo? {
-        KtProtoLog.v(
+        ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                 "DesktopTasksLimiter: addMinimizeBackTaskChangesIfNeeded, newFrontTask=%d",
                 newFrontTaskInfo.taskId)
@@ -185,7 +217,7 @@ class DesktopTasksLimiter (
             visibleFreeformTaskIdsOrderedFrontToBack: List<Int>
     ): RunningTaskInfo? {
         if (visibleFreeformTaskIdsOrderedFrontToBack.size <= getMaxTaskLimit()) {
-            KtProtoLog.v(
+            ProtoLog.v(
                     ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "DesktopTasksLimiter: no need to minimize; tasks below limit")
             // No need to minimize anything
@@ -195,7 +227,7 @@ class DesktopTasksLimiter (
                 shellTaskOrganizer.getRunningTaskInfo(
                         visibleFreeformTaskIdsOrderedFrontToBack.last())
         if (taskToMinimize == null) {
-            KtProtoLog.e(
+            ProtoLog.e(
                     ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "DesktopTasksLimiter: taskToMinimize == null")
             return null

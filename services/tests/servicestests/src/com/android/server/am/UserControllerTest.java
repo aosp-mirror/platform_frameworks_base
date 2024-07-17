@@ -672,6 +672,61 @@ public class UserControllerTest {
                 new HashSet<>(mUserController.getRunningUsersLU()));
     }
 
+    /** Test scheduling stopping of background users - reschedule if current user is a guest. */
+    @Test
+    public void testScheduleStopOfBackgroundUser_rescheduleWhenGuest() throws Exception {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ 2);
+
+        final int TEST_USER_GUEST = 902;
+        setUpUser(TEST_USER_GUEST, UserInfo.FLAG_GUEST);
+
+        setUpUser(TEST_USER_ID2, NO_USERINFO_FLAGS);
+
+        // Switch to TEST_USER_ID from user 0
+        int numberOfUserSwitches = 0;
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
+                ++numberOfUserSwitches, false,
+                /* expectScheduleBackgroundUserStopping= */ false);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID),
+                mUserController.getRunningUsersLU());
+
+        // Switch to TEST_USER_GUEST from TEST_USER_ID
+        addForegroundUserAndContinueUserSwitch(TEST_USER_GUEST, TEST_USER_ID,
+                ++numberOfUserSwitches, false,
+                /* expectScheduleBackgroundUserStopping= */ true);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID, TEST_USER_GUEST),
+                mUserController.getRunningUsersLU());
+
+        // Allow the post-switch processing to complete.
+        // TEST_USER_ID may be scheduled for stopping, but it shouldn't actually stop since the
+        // current user is a Guest.
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_GUEST);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID, TEST_USER_GUEST),
+                mUserController.getRunningUsersLU());
+
+        // Switch to TEST_USER_ID2 from TEST_USER_GUEST
+        // Guests are automatically stopped in the background, so it won't be scheduled.
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID2, TEST_USER_GUEST,
+                ++numberOfUserSwitches, true,
+                /* expectScheduleBackgroundUserStopping= */ false);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID, TEST_USER_ID2),
+                mUserController.getRunningUsersLU());
+
+        // Allow the post-switch processing to complete.
+        // TEST_USER_ID should *still* be scheduled for stopping, since we skipped stopping it
+        // earlier.
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_GUEST);
+        assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_ID2);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID2),
+                mUserController.getRunningUsersLU());
+    }
+
     /**
      * Process queued SCHEDULED_STOP_BACKGROUND_USER_MSG message, if expected.
      * @param userId the user we are checking to see whether it is scheduled.
@@ -682,11 +737,11 @@ public class UserControllerTest {
             boolean expectScheduled, @Nullable Integer userId) {
         TestHandler handler = mInjector.mHandler;
         if (expectScheduled) {
-            assertTrue(handler.hasMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId));
+            assertTrue(handler.hasEqualMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId));
             handler.removeMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId);
             mUserController.processScheduledStopOfBackgroundUser(userId);
         } else {
-            assertFalse(handler.hasMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId));
+            assertFalse(handler.hasEqualMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId));
         }
     }
 
@@ -1534,9 +1589,9 @@ public class UserControllerTest {
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
-        assertEquals(mInjector.mHandler
-                        .hasMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, expectedOldUserId),
-                expectScheduleBackgroundUserStopping);
+        assertEquals(expectScheduleBackgroundUserStopping,
+                mInjector.mHandler
+                        .hasEqualMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, expectedOldUserId));
         verify(mInjector, times(expectedNumberOfCalls)).dismissUserSwitchingDialog(any());
         continueUserSwitchAssertions(oldUserId, newUserId, expectOldUserStopping,
                 expectScheduleBackgroundUserStopping);
@@ -1810,6 +1865,13 @@ public class UserControllerTest {
     }
 
     private static class TestHandler extends Handler {
+        /**
+         * Keeps an accessible copy of messages that were queued for us to query.
+         *
+         * WARNING: queued messages get added to this, but processed/removed messages to NOT
+         * automatically get removed. This can lead to confusing bugs. Maybe one day someone will
+         * fix this, but in the meantime, this is your warning.
+         */
         private final List<Message> mMessages = new ArrayList<>();
 
         TestHandler(Looper looper) {

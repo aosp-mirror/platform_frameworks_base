@@ -19,8 +19,6 @@ import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
 
-import static com.android.window.flags.Flags.windowTokenConfigThreadSafe;
-
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -146,7 +144,7 @@ public class WindowTokenClient extends Binder {
         if (context == null) {
             return;
         }
-        if (shouldReportConfigChange && windowTokenConfigThreadSafe()) {
+        if (shouldReportConfigChange) {
             // Only report to ClientTransactionListenerController when shouldReportConfigChange.
             final ClientTransactionListenerController controller =
                     getClientTransactionListenerController();

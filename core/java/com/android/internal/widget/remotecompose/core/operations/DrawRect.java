@@ -15,88 +15,37 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
-import com.android.internal.widget.remotecompose.core.PaintOperation;
-import com.android.internal.widget.remotecompose.core.WireBuffer;
 
-import java.util.List;
-
-public class DrawRect extends PaintOperation {
-    public static final Companion COMPANION = new Companion();
-    float mLeft;
-    float mTop;
-    float mRight;
-    float mBottom;
+/**
+ * Draw a Rectangle
+ */
+public class DrawRect extends DrawBase4 {
+    public static final Companion COMPANION =
+            new Companion(Operations.DRAW_RECT) {
+                @Override
+                public Operation construct(float x1,
+                                           float y1,
+                                           float x2,
+                                           float y2) {
+                    return new DrawRect(x1, y1, x2, y2);
+                }
+            };
 
     public DrawRect(
             float left,
             float top,
             float right,
             float bottom) {
-        mLeft = left;
-        mTop = top;
-        mRight = right;
-        mBottom = bottom;
-    }
-
-    @Override
-    public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mLeft, mTop, mRight, mBottom);
-    }
-
-    @Override
-    public String toString() {
-        return "DrawRect " + mLeft + " " + mTop
-                + " " + mRight + " " + mBottom + ";";
-    }
-
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            float sLeft = buffer.readFloat();
-            float srcTop = buffer.readFloat();
-            float srcRight = buffer.readFloat();
-            float srcBottom = buffer.readFloat();
-
-            DrawRect op = new DrawRect(sLeft, srcTop, srcRight, srcBottom);
-            operations.add(op);
-        }
-
-        @Override
-        public String name() {
-            return "DrawRect";
-        }
-
-        @Override
-        public int id() {
-            return Operations.DRAW_RECT;
-        }
-
-        public void apply(WireBuffer buffer,
-                          float left,
-                          float top,
-                          float right,
-                          float bottom) {
-            buffer.start(Operations.DRAW_RECT);
-            buffer.writeFloat(left);
-            buffer.writeFloat(top);
-            buffer.writeFloat(right);
-            buffer.writeFloat(bottom);
-        }
+        super(left, top, right, bottom);
+        mName = "DrawRect";
     }
 
     @Override
     public void paint(PaintContext context) {
-        context.drawRect(mLeft,
-                mTop,
-                mRight,
-                mBottom);
+        context.drawRect(mX1, mY1, mX2, mY2);
     }
 
 }

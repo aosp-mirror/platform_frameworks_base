@@ -19,9 +19,9 @@ package com.android.systemui.communal
 import android.annotation.SuppressLint
 import android.app.DreamManager
 import com.android.systemui.CoreStartable
-import com.android.systemui.Flags.communalHub
 import com.android.systemui.Flags.glanceableHubAllowKeyguardWhenDreaming
 import com.android.systemui.Flags.restartDreamOnUnocclude
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -48,6 +48,7 @@ class CommunalDreamStartable
 @Inject
 constructor(
     private val powerInteractor: PowerInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val dreamManager: DreamManager,
@@ -55,7 +56,7 @@ constructor(
 ) : CoreStartable {
     @SuppressLint("MissingPermission")
     override fun start() {
-        if (!communalHub()) {
+        if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
         }
 

@@ -383,3 +383,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "management_mode_policy_metrics"
+    namespace: "enterprise"
+    description: "Enabling management mode and password complexity policy metrics collection"
+    bug: "293091314"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

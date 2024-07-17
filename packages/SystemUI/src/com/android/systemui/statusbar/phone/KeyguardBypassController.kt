@@ -22,6 +22,7 @@ import android.content.res.Resources
 import android.hardware.biometrics.BiometricSourceType
 import android.provider.Settings
 import com.android.app.tracing.ListenersTracing.forEachTraced
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -159,7 +160,7 @@ class KeyguardBypassController @Inject constructor(
     }
 
     fun listenForQsExpandedChange() =
-        applicationScope.launch {
+        applicationScope.launch("listenForQsExpandedChange") {
             shadeInteractorLazy.get().qsExpansion.map { it > 0f }.distinctUntilChanged()
                 .collect { isQsExpanded ->
                     val changed = qsExpanded != isQsExpanded

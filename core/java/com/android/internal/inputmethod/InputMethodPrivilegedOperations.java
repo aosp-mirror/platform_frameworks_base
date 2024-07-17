@@ -378,6 +378,22 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
+     * Calls {@link IInputMethodPrivilegedOperations#onImeSwitchButtonClickFromClient(int)}
+     */
+    @AnyThread
+    public void onImeSwitchButtonClickFromClient(int displayId) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.onImeSwitchButtonClickFromClient(displayId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Calls {@link IInputMethodPrivilegedOperations#notifyUserActionAsync()}
      */
     @AnyThread

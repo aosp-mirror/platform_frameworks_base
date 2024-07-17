@@ -52,7 +52,6 @@ public class DozeBrightnessStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(dozeScreenBrightness)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(dozeScreenBrightness)
                         .setDisplayBrightnessStrategyName(mDozeBrightnessModeStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =

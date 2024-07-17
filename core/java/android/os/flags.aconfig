@@ -76,6 +76,14 @@ flag {
 }
 
 flag {
+    name: "ordered_broadcast_multiple_permissions"
+    is_exported: true
+    namespace: "bluetooth"
+    description: "Guards the Context.sendOrderedBroadcastMultiplePermissions API"
+    bug: "345802719"
+}
+
+flag {
     name: "battery_saver_supported_check_api"
     is_exported: true
     namespace: "backstage_power"
@@ -200,4 +208,19 @@ flag {
      name: "perfetto_sdk_tracing"
      description: "Tracing using Perfetto SDK."
      bug: "303199244"
+}
+
+flag {
+    name: "allow_consentless_bugreport_delegated_consent"
+    namespace: "crumpet"
+    description: "Allow privileged apps to call bugreport generation without enforcing user consent and delegate it to the calling app instead"
+    bug: "324046728"
+}
+
+flag {
+    name: "get_private_space_settings"
+    namespace: "profile_experiences"
+    description: "Guards a new Private Profile API in LauncherApps"
+    bug: "346294653"
+    is_exported: true
 }

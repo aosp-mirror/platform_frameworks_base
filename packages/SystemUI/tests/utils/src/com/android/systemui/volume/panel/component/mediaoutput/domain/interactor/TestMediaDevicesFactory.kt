@@ -18,9 +18,11 @@ package com.android.systemui.volume.panel.component.mediaoutput.domain.interacto
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothProfile
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.TestStubDrawable
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
+import com.android.settingslib.bluetooth.LeAudioProfile
 import com.android.settingslib.media.BluetoothMediaDevice
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.media.PhoneMediaDevice
@@ -59,11 +61,17 @@ object TestMediaDevicesFactory {
                 whenever(name).thenReturn(deviceName)
                 whenever(address).thenReturn(deviceAddress)
             }
+        val leAudioProfile =
+            mock<LeAudioProfile> {
+                whenever(profileId).thenReturn(BluetoothProfile.LE_AUDIO)
+                whenever(isEnabled(bluetoothDevice)).thenReturn(true)
+            }
         val cachedBluetoothDevice: CachedBluetoothDevice = mock {
             whenever(isHearingAidDevice).thenReturn(true)
             whenever(address).thenReturn(deviceAddress)
             whenever(device).thenReturn(bluetoothDevice)
             whenever(name).thenReturn(deviceName)
+            whenever(profiles).thenReturn(listOf(leAudioProfile))
         }
         return mock<BluetoothMediaDevice> {
             whenever(name).thenReturn(deviceName)

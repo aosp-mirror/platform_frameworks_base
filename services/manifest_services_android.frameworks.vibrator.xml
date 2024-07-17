@@ -1,0 +1,7 @@
+<manifest version="1.0" type="framework">
+    <hal format="aidl">
+        <name>android.frameworks.vibrator</name>
+        <version>1</version>
+        <fqname>IVibratorControlService/default</fqname>
+    </hal>
+</manifest>

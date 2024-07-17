@@ -17,8 +17,10 @@
 package com.android.systemui.volume.panel.component.spatial
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.backgroundCoroutineContext
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.spatializerInteractor
+import com.android.systemui.volume.data.repository.audioRepository
 import com.android.systemui.volume.domain.interactor.audioOutputInteractor
 import com.android.systemui.volume.panel.component.spatial.domain.interactor.SpatialAudioComponentInteractor
 
@@ -27,6 +29,8 @@ val Kosmos.spatialAudioComponentInteractor by
         SpatialAudioComponentInteractor(
             audioOutputInteractor,
             spatializerInteractor,
+            audioRepository,
+            backgroundCoroutineContext,
             testScope.backgroundScope
         )
     }

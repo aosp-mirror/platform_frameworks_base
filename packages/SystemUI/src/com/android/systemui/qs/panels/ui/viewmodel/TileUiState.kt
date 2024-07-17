@@ -16,20 +16,22 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
+import androidx.compose.runtime.Immutable
 import com.android.systemui.plugins.qs.QSTile
 import java.util.function.Supplier
 
+@Immutable
 data class TileUiState(
-    val label: CharSequence,
-    val secondaryLabel: CharSequence,
+    val label: String,
+    val secondaryLabel: String,
     val state: Int,
     val icon: Supplier<QSTile.Icon>,
 )
 
 fun QSTile.State.toUiState(): TileUiState {
     return TileUiState(
-        label ?: "",
-        secondaryLabel ?: "",
+        label?.toString() ?: "",
+        secondaryLabel?.toString() ?: "",
         state,
         icon?.let { Supplier { icon } } ?: iconSupplier,
     )

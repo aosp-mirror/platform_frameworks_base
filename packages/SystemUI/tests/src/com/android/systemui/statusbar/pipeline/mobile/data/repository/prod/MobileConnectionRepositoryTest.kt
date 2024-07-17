@@ -25,6 +25,7 @@ import android.platform.test.annotations.EnableFlags
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WLAN
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
+import android.telephony.CarrierConfigManager.KEY_SHOW_5G_SLICE_ICON_BOOL
 import android.telephony.NetworkRegistrationInfo
 import android.telephony.NetworkRegistrationInfo.DOMAIN_PS
 import android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_DENIED
@@ -65,6 +66,7 @@ import android.telephony.TelephonyManager.EXTRA_SPN
 import android.telephony.TelephonyManager.EXTRA_SUBSCRIPTION_ID
 import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
@@ -106,6 +108,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -113,6 +116,7 @@ import org.mockito.MockitoAnnotations
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MobileConnectionRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionRepositoryImpl
     private lateinit var connectionsRepo: FakeMobileConnectionsRepository
@@ -1041,6 +1045,24 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             )
 
             assertThat(latest).isEqualTo(false)
+        }
+
+    @Test
+    fun allowNetworkSliceIndicator_exposesCarrierConfigValue() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.allowNetworkSliceIndicator)
+
+            systemUiCarrierConfig.processNewCarrierConfig(
+                configWithOverride(KEY_SHOW_5G_SLICE_ICON_BOOL, true)
+            )
+
+            assertThat(latest).isTrue()
+
+            systemUiCarrierConfig.processNewCarrierConfig(
+                configWithOverride(KEY_SHOW_5G_SLICE_ICON_BOOL, false)
+            )
+
+            assertThat(latest).isFalse()
         }
 
     @Test

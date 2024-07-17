@@ -550,7 +550,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 .setType(type)
                 .setOnBackInvokedCallback(mAppCallback)
                 .setOnBackNavigationDone(new RemoteCallback(result))
-                .setTouchableRegion(mTouchableRegion));
+                .setTouchableRegion(mTouchableRegion)
+                .setAppProgressAllowed(true));
         triggerBackGesture();
         mShellExecutor.flushAll();
         releaseBackGesture();

@@ -188,7 +188,8 @@ public class BundleUtil {
     public static IStreamingResponseCallback wrapWithValidation(
             IStreamingResponseCallback streamingResponseCallback,
             Executor resourceClosingExecutor,
-            AndroidFuture future) {
+            AndroidFuture future,
+            InferenceInfoStore inferenceInfoStore) {
         return new IStreamingResponseCallback.Stub() {
             @Override
             public void onNewContent(Bundle processedResult) throws RemoteException {
@@ -207,6 +208,7 @@ public class BundleUtil {
                     sanitizeResponseParams(resultBundle);
                     streamingResponseCallback.onSuccess(resultBundle);
                 } finally {
+                    inferenceInfoStore.addInferenceInfoFromBundle(resultBundle);
                     resourceClosingExecutor.execute(() -> tryCloseResource(resultBundle));
                     future.complete(null);
                 }
@@ -216,6 +218,7 @@ public class BundleUtil {
             public void onFailure(int errorCode, String errorMessage,
                     PersistableBundle errorParams) throws RemoteException {
                 streamingResponseCallback.onFailure(errorCode, errorMessage, errorParams);
+                inferenceInfoStore.addInferenceInfoFromBundle(errorParams);
                 future.completeExceptionally(new TimeoutException());
             }
 
@@ -245,7 +248,8 @@ public class BundleUtil {
 
     public static IResponseCallback wrapWithValidation(IResponseCallback responseCallback,
             Executor resourceClosingExecutor,
-            AndroidFuture future) {
+            AndroidFuture future,
+            InferenceInfoStore inferenceInfoStore) {
         return new IResponseCallback.Stub() {
             @Override
             public void onSuccess(Bundle resultBundle)
@@ -254,6 +258,7 @@ public class BundleUtil {
                     sanitizeResponseParams(resultBundle);
                     responseCallback.onSuccess(resultBundle);
                 } finally {
+                    inferenceInfoStore.addInferenceInfoFromBundle(resultBundle);
                     resourceClosingExecutor.execute(() -> tryCloseResource(resultBundle));
                     future.complete(null);
                 }
@@ -263,6 +268,7 @@ public class BundleUtil {
             public void onFailure(int errorCode, String errorMessage,
                     PersistableBundle errorParams) throws RemoteException {
                 responseCallback.onFailure(errorCode, errorMessage, errorParams);
+                inferenceInfoStore.addInferenceInfoFromBundle(errorParams);
                 future.completeExceptionally(new TimeoutException());
             }
 
@@ -291,11 +297,13 @@ public class BundleUtil {
 
 
     public static ITokenInfoCallback wrapWithValidation(ITokenInfoCallback responseCallback,
-            AndroidFuture future) {
+            AndroidFuture future,
+            InferenceInfoStore inferenceInfoStore) {
         return new ITokenInfoCallback.Stub() {
             @Override
             public void onSuccess(TokenInfo tokenInfo) throws RemoteException {
                 responseCallback.onSuccess(tokenInfo);
+                inferenceInfoStore.addInferenceInfoFromBundle(tokenInfo.getInfoParams());
                 future.complete(null);
             }
 
@@ -303,6 +311,7 @@ public class BundleUtil {
             public void onFailure(int errorCode, String errorMessage, PersistableBundle errorParams)
                     throws RemoteException {
                 responseCallback.onFailure(errorCode, errorMessage, errorParams);
+                inferenceInfoStore.addInferenceInfoFromBundle(errorParams);
                 future.completeExceptionally(new TimeoutException());
             }
         };

@@ -61,7 +61,7 @@ import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.CastController.CastDevice;
+import com.android.systemui.statusbar.policy.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DeviceControlsController;
 import com.android.systemui.statusbar.policy.HotspotController;
@@ -422,9 +422,17 @@ public class AutoTileManagerTest extends SysuiTestCase {
     }
 
     private static List<CastDevice> buildFakeCastDevice(boolean isCasting) {
-        CastDevice cd = new CastDevice();
-        cd.state = isCasting ? CastDevice.STATE_CONNECTED : CastDevice.STATE_DISCONNECTED;
-        return Collections.singletonList(cd);
+        CastDevice.CastState state = isCasting
+                ? CastDevice.CastState.Connected
+                : CastDevice.CastState.Disconnected;
+        return Collections.singletonList(
+                new CastDevice(
+                        "id",
+                        /* name= */ null,
+                        /* description= */ null,
+                        /* state= */ state,
+                        /* origin= */ CastDevice.CastOrigin.MediaProjection,
+                        /* tag= */ null));
     }
 
     @Test

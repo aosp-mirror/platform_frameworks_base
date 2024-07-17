@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.panels.ui.compose
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +39,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.addOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -47,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.modifiers.background
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.PartitionedGridViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
@@ -57,9 +64,13 @@ import javax.inject.Inject
 
 @SysUISingleton
 class PartitionedGridLayout @Inject constructor(private val viewModel: PartitionedGridViewModel) :
-    GridLayout {
+    PaginatableGridLayout {
     @Composable
-    override fun TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
+    override fun TileGrid(
+        tiles: List<TileViewModel>,
+        modifier: Modifier,
+        editModeStart: () -> Unit,
+    ) {
         DisposableEffect(tiles) {
             val token = Any()
             tiles.forEach { it.startListening(token) }
@@ -99,14 +110,20 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         tiles: List<EditTileViewModel>,
         modifier: Modifier,
         onAddTile: (TileSpec, Int) -> Unit,
-        onRemoveTile: (TileSpec) -> Unit
+        onRemoveTile: (TileSpec) -> Unit,
     ) {
         val columns by viewModel.columns.collectAsStateWithLifecycle()
         val showLabels by viewModel.showLabels.collectAsStateWithLifecycle()
 
-        val (currentTiles, otherTiles) = tiles.partition { it.isCurrent }
+        val listState = rememberEditListState(tiles)
+        val dragAndDropState = rememberDragAndDropState(listState)
+
+        val (currentTiles, otherTiles) = listState.tiles.partition { it.isCurrent }
         val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
             onAddTile(it, CurrentTilesInteractor.POSITION_AT_END)
+        }
+        val onDoubleTap: (TileSpec) -> Unit by rememberUpdatedState { tileSpec ->
+            viewModel.resize(tileSpec, !viewModel.isIconTile(tileSpec))
         }
         val largeTileHeight = tileHeight()
         val iconTileHeight = tileHeight(showLabels)
@@ -145,22 +162,42 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 largeTileHeight = largeTileHeight,
                 iconTileHeight = iconTileHeight,
                 tilePadding = tilePadding,
-                onRemoveTile = onRemoveTile,
+                onAdd = onAddTile,
+                onRemove = onRemoveTile,
+                onDoubleTap = onDoubleTap,
                 isIconOnly = viewModel::isIconTile,
                 columns = columns,
                 showLabels = showLabels,
+                dragAndDropState = dragAndDropState,
             )
             AvailableTiles(
-                tiles = otherTiles,
+                tiles = otherTiles.filter { !dragAndDropState.isMoving(it.tileSpec) },
                 largeTileHeight = largeTileHeight,
                 iconTileHeight = iconTileHeight,
                 tilePadding = tilePadding,
                 addTileToEnd = addTileToEnd,
+                onRemove = onRemoveTile,
+                onDoubleTap = onDoubleTap,
                 isIconOnly = viewModel::isIconTile,
                 showLabels = showLabels,
                 columns = columns,
+                dragAndDropState = dragAndDropState,
             )
         }
+    }
+
+    override fun splitIntoPages(
+        tiles: List<TileViewModel>,
+        rows: Int,
+        columns: Int,
+    ): List<List<TileViewModel>> {
+        val (smallTiles, largeTiles) = tiles.partition { viewModel.isIconTile(it.spec) }
+
+        val sizedLargeTiles = largeTiles.map { SizedTile(it, 2) }
+        val sizedSmallTiles = smallTiles.map { SizedTile(it, 1) }
+        val largeTilesRows = PaginatableGridLayout.splitInRows(sizedLargeTiles, columns)
+        val smallTilesRows = PaginatableGridLayout.splitInRows(sizedSmallTiles, columns)
+        return (largeTilesRows + smallTilesRows).chunked(rows).map { it.flatten().map { it.tile } }
     }
 
     @Composable
@@ -169,10 +206,13 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         largeTileHeight: Dp,
         iconTileHeight: Dp,
         tilePadding: Dp,
-        onRemoveTile: (TileSpec) -> Unit,
+        onAdd: (TileSpec, Int) -> Unit,
+        onRemove: (TileSpec) -> Unit,
+        onDoubleTap: (TileSpec) -> Unit,
         isIconOnly: (TileSpec) -> Boolean,
         showLabels: Boolean,
         columns: Int,
+        dragAndDropState: DragAndDropState,
     ) {
         val (smallTiles, largeTiles) = tiles.partition { isIconOnly(it.tileSpec) }
 
@@ -182,29 +222,42 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         CurrentTilesContainer {
             TileLazyGrid(
                 columns = GridCells.Fixed(columns),
-                modifier = Modifier.height(largeGridHeight),
+                modifier =
+                    Modifier.height(largeGridHeight)
+                        .dragAndDropTileList(dragAndDropState, { !isIconOnly(it) }, onAdd)
             ) {
                 editTiles(
-                    largeTiles,
-                    ClickAction.REMOVE,
-                    onRemoveTile,
-                    { false },
-                    indicatePosition = true
+                    tiles = largeTiles,
+                    clickAction = ClickAction.REMOVE,
+                    onClick = onRemove,
+                    onDoubleTap = onDoubleTap,
+                    isIconOnly = { false },
+                    dragAndDropState = dragAndDropState,
+                    acceptDrops = { !isIconOnly(it) },
+                    onDrop = onAdd,
+                    indicatePosition = true,
                 )
             }
         }
+
         CurrentTilesContainer {
             TileLazyGrid(
                 columns = GridCells.Fixed(columns),
-                modifier = Modifier.height(smallGridHeight),
+                modifier =
+                    Modifier.height(smallGridHeight)
+                        .dragAndDropTileList(dragAndDropState, { isIconOnly(it) }, onAdd)
             ) {
                 editTiles(
-                    smallTiles,
-                    ClickAction.REMOVE,
-                    onRemoveTile,
-                    { true },
+                    tiles = smallTiles,
+                    clickAction = ClickAction.REMOVE,
+                    onClick = onRemove,
+                    onDoubleTap = onDoubleTap,
+                    isIconOnly = { true },
                     showLabels = showLabels,
-                    indicatePosition = true
+                    dragAndDropState = dragAndDropState,
+                    acceptDrops = { isIconOnly(it) },
+                    onDrop = onAdd,
+                    indicatePosition = true,
                 )
             }
         }
@@ -217,9 +270,12 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         iconTileHeight: Dp,
         tilePadding: Dp,
         addTileToEnd: (TileSpec) -> Unit,
+        onRemove: (TileSpec) -> Unit,
+        onDoubleTap: (TileSpec) -> Unit,
         isIconOnly: (TileSpec) -> Boolean,
         showLabels: Boolean,
         columns: Int,
+        dragAndDropState: DragAndDropState,
     ) {
         val (tilesStock, tilesCustom) = tiles.partition { it.appName == null }
         val (smallTiles, largeTiles) = tilesStock.partition { isIconOnly(it.tileSpec) }
@@ -233,13 +289,28 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         val gridHeight =
             largeGridHeight + smallGridHeight + largeGridHeightCustom + (tilePadding * 2)
 
+        val onDrop: (TileSpec, Int) -> Unit by rememberUpdatedState { tileSpec, _ ->
+            onRemove(tileSpec)
+        }
+
         AvailableTilesContainer {
             TileLazyGrid(
                 columns = GridCells.Fixed(columns),
-                modifier = Modifier.height(gridHeight),
+                modifier =
+                    Modifier.height(gridHeight)
+                        .dragAndDropTileList(dragAndDropState, { true }, onDrop)
             ) {
                 // Large tiles
-                editTiles(largeTiles, ClickAction.ADD, addTileToEnd, isIconOnly)
+                editTiles(
+                    largeTiles,
+                    ClickAction.ADD,
+                    addTileToEnd,
+                    isIconOnly,
+                    dragAndDropState,
+                    onDoubleTap = onDoubleTap,
+                    acceptDrops = { true },
+                    onDrop = onDrop,
+                )
                 fillUpRow(nTiles = largeTiles.size, columns = columns / 2)
 
                 // Small tiles
@@ -248,7 +319,11 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                     ClickAction.ADD,
                     addTileToEnd,
                     isIconOnly,
-                    showLabels = showLabels
+                    dragAndDropState,
+                    onDoubleTap = onDoubleTap,
+                    showLabels = showLabels,
+                    acceptDrops = { true },
+                    onDrop = onDrop,
                 )
                 fillUpRow(nTiles = smallTiles.size, columns = columns)
 
@@ -258,7 +333,11 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                     ClickAction.ADD,
                     addTileToEnd,
                     isIconOnly,
-                    showLabels = showLabels
+                    dragAndDropState,
+                    onDoubleTap = onDoubleTap,
+                    showLabels = showLabels,
+                    acceptDrops = { true },
+                    onDrop = onDrop,
                 )
             }
         }
@@ -268,10 +347,9 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
     private fun CurrentTilesContainer(content: @Composable () -> Unit) {
         Box(
             Modifier.fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    shape = RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius))
+                .dashedBorder(
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
+                    shape = Dimensions.ContainerShape,
                 )
                 .padding(dimensionResource(R.dimen.qs_tile_margin_vertical))
         ) {
@@ -286,7 +364,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 .background(
                     color = MaterialTheme.colorScheme.background,
                     alpha = { 1f },
-                    shape = RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius))
+                    shape = Dimensions.ContainerShape,
                 )
                 .padding(dimensionResource(R.dimen.qs_tile_margin_vertical))
         ) {
@@ -294,15 +372,33 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         }
     }
 
-    private fun gridHeight(nTiles: Int, tileHeight: Dp, columns: Int, padding: Dp): Dp {
-        val rows = (nTiles + columns - 1) / columns
-        return ((tileHeight + padding) * rows) - padding
-    }
-
     /** Fill up the rest of the row if it's not complete. */
     private fun LazyGridScope.fillUpRow(nTiles: Int, columns: Int) {
         if (nTiles % columns != 0) {
             item(span = { GridItemSpan(maxCurrentLineSpan) }) { Spacer(Modifier) }
         }
+    }
+
+    private fun Modifier.dashedBorder(
+        color: Color,
+        shape: Shape,
+    ): Modifier {
+        return this.drawWithContent {
+            val outline = shape.createOutline(size, layoutDirection, this)
+            val path = Path()
+            path.addOutline(outline)
+            val stroke =
+                Stroke(
+                    width = 1.dp.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
+                )
+            this.drawContent()
+            drawPath(path = path, style = stroke, color = color)
+        }
+    }
+
+    private object Dimensions {
+        // Corner radius is half the height of a tile + padding
+        val ContainerShape = RoundedCornerShape(48.dp)
     }
 }

@@ -35,7 +35,7 @@ import android.annotation.Nullable;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -184,7 +184,8 @@ public class MixedTransitionHelper {
 
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             TransitionInfo.Change change = info.getChanges().get(i);
-            if (change == pipChange || !isOpeningMode(change.getMode())) {
+            if (change == pipChange || !isOpeningMode(change.getMode()) ||
+                    change.getTaskInfo() == null) {
                 // Ignore the change/task that's going into Pip or not opening
                 continue;
             }

@@ -59,6 +59,7 @@ import com.android.internal.infra.AndroidFuture;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -224,6 +225,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
                                         Bundle bundle = new Bundle();
                                         parcelFileDescriptorMap.forEach(bundle::putParcelable);
                                         remoteCallback.sendResult(bundle);
+                                        tryClosePfds(parcelFileDescriptorMap.values());
                                     }));
                 }
 
@@ -442,6 +444,16 @@ public abstract class OnDeviceIntelligenceService extends Service {
                 }
             }
         };
+    }
+
+    private static void tryClosePfds(Collection<ParcelFileDescriptor> pfds) {
+        pfds.forEach(pfd -> {
+            try {
+                pfd.close();
+            } catch (Exception e) {
+                Log.w(TAG, "Error closing FD", e);
+            }
+        });
     }
 
     private void onGetReadOnlyFileDescriptor(@NonNull String fileName,

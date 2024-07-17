@@ -18,6 +18,7 @@ package android.view;
 
 import static android.graphics.PointProto.X;
 import static android.graphics.PointProto.Y;
+import static android.util.SequenceUtils.getInitSeq;
 import static android.view.InsetsSourceControlProto.LEASH;
 import static android.view.InsetsSourceControlProto.POSITION;
 import static android.view.InsetsSourceControlProto.TYPE_NUMBER;
@@ -266,6 +267,9 @@ public class InsetsSourceControl implements Parcelable {
 
         private @Nullable InsetsSourceControl[] mControls;
 
+        /** To make sure the info update between client and system server is in order. */
+        private int mSeq = getInitSeq();
+
         public Array() {
         }
 
@@ -280,9 +284,18 @@ public class InsetsSourceControl implements Parcelable {
             readFromParcel(in);
         }
 
+        public int getSeq() {
+            return mSeq;
+        }
+
+        public void setSeq(int seq) {
+            mSeq = seq;
+        }
+
         /** Updates the current Array to the given Array. */
         public void setTo(@NonNull Array other, boolean copyControls) {
             set(other.mControls, copyControls);
+            mSeq = other.mSeq;
         }
 
         /** Updates the current controls to the given controls. */
@@ -336,11 +349,13 @@ public class InsetsSourceControl implements Parcelable {
 
         public void readFromParcel(Parcel in) {
             mControls = in.createTypedArray(InsetsSourceControl.CREATOR);
+            mSeq = in.readInt();
         }
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
             out.writeTypedArray(mControls, flags);
+            out.writeInt(mSeq);
         }
 
         public static final @NonNull Creator<Array> CREATOR = new Creator<>() {
@@ -362,6 +377,7 @@ public class InsetsSourceControl implements Parcelable {
                 return false;
             }
             final InsetsSourceControl.Array other = (InsetsSourceControl.Array) o;
+            // mSeq is for internal bookkeeping only.
             return Arrays.equals(mControls, other.mControls);
         }
 

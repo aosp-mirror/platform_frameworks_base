@@ -137,7 +137,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
     }
 
     abstract ActivityRecord getTopActivity(TYPE source);
-    abstract ActivityRecord getTopFullscreenActivity(TYPE source);
+    abstract WindowState getTopFullscreenWindow(TYPE source);
     abstract ActivityManager.TaskDescription getTaskDescription(TYPE source);
     /**
      * Find the window for a given task to take a snapshot. Top child of the task is usually the one
@@ -382,12 +382,6 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
             }
             return null;
         }
-        if (activity.hasCommittedReparentToAnimationLeash()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. App is animating " + activity);
-            }
-            return null;
-        }
         final WindowState mainWindow = activity.findMainWindow();
         if (mainWindow == null) {
             Slog.w(TAG_WM, "Failed to take screenshot. No main window for " + source);
@@ -471,10 +465,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
      */
     @WindowInsetsController.Appearance
     private int getAppearance(TYPE source) {
-        final ActivityRecord topFullscreenActivity = getTopFullscreenActivity(source);
-        final WindowState topFullscreenWindow = topFullscreenActivity != null
-                ? topFullscreenActivity.findMainWindow()
-                : null;
+        final WindowState topFullscreenWindow = getTopFullscreenWindow(source);
         if (topFullscreenWindow != null) {
             return topFullscreenWindow.mAttrs.insetsFlags.appearance;
         }

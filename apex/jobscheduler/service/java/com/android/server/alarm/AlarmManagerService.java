@@ -120,6 +120,7 @@ import android.os.SystemProperties;
 import android.os.ThreadLocalWorkSource;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -1794,7 +1795,8 @@ public class AlarmManagerService extends SystemService {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mUseFrozenStateToDropListenerAlarms = Flags.useFrozenStateToDropListenerAlarms();
-        mStartUserBeforeScheduledAlarms = Flags.startUserBeforeScheduledAlarms();
+        mStartUserBeforeScheduledAlarms = Flags.startUserBeforeScheduledAlarms()
+                && UserManager.supportsMultipleUsers();
         if (mStartUserBeforeScheduledAlarms) {
             mUserWakeupStore = new UserWakeupStore();
             mUserWakeupStore.init();
@@ -3015,7 +3017,7 @@ public class AlarmManagerService extends SystemService {
                     mUseFrozenStateToDropListenerAlarms);
             pw.println();
             pw.print(Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS,
-                    mStartUserBeforeScheduledAlarms);
+                    Flags.startUserBeforeScheduledAlarms());
             pw.decreaseIndent();
             pw.println();
             pw.println();
@@ -4925,7 +4927,6 @@ public class AlarmManagerService extends SystemService {
             sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
             sdFilter.addAction(Intent.ACTION_USER_STOPPED);
             if (mStartUserBeforeScheduledAlarms) {
-                sdFilter.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED);
                 sdFilter.addAction(Intent.ACTION_USER_REMOVED);
             }
             sdFilter.addAction(Intent.ACTION_UID_REMOVED);
@@ -4956,14 +4957,6 @@ public class AlarmManagerService extends SystemService {
                             mAllowWhileIdleHistory.removeForUser(userHandle);
                             mAllowWhileIdleCompatHistory.removeForUser(userHandle);
                             mTemporaryQuotaReserve.removeForUser(userHandle);
-                        }
-                        return;
-                    case Intent.ACTION_LOCKED_BOOT_COMPLETED:
-                        final int handle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                        if (handle >= 0) {
-                            if (mStartUserBeforeScheduledAlarms) {
-                                mUserWakeupStore.onUserStarted(handle);
-                            }
                         }
                         return;
                     case Intent.ACTION_USER_REMOVED:

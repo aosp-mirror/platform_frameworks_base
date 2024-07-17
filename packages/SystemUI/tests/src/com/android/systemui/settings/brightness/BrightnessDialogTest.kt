@@ -18,11 +18,11 @@ package com.android.systemui.settings.brightness
 
 import android.content.Intent
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManagerPolicyConstants.EXTRA_FROM_BRIGHTNESS_KEY
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
@@ -55,7 +55,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class BrightnessDialogTest : SysuiTestCase() {
 

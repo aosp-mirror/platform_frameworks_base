@@ -23,13 +23,20 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserTracker
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
@@ -39,14 +46,16 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.eq
 
 /** Tests for [UserSettingsProxy]. */
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper
 class UserSettingsProxyTest : SysuiTestCase() {
 
     private var mUserTracker = FakeUserTracker()
-    private var mSettings: UserSettingsProxy = FakeUserSettingsProxy(mUserTracker)
+    private val testDispatcher = StandardTestDispatcher()
+    private var mSettings: UserSettingsProxy = FakeUserSettingsProxy(mUserTracker, testDispatcher)
     private var mContentObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {}
+    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
@@ -54,91 +63,329 @@ class UserSettingsProxyTest : SysuiTestCase() {
             listOf(UserInfo(MAIN_USER_ID, "main", UserInfo.FLAG_MAIN)),
             selectedUserIndex = 0
         )
+        testScope = TestScope(testDispatcher)
     }
 
     @Test
-    fun registerContentObserverForUser_inputString_success() {
-        mSettings.registerContentObserverForUserSync(
-            TEST_SETTING,
-            mContentObserver,
-            mUserTracker.userId
-        )
-        verify(mSettings.getContentResolver())
-            .registerContentObserver(
-                eq(TEST_SETTING_URI),
-                eq(false),
-                eq(mContentObserver),
-                eq(MAIN_USER_ID)
+    fun registerContentObserverForUser_inputString_success() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUserSync(
+                TEST_SETTING,
+                mContentObserver,
+                mUserTracker.userId
             )
-    }
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(false),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
 
     @Test
-    fun registerContentObserverForUser_inputString_notifyForDescendants_true() {
-        mSettings.registerContentObserverForUserSync(
-            TEST_SETTING,
-            notifyForDescendants = true,
-            mContentObserver,
-            mUserTracker.userId
-        )
-        verify(mSettings.getContentResolver())
-            .registerContentObserver(
-                eq(TEST_SETTING_URI),
-                eq(true),
-                eq(mContentObserver),
-                eq(MAIN_USER_ID)
+    fun registerContentObserverForUserSuspend_inputString_success() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUser(
+                TEST_SETTING,
+                mContentObserver,
+                mUserTracker.userId
             )
-    }
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(false),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
 
     @Test
-    fun registerContentObserverForUser_inputUri_success() {
-        mSettings.registerContentObserverForUserSync(
-            TEST_SETTING_URI,
-            mContentObserver,
-            mUserTracker.userId
-        )
-        verify(mSettings.getContentResolver())
-            .registerContentObserver(
-                eq(TEST_SETTING_URI),
-                eq(false),
-                eq(mContentObserver),
-                eq(MAIN_USER_ID)
+    fun registerContentObserverForUserAsync_inputString_success() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUserAsync(
+                TEST_SETTING,
+                mContentObserver,
+                mUserTracker.userId
             )
-    }
+            testScope.advanceUntilIdle()
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(false),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
 
     @Test
-    fun registerContentObserverForUser_inputUri_notifyForDescendants_true() {
-        mSettings.registerContentObserverForUserSync(
-            TEST_SETTING_URI,
-            notifyForDescendants = true,
-            mContentObserver,
-            mUserTracker.userId
-        )
-        verify(mSettings.getContentResolver())
-            .registerContentObserver(
-                eq(TEST_SETTING_URI),
-                eq(true),
-                eq(mContentObserver),
-                eq(MAIN_USER_ID)
+    fun registerContentObserverForUser_inputString_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUserSync(
+                TEST_SETTING,
+                notifyForDescendants = true,
+                mContentObserver,
+                mUserTracker.userId
             )
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(true),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
+
+    @Test
+    fun registerContentObserverForUserSuspend_inputString_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUser(
+                TEST_SETTING,
+                notifyForDescendants = true,
+                mContentObserver,
+                mUserTracker.userId
+            )
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(
+                        true,
+                    ),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
+
+    @Test
+    fun registerContentObserverForUserAsync_inputString_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUserAsync(
+                TEST_SETTING,
+                notifyForDescendants = true,
+                mContentObserver,
+                mUserTracker.userId
+            )
+            testScope.advanceUntilIdle()
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(true),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
+
+    @Test
+    fun registerContentObserverForUser_inputUri_success() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUserSync(
+                TEST_SETTING_URI,
+                mContentObserver,
+                mUserTracker.userId
+            )
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(false),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
+
+    @Test
+    fun registerContentObserverForUserSuspend_inputUri_success() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUser(
+                TEST_SETTING_URI,
+                mContentObserver,
+                mUserTracker.userId
+            )
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(false),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
+
+    @Test
+    fun registerContentObserverForUserAsync_inputUri_success() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUserAsync(
+                TEST_SETTING_URI,
+                mContentObserver,
+                mUserTracker.userId
+            )
+            testScope.advanceUntilIdle()
+
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(false),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun registerContentObserverForUserAsync_callbackAfterRegister() =
+        testScope.runTest {
+            var callbackCalled = false
+            val runnable = { callbackCalled = true }
+
+            mSettings.registerContentObserverForUserAsync(
+                TEST_SETTING_URI,
+                mContentObserver,
+                mUserTracker.userId,
+                runnable
+            )
+            testScope.advanceUntilIdle()
+            assertThat(callbackCalled).isTrue()
+        }
+
+    @Test
+    fun registerContentObserverForUser_inputUri_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUserSync(
+                TEST_SETTING_URI,
+                notifyForDescendants = true,
+                mContentObserver,
+                mUserTracker.userId
+            )
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(true),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
+
+    @Test
+    fun registerContentObserverForUserSuspend_inputUri_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUser(
+                TEST_SETTING_URI,
+                notifyForDescendants = true,
+                mContentObserver,
+                mUserTracker.userId
+            )
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(
+                        true,
+                    ),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
+
+    @Test
+    fun registerContentObserverForUserAsync_inputUri_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverForUserAsync(
+                TEST_SETTING_URI,
+                notifyForDescendants = true,
+                mContentObserver,
+                mUserTracker.userId
+            )
+            testScope.advanceUntilIdle()
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(true),
+                    eq(mContentObserver),
+                    eq(MAIN_USER_ID)
+                )
+        }
+
+    @Test
+    fun registerContentObserver_inputUri_success() =
+        testScope.runTest {
+            mSettings.registerContentObserverSync(TEST_SETTING_URI, mContentObserver)
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(false),
+                    eq(mContentObserver),
+                    eq(0)
+                )
+        }
+
+    @Test
+    fun registerContentObserverSuspend_inputUri_success() =
+        testScope.runTest {
+            mSettings.registerContentObserver(TEST_SETTING_URI, mContentObserver)
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(false),
+                    eq(mContentObserver),
+                    eq(0)
+                )
+        }
+
+    @Test
+    fun registerContentObserverAsync_inputUri_success() {
+        mSettings.registerContentObserverAsync(TEST_SETTING_URI, mContentObserver)
+        testScope.launch {
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(false),
+                    eq(mContentObserver),
+                    eq(0)
+                )
+        }
     }
 
     @Test
-    fun registerContentObserver_inputUri_success() {
-        mSettings.registerContentObserverSync(TEST_SETTING_URI, mContentObserver)
-        verify(mSettings.getContentResolver())
-            .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver), eq(0))
-    }
+    fun registerContentObserver_inputUri_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverSync(
+                TEST_SETTING_URI,
+                notifyForDescendants = true,
+                mContentObserver
+            )
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(true),
+                    eq(mContentObserver),
+                    eq(0)
+                )
+        }
 
     @Test
-    fun registerContentObserver_inputUri_notifyForDescendants_true() {
-        mSettings.registerContentObserverSync(
-            TEST_SETTING_URI,
-            notifyForDescendants = true,
-            mContentObserver
-        )
-        verify(mSettings.getContentResolver())
-            .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver), eq(0))
-    }
+    fun registerContentObserverSuspend_inputUri_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserver(TEST_SETTING_URI, mContentObserver)
+            verify(mSettings.getContentResolver())
+                .registerContentObserver(
+                    eq(TEST_SETTING_URI),
+                    eq(false),
+                    eq(mContentObserver),
+                    eq(0)
+                )
+        }
+
+    @Test
+    fun registerContentObserverAsync_inputUri_notifyForDescendants_true() =
+        testScope.runTest {
+            mSettings.registerContentObserverAsync(TEST_SETTING_URI, mContentObserver)
+            testScope.launch {
+                verify(mSettings.getContentResolver())
+                    .registerContentObserver(
+                        eq(TEST_SETTING_URI),
+                        eq(false),
+                        eq(mContentObserver),
+                        eq(0)
+                    )
+            }
+        }
 
     @Test
     fun getString_keyPresent_returnValidValue() {
@@ -300,7 +547,10 @@ class UserSettingsProxyTest : SysuiTestCase() {
      *
      * This class uses a mock of [ContentResolver] to test the [ContentObserver] registration APIs.
      */
-    private class FakeUserSettingsProxy(override val userTracker: UserTracker) : UserSettingsProxy {
+    private class FakeUserSettingsProxy(
+        override val userTracker: UserTracker,
+        val testDispatcher: CoroutineDispatcher
+    ) : UserSettingsProxy {
 
         private val mContentResolver = mock(ContentResolver::class.java)
         private val userIdToSettingsValueMap: MutableMap<Int, MutableMap<String, String>> =
@@ -310,6 +560,9 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
         override fun getUriFor(name: String) =
             Uri.parse(StringBuilder().append(URI_PREFIX).append(name).toString())
+
+        override val backgroundDispatcher: CoroutineDispatcher
+            get() = testDispatcher
 
         override fun getStringForUser(name: String, userHandle: Int) =
             userIdToSettingsValueMap[userHandle]?.get(name) ?: ""

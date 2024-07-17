@@ -79,6 +79,9 @@ class DemoMobileConnectionRepository(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), _inflateSignalStrength.value)
 
+    // I don't see a reason why we would turn the config off for demo mode.
+    override val allowNetworkSliceIndicator = MutableStateFlow(true)
+
     private val _isEmergencyOnly = MutableStateFlow(false)
     override val isEmergencyOnly =
         _isEmergencyOnly

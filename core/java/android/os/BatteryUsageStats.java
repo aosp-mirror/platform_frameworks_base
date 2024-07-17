@@ -870,6 +870,16 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         }
 
         /**
+         * Returns true if this Builder is configured to hold data for the specified
+         * custom power component ID.
+         */
+        public boolean isSupportedCustomPowerComponent(int componentId) {
+            return componentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
+                    && componentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
+                    + mBatteryConsumerDataLayout.customPowerComponentCount;
+        }
+
+        /**
          * Constructs a read-only object using the Builder values.
          */
         @NonNull

@@ -16,12 +16,18 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.AuthenticationFlags
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -81,6 +87,7 @@ class FromGoneTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionsToLockscreen_ifFinishedInGone() =
         testScope.runTest {
             keyguardTransitionRepository.sendTransitionSteps(
@@ -92,7 +99,34 @@ class FromGoneTransitionInteractorTest : SysuiTestCase() {
             kosmos.fakeKeyguardRepository.setKeyguardShowing(true)
             runCurrent()
 
-            // We're in the middle of a LOCKSCREEN -> GONE transition.
+            // We're in the middle of a GONE -> LOCKSCREEN transition.
+            assertThat(keyguardTransitionRepository)
+                .startedTransition(
+                    to = KeyguardState.LOCKSCREEN,
+                )
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionsToLockscreen_ifFinishedInGone_wmRefactor() =
+        testScope.runTest {
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope,
+            )
+            reset(keyguardTransitionRepository)
+
+            // Trigger lockdown.
+            kosmos.fakeBiometricSettingsRepository.setAuthenticationFlags(
+                AuthenticationFlags(
+                    0,
+                    LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN
+                )
+            )
+            runCurrent()
+
+            // We're in the middle of a GONE -> LOCKSCREEN transition.
             assertThat(keyguardTransitionRepository)
                 .startedTransition(
                     to = KeyguardState.LOCKSCREEN,

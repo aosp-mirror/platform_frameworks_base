@@ -18,10 +18,10 @@ package com.android.systemui.screenrecord
 
 import android.content.Intent
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.widget.Spinner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Dependency
 import com.android.systemui.SysuiTestCase
@@ -55,7 +55,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
 
@@ -109,7 +109,7 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
     fun testShowDialog_partialScreenSharingEnabled_optionsSpinnerIsVisible() {
         showDialog()
 
-        val visibility = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner).visibility
+        val visibility = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options).visibility
         assertThat(visibility).isEqualTo(View.VISIBLE)
     }
 
@@ -155,7 +155,7 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
     fun showDialog_singleAppIsDefault() {
         showDialog()
 
-        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
         val singleApp = context.getString(R.string.screen_share_permission_dialog_option_single_app)
         assertEquals(spinner.adapter.getItem(0), singleApp)
     }
@@ -217,7 +217,7 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
     }
 
     private fun onSpinnerItemSelected(position: Int) {
-        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
         checkNotNull(spinner.onItemSelectedListener)
             .onItemSelected(spinner, mock(), position, /* id= */ 0)
     }

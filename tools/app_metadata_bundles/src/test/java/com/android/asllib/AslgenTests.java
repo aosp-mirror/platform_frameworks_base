@@ -34,13 +34,24 @@ import java.util.List;
 @RunWith(JUnit4.class)
 public class AslgenTests {
     private static final String VALID_MAPPINGS_PATH = "com/android/asllib/validmappings";
-    private static final List<String> VALID_MAPPINGS_SUBDIRS =
-            List.of("location", "contacts", "general");
+    private static final List<String> VALID_MAPPINGS_SUBDIRS = List.of("general");
     private static final String HR_XML_FILENAME = "hr.xml";
     private static final String OD_XML_FILENAME = "od.xml";
 
     /** Logic for setting up tests (empty if not yet needed). */
     public static void main(String[] params) throws Exception {}
+
+    @Test
+    public void testValidOd() throws Exception {
+        System.out.println("start testing valid od.");
+        Path odPath = Paths.get(VALID_MAPPINGS_PATH, "general-v1", OD_XML_FILENAME);
+        InputStream odStream = getClass().getClassLoader().getResourceAsStream(odPath.toString());
+        String odContents =
+                TestUtils.getFormattedXml(
+                        new String(odStream.readAllBytes(), StandardCharsets.UTF_8), false);
+        AndroidSafetyLabel unusedAsl =
+                AslConverter.readFromString(odContents, AslConverter.Format.ON_DEVICE);
+    }
 
     /** Tests valid mappings between HR and OD. */
     @Test

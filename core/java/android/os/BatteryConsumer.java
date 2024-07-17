@@ -888,6 +888,13 @@ public abstract class BatteryConsumer {
             return (T) this;
         }
 
+        @SuppressWarnings("unchecked")
+        @NonNull
+        public T addConsumedPowerForCustomComponent(int componentId, double componentPower) {
+            mPowerComponentsBuilder.addConsumedPowerForCustomComponent(componentId, componentPower);
+            return (T) this;
+        }
+
         /**
          * Sets the amount of time used by the specified component, e.g. CPU, WiFi etc.
          *

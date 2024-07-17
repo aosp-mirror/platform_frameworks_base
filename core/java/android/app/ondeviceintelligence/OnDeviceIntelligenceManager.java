@@ -496,6 +496,24 @@ public final class OnDeviceIntelligenceManager {
         }
     }
 
+    /**
+     * This is primarily intended to be used to attribute/blame on-device intelligence power usage,
+     * via the configured remote implementation, to its actual caller.
+     *
+     * @param startTimeEpochMillis epoch millis used to filter the InferenceInfo events.
+     * @return InferenceInfo events since the passed in startTimeEpochMillis.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public List<InferenceInfo> getLatestInferenceInfo(long startTimeEpochMillis) {
+        try {
+            return mService.getLatestInferenceInfo(startTimeEpochMillis);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 
     /** Request inference with provided Bundle and Params. */
     public static final int REQUEST_TYPE_INFERENCE = 0;
