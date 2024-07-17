@@ -150,7 +150,6 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
                 controller -> controller.onEnrollmentProgress(getSensorId(), remaining));
 
         if (remaining == 0) {
-            resetIgnoreDisplayTouches();
             mSensorOverlays.hide(getSensorId());
             mAuthenticationStateListeners.onAuthenticationStopped(
                     new AuthenticationStoppedInfo.Builder(
@@ -211,7 +210,6 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
         );
         super.onError(errorCode, vendorCode);
 
-        resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
         mAuthenticationStateListeners.onAuthenticationStopped(
                 new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
@@ -227,7 +225,6 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
 
     @Override
     protected void startHalOperation() {
-        resetIgnoreDisplayTouches();
         mSensorOverlays.show(getSensorId(),
                 getRequestReasonFromFingerprintEnrollReason(mEnrollReason), this);
         mAuthenticationStateListeners.onAuthenticationStarted(new AuthenticationStartedInfo
@@ -277,7 +274,6 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
 
     @Override
     protected void stopHalOperation() {
-        resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
         mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
                 .Builder(BiometricSourceType.FINGERPRINT,
@@ -355,6 +351,15 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send onUdfpsUiEvent", e);
+        }
+    }
+
+    @Override
+    public void setIgnoreDisplayTouches(boolean ignoreTouches) {
+        try {
+            getFreshDaemon().getSession().setIgnoreDisplayTouches(ignoreTouches);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to send setIgnoreDisplayTouches", e);
         }
     }
 

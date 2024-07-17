@@ -962,6 +962,19 @@ public class FingerprintService extends SystemService {
             provider.onUdfpsUiEvent(event, requestId, sensorId);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        @Override
+        public void setIgnoreDisplayTouches(long requestId, int sensorId, boolean ignoreTouches) {
+            super.setIgnoreDisplayTouches_enforcePermission();
+
+            final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
+            if (provider == null) {
+                Slog.w(TAG,
+                        "No matching provider for setIgnoreDisplayTouches, sensorId: " + sensorId);
+                return;
+            }
+            provider.setIgnoreDisplayTouches(requestId, sensorId, ignoreTouches);
+        }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
