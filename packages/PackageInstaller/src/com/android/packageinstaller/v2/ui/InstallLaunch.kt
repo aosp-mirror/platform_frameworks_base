@@ -171,15 +171,20 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
                     val successIntent = success.resultIntent
                     setResult(Activity.RESULT_OK, successIntent, true)
                 } else {
-                    val successFragment = InstallSuccessFragment(success)
-                    showDialogInner(successFragment)
+                    val successDialog = InstallSuccessFragment(success)
+                    showDialogInner(successDialog)
                 }
             }
 
             InstallStage.STAGE_FAILED -> {
                 val failed = installStage as InstallFailed
-                val failedDialog = InstallFailedFragment(failed)
-                showDialogInner(failedDialog)
+                if (failed.shouldReturnResult) {
+                    val failureIntent = failed.resultIntent
+                    setResult(Activity.RESULT_FIRST_USER, failureIntent, true)
+                } else {
+                    val failureDialog = InstallFailedFragment(failed)
+                    showDialogInner(failureDialog)
+                }
             }
 
             else -> {
