@@ -99,3 +99,14 @@ flag {
         purpose: PURPOSE_FEATURE
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "haptic_feedback_input_source_customization_enabled"
+    description: "Enabled the extended haptic feedback customization by input source."
+    bug: "331819348"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
