@@ -369,9 +369,6 @@ private class DragControllerImpl(
             // immediately go back B => A.
             if (targetScene != swipeTransition._currentScene) {
                 swipeTransition._currentScene = targetScene
-                with(draggableHandler.layoutImpl.state) {
-                    draggableHandler.coroutineScope.onChangeScene(targetScene.key)
-                }
             }
 
             swipeTransition.animateOffset(
@@ -511,7 +508,7 @@ private class DragControllerImpl(
 }
 
 private fun SwipeTransition(
-    layoutState: BaseSceneTransitionLayoutState,
+    layoutState: MutableSceneTransitionLayoutStateImpl,
     coroutineScope: CoroutineScope,
     fromScene: Scene,
     result: UserActionResult,
@@ -566,7 +563,7 @@ private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
 
 private class SwipeTransition(
     val layoutImpl: SceneTransitionLayoutImpl,
-    val layoutState: BaseSceneTransitionLayoutState,
+    val layoutState: MutableSceneTransitionLayoutStateImpl,
     val coroutineScope: CoroutineScope,
     override val key: TransitionKey?,
     val _fromScene: Scene,
