@@ -207,8 +207,8 @@ interface BaseSceneScope : ElementStateScope {
      * @param rightBehavior when we should perform the overscroll animation at the right.
      */
     fun Modifier.horizontalNestedScrollToScene(
-        leftBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
-        rightBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        leftBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
+        rightBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
         isExternalOverscrollGesture: () -> Boolean = { false },
     ): Modifier
 
@@ -220,8 +220,8 @@ interface BaseSceneScope : ElementStateScope {
      * @param bottomBehavior when we should perform the overscroll animation at the bottom.
      */
     fun Modifier.verticalNestedScrollToScene(
-        topBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
-        bottomBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        topBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
+        bottomBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
         isExternalOverscrollGesture: () -> Boolean = { false },
     ): Modifier
 

@@ -20,6 +20,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.node.DelegatableNode
@@ -81,8 +82,24 @@ private class SwipeToSceneNode(
             }
         }
 
-    override fun onAttach() {
-        delegate(ScrollBehaviorOwnerNode(draggableHandler.nestedScrollKey))
+    private val nestedScrollHandlerImpl =
+        NestedScrollHandlerImpl(
+            layoutImpl = draggableHandler.layoutImpl,
+            orientation = draggableHandler.orientation,
+            topOrLeftBehavior = NestedScrollBehavior.Default,
+            bottomOrRightBehavior = NestedScrollBehavior.Default,
+            isExternalOverscrollGesture = { false },
+            pointersInfoOwner = { multiPointerDraggableNode.pointersInfo() },
+        )
+
+    init {
+        delegate(nestedScrollModifierNode(nestedScrollHandlerImpl.connection, dispatcher = null))
+        delegate(ScrollBehaviorOwnerNode(draggableHandler.nestedScrollKey, nestedScrollHandlerImpl))
+    }
+
+    override fun onDetach() {
+        // Make sure we reset the scroll connection when this modifier is removed from composition
+        nestedScrollHandlerImpl.connection.reset()
     }
 
     override fun onPointerEvent(
@@ -151,13 +168,17 @@ internal fun interface ScrollBehaviorOwner {
  *
  * TODO(b/353234530) move this logic into [SwipeToSceneNode]
  */
-private class ScrollBehaviorOwnerNode(override val traverseKey: Any) :
-    Modifier.Node(), TraversableNode, ScrollBehaviorOwner {
+private class ScrollBehaviorOwnerNode(
+    override val traverseKey: Any,
+    val nestedScrollHandlerImpl: NestedScrollHandlerImpl
+) : Modifier.Node(), TraversableNode, ScrollBehaviorOwner {
     override fun updateScrollBehaviors(
         topOrLeftBehavior: NestedScrollBehavior,
         bottomOrRightBehavior: NestedScrollBehavior,
         isExternalOverscrollGesture: () -> Boolean
     ) {
-        // This method will be used to update the desired behavior in a following CL.
+        nestedScrollHandlerImpl.topOrLeftBehavior = topOrLeftBehavior
+        nestedScrollHandlerImpl.bottomOrRightBehavior = bottomOrRightBehavior
+        nestedScrollHandlerImpl.isExternalOverscrollGesture = isExternalOverscrollGesture
     }
 }
