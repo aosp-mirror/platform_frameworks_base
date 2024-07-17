@@ -33,13 +33,13 @@ import android.view.View
 import android.view.WindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
-import com.android.systemui.Flags.communalHub
 import com.android.systemui.Flags.mediaLockscreenLaunchAnimation
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.DelegateTransitionAnimatorController
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.camera.CameraIntents
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.DisplayId
@@ -94,6 +94,7 @@ constructor(
     private val activityIntentHelper: ActivityIntentHelper,
     @Main private val mainExecutor: DelayableExecutor,
     private val communalSceneInteractor: CommunalSceneInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
 ) : ActivityStarterInternal {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -561,7 +562,7 @@ constructor(
 
                 override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                     super.onTransitionAnimationStart(isExpandingFullyAbove)
-                    if (communalHub()) {
+                    if (communalSettingsInteractor.isCommunalFlagEnabled()) {
                         communalSceneInteractor.snapToScene(
                             CommunalScenes.Blank,
                             ActivityTransitionAnimator.TIMINGS.totalDuration
@@ -658,7 +659,7 @@ constructor(
     }
 
     private fun isCommunalWidgetLaunch(): Boolean {
-        return communalHub() &&
+        return communalSettingsInteractor.isCommunalFlagEnabled() &&
             communalSceneInteractor.isCommunalVisible.value &&
             communalSceneInteractor.isLaunchingWidget.value
     }

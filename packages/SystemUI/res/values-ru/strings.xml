@@ -126,31 +126,27 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Нажмите, чтобы посмотреть."</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Не удалось сохранить запись видео с экрана."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Не удалось начать запись видео с экрана."</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
-    <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Запись в приложении &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; будет прекращена."</string>
-    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Остановить запись?"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"Вы записываете свой экран."</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Вы записываете экран приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Остановить запись"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Демонстрация экрана"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
-    <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Демонстрация экрана приложения &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; будет прекращена."</string>
-    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
-    <skip />
-    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"Трансляция экрана"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
-    <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Трансляция из приложения &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; будет прекращена."</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
-    <skip />
-    <!-- no translation found for close_dialog_button (4749497706540104133) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Закрыть совместный доступ к экрану?"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Вы демонстрируете свой экран в приложении \"<xliff:g id="HOST_APP_NAME">%1$s</xliff:g>\"."</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Вы демонстрируете свой экран в приложении."</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Вы демонстрируете экран приложения \"<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>\"."</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Вы демонстрируете экран приложения."</string>
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Закрыть доступ"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Трансляция экрана"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Прекратить трансляцию?"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"Вы транслируете свой экран на устройство \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"Вы транслируете свой экран на устройство поблизости."</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"Вы транслируете приложение \"<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>\" на устройство \"<xliff:g id="DEVICE_NAME">%2$s</xliff:g>\"."</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"Вы транслируете приложение \"<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>\" на устройство поблизости."</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"Вы транслируете на устройство \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"Вы транслируете на устройство поблизости."</string>
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Остановить трансляцию"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"Закрыть"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Запись проблем на видео"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Обрабатываем запись"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Текущее уведомление о записи проблемы на видео"</string>
@@ -161,8 +157,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Не удалось сохранить запись."</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Не удалось начать запись."</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Полноэкранный режим"</string>
-    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2717426731830851921">"Чтобы выйти, проведите вниз от верхнего края экрана"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"ОК"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Назад"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Главный экран"</string>
@@ -295,6 +290,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Заставка"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не беспокоить"</string>
+    <!-- no translation found for quick_settings_modes_label (5407025818652750501) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Нет доступных сопряженных устройств"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Нажмите, чтобы подключить или отключить устройство."</string>
@@ -306,8 +303,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Сохранено"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"отключить"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"активировать"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Включить автоматически завтра"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Bluetooth используется в таких функциях и сервисах, как \"Быстрая отправка\" и \"Найти устройство\""</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth включится завтра утром"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Отправить аудио"</string>
@@ -495,12 +491,11 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"выбрать виджет"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"удалить виджет"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"разместить выбранный виджет"</string>
-    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
-    <skip />
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"Виджеты на заблокированном экране"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Они видны всем, даже если планшет заблокирован."</string>
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Виджеты на заблокированном экране"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Чтобы открыть приложение, используя виджет, вам нужно будет подтвердить свою личность. Обратите внимание, что виджеты видны всем, даже если планшет заблокирован. Некоторые виджеты не предназначены для использования на заблокированном экране. Добавлять их туда может быть небезопасно."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ОК"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Сменить пользователя."</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"раскрывающееся меню"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Все приложения и данные этого профиля будут удалены."</string>
@@ -722,7 +717,8 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"По умолчанию"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автоматически"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звука и вибрации"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звука или вибрации, появляется в нижней части списка разговоров"</string>
+    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
+    <skip />
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Звонок или вибрация в зависимости от настроек устройства"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Звонок или вибрация в зависимости от настроек устройства. Разговоры из приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" по умолчанию появляются в виде всплывающего чата."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Система будет сама определять, включать ли звуковой сигнал или вибрацию для уведомления"</string>
@@ -779,6 +775,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -1361,22 +1358,19 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Разделение экрана"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Ввод"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Ярлыки приложений"</string>
+    <!-- no translation found for shortcut_helper_category_current_app_shortcuts (4017840565974573628) -->
+    <skip />
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Специальные возможности"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Быстрые клавиши"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Найти быстрые клавиши"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Значок \"Свернуть\""</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Значок \"Развернуть\""</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Жест \"назад\""</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Жест \"на главный экран\""</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Клавиша действия"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
+    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Отлично!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Чтобы вернуться, проведите тремя пальцами влево или вправо по сенсорной панели."</string>
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Три пальца двигаются вправо и влево по сенсорной панели"</string>
@@ -1385,4 +1379,6 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Уровень %1$d из %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Управление домом"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Быстрый доступ к управлению домом через заставку"</string>
+    <!-- no translation found for volume_undo_action (5815519725211877114) -->
+    <skip />
 </resources>

@@ -20,9 +20,9 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.Flags.communalHub
 import com.android.systemui.common.ui.view.onApplyWindowInsets
 import com.android.systemui.common.ui.view.onLayoutChanged
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
@@ -53,6 +53,7 @@ constructor(
     private val controller: NotificationStackScrollLayoutController,
     private val notificationStackSizeCalculator: NotificationStackSizeCalculator,
     private val notificationScrollViewBinder: NotificationScrollViewBinder,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     @Main private val mainImmediateDispatcher: CoroutineDispatcher,
 ) {
 
@@ -164,7 +165,7 @@ constructor(
                         }
                     }
 
-                    if (communalHub()) {
+                    if (communalSettingsInteractor.isCommunalFlagEnabled()) {
                         launch {
                             viewModel.glanceableHubAlpha.collect {
                                 controller.setMaxAlphaForGlanceableHub(it)

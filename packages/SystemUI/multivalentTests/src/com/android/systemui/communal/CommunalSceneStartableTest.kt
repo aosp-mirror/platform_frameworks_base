@@ -24,6 +24,7 @@ import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
@@ -78,6 +79,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                 CommunalSceneStartable(
                         dockManager = dockManager,
                         communalInteractor = communalInteractor,
+                        communalSettingsInteractor = communalSettingsInteractor,
                         communalSceneInteractor = communalSceneInteractor,
                         keyguardTransitionInteractor = keyguardTransitionInteractor,
                         keyguardInteractor = keyguardInteractor,

@@ -2261,6 +2261,12 @@ final class InstallPackageHelper {
                         installRequest.getNewUsers());
                 mPm.updateSequenceNumberLP(ps, installRequest.getNewUsers());
                 mPm.updateInstantAppInstallerLocked(packageName);
+
+                // The installation is success, remove the split info copy stored in package
+                // setting for the downgrade version check of DELETE_KEEP_DATA and archived app
+                // cases.
+                ps.setSplitNames(null);
+                ps.setSplitRevisionCodes(null);
             }
             installRequest.onCommitFinished();
         }

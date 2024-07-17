@@ -64,7 +64,6 @@ import com.android.systemui.statusbar.notification.NotificationUtils.interpolate
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.whenever
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -77,6 +76,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
@@ -213,9 +213,11 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         }
 
     @Test
-    fun validatePaddingTop() =
+    fun validatePaddingTopInNonSplitShade_usesLargeScreenHeader() =
         testScope.runTest {
+            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(10)
             overrideResource(R.bool.config_use_split_notification_shade, false)
+            overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
 
@@ -223,6 +225,21 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             configurationRepository.onAnyConfigurationChange()
 
+            assertThat(paddingTop).isEqualTo(10)
+        }
+
+    @Test
+    fun validatePaddingTopInNonSplitShade_doesNotUseLargeScreenHeader() =
+        testScope.runTest {
+            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(10)
+            overrideResource(R.bool.config_use_split_notification_shade, false)
+            overrideResource(R.bool.config_use_large_screen_shade_header, false)
+            overrideResource(R.dimen.large_screen_shade_header_height, 10)
+            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
+
+            val paddingTop by collectLastValue(underTest.paddingTopDimen)
+
+            configurationRepository.onAnyConfigurationChange()
             assertThat(paddingTop).isEqualTo(0)
         }
 

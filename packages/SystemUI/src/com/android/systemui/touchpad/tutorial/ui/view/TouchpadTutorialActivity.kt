@@ -27,10 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
-import com.android.systemui.touchpad.tutorial.ui.Screen.BACK_GESTURE
-import com.android.systemui.touchpad.tutorial.ui.Screen.HOME_GESTURE
-import com.android.systemui.touchpad.tutorial.ui.Screen.TUTORIAL_SELECTION
-import com.android.systemui.touchpad.tutorial.ui.TouchpadTutorialViewModel
+import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
+import com.android.systemui.touchpad.tutorial.ui.composable.TutorialSelectionScreen
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.BACK_GESTURE
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.HOME_GESTURE
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.TUTORIAL_SELECTION
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.TouchpadTutorialViewModel
 import javax.inject.Inject
 
 class TouchpadTutorialActivity

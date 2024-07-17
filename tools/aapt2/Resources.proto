@@ -246,6 +246,7 @@ message Entry {
 message ConfigValue {
   Configuration config = 1;
   Value value = 2;
+  uint32 flag_status = 3;
 }
 
 // The generic meta-data for every value in a resource table.

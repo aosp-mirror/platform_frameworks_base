@@ -1411,10 +1411,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"برای غیرفعال کردن اشکال‌زدایی بی‌سیم انتخاب کنید."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"«حالت مجموعه داده‌های تست» فعال شد"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"برای غیرفعال کردن «حالت مجموعه داده‌های تست»، بازنشانی کارخانه‌ای کنید."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"‏پیکربندی ساخت HSUM اشتباه است"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"وضعیت «حالت کاربر سیستم بی‌سر» در این دستگاه با پیکربندی ساخت متفاوت است. لطفاً دستگاه را بازنشانی کارخانه‌ای کنید."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"کنسول سریال فعال است"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"‏عملکرد تحت‌تأثیر قرار گرفته است. برای غیرفعال کردن، bootloader را بررسی کنید."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"‏MTE آزمایشی فعال شد"</string>
@@ -1759,12 +1757,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> روشن شد."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> خاموش شد."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"کلیدهای میزان صدا را رها کنید. برای روشن کردن <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید میزان صدا را مجدداً به‌مدت ۳ ثانیه فشار دهید و نگه دارید."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"انتخاب ویژگی"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"انتخاب ویژگی"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"انتخاب ویژگی"</string>
     <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"دفعه بعد که روی دکمه دسترس‌پذیری تک‌ضرب بزنید، این ویژگی باز می‌شود"</string>
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"دفعه بعد که از این میان‌بر استفاده کنید، این ویژگی باز می‌شود. با ۲ انگشت از پایین صفحه تند به بالا بکشید و سریع رها کنید."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"دفعه بعد که از این میان‌بر استفاده کنید، این ویژگی باز می‌شود. با ۳ انگشت از پایین صفحه تند به بالا بکشید و سریع رها کنید."</string>
@@ -1890,8 +1885,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"پین بیش از حد کوتاه است. باید حداقل ۴ رقم باشد."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"بعداً دوباره امتحان کنید"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"مشاهده در حالت تمام صفحه"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"برای خروج، از بالای صفحه تند به پایین بکشید"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"متوجه شدم"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"برای دید بهتر، دستگاه را بچرخانید"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"برای دید بهتر، <xliff:g id="NAME">%s</xliff:g> را به‌صورت تمام‌صفحه باز کنید"</string>
@@ -2443,4 +2437,22 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"تغییر کاربر"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"بی‌صدا کردن"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"برای بی‌صدا کردن تک‌ضرب بزنید"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
+    <skip />
 </resources>

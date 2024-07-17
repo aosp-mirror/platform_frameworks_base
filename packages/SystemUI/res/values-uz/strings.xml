@@ -126,31 +126,27 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Koʻrish uchun bosing"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Ekran yozuvi saqlanmadi"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Ekranni yozib olish boshlanmadi"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
-    <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; yozib olinishini toʻxtatasiz"</string>
-    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Yozuv toʻxtatilsinmi?"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"Hozir butun ekran yozib olinmoqda"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Hozir <xliff:g id="APP_NAME">%1$s</xliff:g> ilovasi yozib olinmoqda"</string>
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Yozuvni toʻxtatish"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Ekran ulashilmoqda"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
-    <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ulashuvini toʻxtatasiz"</string>
-    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
-    <skip />
-    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"Ekran namoyish qilinmoqda"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
-    <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; translatsiyasini toʻxtatasiz"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
-    <skip />
-    <!-- no translation found for close_dialog_button (4749497706540104133) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Ekran namoyishi toʻxtatilsinmi?"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Hozir butun ekran <xliff:g id="HOST_APP_NAME">%1$s</xliff:g> ilovasiga ulashilmoqda"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Hozir butun ekran ilovaga ulashilmoqda"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Hozir <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ilovasiga kontent ulashilmoqda"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Hozir ilovaga kontent ulashilmoqda"</string>
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Namoyishni toʻxtatish"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Ekran translatsiya qilinmoqda"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Toʻxtatilsinmi?"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"Hozir butun ekran <xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga translatsiya qilinmoqda"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"Hozir butun ekran atrofdagi qurilmaga translatsiya qilinmoqda"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"Hozir <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ilovasi <xliff:g id="DEVICE_NAME">%2$s</xliff:g> qurilmasiga translatsiya qilinmoqda"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"Hozir <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ilovasi atrofdagi qurilmaga translatsiya qilinmoqda"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"Hozir <xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga kontent translatsiya qilinmoqda"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"Hozir atrofdagi qurilmaga kontent translatsiya qilinmoqda"</string>
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Toʻxtatish"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"Yopish"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Muammoni yozib olish vositasi"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Yozuv qayta ishlanmoqda"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Muammo toʻplash seansi uchun faol bildirishnoma"</string>
@@ -161,8 +157,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Yozuv saqlanmadi"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Yozib olish boshlanmadi"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Butun ekran rejimi"</string>
-    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2717426731830851921">"Chiqish uchun ekranning tepasidan pastga suring"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Orqaga"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Uyga"</string>
@@ -295,6 +290,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Ekran lavhasi"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Bezovta qilinmasin"</string>
+    <!-- no translation found for quick_settings_modes_label (5407025818652750501) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Ulangan qurilmalar topilmadi"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Qurilma ulash yoki uzish uchun tegining"</string>
@@ -306,8 +303,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Saqlangan"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"uzish"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"faollashtirish"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Ertaga avtomatik yoqilsin"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Tezkor ulashuv va Qurilmamni top kabi funksiyalar Bluetooth ishlatadi"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth ertaga ertalab yoqiladi"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Audioni ulashish"</string>
@@ -495,12 +491,11 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"vidjet tanlash"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"vidjetni olib tashlash"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"tanlangan vidjetni joylash"</string>
-    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
-    <skip />
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"Ekran qulfi vidjetlari"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Ekran quflidagi vidjetlar hammaga koʻrinadi, hatto planshet qulflanganda ham."</string>
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Ekran qulfi vidjetlari"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Ilovani vidjet orqali ochish uchun shaxsingizni tasdiqlashingiz kerak. Shuningdek, planshet qulflanganda ham bu axborotlar hammaga koʻrinishini unutmang. Ayrim vidjetlar ekran qulfiga moslanmagan va ularni bu yerda chiqarish xavfli boʻlishi mumkin."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Foydalanuvchini almashtirish"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"tortib tushiriladigan menyu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
@@ -722,7 +717,8 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Standart"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Avtomatik"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Tovush yoki tebranishsiz"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Tovush yoki tebranishsiz hamda suhbatlar ruknining pastida chiqadi"</string>
+    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
+    <skip />
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Qurilma sozlamalari asosida jiringlashi yoki tebranishi mumkin"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Qurilma sozlamalari asosida jiringlashi yoki tebranishi mumkin. <xliff:g id="APP_NAME">%1$s</xliff:g> suhbatlari standart holatda bulutcha shaklida chiqadi."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Bu bildirishnoma jiringlashi yoki tebranishini hal qilsin"</string>
@@ -779,6 +775,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -1361,22 +1358,19 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Ekranni ikkiga ajratish"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Kiritish"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Ilova yorliqlari"</string>
+    <!-- no translation found for shortcut_helper_category_current_app_shortcuts (4017840565974573628) -->
+    <skip />
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Qulayliklar"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Tezkor tugmalar"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Tezkor tugmalar qidiruvi"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Yigʻish belgisi"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Yoyish belgisi"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"yoki"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Orqaga qaytish ishorasi"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Asosiy ekran ishorasi"</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Amal tugmasi"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Tayyor"</string>
+    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Barakalla!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Orqaga qaytish"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Ortga qaytish uchun sensorli panelda uchta barmoqni chapga yoki oʻngga suring."</string>
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Sensorli panelda uchta barmoq chapga va oʻngga harakatlanishi"</string>
@@ -1385,4 +1379,6 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Daraja: %1$d / %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Uy boshqaruvi"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Uy boshqaruvi tugmalarini ekran lavhasida tezkor oching"</string>
+    <!-- no translation found for volume_undo_action (5815519725211877114) -->
+    <skip />
 </resources>

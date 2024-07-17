@@ -1411,10 +1411,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"வைஃபை பிழைதிருத்தத்தை முடக்க தேர்ந்தெடுக்கவும்."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"\'தன்னியக்க சோதனைப்\' பயன்முறை இயக்கப்பட்டது"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"’தன்னியக்க சோதனைப்\' பயன்முறையை முடக்க ஆரம்பநிலைக்கு மீட்டமைக்கவும்."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"தவறான HSUM பதிப்பு உள்ளமைப்பு"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"இந்தச் சாதனத்தின் காட்சி இடைமுகமற்ற சிஸ்டம் பயனர் பயன்முறையின் நிலை அதன் பதிப்பு உள்ளமைப்பிலிருந்து வேறுபடுகிறது. சாதனத்தை ஆரம்பநிலைக்கு மீட்டமையுங்கள்."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"சீரியல் கன்சோல் இயக்கப்பட்டது"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"செயல்திறன் பாதிக்கப்பட்டுள்ளது. முடக்குவதற்கு பூட்லோடரைத் தேர்வுசெய்யவும்."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"பரிசோதனை MTE இயக்கப்பட்டது"</string>
@@ -1527,7 +1525,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"பணிக் கணக்கில் பயன்பாட்டைப் பயன்படுத்துகிறீர்கள்"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"உள்ளீட்டு முறை"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"ஒத்திசை"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"அணுகல்தன்மை"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"மாற்றுத்திறன் வசதி"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"வால்பேப்பர்"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"வால்பேப்பரை மாற்று"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"அறிவிப்புகளைக் கண்காணிக்கும் சேவை"</string>
@@ -1759,12 +1757,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆன் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆஃப் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ஒலியளவு பட்டன்களை அழுத்துவதை நிறுத்துங்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> சேவையை இயக்க, ஒலியளவு பட்டன்கள் இரண்டையும் 3 வினாடிகளுக்கு மீண்டும் அழுத்திப் பிடிக்கவும்."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"அம்சத்தைத் தேர்வுசெய்யுங்கள்"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"அம்சத்தைத் தேர்வுசெய்யுங்கள்"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"அம்சத்தைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"அடுத்த முறை மாற்றுத்திறன் பட்டனை நீங்கள் தட்டும்போது அம்சம் திறக்கும்"</string>
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"அடுத்த முறை இந்த ஷார்ட்கட்டை நீங்கள் பயன்படுத்தும்போது அம்சம் திறக்கும். 2 விரல்களால் திரையின் கீழிருந்து மேல்நோக்கி ஸ்வைப் செய்து விரைவாக விரல்களை எடுக்கவும்."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"அடுத்த முறை இந்த ஷார்ட்கட்டை நீங்கள் பயன்படுத்தும்போது அம்சம் திறக்கும். 3 விரல்களால் திரையின் கீழிருந்து மேல்நோக்கி ஸ்வைப் செய்து விரைவாக விரல்களை எடுக்கவும்."</string>
@@ -1890,8 +1885,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"பின் மிகவும் சிறியதாக உள்ளது. குறைந்தது 4 இலக்கங்கள் இருக்க வேண்டும்."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"மீண்டும் முயற்சிக்கவும்"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"முழுத் திரையில் காட்டுகிறது"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"வெளியேற, உங்கள் திரையின் மேலிருந்து கீழ்நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"புரிந்தது"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"சிறந்த காட்சிக்கு சுழற்றுங்கள்"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"சிறந்த காட்சிக்கு, <xliff:g id="NAME">%s</xliff:g> ஆப்ஸை முழுத்திரைப் பயன்முறையில் திறக்கவும்"</string>
@@ -2065,7 +2059,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"செய்திகளும் பத்திரிகைகளும்"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"வரைபடங்களும் வழிசெலுத்தலும்"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"உற்பத்தித்திறன்"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"அணுகல்தன்மை"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"மாற்றுத்திறன் வசதி"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"சாதனச் சேமிப்பகம்"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB பிழைதிருத்தம்"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"மணி"</string>
@@ -2443,4 +2437,22 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"பயனரை மாற்றுங்கள்"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"ஒலியடக்கு"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"ஒலியடக்க தட்டவும்"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
+    <skip />
 </resources>
