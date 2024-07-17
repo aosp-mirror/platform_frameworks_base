@@ -57,7 +57,7 @@ constructor(
         interactor.ongoingCallState
             .map { state ->
                 when (state) {
-                    is OngoingCallModel.NoCall -> OngoingActivityChipModel.Hidden
+                    is OngoingCallModel.NoCall -> OngoingActivityChipModel.Hidden()
                     is OngoingCallModel.InCall -> {
                         // This block mimics OngoingCallController#updateChip.
                         if (state.startTimeMs <= 0L) {
@@ -82,7 +82,7 @@ constructor(
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden())
 
     private fun getOnClickListener(state: OngoingCallModel.InCall): View.OnClickListener? {
         if (state.intent == null) {

@@ -326,7 +326,7 @@ public class DisplayRotation {
     DisplayRotationImmersiveAppCompatPolicy initImmersiveAppCompatPolicy(
                 WindowManagerService service, DisplayContent displayContent) {
         return DisplayRotationImmersiveAppCompatPolicy.createIfNeeded(
-                service.mLetterboxConfiguration, this, displayContent);
+                service.mAppCompatConfiguration, this, displayContent);
     }
 
     // Change the default value to the value specified in the sysprop

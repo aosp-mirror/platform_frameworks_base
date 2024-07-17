@@ -4354,7 +4354,8 @@ public final class InputMethodManager {
     }
 
     /**
-     * Called when the IME switch button was clicked from the system. This will show the input
+     * Called when the IME switch button was clicked from the system. Depending on the number of
+     * enabled IME subtypes, this will either switch to the next IME/subtype, or show the input
      * method picker dialog.
      *
      * @param displayId The ID of the display where the input method picker dialog should be shown.

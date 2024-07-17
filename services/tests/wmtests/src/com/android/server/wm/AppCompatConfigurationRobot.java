@@ -24,46 +24,46 @@ import static org.mockito.Mockito.when;
 import androidx.annotation.NonNull;
 
 /**
- * Robot implementation for {@link LetterboxConfiguration}.
+ * Robot implementation for {@link AppCompatConfiguration}.
  */
-class AppCompatLetterboxConfigurationRobot {
+class AppCompatConfigurationRobot {
 
     @NonNull
-    private final LetterboxConfiguration mLetterboxConfiguration;
+    private final AppCompatConfiguration mAppCompatConfiguration;
 
-    AppCompatLetterboxConfigurationRobot(@NonNull LetterboxConfiguration letterboxConfiguration) {
-        mLetterboxConfiguration = letterboxConfiguration;
-        spyOn(mLetterboxConfiguration);
+    AppCompatConfigurationRobot(@NonNull AppCompatConfiguration appCompatConfiguration) {
+        mAppCompatConfiguration = appCompatConfiguration;
+        spyOn(mAppCompatConfiguration);
     }
 
     void enableTranslucentPolicy(boolean enabled) {
-        when(mLetterboxConfiguration.isTranslucentLetterboxingEnabled()).thenReturn(enabled);
+        when(mAppCompatConfiguration.isTranslucentLetterboxingEnabled()).thenReturn(enabled);
     }
 
     void enablePolicyForIgnoringRequestedOrientation(boolean enabled) {
-        doReturn(enabled).when(mLetterboxConfiguration)
+        doReturn(enabled).when(mAppCompatConfiguration)
                 .isPolicyForIgnoringRequestedOrientationEnabled();
     }
 
     void enableCameraCompatTreatment(boolean enabled) {
-        doReturn(enabled).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled();
+        doReturn(enabled).when(mAppCompatConfiguration).isCameraCompatTreatmentEnabled();
     }
 
     void enableCameraCompatTreatmentAtBuildTime(boolean enabled) {
-        doReturn(enabled).when(mLetterboxConfiguration)
+        doReturn(enabled).when(mAppCompatConfiguration)
                 .isCameraCompatTreatmentEnabledAtBuildTime();
     }
 
     void enableUserAppAspectRatioFullscreen(boolean enabled) {
-        doReturn(enabled).when(mLetterboxConfiguration).isUserAppAspectRatioFullscreenEnabled();
+        doReturn(enabled).when(mAppCompatConfiguration).isUserAppAspectRatioFullscreenEnabled();
     }
 
     void enableUserAppAspectRatioSettings(boolean enabled) {
-        doReturn(enabled).when(mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
+        doReturn(enabled).when(mAppCompatConfiguration).isUserAppAspectRatioSettingsEnabled();
     }
 
     void enableCameraCompatSplitScreenAspectRatio(boolean enabled) {
-        doReturn(enabled).when(mLetterboxConfiguration)
+        doReturn(enabled).when(mAppCompatConfiguration)
                 .isCameraCompatSplitScreenAspectRatioEnabled();
     }
 

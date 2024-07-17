@@ -122,7 +122,8 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
 
                                     // Notify listeners
                                     listener.onOngoingActivityStatusChanged(
-                                        hasOngoingActivity = true
+                                        hasOngoingActivity = true,
+                                        shouldAnimate = true,
                                     )
                                 }
                                 is OngoingActivityChipModel.Hidden -> {
@@ -130,7 +131,8 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                                     // b/192243808 and [Chronometer.start].
                                     chipTimeView.stop()
                                     listener.onOngoingActivityStatusChanged(
-                                        hasOngoingActivity = false
+                                        hasOngoingActivity = false,
+                                        shouldAnimate = chipModel.shouldAnimate,
                                     )
                                 }
                             }
@@ -266,8 +268,13 @@ interface StatusBarVisibilityChangeListener {
     /** Called when a transition from lockscreen to dream has started. */
     fun onTransitionFromLockscreenToDreamStarted()
 
-    /** Called when the status of the ongoing activity chip (active or not active) has changed. */
-    fun onOngoingActivityStatusChanged(hasOngoingActivity: Boolean)
+    /**
+     * Called when the status of the ongoing activity chip (active or not active) has changed.
+     *
+     * @param shouldAnimate true if the chip should animate in/out, and false if the chip should
+     *   immediately appear/disappear.
+     */
+    fun onOngoingActivityStatusChanged(hasOngoingActivity: Boolean, shouldAnimate: Boolean)
 
     /**
      * Called when the scene state has changed such that the home status bar is newly allowed or no

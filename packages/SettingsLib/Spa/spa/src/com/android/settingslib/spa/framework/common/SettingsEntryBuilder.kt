@@ -16,7 +16,6 @@
 
 package com.android.settingslib.spa.framework.common
 
-import android.net.Uri
 import android.os.Bundle
 import androidx.compose.runtime.remember
 import com.android.settingslib.spa.framework.util.genEntryId
@@ -36,13 +35,11 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
     private var isAllowSearch: Boolean = false
     private var isSearchDataDynamic: Boolean = false
     private var hasMutableStatus: Boolean = false
-    private var hasSliceSupport: Boolean = false
 
     // Functions
     private var uiLayoutFn: UiLayerRenderer = { }
     private var statusDataFn: StatusDataGetter = { null }
     private var searchDataFn: SearchDataGetter = { null }
-    private var sliceDataFn: SliceDataGetter = { _: Uri, _: Bundle? -> null }
 
     fun build(): SettingsEntry {
         val page = fromPage ?: owner
@@ -62,12 +59,10 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
             isAllowSearch = isEnabled && isAllowSearch,
             isSearchDataDynamic = isSearchDataDynamic,
             hasMutableStatus = hasMutableStatus,
-            hasSliceSupport = isEnabled && hasSliceSupport,
 
             // functions
             statusDataImpl = statusDataFn,
             searchDataImpl = searchDataFn,
-            sliceDataImpl = sliceDataFn,
             uiLayoutImpl = uiLayoutFn,
         )
     }
@@ -120,12 +115,6 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
     fun clearSearchDataFn(): SettingsEntryBuilder {
         this.searchDataFn = { null }
         this.isAllowSearch = false
-        return this
-    }
-
-    fun setSliceDataFn(fn: SliceDataGetter): SettingsEntryBuilder {
-        this.sliceDataFn = fn
-        this.hasSliceSupport = true
         return this
     }
 

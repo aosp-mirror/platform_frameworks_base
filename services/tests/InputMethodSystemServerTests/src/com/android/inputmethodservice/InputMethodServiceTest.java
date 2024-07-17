@@ -60,6 +60,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -769,7 +770,8 @@ public class InputMethodServiceTest {
     }
 
     /**
-     * Verifies that clicking on the IME switch button shows the Input Method Switcher Menu.
+     * Verifies that clicking on the IME switch button either shows the Input Method Switcher Menu,
+     * or switches the input method.
      */
     @Test
     public void testImeSwitchButtonClick() throws Exception {
@@ -794,13 +796,16 @@ public class InputMethodServiceTest {
         assertThat(mInputMethodService.isInputViewShown()).isTrue();
 
         final var imm = mContext.getSystemService(InputMethodManager.class);
+        final var initialInfo = imm.getCurrentInputMethodInfo();
 
         final var imeSwitchButtonUiObject = getUiObjectById(INPUT_METHOD_NAV_IME_SWITCHER_ID);
         imeSwitchButtonUiObject.click();
         mInstrumentation.waitForIdleSync();
 
-        assertWithMessage("Input Method Switcher Menu is shown")
-                .that(isInputMethodPickerShown(imm))
+        final var newInfo = imm.getCurrentInputMethodInfo();
+
+        assertWithMessage("Input Method Switcher Menu is shown or input method was switched")
+                .that(isInputMethodPickerShown(imm) || !Objects.equals(initialInfo, newInfo))
                 .isTrue();
 
         assertThat(mInputMethodService.isInputViewShown()).isTrue();

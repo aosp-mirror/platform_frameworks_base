@@ -1757,6 +1757,15 @@ public class AudioDeviceInventory {
             if (AudioService.DEBUG_DEVICES) {
                 Slog.i(TAG, "deviceInfo:" + di + " is(already)Connected:" + isConnected);
             }
+            // Do not report an error in case of redundant connect or disconnect request
+            // as this can cause a state mismatch between BtHelper and AudioDeviceInventory
+            if (connect == isConnected) {
+                Log.i(TAG, "handleDeviceConnection() deviceInfo=" + di + " is already "
+                        + (connect ? "" : "dis") + "connected");
+                mmi.set(MediaMetrics.Property.STATE, connect
+                        ? MediaMetrics.Value.CONNECT : MediaMetrics.Value.DISCONNECT).record();
+                return true;
+            }
             if (connect && !isConnected) {
                 final int res;
                 if (isForTesting) {

@@ -1084,6 +1084,15 @@
     <!-- QuickStep: Accessibility to toggle overview [CHAR LIMIT=40] -->
     <string name="quick_step_accessibility_toggle_overview">Toggle Overview</string>
 
+    <!-- Priority modes dialog title [CHAR LIMIT=35] -->
+    <string name="zen_modes_dialog_title">Priority modes</string>
+
+    <!-- Priority modes dialog confirmation button [CHAR LIMIT=15] -->
+    <string name="zen_modes_dialog_done">Done</string>
+
+    <!-- Priority modes dialog settings shortcut button [CHAR LIMIT=15] -->
+    <string name="zen_modes_dialog_settings">Settings</string>
+
     <!-- Zen mode: Priority only introduction message on first use -->
     <string name="zen_priority_introduction">You won\'t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify. You\'ll still hear anything you choose to play including music, videos, and games.</string>
 
@@ -1249,6 +1258,8 @@
     <string name="communal_widget_picker_title">Lock screen widgets</string>
     <!-- Text displayed below the title in the communal widget picker providing additional details about the communal surface. [CHAR LIMIT=80] -->
     <string name="communal_widget_picker_description">Anyone can view widgets on your lock screen, even if your tablet\'s locked.</string>
+    <!-- Label for accessibility action to unselect a widget in edit mode. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_unselect_widget">unselect widget</string>
     <!-- Title shown above information regarding lock screen widgets. [CHAR LIMIT=50] -->
     <string name="communal_widgets_disclaimer_title">Lock screen widgets</string>
     <!-- Information about lock screen widgets presented to the user. [CHAR LIMIT=NONE] -->

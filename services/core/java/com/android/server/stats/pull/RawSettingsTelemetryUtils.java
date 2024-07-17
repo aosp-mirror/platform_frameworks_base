@@ -29,9 +29,9 @@ import com.android.internal.display.RefreshRateSettingsUtils;
  * is acceptable for telemetry system.
  * For instance, raw setting values could be hard to visualize on dashboards, etc.
  */
-public final class RawSettingsTelemetryUtil {
+public final class RawSettingsTelemetryUtils {
 
-    private static final String TAG = "SettingsTelemetryUtil";
+    private static final String TAG = "SettingsTelemetryUtils";
 
     /**
      * Get string that should be written as a value of settingKey and should be sent to telemetry

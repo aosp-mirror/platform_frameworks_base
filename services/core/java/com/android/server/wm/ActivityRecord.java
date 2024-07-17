@@ -234,7 +234,7 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_F
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutMillisLocked;
-import static com.android.server.wm.DesktopModeLaunchParamsModifier.canEnterDesktopMode;
+import static com.android.server.wm.DesktopModeHelper.canEnterDesktopMode;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -8964,7 +8964,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * <p>Conditions that need to be met:
      *
      * <ul>
-     *     <li>{@link LetterboxConfiguration#getIsEducationEnabled} is true.
+     *     <li>{@link AppCompatConfiguration#getIsEducationEnabled} is true.
      *     <li>The activity is eligible for fixed orientation letterbox.
      *     <li>The activity is in fullscreen.
      *     <li>The activity is portrait-only.
@@ -8973,7 +8973,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * </ul>
      */
     boolean isEligibleForLetterboxEducation() {
-        return mWmService.mLetterboxConfiguration.getIsEducationEnabled()
+        return mWmService.mAppCompatConfiguration.getIsEducationEnabled()
                 && mIsEligibleForFixedOrientationLetterbox
                 && getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                 && getRequestedConfigurationOrientation() == ORIENTATION_PORTRAIT

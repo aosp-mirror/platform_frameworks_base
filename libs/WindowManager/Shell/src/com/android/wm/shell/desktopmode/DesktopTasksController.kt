@@ -983,6 +983,7 @@ class DesktopTasksController(
             ProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: skip keyguard is locked")
             return null
         }
+        val wct = WindowContainerTransaction()
         if (!isDesktopModeShowing(task.displayId)) {
             ProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
@@ -990,12 +991,17 @@ class DesktopTasksController(
                     " taskId=%d",
                 task.taskId
             )
-            return WindowContainerTransaction().also { wct ->
-                bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
-                wct.reorder(task.token, true)
+            // We are outside of desktop mode and already existing desktop task is being launched.
+            // We should make this task go to fullscreen instead of freeform. Note that this means
+            // any re-launch of a freeform window outside of desktop will be in fullscreen.
+            if (desktopModeTaskRepository.isActiveTask(task.taskId)) {
+                addMoveToFullscreenChanges(wct, task)
+                return wct
             }
+            bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
+            wct.reorder(task.token, true)
+            return wct
         }
-        val wct = WindowContainerTransaction()
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(task.token, DESKTOP_DENSITY_OVERRIDE)
         }

@@ -3007,11 +3007,17 @@ class Task extends TaskFragment {
         return r.getTask().mTaskId != taskId && r.token != notTop && r.canBeTopRunning();
     }
 
-    ActivityRecord getTopFullscreenActivity() {
-        return getActivity((r) -> {
-            final WindowState win = r.findMainWindow();
-            return (win != null && win.mAttrs.isFullscreen());
+    WindowState getTopFullscreenMainWindow(boolean includeStartingApp) {
+        final WindowState[] candidate = new WindowState[1];
+        getActivity((r) -> {
+            final WindowState win = r.findMainWindow(includeStartingApp);
+            if (win != null && win.mAttrs.isFullscreen()) {
+                candidate[0] = win;
+                return true;
+            }
+            return false;
         });
+        return candidate[0];
     }
 
     /**
@@ -3377,7 +3383,7 @@ class Task extends TaskFragment {
         // Whether the direct top activity is in size compat mode
         appCompatTaskInfo.topActivityInSizeCompat = isTopActivityVisible && top.inSizeCompatMode();
         if (appCompatTaskInfo.topActivityInSizeCompat
-                && mWmService.mLetterboxConfiguration.isTranslucentLetterboxingEnabled()) {
+                && mWmService.mAppCompatConfiguration.isTranslucentLetterboxingEnabled()) {
             // We hide the restart button in case of transparent activities.
             appCompatTaskInfo.topActivityInSizeCompat = top.fillsParent();
         }
@@ -3579,14 +3585,12 @@ class Task extends TaskFragment {
         // starting window because persisted configuration does not effect to Task.
         info.taskInfo.configuration.setTo(activity.getConfiguration());
         if (!Flags.drawSnapshotAspectRatioMatch()) {
-            final ActivityRecord topFullscreenActivity = getTopFullscreenActivity();
-            if (topFullscreenActivity != null) {
-                final WindowState mainWindow = topFullscreenActivity.findMainWindow(false);
-                if (mainWindow != null) {
-                    info.topOpaqueWindowInsetsState =
-                            mainWindow.getInsetsStateWithVisibilityOverride();
-                    info.topOpaqueWindowLayoutParams = mainWindow.getAttrs();
-                }
+            final WindowState mainWindow =
+                    getTopFullscreenMainWindow(false /* includeStartingApp */);
+            if (mainWindow != null) {
+                info.topOpaqueWindowInsetsState =
+                        mainWindow.getInsetsStateWithVisibilityOverride();
+                info.topOpaqueWindowLayoutParams = mainWindow.getAttrs();
             }
         }
         return info;
