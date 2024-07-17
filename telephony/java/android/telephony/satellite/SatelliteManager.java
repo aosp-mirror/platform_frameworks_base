@@ -1078,6 +1078,11 @@ public final class SatelliteManager {
      * @hide
      */
     public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED = 5;
+    /**
+     * Datagram type indicating that the message to be sent or received is of type SMS.
+     * @hide
+     */
+    public static final int DATAGRAM_TYPE_SMS = 6;
 
     /** @hide */
     @IntDef(prefix = "DATAGRAM_TYPE_", value = {
@@ -1086,7 +1091,8 @@ public final class SatelliteManager {
             DATAGRAM_TYPE_LOCATION_SHARING,
             DATAGRAM_TYPE_KEEP_ALIVE,
             DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP,
-            DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED
+            DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED,
+            DATAGRAM_TYPE_SMS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatagramType {}

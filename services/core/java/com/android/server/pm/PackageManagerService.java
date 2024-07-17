@@ -31,6 +31,7 @@ import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_UNSET;
+import static android.crashrecovery.flags.Flags.refactorCrashrecovery;
 import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
@@ -3037,7 +3038,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mCompilerStats.writeNow();
         mDexManager.writePackageDexUsageNow();
         mDynamicCodeLogger.writeNow();
-        PackageWatchdog.getInstance(mContext).writeNow();
+        if (!refactorCrashrecovery()) {
+            PackageWatchdog.getInstance(mContext).writeNow();
+        }
 
         synchronized (mLock) {
             mPackageUsage.writeNow(mSettings.getPackagesLocked());

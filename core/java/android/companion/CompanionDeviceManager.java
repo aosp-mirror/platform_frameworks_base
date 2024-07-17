@@ -1172,6 +1172,12 @@ public final class CompanionDeviceManager {
      * BluetoothDevice#ACTION_BOND_STATE_CHANGED} intents to be notified when the bond removal
      * process completes, and its result.
      *
+     * <p>This API should be used to remove a bluetooth bond that was created either
+     * by using {@link BluetoothDevice#createBond(int)} or by a direct user action.
+     * The association must already exist with this device before calling this method, but
+     * this may be done retroactively to remove a bond that was created outside of the
+     * CompanionDeviceManager.
+     *
      * @param associationId an already-associated companion device to remove bond from
      * @return false on immediate error, true if bond removal process will begin
      */

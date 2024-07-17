@@ -9666,18 +9666,18 @@ public final class ViewRootImpl implements ViewParent,
      * {@inheritDoc}
      */
     @Override
-    public boolean performHapticFeedback(int effectId, boolean always, boolean fromIme) {
+    public boolean performHapticFeedback(int effectId, int flags, int privFlags) {
         if ((mDisplay.getFlags() & Display.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
             return false;
         }
 
         try {
             if (USE_ASYNC_PERFORM_HAPTIC_FEEDBACK) {
-                mWindowSession.performHapticFeedbackAsync(effectId, always, fromIme);
+                mWindowSession.performHapticFeedbackAsync(effectId, flags, privFlags);
                 return true;
             } else {
                 // Original blocking binder call path.
-                return mWindowSession.performHapticFeedback(effectId, always, fromIme);
+                return mWindowSession.performHapticFeedback(effectId, flags, privFlags);
             }
         } catch (RemoteException e) {
             return false;

@@ -1980,12 +1980,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             }
             clearContentOverlay();
         }
-        if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
-            // Avoid double removal, which is fatal.
-            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: trying to remove overlay (%s) while in UNDEFINED state", TAG, surface);
-            return;
-        }
         if (surface == null || !surface.isValid()) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: trying to remove invalid content overlay (%s)", TAG, surface);

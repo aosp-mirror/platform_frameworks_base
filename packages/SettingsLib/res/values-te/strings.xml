@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"డీబగ్ యాప్‌ల కోసం GPU డీబగ్ లేయర్‌లను లోడ్ చేయడాన్ని అనుమతించండి"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"వివరణాత్మక వెండార్‌ లాగింగ్‌ను ఎనేబుల్ చేయండి"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"బగ్ రిపోర్ట్‌లలో అదనపు పరికర-నిర్దిష్ట వెండార్ లాగ్‌లను చేర్చండి, అవి ప్రైవేట్ సమాచారాన్ని కలిగి ఉండవచ్చు, మరింత బ్యాటరీని, మరియు/లేదా మరింత స్టోరేజ్‌ను ఉపయోగించవచ్చు."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"ఒక రోజు తర్వాత డిజేబుల్ చేయండి"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"వెర్బోస్ వెండర్ లాగింగ్ ముగిసింది"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"ఒక రోజు పాటు ఎనేబుల్ చేసి ఉంది"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"ఇంకొక రోజు ఎనేబుల్ చేసి ఉంచండి"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"ఒక రోజు తర్వాత డిజేబుల్ అవుతుంది"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"నిరవధికంగా ఎనేబుల్ చేయబడింది"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"విండో యానిమేషన్ స్కేల్"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ట్రాన్సిషన్ యానిమేషన్ స్కేల్"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"యానిమేటర్ వ్యవధి స్కేల్"</string>

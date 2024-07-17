@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Учитава отклањање грешака GPU-a у апл. за отклањање грешака"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Опширне евиденције продавца"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Уврштава у извештаје о грешкама додатне посебне евиденције продавца за уређаје, које могу да садрже приватне податке, да троше више батерије и/или да користе више меморије."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"Онемогући после једног дана"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"Детаљно евидентирање продавца је завршено"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"Омогућено на један дан"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"Омогући још један дан"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"Онемогућено после једног дана"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Омогућено неограничено"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Размера анимације прозора"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Размера анимације прелаза"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Аниматорова размера трајања"</string>

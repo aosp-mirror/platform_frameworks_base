@@ -1658,7 +1658,7 @@ public class SizeCompatTests extends WindowTestsBase {
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     public void testCompatScaling_freeformUnresizeableApp_smallerThanParent_upScaled() {
         doReturn(true).when(() ->
-                DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
+                DesktopModeHelper.canEnterDesktopMode(any()));
         final int dw = 600;
         final int dh = 800;
         final DisplayContent display = new TestDisplayContent.Builder(mAtm, dw, dh)

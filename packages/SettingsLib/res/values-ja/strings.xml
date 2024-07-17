@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"デバッグアプリに GPU デバッグレイヤの読み込みを許可"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ベンダーの詳細なロギングを有効にする"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"バグレポートには、その他のデバイス固有のベンダーログが含まれます。これには、非公開の情報が含まれることがあります。また、バッテリーやストレージの使用量が増えることもあります。"</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"1 日後に無効にする"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"ベンダーの詳細なロギングが終了しました"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"1 日間有効にしました"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"あと 1 日有効にする"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"1 日後に無効にします"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"期限なしで有効にしました"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ウィンドウ アニメ スケール"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"トランジション アニメ スケール"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator 再生時間スケール"</string>
