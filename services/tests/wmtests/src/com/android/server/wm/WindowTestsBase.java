@@ -141,8 +141,8 @@ import java.util.HashMap;
 import java.util.List;
 
 /** Common base class for window manager unit test classes. */
-class WindowTestsBase extends SystemServiceTestsBase {
-    final Context mContext = getInstrumentation().getTargetContext();
+public class WindowTestsBase extends SystemServiceTestsBase {
+    protected final Context mContext = getInstrumentation().getTargetContext();
 
     // Default package name
     static final String DEFAULT_COMPONENT_PACKAGE_NAME = "com.foo";
