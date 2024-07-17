@@ -383,21 +383,25 @@ TEST(UtilTest, ParseFeatureFlagsParameter_InvalidValue) {
 TEST(UtilTest, ParseFeatureFlagsParameter_DuplicateFlag) {
   auto diagnostics = test::ContextBuilder().Build()->GetDiagnostics();
   FeatureFlagValues feature_flag_values;
-  ASSERT_TRUE(
-      ParseFeatureFlagsParameter("foo=true,bar=true,foo=false", diagnostics, &feature_flag_values));
-  EXPECT_THAT(feature_flag_values, UnorderedElementsAre(Pair("foo", std::optional<bool>(false)),
-                                                        Pair("bar", std::optional<bool>(true))));
+  ASSERT_TRUE(ParseFeatureFlagsParameter("foo=true,bar=true,foo:ro=false", diagnostics,
+                                         &feature_flag_values));
+  EXPECT_THAT(
+      feature_flag_values,
+      UnorderedElementsAre(Pair("foo", FeatureFlagProperties{true, std::optional<bool>(false)}),
+                           Pair("bar", FeatureFlagProperties{false, std::optional<bool>(true)})));
 }
 
 TEST(UtilTest, ParseFeatureFlagsParameter_Valid) {
   auto diagnostics = test::ContextBuilder().Build()->GetDiagnostics();
   FeatureFlagValues feature_flag_values;
-  ASSERT_TRUE(ParseFeatureFlagsParameter("foo= true, bar =FALSE,baz=, quux", diagnostics,
+  ASSERT_TRUE(ParseFeatureFlagsParameter("foo= true, bar:ro =FALSE,baz=, quux", diagnostics,
                                          &feature_flag_values));
-  EXPECT_THAT(feature_flag_values,
-              UnorderedElementsAre(Pair("foo", std::optional<bool>(true)),
-                                   Pair("bar", std::optional<bool>(false)),
-                                   Pair("baz", std::nullopt), Pair("quux", std::nullopt)));
+  EXPECT_THAT(
+      feature_flag_values,
+      UnorderedElementsAre(Pair("foo", FeatureFlagProperties{false, std::optional<bool>(true)}),
+                           Pair("bar", FeatureFlagProperties{true, std::optional<bool>(false)}),
+                           Pair("baz", FeatureFlagProperties{false, std::nullopt}),
+                           Pair("quux", FeatureFlagProperties{false, std::nullopt})));
 }
 
 TEST (UtilTest, AdjustSplitConstraintsForMinSdk) {

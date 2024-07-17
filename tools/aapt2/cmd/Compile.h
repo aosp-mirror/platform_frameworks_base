@@ -24,6 +24,7 @@
 #include "Command.h"
 #include "ResourceTable.h"
 #include "androidfw/IDiagnostics.h"
+#include "cmd/Util.h"
 #include "format/Archive.h"
 #include "process/IResourceTableConsumer.h"
 
@@ -45,6 +46,7 @@ struct CompileOptions {
   bool preserve_visibility_of_styleables = false;
   bool verbose = false;
   std::optional<std::string> product_;
+  FeatureFlagValues feature_flag_values;
 };
 
 /** Parses flags and compiles resources to be used in linking.  */
@@ -92,6 +94,12 @@ class CompileCommand : public Command {
                     "Leave only resources specific to the given product. All "
                     "other resources (including defaults) are removed.",
                     &options_.product_);
+    AddOptionalFlagList("--feature-flags",
+                        "Specify the values of feature flags. The pairs in the argument\n"
+                        "are separated by ',' the name is separated from the value by '='.\n"
+                        "The name can have a suffix of ':ro' to indicate it is read only."
+                        "Example: \"flag1=true,flag2:ro=false,flag3=\" (flag3 has no given value).",
+                        &feature_flags_args_);
   }
 
   int Action(const std::vector<std::string>& args) override;
@@ -101,6 +109,7 @@ class CompileCommand : public Command {
   CompileOptions options_;
   std::optional<std::string> visibility_;
   std::optional<std::string> trace_folder_;
+  std::vector<std::string> feature_flags_args_;
 };
 
 int Compile(IAaptContext* context, io::IFileCollection* inputs, IArchiveWriter* output_writer,
