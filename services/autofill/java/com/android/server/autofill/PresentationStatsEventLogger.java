@@ -804,7 +804,15 @@ public final class PresentationStatsEventLogger {
                     + event.mSuggestionPresentedLastTimestampMs
                     + " event.mFocusedVirtualAutofillId=" + event.mFocusedVirtualAutofillId
                     + " event.mFieldFirstLength=" + event.mFieldFirstLength
-                    + " event.mFieldLastLength=" + event.mFieldLastLength);
+                    + " event.mFieldLastLength=" + event.mFieldLastLength
+                    + " event.mViewFailedPriorToRefillCount=" + event.mViewFailedPriorToRefillCount
+                    + " event.mViewFilledSuccessfullyOnRefillCount="
+                    + event.mViewFilledSuccessfullyOnRefillCount
+                    + " event.mViewFailedOnRefillCount=" + event.mViewFailedOnRefillCount
+                    + " event.notExpiringResponseDuringAuthCount="
+                    + event.mFixExpireResponseDuringAuthCount
+                    + " event.notifyViewEnteredIgnoredDuringAuthCount="
+                    + event.mNotifyViewEnteredIgnoredDuringAuthCount);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -859,7 +867,12 @@ public final class PresentationStatsEventLogger {
                 event.mSuggestionPresentedLastTimestampMs,
                 event.mFocusedVirtualAutofillId,
                 event.mFieldFirstLength,
-                event.mFieldLastLength);
+                event.mFieldLastLength,
+                event.mViewFailedPriorToRefillCount,
+                event.mViewFilledSuccessfullyOnRefillCount,
+                event.mViewFailedOnRefillCount,
+                event.mFixExpireResponseDuringAuthCount,
+                event.mNotifyViewEnteredIgnoredDuringAuthCount);
         mEventInternal = Optional.empty();
     }
 
@@ -912,6 +925,12 @@ public final class PresentationStatsEventLogger {
         // uninitialized doesn't help much, as this would be non-zero only if callback is received.
         int mViewFillSuccessCount = 0;
         int mViewFilledButUnexpectedCount = 0;
+        int mViewFailedPriorToRefillCount = 0;
+        int mViewFailedOnRefillCount = 0;
+        int mViewFilledSuccessfullyOnRefillCount = 0;
+
+        int mFixExpireResponseDuringAuthCount = 0;
+        int mNotifyViewEnteredIgnoredDuringAuthCount = 0;
 
         ArraySet<AutofillId> mAutofillIdsAttemptedAutofill;
         ArraySet<AutofillId> mAlreadyFilledAutofillIds = new ArraySet<>();
