@@ -3506,6 +3506,9 @@ class Task extends TaskFragment {
         if (task.effectiveUid != baseActivityUid) {
             info.baseActivity = new ComponentName("", "");
         }
+
+        info.capturedLink = null;
+        info.capturedLinkTimestamp = 0;
     }
 
     @Nullable PictureInPictureParams getPictureInPictureParams() {

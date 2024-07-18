@@ -2894,6 +2894,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         ActivityRecord fillAndReturnTop(Task task, TaskInfo info) {
             info.numActivities = 0;
             info.baseActivity = null;
+            info.capturedLink = null;
+            info.capturedLinkTimestamp = 0;
             mInfo = info;
             task.forAllActivities(this);
             final ActivityRecord top = mTopRunning;
