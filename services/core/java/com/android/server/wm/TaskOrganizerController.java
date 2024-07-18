@@ -390,7 +390,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 t.mTaskAppearedSent = false;
             }
             if (removeFromSystem) {
-                mService.removeTask(t.mTaskId);
+                mService.removeTask(t);
             }
             return taskAppearedSent;
         }

@@ -3017,6 +3017,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @SuppressWarnings("GuardedBy")
     public void testDisplayIgnoreOrientationRequest_pausedAppNotLostSizeCompat() {
         // Set up a display in landscape and ignoring orientation request.
         setUpDisplaySizeWithApp(2800, 1400);
@@ -3043,7 +3044,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertActivityMaxBoundsSandboxed();
 
         final Rect activityBounds = new Rect(mActivity.getBounds());
-        mTask.resumeTopActivityUncheckedLocked(null /* prev */, null /* options */);
+        mTask.resumeTopActivityUncheckedLocked(null /* prev */, null /* options */,
+                false /* deferPause */);
 
         // App still in size compat, and the bounds don't change.
         verify(mActivity, never()).clearSizeCompatMode();
