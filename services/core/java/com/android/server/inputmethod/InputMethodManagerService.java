@@ -22,8 +22,6 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.os.UserManager.USER_TYPE_SYSTEM_HEADLESS;
-import static android.provider.Settings.Secure.STYLUS_HANDWRITING_DEFAULT_VALUE;
-import static android.provider.Settings.Secure.STYLUS_HANDWRITING_ENABLED;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BACK_DISPOSITION;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BOUND_TO_METHOD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CONCURRENT_MULTI_USER_MODE_ENABLED;
@@ -51,6 +49,7 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTargetWindowState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeVisibilityResult;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
 import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
 import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.MODE_AUTO;
@@ -597,7 +596,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
                 break;
             }
-            case STYLUS_HANDWRITING_ENABLED: {
+            case Settings.Secure.STYLUS_HANDWRITING_ENABLED: {
                 InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
                 InputMethodManager
                         .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
@@ -1617,8 +1616,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // If user is a profile, use preference of it`s parent profile.
         final int profileParentUserId = mUserManagerInternal.getProfileParentId(userId);
         if (Settings.Secure.getIntForUser(context.getContentResolver(),
-                STYLUS_HANDWRITING_ENABLED, STYLUS_HANDWRITING_DEFAULT_VALUE,
-                profileParentUserId) == 0) {
+                Settings.Secure.STYLUS_HANDWRITING_ENABLED,
+                Settings.Secure.STYLUS_HANDWRITING_DEFAULT_VALUE, profileParentUserId) == 0) {
             return false;
         }
         return true;
@@ -4787,8 +4786,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(
                         windowToken, userId);
                 mVisibilityApplier.applyImeVisibility(requestToken, statsToken,
-                        setVisible ? ImeVisibilityStateComputer.STATE_SHOW_IME
-                                : ImeVisibilityStateComputer.STATE_HIDE_IME,
+                        setVisible ? STATE_SHOW_IME : STATE_HIDE_IME,
                         SoftInputShowHideReason.NOT_SET /* ignore reason */, userId);
             }
         } finally {
@@ -6274,7 +6272,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             boolean isCritical) {
         IInputMethodInvoker method;
         ClientState client;
-        ClientState focusedWindowClient;
 
         final Printer p = new PrintWriterPrinter(pw);
 
