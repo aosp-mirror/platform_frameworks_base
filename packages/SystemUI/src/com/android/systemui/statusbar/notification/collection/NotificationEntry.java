@@ -1005,6 +1005,16 @@ public final class NotificationEntry extends ListEntry implements NotificationRo
         mIsMarkedForUserTriggeredMovement = marked;
     }
 
+    private boolean mSeenInShade = false;
+
+    public void setSeenInShade(boolean seen) {
+        mSeenInShade = seen;
+    }
+
+    public boolean isSeenInShade() {
+        return mSeenInShade;
+    }
+
     public void setIsHeadsUpEntry(boolean isHeadsUpEntry) {
         mIsHeadsUpEntry = isHeadsUpEntry;
     }
