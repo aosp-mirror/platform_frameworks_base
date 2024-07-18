@@ -24,6 +24,7 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
@@ -101,6 +102,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final @ShellBackgroundThread ShellExecutor mBgExecutor;
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
+    private final SplitScreenController mSplitScreenController;
 
     private WindowDecorationViewHolder mWindowDecorViewHolder;
     private View.OnClickListener mOnCaptionButtonClickListener;
@@ -151,6 +153,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     DesktopModeWindowDecoration(
             Context context,
             DisplayController displayController,
+            SplitScreenController splitScreenController,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -159,16 +162,18 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
-        this (context, displayController, taskOrganizer, taskInfo, taskSurface,
-                handler, bgExecutor, choreographer, syncQueue, rootTaskDisplayAreaOrganizer,
-                SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
-                WindowContainerTransaction::new, SurfaceControl::new,
-                new SurfaceControlViewHostFactory() {}, DefaultMaximizeMenuFactory.INSTANCE);
+        this (context, displayController, splitScreenController, taskOrganizer, taskInfo,
+                taskSurface, handler, bgExecutor, choreographer, syncQueue,
+                rootTaskDisplayAreaOrganizer, SurfaceControl.Builder::new,
+                SurfaceControl.Transaction::new,  WindowContainerTransaction::new,
+                SurfaceControl::new, new SurfaceControlViewHostFactory() {},
+                DefaultMaximizeMenuFactory.INSTANCE);
     }
 
     DesktopModeWindowDecoration(
             Context context,
             DisplayController displayController,
+            SplitScreenController splitScreenController,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -187,6 +192,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
                 surfaceControlViewHostFactory);
+        mSplitScreenController = splitScreenController;
         mHandler = handler;
         mBgExecutor = bgExecutor;
         mChoreographer = choreographer;
@@ -367,25 +373,39 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (mResult.mRootView == null) {
             // This means something blocks the window decor from showing, e.g. the task is hidden.
             // Nothing is set up in this case including the decoration surface.
+            disposeStatusBarInputLayer();
             Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
             return;
         }
 
         if (oldRootView != mResult.mRootView) {
+            disposeStatusBarInputLayer();
             mWindowDecorViewHolder = createViewHolder();
         }
         Trace.beginSection("DesktopModeWindowDecoration#relayout-binding");
-        mWindowDecorViewHolder.bindData(mTaskInfo);
+
+        final Point position = new Point();
+        if (isAppHandle(mWindowDecorViewHolder)) {
+            position.set(determineHandlePosition());
+        }
+        mWindowDecorViewHolder.bindData(mTaskInfo,
+                position,
+                mResult.mCaptionWidth,
+                mResult.mCaptionHeight,
+                isCaptionVisible());
         Trace.endSection();
 
         if (!mTaskInfo.isFocused) {
             closeHandleMenu();
             closeMaximizeMenu();
         }
-
         updateDragResizeListener(oldDecorationSurface);
         updateMaximizeMenu(startT);
         Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
+    }
+
+    private boolean isCaptionVisible() {
+        return mTaskInfo.isVisible && mIsCaptionVisible;
     }
 
     private void setCapturedLink(Uri capturedLink, long timeStamp) {
@@ -469,12 +489,42 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
     }
 
+    private Point determineHandlePosition() {
+        final Point position = new Point(mResult.mCaptionX, 0);
+        if (mSplitScreenController.getSplitPosition(mTaskInfo.taskId)
+                == SPLIT_POSITION_BOTTOM_OR_RIGHT
+                && mDisplayController.getDisplayLayout(mTaskInfo.displayId).isLandscape()
+        ) {
+            // If this is the right split task, add left stage's width.
+            final Rect leftStageBounds = new Rect();
+            mSplitScreenController.getStageBounds(leftStageBounds, new Rect());
+            position.x += leftStageBounds.width();
+        }
+        return position;
+    }
+
+    /**
+     * Dispose of the view used to forward inputs in status bar region. Intended to be
+     * used any time handle is no longer visible.
+     */
+    void disposeStatusBarInputLayer() {
+        if (!isAppHandle(mWindowDecorViewHolder)
+                || !Flags.enableAdditionalWindowsAboveStatusBar()) {
+            return;
+        }
+        ((AppHandleViewHolder) mWindowDecorViewHolder).disposeStatusBarInputLayer();
+    }
+
     private WindowDecorationViewHolder createViewHolder() {
         if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) {
             return new AppHandleViewHolder(
                     mResult.mRootView,
                     mOnCaptionTouchListener,
-                    mOnCaptionButtonClickListener
+                    mOnCaptionButtonClickListener,
+                    (v, event) -> {
+                        updateHoverAndPressStatus(event);
+                        return true;
+                    }
             );
         } else if (mRelayoutParams.mLayoutResId
                 == R.layout.desktop_mode_app_header) {
@@ -495,6 +545,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     });
         }
         throw new IllegalArgumentException("Unexpected layout resource id");
+    }
+
+    private boolean isAppHandle(WindowDecorationViewHolder viewHolder) {
+        return viewHolder instanceof AppHandleViewHolder;
     }
 
     @VisibleForTesting
@@ -965,9 +1019,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * @return {@code true} if event is inside caption handle view, {@code false} if not
      */
     boolean checkTouchEventInFocusedCaptionHandle(MotionEvent ev) {
-        if (isHandleMenuActive() || !(mWindowDecorViewHolder
-                instanceof AppHandleViewHolder)) {
+        if (isHandleMenuActive() || !isAppHandle(mWindowDecorViewHolder)
+                || Flags.enableAdditionalWindowsAboveStatusBar()) {
             return false;
+        }
+        // The status bar input layer can only receive input in handle coordinates to begin with,
+        // so checking coordinates is unnecessary as input is always within handle bounds.
+        if (isAppHandle(mWindowDecorViewHolder)
+                && Flags.enableAdditionalWindowsAboveStatusBar()
+                && isCaptionVisible()) {
+            return true;
         }
 
         return checkTouchEventInCaption(ev);
@@ -1002,7 +1063,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * @param ev the MotionEvent to compare
      */
     void checkTouchEvent(MotionEvent ev) {
-        if (mResult.mRootView == null) return;
+        if (mResult.mRootView == null || Flags.enableAdditionalWindowsAboveStatusBar()) return;
         final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
         final View handle = caption.findViewById(R.id.caption_handle);
         final boolean inHandle = !isHandleMenuActive()
@@ -1024,7 +1085,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * @param ev the MotionEvent to compare against.
      */
     void updateHoverAndPressStatus(MotionEvent ev) {
-        if (mResult.mRootView == null) return;
+        if (mResult.mRootView == null || Flags.enableAdditionalWindowsAboveStatusBar()) return;
         final View handle = mResult.mRootView.findViewById(R.id.caption_handle);
         final boolean inHandle = !isHandleMenuActive()
                 && checkTouchEventInFocusedCaptionHandle(ev);
@@ -1034,13 +1095,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // We want handle to remain pressed if the pointer moves outside of it during a drag.
         handle.setPressed((inHandle && action == ACTION_DOWN)
                 || (handle.isPressed() && action != ACTION_UP && action != ACTION_CANCEL));
-        if (isHandleMenuActive() && !isHandleMenuAboveStatusBar()) {
+        if (isHandleMenuActive()) {
             mHandleMenu.checkMotionEvent(ev);
         }
-    }
-
-    private boolean isHandleMenuAboveStatusBar() {
-        return Flags.enableAdditionalWindowsAboveStatusBar() && !mTaskInfo.isFreeform();
     }
 
     private boolean pointInView(View v, float x, float y) {
@@ -1054,6 +1111,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         closeHandleMenu();
         mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
         disposeResizeVeil();
+        disposeStatusBarInputLayer();
         clearCurrentViewHostRunnable();
         super.close();
     }
@@ -1153,6 +1211,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         DesktopModeWindowDecoration create(
                 Context context,
                 DisplayController displayController,
+                SplitScreenController splitScreenController,
                 ShellTaskOrganizer taskOrganizer,
                 ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,
@@ -1164,6 +1223,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return new DesktopModeWindowDecoration(
                     context,
                     displayController,
+                    splitScreenController,
                     taskOrganizer,
                     taskInfo,
                     taskSurface,

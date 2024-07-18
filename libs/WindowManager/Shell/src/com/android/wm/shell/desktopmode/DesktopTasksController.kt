@@ -69,6 +69,7 @@ import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
+import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
@@ -1334,33 +1335,36 @@ class DesktopTasksController(
      *
      * @param taskInfo the task being dragged.
      * @param y height of drag, to be checked against status bar height.
+     * @return the [IndicatorType] used for the resulting transition
      */
     fun onDragPositioningEndThroughStatusBar(
         inputCoordinates: PointF,
         taskInfo: RunningTaskInfo,
-    ) {
-        val indicator = getVisualIndicator() ?: return
+    ): IndicatorType {
+        val indicator = getVisualIndicator() ?: return IndicatorType.NO_INDICATOR
         val indicatorType = indicator.updateIndicatorType(inputCoordinates, taskInfo.windowingMode)
         when (indicatorType) {
-            DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR -> {
-                val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
+            IndicatorType.TO_DESKTOP_INDICATOR -> {
+                val displayLayout = displayController.getDisplayLayout(taskInfo.displayId)
+                    ?: return IndicatorType.NO_INDICATOR
                 if (Flags.enableWindowingDynamicInitialBounds()) {
                     finalizeDragToDesktop(taskInfo, calculateInitialBounds(displayLayout, taskInfo))
                 } else {
                     finalizeDragToDesktop(taskInfo, getDefaultDesktopTaskBounds(displayLayout))
                 }
             }
-            DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR,
-            DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR -> {
+            IndicatorType.NO_INDICATOR,
+            IndicatorType.TO_FULLSCREEN_INDICATOR -> {
                 cancelDragToDesktop(taskInfo)
             }
-            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
+            IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
                 requestSplit(taskInfo, leftOrTop = true)
             }
-            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
+            IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
                 requestSplit(taskInfo, leftOrTop = false)
             }
         }
+        return indicatorType
     }
 
     /** Update the exclusion region for a specified task */
