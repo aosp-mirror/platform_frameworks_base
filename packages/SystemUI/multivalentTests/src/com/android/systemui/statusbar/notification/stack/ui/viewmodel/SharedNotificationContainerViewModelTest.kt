@@ -1096,7 +1096,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
                 )
             )
             runCurrent()
-            assertThat(alpha).isEqualTo(0f)
+            // Resets to 1f after communal scene is hidden
+            assertThat(alpha).isEqualTo(1f)
         }
 
     @Test
@@ -1151,7 +1152,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
                 )
             )
             runCurrent()
-            assertThat(alpha).isEqualTo(0f)
+            assertThat(alpha).isEqualTo(1f)
         }
 
     @Test
@@ -1208,7 +1209,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
                 )
             )
             runCurrent()
-            assertThat(alpha).isEqualTo(0f)
+            // Resets to 1f after communal scene is hidden
+            assertThat(alpha).isEqualTo(1f)
         }
 
     @Test
@@ -1263,7 +1265,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
                 )
             )
             runCurrent()
-            assertThat(alpha).isEqualTo(0f)
+            assertThat(alpha).isEqualTo(1f)
         }
 
     private suspend fun TestScope.showLockscreen() {

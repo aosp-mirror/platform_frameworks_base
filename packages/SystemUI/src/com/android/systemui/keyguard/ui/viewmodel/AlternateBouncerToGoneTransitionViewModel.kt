@@ -83,6 +83,7 @@ constructor(
                     MathUtils.lerp(startAlpha, 0f, it)
                 }
             },
+            onFinish = { 1f },
         )
     }
 
