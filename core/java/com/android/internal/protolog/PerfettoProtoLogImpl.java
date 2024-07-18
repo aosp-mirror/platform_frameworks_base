@@ -66,6 +66,7 @@ import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogDataType;
 import com.android.internal.protolog.common.LogLevel;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -100,6 +101,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     );
     @Nullable
     private final ProtoLogViewerConfigReader mViewerConfigReader;
+    @Nullable
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
     private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
     private final Runnable mCacheUpdater;
@@ -111,13 +113,12 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     private final Lock mBackgroundServiceLock = new ReentrantLock();
     private ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
-    public PerfettoProtoLogImpl(String viewerConfigFilePath, Runnable cacheUpdater) {
+    public PerfettoProtoLogImpl(@NonNull String viewerConfigFilePath, Runnable cacheUpdater) {
         this(() -> {
             try {
                 return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
             } catch (FileNotFoundException e) {
-                Slog.w(LOG_TAG, "Failed to load viewer config file " + viewerConfigFilePath, e);
-                return null;
+                throw new RuntimeException("Failed to load viewer config file " + viewerConfigFilePath, e);
             }
         }, cacheUpdater);
     }
@@ -127,7 +128,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     public PerfettoProtoLogImpl(
-            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             Runnable cacheUpdater
     ) {
         this(viewerConfigInputStreamProvider,
@@ -241,6 +242,15 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     public void registerGroups(IProtoLogGroup... protoLogGroups) {
         for (IProtoLogGroup protoLogGroup : protoLogGroups) {
             mLogGroups.put(protoLogGroup.name(), protoLogGroup);
+        }
+
+        final String[] groupsLoggingToLogcat = Arrays.stream(protoLogGroups)
+                .filter(IProtoLogGroup::isLogToLogcat)
+                .map(IProtoLogGroup::name)
+                .toArray(String[]::new);
+
+        if (mViewerConfigReader != null) {
+            mViewerConfigReader.loadViewerConfig(groupsLoggingToLogcat);
         }
     }
 
