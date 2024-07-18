@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.education.data.repository
+package com.android.systemui.education.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
-import java.time.Clock
-import java.time.Instant
+import com.android.systemui.kosmos.testScope
 
-var Kosmos.contextualEducationRepository: ContextualEducationRepository by
-    Kosmos.Fixture { FakeContextualEducationRepository(fakeEduClock) }
-
-var Kosmos.fakeEduClock: Clock by Kosmos.Fixture { FakeEduClock(Instant.MIN) }
+var Kosmos.keyboardTouchpadEduStatsInteractor by
+    Kosmos.Fixture {
+        KeyboardTouchpadEduStatsInteractorImpl(
+            backgroundScope = testScope.backgroundScope,
+            contextualEducationInteractor = contextualEducationInteractor
+        )
+    }
