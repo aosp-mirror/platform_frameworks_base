@@ -20,8 +20,11 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.DreamManager
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -166,7 +169,7 @@ constructor(
                         }
                     } else if (occluded) {
                         startTransitionTo(KeyguardState.OCCLUDED)
-                    } else if (isIdleOnCommunal) {
+                    } else if (isIdleOnCommunal && !communalSceneKtfRefactor()) {
                         if (SceneContainerFlag.isEnabled) {
                             // TODO(b/336576536): Check if adaptation for scene framework is needed
                         } else {
@@ -183,7 +186,7 @@ constructor(
                         if (SceneContainerFlag.isEnabled) {
                             // TODO(b/336576536): Check if adaptation for scene framework is needed
                         } else {
-                            startTransitionTo(KeyguardState.GLANCEABLE_HUB)
+                            transitionToGlanceableHub()
                         }
                     } else {
                         startTransitionTo(KeyguardState.LOCKSCREEN)
@@ -218,7 +221,9 @@ constructor(
                         canWakeDirectlyToGone,
                         primaryBouncerShowing) ->
                     if (
-                        !maybeStartTransitionToOccludedOrInsecureCamera() &&
+                        !maybeStartTransitionToOccludedOrInsecureCamera { state, reason ->
+                            startTransitionTo(state, ownerReason = reason)
+                        } &&
                             // Handled by dismissFromDozing().
                             !isWakeAndUnlock(biometricUnlockState.mode)
                     ) {
@@ -242,7 +247,7 @@ constructor(
                                     ownerReason = "waking from dozing"
                                 )
                             }
-                        } else if (isIdleOnCommunal) {
+                        } else if (isIdleOnCommunal && !communalSceneKtfRefactor()) {
                             if (SceneContainerFlag.isEnabled) {
                                 // TODO(b/336576536): Check if adaptation for scene framework is
                                 // needed
@@ -264,10 +269,7 @@ constructor(
                                 // TODO(b/336576536): Check if adaptation for scene framework is
                                 // needed
                             } else {
-                                startTransitionTo(
-                                    KeyguardState.GLANCEABLE_HUB,
-                                    ownerReason = "waking from dozing"
-                                )
+                                transitionToGlanceableHub()
                             }
                         } else {
                             startTransitionTo(
@@ -277,6 +279,18 @@ constructor(
                         }
                     }
                 }
+        }
+    }
+
+    private suspend fun transitionToGlanceableHub() {
+        if (communalSceneKtfRefactor()) {
+            communalSceneInteractor.changeScene(
+                CommunalScenes.Communal,
+                // Immediately show the hub when transitioning from dozing to hub.
+                CommunalTransitionKeys.Immediately,
+            )
+        } else {
+            startTransitionTo(KeyguardState.GLANCEABLE_HUB)
         }
     }
 

@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
@@ -25,9 +26,13 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
 import com.android.systemui.Flags
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_COMMUNAL_SCENE_KTF_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.communal.domain.interactor.CommunalSceneTransitionInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
+import com.android.systemui.communal.domain.interactor.communalSceneTransitionInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.flags.BrokenWithSceneContainer
@@ -122,15 +127,22 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     private val fromGlanceableHubTransitionInteractor by lazy {
         kosmos.fromGlanceableHubTransitionInteractor
     }
+    private val communalSceneTransitionInteractor by lazy {
+        kosmos.communalSceneTransitionInteractor
+    }
 
     private val powerInteractor by lazy { kosmos.powerInteractor }
     private val communalInteractor by lazy { kosmos.communalInteractor }
+    private val communalSceneInteractor by lazy { kosmos.communalSceneInteractor }
 
     companion object {
         @JvmStatic
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+            return FlagsParameterization.allCombinationsOf(
+                    FLAG_COMMUNAL_SCENE_KTF_REFACTOR,
+                )
+                .andSceneContainer()
         }
     }
 
@@ -163,6 +175,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         fromOccludedTransitionInteractor.start()
         fromAlternateBouncerTransitionInteractor.start()
         fromGlanceableHubTransitionInteractor.start()
+        communalSceneTransitionInteractor.start()
     }
 
     @Test
@@ -636,6 +649,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     @Test
     @DisableSceneContainer
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun dozingToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to DOZING
@@ -770,6 +784,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     @Test
     @BrokenWithSceneContainer(339465026)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun goneToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to GONE
@@ -793,6 +808,29 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                     from = KeyguardState.GONE,
                     ownerName = FromGoneTransitionInteractor::class.simpleName,
                     animatorAssertion = { it.isNotNull() }
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    @BrokenWithSceneContainer(339465026)
+    @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun goneToGlanceableHub_communalKtfRefactor() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to GONE
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+
+            // WHEN the glanceable hub is shown
+            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    to = KeyguardState.GLANCEABLE_HUB,
+                    from = KeyguardState.GONE,
+                    ownerName = CommunalSceneTransitionInteractor::class.simpleName,
+                    animatorAssertion = { it.isNull() }
                 )
 
             coroutineContext.cancelChildren()
@@ -941,6 +979,11 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     @Test
     fun alternateBouncerToGlanceableHub() =
         testScope.runTest {
+            // GIVEN the device is idle on the glanceable hub
+            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            runCurrent()
+            clearInvocations(transitionRepository)
+
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
             bouncerRepository.setAlternateVisible(true)
             runTransitionAndSetWakefulness(
@@ -951,19 +994,11 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             // GIVEN the primary bouncer isn't showing and device not sleeping
             bouncerRepository.setPrimaryShow(false)
 
-            // GIVEN the device is idle on the glanceable hub
-            val idleTransitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(CommunalScenes.Communal)
-                )
-            communalInteractor.setTransitionState(idleTransitionState)
-            runCurrent()
-
             // WHEN the alternateBouncer stops showing
             bouncerRepository.setAlternateVisible(false)
             advanceTimeBy(200L)
 
-            // THEN a transition to LOCKSCREEN should occur
+            // THEN a transition to GLANCEABLE_HUB should occur
             assertThat(transitionRepository)
                 .startedTransition(
                     ownerName = FromAlternateBouncerTransitionInteractor::class.simpleName,
@@ -1063,17 +1098,16 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     @DisableSceneContainer
     fun primaryBouncerToGlanceableHub() =
         testScope.runTest {
+            // GIVEN the device is idle on the glanceable hub
+            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            runCurrent()
+
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
             bouncerRepository.setPrimaryShow(true)
-            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER)
-
-            // GIVEN the device is idle on the glanceable hub
-            val idleTransitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(CommunalScenes.Communal)
-                )
-            communalInteractor.setTransitionState(idleTransitionState)
-            runCurrent()
+            runTransitionAndSetWakefulness(
+                KeyguardState.GLANCEABLE_HUB,
+                KeyguardState.PRIMARY_BOUNCER
+            )
 
             // WHEN the primaryBouncer stops showing
             bouncerRepository.setPrimaryShow(false)
@@ -1095,27 +1129,26 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     @DisableSceneContainer
     fun primaryBouncerToGlanceableHubWhileDreaming() =
         testScope.runTest {
+            // GIVEN the device is idle on the glanceable hub
+            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            runCurrent()
+
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
             bouncerRepository.setPrimaryShow(true)
-            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER)
+            runTransitionAndSetWakefulness(
+                KeyguardState.GLANCEABLE_HUB,
+                KeyguardState.PRIMARY_BOUNCER
+            )
 
             // GIVEN that we are dreaming and occluded
             keyguardRepository.setDreaming(true)
             keyguardRepository.setKeyguardOccluded(true)
 
-            // GIVEN the device is idle on the glanceable hub
-            val idleTransitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(CommunalScenes.Communal)
-                )
-            communalInteractor.setTransitionState(idleTransitionState)
-            runCurrent()
-
             // WHEN the primaryBouncer stops showing
             bouncerRepository.setPrimaryShow(false)
             runCurrent()
 
-            // THEN a transition to LOCKSCREEN should occur
+            // THEN a transition to GLANCEABLE_HUB should occur
             assertThat(transitionRepository)
                 .startedTransition(
                     ownerName = FromPrimaryBouncerTransitionInteractor::class.simpleName,
@@ -1219,6 +1252,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     @Test
     @BrokenWithSceneContainer(339465026)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun occludedToGlanceableHub() =
         testScope.runTest {
             // GIVEN a device on lockscreen
@@ -1256,6 +1290,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     @Test
     @BrokenWithSceneContainer(339465026)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun occludedToGlanceableHubWhenInitiallyOnHub() =
         testScope.runTest {
             // GIVEN a device on lockscreen and communal is available
@@ -1287,6 +1322,37 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                     from = KeyguardState.OCCLUDED,
                     to = KeyguardState.GLANCEABLE_HUB,
                     animatorAssertion = { it.isNotNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    @BrokenWithSceneContainer(339465026)
+    @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun occludedToGlanceableHub_communalKtfRefactor() =
+        testScope.runTest {
+            // GIVEN a device on lockscreen and communal is available
+            keyguardRepository.setKeyguardShowing(true)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            // GIVEN a prior transition has run to OCCLUDED from GLANCEABLE_HUB
+            runTransitionAndSetWakefulness(KeyguardState.GLANCEABLE_HUB, KeyguardState.OCCLUDED)
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            // WHEN occlusion ends
+            keyguardRepository.setKeyguardOccluded(false)
+            runCurrent()
+
+            // THEN a transition to GLANCEABLE_HUB should occur
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = CommunalSceneTransitionInteractor::class.simpleName,
+                    from = KeyguardState.OCCLUDED,
+                    to = KeyguardState.GLANCEABLE_HUB,
+                    animatorAssertion = { it.isNull() },
                 )
 
             coroutineContext.cancelChildren()
@@ -1511,6 +1577,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     @Test
     @DisableSceneContainer
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun dreamingToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to DREAMING
@@ -1541,6 +1608,47 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             assertThat(transitionRepository)
                 .startedTransition(
                     ownerName = FromDreamingTransitionInteractor::class.simpleName,
+                    from = KeyguardState.DREAMING,
+                    to = KeyguardState.GLANCEABLE_HUB,
+                    animatorAssertion = { it.isNull() }, // transition should be manually animated
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    @DisableSceneContainer
+    @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun dreamingToGlanceableHub_communalKtfRefactor() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DREAMING
+            keyguardRepository.setDreaming(true)
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DREAMING)
+            runCurrent()
+
+            // WHEN a transition to the glanceable hub starts
+            val currentScene = CommunalScenes.Blank
+            val targetScene = CommunalScenes.Communal
+
+            val progress = MutableStateFlow(0f)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = currentScene,
+                        toScene = targetScene,
+                        currentScene = flowOf(targetScene),
+                        progress = progress,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            communalSceneInteractor.setTransitionState(transitionState)
+            progress.value = .1f
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = CommunalSceneTransitionInteractor::class.simpleName,
                     from = KeyguardState.DREAMING,
                     to = KeyguardState.GLANCEABLE_HUB,
                     animatorAssertion = { it.isNull() }, // transition should be manually animated
@@ -1679,6 +1787,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     @Test
     @DisableSceneContainer
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun lockscreenToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to LOCKSCREEN
@@ -1737,6 +1846,48 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     @Test
     @DisableSceneContainer
+    @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun lockscreenToGlanceableHub_communalKtfRefactor() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to LOCKSCREEN
+            runTransitionAndSetWakefulness(KeyguardState.AOD, KeyguardState.LOCKSCREEN)
+            runCurrent()
+
+            // WHEN a glanceable hub transition starts
+            val currentScene = CommunalScenes.Blank
+            val targetScene = CommunalScenes.Communal
+
+            val progress = MutableStateFlow(0f)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = currentScene,
+                        toScene = targetScene,
+                        currentScene = flowOf(targetScene),
+                        progress = progress,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            communalSceneInteractor.setTransitionState(transitionState)
+            progress.value = .1f
+            runCurrent()
+
+            // THEN a transition from LOCKSCREEN => GLANCEABLE_HUB should occur
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = CommunalSceneTransitionInteractor::class.simpleName,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GLANCEABLE_HUB,
+                    animatorAssertion = { it.isNull() }, // transition should be manually animated
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    @DisableSceneContainer
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun glanceableHubToLockscreen() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
@@ -1792,6 +1943,48 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     @Test
     @DisableSceneContainer
+    @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun glanceableHubToLockscreen_communalKtfRefactor() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to GLANCEABLE_HUB
+            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            runCurrent()
+            clearInvocations(transitionRepository)
+
+            // WHEN a transition away from glanceable hub starts
+            val currentScene = CommunalScenes.Communal
+            val targetScene = CommunalScenes.Blank
+
+            val progress = MutableStateFlow(0f)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = currentScene,
+                        toScene = targetScene,
+                        currentScene = flowOf(targetScene),
+                        progress = progress,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            communalSceneInteractor.setTransitionState(transitionState)
+            progress.value = .1f
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = CommunalSceneTransitionInteractor::class.simpleName,
+                    from = KeyguardState.GLANCEABLE_HUB,
+                    to = KeyguardState.LOCKSCREEN,
+                    animatorAssertion = { it.isNull() }, // transition should be manually animated
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    @DisableSceneContainer
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun glanceableHubToDozing() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
@@ -1807,6 +2000,31 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                     from = KeyguardState.GLANCEABLE_HUB,
                     to = KeyguardState.DOZING,
                     animatorAssertion = { it.isNotNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    @DisableSceneContainer
+    @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun glanceableHubToDozing_communalKtfRefactor() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to GLANCEABLE_HUB
+            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            runCurrent()
+            clearInvocations(transitionRepository)
+
+            // WHEN the device begins to sleep
+            powerInteractor.setAsleepForTest()
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = CommunalSceneTransitionInteractor::class.simpleName,
+                    from = KeyguardState.GLANCEABLE_HUB,
+                    to = KeyguardState.DOZING,
+                    animatorAssertion = { it.isNull() },
                 )
 
             coroutineContext.cancelChildren()
@@ -1858,6 +2076,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     @Test
     @BrokenWithSceneContainer(339465026)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun glanceableHubToOccluded() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
@@ -1888,7 +2107,33 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
+    @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun glanceableHubToOccluded_communalKtfRefactor() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to GLANCEABLE_HUB
+            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            runCurrent()
+            clearInvocations(transitionRepository)
+
+            // WHEN the keyguard is occluded
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = CommunalSceneTransitionInteractor::class.simpleName,
+                    from = KeyguardState.GLANCEABLE_HUB,
+                    to = KeyguardState.OCCLUDED,
+                    animatorAssertion = { it.isNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
     @DisableSceneContainer
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun glanceableHubToGone() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
@@ -1911,6 +2156,32 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     @Test
     @DisableSceneContainer
+    @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun glanceableHubToGone_communalKtfRefactor() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to GLANCEABLE_HUB
+            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            runCurrent()
+            clearInvocations(transitionRepository)
+
+            // WHEN keyguard goes away
+            keyguardRepository.setKeyguardGoingAway(true)
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = CommunalSceneTransitionInteractor::class.simpleName,
+                    from = KeyguardState.GLANCEABLE_HUB,
+                    to = KeyguardState.GONE,
+                    animatorAssertion = { it.isNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    @DisableSceneContainer
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun glanceableHubToDreaming() =
         testScope.runTest {
             // GIVEN that we are dreaming and not dozing
@@ -1939,12 +2210,58 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                         isUserInputOngoing = flowOf(false),
                     )
                 )
-            communalInteractor.setTransitionState(transitionState)
+            communalSceneInteractor.setTransitionState(transitionState)
             runCurrent()
 
             assertThat(transitionRepository)
                 .startedTransition(
                     ownerName = FromGlanceableHubTransitionInteractor::class.simpleName,
+                    from = KeyguardState.GLANCEABLE_HUB,
+                    to = KeyguardState.DREAMING,
+                    animatorAssertion = { it.isNull() }, // transition should be manually animated
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    @DisableSceneContainer
+    @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun glanceableHubToDreaming_communalKtfRefactor() =
+        testScope.runTest {
+            // GIVEN that we are dreaming and not dozing
+            keyguardRepository.setDreaming(true)
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            runCurrent()
+
+            // GIVEN a prior transition has run to GLANCEABLE_HUB
+            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            runCurrent()
+            clearInvocations(transitionRepository)
+
+            // WHEN a transition away from glanceable hub starts
+            val currentScene = CommunalScenes.Communal
+            val targetScene = CommunalScenes.Blank
+
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = currentScene,
+                        toScene = targetScene,
+                        currentScene = flowOf(targetScene),
+                        progress = flowOf(0f, 0.1f),
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            communalSceneInteractor.setTransitionState(transitionState)
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = CommunalSceneTransitionInteractor::class.simpleName,
                     from = KeyguardState.GLANCEABLE_HUB,
                     to = KeyguardState.DREAMING,
                     animatorAssertion = { it.isNull() }, // transition should be manually animated
