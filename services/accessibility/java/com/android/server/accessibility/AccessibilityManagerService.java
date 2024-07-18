@@ -38,7 +38,11 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAG
 import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
 import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
 import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.accessibility.AccessibilityManager.FlashNotificationReason;
 
 import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
@@ -55,6 +59,7 @@ import static com.android.internal.accessibility.common.ShortcutConstants.UserSh
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TRIPLETAP;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TWOFINGER_DOUBLETAP;
 import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logAccessibilityShortcutActivated;
+import static com.android.internal.accessibility.util.AccessibilityUtils.isUserSetupCompleted;
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
@@ -937,8 +942,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             }
                         }
                         case Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                                Settings.Secure.ACCESSIBILITY_QS_TARGETS,
-                                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE ->
+                             Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS,
+                             Settings.Secure.ACCESSIBILITY_QS_TARGETS,
+                             Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE ->
                                 restoreShortcutTargets(newValue,
                                         ShortcutUtils.convertToType(which));
                     }
@@ -1995,6 +2001,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // Accessibility Menu component disabled.
             disableAccessibilityMenuToMigrateIfNeeded();
 
+            // As an initialization step, update the shortcuts for the current user.
+            updateShortcutsForCurrentNavigationMode();
+
             if (announceNewUser) {
                 // Schedule announcement of the current user if needed.
                 mMainHandler.sendMessageDelayed(
@@ -2214,6 +2223,69 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         mProxyManager.clearCacheLocked();
+    }
+
+    @VisibleForTesting
+    void updateShortcutsForCurrentNavigationMode() {
+        synchronized (mLock) {
+            AccessibilityUserState userState = getCurrentUserStateLocked();
+            if (!isUserSetupCompleted(mContext)) {
+                return;
+            }
+            final boolean isInGesturalNavigation = Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(), Settings.Secure.NAVIGATION_MODE,
+                    -1, userState.mUserId) == NAV_BAR_MODE_GESTURAL;
+
+            Set<String> gestureTargets = userState.getShortcutTargetsLocked(GESTURE);
+            Set<String> softwareTargets = userState.getShortcutTargetsLocked(SOFTWARE);
+            int buttonMode = ShortcutUtils.getButtonMode(mContext, userState.mUserId);
+
+            if (android.provider.Flags.a11yStandaloneGestureEnabled()) {
+                if (isInGesturalNavigation) {
+                    if (buttonMode == ACCESSIBILITY_BUTTON_MODE_GESTURE) {
+                        // GESTURE button mode indicates migrating from old version
+                        // User was using gesture, so move all targets into gesture
+                        gestureTargets.addAll(softwareTargets);
+                        softwareTargets.clear();
+                    }
+                    buttonMode = ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+                } else {
+                    // Only change the current button mode if there are gesture targets
+                    // (indicating the user came from gesture mode or is migrating)
+                    if (!gestureTargets.isEmpty()) {
+                        buttonMode = softwareTargets.isEmpty()
+                                ? ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR
+                                : ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+
+                        softwareTargets.addAll(gestureTargets);
+                        gestureTargets.clear();
+                    }
+                }
+            } else {
+                if (!gestureTargets.isEmpty()) {
+                    // Adjust button mode before clearing out gesture targets
+                    if (!softwareTargets.isEmpty()) {
+                        buttonMode = ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+                    } else if (isInGesturalNavigation) {
+                        buttonMode = ACCESSIBILITY_BUTTON_MODE_GESTURE;
+                    } else {
+                        buttonMode = ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
+                    }
+                    softwareTargets.addAll(gestureTargets);
+                    gestureTargets.clear();
+                } else if (buttonMode != ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
+                    buttonMode = isInGesturalNavigation
+                            ? ACCESSIBILITY_BUTTON_MODE_GESTURE
+                            : ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
+                }
+            }
+
+            updateShortcutTargetSets(userState, Set.of(
+                    Pair.create(gestureTargets, GESTURE),
+                    Pair.create(softwareTargets, SOFTWARE)
+            ));
+            ShortcutUtils.setButtonMode(mContext, buttonMode, userState.mUserId);
+        }
     }
 
     private void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
@@ -3644,6 +3716,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         persistColonDelimitedSetToSettingLocked(ShortcutUtils.convertToKey(shortcutType),
                 userState.mUserId, currentTargets, str -> str);
         scheduleNotifyClientsOfServicesStateChangeLocked(userState);
+    }
+
+    private void updateShortcutTargetSets(AccessibilityUserState userState,
+            Set<Pair<Set<String>, Integer>> targetSets) {
+        boolean somethingChanged = false;
+        for (Pair<Set<String>, Integer> pair : targetSets) {
+            Set<String> targets = pair.first;
+            int type = pair.second;
+            if (userState.updateShortcutTargetsLocked(targets, type)) {
+                somethingChanged = true;
+                persistColonDelimitedSetToSettingLocked(ShortcutUtils.convertToKey(type),
+                        userState.mUserId, targets, str -> str);
+            }
+        }
+        if (somethingChanged) {
+            scheduleNotifyClientsOfServicesStateChangeLocked(userState);
+        }
     }
 
     /**
@@ -5505,6 +5594,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mMouseKeysUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_MOUSE_KEYS_ENABLED);
 
+        private final Uri mNavigationModeUri = Settings.Secure.getUriFor(
+                Settings.Secure.NAVIGATION_MODE);
+
+        private final Uri mUserSetupCompleteUri = Settings.Secure.getUriFor(
+                Settings.Secure.USER_SETUP_COMPLETE);
+
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -5555,6 +5650,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mAlwaysOnMagnificationUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mMouseKeysUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mNavigationModeUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mUserSetupCompleteUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -5639,6 +5738,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (readMouseKeysEnabledLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
+                } else if (mNavigationModeUri.equals(uri) || mUserSetupCompleteUri.equals(uri)) {
+                    updateShortcutsForCurrentNavigationMode();
                 }
             }
         }
