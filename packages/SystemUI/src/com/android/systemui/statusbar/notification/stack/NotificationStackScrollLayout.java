@@ -111,6 +111,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.shared.NotificationHeadsUpCycling;
+import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
@@ -4857,10 +4858,13 @@ public class NotificationStackScrollLayout
      * @param isHeadsUp true for appear, false for disappear animations
      */
     public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {
-        final boolean closedAndSeenInShade = !mIsExpanded && row.getEntry() != null
-                && row.getEntry().isSeenInShade();
-        final boolean addAnimation = mAnimationsEnabled && !closedAndSeenInShade &&
-                (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed);
+        boolean addAnimation =
+                mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed);
+        if (NotificationThrottleHun.isEnabled()) {
+            final boolean closedAndSeenInShade = !mIsExpanded && row.getEntry() != null
+                    && row.getEntry().isSeenInShade();
+            addAnimation = addAnimation && !closedAndSeenInShade;
+        }
         if (SPEW) {
             Log.v(TAG, "generateHeadsUpAnimation:"
                     + " addAnimation=" + addAnimation
