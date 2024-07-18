@@ -66,7 +66,6 @@ import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogDataType;
 import com.android.internal.protolog.common.LogLevel;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -89,7 +88,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * A service for the ProtoLog logging system.
  */
-public class PerfettoProtoLogImpl implements IProtoLog {
+public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProtoLog {
     private static final String LOG_TAG = "ProtoLog";
     public static final String NULL_STRING = "null";
     private final AtomicInteger mTracingInstances = new AtomicInteger();
@@ -202,6 +201,15 @@ public class PerfettoProtoLogImpl implements IProtoLog {
      */
     public boolean isProtoEnabled() {
         return mTracingInstances.get() > 0;
+    }
+
+    @Override
+    public void toggleLogcat(boolean enabled, String[] groups) {
+        if (enabled) {
+            startLoggingToLogcat(groups, null);
+        } else {
+            stopLoggingToLogcat(groups, null);
+        }
     }
 
     /**
