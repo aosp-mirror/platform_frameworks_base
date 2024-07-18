@@ -35,7 +35,7 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.res.R
 import com.android.systemui.util.animation.MeasurementInput
 
-private object MediaCarousel {
+object MediaCarousel {
     object Elements {
         internal val Content =
             ElementKey(debugName = "MediaCarouselContent", scenePicker = MediaScenePicker)
