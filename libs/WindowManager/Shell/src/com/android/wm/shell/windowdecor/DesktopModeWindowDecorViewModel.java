@@ -669,12 +669,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 View v, MotionEvent e) {
             final int id = v.getId();
             if (id == R.id.caption_handle) {
-                if (e.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    // Caption handle is located within the status bar region, meaning the
-                    // DisplayPolicy will attempt to transfer this input to status bar if it's
-                    // a swipe down. Pilfer here to keep the gesture in handle alone.
-                    mInputManager.pilferPointers(v.getViewRootImpl().getInputToken());
-                }
                 handleCaptionThroughStatusBar(e, decoration);
                 final boolean wasDragging = mIsDragging;
                 updateDragStatus(e.getActionMasked());
