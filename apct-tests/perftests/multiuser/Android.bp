@@ -38,3 +38,10 @@ android_test {
     ],
     certificate: "platform",
 }
+
+filegroup {
+    name: "multi_user_trace_config",
+    srcs: [
+        "trace_configs/trace_config_multi_user.textproto",
+    ],
+}
