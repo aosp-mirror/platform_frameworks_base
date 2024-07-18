@@ -43,8 +43,8 @@ import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.WindowContextInfo;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -87,10 +87,6 @@ public class ClientTransactionItemTest {
     private ActivityThread.ActivityClientRecord mActivityClientRecord;
     private ArrayMap<IBinder, DestroyActivityItem> mActivitiesToBeDestroyed;
     private InsetsState mInsetsState;
-    private ClientWindowFrames mFrames;
-    private MergedConfiguration mMergedConfiguration;
-    private ActivityWindowInfo mActivityWindowInfo;
-    private InsetsSourceControl.Array mActiveControls;
 
     @Before
     public void setup() {
@@ -99,10 +95,6 @@ public class ClientTransactionItemTest {
         mActivitiesToBeDestroyed = new ArrayMap<>();
         mActivityClientRecord = new ActivityThread.ActivityClientRecord();
         mInsetsState = new InsetsState();
-        mFrames = new ClientWindowFrames();
-        mMergedConfiguration = new MergedConfiguration(mGlobalConfig, mConfiguration);
-        mActivityWindowInfo = new ActivityWindowInfo();
-        mActiveControls = new InsetsSourceControl.Array();
 
         doReturn(mActivity).when(mHandler).getActivity(mActivityToken);
         doReturn(mActivitiesToBeDestroyed).when(mHandler).getActivitiesToBeDestroyed();
@@ -112,6 +104,7 @@ public class ClientTransactionItemTest {
     public void testDestroyActivityItem_preExecute() {
         final DestroyActivityItem item = DestroyActivityItem
                 .obtain(mActivityToken, false /* finished */);
+
         item.preExecute(mHandler);
 
         assertEquals(1, mActivitiesToBeDestroyed.size());
@@ -123,6 +116,7 @@ public class ClientTransactionItemTest {
         final DestroyActivityItem item = DestroyActivityItem
                 .obtain(mActivityToken, false /* finished */);
         item.preExecute(mHandler);
+
         item.postExecute(mHandler, mPendingActions);
 
         assertTrue(mActivitiesToBeDestroyed.isEmpty());
@@ -132,6 +126,7 @@ public class ClientTransactionItemTest {
     public void testDestroyActivityItem_execute() {
         final DestroyActivityItem item = DestroyActivityItem
                 .obtain(mActivityToken, false /* finished */);
+
         item.execute(mHandler, mActivityClientRecord, mPendingActions);
 
         verify(mHandler).handleDestroyActivity(eq(mActivityClientRecord), eq(false) /* finishing */,
@@ -142,6 +137,7 @@ public class ClientTransactionItemTest {
     public void testWindowContextInfoChangeItem_execute() {
         final WindowContextInfoChangeItem item = WindowContextInfoChangeItem
                 .obtain(mWindowClientToken, mConfiguration, DEFAULT_DISPLAY);
+
         item.execute(mHandler, mPendingActions);
 
         verify(mHandler).handleWindowContextInfoChanged(mWindowClientToken,
@@ -152,6 +148,7 @@ public class ClientTransactionItemTest {
     public void testWindowContextWindowRemovalItem_execute() {
         final WindowContextWindowRemovalItem item = WindowContextWindowRemovalItem.obtain(
                 mWindowClientToken);
+
         item.execute(mHandler, mPendingActions);
 
         verify(mHandler).handleWindowContextWindowRemoval(mWindowClientToken);
@@ -159,37 +156,43 @@ public class ClientTransactionItemTest {
 
     @Test
     public void testWindowStateResizeItem_execute() throws RemoteException {
-        final WindowStateResizeItem item = WindowStateResizeItem.obtain(mWindow, mFrames,
-                true /* reportDraw */, mMergedConfiguration, mInsetsState, true /* forceLayout */,
+        final MergedConfiguration mergedConfiguration = new MergedConfiguration(mGlobalConfig,
+                mConfiguration);
+        final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
+        final ClientWindowFrames frames = new ClientWindowFrames();
+        final WindowStateResizeItem item = new WindowStateResizeItem(mWindow, frames,
+                true /* reportDraw */, mergedConfiguration, mInsetsState, true /* forceLayout */,
                 true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
-                true /* dragResizing */, mActivityWindowInfo);
+                true /* dragResizing */, activityWindowInfo);
+
         item.execute(mHandler, mPendingActions);
 
-        verify(mWindow).resized(mFrames,
-                true /* reportDraw */, mMergedConfiguration, mInsetsState, true /* forceLayout */,
+        verify(mWindow).resized(frames,
+                true /* reportDraw */, mergedConfiguration, mInsetsState, true /* forceLayout */,
                 true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
-                true /* dragResizing */, mActivityWindowInfo);
+                true /* dragResizing */, activityWindowInfo);
     }
 
     @Test
     public void testWindowStateInsetsControlChangeItem_execute() throws RemoteException {
-        final WindowStateInsetsControlChangeItem item = WindowStateInsetsControlChangeItem.obtain(
-                mWindow, mInsetsState, mActiveControls);
+        final InsetsSourceControl.Array activeControls = new InsetsSourceControl.Array();
+        final WindowStateInsetsControlChangeItem item = new WindowStateInsetsControlChangeItem(
+                mWindow, mInsetsState, activeControls);
+
         item.execute(mHandler, mPendingActions);
 
-        verify(mWindow).insetsControlChanged(mInsetsState, mActiveControls);
+        verify(mWindow).insetsControlChanged(mInsetsState, activeControls);
     }
 
     @Test
     public void testWindowStateInsetsControlChangeItem_executeError() throws RemoteException {
+        final InsetsSourceControl.Array spiedActiveControls = spy(new InsetsSourceControl.Array());
+        final WindowStateInsetsControlChangeItem item = new WindowStateInsetsControlChangeItem(
+                mWindow, mInsetsState, spiedActiveControls, false /* copyActiveControls */);
         doThrow(new RemoteException()).when(mWindow).insetsControlChanged(any(), any());
 
-        mActiveControls = spy(mActiveControls);
-        final WindowStateInsetsControlChangeItem item = WindowStateInsetsControlChangeItem.obtain(
-                mWindow, mInsetsState, mActiveControls);
-        item.mActiveControls = mActiveControls;
         item.execute(mHandler, mPendingActions);
 
-        verify(mActiveControls).release();
+        verify(spiedActiveControls).release();
     }
 }

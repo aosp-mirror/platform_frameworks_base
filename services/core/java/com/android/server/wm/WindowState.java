@@ -3784,7 +3784,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         markRedrawForSyncReported();
         getProcess().scheduleClientTransactionItem(
-                WindowStateResizeItem.obtain(mClient, mLastReportedFrames, reportDraw,
+                new WindowStateResizeItem(mClient, mLastReportedFrames, reportDraw,
                         mLastReportedConfiguration, mLastReportedInsetsState, forceRelayout,
                         alwaysConsumeSystemBars, displayId,
                         syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
@@ -3854,7 +3854,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         fillInsetsState(mLastReportedInsetsState, false /* copySources */);
         fillInsetsSourceControls(mLastReportedActiveControls, false /* copyControls */);
         if (Flags.insetsControlChangedItem()) {
-            getProcess().scheduleClientTransactionItem(WindowStateInsetsControlChangeItem.obtain(
+            getProcess().scheduleClientTransactionItem(new WindowStateInsetsControlChangeItem(
                     mClient, mLastReportedInsetsState, mLastReportedActiveControls));
         } else {
             try {

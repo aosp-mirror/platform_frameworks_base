@@ -75,6 +75,17 @@ public abstract class ClientTransactionItem implements BaseClientRequest, Parcel
         pw.append(prefix).println(this);
     }
 
+    /**
+     * Provides a default empty implementation for progressive cleanup.
+     *
+     * @deprecated This method is deprecated. The object pool is no longer used, so there's
+     * no need to recycle objects.
+     * TODO(b/311089192): Remove once ObjectPoolItem inheritance is removed.
+     */
+    @Override
+    @Deprecated
+    public void recycle() {}
+
     // Parcelable
 
     @Override
