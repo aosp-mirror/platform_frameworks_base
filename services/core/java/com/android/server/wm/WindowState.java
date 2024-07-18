@@ -5506,7 +5506,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public SurfaceControl getAnimationLeashParent() {
-        if (isStartingWindowAssociatedToTask()) {
+        if (mActivityRecord != null && !mActivityRecord.hasFixedRotationTransform()
+                && isStartingWindowAssociatedToTask()) {
             return mStartingData.mAssociatedTask.mSurfaceControl;
         }
         return super.getAnimationLeashParent();

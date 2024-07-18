@@ -2867,7 +2867,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mStartingData != null) {
             if (mStartingData.mAssociatedTask != null) {
                 // The snapshot type may have called associateStartingDataWithTask().
-                attachStartingSurfaceToAssociatedTask();
+                // If this activity is rotated, don't attach to task to preserve the transform.
+                if (!hasFixedRotationTransform()) {
+                    attachStartingSurfaceToAssociatedTask();
+                }
             } else if (isEmbedded()) {
                 associateStartingWindowWithTaskIfNeeded();
             }
