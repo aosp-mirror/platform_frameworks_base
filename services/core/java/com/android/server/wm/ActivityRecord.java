@@ -2901,6 +2901,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 || mStartingData.mAssociatedTask != null) {
             return;
         }
+        if (task.isVisible() && !task.inTransition()) {
+            // Don't associated with task if the task is visible especially when the activity is
+            // embedded. We just need to show splash screen on the activity in case the first frame
+            // is not ready.
+            return;
+        }
         associateStartingDataWithTask();
         attachStartingSurfaceToAssociatedTask();
     }
