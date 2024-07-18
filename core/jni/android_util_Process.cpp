@@ -1094,7 +1094,8 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
                 static_assert(kProcReadMinHeapBufferSize > sizeof(stackBuf));
                 std::memcpy(heapBuf.data(), stackBuf, sizeof(stackBuf));
             } else {
-                if (heapBuf.size() >= std::numeric_limits<ssize_t>::max() / 2) {
+                constexpr size_t MAX_READABLE_PROCFILE_SIZE = 64 << 20;
+                if (heapBuf.size() >= MAX_READABLE_PROCFILE_SIZE) {
                     if (kDebugProc) {
                         ALOGW("Proc file too big: %s fd=%d size=%zu\n",
                               file8.get(), fd.get(), heapBuf.size());
