@@ -77,7 +77,7 @@ constructor(
 }
 
 @SysUISingleton
-class AudioSharingInteractorEmptyImpl : AudioSharingInteractor {
+class AudioSharingInteractorEmptyImpl @Inject constructor() : AudioSharingInteractor {
     override val volume: Flow<Int?> = emptyFlow()
     override val volumeMin: Int = EMPTY_VOLUME
     override val volumeMax: Int = EMPTY_VOLUME
