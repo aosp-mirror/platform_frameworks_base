@@ -16,6 +16,9 @@
 
 package android.os;
 
+import static android.os.vibrator.Flags.FLAG_VIBRATION_ATTRIBUTE_IME_USAGE_API;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,6 +58,7 @@ public final class VibrationAttributes implements Parcelable {
             USAGE_PHYSICAL_EMULATION,
             USAGE_RINGTONE,
             USAGE_TOUCH,
+            USAGE_IME_FEEDBACK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Usage {}
@@ -135,6 +139,12 @@ public final class VibrationAttributes implements Parcelable {
      * Usage value to use for accessibility vibrations, such as with a screen reader.
      */
     public static final int USAGE_ACCESSIBILITY = 0x40 | USAGE_CLASS_FEEDBACK;
+    /**
+     * Usage value to use for input method editor (IME) haptic feedback.
+     */
+    @FlaggedApi(FLAG_VIBRATION_ATTRIBUTE_IME_USAGE_API)
+    public static final int USAGE_IME_FEEDBACK = 0x50 | USAGE_CLASS_FEEDBACK;
+
     /**
      * Usage value to use for media vibrations, such as music, movie, soundtrack, animations, games,
      * or any interactive media that isn't for touch feedback specifically.
@@ -349,6 +359,7 @@ public final class VibrationAttributes implements Parcelable {
             case USAGE_RINGTONE:
                 return AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
             case USAGE_TOUCH:
+            case USAGE_IME_FEEDBACK:
                 return AudioAttributes.USAGE_ASSISTANCE_SONIFICATION;
             case USAGE_ALARM:
                 return AudioAttributes.USAGE_ALARM;
@@ -447,6 +458,8 @@ public final class VibrationAttributes implements Parcelable {
                 return "PHYSICAL_EMULATION";
             case USAGE_HARDWARE_FEEDBACK:
                 return "HARDWARE_FEEDBACK";
+            case USAGE_IME_FEEDBACK:
+                return "IME";
             default:
                 return "unknown usage " + usage;
         }

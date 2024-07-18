@@ -154,6 +154,9 @@ public class VibratorManagerServiceTest {
     private static final VibrationAttributes RINGTONE_ATTRS =
             new VibrationAttributes.Builder().setUsage(
                     VibrationAttributes.USAGE_RINGTONE).build();
+    private static final VibrationAttributes IME_FEEDBACK_ATTRS =
+            new VibrationAttributes.Builder().setUsage(
+                    VibrationAttributes.USAGE_IME_FEEDBACK).build();
     private static final VibrationAttributes UNKNOWN_ATTRS =
             new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_UNKNOWN).build();
 
@@ -853,6 +856,7 @@ public class VibratorManagerServiceTest {
         vibrate(service, VibrationEffect.createOneShot(2000, 200),
                 new VibrationAttributes.Builder().setUsage(
                         VibrationAttributes.USAGE_UNKNOWN).build());
+        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), IME_FEEDBACK_ATTRS);
 
         InOrder inOrderVerifier = inOrder(mAppOpsManagerMock);
         inOrderVerifier.verify(mAppOpsManagerMock).checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
@@ -868,6 +872,8 @@ public class VibratorManagerServiceTest {
                 anyInt(), anyString());
         inOrderVerifier.verify(mAppOpsManagerMock).checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
                 eq(AudioAttributes.USAGE_UNKNOWN), anyInt(), anyString());
+        inOrderVerifier.verify(mAppOpsManagerMock).checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
+                eq(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION), anyInt(), anyString());
     }
 
     @Test
