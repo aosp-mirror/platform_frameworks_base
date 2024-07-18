@@ -50,6 +50,7 @@ import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -180,6 +181,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final LauncherApps mLauncherApps;
     private final RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     private final ShellExecutor mMainExecutor;
+    private final Handler mMainHandler;
     private final SplitScreenImpl mImpl = new SplitScreenImpl();
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
@@ -227,7 +229,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             Optional<DesktopTasksController> desktopTasksController,
             @Nullable StageCoordinator stageCoordinator,
             MultiInstanceHelper multiInstanceHelper,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor,
+            Handler mainHandler) {
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
         mTaskOrganizer = shellTaskOrganizer;
@@ -236,6 +239,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mLauncherApps = context.getSystemService(LauncherApps.class);
         mRootTDAOrganizer = rootTDAOrganizer;
         mMainExecutor = mainExecutor;
+        mMainHandler = mainHandler;
         mDisplayController = displayController;
         mDisplayImeController = displayImeController;
         mDisplayInsetsController = displayInsetsController;
@@ -292,7 +296,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool, mIconProvider,
-                mMainExecutor, mRecentTasksOptional, mLaunchAdjacentController,
+                mMainExecutor, mMainHandler, mRecentTasksOptional, mLaunchAdjacentController,
                 mWindowDecorViewModel);
     }
 
@@ -448,11 +452,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     @Override
     public void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
             boolean animatingDismiss) {
-        mStageCoordinator.onKeyguardVisibilityChanged(visible);
+        mStageCoordinator.onKeyguardStateChanged(visible, occluded);
     }
 
     public void onFinishedWakingUp() {
         mStageCoordinator.onFinishedWakingUp();
+    }
+
+    public void onStartedGoingToSleep() {
+        mStageCoordinator.onStartedGoingToSleep();
     }
 
     public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
@@ -1198,6 +1206,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         @Override
         public void onFinishedWakingUp() {
             mMainExecutor.execute(SplitScreenController.this::onFinishedWakingUp);
+        }
+
+        @Override
+        public void onStartedGoingToSleep() {
+            mMainExecutor.execute(SplitScreenController.this::onStartedGoingToSleep);
         }
 
         @Override
