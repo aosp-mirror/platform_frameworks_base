@@ -768,7 +768,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         return -1;
     }
 
-    private synchronized void onTracingInstanceStart(ProtoLogDataSource.ProtoLogConfig config) {
+    private synchronized void onTracingInstanceStart(
+            int instanceIdx, ProtoLogDataSource.ProtoLogConfig config) {
         final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
         for (int i = defaultLogFrom.ordinal(); i < LogLevel.values().length; i++) {
             mDefaultLogLevelCounts[i]++;
@@ -801,7 +802,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         this.mTracingInstances.incrementAndGet();
     }
 
-    private synchronized void onTracingInstanceStop(ProtoLogDataSource.ProtoLogConfig config) {
+    private synchronized void onTracingInstanceStop(
+            int instanceIdx, ProtoLogDataSource.ProtoLogConfig config) {
         this.mTracingInstances.decrementAndGet();
 
         final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
