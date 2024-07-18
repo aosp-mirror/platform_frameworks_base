@@ -382,7 +382,8 @@ constructor(dumpManager: DumpManager,
             "\nPREVIOUS: [$previousHunKey]" +
             "\nNEXT LIST: $nextListStr" +
             "\nNEXT MAP: $nextMapStr" +
-            "\nDROPPED: $dropSetStr"
+            "\nDROPPED: $dropSetStr" +
+            "\nENABLED: $enableAtRuntime"
     }
 
     private fun logState(reason: String) {
