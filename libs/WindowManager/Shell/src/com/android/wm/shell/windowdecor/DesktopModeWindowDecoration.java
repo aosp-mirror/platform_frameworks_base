@@ -29,6 +29,7 @@ import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLarge
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.ComponentName;
@@ -68,7 +69,9 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.common.OnTaskActionClickListener;
@@ -95,6 +98,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     static final long CLOSE_MAXIMIZE_MENU_DELAY_MS = 150L;
 
     private final Handler mHandler;
+    private final @ShellBackgroundThread ShellExecutor mBgExecutor;
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
 
@@ -151,11 +155,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
             Handler handler,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         this (context, displayController, taskOrganizer, taskInfo, taskSurface,
-                handler, choreographer, syncQueue, rootTaskDisplayAreaOrganizer,
+                handler, bgExecutor, choreographer, syncQueue, rootTaskDisplayAreaOrganizer,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
                 WindowContainerTransaction::new, SurfaceControl::new,
                 new SurfaceControlViewHostFactory() {}, DefaultMaximizeMenuFactory.INSTANCE);
@@ -168,6 +173,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
             Handler handler,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
@@ -182,6 +188,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 windowContainerTransactionSupplier, surfaceControlSupplier,
                 surfaceControlViewHostFactory);
         mHandler = handler;
+        mBgExecutor = bgExecutor;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
@@ -327,6 +334,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mHandler.post(mCurrentViewHostRunnable);
     }
 
+    @SuppressLint("MissingPermission")
     private void updateRelayoutParamsAndSurfaces(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
             boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
@@ -353,7 +361,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
 
         Trace.beginSection("DesktopModeWindowDecoration#relayout-applyWCT");
-        mTaskOrganizer.applyTransaction(wct);
+        mBgExecutor.execute(() -> mTaskOrganizer.applyTransaction(wct));
         Trace.endSection();
 
         if (mResult.mRootView == null) {
@@ -1147,6 +1155,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,
                 Handler handler,
+                @ShellBackgroundThread ShellExecutor bgExecutor,
                 Choreographer choreographer,
                 SyncTransactionQueue syncQueue,
                 RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
@@ -1157,6 +1166,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     taskInfo,
                     taskSurface,
                     handler,
+                    bgExecutor,
                     choreographer,
                     syncQueue,
                     rootTaskDisplayAreaOrganizer);

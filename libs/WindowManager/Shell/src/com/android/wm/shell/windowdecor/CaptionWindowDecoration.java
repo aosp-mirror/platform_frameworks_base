@@ -21,6 +21,7 @@ import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLarge
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
@@ -48,7 +49,9 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 
 /**
@@ -58,6 +61,7 @@ import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
  */
 public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearLayout> {
     private final Handler mHandler;
+    private final @ShellBackgroundThread ShellExecutor mBgExecutor;
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
 
@@ -78,10 +82,12 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
             Handler handler,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue) {
         super(context, displayController, taskOrganizer, taskInfo, taskSurface);
         mHandler = handler;
+        mBgExecutor = bgExecutor;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
     }
@@ -218,6 +224,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         relayoutParams.mOccludingCaptionElements.add(controlsElement);
     }
 
+    @SuppressLint("MissingPermission")
     void relayout(RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
             boolean applyStartTransactionOnDraw, boolean setTaskCropAndPosition) {
@@ -235,7 +242,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
 
-        mTaskOrganizer.applyTransaction(wct);
+        mBgExecutor.execute(() -> mTaskOrganizer.applyTransaction(wct));
 
         if (mResult.mRootView == null) {
             // This means something blocks the window decor from showing, e.g. the task is hidden.

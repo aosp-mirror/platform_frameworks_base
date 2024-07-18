@@ -98,6 +98,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
 import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
@@ -132,6 +133,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final ShellController mShellController;
     private final Context mContext;
     private final Handler mMainHandler;
+    private final @ShellBackgroundThread ShellExecutor mBgExecutor;
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
     private final SyncTransactionQueue mSyncQueue;
@@ -183,6 +185,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellExecutor shellExecutor,
             Handler mainHandler,
             Choreographer mainChoreographer,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             IWindowManager windowManager,
@@ -201,6 +204,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 shellExecutor,
                 mainHandler,
                 mainChoreographer,
+                bgExecutor,
                 shellInit,
                 shellCommandHandler,
                 windowManager,
@@ -225,6 +229,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellExecutor shellExecutor,
             Handler mainHandler,
             Choreographer mainChoreographer,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             IWindowManager windowManager,
@@ -245,6 +250,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
         mMainChoreographer = mainChoreographer;
+        mBgExecutor = bgExecutor;
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mTaskOrganizer = taskOrganizer;
         mShellController = shellController;
@@ -1095,6 +1101,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         taskInfo,
                         taskSurface,
                         mMainHandler,
+                        mBgExecutor,
                         mMainChoreographer,
                         mSyncQueue,
                         mRootTaskDisplayAreaOrganizer);
