@@ -59,6 +59,7 @@ public class WindowExtensionsTest {
     @Test
     public void testGetVendorApiLevel_extensionsEnabled_matchesCurrentVersion() {
         assumeTrue(WindowManager.hasWindowExtensionsEnabled());
+        assumeFalse(((WindowExtensionsImpl) mExtensions).hasLevelOverride());
         assertThat(mVersion).isEqualTo(getExtensionsVersionCurrentPlatform());
     }
 

@@ -103,9 +103,12 @@ class WindowExtensionsImpl implements WindowExtensions {
     @Override
     public int getVendorApiLevel() {
         final int levelOverride = getLevelOverride();
-        return (levelOverride != NO_LEVEL_OVERRIDE)
-                ? levelOverride
-                : getExtensionsVersionCurrentPlatform();
+        return hasLevelOverride() ? levelOverride : getExtensionsVersionCurrentPlatform();
+    }
+
+    @VisibleForTesting
+    boolean hasLevelOverride() {
+        return getLevelOverride() != NO_LEVEL_OVERRIDE;
     }
 
     private int getLevelOverride() {
