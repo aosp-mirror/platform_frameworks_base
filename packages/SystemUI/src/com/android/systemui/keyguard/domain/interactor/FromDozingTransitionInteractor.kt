@@ -25,7 +25,7 @@ import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode.Companion.isWakeAndUnlock
@@ -59,7 +59,7 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
-    val deviceEntryRepository: DeviceEntryRepository,
+    val deviceEntryInteractor: DeviceEntryInteractor,
     private val wakeToGoneInteractor: KeyguardWakeDirectlyToGoneInteractor,
     private val dreamManager: DreamManager,
 ) :
@@ -146,7 +146,7 @@ constructor(
                         isIdleOnCommunal,
                         canTransitionToGoneOnWake,
                         primaryBouncerShowing) ->
-                    if (!deviceEntryRepository.isLockscreenEnabled()) {
+                    if (!deviceEntryInteractor.isLockscreenEnabled()) {
                         if (SceneContainerFlag.isEnabled) {
                             // TODO(b/336576536): Check if adaptation for scene framework is needed
                         } else {

@@ -64,6 +64,7 @@ internal class DraggableHandlerImpl(
     internal val orientation: Orientation,
     internal val coroutineScope: CoroutineScope,
 ) : DraggableHandler {
+    internal val nestedScrollKey = Any()
     /** The [DraggableHandler] can only have one active [DragController] at a time. */
     private var dragController: DragControllerImpl? = null
 
@@ -912,9 +913,9 @@ private class Swipes(
 internal class NestedScrollHandlerImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val orientation: Orientation,
-    private val topOrLeftBehavior: NestedScrollBehavior,
-    private val bottomOrRightBehavior: NestedScrollBehavior,
-    private val isExternalOverscrollGesture: () -> Boolean,
+    internal var topOrLeftBehavior: NestedScrollBehavior,
+    internal var bottomOrRightBehavior: NestedScrollBehavior,
+    internal var isExternalOverscrollGesture: () -> Boolean,
     private val pointersInfoOwner: PointersInfoOwner,
 ) {
     private val layoutState = layoutImpl.state

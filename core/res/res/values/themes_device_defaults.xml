@@ -6179,4 +6179,10 @@ easier.
         <item name="colorListDivider">@color/list_divider_opacity_device_default_light</item>
         <item name="opacityListDivider">@color/list_divider_opacity_device_default_light</item>
     </style>
+
+    <!--  Device default theme for the Input Method Switcher dialog.  -->
+    <style name="Theme.DeviceDefault.InputMethodSwitcherDialog" parent="Theme.DeviceDefault.Dialog.Alert.DayNight">
+        <item name="windowMinWidthMajor">@null</item>
+        <item name="windowMinWidthMinor">@null</item>
+    </style>
 </resources>

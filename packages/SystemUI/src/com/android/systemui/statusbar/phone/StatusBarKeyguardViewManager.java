@@ -55,6 +55,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.Flags;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
@@ -708,15 +709,30 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * {@link #needsFullscreenBouncer()}.
      */
     protected void showBouncerOrKeyguard(boolean hideBouncerWhenShowing) {
-        if (needsFullscreenBouncer() && !mDozing) {
+        boolean isDozing = mDozing;
+        if (Flags.simPinRaceConditionOnRestart()) {
+            KeyguardState toState = mKeyguardTransitionInteractor.getTransitionState().getValue()
+                    .getTo();
+            isDozing = mDozing || toState == KeyguardState.DOZING || toState == KeyguardState.AOD;
+        }
+        if (needsFullscreenBouncer() && !isDozing) {
             // The keyguard might be showing (already). So we need to hide it.
             if (!primaryBouncerIsShowing()) {
-                mCentralSurfaces.hideKeyguard();
                 if (SceneContainerFlag.isEnabled()) {
+                    mCentralSurfaces.hideKeyguard();
                     mSceneInteractorLazy.get().changeScene(
                             Scenes.Bouncer, "StatusBarKeyguardViewManager.showBouncerOrKeyguard");
                 } else {
-                    mPrimaryBouncerInteractor.show(/* isScrimmed= */ true);
+                    if (Flags.simPinRaceConditionOnRestart()) {
+                        if (mPrimaryBouncerInteractor.show(/* isScrimmed= */ true)) {
+                            mCentralSurfaces.hideKeyguard();
+                        } else {
+                            mCentralSurfaces.showKeyguard();
+                        }
+                    } else {
+                        mCentralSurfaces.hideKeyguard();
+                        mPrimaryBouncerInteractor.show(/* isScrimmed= */ true);
+                    }
                 }
             } else {
                 Log.e(TAG, "Attempted to show the sim bouncer when it is already showing.");

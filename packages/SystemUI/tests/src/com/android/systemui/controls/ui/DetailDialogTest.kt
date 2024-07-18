@@ -89,7 +89,8 @@ class DetailDialogTest : SysuiTestCase() {
         verify(taskView).startActivity(any(), any(), capture(optionsCaptor), any())
 
         assertThat(optionsCaptor.value.pendingIntentBackgroundActivityStartMode)
-            .isEqualTo(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+            .isAnyOf(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED,
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS)
         assertThat(optionsCaptor.value.isPendingIntentBackgroundActivityLaunchAllowedByPermission)
             .isTrue()
         assertThat(optionsCaptor.value.taskAlwaysOnTop).isTrue()

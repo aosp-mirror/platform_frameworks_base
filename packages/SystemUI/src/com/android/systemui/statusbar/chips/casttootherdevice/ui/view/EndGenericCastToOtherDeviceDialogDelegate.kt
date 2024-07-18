@@ -55,9 +55,10 @@ class EndGenericCastToOtherDeviceDialogDelegate(
             // No custom on-click, because the dialog will automatically be dismissed when the
             // button is clicked anyway.
             setNegativeButton(R.string.close_dialog_button, /* onClick= */ null)
-            setPositiveButton(R.string.cast_to_other_device_stop_dialog_button) { _, _ ->
-                stopAction.invoke()
-            }
+            setPositiveButton(
+                R.string.cast_to_other_device_stop_dialog_button,
+                endMediaProjectionDialogHelper.wrapStopAction(stopAction),
+            )
         }
     }
 }

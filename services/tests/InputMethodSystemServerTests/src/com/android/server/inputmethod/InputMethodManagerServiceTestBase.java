@@ -161,6 +161,7 @@ public class InputMethodManagerServiceTestBase {
                         .spyStatic(InputMethodUtils.class)
                         .mockStatic(ServiceManager.class)
                         .spyStatic(AdditionalSubtypeMapRepository.class)
+                        .spyStatic(AdditionalSubtypeUtils.class)
                         .startMocking();
 
         mContext = spy(InstrumentationRegistry.getInstrumentation().getContext());
@@ -235,6 +236,7 @@ public class InputMethodManagerServiceTestBase {
 
         // The background writer thread in AdditionalSubtypeMapRepository should be stubbed out.
         doNothing().when(AdditionalSubtypeMapRepository::startWriterThread);
+        doReturn(AdditionalSubtypeMap.EMPTY_MAP).when(() -> AdditionalSubtypeUtils.load(anyInt()));
 
         mServiceThread =
                 new ServiceThread(
@@ -266,6 +268,10 @@ public class InputMethodManagerServiceTestBase {
         // Public local InputMethodManagerService.
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         lifecycle.onStart();
+
+        // Emulate that the user initialization is done.
+        AdditionalSubtypeMapRepository.ensureInitializedAndGet(mCallingUserId);
+        mInputMethodManagerService.getUserData(mCallingUserId).mBackgroundLoadLatch.countDown();
 
         // After this boot phase, services can broadcast Intents.
         lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);

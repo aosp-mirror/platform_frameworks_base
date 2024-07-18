@@ -16,7 +16,6 @@
 
 package com.android.settingslib.spa.framework.common
 
-import android.net.Uri
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -42,7 +41,6 @@ val LocalEntryDataProvider =
 typealias UiLayerRenderer = @Composable (arguments: Bundle?) -> Unit
 typealias StatusDataGetter = (arguments: Bundle?) -> EntryStatusData?
 typealias SearchDataGetter = (arguments: Bundle?) -> EntrySearchData?
-typealias SliceDataGetter = (sliceUri: Uri, arguments: Bundle?) -> EntrySliceData?
 
 /**
  * Defines data of a Settings entry.
@@ -80,9 +78,6 @@ data class SettingsEntry(
     // If so, for instance, we'll reindex its status for search.
     val hasMutableStatus: Boolean = false,
 
-    // Indicate whether the entry has SliceProvider support.
-    val hasSliceSupport: Boolean = false,
-
     /**
      * ========================================
      * Defines entry APIs to get data here.
@@ -100,12 +95,6 @@ data class SettingsEntry(
      * Returns null if this entry do NOT support search.
      */
     private val searchDataImpl: SearchDataGetter = { null },
-
-    /**
-     * API to get Slice data of this entry. The Slice data is implemented as a LiveData,
-     * and is associated with the Slice's lifecycle (pin / unpin) by the framework.
-     */
-    private val sliceDataImpl: SliceDataGetter = { _: Uri, _: Bundle? -> null },
 
     /**
      * API to Render UI of this entry directly. For now, we use it in the internal injection, to
@@ -135,10 +124,6 @@ data class SettingsEntry(
 
     fun getSearchData(runtimeArguments: Bundle? = null): EntrySearchData? {
         return searchDataImpl(fullArgument(runtimeArguments))
-    }
-
-    fun getSliceData(sliceUri: Uri, runtimeArguments: Bundle? = null): EntrySliceData? {
-        return sliceDataImpl(sliceUri, fullArgument(runtimeArguments))
     }
 
     @Composable
