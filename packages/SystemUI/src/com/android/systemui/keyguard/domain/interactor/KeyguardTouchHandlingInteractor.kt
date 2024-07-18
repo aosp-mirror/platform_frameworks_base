@@ -138,7 +138,7 @@ constructor(
             return
         }
 
-        if (isA11yAction || featureFlags.isEnabled(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP)) {
+        if (isA11yAction) {
             showSettings()
         } else {
             showMenu()
