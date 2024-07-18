@@ -75,6 +75,7 @@ import com.android.systemui.qs.QsEventLoggerFake;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.statusbar.StatusBarState;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -144,6 +145,12 @@ public class QSTileImplTest extends SysuiTestCase {
         mInstanceId = InstanceId.fakeInstanceId(mQsEventLoggerFake.getLastInstanceId());
 
         mTile.setTileSpec(SPEC);
+    }
+
+    @After
+    public void destroyTile() {
+        mTile.destroy();
+        mTestableLooper.processAllMessages();
     }
 
     @Test
