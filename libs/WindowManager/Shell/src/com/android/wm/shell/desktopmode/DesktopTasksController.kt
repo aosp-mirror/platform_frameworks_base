@@ -671,7 +671,7 @@ class DesktopTasksController(
             } else {
                 // if non-resizable then calculate max bounds according to aspect ratio
                 val activityAspectRatio = calculateAspectRatio(taskInfo)
-                val newSize = maximumSizeMaintainingAspectRatio(taskInfo,
+                val newSize = maximizeSizeGivenAspectRatio(taskInfo,
                     Size(stableBounds.width(), stableBounds.height()), activityAspectRatio)
                 val newBounds = centerInArea(
                     newSize, stableBounds, stableBounds.left, stableBounds.top)
@@ -1079,7 +1079,6 @@ class DesktopTasksController(
         wct: WindowContainerTransaction,
         taskInfo: RunningTaskInfo
     ) {
-        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
         val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(taskInfo.displayId)!!
         val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
         val targetWindowingMode =
@@ -1089,9 +1088,6 @@ class DesktopTasksController(
             } else {
                 WINDOWING_MODE_FREEFORM
             }
-        if (Flags.enableWindowingDynamicInitialBounds()) {
-            wct.setBounds(taskInfo.token, calculateInitialBounds(displayLayout, taskInfo))
-        }
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
         wct.reorder(taskInfo.token, true /* onTop */)
         if (useDesktopOverrideDensity()) {

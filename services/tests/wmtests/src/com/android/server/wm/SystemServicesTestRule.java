@@ -203,6 +203,7 @@ public class SystemServicesTestRule implements TestRule {
                 .mockStatic(LockGuard.class, mockStubOnly)
                 .mockStatic(Watchdog.class, mockStubOnly)
                 .spyStatic(DesktopModeHelper.class)
+                .spyStatic(DesktopModeBoundsCalculator.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
