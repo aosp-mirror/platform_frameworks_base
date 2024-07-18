@@ -39,8 +39,8 @@ import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
 import android.window.ActivityWindowInfo;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -295,7 +295,7 @@ public class TransactionParcelTests {
 
         StopActivityItem lifecycleRequest = StopActivityItem.obtain(mActivityToken);
 
-        ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        final ClientTransaction transaction = new ClientTransaction();
         transaction.addTransactionItem(callback1);
         transaction.addTransactionItem(callback2);
         transaction.addTransactionItem(lifecycleRequest);
