@@ -268,7 +268,7 @@
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Informe completo"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utiliza esta opción para que la interferencia del sistema sea mínima cuando el dispositivo no responda o funcione demasiado lento, o bien cuando necesites todas las secciones del informe. No permite introducir más detalles ni hacer más capturas de pantalla."</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{La captura de pantalla para el informe de errores se hará en # segundo.}many{La captura de pantalla para el informe de errores se hará en # segundos.}other{La captura de pantalla para el informe de errores se hará en # segundos.}}"</string>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Se ha hecho la captura de pantalla con el informe de errores"</string>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Captura de pantalla generada con el informe de errores"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"No se ha podido hacer la captura de pantalla con el informe de errores"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo Silencio"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"El sonido está desactivado. Activar"</string>
@@ -710,7 +710,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Mueve el teléfono hacia la izquierda"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Mueve el teléfono hacia la derecha"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Mira de forma más directa al dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"No se puede detectar tu cara. Sujeta el teléfono a la altura de los ojos."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"No se detecta tu cara. Sujeta el teléfono a la altura de los ojos."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"El teléfono se mueve demasiado. Mantenlo quieto."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Vuelve a registrar tu cara."</string>
     <string name="face_acquired_too_different" msgid="4505278456634706967">"Cara no reconocida. Inténtalo de nuevo."</string>
@@ -1427,7 +1427,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Mostrar sobre otras aplicaciones"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> se muestra sobre otras aplicaciones"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> se muestra sobre otras apps"</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> se muestra sobre otras aplicaciones"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Si no quieres que <xliff:g id="NAME">%s</xliff:g> utilice esta función, toca la notificación para abrir los ajustes y desactivarla."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desactivar"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Comprobando <xliff:g id="NAME">%s</xliff:g>…"</string>
@@ -1739,7 +1739,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Hecho"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactivar acceso directo"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar acceso directo"</string>
-    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Invertir colores"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inversión de colores"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Corrección de color"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo Una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Atenuación extra"</string>
@@ -2397,12 +2397,12 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abre Mensajes"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cómo funciona"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configura Desbloqueo con huella digital de nuevo"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> no funcionaba correctamente y se ha eliminado"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> y <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> no funcionaban correctamente y se han eliminado"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> no funcionaba correctamente y se ha eliminado. Configúrala de nuevo para desbloquear el teléfono con la huella digital."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> y <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> no funcionaban correctamente y se han eliminado. Configúralas de nuevo para desbloquear el teléfono con la huella digital."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ya no puede reconocerse."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> y <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ya no pueden reconocerse."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> ya no puede reconocerse. Vuelve a configurar Desbloqueo con huella digital."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> y <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ya no pueden reconocerse. Vuelve a configurar Desbloqueo con huella digital."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Configura Desbloqueo facial de nuevo"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Tu modelo facial no funcionaba correctamente y se ha eliminado. Configúralo de nuevo para desbloquear el teléfono con la cara."</string>
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Tu modelo facial ya no puede reconocerse. Vuelve a configurar Desbloqueo facial."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configurar"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ahora no"</string>
 </resources>

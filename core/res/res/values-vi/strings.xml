@@ -300,7 +300,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Các ứng dụng tiêu thụ pin"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Phóng to"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Việc sử dụng tính năng hỗ trợ tiếp cận"</string>
-    <string name="notification_channel_display" msgid="6905032605735615090">"Màn hình"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Hiển thị"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang sử dụng pin"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ứng dụng đang sử dụng pin"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
@@ -1091,8 +1091,8 @@
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"Ở lại trang này"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nBạn có chắc chắn muốn điều hướng khỏi trang này không?"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"Tự động điền với <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
-    <string name="permlab_setAlarm" msgid="1158001610254173567">"đặt báo thức"</string>
-    <string name="permdesc_setAlarm" msgid="2185033720060109640">"Cho phép ứng dụng đặt báo thức trong ứng dụng đồng hồ báo thức được cài đặt. Một số ứng dụng đồng hồ báo thức có thể không thực thi tính  năng này."</string>
+    <string name="permlab_setAlarm" msgid="1158001610254173567">"đặt chuông báo"</string>
+    <string name="permdesc_setAlarm" msgid="2185033720060109640">"Cho phép ứng dụng đặt chuông báo trong ứng dụng đồng hồ được cài đặt. Một số ứng dụng đồng hồ có thể không có năng này."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"thêm thư thoại"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"Cho phép ứng dụng thêm thông báo vào hộp thư thoại đến của bạn."</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> đã dán dữ liệu từ bảng nhớ tạm của bạn"</string>
@@ -1320,7 +1320,7 @@
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Mặc định (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Không"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Nhạc chuông"</string>
-    <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Âm thanh báo thức"</string>
+    <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Âm thanh chuông báo"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Âm thanh thông báo"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Không xác định"</string>
     <string name="wifi_available_sign_in" msgid="381054692557675237">"Đăng nhập vào mạng Wi-Fi"</string>
@@ -1426,7 +1426,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Hiển thị trên các ứng dụng khác"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> hiển thị trên các ứng dụng khác"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> hiển thị trên ứng dụng khác"</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> đang hiện trên các ứng dụng khác"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Nếu bạn không muốn <xliff:g id="NAME">%s</xliff:g> sử dụng tính năng này, hãy nhấn để mở cài đặt và tắt tính năng này."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Tắt"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Đang kiểm tra <xliff:g id="NAME">%s</xliff:g>…"</string>
@@ -2396,12 +2396,12 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mở ứng dụng Tin nhắn"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cách hoạt động"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Thiết lập lại tính năng Mở khoá bằng vân tay"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> không dùng được và đã bị xoá"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> và <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> không dùng được và đã bị xoá"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> không dùng được và đã bị xoá. Hãy thiết lập lại để mở khoá điện thoại bằng vân tay."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> và <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> không dùng được và đã bị xoá. Hãy thiết lập lại để mở khoá điện thoại bằng vân tay."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Không nhận dạng được <xliff:g id="FINGERPRINT">%s</xliff:g> nữa."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Không nhận dạng được <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> và <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nữa."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"Không nhận dạng được <xliff:g id="FINGERPRINT">%s</xliff:g> nữa. Hãy thiết lập lại tính năng Mở khoá bằng vân tay."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"Không nhận dạng được <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> và <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nữa. Hãy thiết lập lại tính năng Mở khoá bằng vân tay."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Thiết lập lại tính năng Mở khoá bằng khuôn mặt"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Mẫu khuôn mặt của bạn không dùng được và đã bị xoá. Hãy thiết lập lại để mở khoá điện thoại bằng khuôn mặt."</string>
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Không nhận dạng được mẫu khuôn mặt của bạn nữa. Hãy thiết lập lại tính năng Mở khoá bằng khuôn mặt."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Thiết lập"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Để sau"</string>
 </resources>

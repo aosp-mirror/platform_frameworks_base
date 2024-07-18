@@ -413,9 +413,9 @@
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Questa app può essere eseguita in background, velocizzando il consumo della batteria."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"utilizzo dei dati in background"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Questa app può usare dati in background, aumentando l\'utilizzo dei dati."</string>
-    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Pianificare la precisione delle azioni temporizzate"</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Programma azioni temporizzate con precisione"</string>
     <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Questa app può pianificare il lavoro al momento desiderato nel futuro. Significa anche che l\'app può essere eseguita quando non stai attivamente utilizzando il dispositivo."</string>
-    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Pianifica sveglie o promemoria eventi"</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Programma sveglie o promemoria eventi"</string>
     <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Quest\'app può pianificare azioni come sveglie e promemoria per notificarti al momento desiderato nel futuro."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"esecuzione permanente delle applicazioni"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Consente all\'applicazione di rendere persistenti in memoria alcune sue parti. Ciò può limitare la memoria disponibile per altre applicazioni, rallentando il tablet."</string>
@@ -2025,7 +2025,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Tocca per visualizzare i file"</string>
     <string name="pin_target" msgid="8036028973110156895">"Fissa"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"Blocca <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="unpin_target" msgid="3963318576590204447">"Sgancia"</string>
+    <string name="unpin_target" msgid="3963318576590204447">"Sblocca"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Sblocca <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Informazioni app"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
@@ -2397,12 +2397,12 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Apri Messaggi"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Come funziona"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Riconfigura lo Sblocco con l\'Impronta"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> non funzionava bene ed è stata eliminata"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> non funzionavano bene e sono state eliminate"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> non funzionava bene ed è stata eliminata. Riconfigurala per sbloccare lo smartphone con l\'impronta."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> non funzionavano bene e sono state eliminate. Riconfigurale per sbloccare lo smartphone con l\'impronta."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> non può più essere riconosciuto."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> non possono più essere riconosciuti."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> non può più essere riconosciuto. Riconfigura lo Sblocco con l\'Impronta."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> non possono più essere riconosciuti. Riconfigura lo Sblocco con l\'Impronta."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Riconfigura lo Sblocco con il Volto"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Il tuo modello del volto non funzionava bene ed è stato eliminato. Riconfiguralo per sbloccare lo smartphone con il volto."</string>
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Il tuo modello del volto non può più essere riconosciuto. Riconfigura lo Sblocco con il Volto."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configura"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Non ora"</string>
 </resources>

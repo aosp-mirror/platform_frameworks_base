@@ -2026,7 +2026,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Fäst <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Lossa"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Lossa <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Info om appen"</string>
+    <string name="app_info" msgid="6113278084877079851">"Appinformation"</string>
     <string name="negative_duration" msgid="1938335096972945232">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo startas …"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Enheten återställs …"</string>
@@ -2396,12 +2396,12 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Öppna Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Så fungerar det"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfigurera fingeravtryckslås igen"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> fungerade inte bra och har raderats"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> och <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> fungerade inte bra och har raderats"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> fungerade inte bra och har raderats. Konfigurera det igen för att låsa upp telefonen med fingeravtryck."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> och <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> fungerade inte bra och har raderats. Konfigurera dem igen för att låsa upp telefonen med fingeravtryck."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Det går inte längre att känna igen <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Det går inte längre att känna igen <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> och <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"Det går inte längre att känna igen <xliff:g id="FINGERPRINT">%s</xliff:g>. Konfigurera fingeravtryckslås igen."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"Det går inte längre att känna igen <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> och <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>. Konfigurera fingeravtryckslås igen."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Konfigurera ansiktslås igen"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Ansiktsmodellen fungerade inte bra och har raderats. Konfigurera den igen för att låsa upp telefonen med ansiktet."</string>
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Det går inte längre att känna igen din ansiktsmodell. Konfigurera ansiktslåset på nytt."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Ställ in"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Inte nu"</string>
 </resources>
