@@ -59,6 +59,9 @@ interface NotificationScrollView {
     /** set the y position in px of the top of the HUN in this view's coordinates */
     fun setHeadsUpTop(headsUpTop: Float)
 
+    /** set the bottom-most y position in px, where we can draw HUNs in this view's coordinates */
+    fun setHeadsUpBottom(headsUpBottom: Float)
+
     /** set whether the view has been scrolled all the way to the top */
     fun setScrolledToTop(scrolledToTop: Boolean)
 

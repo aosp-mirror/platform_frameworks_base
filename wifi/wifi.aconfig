@@ -25,3 +25,13 @@ flag {
     description: "Add API to migrate all values from Legacy Keystore to the new Wifi Blobstore database"
     bug: "332560152"
 }
+
+flag {
+    name: "hotspot_network_unknown_status_resets_connecting_state"
+    namespace: "wifi"
+    description: "Reset the connecting state flags when the hotspot network updates to unknown."
+    bug: "329670511"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

@@ -1577,6 +1577,8 @@
   <java-symbol type="layout" name="input_method" />
   <java-symbol type="layout" name="input_method_extract_view" />
   <java-symbol type="layout" name="input_method_switch_item" />
+  <java-symbol type="layout" name="input_method_switch_item_new" />
+  <java-symbol type="layout" name="input_method_switch_dialog_new" />
   <java-symbol type="layout" name="input_method_switch_dialog_title" />
   <java-symbol type="layout" name="js_prompt" />
   <java-symbol type="layout" name="list_content_simple" />
@@ -2552,6 +2554,7 @@
   <java-symbol type="dimen" name="input_method_nav_key_button_ripple_max_width" />
   <java-symbol type="drawable" name="ic_ime_nav_back" />
   <java-symbol type="drawable" name="ic_ime_switcher" />
+  <java-symbol type="drawable" name="ic_ime_switcher_new" />
   <java-symbol type="id" name="input_method_nav_back" />
   <java-symbol type="id" name="input_method_nav_buttons" />
   <java-symbol type="id" name="input_method_nav_center_group" />
@@ -5400,6 +5403,7 @@
   <java-symbol type="style" name="Theme.DeviceDefault.DialogWhenLarge" />
   <java-symbol type="style" name="Theme.DeviceDefault.DocumentsUI" />
   <java-symbol type="style" name="Theme.DeviceDefault.InputMethod" />
+  <java-symbol type="style" name="Theme.DeviceDefault.InputMethodSwitcherDialog" />
   <java-symbol type="style" name="Theme.DeviceDefault.Light.DarkActionBar" />
   <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.FixedSize" />
   <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.MinWidth" />

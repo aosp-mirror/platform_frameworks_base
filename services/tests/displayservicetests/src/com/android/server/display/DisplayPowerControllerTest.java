@@ -2137,6 +2137,14 @@ public final class DisplayPowerControllerTest {
     private void setUpDisplay(int displayId, String uniqueId, LogicalDisplay logicalDisplayMock,
             DisplayDevice displayDeviceMock, DisplayDeviceConfig displayDeviceConfigMock,
             boolean isEnabled) {
+
+        setUpDisplay(displayId, uniqueId, logicalDisplayMock, displayDeviceMock,
+                displayDeviceConfigMock, isEnabled, "display_name");
+    }
+
+    private void setUpDisplay(int displayId, String uniqueId, LogicalDisplay logicalDisplayMock,
+            DisplayDevice displayDeviceMock, DisplayDeviceConfig displayDeviceConfigMock,
+            boolean isEnabled, String displayName) {
         DisplayInfo info = new DisplayInfo();
         DisplayDeviceInfo deviceInfo = new DisplayDeviceInfo();
         deviceInfo.uniqueId = uniqueId;
@@ -2148,6 +2156,7 @@ public final class DisplayPowerControllerTest {
         when(logicalDisplayMock.isInTransitionLocked()).thenReturn(false);
         when(displayDeviceMock.getDisplayDeviceInfoLocked()).thenReturn(deviceInfo);
         when(displayDeviceMock.getUniqueId()).thenReturn(uniqueId);
+        when(displayDeviceMock.getNameLocked()).thenReturn(displayName);
         when(displayDeviceMock.getDisplayDeviceConfig()).thenReturn(displayDeviceConfigMock);
         when(displayDeviceConfigMock.getProximitySensor()).thenReturn(
                 new SensorData(Sensor.STRING_TYPE_PROXIMITY, null));

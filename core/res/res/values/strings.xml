@@ -3880,6 +3880,8 @@
 
     <!-- Title of the pop-up dialog in which the user switches keyboard, also known as input method. -->
     <string name="select_input_method">Choose input method</string>
+    <!-- Button to access the language settings of the current input method. [CHAR LIMIT=50]-->
+    <string name="input_method_language_settings">Language Settings</string>
     <!-- Summary text of a toggle switch to enable/disable use of the IME while a physical
          keyboard is connected -->
     <string name="show_ime">Keep it on screen while physical keyboard is active</string>

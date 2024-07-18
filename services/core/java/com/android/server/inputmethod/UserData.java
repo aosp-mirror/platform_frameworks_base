@@ -28,12 +28,20 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Placeholder for all IMMS user specific fields */
 final class UserData {
     @UserIdInt
     final int mUserId;
+
+    /**
+     * Tells whether {@link InputMethodManagerService.Lifecycle#initializeUsersAsync(int[])} is
+     * completed for this user or not.
+     */
+    @NonNull
+    final CountDownLatch mBackgroundLoadLatch = new CountDownLatch(1);
 
     @NonNull
     final InputMethodBindingController mBindingController;

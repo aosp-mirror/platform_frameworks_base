@@ -514,7 +514,7 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
      */
     void runTestScenario(boolean withActivity,
                          @NonNull Consumer<OrientationPolicyRobotTest> consumer) {
-        spyOn(mWm.mLetterboxConfiguration);
+        spyOn(mWm.mAppCompatConfiguration);
         final OrientationPolicyRobotTest robot =
                 new OrientationPolicyRobotTest(mWm, mAtm, mSupervisor, withActivity);
         consumer.accept(robot);

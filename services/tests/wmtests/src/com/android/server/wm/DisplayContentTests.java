@@ -1874,8 +1874,8 @@ public class DisplayContentTests extends WindowTestsBase {
     @EnableFlags(com.android.window.flags.Flags.FLAG_RESPECT_NON_TOP_VISIBLE_FIXED_ORIENTATION)
     @Test
     public void testRespectNonTopVisibleFixedOrientation() {
-        spyOn(mWm.mLetterboxConfiguration);
-        doReturn(false).when(mWm.mLetterboxConfiguration).isTranslucentLetterboxingEnabled();
+        spyOn(mWm.mAppCompatConfiguration);
+        doReturn(false).when(mWm.mAppCompatConfiguration).isTranslucentLetterboxingEnabled();
         makeDisplayPortrait(mDisplayContent);
         final ActivityRecord nonTopVisible = new ActivityBuilder(mAtm)
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
@@ -2604,7 +2604,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // test misc display overrides
         assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
-                mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
+                mWm.mAppCompatConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);
     }
 
@@ -2647,7 +2647,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // test misc display overrides
         assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
-                mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
+                mWm.mAppCompatConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);
     }
 

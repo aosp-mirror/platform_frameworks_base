@@ -59,5 +59,6 @@ constructor(
                     QSTileState.UserAction.CLICK,
                     QSTileState.UserAction.LONG_CLICK,
                 )
+            sideViewIcon = QSTileState.SideViewIcon.Chevron
         }
 }

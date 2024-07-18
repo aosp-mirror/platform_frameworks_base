@@ -1559,6 +1559,63 @@ class SceneContainerStartableTest : SysuiTestCase() {
             verify(dismissCallback).onDismissCancelled()
         }
 
+    @Test
+    fun refreshLockscreenEnabled() =
+        testScope.runTest {
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = true,
+                    initialSceneKey = Scenes.Gone,
+                )
+            underTest.start()
+            val isLockscreenEnabled by
+                collectLastValue(kosmos.deviceEntryInteractor.isLockscreenEnabled)
+            assertThat(isLockscreenEnabled).isTrue()
+
+            kosmos.fakeDeviceEntryRepository.setPendingLockscreenEnabled(false)
+            runCurrent()
+            // Pending value didn't propagate yet.
+            assertThat(isLockscreenEnabled).isTrue()
+
+            // Starting a transition to Lockscreen should refresh the value, causing the pending
+            // value
+            // to propagate to the real flow:
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Gone,
+                    toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Gone),
+                    progress = flowOf(0.1f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+            assertThat(isLockscreenEnabled).isFalse()
+
+            kosmos.fakeDeviceEntryRepository.setPendingLockscreenEnabled(true)
+            runCurrent()
+            // Pending value didn't propagate yet.
+            assertThat(isLockscreenEnabled).isFalse()
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Gone)
+            runCurrent()
+            assertThat(isLockscreenEnabled).isFalse()
+
+            // Starting another transition to Lockscreen should refresh the value, causing the
+            // pending
+            // value to propagate to the real flow:
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Gone,
+                    toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Gone),
+                    progress = flowOf(0.1f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+            assertThat(isLockscreenEnabled).isTrue()
+        }
+
     private fun TestScope.emulateSceneTransition(
         transitionStateFlow: MutableStateFlow<ObservableTransitionState>,
         toScene: SceneKey,

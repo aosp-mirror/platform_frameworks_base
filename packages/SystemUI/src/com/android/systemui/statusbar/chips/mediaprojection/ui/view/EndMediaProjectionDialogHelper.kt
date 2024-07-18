@@ -17,7 +17,9 @@
 package com.android.systemui.statusbar.chips.mediaprojection.ui.view
 
 import android.app.ActivityManager
+import android.content.DialogInterface
 import android.content.pm.PackageManager
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -29,11 +31,34 @@ class EndMediaProjectionDialogHelper
 @Inject
 constructor(
     private val dialogFactory: SystemUIDialog.Factory,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val packageManager: PackageManager,
 ) {
     /** Creates a new [SystemUIDialog] using the given delegate. */
     fun createDialog(delegate: SystemUIDialog.Delegate): SystemUIDialog {
         return dialogFactory.create(delegate)
+    }
+
+    /**
+     * Returns the click listener that should be invoked if a user clicks "Stop" on the end media
+     * projection dialog.
+     *
+     * The click listener will invoke [stopAction] and also do some UI manipulation.
+     *
+     * @param stopAction an action that, when invoked, should notify system API(s) that the media
+     *   projection should be stopped.
+     */
+    fun wrapStopAction(stopAction: () -> Unit): DialogInterface.OnClickListener {
+        return DialogInterface.OnClickListener { _, _ ->
+            // If the projection is stopped, then the chip will disappear, so we don't want the
+            // dialog to animate back into the chip just for the chip to disappear in a few frames.
+            dialogTransitionAnimator.disableAllCurrentDialogsExitAnimations()
+            stopAction.invoke()
+            // TODO(b/332662551): If the projection is stopped, there's a brief moment where the
+            // dialog closes and the chip re-shows because the system APIs haven't come back and
+            // told SysUI that the projection has officially stopped. It would be great for the chip
+            // to not re-show at all.
+        }
     }
 
     fun getAppName(state: MediaProjectionState.Projecting): CharSequence? {
