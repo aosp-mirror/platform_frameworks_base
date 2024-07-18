@@ -16,6 +16,7 @@
 package com.android.systemui.shade
 
 import android.os.SystemClock
+import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
 import android.widget.FrameLayout
@@ -208,9 +209,9 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testDragDownHelperCalledWhenDraggingDown() =
         testScope.runTest {
-            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
             whenever(dragDownHelper.isDraggingDown).thenReturn(true)
             val now = SystemClock.elapsedRealtime()
             val ev = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, 0f, 0f, 0 /* meta */)

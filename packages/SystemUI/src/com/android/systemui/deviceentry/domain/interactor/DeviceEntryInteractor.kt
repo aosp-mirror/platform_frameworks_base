@@ -28,12 +28,14 @@ import com.android.systemui.utils.coroutines.flow.mapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -101,6 +103,10 @@ constructor(
                 initialValue = false,
             )
 
+    val isLockscreenEnabled: Flow<Boolean> by lazy {
+        repository.isLockscreenEnabled.onStart { refreshLockscreenEnabled() }
+    }
+
     /**
      * Whether it's currently possible to swipe up to enter the device without requiring
      * authentication or when the device is already authenticated using a passive authentication
@@ -115,14 +121,14 @@ constructor(
      */
     val canSwipeToEnter: StateFlow<Boolean?> =
         combine(
-                // This is true when the user has chosen to show the lockscreen but has not made it
-                // secure.
                 authenticationInteractor.authenticationMethod.map {
-                    it == AuthenticationMethodModel.None && repository.isLockscreenEnabled()
+                    it == AuthenticationMethodModel.None
                 },
+                isLockscreenEnabled,
                 deviceUnlockedInteractor.deviceUnlockStatus,
                 isDeviceEntered
-            ) { isSwipeAuthMethod, deviceUnlockStatus, isDeviceEntered ->
+            ) { isNoneAuthMethod, isLockscreenEnabled, deviceUnlockStatus, isDeviceEntered ->
+                val isSwipeAuthMethod = isNoneAuthMethod && isLockscreenEnabled
                 (isSwipeAuthMethod ||
                     (deviceUnlockStatus.isUnlocked &&
                         deviceUnlockStatus.deviceUnlockSource?.dismissesLockscreen == false)) &&
@@ -183,6 +189,17 @@ constructor(
      */
     suspend fun isLockscreenEnabled(): Boolean {
         return repository.isLockscreenEnabled()
+    }
+
+    /**
+     * Forces a refresh of the value of [isLockscreenEnabled] such that the flow emits the latest
+     * value.
+     *
+     * Without calling this method, the flow will have a stale value unless the collector is removed
+     * and re-added.
+     */
+    suspend fun refreshLockscreenEnabled() {
+        isLockscreenEnabled()
     }
 
     /**

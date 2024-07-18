@@ -18,6 +18,7 @@
 
 package com.android.systemui.shade
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import android.view.HapticFeedbackConstants
@@ -27,6 +28,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.CollectionUtils
 import com.android.keyguard.KeyguardClockSwitch.LARGE
+import com.android.systemui.Flags
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
@@ -58,6 +60,7 @@ import org.mockito.Mockito.verify
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
+@DisableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 class NotificationPanelViewControllerWithCoroutinesTest :
     NotificationPanelViewControllerBaseTest() {
 

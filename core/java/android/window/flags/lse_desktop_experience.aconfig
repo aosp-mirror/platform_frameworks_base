@@ -129,6 +129,13 @@ flag {
 }
 
 flag {
+    name: "enable_caption_compat_inset_force_consumption_always"
+    namespace: "lse_desktop_experience"
+    description: "Enables force-consumption of caption bar insets for all apps in freeform"
+    bug: "352563889"
+}
+
+flag {
     name: "show_desktop_windowing_dev_option"
     namespace: "lse_desktop_experience"
     description: "Whether to show developer option for enabling desktop windowing mode"

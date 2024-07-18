@@ -65,6 +65,7 @@ import java.util.Map;
  *
  * {@hide}
  */
+@JavaDelegator
 oneway interface IApplicationThread {
     void scheduleReceiver(in Intent intent, in ActivityInfo info,
             in CompatibilityInfo compatInfo,

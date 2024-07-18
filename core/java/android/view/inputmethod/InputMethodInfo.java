@@ -891,12 +891,13 @@ public final class InputMethodInfo implements Parcelable {
     @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API)
     @Nullable
     public Intent createImeLanguageSettingsActivityIntent() {
-        if (TextUtils.isEmpty(mLanguageSettingsActivityName)) {
+        final var activityName = !TextUtils.isEmpty(mLanguageSettingsActivityName)
+                ? mLanguageSettingsActivityName : mSettingsActivityName;
+        if (TextUtils.isEmpty(activityName)) {
             return null;
         }
         return new Intent(ACTION_IME_LANGUAGE_SETTINGS).setComponent(
-                new ComponentName(getServiceInfo().packageName,
-                        mLanguageSettingsActivityName)
+                new ComponentName(getServiceInfo().packageName, activityName)
         );
     }
 

@@ -2135,8 +2135,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final boolean targetedBroadcast = r.intent.getComponent() != null;
         final boolean targetedSelf = Objects.equals(r.callerPackage, receiverPackageName);
         if (targetedBroadcast && !targetedSelf) {
-            mService.mUsageStatsService.reportEvent(receiverPackageName,
-                    r.userId, Event.APP_COMPONENT_USED);
+            if (r.userId == UserHandle.USER_ALL) {
+                mService.mUsageStatsService.reportEventForAllUsers(
+                        receiverPackageName, Event.APP_COMPONENT_USED);
+            } else {
+                mService.mUsageStatsService.reportEvent(receiverPackageName,
+                        r.userId, Event.APP_COMPONENT_USED);
+            }
         }
 
         mService.notifyPackageUse(receiverPackageName,

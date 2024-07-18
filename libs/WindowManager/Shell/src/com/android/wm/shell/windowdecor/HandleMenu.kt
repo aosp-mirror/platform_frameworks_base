@@ -15,19 +15,15 @@
  */
 package com.android.wm.shell.windowdecor
 
+import android.annotation.ColorInt
 import android.annotation.DimenRes
 import android.app.ActivityManager
-import android.app.WindowConfiguration
-import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
-import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
-import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
-import android.app.WindowConfiguration.WINDOWING_MODE_PINNED
 import android.content.Context
 import android.content.res.ColorStateList
-import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.Color
+import android.graphics.BlendMode
+import android.graphics.BlendModeColorFilter
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
@@ -40,6 +36,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.window.SurfaceSyncGroup
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.view.isGone
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.common.DisplayController
@@ -47,7 +45,10 @@ import com.android.wm.shell.common.split.SplitScreenConstants
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer
+import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.extension.isFullscreen
+import com.android.wm.shell.windowdecor.extension.isMultiWindow
+import com.android.wm.shell.windowdecor.extension.isPinned
 
 /**
  * Handle menu opened when the appropriate button is clicked on.
@@ -72,6 +73,7 @@ class HandleMenu(
 ) {
     private val context: Context = parentDecor.mDecorWindowContext
     private val taskInfo: ActivityManager.RunningTaskInfo = parentDecor.mTaskInfo
+    private val decorThemeUtil = DecorThemeUtil(context)
 
     private val isViewAboveStatusBar: Boolean
         get() = (Flags.enableAdditionalWindowsAboveStatusBar() && !taskInfo.isFreeform)
@@ -101,31 +103,6 @@ class HandleMenu(
     // about the menu's coordinates relative to the display as a whole, so we need to maintain
     // those as well.
     private val globalMenuPosition: Point = Point()
-
-    /**
-     * An a array of windowing icon color based on current UI theme. First element of the
-     * array is for inactive icons and the second is for active icons.
-     */
-    private val windowingIconColor: Array<ColorStateList>
-        get() {
-            val mode = (context.resources.configuration.uiMode
-                    and Configuration.UI_MODE_NIGHT_MASK)
-            val isNightMode = (mode == Configuration.UI_MODE_NIGHT_YES)
-            val typedArray = context.obtainStyledAttributes(
-                intArrayOf(
-                    com.android.internal.R.attr.materialColorOnSurface,
-                    com.android.internal.R.attr.materialColorPrimary
-                )
-            )
-            val inActiveColor =
-                typedArray.getColor(0, if (isNightMode) Color.WHITE else Color.BLACK)
-            val activeColor = typedArray.getColor(1, if (isNightMode) Color.WHITE else Color.BLACK)
-            typedArray.recycle()
-            return arrayOf(
-                ColorStateList.valueOf(inActiveColor),
-                ColorStateList.valueOf(activeColor)
-            )
-        }
 
     init {
         updateHandleMenuPillPositions()
@@ -175,9 +152,8 @@ class HandleMenu(
      * Animates the appearance of the handle menu and its three pills.
      */
     private fun animateHandleMenu() {
-        when (taskInfo.windowingMode) {
-            WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-            WINDOWING_MODE_MULTI_WINDOW -> {
+        when {
+            taskInfo.isFullscreen || taskInfo.isMultiWindow -> {
                 handleMenuAnimator?.animateCaptionHandleExpandToOpen()
             }
             else -> {
@@ -193,85 +169,94 @@ class HandleMenu(
     private fun setupHandleMenu() {
         val handleMenu = handleMenuViewContainer?.view ?: return
         handleMenu.setOnTouchListener(onTouchListener)
-        setupAppInfoPill(handleMenu)
+
+        val style = calculateMenuStyle()
+        setupAppInfoPill(handleMenu, style)
         if (shouldShowWindowingPill) {
-            setupWindowingPill(handleMenu)
+            setupWindowingPill(handleMenu, style)
         }
-        setupMoreActionsPill(handleMenu)
-        setupOpenInBrowserPill(handleMenu)
+        setupMoreActionsPill(handleMenu, style)
+        setupOpenInBrowserPill(handleMenu, style)
     }
 
     /**
      * Set up interactive elements of handle menu's app info pill.
      */
-    private fun setupAppInfoPill(handleMenu: View) {
-        val collapseBtn = handleMenu.findViewById<HandleMenuImageButton>(R.id.collapse_menu_button)
-        val appIcon = handleMenu.findViewById<ImageView>(R.id.application_icon)
-        val appName = handleMenu.findViewById<TextView>(R.id.application_name)
-        collapseBtn.setOnClickListener(onClickListener)
-        collapseBtn.taskInfo = taskInfo
-        appIcon.setImageBitmap(appIconBitmap)
-        appName.text = this.appName
+    private fun setupAppInfoPill(handleMenu: View, style: MenuStyle) {
+        val pill = handleMenu.requireViewById<View>(R.id.app_info_pill).apply {
+            background.colorFilter = BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
+        }
+
+        pill.requireViewById<HandleMenuImageButton>(R.id.collapse_menu_button)
+            .let { collapseBtn ->
+                collapseBtn.imageTintList = ColorStateList.valueOf(style.textColor)
+                collapseBtn.setOnClickListener(onClickListener)
+                collapseBtn.taskInfo = taskInfo
+            }
+        pill.requireViewById<ImageView>(R.id.application_icon).let { appIcon ->
+            appIcon.setImageBitmap(appIconBitmap)
+        }
+        pill.requireViewById<TextView>(R.id.application_name).let { appNameView ->
+            appNameView.text = appName
+            appNameView.setTextColor(style.textColor)
+        }
     }
 
     /**
      * Set up interactive elements and color of handle menu's windowing pill.
      */
-    private fun setupWindowingPill(handleMenu: View) {
-        val fullscreenBtn = handleMenu.findViewById<ImageButton>(R.id.fullscreen_button)
-        val splitscreenBtn = handleMenu.findViewById<ImageButton>(R.id.split_screen_button)
-        val floatingBtn = handleMenu.findViewById<ImageButton>(R.id.floating_button)
+    private fun setupWindowingPill(handleMenu: View, style: MenuStyle) {
+        val pill = handleMenu.requireViewById<View>(R.id.windowing_pill).apply {
+            background.colorFilter = BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
+        }
+
+        val fullscreenBtn = pill.requireViewById<ImageButton>(R.id.fullscreen_button)
+        val splitscreenBtn = pill.requireViewById<ImageButton>(R.id.split_screen_button)
+        val floatingBtn = pill.requireViewById<ImageButton>(R.id.floating_button)
         // TODO: Remove once implemented.
         floatingBtn.visibility = View.GONE
+        val desktopBtn = handleMenu.requireViewById<ImageButton>(R.id.desktop_button)
 
-        val desktopBtn = handleMenu.findViewById<ImageButton>(R.id.desktop_button)
         fullscreenBtn.setOnClickListener(onClickListener)
         splitscreenBtn.setOnClickListener(onClickListener)
         floatingBtn.setOnClickListener(onClickListener)
         desktopBtn.setOnClickListener(onClickListener)
-        // The button corresponding to the windowing mode that the task is currently in uses a
-        // different color than the others.
-        val iconColors = windowingIconColor
-        val inActiveColorStateList = iconColors[0]
-        val activeColorStateList = iconColors[1]
-        fullscreenBtn.imageTintList = if (taskInfo.isFullscreen) {
-            activeColorStateList
-        } else {
-            inActiveColorStateList
-        }
-        splitscreenBtn.imageTintList = if (taskInfo.windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
-            activeColorStateList
-        } else {
-            inActiveColorStateList
-        }
-        floatingBtn.imageTintList = if (taskInfo.windowingMode == WINDOWING_MODE_PINNED) {
-            activeColorStateList
-        } else {
-            inActiveColorStateList
-        }
-        desktopBtn.imageTintList = if (taskInfo.isFreeform) {
-            activeColorStateList
-        } else {
-            inActiveColorStateList
-        }
+
+        fullscreenBtn.isSelected = taskInfo.isFullscreen
+        fullscreenBtn.imageTintList = style.windowingButtonColor
+        splitscreenBtn.isSelected = taskInfo.isMultiWindow
+        splitscreenBtn.imageTintList = style.windowingButtonColor
+        floatingBtn.isSelected = taskInfo.isPinned
+        floatingBtn.imageTintList = style.windowingButtonColor
+        desktopBtn.isSelected = taskInfo.isFreeform
+        desktopBtn.imageTintList = style.windowingButtonColor
     }
 
     /**
      * Set up interactive elements & height of handle menu's more actions pill
      */
-    private fun setupMoreActionsPill(handleMenu: View) {
-        if (!SHOULD_SHOW_MORE_ACTIONS_PILL) {
-            handleMenu.findViewById<View>(R.id.more_actions_pill).visibility = View.GONE
+    private fun setupMoreActionsPill(handleMenu: View, style: MenuStyle) {
+        val pill = handleMenu.requireViewById<View>(R.id.more_actions_pill).apply {
+            isGone = !SHOULD_SHOW_MORE_ACTIONS_PILL
+            background.colorFilter = BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
+        }
+        pill.requireViewById<Button>(R.id.screenshot_button).let { screenshotBtn ->
+            screenshotBtn.setTextColor(style.textColor)
+            screenshotBtn.compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
         }
     }
 
-    private fun setupOpenInBrowserPill(handleMenu: View) {
-        if (!shouldShowBrowserPill) {
-            handleMenu.findViewById<View>(R.id.open_in_browser_pill).visibility = View.GONE
-            return
+    private fun setupOpenInBrowserPill(handleMenu: View, style: MenuStyle) {
+        val pill = handleMenu.requireViewById<View>(R.id.open_in_browser_pill).apply {
+            isGone = !shouldShowBrowserPill
+            background.colorFilter = BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
         }
-        val browserButton = handleMenu.findViewById<Button>(R.id.open_in_browser_button)
-        browserButton.setOnClickListener(onClickListener)
+
+        pill.requireViewById<Button>(R.id.open_in_browser_button).let { browserButton ->
+            browserButton.setOnClickListener(onClickListener)
+            browserButton.setTextColor(style.textColor)
+            browserButton.compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
+        }
     }
 
     /**
@@ -303,20 +288,20 @@ class HandleMenu(
     }
 
     private fun updateGlobalMenuPosition(taskBounds: Rect) {
-        when (taskInfo.windowingMode) {
-            WINDOWING_MODE_FREEFORM -> {
+        when {
+            taskInfo.isFreeform -> {
                 globalMenuPosition.set(
                     /* x = */ taskBounds.left + marginMenuStart,
                     /* y = */ taskBounds.top + marginMenuTop
                 )
             }
-            WINDOWING_MODE_FULLSCREEN -> {
+            taskInfo.isFullscreen -> {
                 globalMenuPosition.set(
                     /* x = */ taskBounds.width() / 2 - (menuWidth / 2),
                     /* y = */ marginMenuTop
                 )
             }
-            WINDOWING_MODE_MULTI_WINDOW -> {
+            taskInfo.isMultiWindow -> {
                 val splitPosition = splitScreenController.getSplitPosition(taskInfo.taskId)
                 val leftOrTopStageBounds = Rect()
                 val rightOrBottomStageBounds = Rect()
@@ -469,13 +454,40 @@ class HandleMenu(
             handleMenuViewContainer?.releaseView()
             handleMenuViewContainer = null
         }
-        if (taskInfo.windowingMode == WINDOWING_MODE_FULLSCREEN ||
-            taskInfo.windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
+        if (taskInfo.isFullscreen || taskInfo.isMultiWindow) {
             handleMenuAnimator?.animateCollapseIntoHandleClose(after)
         } else {
             handleMenuAnimator?.animateClose(after)
         }
     }
+
+    private fun calculateMenuStyle(): MenuStyle {
+        val colorScheme = decorThemeUtil.getColorScheme(taskInfo)
+        return MenuStyle(
+            backgroundColor = colorScheme.surfaceBright.toArgb(),
+            textColor = colorScheme.onSurface.toArgb(),
+            windowingButtonColor = ColorStateList(
+                arrayOf(
+                    intArrayOf(android.R.attr.state_pressed),
+                    intArrayOf(android.R.attr.state_focused),
+                    intArrayOf(android.R.attr.state_selected),
+                    intArrayOf(),
+                ),
+                intArrayOf(
+                    colorScheme.onSurface.toArgb(),
+                    colorScheme.onSurface.toArgb(),
+                    colorScheme.primary.toArgb(),
+                    colorScheme.onSurface.toArgb(),
+                )
+            ),
+        )
+    }
+
+    private data class MenuStyle(
+        @ColorInt val backgroundColor: Int,
+        @ColorInt val textColor: Int,
+        val windowingButtonColor: ColorStateList,
+    )
 
     companion object {
         private const val TAG = "HandleMenu"

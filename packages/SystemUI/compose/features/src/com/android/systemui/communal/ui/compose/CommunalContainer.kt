@@ -209,7 +209,6 @@ fun CommunalContainer(
                 backgroundType = backgroundType,
                 colors = colors,
                 content = content,
-                modifier = Modifier.horizontalNestedScrollToScene(),
             )
         }
     }
