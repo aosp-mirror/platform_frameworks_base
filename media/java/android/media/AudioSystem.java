@@ -2651,4 +2651,11 @@ public class AudioSystem
      * @hide
      */
     public static native boolean isBluetoothVariableLatencyEnabled();
+
+    /**
+     * Register a native listener for system property sysprop
+     * @param callback the listener which fires when the property changes
+     * @hide
+     */
+    public static native void listenForSystemPropertyChange(String sysprop, Runnable callback);
 }
