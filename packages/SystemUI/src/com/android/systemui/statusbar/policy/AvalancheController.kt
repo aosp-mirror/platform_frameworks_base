@@ -37,9 +37,10 @@ import javax.inject.Inject
 @SysUISingleton
 class AvalancheController
 @Inject
-constructor(dumpManager: DumpManager,
-            private val uiEventLogger: UiEventLogger,
-            @Background private val bgHandler: Handler
+constructor(
+    dumpManager: DumpManager,
+    private val uiEventLogger: UiEventLogger,
+    @Background private val bgHandler: Handler
 ) : Dumpable {
 
     private val tag = "AvalancheController"
@@ -52,6 +53,9 @@ constructor(dumpManager: DumpManager,
                 // allowed again.
                 logDroppedHunsInBackground(getWaitingKeys().size)
                 clearNext()
+            }
+            if (field != value) {
+                field = value
             }
         }
 
@@ -100,7 +104,7 @@ constructor(dumpManager: DumpManager,
         return getKey(headsUpEntryShowing)
     }
 
-    fun isEnabled() : Boolean {
+    fun isEnabled(): Boolean {
         return NotificationThrottleHun.isEnabled && enableAtRuntime
     }
 
@@ -110,7 +114,7 @@ constructor(dumpManager: DumpManager,
             log { "Runnable is NULL, stop update." }
             return
         }
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             runnable.run()
             return
         }
@@ -170,7 +174,7 @@ constructor(dumpManager: DumpManager,
             log { "Runnable is NULL, stop delete." }
             return
         }
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             runnable.run()
             return
         }
@@ -356,12 +360,14 @@ constructor(dumpManager: DumpManager,
     }
 
     private fun logDroppedHunsInBackground(numDropped: Int) {
-        bgHandler.post(Runnable {
-            // Do this in the background to avoid missing frames when closing the shade
-            for (n in 1..numDropped) {
-                uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_DROPPED)
+        bgHandler.post(
+            Runnable {
+                // Do this in the background to avoid missing frames when closing the shade
+                for (n in 1..numDropped) {
+                    uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_DROPPED)
+                }
             }
-        })
+        )
     }
 
     fun clearNext() {
