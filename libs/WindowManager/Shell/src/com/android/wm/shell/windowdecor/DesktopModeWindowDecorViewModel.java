@@ -22,6 +22,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.Intent.ACTION_MAIN;
+import static android.content.Intent.CATEGORY_APP_BROWSER;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
@@ -43,11 +45,8 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -430,17 +429,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     private void openInBrowser(Uri uri) {
-        final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
-                .setComponent(getDefaultBrowser())
+        final Intent intent = Intent.makeMainSelectorActivity(ACTION_MAIN, CATEGORY_APP_BROWSER)
+                .setData(uri)
                 .addFlags(FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivity(intent);
-    }
-
-    private ComponentName getDefaultBrowser() {
-        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://"));
-        final ResolveInfo info = mContext.getPackageManager()
-                .resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        return info.getComponentInfo().getComponentName();
     }
 
     private class DesktopModeTouchEventListener extends GestureDetector.SimpleOnGestureListener
