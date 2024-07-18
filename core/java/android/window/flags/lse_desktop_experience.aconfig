@@ -101,6 +101,13 @@ flag {
 }
 
 flag {
+    name: "enable_cascading_windows"
+    namespace: "lse_desktop_experience"
+    description: "Whether to apply cascading effect for placing multiple windows when first launched"
+    bug: "325240051"
+}
+
+flag {
     name: "enable_camera_compat_for_desktop_windowing"
     namespace: "lse_desktop_experience"
     description: "Whether to apply Camera Compat treatment to fixed-orientation apps in desktop windowing mode"
