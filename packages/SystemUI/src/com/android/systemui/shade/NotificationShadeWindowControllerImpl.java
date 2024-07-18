@@ -341,6 +341,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mScreenBrightnessDoze = value / 255f;
     }
 
+    @Override
+    public void setDozeScreenBrightnessFloat(float value) {
+        mScreenBrightnessDoze = value;
+    }
+
     private void setKeyguardDark(boolean dark) {
         int vis = mWindowRootView.getSystemUiVisibility();
         if (dark) {
