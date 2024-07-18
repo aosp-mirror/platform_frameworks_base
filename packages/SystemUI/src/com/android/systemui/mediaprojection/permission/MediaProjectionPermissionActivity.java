@@ -187,70 +187,40 @@ public class MediaProjectionPermissionActivity extends Activity
             }
         }
 
-        CharSequence dialogText = null;
-        CharSequence dialogTitle = null;
-
         final String appName = extractAppName(aInfo, packageManager);
         final boolean hasCastingCapabilities =
                 Utils.isHeadlessRemoteDisplayProvider(packageManager, mPackageName);
 
-        if (hasCastingCapabilities) {
-            dialogText = getString(R.string.media_projection_sys_service_dialog_warning);
-            dialogTitle = getString(R.string.media_projection_sys_service_dialog_title);
-        } else {
-            String actionText = getString(R.string.media_projection_dialog_warning, appName);
-            SpannableString message = new SpannableString(actionText);
-
-            int appNameIndex = actionText.indexOf(appName);
-            if (appNameIndex >= 0) {
-                message.setSpan(new StyleSpan(Typeface.BOLD),
-                        appNameIndex, appNameIndex + appName.length(), 0);
-            }
-            dialogText = message;
-            dialogTitle = getString(R.string.media_projection_dialog_title, appName);
-        }
-
         // Using application context for the dialog, instead of the activity context, so we get
         // the correct screen width when in split screen.
         Context dialogContext = getApplicationContext();
-        if (isPartialScreenSharingEnabled()) {
-            final boolean overrideDisableSingleAppOption =
-                    CompatChanges.isChangeEnabled(
-                            OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION,
-                            mPackageName, getHostUserHandle());
-            MediaProjectionPermissionDialogDelegate delegate =
-                    new MediaProjectionPermissionDialogDelegate(
-                            dialogContext,
-                            getMediaProjectionConfig(),
-                            dialog -> {
-                                ScreenShareOption selectedOption =
-                                        dialog.getSelectedScreenShareOption();
-                                grantMediaProjectionPermission(selectedOption.getMode());
-                            },
-                            () -> finish(RECORD_CANCEL, /* projection= */ null),
-                            hasCastingCapabilities,
-                            appName,
-                            overrideDisableSingleAppOption,
-                            mUid,
-                            mMediaProjectionMetricsLogger);
-            mDialog =
-                    new AlertDialogWithDelegate(
-                            dialogContext, R.style.Theme_SystemUI_Dialog, delegate);
-        } else {
-            AlertDialog.Builder dialogBuilder =
-                    new AlertDialog.Builder(dialogContext, R.style.Theme_SystemUI_Dialog)
-                            .setTitle(dialogTitle)
-                            .setIcon(R.drawable.ic_media_projection_permission)
-                            .setMessage(dialogText)
-                            .setPositiveButton(R.string.media_projection_action_text, this)
-                            .setNeutralButton(android.R.string.cancel, this);
-            mDialog = dialogBuilder.create();
-        }
+        final boolean overrideDisableSingleAppOption =
+                CompatChanges.isChangeEnabled(
+                        OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION,
+                        mPackageName, getHostUserHandle());
+        MediaProjectionPermissionDialogDelegate delegate =
+                new MediaProjectionPermissionDialogDelegate(
+                        dialogContext,
+                        getMediaProjectionConfig(),
+                        dialog -> {
+                            ScreenShareOption selectedOption =
+                                    dialog.getSelectedScreenShareOption();
+                            grantMediaProjectionPermission(selectedOption.getMode());
+                        },
+                        () -> finish(RECORD_CANCEL, /* projection= */ null),
+                        hasCastingCapabilities,
+                        appName,
+                        overrideDisableSingleAppOption,
+                        mUid,
+                        mMediaProjectionMetricsLogger);
+        mDialog =
+                new AlertDialogWithDelegate(
+                        dialogContext, R.style.Theme_SystemUI_Dialog, delegate);
 
         if (savedInstanceState == null) {
             mMediaProjectionMetricsLogger.notifyProjectionInitiated(
                     mUid,
-                    appName == null
+                    hasCastingCapabilities
                             ? SessionCreationSource.CAST
                             : SessionCreationSource.APP);
         }
@@ -366,7 +336,7 @@ public class MediaProjectionPermissionActivity extends Activity
                 setResult(RESULT_OK, intent);
                 finish(RECORD_CONTENT_DISPLAY, projection);
             }
-            if (isPartialScreenSharingEnabled() && screenShareMode == SINGLE_APP) {
+            if (screenShareMode == SINGLE_APP) {
                 IMediaProjection projection = MediaProjectionServiceHelper.createOrReuseProjection(
                         mUid, mPackageName, mReviewGrantedConsentRequired);
                 final Intent intent = new Intent(this,
@@ -436,9 +406,5 @@ public class MediaProjectionPermissionActivity extends Activity
         }
         return intent.getParcelableExtra(
                 MediaProjectionManager.EXTRA_MEDIA_PROJECTION_CONFIG);
-    }
-
-    private boolean isPartialScreenSharingEnabled() {
-        return mFeatureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING);
     }
 }
