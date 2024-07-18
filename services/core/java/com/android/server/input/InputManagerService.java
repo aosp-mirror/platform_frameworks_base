@@ -2224,6 +2224,12 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     @SuppressWarnings("unused")
+    private void notifyConfigurationChanged(long whenNanos) {
+        mWindowManagerCallbacks.notifyConfigurationChanged();
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
     private void notifyInputDevicesChanged(InputDevice[] inputDevices) {
         synchronized (mInputDevicesLock) {
             if (!mInputDevicesChangedPending) {
@@ -2234,9 +2240,6 @@ public class InputManagerService extends IInputManager.Stub
 
             mInputDevices = inputDevices;
         }
-        // Input device change can possibly change configuration, so notify window manager to update
-        // its configuration.
-        mWindowManagerCallbacks.notifyConfigurationChanged();
     }
 
     // Native callback.
