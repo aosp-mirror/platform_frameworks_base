@@ -1572,13 +1572,22 @@ public class TransitionTests extends WindowTestsBase {
         enteringAnimReports.clear();
         doCallRealMethod().when(mWm.mRoot).ensureActivitiesVisible(any(), anyBoolean());
         final boolean[] wasInFinishingTransition = { false };
-        controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener() {
+        controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener(
+                mDisplayContent.mDisplayId) {
             @Override
             public void onAppTransitionFinishedLocked(IBinder token) {
                 final ActivityRecord r = ActivityRecord.forToken(token);
                 if (r != null) {
                     wasInFinishingTransition[0] = controller.inFinishingTransition(r);
                 }
+            }
+        });
+        final boolean[] calledListenerOnOtherDisplay = { false };
+        controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener(
+                mDisplayContent.mDisplayId + 1234) {
+            @Override
+            public void onAppTransitionFinishedLocked(IBinder token) {
+                calledListenerOnOtherDisplay[0] = true;
             }
         });
         assertTrue(activity1.isVisible());
@@ -1591,6 +1600,7 @@ public class TransitionTests extends WindowTestsBase {
 
         controller.finishTransition(closeTransition);
         assertTrue(wasInFinishingTransition[0]);
+        assertFalse(calledListenerOnOtherDisplay[0]);
         assertNull(controller.mFinishingTransition);
 
         assertTrue(activity2.isVisible());

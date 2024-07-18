@@ -744,6 +744,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (mController.isAnimating()) {
             dc.enableHighPerfTransition(true);
         }
+        mController.dispatchLegacyAppTransitionPending(dc.mDisplayId);
     }
 
     /**
@@ -1617,7 +1618,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mController.mTransitionTracer.logAbortedTransition(this);
         // Syncengine abort will call through to onTransactionReady()
         mSyncEngine.abort(mSyncId);
-        mController.dispatchLegacyAppTransitionCancelled();
+        mController.dispatchLegacyAppTransitionCancelled(mTargetDisplays);
         invokeTransitionEndedListeners();
     }
 
