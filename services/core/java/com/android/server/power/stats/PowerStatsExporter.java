@@ -129,17 +129,55 @@ public class PowerStatsExporter {
         if (descriptor == null) {
             return;
         }
+        boolean isCustomComponent =
+                descriptor.powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
 
         PowerStatsLayout layout = new PowerStatsLayout();
         layout.fromExtras(descriptor.extras);
 
         long[] deviceStats = new long[descriptor.statsArrayLength];
+        for (int screenState = 0; screenState < BatteryConsumer.SCREEN_STATE_COUNT; screenState++) {
+            if (batteryUsageStatsBuilder.isScreenStateDataNeeded()) {
+                if (screenState == BatteryConsumer.SCREEN_STATE_UNSPECIFIED) {
+                    continue;
+                }
+            } else if (screenState != BatteryConsumer.SCREEN_STATE_UNSPECIFIED) {
+                continue;
+            }
+
+            for (int powerState = 0; powerState < BatteryConsumer.POWER_STATE_COUNT; powerState++) {
+                if (batteryUsageStatsBuilder.isPowerStateDataNeeded() && !isCustomComponent) {
+                    if (powerState == BatteryConsumer.POWER_STATE_UNSPECIFIED) {
+                        continue;
+                    }
+                } else if (powerState != BatteryConsumer.POWER_STATE_BATTERY) {
+                    continue;
+                }
+
+                populateAggregatedBatteryConsumer(batteryUsageStatsBuilder, powerComponentStats,
+                        layout, deviceStats, screenState, powerState);
+            }
+        }
+        if (layout.isUidPowerAttributionSupported()) {
+            populateBatteryConsumers(batteryUsageStatsBuilder,
+                    powerComponentStats, layout);
+        }
+    }
+
+    private static void populateAggregatedBatteryConsumer(
+            BatteryUsageStats.Builder batteryUsageStatsBuilder,
+            PowerComponentAggregatedPowerStats powerComponentStats, PowerStatsLayout layout,
+            long[] deviceStats, @BatteryConsumer.ScreenState int screenState,
+            @BatteryConsumer.PowerState int powerState) {
+        int powerComponentId = powerComponentStats.powerComponentId;
+        boolean isCustomComponent =
+                powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+
         double[] totalPower = new double[1];
         MultiStateStats.States.forEachTrackedStateCombination(
                 powerComponentStats.getConfig().getDeviceStateConfig(),
                 states -> {
-                    if (states[AggregatedPowerStatsConfig.STATE_POWER]
-                            != AggregatedPowerStatsConfig.POWER_STATE_BATTERY) {
+                    if (!areMatchingStates(states, screenState, powerState)) {
                         return;
                     }
 
@@ -153,24 +191,23 @@ public class PowerStatsExporter {
         AggregateBatteryConsumer.Builder deviceScope =
                 batteryUsageStatsBuilder.getAggregateBatteryConsumerBuilder(
                         BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
-        if (descriptor.powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
-            if (batteryUsageStatsBuilder.isSupportedCustomPowerComponent(
-                    descriptor.powerComponentId)) {
-                deviceScope.addConsumedPowerForCustomComponent(descriptor.powerComponentId,
-                        totalPower[0]);
+        if (isCustomComponent) {
+            if (batteryUsageStatsBuilder.isSupportedCustomPowerComponent(powerComponentId)) {
+                deviceScope.addConsumedPowerForCustomComponent(powerComponentId, totalPower[0]);
             }
         } else {
-            deviceScope.addConsumedPower(descriptor.powerComponentId,
-                    totalPower[0], BatteryConsumer.POWER_MODEL_UNDEFINED);
-        }
-
-        if (layout.isUidPowerAttributionSupported()) {
-            populateUidBatteryConsumers(batteryUsageStatsBuilder,
-                    powerComponentStats, layout);
+            BatteryConsumer.Key key = deviceScope.getKey(powerComponentId,
+                    BatteryConsumer.PROCESS_STATE_ANY, screenState, powerState);
+            if (key != null) {
+                deviceScope.addConsumedPower(key, totalPower[0],
+                        BatteryConsumer.POWER_MODEL_UNDEFINED);
+            }
+            deviceScope.addConsumedPower(powerComponentId, totalPower[0],
+                    BatteryConsumer.POWER_MODEL_UNDEFINED);
         }
     }
 
-    private static void populateUidBatteryConsumers(
+    private static void populateBatteryConsumers(
             BatteryUsageStats.Builder batteryUsageStatsBuilder,
             PowerComponentAggregatedPowerStats powerComponentStats,
             PowerStatsLayout layout) {
@@ -185,11 +222,44 @@ public class PowerStatsExporter {
                 .getUidStateConfig()[AggregatedPowerStatsConfig.STATE_PROCESS_STATE].isTracked()
                 && powerComponentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
 
+        ArrayList<Integer> uids = new ArrayList<>();
+        powerComponentStats.collectUids(uids);
+        for (int screenState = 0; screenState < BatteryConsumer.SCREEN_STATE_COUNT; screenState++) {
+            if (batteryUsageStatsBuilder.isScreenStateDataNeeded()) {
+                if (screenState == BatteryConsumer.SCREEN_STATE_UNSPECIFIED) {
+                    continue;
+                }
+            } else if (screenState != BatteryConsumer.SCREEN_STATE_UNSPECIFIED) {
+                continue;
+            }
+
+            for (int powerState = 0; powerState < BatteryConsumer.POWER_STATE_COUNT; powerState++) {
+                if (batteryUsageStatsBuilder.isPowerStateDataNeeded()) {
+                    if (powerState == BatteryConsumer.POWER_STATE_UNSPECIFIED) {
+                        continue;
+                    }
+                } else if (powerState != BatteryConsumer.POWER_STATE_BATTERY) {
+                    continue;
+                }
+
+                populateUidBatteryConsumers(batteryUsageStatsBuilder, powerComponentStats, layout,
+                        uids, powerComponent, uidStats, breakDownByProcState, screenState,
+                        powerState);
+            }
+        }
+    }
+
+    private static void populateUidBatteryConsumers(
+            BatteryUsageStats.Builder batteryUsageStatsBuilder,
+            PowerComponentAggregatedPowerStats powerComponentStats, PowerStatsLayout layout,
+            List<Integer> uids, AggregatedPowerStatsConfig.PowerComponent powerComponent,
+            long[] uidStats, boolean breakDownByProcState,
+            @BatteryConsumer.ScreenState int screenState,
+            @BatteryConsumer.PowerState int powerState) {
+        int powerComponentId = powerComponentStats.powerComponentId;
         double[] powerByProcState =
                 new double[breakDownByProcState ? BatteryConsumer.PROCESS_STATE_COUNT : 1];
         double powerAllApps = 0;
-        ArrayList<Integer> uids = new ArrayList<>();
-        powerComponentStats.collectUids(uids);
         for (int uid : uids) {
             UidBatteryConsumer.Builder builder =
                     batteryUsageStatsBuilder.getOrCreateUidBatteryConsumerBuilder(uid);
@@ -199,8 +269,7 @@ public class PowerStatsExporter {
             MultiStateStats.States.forEachTrackedStateCombination(
                     powerComponent.getUidStateConfig(),
                     states -> {
-                        if (states[AggregatedPowerStatsConfig.STATE_POWER]
-                                != AggregatedPowerStatsConfig.POWER_STATE_BATTERY) {
+                        if (!areMatchingStates(states, screenState, powerState)) {
                             return;
                         }
 
@@ -224,8 +293,17 @@ public class PowerStatsExporter {
                 powerAllProcStates += power;
                 if (breakDownByProcState
                         && procState != BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
-                    builder.addConsumedPower(builder.getKey(powerComponentId, procState), power,
-                            BatteryConsumer.POWER_MODEL_UNDEFINED);
+                    if (batteryUsageStatsBuilder.isPowerStateDataNeeded()) {
+                        builder.addConsumedPower(
+                                builder.getKey(powerComponentId, procState, screenState,
+                                        powerState),
+                                power, BatteryConsumer.POWER_MODEL_UNDEFINED);
+                    } else {
+                        builder.addConsumedPower(
+                                builder.getKey(powerComponentId, procState, screenState,
+                                        BatteryConsumer.POWER_STATE_UNSPECIFIED),
+                                power, BatteryConsumer.POWER_MODEL_UNDEFINED);
+                    }
                 }
             }
             if (powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
@@ -243,8 +321,49 @@ public class PowerStatsExporter {
         if (powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
             allAppsScope.addConsumedPowerForCustomComponent(powerComponentId, powerAllApps);
         } else {
+            BatteryConsumer.Key key = allAppsScope.getKey(powerComponentId,
+                    BatteryConsumer.PROCESS_STATE_ANY, screenState, powerState);
+            if (key != null) {
+                allAppsScope.addConsumedPower(key, powerAllApps,
+                        BatteryConsumer.POWER_MODEL_UNDEFINED);
+            }
             allAppsScope.addConsumedPower(powerComponentId, powerAllApps,
                     BatteryConsumer.POWER_MODEL_UNDEFINED);
         }
+    }
+
+    private static boolean areMatchingStates(int[] states,
+            @BatteryConsumer.ScreenState int screenState,
+            @BatteryConsumer.PowerState int powerState) {
+        switch (screenState) {
+            case BatteryConsumer.SCREEN_STATE_ON:
+                if (states[AggregatedPowerStatsConfig.STATE_SCREEN]
+                        != AggregatedPowerStatsConfig.SCREEN_STATE_ON) {
+                    return false;
+                }
+                break;
+            case BatteryConsumer.SCREEN_STATE_OTHER:
+                if (states[AggregatedPowerStatsConfig.STATE_SCREEN]
+                        != AggregatedPowerStatsConfig.SCREEN_STATE_OTHER) {
+                    return false;
+                }
+                break;
+        }
+
+        switch (powerState) {
+            case BatteryConsumer.POWER_STATE_BATTERY:
+                if (states[AggregatedPowerStatsConfig.STATE_POWER]
+                        != AggregatedPowerStatsConfig.POWER_STATE_BATTERY) {
+                    return false;
+                }
+                break;
+            case BatteryConsumer.POWER_STATE_OTHER:
+                if (states[AggregatedPowerStatsConfig.STATE_POWER]
+                        != AggregatedPowerStatsConfig.POWER_STATE_OTHER) {
+                    return false;
+                }
+                break;
+        }
+        return true;
     }
 }
