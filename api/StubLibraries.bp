@@ -1345,4 +1345,5 @@ java_library {
         ":hwbinder-stubs-docs",
     ],
     visibility: ["//visibility:public"],
+    is_stubs_module: true,
 }
