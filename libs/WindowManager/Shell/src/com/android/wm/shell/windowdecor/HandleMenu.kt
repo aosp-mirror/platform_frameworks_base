@@ -69,7 +69,9 @@ class HandleMenu(
     private val splitScreenController: SplitScreenController,
     private val shouldShowWindowingPill: Boolean,
     private val shouldShowBrowserPill: Boolean,
-    private val captionHeight: Int
+    private val captionWidth: Int,
+    private val captionHeight: Int,
+    captionX: Int
 ) {
     private val context: Context = parentDecor.mDecorWindowContext
     private val taskInfo: ActivityManager.RunningTaskInfo = parentDecor.mTaskInfo
@@ -105,7 +107,7 @@ class HandleMenu(
     private val globalMenuPosition: Point = Point()
 
     init {
-        updateHandleMenuPillPositions()
+        updateHandleMenuPillPositions(captionX)
     }
 
     fun show() {
@@ -262,11 +264,11 @@ class HandleMenu(
     /**
      * Updates handle menu's position variables to reflect its next position.
      */
-    private fun updateHandleMenuPillPositions() {
+    private fun updateHandleMenuPillPositions(captionX: Int) {
         val menuX: Int
         val menuY: Int
         val taskBounds = taskInfo.getConfiguration().windowConfiguration.bounds
-        updateGlobalMenuPosition(taskBounds)
+        updateGlobalMenuPosition(taskBounds, captionX)
         if (layoutResId == R.layout.desktop_mode_app_header) {
             // Align the handle menu to the left side of the caption.
             menuX = marginMenuStart
@@ -287,7 +289,8 @@ class HandleMenu(
         handleMenuPosition.set(menuX.toFloat(), menuY.toFloat())
     }
 
-    private fun updateGlobalMenuPosition(taskBounds: Rect) {
+    private fun updateGlobalMenuPosition(taskBounds: Rect, captionX: Int) {
+        val nonFreeformX = captionX + (captionWidth / 2) - (menuWidth / 2)
         when {
             taskInfo.isFreeform -> {
                 globalMenuPosition.set(
@@ -297,7 +300,7 @@ class HandleMenu(
             }
             taskInfo.isFullscreen -> {
                 globalMenuPosition.set(
-                    /* x = */ taskBounds.width() / 2 - (menuWidth / 2),
+                    /* x = */ nonFreeformX,
                     /* y = */ marginMenuTop
                 )
             }
@@ -311,16 +314,13 @@ class HandleMenu(
                 when (splitPosition) {
                     SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT -> {
                         globalMenuPosition.set(
-                            /* x = */ leftOrTopStageBounds.width()
-                                    + (rightOrBottomStageBounds.width() / 2)
-                                    - (menuWidth / 2),
+                            /* x = */ leftOrTopStageBounds.width() + nonFreeformX,
                             /* y = */ marginMenuTop
                         )
                     }
                     SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT -> {
                         globalMenuPosition.set(
-                            /* x = */ (leftOrTopStageBounds.width() / 2)
-                                    - (menuWidth / 2),
+                            /* x = */ nonFreeformX,
                             /* y = */ marginMenuTop
                         )
                     }
@@ -332,9 +332,12 @@ class HandleMenu(
     /**
      * Update pill layout, in case task changes have caused positioning to change.
      */
-    fun relayout(t: SurfaceControl.Transaction) {
+    fun relayout(
+        t: SurfaceControl.Transaction,
+        captionX: Int
+    ) {
         handleMenuViewContainer?.let { container ->
-            updateHandleMenuPillPositions()
+            updateHandleMenuPillPositions(captionX)
             container.setPosition(t, handleMenuPosition.x, handleMenuPosition.y)
         }
     }

@@ -345,7 +345,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
 
         if (isHandleMenuActive()) {
-            mHandleMenu.relayout(startT);
+            mHandleMenu.relayout(startT, mResult.mCaptionX);
         }
 
         updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
@@ -871,7 +871,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 splitScreenController,
                 DesktopModeStatus.canEnterDesktopMode(mContext),
                 browserLinkAvailable(),
-                mResult.mCaptionHeight
+                mResult.mCaptionWidth,
+                mResult.mCaptionHeight,
+                mResult.mCaptionX
         );
         mWindowDecorViewHolder.onHandleMenuOpened();
         mHandleMenu.show();
