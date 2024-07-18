@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.domain.interactor
 
+import com.android.app.tracing.coroutines.launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
@@ -26,9 +27,11 @@ import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,6 +42,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -57,17 +61,48 @@ constructor(
         _isLaunchingWidget.value = launching
     }
 
+    fun interface OnSceneAboutToChangeListener {
+        /** Notifies that the scene is about to change to [toScene]. */
+        fun onSceneAboutToChange(toScene: SceneKey, keyguardState: KeyguardState?)
+    }
+
+    private val onSceneAboutToChangeListener = mutableSetOf<OnSceneAboutToChangeListener>()
+
+    /** Registers a listener which is called when the scene is about to change. */
+    fun registerSceneStateProcessor(processor: OnSceneAboutToChangeListener) {
+        onSceneAboutToChangeListener.add(processor)
+    }
+
     /**
      * Asks for an asynchronous scene witch to [newScene], which will use the corresponding
      * installed transition or the one specified by [transitionKey], if provided.
      */
-    fun changeScene(newScene: SceneKey, transitionKey: TransitionKey? = null) {
-        communalSceneRepository.changeScene(newScene, transitionKey)
+    fun changeScene(
+        newScene: SceneKey,
+        transitionKey: TransitionKey? = null,
+        keyguardState: KeyguardState? = null,
+    ) {
+        applicationScope.launch {
+            notifyListeners(newScene, keyguardState)
+            communalSceneRepository.changeScene(newScene, transitionKey)
+        }
     }
 
     /** Immediately snaps to the new scene. */
-    fun snapToScene(newScene: SceneKey, delayMillis: Long = 0) {
-        communalSceneRepository.snapToScene(newScene, delayMillis)
+    fun snapToScene(
+        newScene: SceneKey,
+        delayMillis: Long = 0,
+        keyguardState: KeyguardState? = null
+    ) {
+        applicationScope.launch("$TAG#snapToScene") {
+            delay(delayMillis)
+            notifyListeners(newScene, keyguardState)
+            communalSceneRepository.snapToScene(newScene)
+        }
+    }
+
+    private fun notifyListeners(newScene: SceneKey, keyguardState: KeyguardState?) {
+        onSceneAboutToChangeListener.forEach { it.onSceneAboutToChange(newScene, keyguardState) }
     }
 
     /** Changes to Blank scene when starting an activity after dismissing keyguard. */
@@ -164,4 +199,8 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = false,
             )
+
+    private companion object {
+        const val TAG = "CommunalSceneInteractor"
+    }
 }
