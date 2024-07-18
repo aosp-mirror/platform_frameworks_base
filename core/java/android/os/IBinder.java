@@ -29,7 +29,7 @@ import java.io.FileDescriptor;
  * interface describes the abstract protocol for interacting with a
  * remotable object.  Do not implement this interface directly, instead
  * extend from {@link Binder}.
- * 
+ *
  * <p>The key IBinder API is {@link #transact transact()} matched by
  * {@link Binder#onTransact Binder.onTransact()}.  These
  * methods allow you to send a call to an IBinder object and receive a
@@ -40,7 +40,7 @@ import java.io.FileDescriptor;
  * expected behavior when calling an object that exists in the local
  * process, and the underlying inter-process communication (IPC) mechanism
  * ensures that these same semantics apply when going across processes.
- * 
+ *
  * <p>The data sent through transact() is a {@link Parcel}, a generic buffer
  * of data that also maintains some meta-data about its contents.  The meta
  * data is used to manage IBinder object references in the buffer, so that those
@@ -51,7 +51,7 @@ import java.io.FileDescriptor;
  * same IBinder object back.  These semantics allow IBinder/Binder objects to
  * be used as a unique identity (to serve as a token or for other purposes)
  * that can be managed across processes.
- * 
+ *
  * <p>The system maintains a pool of transaction threads in each process that
  * it runs in.  These threads are used to dispatch all
  * IPCs coming in from other processes.  For example, when an IPC is made from
@@ -62,7 +62,7 @@ import java.io.FileDescriptor;
  * thread in process A returns to allow its execution to continue.  In effect,
  * other processes appear to use as additional threads that you did not create
  * executing in your own process.
- * 
+ *
  * <p>The Binder system also supports recursion across processes.  For example
  * if process A performs a transaction to process B, and process B while
  * handling that transaction calls transact() on an IBinder that is implemented
@@ -70,7 +70,7 @@ import java.io.FileDescriptor;
  * transaction to finish will take care of calling Binder.onTransact() on the
  * object being called by B.  This ensures that the recursion semantics when
  * calling remote binder object are the same as when calling local objects.
- * 
+ *
  * <p>When working with remote objects, you often want to find out when they
  * are no longer valid.  There are three ways this can be determined:
  * <ul>
@@ -83,7 +83,7 @@ import java.io.FileDescriptor;
  * a {@link DeathRecipient} with the IBinder, which will be called when its
  * containing process goes away.
  * </ul>
- * 
+ *
  * @see Binder
  */
 public interface IBinder {
@@ -95,17 +95,17 @@ public interface IBinder {
      * The last transaction code available for user commands.
      */
     int LAST_CALL_TRANSACTION   = 0x00ffffff;
-    
+
     /**
      * IBinder protocol transaction code: pingBinder().
      */
     int PING_TRANSACTION        = ('_'<<24)|('P'<<16)|('N'<<8)|'G';
-    
+
     /**
      * IBinder protocol transaction code: dump internal state.
      */
     int DUMP_TRANSACTION        = ('_'<<24)|('D'<<16)|('M'<<8)|'P';
-    
+
     /**
      * IBinder protocol transaction code: execute a shell command.
      * @hide
@@ -129,7 +129,7 @@ public interface IBinder {
      * across the platform.  To support older code, the default implementation
      * logs the tweet to the main log as a simple emulation of broadcasting
      * it publicly over the Internet.
-     * 
+     *
      * <p>Also, upon completing the dispatch, the object must make a cup
      * of tea, return it to the caller, and exclaim "jolly good message
      * old boy!".
@@ -142,7 +142,7 @@ public interface IBinder {
      * its own like counter, and may display this value to the user to indicate the
      * quality of the app.  This is an optional command that applications do not
      * need to handle, so the default implementation is to do nothing.
-     * 
+     *
      * <p>There is no response returned and nothing about the
      * system will be functionally affected by it, but it will improve the
      * app's self-esteem.
@@ -185,7 +185,8 @@ public interface IBinder {
 
     /**
      * Limit that should be placed on IPC sizes to keep them safely under the
-     * transaction buffer limit.
+     * transaction buffer limit. This is a recommendation, and is not the real
+     * limit. Transactions should be preferred to be even smaller than this.
      * @hide
      */
     public static final int MAX_IPC_SIZE = 64 * 1024;
@@ -206,7 +207,7 @@ public interface IBinder {
 
     /**
      * Check to see if the object still exists.
-     * 
+     *
      * @return Returns false if the
      * hosting process is gone, otherwise the result (always by default
      * true) returned by the pingBinder() implementation on the other
@@ -221,7 +222,7 @@ public interface IBinder {
      * true, the process may have died while the call is returning.
      */
     public boolean isBinderAlive();
-    
+
     /**
      * Attempt to retrieve a local implementation of an interface
      * for this Binder object.  If null is returned, you will need
@@ -232,7 +233,7 @@ public interface IBinder {
 
     /**
      * Print the object's state into the given stream.
-     * 
+     *
      * @param fd The raw file descriptor that the dump is being sent to.
      * @param args additional arguments to the dump request.
      */
@@ -280,7 +281,7 @@ public interface IBinder {
 
     /**
      * Perform a generic operation with the object.
-     * 
+     *
      * @param code The action to perform.  This should
      * be a number between {@link #FIRST_CALL_TRANSACTION} and
      * {@link #LAST_CALL_TRANSACTION}.
@@ -360,13 +361,13 @@ public interface IBinder {
      * Remove a previously registered death notification.
      * The recipient will no longer be called if this object
      * dies.
-     * 
+     *
      * @return {@code true} if the <var>recipient</var> is successfully
      * unlinked, assuring you that its
      * {@link DeathRecipient#binderDied DeathRecipient.binderDied()} method
      * will not be called;  {@code false} if the target IBinder has already
      * died, meaning the method has been (or soon will be) called.
-     * 
+     *
      * @throws java.util.NoSuchElementException if the given
      * <var>recipient</var> has not been registered with the IBinder, and
      * the IBinder is still alive.  Note that if the <var>recipient</var>
