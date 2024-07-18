@@ -16,6 +16,7 @@
 
 package com.android.server.display.config
 
+import android.os.PowerManager
 import android.util.Spline.createSpline
 import androidx.test.filters.SmallTest
 import com.android.server.display.DisplayBrightnessState
@@ -42,7 +43,7 @@ class HdrBrightnessDataTest {
             )
         }
 
-        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration)
+        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration) { 0.6f }
         assertThat(hdrBrightnessData).isNotNull()
 
         assertThat(hdrBrightnessData!!.brightnessDecreaseDebounceMillis).isEqualTo(3000)
@@ -54,6 +55,7 @@ class HdrBrightnessDataTest {
         assertThat(hdrBrightnessData.maxBrightnessLimits).containsEntry(500f, 0.6f)
         assertThat(hdrBrightnessData.maxBrightnessLimits).containsEntry(600f, 0.7f)
 
+        assertThat(hdrBrightnessData.hbmTransitionPoint).isEqualTo(PowerManager.BRIGHTNESS_MAX)
         assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForNbm).isEqualTo(
             HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT
         )
@@ -79,10 +81,13 @@ class HdrBrightnessDataTest {
             )
         }
 
-        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration)
+        val transitionPoint = 0.6f
+        val hdrBrightnessData =
+            HdrBrightnessData.loadConfig(displayConfiguration) { transitionPoint }
         assertThat(hdrBrightnessData).isNotNull()
 
-        assertThat(hdrBrightnessData!!.minimumHdrPercentOfScreenForNbm).isEqualTo(0.2f)
+        assertThat(hdrBrightnessData!!.hbmTransitionPoint).isEqualTo(transitionPoint)
+        assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForNbm).isEqualTo(0.2f)
         assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForHbm).isEqualTo(0.2f)
         assertThat(hdrBrightnessData.allowInLowPowerMode).isFalse()
 
@@ -100,7 +105,9 @@ class HdrBrightnessDataTest {
             )
         }
 
-        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration)
+        val transitionPoint = 0.6f
+        val hdrBrightnessData =
+            HdrBrightnessData.loadConfig(displayConfiguration) { transitionPoint }
         assertThat(hdrBrightnessData).isNotNull()
 
         assertThat(hdrBrightnessData!!.brightnessDecreaseDebounceMillis).isEqualTo(0)
@@ -112,6 +119,7 @@ class HdrBrightnessDataTest {
 
         assertThat(hdrBrightnessData.maxBrightnessLimits).hasSize(0)
 
+        assertThat(hdrBrightnessData.hbmTransitionPoint).isEqualTo(transitionPoint)
         assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForNbm).isEqualTo(0.2f)
         assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForHbm).isEqualTo(0.2f)
         assertThat(hdrBrightnessData.allowInLowPowerMode).isFalse()
@@ -125,7 +133,7 @@ class HdrBrightnessDataTest {
     fun `test HdrBrightnessData configuration no configuration`() {
         val displayConfiguration = createDisplayConfiguration()
 
-        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration)
+        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration) { 0.6f }
         assertThat(hdrBrightnessData).isNull()
     }
 
@@ -144,10 +152,13 @@ class HdrBrightnessDataTest {
             )
         }
 
-        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration)
+        val transitionPoint = 0.6f
+        val hdrBrightnessData =
+            HdrBrightnessData.loadConfig(displayConfiguration) { transitionPoint }
         assertThat(hdrBrightnessData).isNotNull()
 
-        assertThat(hdrBrightnessData!!.minimumHdrPercentOfScreenForNbm).isEqualTo(0.3f)
+        assertThat(hdrBrightnessData!!.hbmTransitionPoint).isEqualTo(transitionPoint)
+        assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForNbm).isEqualTo(0.3f)
         assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForHbm).isEqualTo(0.6f)
         assertThat(hdrBrightnessData.allowInLowPowerMode).isTrue()
 
