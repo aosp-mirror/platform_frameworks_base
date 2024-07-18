@@ -756,7 +756,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             setEntry(entry, createRemoveRunnable(entry));
         }
 
-        private void setEntry(@NonNull final NotificationEntry entry,
+        protected void setEntry(@NonNull final NotificationEntry entry,
                 @Nullable Runnable removeRunnable) {
             mEntry = entry;
             mRemoveRunnable = removeRunnable;

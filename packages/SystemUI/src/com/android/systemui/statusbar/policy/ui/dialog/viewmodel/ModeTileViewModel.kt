@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.stack.data.repository
+package com.android.systemui.statusbar.policy.ui.dialog.viewmodel
 
-import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
+import com.android.systemui.common.shared.model.Icon
 
-fun FakeHeadsUpNotificationRepository.setNotifications(notifications: List<HeadsUpRowRepository>) {
-    setNotifications(*notifications.toTypedArray())
-}
-
-fun FakeHeadsUpNotificationRepository.setNotifications(vararg notifications: HeadsUpRowRepository) {
-    this.activeHeadsUpRows.value = notifications.toSet()
-}
+/**
+ * Viewmodel for a tile representing a single priority ("zen") mode, for use within the modes
+ * dialog. Not to be confused with ModesTile, which is the Quick Settings tile that opens the
+ * dialog.
+ */
+data class ModeTileViewModel(
+    val id: String,
+    val icon: Icon,
+    val text: String,
+    val subtext: String,
+    val enabled: Boolean,
+    val contentDescription: String,
+    val onClick: () -> Unit,
+    val onLongClick: () -> Unit,
+)

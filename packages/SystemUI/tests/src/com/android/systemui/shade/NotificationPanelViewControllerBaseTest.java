@@ -675,8 +675,14 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
         mMainHandler = new Handler(Looper.getMainLooper());
 
+        LongPressHandlingView longPressHandlingView = mock(LongPressHandlingView.class);
         when(mView.requireViewById(R.id.keyguard_long_press))
-                .thenReturn(mock(LongPressHandlingView.class));
+                .thenReturn(longPressHandlingView);
+
+        Resources longPressHandlingViewRes = mock(Resources.class);
+        when(longPressHandlingView.getResources()).thenReturn(longPressHandlingViewRes);
+        when(longPressHandlingViewRes.getString(anyInt())).thenReturn("");
+
 
         mHeadsUpNotificationInteractor =
                 new HeadsUpNotificationInteractor(mFakeHeadsUpNotificationRepository,

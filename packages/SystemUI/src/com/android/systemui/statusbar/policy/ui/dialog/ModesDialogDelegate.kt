@@ -29,6 +29,8 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.statusbar.phone.create
+import com.android.systemui.statusbar.policy.ui.dialog.composable.ModeTileGrid
+import com.android.systemui.statusbar.policy.ui.dialog.viewmodel.ModesDialogViewModel
 import javax.inject.Inject
 
 class ModesDialogDelegate
@@ -37,12 +39,13 @@ constructor(
     private val sysuiDialogFactory: SystemUIDialogFactory,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val activityStarter: ActivityStarter,
+    private val viewModel: ModesDialogViewModel,
 ) : SystemUIDialog.Delegate {
     override fun createDialog(): SystemUIDialog {
         return sysuiDialogFactory.create { dialog ->
             AlertDialogContent(
                 title = { Text(stringResource(R.string.zen_modes_dialog_title)) },
-                content = { Text("Under construction") },
+                content = { ModeTileGrid(viewModel) },
                 neutralButton = {
                     PlatformOutlinedButton(
                         onClick = {

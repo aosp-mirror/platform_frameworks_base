@@ -505,14 +505,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mClock = mInjector.getClock();
         mLogicalDisplay = logicalDisplay;
         mDisplayId = mLogicalDisplay.getDisplayIdLocked();
+        mDisplayDevice = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
+        IBinder displayToken = mDisplayDevice.getDisplayTokenLocked();
+        DisplayDeviceInfo displayDeviceInfo = mDisplayDevice.getDisplayDeviceInfoLocked();
         mSensorManager = sensorManager;
         mHandler = new DisplayControllerHandler(handler.getLooper());
-        mDisplayDeviceConfig = logicalDisplay.getPrimaryDisplayDeviceLocked()
-                .getDisplayDeviceConfig();
+        mDisplayDeviceConfig = mDisplayDevice.getDisplayDeviceConfig();
         mIsEnabled = logicalDisplay.isEnabledLocked();
         mIsInTransition = logicalDisplay.isInTransitionLocked();
-        mIsDisplayInternal = logicalDisplay.getPrimaryDisplayDeviceLocked()
-                .getDisplayDeviceInfoLocked().type == Display.TYPE_INTERNAL;
+        mIsDisplayInternal = displayDeviceInfo.type == Display.TYPE_INTERNAL;
         mWakelockController = mInjector.getWakelockController(mDisplayId, callbacks);
         mDisplayPowerProximityStateController = mInjector.getDisplayPowerProximityStateController(
                 mWakelockController, mDisplayDeviceConfig, mHandler.getLooper(),
@@ -521,7 +522,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mTag = TAG + "[" + mDisplayId + "]";
         mThermalBrightnessThrottlingDataId =
                 logicalDisplay.getDisplayInfoLocked().thermalBrightnessThrottlingDataId;
-        mDisplayDevice = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
+
         mUniqueDisplayId = mDisplayDevice.getUniqueId();
         mDisplayStatsId = mUniqueDisplayId.hashCode();
         mPhysicalDisplayName = mDisplayDevice.getNameLocked();
@@ -569,8 +570,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         mBrightnessRangeController = mInjector.getBrightnessRangeController(hbmController,
                 modeChangeCallback, mDisplayDeviceConfig, mHandler, flags,
-                mDisplayDevice.getDisplayTokenLocked(),
-                mDisplayDevice.getDisplayDeviceInfoLocked());
+                displayToken, displayDeviceInfo);
 
         mDisplayBrightnessController =
                 new DisplayBrightnessController(context, null,
@@ -584,8 +584,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         mUniqueDisplayId,
                         mThermalBrightnessThrottlingDataId,
                         logicalDisplay.getPowerThrottlingDataIdLocked(),
-                        mDisplayDeviceConfig,
-                        mDisplayId), mContext, flags, mSensorManager);
+                        mDisplayDeviceConfig, displayDeviceInfo.width, displayDeviceInfo.height,
+                        displayToken, mDisplayId), mContext, flags, mSensorManager);
         // Seed the cached brightness
         saveBrightnessInfo(getScreenBrightnessSetting());
         mAutomaticBrightnessStrategy =
@@ -893,7 +893,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mBrightnessClamperController.onDisplayChanged(
                     new BrightnessClamperController.DisplayDeviceData(uniqueId,
                             thermalBrightnessThrottlingDataId, powerThrottlingDataId,
-                            config, mDisplayId));
+                            config, info.width, info.height, token, mDisplayId));
 
             if (changed) {
                 updatePowerState();

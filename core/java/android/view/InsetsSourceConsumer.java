@@ -43,6 +43,7 @@ import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.ImeTracing;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -296,6 +297,13 @@ public class InsetsSourceConsumer {
 
     @VisibleForTesting(visibility = PACKAGE)
     public boolean applyLocalVisibilityOverride() {
+        if (Flags.refactorInsetsController()) {
+            if (mType == WindowInsets.Type.ime()) {
+                ImeTracing.getInstance().triggerClientDump(
+                        "ImeInsetsSourceConsumer#applyLocalVisibilityOverride",
+                        mController.getHost().getInputMethodManager(), null /* icProto */);
+            }
+        }
         final InsetsSource source = mState.peekSource(mId);
         if (source == null) {
             return false;
@@ -396,6 +404,14 @@ public class InsetsSourceConsumer {
      */
     public void removeSurface() {
         // no-op for types that always return ShowResult#SHOW_IMMEDIATELY.
+        if (Flags.refactorInsetsController()) {
+            if (mType == WindowInsets.Type.ime()) {
+                final IBinder window = mController.getHost().getWindowToken();
+                if (window != null) {
+                    mController.getHost().getInputMethodManager().removeImeSurface(window);
+                }
+            }
+        }
     }
 
     @VisibleForTesting(visibility = PACKAGE)

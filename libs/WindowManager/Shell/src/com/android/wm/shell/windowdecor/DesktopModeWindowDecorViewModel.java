@@ -22,6 +22,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.Intent.ACTION_MAIN;
+import static android.content.Intent.CATEGORY_APP_BROWSER;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
@@ -43,11 +45,8 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -98,6 +97,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
 import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
@@ -132,6 +132,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final ShellController mShellController;
     private final Context mContext;
     private final Handler mMainHandler;
+    private final @ShellBackgroundThread ShellExecutor mBgExecutor;
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
     private final SyncTransactionQueue mSyncQueue;
@@ -183,6 +184,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellExecutor shellExecutor,
             Handler mainHandler,
             Choreographer mainChoreographer,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             IWindowManager windowManager,
@@ -201,6 +203,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 shellExecutor,
                 mainHandler,
                 mainChoreographer,
+                bgExecutor,
                 shellInit,
                 shellCommandHandler,
                 windowManager,
@@ -225,6 +228,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellExecutor shellExecutor,
             Handler mainHandler,
             Choreographer mainChoreographer,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             IWindowManager windowManager,
@@ -245,6 +249,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
         mMainChoreographer = mainChoreographer;
+        mBgExecutor = bgExecutor;
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mTaskOrganizer = taskOrganizer;
         mShellController = shellController;
@@ -424,17 +429,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     private void openInBrowser(Uri uri) {
-        final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
-                .setComponent(getDefaultBrowser())
+        final Intent intent = Intent.makeMainSelectorActivity(ACTION_MAIN, CATEGORY_APP_BROWSER)
+                .setData(uri)
                 .addFlags(FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivity(intent);
-    }
-
-    private ComponentName getDefaultBrowser() {
-        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://"));
-        final ResolveInfo info = mContext.getPackageManager()
-                .resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        return info.getComponentInfo().getComponentName();
     }
 
     private class DesktopModeTouchEventListener extends GestureDetector.SimpleOnGestureListener
@@ -1095,6 +1093,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         taskInfo,
                         taskSurface,
                         mMainHandler,
+                        mBgExecutor,
                         mMainChoreographer,
                         mSyncQueue,
                         mRootTaskDisplayAreaOrganizer);

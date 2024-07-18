@@ -37,8 +37,12 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.WindowManager.BadTokenException;
 import android.view.WindowManager.LayoutParams;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 import android.widget.TextView;
 
@@ -46,6 +50,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -60,6 +65,9 @@ import org.mockito.Spy;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ImeInsetsSourceConsumerTest {
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     Context mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
     InsetsSourceConsumer mImeConsumer;
@@ -112,6 +120,7 @@ public class ImeInsetsSourceConsumerTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testImeRequestedVisibleAwaitingControl() {
         // Set null control and then request show.
         mController.onControlsChanged(new InsetsSourceControl[] { null });
@@ -141,6 +150,7 @@ public class ImeInsetsSourceConsumerTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testImeRequestedVisibleAwaitingLeash() {
         // Set null control, then request show.
         mController.onControlsChanged(new InsetsSourceControl[] { null });
@@ -185,6 +195,7 @@ public class ImeInsetsSourceConsumerTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testImeGetAndClearSkipAnimationOnce_expectSkip() {
         // Expect IME animation will skipped when the IME is visible at first place.
         verifyImeGetAndClearSkipAnimationOnce(true /* hasWindowFocus */, true /* hasViewFocus */,
@@ -192,6 +203,7 @@ public class ImeInsetsSourceConsumerTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testImeGetAndClearSkipAnimationOnce_expectNoSkip() {
         // Expect IME animation will not skipped if previously no view focused when gained the
         // window focus and requesting the IME visible next time.

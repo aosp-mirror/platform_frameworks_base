@@ -180,6 +180,23 @@ class AvalancheControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testDelete_untracked_runnableRuns() {
+        val headsUpEntry = createHeadsUpEntry(id = 0)
+
+        // None showing
+        mAvalancheController.headsUpEntryShowing = null
+
+        // Nothing is next
+        mAvalancheController.clearNext()
+
+        // Delete
+        mAvalancheController.delete(headsUpEntry, runnableMock!!, "testLabel")
+
+        // Runnable was run
+        Mockito.verify(runnableMock, Mockito.times(1)).run()
+    }
+
+    @Test
     fun testDelete_isNext_removedFromNext_runnableNotRun() {
         // Entry is next
         val headsUpEntry = createHeadsUpEntry(id = 0)

@@ -1197,6 +1197,26 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    public void testGenerateHeadsUpAnimation_isSeenInShade_noAnimation() {
+        // GIVEN NSSL is ready for HUN animations
+        Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);
+        prepareStackScrollerForHunAnimations(headsUpAnimatingAwayListener);
+
+        // Entry was seen in shade
+        NotificationEntry entry = mock(NotificationEntry.class);
+        when(entry.isSeenInShade()).thenReturn(true);
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        when(row.getEntry()).thenReturn(entry);
+
+        // WHEN we generate an add event
+        mStackScroller.generateHeadsUpAnimation(row, /* isHeadsUp = */ true);
+
+        // THEN nothing happens
+        assertThat(mStackScroller.isAddOrRemoveAnimationPending()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
     public void testOnChildAnimationsFinished_resetsheadsUpAnimatingAway() {
         // GIVEN NSSL is ready for HUN animations
         Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);

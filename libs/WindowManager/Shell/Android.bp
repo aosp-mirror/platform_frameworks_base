@@ -239,6 +239,9 @@ android_library {
         "wmshell.protolog.json.gz",
         "wmshell.protolog.pb",
     ],
+    flags_packages: [
+        "com_android_wm_shell_flags",
+    ],
     kotlincflags: ["-Xjvm-default=all"],
     manifest: "AndroidManifest.xml",
     plugins: ["dagger2-compiler"],

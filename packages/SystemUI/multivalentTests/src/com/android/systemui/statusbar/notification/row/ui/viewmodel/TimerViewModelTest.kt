@@ -18,6 +18,7 @@
 
 package com.android.systemui.statusbar.notification.row.ui.viewmodel
 
+import android.app.Notification
 import android.app.PendingIntent
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -90,7 +91,8 @@ class TimerViewModelTest : SysuiTestCase() {
         name: String = "example",
         timeRemaining: Duration = Duration.ofMinutes(3),
         resumeIntent: PendingIntent? = null,
-        resetIntent: PendingIntent? = null
+        addMinuteAction: Notification.Action? = null,
+        resetAction: Notification.Action? = null
     ) =
         TimerContentModel(
             icon = icon,
@@ -99,7 +101,8 @@ class TimerViewModelTest : SysuiTestCase() {
                 Paused(
                     timeRemaining = timeRemaining,
                     resumeIntent = resumeIntent,
-                    resetIntent = resetIntent,
+                    addMinuteAction = addMinuteAction,
+                    resetAction = resetAction,
                 )
         )
 }

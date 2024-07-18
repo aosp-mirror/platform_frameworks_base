@@ -88,7 +88,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * A service for the ProtoLog logging system.
  */
-public class PerfettoProtoLogImpl implements IProtoLog {
+public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProtoLog {
     private static final String LOG_TAG = "ProtoLog";
     public static final String NULL_STRING = "null";
     private final AtomicInteger mTracingInstances = new AtomicInteger();
@@ -100,6 +100,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     );
     @Nullable
     private final ProtoLogViewerConfigReader mViewerConfigReader;
+    @Nullable
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
     private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
     private final Runnable mCacheUpdater;
@@ -111,13 +112,12 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     private final Lock mBackgroundServiceLock = new ReentrantLock();
     private ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
-    public PerfettoProtoLogImpl(String viewerConfigFilePath, Runnable cacheUpdater) {
+    public PerfettoProtoLogImpl(@NonNull String viewerConfigFilePath, Runnable cacheUpdater) {
         this(() -> {
             try {
                 return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
             } catch (FileNotFoundException e) {
-                Slog.w(LOG_TAG, "Failed to load viewer config file " + viewerConfigFilePath, e);
-                return null;
+                throw new RuntimeException("Failed to load viewer config file " + viewerConfigFilePath, e);
             }
         }, cacheUpdater);
     }
@@ -127,7 +127,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     public PerfettoProtoLogImpl(
-            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             Runnable cacheUpdater
     ) {
         this(viewerConfigInputStreamProvider,
@@ -203,13 +203,23 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return mTracingInstances.get() > 0;
     }
 
+    @Override
+    public void toggleLogcat(boolean enabled, String[] groups) {
+        final ILogger logger = (message) -> Log.d(LOG_TAG, message);
+        if (enabled) {
+            startLoggingToLogcat(groups, logger);
+        } else {
+            stopLoggingToLogcat(groups, logger);
+        }
+    }
+
     /**
      * Start text logging
      * @param groups Groups to start text logging for
      * @param logger A logger to write status updates to
      * @return status code
      */
-    public int startLoggingToLogcat(String[] groups, ILogger logger) {
+    public int startLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
         if (mViewerConfigReader != null) {
             mViewerConfigReader.loadViewerConfig(groups, logger);
         }
@@ -222,7 +232,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
      * @param logger A logger to write status updates to
      * @return status code
      */
-    public int stopLoggingToLogcat(String[] groups, ILogger logger) {
+    public int stopLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
         if (mViewerConfigReader != null) {
             mViewerConfigReader.unloadViewerConfig(groups, logger);
         }
@@ -242,13 +252,29 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         for (IProtoLogGroup protoLogGroup : protoLogGroups) {
             mLogGroups.put(protoLogGroup.name(), protoLogGroup);
         }
+
+        final String[] groupsLoggingToLogcat = Arrays.stream(protoLogGroups)
+                .filter(IProtoLogGroup::isLogToLogcat)
+                .map(IProtoLogGroup::name)
+                .toArray(String[]::new);
+
+        if (mViewerConfigReader != null) {
+            mViewerConfigReader.loadViewerConfig(groupsLoggingToLogcat);
+        }
     }
 
     /**
      * Responds to a shell command.
      */
+    @Deprecated
     public int onShellCommand(ShellCommand shell) {
         PrintWriter pw = shell.getOutPrintWriter();
+
+        if (android.tracing.Flags.clientSideProtoLogging()) {
+            pw.println("Command deprecated. Please use 'cmd protolog' instead.");
+            return -1;
+        }
+
         String cmd = shell.getNextArg();
         if (cmd == null) {
             return unknownCommand(pw);

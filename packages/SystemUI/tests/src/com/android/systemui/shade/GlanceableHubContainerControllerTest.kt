@@ -312,6 +312,59 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
+    fun lifecycle_doesNotResumeOnUserInteractivityOnceExpanded() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Shade shows up.
+                shadeTestUtil.setShadeExpansion(1.0f)
+                testableLooper.processAllMessages()
+                underTest.onTouchEvent(DOWN_EVENT)
+                testableLooper.processAllMessages()
+
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.STARTED)
+
+                // Shade starts collapsing.
+                shadeTestUtil.setShadeExpansion(.5f)
+                testableLooper.processAllMessages()
+                underTest.onTouchEvent(DOWN_EVENT)
+                testableLooper.processAllMessages()
+
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.STARTED)
+
+                // Shade fully collpase, and then expand should with touch interaction should now
+                // be resumed.
+                shadeTestUtil.setShadeExpansion(0f)
+                testableLooper.processAllMessages()
+                shadeTestUtil.setShadeExpansion(.5f)
+                testableLooper.processAllMessages()
+                underTest.onTouchEvent(DOWN_EVENT)
+                testableLooper.processAllMessages()
+
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.RESUMED)
+            }
+        }
+
+    @Test
+    fun touchHandling_moveEventProcessedAfterCancel() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Shade shows up.
+                shadeTestUtil.setQsExpansion(0.5f)
+                testableLooper.processAllMessages()
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                assertThat(underTest.onTouchEvent(CANCEL_EVENT)).isTrue()
+                assertThat(underTest.onTouchEvent(UP_EVENT)).isFalse()
+                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isTrue()
+            }
+        }
+
+    @Test
     fun editMode_communalAvailable() =
         with(kosmos) {
             testScope.runTest {
@@ -484,6 +537,36 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 0L,
                 0L,
                 MotionEvent.ACTION_DOWN,
+                CONTAINER_WIDTH.toFloat() / 2,
+                CONTAINER_HEIGHT.toFloat() / 2,
+                0
+            )
+
+        private val CANCEL_EVENT =
+            MotionEvent.obtain(
+                0L,
+                0L,
+                MotionEvent.ACTION_CANCEL,
+                CONTAINER_WIDTH.toFloat() / 2,
+                CONTAINER_HEIGHT.toFloat() / 2,
+                0
+            )
+
+        private val MOVE_EVENT =
+            MotionEvent.obtain(
+                0L,
+                0L,
+                MotionEvent.ACTION_MOVE,
+                CONTAINER_WIDTH.toFloat() / 2,
+                CONTAINER_HEIGHT.toFloat() / 2,
+                0
+            )
+
+        private val UP_EVENT =
+            MotionEvent.obtain(
+                0L,
+                0L,
+                MotionEvent.ACTION_UP,
                 CONTAINER_WIDTH.toFloat() / 2,
                 CONTAINER_HEIGHT.toFloat() / 2,
                 0

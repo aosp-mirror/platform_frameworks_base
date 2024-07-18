@@ -110,7 +110,7 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                                     chipView.setOnClickListener(chipModel.onClickListener)
 
                                     // Accessibility
-                                    setChipAccessibility(chipModel, chipView)
+                                    setChipAccessibility(chipModel, chipView, chipBackgroundView)
 
                                     // Colors
                                     val textColor = chipModel.colors.text(chipContext)
@@ -213,7 +213,11 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
         this.setPaddingRelative(/* start= */ 0, paddingTop, paddingEnd, paddingBottom)
     }
 
-    private fun setChipAccessibility(chipModel: OngoingActivityChipModel.Shown, chipView: View) {
+    private fun setChipAccessibility(
+        chipModel: OngoingActivityChipModel.Shown,
+        chipView: View,
+        chipBackgroundView: View,
+    ) {
         when (chipModel) {
             is OngoingActivityChipModel.Shown.Countdown -> {
                 // Set as assertive so talkback will announce the countdown
@@ -223,6 +227,16 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
             is OngoingActivityChipModel.Shown.IconOnly -> {
                 chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE
             }
+        }
+        // Clickable chips need to be a minimum size for accessibility purposes, but let
+        // non-clickable chips be smaller.
+        if (chipModel.onClickListener != null) {
+            chipBackgroundView.minimumWidth =
+                chipBackgroundView.context.resources.getDimensionPixelSize(
+                    R.dimen.min_clickable_item_size
+                )
+        } else {
+            chipBackgroundView.minimumWidth = 0
         }
     }
 
