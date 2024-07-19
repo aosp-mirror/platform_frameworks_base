@@ -24,6 +24,17 @@ import java.io.ByteArrayOutputStream
 import java.io.OutputStreamWriter
 import org.xmlpull.v1.XmlSerializer
 
+@JvmOverloads
+fun createSensorData(
+    type: String? = null,
+    name: String? = null,
+    minRefreshRate: Float = 0f,
+    maxRefreshRate: Float = Float.POSITIVE_INFINITY,
+    supportedModes: List<SupportedModeData> = emptyList()
+): SensorData {
+    return SensorData(type, name, minRefreshRate, maxRefreshRate, supportedModes)
+}
+
 fun createRefreshRateData(
     defaultRefreshRate: Int = 60,
     defaultPeakRefreshRate: Int = 60,
