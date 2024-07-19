@@ -240,3 +240,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "dont_break_email_in_nobreak_tag"
+  namespace: "text"
+  description: "Prevent line break inside email."
+  bug: "350691716"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
