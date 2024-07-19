@@ -49,9 +49,29 @@ import java.util.Objects;
 public abstract class ActivityTransactionItem extends ClientTransactionItem {
 
     /** Target client activity. */
+    // TODO(b/311089192): Mark this with @NonNull and final.
     private IBinder mActivityToken;
 
-    ActivityTransactionItem() {}
+    public ActivityTransactionItem(@NonNull IBinder activityToken) {
+        mActivityToken = requireNonNull(activityToken);
+    }
+
+    // TODO(b/311089192): Remove this method once no subclasses obtain from the object pool.
+    @Deprecated
+    ActivityTransactionItem() {
+    }
+
+    /**
+     * Sets the activity token after the instance is obtained from the object pool.
+     *
+     * @deprecated This method is deprecated. The object pool is no longer used.
+     *     Instead, directly create a new object with the activity token.
+     * TODO(b/311089192): Remove this method once no subclasses obtain from the object pool.
+     */
+    @Deprecated
+    void setActivityToken(@NonNull IBinder activityToken) {
+        mActivityToken = requireNonNull(activityToken);
+    }
 
     @Override
     public final void execute(@NonNull ClientTransactionHandler client,
@@ -94,26 +114,18 @@ public abstract class ActivityTransactionItem extends ClientTransactionItem {
         return mActivityToken;
     }
 
-    void setActivityToken(@NonNull IBinder activityToken) {
-        mActivityToken = requireNonNull(activityToken);
-    }
+    // Parcelable implementation
 
-    // To be overridden
-
-    ActivityTransactionItem(@NonNull Parcel in) {
-        mActivityToken = in.readStrongBinder();
-    }
-
+    /** Writes to Parcel. */
     @CallSuper
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mActivityToken);
     }
 
-    @CallSuper
-    @Override
-    public void recycle() {
-        mActivityToken = null;
+    /** Reads from Parcel. */
+    ActivityTransactionItem(@NonNull Parcel in) {
+        this(in.readStrongBinder());
     }
 
     @Override
