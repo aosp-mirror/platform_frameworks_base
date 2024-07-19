@@ -25,7 +25,7 @@ import com.android.systemui.scene.shared.model.Scenes
 /** [ElementScenePicker] implementation for the media carousel object. */
 object MediaScenePicker : ElementScenePicker {
 
-    private val shadeLockscreenFraction = 0.65f
+    const val SHADE_FRACTION = 0.66f
     private val scenes =
         setOf(
             Scenes.Lockscreen,
@@ -44,7 +44,7 @@ object MediaScenePicker : ElementScenePicker {
         return when {
             // TODO: 352052894 - update with the actual scene picking
             transition.isTransitioning(from = Scenes.Lockscreen, to = Scenes.Shade) -> {
-                if (transition.progress < shadeLockscreenFraction) {
+                if (transition.progress < SHADE_FRACTION) {
                     Scenes.Lockscreen
                 } else {
                     Scenes.Shade
@@ -53,7 +53,7 @@ object MediaScenePicker : ElementScenePicker {
 
             // TODO: 345467290 - update with the actual scene picking
             transition.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen) -> {
-                if (transition.progress < 1f - shadeLockscreenFraction) {
+                if (transition.progress < 1f - SHADE_FRACTION) {
                     Scenes.Shade
                 } else {
                     Scenes.Lockscreen

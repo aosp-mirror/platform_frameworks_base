@@ -47,6 +47,7 @@ constructor(
     hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
     keyguardCoordinator: KeyguardCoordinator,
     unseenKeyguardCoordinator: OriginalUnseenKeyguardCoordinator,
+    lockScreenMinimalismCoordinator: LockScreenMinimalismCoordinator,
     rankingCoordinator: RankingCoordinator,
     colorizedFgsCoordinator: ColorizedFgsCoordinator,
     deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
@@ -87,7 +88,11 @@ constructor(
         mCoordinators.add(hideLocallyDismissedNotifsCoordinator)
         mCoordinators.add(hideNotifsForOtherUsersCoordinator)
         mCoordinators.add(keyguardCoordinator)
-        mCoordinators.add(unseenKeyguardCoordinator)
+        if (NotificationMinimalismPrototype.isEnabled) {
+            mCoordinators.add(lockScreenMinimalismCoordinator)
+        } else {
+            mCoordinators.add(unseenKeyguardCoordinator)
+        }
         mCoordinators.add(rankingCoordinator)
         mCoordinators.add(colorizedFgsCoordinator)
         mCoordinators.add(deviceProvisionedCoordinator)
@@ -120,12 +125,12 @@ constructor(
         }
 
         // Manually add Ordered Sections
-        if (NotificationMinimalismPrototype.V2.isEnabled) {
-            mOrderedSections.add(unseenKeyguardCoordinator.topOngoingSectioner) // Top Ongoing
+        if (NotificationMinimalismPrototype.isEnabled) {
+            mOrderedSections.add(lockScreenMinimalismCoordinator.topOngoingSectioner) // Top Ongoing
         }
         mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
-        if (NotificationMinimalismPrototype.V2.isEnabled) {
-            mOrderedSections.add(unseenKeyguardCoordinator.topUnseenSectioner) // Top Unseen
+        if (NotificationMinimalismPrototype.isEnabled) {
+            mOrderedSections.add(lockScreenMinimalismCoordinator.topUnseenSectioner) // Top Unseen
         }
         mOrderedSections.add(colorizedFgsCoordinator.sectioner) // ForegroundService
         if (PriorityPeopleSection.isEnabled) {

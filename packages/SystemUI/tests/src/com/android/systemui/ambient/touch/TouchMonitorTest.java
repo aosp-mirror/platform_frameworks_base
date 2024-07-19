@@ -710,6 +710,35 @@ public class TouchMonitorTest extends SysuiTestCase {
         environment.verifyLifecycleObserversUnregistered();
     }
 
+    @Test
+    public void testLastSessionPop_createsNewInputSession() {
+        final TouchHandler touchHandler = createTouchHandler();
+
+        final TouchHandler.TouchSession.Callback callback =
+                Mockito.mock(TouchHandler.TouchSession.Callback.class);
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
+
+        final InputEvent initialEvent = Mockito.mock(InputEvent.class);
+        environment.publishInputEvent(initialEvent);
+
+        final TouchHandler.TouchSession session = captureSession(touchHandler);
+        session.registerCallback(callback);
+
+        // Clear invocations on input session and factory.
+        clearInvocations(environment.mInputFactory);
+        clearInvocations(environment.mInputSession);
+
+        // Pop only active touch session.
+        session.pop();
+        environment.executeAll();
+
+        // Verify that input session disposed and new session requested from factory.
+        verify(environment.mInputSession).dispose();
+        verify(environment.mInputFactory).create(any(), any(), any(), anyBoolean());
+    }
+
     private GestureDetector.OnGestureListener registerGestureListener(TouchHandler handler) {
         final GestureDetector.OnGestureListener gestureListener = Mockito.mock(
                 GestureDetector.OnGestureListener.class);

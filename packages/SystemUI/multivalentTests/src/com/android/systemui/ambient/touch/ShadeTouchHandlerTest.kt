@@ -146,6 +146,14 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
         verify(mShadeViewController, never()).handleExternalTouch(any())
     }
 
+    @Test
+    fun testCancelMotionEvent_popsTouchSession() {
+        swipe(Direction.DOWN)
+        val event = MotionEvent.obtain(0, 0, MotionEvent.ACTION_CANCEL, 0f, 0f, 0)
+        mInputListenerCaptor.lastValue.onInputEvent(event)
+        verify(mTouchSession).pop()
+    }
+
     /**
      * Simulates a swipe in the given direction and returns true if the touch was intercepted by the
      * touch handler's gesture listener.

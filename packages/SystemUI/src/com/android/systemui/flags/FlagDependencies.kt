@@ -37,6 +37,8 @@ import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefac
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import javax.inject.Inject
@@ -55,6 +57,7 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         FooterViewRefactor.token dependsOn NotificationIconContainerRefactor.token
         NotificationAvalancheSuppression.token dependsOn VisualInterruptionRefactor.token
         PriorityPeopleSection.token dependsOn SortBySectionTimeFlag.token
+        NotificationMinimalismPrototype.token dependsOn NotificationsHeadsUpRefactor.token
 
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }

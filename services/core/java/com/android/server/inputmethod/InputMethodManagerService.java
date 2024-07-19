@@ -22,8 +22,6 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.os.UserManager.USER_TYPE_SYSTEM_HEADLESS;
-import static android.provider.Settings.Secure.STYLUS_HANDWRITING_DEFAULT_VALUE;
-import static android.provider.Settings.Secure.STYLUS_HANDWRITING_ENABLED;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BACK_DISPOSITION;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BOUND_TO_METHOD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CONCURRENT_MULTI_USER_MODE_ENABLED;
@@ -51,6 +49,7 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTargetWindowState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeVisibilityResult;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
 import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
 import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.MODE_AUTO;
@@ -597,7 +596,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
                 break;
             }
-            case STYLUS_HANDWRITING_ENABLED: {
+            case Settings.Secure.STYLUS_HANDWRITING_ENABLED: {
                 InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
                 InputMethodManager
                         .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
@@ -702,24 +701,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             super(true);
         }
 
-        @GuardedBy("ImfLock.class")
-        private boolean isChangingPackagesOfCurrentUserLocked() {
-            final int userId = getChangingUserId();
-            final boolean retval = userId == mCurrentUserId;
-            if (DEBUG) {
-                if (!retval) {
-                    Slog.d(TAG, "--- ignore this call back from a background user: " + userId);
-                }
-            }
-            return retval;
-        }
-
         @Override
         public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
             synchronized (ImfLock.class) {
-                if (!isChangingPackagesOfCurrentUserLocked()) {
-                    return false;
-                }
                 final int userId = getChangingUserId();
                 final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
                 String curInputMethodId = settings.getSelectedInputMethod();
@@ -1114,13 +1098,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
                     userId, AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO);
             InputMethodSettingsRepository.put(userId, newSettings);
-            if (mCurrentUserId == userId) {
-                // We need to rebuild IMEs.
-                postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */, userId);
-                updateInputMethodsFromSettingsLocked(true /* enabledChanged */, userId);
-            } else if (mConcurrentMultiUserModeEnabled) {
-                initializeVisibleBackgroundUserLocked(userId);
-            }
+            // We need to rebuild IMEs.
+            postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */, userId);
+            updateInputMethodsFromSettingsLocked(true /* enabledChanged */, userId);
         }
     }
 
@@ -1455,9 +1435,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 (windowToken, imeVisible) -> {
                     if (Flags.refactorInsetsController()) {
                         if (imeVisible) {
-                            showSoftInputInternal(windowToken);
+                            showCurrentInputInternal(windowToken);
                         } else {
-                            hideSoftInputInternal(windowToken);
+                            hideCurrentInputInternal(windowToken);
                         }
                     }
                 });
@@ -1631,8 +1611,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // If user is a profile, use preference of it`s parent profile.
         final int profileParentUserId = mUserManagerInternal.getProfileParentId(userId);
         if (Settings.Secure.getIntForUser(context.getContentResolver(),
-                STYLUS_HANDWRITING_ENABLED, STYLUS_HANDWRITING_DEFAULT_VALUE,
-                profileParentUserId) == 0) {
+                Settings.Secure.STYLUS_HANDWRITING_ENABLED,
+                Settings.Secure.STYLUS_HANDWRITING_DEFAULT_VALUE, profileParentUserId) == 0) {
             return false;
         }
         return true;
@@ -1933,7 +1913,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (Flags.refactorInsetsController()) {
             if (isShowRequestedForCurrentWindow(userId) && userData.mImeBindingState != null
                     && userData.mImeBindingState.mFocusedWindow != null) {
-                showSoftInputInternal(userData.mImeBindingState.mFocusedWindow);
+                showCurrentInputInternal(userData.mImeBindingState.mFocusedWindow);
             }
         } else {
             if (isShowRequestedForCurrentWindow(userId)) {
@@ -3165,8 +3145,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    boolean showSoftInputInternal(IBinder windowToken) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInputInternal");
+    boolean showCurrentInputInternal(IBinder windowToken) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showCurrentInputInternal");
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#showSoftInput", mDumper);
         synchronized (ImfLock.class) {
@@ -3185,8 +3165,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    boolean hideSoftInputInternal(IBinder windowToken) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInputInternal");
+    boolean hideCurrentInputInternal(IBinder windowToken) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideCurrentInputInternal");
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#hideSoftInput", mDumper);
         synchronized (ImfLock.class) {
@@ -4801,8 +4781,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(
                         windowToken, userId);
                 mVisibilityApplier.applyImeVisibility(requestToken, statsToken,
-                        setVisible ? ImeVisibilityStateComputer.STATE_SHOW_IME
-                                : ImeVisibilityStateComputer.STATE_HIDE_IME,
+                        setVisible ? STATE_SHOW_IME : STATE_HIDE_IME,
                         SoftInputShowHideReason.NOT_SET /* ignore reason */, userId);
             }
         } finally {
@@ -6288,7 +6267,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             boolean isCritical) {
         IInputMethodInvoker method;
         ClientState client;
-        ClientState focusedWindowClient;
 
         final Printer p = new PrintWriterPrinter(pw);
 

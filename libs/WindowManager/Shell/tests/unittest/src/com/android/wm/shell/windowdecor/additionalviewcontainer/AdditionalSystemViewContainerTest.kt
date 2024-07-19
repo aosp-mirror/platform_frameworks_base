@@ -68,12 +68,12 @@ class AdditionalSystemViewContainerTest : ShellTestCase() {
     fun testReleaseView_ViewRemoved() {
         viewContainer = AdditionalSystemViewContainer(
             mockContext,
-            R.layout.desktop_mode_window_decor_handle_menu,
             TASK_ID,
             X,
             Y,
             WIDTH,
-            HEIGHT
+            HEIGHT,
+            R.layout.desktop_mode_window_decor_handle_menu
         )
         verify(mockWindowManager).addView(eq(mockView), any())
         viewContainer.releaseView()

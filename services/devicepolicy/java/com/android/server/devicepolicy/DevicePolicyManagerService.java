@@ -3943,10 +3943,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /**
      * @param adminReceiver The admin to add
      * @param refreshing true = update an active admin, no error
+     * @param userHandle which user this admin will be set on
+     * @param provisioningContext additional information for debugging
      */
     @Override
     public void setActiveAdmin(
-            ComponentName adminReceiver, boolean refreshing, int userHandle) {
+            ComponentName adminReceiver,
+            boolean refreshing,
+            int userHandle,
+            @Nullable String provisioningContext
+    ) {
         if (!mHasFeature) {
             return;
         }
@@ -3972,6 +3978,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 newAdmin.testOnlyAdmin =
                         (existingAdmin != null) ? existingAdmin.testOnlyAdmin
                                 : isPackageTestOnly(adminReceiver.getPackageName(), userHandle);
+                newAdmin.setProvisioningContext(provisioningContext);
                 policy.mAdminMap.put(adminReceiver, newAdmin);
                 int replaceIndex = -1;
                 final int N = policy.mAdminList.size();
@@ -12830,7 +12837,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         });
 
         // Set admin.
-        setActiveAdmin(profileOwner, /* refreshing= */ true, userId);
+        setActiveAdmin(profileOwner, /* refreshing= */ true, userId, null);
         setProfileOwner(profileOwner, userId);
 
         synchronized (getLockObject()) {
@@ -21883,7 +21890,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             @UserIdInt int userId, @UserIdInt int callingUserId, ComponentName adminComponent) {
         final String adminPackage = adminComponent.getPackageName();
         enablePackage(adminPackage, callingUserId);
-        setActiveAdmin(adminComponent, /* refreshing= */ true, userId);
+        setActiveAdmin(adminComponent, /* refreshing= */ true, userId, null);
     }
 
     private void enablePackage(String packageName, @UserIdInt int userId) {

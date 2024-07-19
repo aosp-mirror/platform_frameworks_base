@@ -231,7 +231,6 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
         // extra activity options to set on pending intent
         val activityOptions = mock(ActivityOptions::class.java)
         activityOptions.splashScreenStyle = SPLASH_SCREEN_STYLE_SOLID_COLOR
-        activityOptions.isPendingIntentBackgroundActivityLaunchAllowedByPermission = false
         val bundleCaptor = argumentCaptor<Bundle>()
 
         startPendingIntentMaybeDismissingKeyguard(
@@ -255,7 +254,8 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
                 bundleCaptor.capture()
             )
         val options = ActivityOptions.fromBundle(bundleCaptor.firstValue)
-        assertThat(options.isPendingIntentBackgroundActivityLaunchAllowedByPermission).isFalse()
+        assertThat(options.getPendingIntentBackgroundActivityStartMode())
+            .isEqualTo(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS)
         assertThat(options.splashScreenStyle).isEqualTo(SPLASH_SCREEN_STYLE_SOLID_COLOR)
     }
 
