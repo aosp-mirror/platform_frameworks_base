@@ -18,33 +18,52 @@ package com.android.systemui.unfold.util
 
 import android.content.Context
 import android.hardware.devicestate.DeviceState
+import android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY
+import android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY
+import android.hardware.devicestate.DeviceStateManager
+import android.hardware.devicestate.feature.flags.Flags as DeviceStateManagerFlags
 import org.junit.Assume.assumeTrue
 
 object FoldableTestUtils {
-
     /** Finds device state for folded and unfolded. */
     fun findDeviceStates(context: Context): FoldableDeviceStates {
-        // TODO(b/325474477): Migrate clients to updated DeviceStateManager API's
-        val foldedDeviceStates: IntArray = context.resources.getIntArray(
-            com.android.internal.R.array.config_foldedDeviceStates)
-        assumeTrue("Test should be launched on a foldable device",
-            foldedDeviceStates.isNotEmpty())
+        if (DeviceStateManagerFlags.deviceStatePropertyMigration()) {
+            val deviceStateManager = context.getSystemService(DeviceStateManager::class.java)
+            val deviceStateList = deviceStateManager.supportedDeviceStates
 
-        val folded = getDeviceState(
-            identifier = foldedDeviceStates.maxOrNull()!!
-        )
-        val unfolded = getDeviceState(
-            identifier = folded.identifier + 1
-        )
-        return FoldableDeviceStates(folded = folded, unfolded = unfolded)
+            val folded =
+                deviceStateList.firstOrNull { state ->
+                    state.hasProperty(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY)
+                }
+            val unfolded =
+                deviceStateList.firstOrNull { state ->
+                    state.hasProperty(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY)
+                }
+
+            assumeTrue(
+                "Test should only be ran on a foldable device",
+                (folded != null) && (unfolded != null)
+            )
+
+            return FoldableDeviceStates(folded = folded!!, unfolded = unfolded!!)
+        } else {
+            val foldedDeviceStates: IntArray =
+                context.resources.getIntArray(
+                    com.android.internal.R.array.config_foldedDeviceStates
+                )
+            assumeTrue(
+                "Test should be launched on a foldable device",
+                foldedDeviceStates.isNotEmpty()
+            )
+
+            val folded = getDeviceState(identifier = foldedDeviceStates.maxOrNull()!!)
+            val unfolded = getDeviceState(identifier = folded.identifier + 1)
+            return FoldableDeviceStates(folded = folded, unfolded = unfolded)
+        }
     }
 
     private fun getDeviceState(identifier: Int): DeviceState {
-        return DeviceState(
-            DeviceState.Configuration.Builder(
-                identifier, "" /* name */
-            ).build()
-        )
+        return DeviceState(DeviceState.Configuration.Builder(identifier, "" /* name */).build())
     }
 }
 

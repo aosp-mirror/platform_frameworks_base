@@ -29,12 +29,15 @@ import com.android.systemui.qs.tiles.impl.rotation.qsRotationLockTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
+import com.android.systemui.defaultDeviceState
 import com.android.systemui.statusbar.policy.devicePostureController
-import com.android.systemui.util.mockito.whenever
+import com.android.systemui.deviceStateManager
+import com.android.systemui.foldedDeviceStateList
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -42,13 +45,17 @@ class RotationLockTileMapperTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val rotationLockTileConfig = kosmos.qsRotationLockTileConfig
     private val devicePostureController = kosmos.devicePostureController
+    private val deviceStateManager = kosmos.deviceStateManager
 
     private lateinit var mapper: RotationLockTileMapper
 
     @Before
     fun setup() {
+        deviceStateManager
         whenever(devicePostureController.devicePosture)
             .thenReturn(DevicePostureController.DEVICE_POSTURE_CLOSED)
+        whenever(deviceStateManager.supportedDeviceStates)
+            .thenReturn(listOf(kosmos.defaultDeviceState))
 
         mapper =
             RotationLockTileMapper(
@@ -64,7 +71,8 @@ class RotationLockTileMapperTest : SysuiTestCase() {
                     }
                     .resources,
                 context.theme,
-                devicePostureController
+                devicePostureController,
+                deviceStateManager
             )
     }
 
@@ -162,6 +170,7 @@ class RotationLockTileMapperTest : SysuiTestCase() {
                 intArrayOf(1, 2, 3)
             )
         }
+        whenever(deviceStateManager.supportedDeviceStates).thenReturn(kosmos.foldedDeviceStateList)
     }
 
     private fun createRotationLockTileState(

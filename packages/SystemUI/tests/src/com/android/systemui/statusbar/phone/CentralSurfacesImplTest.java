@@ -18,6 +18,12 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE;
 import static android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED;
 import static android.provider.Settings.Global.HEADS_UP_ON;
 
@@ -223,7 +229,9 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Provider;
 
@@ -233,8 +241,22 @@ import javax.inject.Provider;
 @EnableFlags(FLAG_LIGHT_REVEAL_MIGRATION)
 public class CentralSurfacesImplTest extends SysuiTestCase {
 
-    private static final int FOLD_STATE_FOLDED = 0;
-    private static final int FOLD_STATE_UNFOLDED = 1;
+    private static final DeviceState FOLD_STATE_FOLDED = new DeviceState(
+            new DeviceState.Configuration.Builder(0 /* identifier */, "FOLDED" /* name */)
+                    .setSystemProperties(
+                            Set.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                                    PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP))
+                    .setPhysicalProperties(
+                            Set.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED))
+                    .build());
+    private static final DeviceState FOLD_STATE_UNFOLDED = new DeviceState(
+            new DeviceState.Configuration.Builder(1 /* identifier */, "UNFOLDED" /* name */)
+                    .setSystemProperties(
+                            Set.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
+                                    PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE))
+                    .setPhysicalProperties(
+                            Set.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN))
+                    .build());
 
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
 
@@ -429,6 +451,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mStackScroller.generateLayoutParams(any())).thenReturn(new LayoutParams(0, 0));
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
         when(mPowerManagerService.isInteractive()).thenReturn(true);
+        when(mDeviceStateManager.getSupportedDeviceStates())
+                .thenReturn(List.of(FOLD_STATE_FOLDED, FOLD_STATE_UNFOLDED));
 
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];
@@ -996,8 +1020,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeOpen_setsLeaveOpenOnKeyguardHide() {
-        setFoldedStates(FOLD_STATE_FOLDED);
-        setGoToSleepStates(FOLD_STATE_FOLDED);
+        setFoldedStates(FOLD_STATE_FOLDED.getIdentifier());
+        setGoToSleepStates(FOLD_STATE_FOLDED.getIdentifier());
         mCentralSurfaces.setBarStateForTest(SHADE);
         when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(true);
 
@@ -1008,8 +1032,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeOpen_onKeyguard_doesNotSetLeaveOpenOnKeyguardHide() {
-        setFoldedStates(FOLD_STATE_FOLDED);
-        setGoToSleepStates(FOLD_STATE_FOLDED);
+        setFoldedStates(FOLD_STATE_FOLDED.getIdentifier());
+        setGoToSleepStates(FOLD_STATE_FOLDED.getIdentifier());
         mCentralSurfaces.setBarStateForTest(KEYGUARD);
         when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(true);
 
@@ -1021,8 +1045,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeClose_doesNotSetLeaveOpenOnKeyguardHide() {
-        setFoldedStates(FOLD_STATE_FOLDED);
-        setGoToSleepStates(FOLD_STATE_FOLDED);
+        setFoldedStates(FOLD_STATE_FOLDED.getIdentifier());
+        setGoToSleepStates(FOLD_STATE_FOLDED.getIdentifier());
         mCentralSurfaces.setBarStateForTest(SHADE);
         when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(false);
 
@@ -1033,8 +1057,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeExpanding_onKeyguard_closesQS() {
-        setFoldedStates(FOLD_STATE_FOLDED);
-        setGoToSleepStates(FOLD_STATE_FOLDED);
+        setFoldedStates(FOLD_STATE_FOLDED.getIdentifier());
+        setGoToSleepStates(FOLD_STATE_FOLDED.getIdentifier());
         mCentralSurfaces.setBarStateForTest(KEYGUARD);
         when(mNotificationPanelViewController.isExpandingOrCollapsing()).thenReturn(true);
 
@@ -1046,8 +1070,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeExpanded_onKeyguard_closesQS() {
-        setFoldedStates(FOLD_STATE_FOLDED);
-        setGoToSleepStates(FOLD_STATE_FOLDED);
+        setFoldedStates(FOLD_STATE_FOLDED.getIdentifier());
+        setGoToSleepStates(FOLD_STATE_FOLDED.getIdentifier());
         mCentralSurfaces.setBarStateForTest(KEYGUARD);
         when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(true);
 
@@ -1364,9 +1388,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.updateIsKeyguard(false /* forceStateChange */);
     }
 
-    private void setDeviceState(int state) {
-        DeviceState deviceState = new DeviceState(
-                new DeviceState.Configuration.Builder(state, "TEST").build());
+    private void setDeviceState(DeviceState deviceState) {
         ArgumentCaptor<DeviceStateManager.DeviceStateCallback> callbackCaptor =
                 ArgumentCaptor.forClass(DeviceStateManager.DeviceStateCallback.class);
         verify(mDeviceStateManager).registerCallback(any(), callbackCaptor.capture());
