@@ -30,6 +30,7 @@ import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.common.ProtoLogToolInjected;
 
+import java.io.File;
 import java.util.TreeMap;
 
 /**
@@ -105,7 +106,15 @@ public class ProtoLogImpl {
     public static synchronized IProtoLog getSingleInstance() {
         if (sServiceInstance == null) {
             if (android.tracing.Flags.perfettoProtologTracing()) {
-                sServiceInstance = new PerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater);
+                File f = new File(sViewerConfigPath);
+                if (!ProtoLog.REQUIRE_PROTOLOGTOOL && !f.exists()) {
+                    // TODO(b/353530422): Remove - temporary fix to unblock b/352290057
+                    // In so tests the viewer config file might not exist in which we don't
+                    // want to provide config path to the user
+                    sServiceInstance = new PerfettoProtoLogImpl(null, null, sCacheUpdater);
+                } else {
+                    sServiceInstance = new PerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater);
+                }
             } else {
                 sServiceInstance = new LegacyProtoLogImpl(
                         sLegacyOutputFilePath, sLegacyViewerConfigPath, sCacheUpdater);

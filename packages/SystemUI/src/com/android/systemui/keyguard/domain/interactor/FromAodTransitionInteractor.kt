@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
+import android.util.Log
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
 import com.android.systemui.dagger.SysUISingleton
@@ -184,11 +185,7 @@ constructor(
                 .filterRelevantKeyguardStateAnd { isOccluded -> isOccluded }
                 .collect {
                     if (!maybeHandleInsecurePowerGesture()) {
-                        startTransitionTo(
-                            toState = KeyguardState.OCCLUDED,
-                            modeOnCanceled = TransitionModeOnCanceled.RESET,
-                            ownerReason = "isOccluded = true",
-                        )
+                        Log.i(TAG, "Ignoring change to isOccluded to prevent errant AOD->OCCLUDED")
                     }
                 }
         }

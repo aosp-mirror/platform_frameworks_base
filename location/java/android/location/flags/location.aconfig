@@ -2,6 +2,20 @@ package: "android.location.flags"
 container: "system"
 
 flag {
+    name: "keep_gnss_stationary_throttling"
+    namespace: "location"
+    description: "Keeps stationary throttling for the GNSS provider even if the disable_stationary_throttling flag is true."
+    bug: "354000147"
+}
+
+flag {
+    name: "disable_stationary_throttling"
+    namespace: "location"
+    description: "Disables stationary throttling for all providers"
+    bug: "354000147"
+}
+
+flag {
     name: "new_geocoder"
     namespace: "location"
     description: "Flag for new Geocoder APIs"

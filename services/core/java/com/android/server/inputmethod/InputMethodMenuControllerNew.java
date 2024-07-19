@@ -17,17 +17,22 @@
 package com.android.server.inputmethod;
 
 
+import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+
 import static com.android.server.inputmethod.InputMethodManagerService.DEBUG;
 import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Printer;
 import android.util.Slog;
@@ -80,6 +85,7 @@ final class InputMethodMenuControllerNew {
      * @param displayId     the ID of the display where the menu was requested.
      * @param userId        the ID of the user that requested the menu.
      */
+    @RequiresPermission(allOf = {INTERACT_ACROSS_USERS, HIDE_OVERLAY_WINDOWS})
     void show(@NonNull List<MenuItem> items, int selectedIndex, int displayId,
             @UserIdInt int userId) {
         // Hide the menu in case it was already showing.
@@ -120,7 +126,7 @@ final class InputMethodMenuControllerNew {
                     .requireViewById(com.android.internal.R.id.button1);
             languageSettingsButton.setVisibility(View.VISIBLE);
             languageSettingsButton.setOnClickListener(v -> {
-                v.getContext().startActivity(languageSettingsIntent);
+                v.getContext().startActivityAsUser(languageSettingsIntent, UserHandle.of(userId));
                 hide(displayId, userId);
             });
         }

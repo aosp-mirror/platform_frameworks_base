@@ -31,6 +31,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -42,6 +43,7 @@ val Kosmos.communalInteractor by Fixture {
     CommunalInteractor(
         applicationScope = applicationCoroutineScope,
         bgDispatcher = testDispatcher,
+        bgScope = testScope.backgroundScope,
         broadcastDispatcher = broadcastDispatcher,
         communalSceneInteractor = communalSceneInteractor,
         widgetRepository = communalWidgetRepository,

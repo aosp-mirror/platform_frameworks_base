@@ -25,20 +25,11 @@ import kotlinx.coroutines.flow.map
 /** Fake implementation of [CommunalPrefsRepository] */
 class FakeCommunalPrefsRepository : CommunalPrefsRepository {
     private val _isCtaDismissed = MutableStateFlow<Set<UserInfo>>(emptySet())
-    private val _isDisclaimerDismissed = MutableStateFlow<Set<UserInfo>>(emptySet())
 
     override fun isCtaDismissed(user: UserInfo): Flow<Boolean> =
         _isCtaDismissed.map { it.contains(user) }
 
-    override fun isDisclaimerDismissed(user: UserInfo): Flow<Boolean> =
-        _isDisclaimerDismissed.map { it.contains(user) }
-
     override suspend fun setCtaDismissed(user: UserInfo) {
         _isCtaDismissed.value = _isCtaDismissed.value.toMutableSet().apply { add(user) }
-    }
-
-    override suspend fun setDisclaimerDismissed(user: UserInfo) {
-        _isDisclaimerDismissed.value =
-            _isDisclaimerDismissed.value.toMutableSet().apply { add(user) }
     }
 }

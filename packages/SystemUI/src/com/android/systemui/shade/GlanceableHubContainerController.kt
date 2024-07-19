@@ -56,13 +56,12 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
-import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.collectFlow
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /**
@@ -165,7 +164,14 @@ constructor(
      *
      * Based on [ShadeInteractor.isAnyFullyExpanded] and [ShadeInteractor.isUserInteracting].
      */
-    private var shadeShowing = false
+    private var shadeShowingAndConsumingTouches = false
+
+    /**
+     * True if the shade ever fully expands and the user isn't interacting with it (aka finger on
+     * screen dragging). In this case, the shade should handle all touch events until it has fully
+     * collapsed.
+     */
+    private var userNotInteractiveAtShadeFullyExpanded = false
 
     /**
      * True if the device is dreaming, in which case we shouldn't do anything for top/bottom swipes
@@ -317,9 +323,25 @@ constructor(
         )
         collectFlow(
             containerView,
-            allOf(shadeInteractor.isAnyFullyExpanded, not(shadeInteractor.isUserInteracting)),
-            {
-                shadeShowing = it
+            combine(
+                shadeInteractor.isAnyFullyExpanded,
+                shadeInteractor.isUserInteracting,
+                shadeInteractor.isShadeFullyCollapsed,
+                ::Triple
+            ),
+            { (isFullyExpanded, isUserInteracting, isShadeFullyCollapsed) ->
+                val expandedAndNotInteractive = isFullyExpanded && !isUserInteracting
+
+                // If we ever are fully expanded and not interacting, capture this state as we
+                // should not handle touches until we fully collapse again
+                userNotInteractiveAtShadeFullyExpanded =
+                    !isShadeFullyCollapsed &&
+                        (userNotInteractiveAtShadeFullyExpanded || expandedAndNotInteractive)
+
+                // If the shade reaches full expansion without interaction, then we should allow it
+                // to consume touches rather than handling it here until it disappears.
+                shadeShowingAndConsumingTouches =
+                    userNotInteractiveAtShadeFullyExpanded || expandedAndNotInteractive
                 updateTouchHandlingState()
             }
         )
@@ -337,7 +359,8 @@ constructor(
      * Also clears gesture exclusion zones when the hub is occluded or gone.
      */
     private fun updateTouchHandlingState() {
-        val shouldInterceptGestures = hubShowing && !(shadeShowing || anyBouncerShowing)
+        val shouldInterceptGestures =
+            hubShowing && !(shadeShowingAndConsumingTouches || anyBouncerShowing)
         if (shouldInterceptGestures) {
             lifecycleRegistry.currentState = Lifecycle.State.RESUMED
         } else {
@@ -395,11 +418,12 @@ constructor(
     private fun handleTouchEventOnCommunalView(view: View, ev: MotionEvent): Boolean {
         val isDown = ev.actionMasked == MotionEvent.ACTION_DOWN
         val isUp = ev.actionMasked == MotionEvent.ACTION_UP
+        val isMove = ev.actionMasked == MotionEvent.ACTION_MOVE
         val isCancel = ev.actionMasked == MotionEvent.ACTION_CANCEL
 
-        val hubOccluded = anyBouncerShowing || shadeShowing
+        val hubOccluded = anyBouncerShowing || shadeShowingAndConsumingTouches
 
-        if (isDown && !hubOccluded) {
+        if ((isDown || isMove) && !hubOccluded) {
             isTrackingHubTouch = true
         }
 

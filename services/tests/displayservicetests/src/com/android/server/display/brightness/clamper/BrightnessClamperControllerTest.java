@@ -24,6 +24,7 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,8 +42,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.display.DisplayBrightnessState;
-import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.clamper.BrightnessClamperController.ModifiersAggregatedState;
 import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.feature.DisplayManagerFlags;
@@ -89,6 +90,10 @@ public class BrightnessClamperControllerTest {
     @Mock
     private BrightnessModifier mMockModifier;
     @Mock
+    private TestStatefulModifier mMockStatefulModifier;
+    @Mock
+    private TestDisplayListenerModifier mMockDisplayListenerModifier;
+    @Mock
     private DisplayManagerInternal.DisplayPowerRequest mMockRequest;
 
     @Mock
@@ -99,7 +104,8 @@ public class BrightnessClamperControllerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mTestInjector = new TestInjector(List.of(mMockClamper), List.of(mMockModifier));
+        mTestInjector = new TestInjector(List.of(mMockClamper),
+                List.of(mMockModifier, mMockStatefulModifier, mMockDisplayListenerModifier));
         when(mMockDisplayDeviceData.getDisplayId()).thenReturn(DISPLAY_ID);
         when(mMockDisplayDeviceData.getAmbientLightSensor()).thenReturn(mMockSensorData);
 
@@ -168,6 +174,13 @@ public class BrightnessClamperControllerTest {
     }
 
     @Test
+    public void testOnDisplayChanged_DelegatesToDisplayListeners() {
+        mClamperController.onDisplayChanged(mMockDisplayDeviceData);
+
+        verify(mMockDisplayListenerModifier).onDisplayChanged(mMockDisplayDeviceData);
+    }
+
+    @Test
     public void testOnDisplayChanged_doesNotRestartLightSensor() {
         mClamperController.onDisplayChanged(mMockDisplayDeviceData);
 
@@ -189,6 +202,8 @@ public class BrightnessClamperControllerTest {
         mClamperController.clamp(mMockRequest, initialBrightness, initialSlowChange, STATE_ON);
 
         verify(mMockModifier).apply(eq(mMockRequest), any());
+        verify(mMockDisplayListenerModifier).apply(eq(mMockRequest), any());
+        verify(mMockStatefulModifier).apply(eq(mMockRequest), any());
     }
 
     @Test
@@ -326,9 +341,38 @@ public class BrightnessClamperControllerTest {
         verify(mMockClamper).stop();
     }
 
+    @Test
+    public void test_doesNotNotifyExternalListener_aggregatedStateNotChanged() {
+        mTestInjector.mCapturedChangeListener.onChanged();
+        mTestHandler.flush();
+
+        verify(mMockExternalListener, never()).onChanged();
+    }
+
+    @Test
+    public void test_notifiesExternalListener_aggregatedStateChanged() {
+        doAnswer((invocation) -> {
+            ModifiersAggregatedState argument = invocation.getArgument(0);
+            argument.mHdrHbmEnabled = true;
+            return null;
+        }).when(mMockStatefulModifier).applyStateChange(any());
+        mTestInjector.mCapturedChangeListener.onChanged();
+        mTestHandler.flush();
+
+        verify(mMockExternalListener).onChanged();
+    }
+
     private BrightnessClamperController createBrightnessClamperController() {
         return new BrightnessClamperController(mTestInjector, mTestHandler, mMockExternalListener,
                 mMockDisplayDeviceData, mMockContext, mFlags, mSensorManager);
+    }
+
+    interface TestDisplayListenerModifier extends BrightnessStateModifier,
+            BrightnessClamperController.DisplayDeviceDataListener {
+    }
+
+    interface TestStatefulModifier extends BrightnessStateModifier,
+            BrightnessClamperController.StatefulModifier {
     }
 
     private class TestInjector extends BrightnessClamperController.Injector {
@@ -366,7 +410,7 @@ public class BrightnessClamperControllerTest {
         @Override
         List<BrightnessStateModifier> getModifiers(DisplayManagerFlags flags, Context context,
                 Handler handler, BrightnessClamperController.ClamperChangeListener listener,
-                DisplayDeviceConfig displayDeviceConfig) {
+                BrightnessClamperController.DisplayDeviceData displayDeviceData) {
             return mModifiers;
         }
 

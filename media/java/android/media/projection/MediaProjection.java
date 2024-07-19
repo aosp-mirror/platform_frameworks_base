@@ -23,6 +23,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManager.VirtualDisplayFlag;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
 import android.os.Build;
@@ -140,6 +141,7 @@ public final class MediaProjection {
     /**
      * @hide
      */
+    @Nullable
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int dpi, boolean isSecure, @Nullable Surface surface,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
@@ -192,6 +194,11 @@ public final class MediaProjection {
      *                                 <li>If attempting to create a new virtual display
      *                                 associated with this MediaProjection instance after it has
      *                                 been stopped by invoking {@link #stop()}.
+     *                                 <li>If attempting to create a new virtual display
+     *                                 associated with this MediaProjection instance after a
+     *                                 {@link MediaProjection.Callback#onStop()} callback has been
+     *                                 received due to the user or the system stopping the
+     *                                 MediaProjection session.
      *                                 <li>If the target SDK is {@link
      *                                 android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and up,
      *                                 and if this instance has already taken a recording through
@@ -208,12 +215,17 @@ public final class MediaProjection {
      *                               {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U}.
      *                               Instead, recording doesn't begin until the user re-grants
      *                               consent in the dialog.
+     * @return The created {@link VirtualDisplay}, or {@code null} if no {@link VirtualDisplay}
+     * could be created.
      * @see VirtualDisplay
      * @see VirtualDisplay.Callback
      */
+    @SuppressWarnings("RequiresPermission")
+    @Nullable
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
-            int width, int height, int dpi, int flags, @Nullable Surface surface,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+            int width, int height, int dpi, @VirtualDisplayFlag int flags,
+            @Nullable Surface surface, @Nullable VirtualDisplay.Callback callback,
+            @Nullable Handler handler) {
         if (shouldMediaProjectionRequireCallback()) {
             if (mCallbacks.isEmpty()) {
                 final IllegalStateException e = new IllegalStateException(

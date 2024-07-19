@@ -211,6 +211,7 @@ public abstract class WMShellModule {
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellMainThread Choreographer mainChoreographer,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
             IWindowManager windowManager,
             ShellCommandHandler shellCommandHandler,
@@ -229,6 +230,7 @@ public abstract class WMShellModule {
                     mainExecutor,
                     mainHandler,
                     mainChoreographer,
+                    bgExecutor,
                     shellInit,
                     shellCommandHandler,
                     windowManager,
@@ -246,6 +248,7 @@ public abstract class WMShellModule {
                 context,
                 mainHandler,
                 mainExecutor,
+                bgExecutor,
                 mainChoreographer,
                 windowManager,
                 shellInit,
@@ -366,13 +369,14 @@ public abstract class WMShellModule {
             Optional<WindowDecorViewModel> windowDecorViewModel,
             Optional<DesktopTasksController> desktopTasksController,
             MultiInstanceHelper multiInstanceHelper,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler) {
         return new SplitScreenController(context, shellInit, shellCommandHandler, shellController,
                 shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, displayController,
                 displayImeController, displayInsetsController, dragAndDropController, transitions,
                 transactionPool, iconProvider, recentTasks, launchAdjacentController,
                 windowDecorViewModel, desktopTasksController, null /* stageCoordinator */,
-                multiInstanceHelper, mainExecutor);
+                multiInstanceHelper, mainExecutor, mainHandler);
     }
 
     //

@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.splitscreen;
 
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -92,6 +92,7 @@ import android.graphics.Rect;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -119,6 +120,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
+import com.android.internal.policy.FoldLockSettingsObserver;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.launcher3.icons.IconProvider;
@@ -191,7 +193,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private SplitLayout mSplitLayout;
     private ValueAnimator mDividerFadeInAnimator;
     private boolean mDividerVisible;
-    private boolean mKeyguardShowing;
+    private boolean mKeyguardActive;
     private boolean mShowDecorImmediately;
     private final SyncTransactionQueue mSyncQueue;
     private final ShellTaskOrganizer mTaskOrganizer;
@@ -205,6 +207,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private SplitScreenTransitions mSplitTransitions;
     private final SplitscreenEventLogger mLogger;
     private final ShellExecutor mMainExecutor;
+    private final Handler mMainHandler;
     // Cache live tile tasks while entering recents, evict them from stages in finish transaction
     // if user is opening another task(s).
     private final ArrayList<Integer> mPausingTasks = new ArrayList<>();
@@ -233,7 +236,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mIsExiting;
     private boolean mIsRootTranslucent;
     @VisibleForTesting
-    int mTopStageAfterFoldDismiss;
+    @StageType int mLastActiveStage;
+    private boolean mBreakOnNextWake;
+    /** Used to get the Settings value for "Continue using apps on fold". */
+    private FoldLockSettingsObserver mFoldLockSettingsObserver;
 
     private DefaultMixedHandler mMixedHandler;
     private final Toast mSplitUnsupportedToast;
@@ -313,9 +319,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             ShellTaskOrganizer taskOrganizer, DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, Transitions transitions,
-            TransactionPool transactionPool,
-            IconProvider iconProvider, ShellExecutor mainExecutor,
-            Optional<RecentTasksController> recentTasks,
+            TransactionPool transactionPool, IconProvider iconProvider, ShellExecutor mainExecutor,
+            Handler mainHandler, Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
             Optional<WindowDecorViewModel> windowDecorViewModel) {
         mContext = context;
@@ -324,6 +329,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mTaskOrganizer = taskOrganizer;
         mLogger = new SplitscreenEventLogger();
         mMainExecutor = mainExecutor;
+        mMainHandler = mainHandler;
         mRecentTasks = recentTasks;
         mLaunchAdjacentController = launchAdjacentController;
         mWindowDecorViewModel = windowDecorViewModel;
@@ -366,6 +372,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // With shell transition, we should update recents tile each callback so set this to true by
         // default.
         mShouldUpdateRecents = ENABLE_SHELL_TRANSITIONS;
+        mFoldLockSettingsObserver =
+                new FoldLockSettingsObserver(mainHandler, context);
+        mFoldLockSettingsObserver.register();
     }
 
     @VisibleForTesting
@@ -373,9 +382,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             ShellTaskOrganizer taskOrganizer, MainStage mainStage, SideStage sideStage,
             DisplayController displayController, DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, SplitLayout splitLayout,
-            Transitions transitions, TransactionPool transactionPool,
-            ShellExecutor mainExecutor,
-            Optional<RecentTasksController> recentTasks,
+            Transitions transitions, TransactionPool transactionPool, ShellExecutor mainExecutor,
+            Handler mainHandler, Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
             Optional<WindowDecorViewModel> windowDecorViewModel) {
         mContext = context;
@@ -393,6 +401,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 this::onTransitionAnimationComplete, this);
         mLogger = new SplitscreenEventLogger();
         mMainExecutor = mainExecutor;
+        mMainHandler = mainHandler;
         mRecentTasks = recentTasks;
         mLaunchAdjacentController = launchAdjacentController;
         mWindowDecorViewModel = windowDecorViewModel;
@@ -400,6 +409,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         transitions.addHandler(this);
         mSplitUnsupportedToast = Toast.makeText(mContext,
                 R.string.dock_non_resizeble_failed_to_dock_text, Toast.LENGTH_SHORT);
+        mFoldLockSettingsObserver =
+                new FoldLockSettingsObserver(context.getMainThreadHandler(), context);
+        mFoldLockSettingsObserver.register();
     }
 
     public void setMixedHandler(DefaultMixedHandler mixedHandler) {
@@ -1504,51 +1516,80 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    void onKeyguardVisibilityChanged(boolean showing) {
-        mKeyguardShowing = showing;
+    /**
+     * Runs when keyguard state changes. The booleans here are a bit complicated, so for reference:
+     * @param active {@code true} if we are in a state where the keyguard *should* be shown
+     *                           -- still true when keyguard is "there" but is behind an app, or
+     *                           screen is off.
+     * @param occludingTaskRunning {@code true} when there is a running task that has
+     *                                         FLAG_SHOW_WHEN_LOCKED -- also true when the task is
+     *                                         just running on its own and keyguard is not active
+     *                                         at all.
+     */
+    void onKeyguardStateChanged(boolean active, boolean occludingTaskRunning) {
+        mKeyguardActive = active;
         if (!mMainStage.isActive()) {
             return;
         }
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onKeyguardVisibilityChanged: showing=%b", showing);
-        setDividerVisibility(!mKeyguardShowing, null);
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN,
+                "onKeyguardVisibilityChanged: active=%b occludingTaskRunning=%b",
+                active, occludingTaskRunning);
+        setDividerVisibility(!mKeyguardActive, null);
+
+        if (active && occludingTaskRunning) {
+            dismissSplitKeepingLastActiveStage(EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
+        }
     }
 
     void onFinishedWakingUp() {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onFinishedWakingUp");
-        if (!mMainStage.isActive()) {
+        if (mBreakOnNextWake) {
+            dismissSplitKeepingLastActiveStage(EXIT_REASON_DEVICE_FOLDED);
+        }
+    }
+
+    void onStartedGoingToSleep() {
+        recordLastActiveStage();
+    }
+
+    /**
+     * Records the user's last focused stage -- main stage or side stage. Used to determine which
+     * stage of a split pair should be kept, in cases where system focus has moved elsewhere.
+     */
+    void recordLastActiveStage() {
+        if (!isSplitActive() || !isSplitScreenVisible()) {
+            mLastActiveStage = STAGE_TYPE_UNDEFINED;
+        } else if (mMainStage.isFocused()) {
+            mLastActiveStage = STAGE_TYPE_MAIN;
+        } else if (mSideStage.isFocused()) {
+            mLastActiveStage = STAGE_TYPE_SIDE;
+        }
+    }
+
+    /**
+     * Dismisses split, keeping the app that the user focused last in split screen. If the user was
+     * not in split screen, {@link #mLastActiveStage} should be set to STAGE_TYPE_UNDEFINED, and we
+     * will do a no-op.
+     */
+    void dismissSplitKeepingLastActiveStage(@ExitReason int reason) {
+        if (!mMainStage.isActive() || mLastActiveStage == STAGE_TYPE_UNDEFINED) {
+            // no-op
             return;
         }
 
-        // Check if there's only one stage visible while keyguard occluded.
-        final boolean mainStageVisible = mMainStage.mRootTaskInfo.isVisible;
-        final boolean oneStageVisible =
-                mMainStage.mRootTaskInfo.isVisible != mSideStage.mRootTaskInfo.isVisible;
-        if (oneStageVisible && !ENABLE_SHELL_TRANSITIONS) {
-            // Dismiss split because there's show-when-locked activity showing on top of keyguard.
-            // Also make sure the task contains show-when-locked activity remains on top after split
-            // dismissed.
-            final StageTaskListener toTop = mainStageVisible ? mMainStage : mSideStage;
-            exitSplitScreen(toTop, EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
+        if (ENABLE_SHELL_TRANSITIONS) {
+            // Need manually clear here due to this transition might be aborted due to keyguard
+            // on top and lead to no visible change.
+            clearSplitPairedInRecents(reason);
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            prepareExitSplitScreen(mLastActiveStage, wct);
+            mSplitTransitions.startDismissTransition(wct, this, mLastActiveStage, reason);
+            setSplitsVisible(false);
+        } else {
+            exitSplitScreen(mLastActiveStage == STAGE_TYPE_MAIN ? mMainStage : mSideStage, reason);
         }
 
-        // Dismiss split if the flag record any side of stages.
-        if (mTopStageAfterFoldDismiss != STAGE_TYPE_UNDEFINED) {
-            if (ENABLE_SHELL_TRANSITIONS) {
-                // Need manually clear here due to this transition might be aborted due to keyguard
-                // on top and lead to no visible change.
-                clearSplitPairedInRecents(EXIT_REASON_DEVICE_FOLDED);
-                final WindowContainerTransaction wct = new WindowContainerTransaction();
-                prepareExitSplitScreen(mTopStageAfterFoldDismiss, wct);
-                mSplitTransitions.startDismissTransition(wct, this,
-                        mTopStageAfterFoldDismiss, EXIT_REASON_DEVICE_FOLDED);
-                setSplitsVisible(false);
-            } else {
-                exitSplitScreen(
-                        mTopStageAfterFoldDismiss == STAGE_TYPE_MAIN ? mMainStage : mSideStage,
-                        EXIT_REASON_DEVICE_FOLDED);
-            }
-            mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
-        }
+        mBreakOnNextWake = false;
     }
 
     void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
@@ -1909,8 +1950,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         // Put BAL flags to avoid activity start aborted. Otherwise, flows like shortcut to split
         // will be canceled.
-        options.setPendingIntentBackgroundActivityStartMode(MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-        options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+        options.setPendingIntentBackgroundActivityStartMode(
+                MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
 
         // TODO (b/336477473): Disallow enter PiP when launching a task in split by default;
         //                     this might have to be changed as more split-to-pip cujs are defined.
@@ -2223,11 +2264,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN,
                 "setDividerVisibility: visible=%b keyguardShowing=%b dividerAnimating=%b caller=%s",
-                visible, mKeyguardShowing, mIsDividerRemoteAnimating, Debug.getCaller());
+                visible, mKeyguardActive, mIsDividerRemoteAnimating, Debug.getCaller());
 
         // Defer showing divider bar after keyguard dismissed, so it won't interfere with keyguard
         // dismissing animation.
-        if (visible && mKeyguardShowing) {
+        if (visible && mKeyguardActive) {
             ProtoLog.d(WM_SHELL_SPLIT_SCREEN,
                     "   Defer showing divider bar due to keyguard showing.");
             return;
@@ -2597,19 +2638,22 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     @VisibleForTesting
     void onFoldedStateChanged(boolean folded) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onFoldedStateChanged: folded=%b", folded);
-        mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
-        if (!folded) return;
 
-        if (!isSplitActive() || !isSplitScreenVisible()) return;
-
-        // To avoid split dismiss when user fold the device and unfold to use later, we only
-        // record the flag here and try to dismiss on wakeUp callback to ensure split dismiss
-        // when user interact on phone folded.
-        if (mMainStage.isFocused()) {
-            mTopStageAfterFoldDismiss = STAGE_TYPE_MAIN;
-        } else if (mSideStage.isFocused()) {
-            mTopStageAfterFoldDismiss = STAGE_TYPE_SIDE;
+        if (folded) {
+            recordLastActiveStage();
+            // If user folds and has the setting "Continue using apps on fold = NEVER", we assume
+            // they don't want to continue using split on the outer screen (i.e. we break split if
+            // they wake the device in its folded state).
+            mBreakOnNextWake = willSleepOnFold();
+        } else {
+            mBreakOnNextWake = false;
         }
+    }
+
+    /** Returns true if the phone will sleep when it folds. */
+    @VisibleForTesting
+    boolean willSleepOnFold() {
+        return mFoldLockSettingsObserver != null && mFoldLockSettingsObserver.isSleepOnFold();
     }
 
     private Rect getSideStageBounds() {

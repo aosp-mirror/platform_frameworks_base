@@ -17,7 +17,6 @@
 package com.android.systemui.communal.domain.interactor
 
 import android.content.pm.UserInfo
-import com.android.app.tracing.coroutines.launch
 import com.android.systemui.communal.data.repository.CommunalPrefsRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -43,7 +42,7 @@ constructor(
     private val repository: CommunalPrefsRepository,
     userInteractor: SelectedUserInteractor,
     private val userTracker: UserTracker,
-    @CommunalTableLog tableLogBuffer: TableLogBuffer
+    @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) {
 
     val isCtaDismissed: Flow<Boolean> =
@@ -63,25 +62,6 @@ constructor(
 
     suspend fun setCtaDismissed(user: UserInfo = userTracker.userInfo) =
         repository.setCtaDismissed(user)
-
-    val isDisclaimerDismissed: Flow<Boolean> =
-        userInteractor.selectedUserInfo
-            .flatMapLatest { user -> repository.isDisclaimerDismissed(user) }
-            .logDiffsForTable(
-                tableLogBuffer = tableLogBuffer,
-                columnPrefix = "",
-                columnName = "isDisclaimerDismissed",
-                initialValue = false,
-            )
-            .stateIn(
-                scope = bgScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
-
-    fun setDisclaimerDismissed(user: UserInfo = userTracker.userInfo) {
-        bgScope.launch("$TAG#setDisclaimerDismissed") { repository.setDisclaimerDismissed(user) }
-    }
 
     private companion object {
         const val TAG = "CommunalPrefsInteractor"

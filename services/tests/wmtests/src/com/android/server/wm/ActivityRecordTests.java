@@ -2955,7 +2955,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testStartingWindowInTaskFragment() {
-        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setVisible(false).build();
         final WindowState startingWindow = createWindowState(
                 new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING), activity1);
         activity1.addWindow(startingWindow);
@@ -3007,6 +3008,28 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity1.onFirstWindowDrawn(activityWindow);
         activity2.onFirstWindowDrawn(activityWindow);
         assertNull(activity1.mStartingWindow);
+        assertNull(task.mSharedStartingData);
+    }
+
+    @Test
+    public void testStartingWindowInTaskFragmentWithVisibleTask() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity1.getTask();
+        final Rect taskBounds = task.getBounds();
+        final Rect tfBounds = new Rect(taskBounds.left, taskBounds.top,
+                taskBounds.left + taskBounds.width() / 2, taskBounds.bottom);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm).setParentTask(task)
+                .setBounds(tfBounds).build();
+
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).build();
+        final WindowState startingWindow = createWindowState(
+                new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING), activity1);
+        taskFragment.addChild(activity2);
+        activity2.addWindow(startingWindow);
+        activity2.mStartingData = mock(StartingData.class);
+        activity2.attachStartingWindow(startingWindow);
+
+        assertNull(activity2.mStartingData.mAssociatedTask);
         assertNull(task.mSharedStartingData);
     }
 

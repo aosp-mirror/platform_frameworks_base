@@ -49,14 +49,8 @@ interface CommunalPrefsRepository {
     /** Whether the CTA tile has been dismissed. */
     fun isCtaDismissed(user: UserInfo): Flow<Boolean>
 
-    /** Whether the lock screen widget disclaimer has been dismissed by the user. */
-    fun isDisclaimerDismissed(user: UserInfo): Flow<Boolean>
-
     /** Save the CTA tile dismissed state for the current user. */
     suspend fun setCtaDismissed(user: UserInfo)
-
-    /** Save the lock screen widget disclaimer dismissed state for the current user. */
-    suspend fun setDisclaimerDismissed(user: UserInfo)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,9 +67,6 @@ constructor(
 
     override fun isCtaDismissed(user: UserInfo): Flow<Boolean> =
         readKeyForUser(user, CTA_DISMISSED_STATE)
-
-    override fun isDisclaimerDismissed(user: UserInfo): Flow<Boolean> =
-        readKeyForUser(user, DISCLAIMER_DISMISSED_STATE)
 
     /**
      * Emits an event each time a Backup & Restore restoration job is completed, and once at the
@@ -95,12 +86,6 @@ constructor(
         withContext(bgDispatcher) {
             getSharedPrefsForUser(user).edit().putBoolean(CTA_DISMISSED_STATE, true).apply()
             logger.i("Dismissed CTA tile")
-        }
-
-    override suspend fun setDisclaimerDismissed(user: UserInfo) =
-        withContext(bgDispatcher) {
-            getSharedPrefsForUser(user).edit().putBoolean(DISCLAIMER_DISMISSED_STATE, true).apply()
-            logger.i("Dismissed widget disclaimer")
         }
 
     private fun getSharedPrefsForUser(user: UserInfo): SharedPreferences {
@@ -124,6 +109,5 @@ constructor(
         const val TAG = "CommunalPrefsRepository"
         const val FILE_NAME = "communal_hub_prefs"
         const val CTA_DISMISSED_STATE = "cta_dismissed"
-        const val DISCLAIMER_DISMISSED_STATE = "disclaimer_dismissed"
     }
 }
