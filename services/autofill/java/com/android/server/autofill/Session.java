@@ -6641,8 +6641,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 boolean waitingDatasetAuth = false;
                 boolean hideHighlight = (entryCount == 1
                         && dataset.getFieldIds().get(0).equals(mCurrentViewId));
-                // Count how many views are filtered because they are not in current session
-                int numOfViewsFiltered = 0;
                 for (int i = 0; i < entryCount; i++) {
                     if (dataset.getFieldValues().get(i) == null) {
                         continue;
@@ -6655,7 +6653,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             Slog.v(TAG, "Skipping filling view: " +
                                     viewId + " as it isn't part of the current session: " + id);
                         }
-                        numOfViewsFiltered += 1;
                         continue;
                     }
                     ids.add(viewId);
@@ -6669,8 +6666,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         viewState.resetState(ViewState.STATE_WAITING_DATASET_AUTH);
                     }
                 }
-                mPresentationStatsEventLogger.maybeSetFilteredFillableViewsCount(
-                        numOfViewsFiltered);
                 if (!ids.isEmpty()) {
                     if (waitingDatasetAuth) {
                         mUi.hideFillUi(this);
