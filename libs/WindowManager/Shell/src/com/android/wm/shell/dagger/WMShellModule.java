@@ -567,13 +567,15 @@ public abstract class WMShellModule {
             Transitions transitions,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             ShellTaskOrganizer shellTaskOrganizer) {
+        int maxTaskLimit = DesktopModeStatus.getMaxTaskLimit(context);
         if (!DesktopModeStatus.canEnterDesktopMode(context)
-                || DESKTOP_WINDOWING_MODE.isEnabled(context)) {
+                || DESKTOP_WINDOWING_MODE.isEnabled(context)
+                || maxTaskLimit <= 0) {
             return Optional.empty();
         }
         return Optional.of(
                 new DesktopTasksLimiter(
-                        transitions, desktopModeTaskRepository, shellTaskOrganizer));
+                        transitions, desktopModeTaskRepository, shellTaskOrganizer, maxTaskLimit));
     }
 
 

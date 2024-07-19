@@ -126,11 +126,11 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.capture
 import org.mockito.quality.Strictness
-import org.mockito.Mockito.`when` as whenever
 
 /**
  * Test class for {@link DesktopTasksController}
@@ -204,7 +204,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
     shellInit = spy(ShellInit(testExecutor))
     desktopModeTaskRepository = DesktopModeTaskRepository()
     desktopTasksLimiter =
-        DesktopTasksLimiter(transitions, desktopModeTaskRepository, shellTaskOrganizer)
+        DesktopTasksLimiter(
+            transitions,
+            desktopModeTaskRepository,
+            shellTaskOrganizer,
+            MAX_TASK_LIMIT,
+        )
 
     whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
     whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
@@ -780,45 +785,41 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun moveToDesktop_desktopWallpaperDisabled_bringsTasksOver_dontShowBackTask() {
-    val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
-    val freeformTasks = (1..taskLimit).map { _ -> setUpFreeformTask() }
+    val freeformTasks = (1..MAX_TASK_LIMIT).map { _ -> setUpFreeformTask() }
     val newTask = setUpFullscreenTask()
     val homeTask = setUpHomeTask()
 
     controller.moveToDesktop(newTask, transitionSource = UNKNOWN)
 
     val wct = getLatestEnterDesktopWct()
-    assertThat(wct.hierarchyOps.size).isEqualTo(taskLimit + 1) // visible tasks + home
+    assertThat(wct.hierarchyOps.size).isEqualTo(MAX_TASK_LIMIT + 1) // visible tasks + home
     wct.assertReorderAt(0, homeTask)
     wct.assertReorderSequenceInRange(
-      range = 1..<(taskLimit + 1),
-      *freeformTasks.drop(1).toTypedArray(), // Skipping freeformTasks[0]
-      newTask
-    )
+        range = 1..<(MAX_TASK_LIMIT + 1),
+        *freeformTasks.drop(1).toTypedArray(), // Skipping freeformTasks[0]
+        newTask)
   }
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun moveToDesktop_desktopWallpaperEnabled_bringsTasksOverLimit_dontShowBackTask() {
-    val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
-    val freeformTasks = (1..taskLimit).map { _ -> setUpFreeformTask() }
+    val freeformTasks = (1..MAX_TASK_LIMIT).map { _ -> setUpFreeformTask() }
     val newTask = setUpFullscreenTask()
     val homeTask = setUpHomeTask()
 
     controller.moveToDesktop(newTask, transitionSource = UNKNOWN)
 
     val wct = getLatestEnterDesktopWct()
-    assertThat(wct.hierarchyOps.size).isEqualTo(taskLimit + 2) // tasks + home + wallpaper
+    assertThat(wct.hierarchyOps.size).isEqualTo(MAX_TASK_LIMIT + 2) // tasks + home + wallpaper
     // Move home to front
     wct.assertReorderAt(0, homeTask)
     // Add desktop wallpaper activity
     wct.assertPendingIntentAt(1, desktopWallpaperIntent)
     // Bring freeform tasks to front
     wct.assertReorderSequenceInRange(
-      range = 2..<(taskLimit + 2),
-      *freeformTasks.drop(1).toTypedArray(), // Skipping freeformTasks[0]
-      newTask
-    )
+        range = 2..<(MAX_TASK_LIMIT + 2),
+        *freeformTasks.drop(1).toTypedArray(), // Skipping freeformTasks[0]
+        newTask)
   }
 
   @Test
@@ -932,9 +933,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   fun moveTaskToFront_bringsTasksOverLimit_minimizesBackTask() {
-    val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
     setUpHomeTask()
-    val freeformTasks = (1..taskLimit + 1).map { _ -> setUpFreeformTask() }
+    val freeformTasks = (1..MAX_TASK_LIMIT + 1).map { _ -> setUpFreeformTask() }
 
     controller.moveTaskToFront(freeformTasks[0])
 
@@ -1141,8 +1141,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun handleRequest_fullscreenTaskToFreeform_bringsTasksOverLimit_otherTaskIsMinimized() {
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
-    val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
-    val freeformTasks = (1..taskLimit).map { _ -> setUpFreeformTask() }
+    val freeformTasks = (1..MAX_TASK_LIMIT).map { _ -> setUpFreeformTask() }
     freeformTasks.forEach { markTaskVisible(it) }
     val fullscreenTask = createFullscreenTask()
 
@@ -1187,8 +1186,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun handleRequest_freeformTask_freeformVisible_aboveTaskLimit_minimize() {
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
-    val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
-    val freeformTasks = (1..taskLimit).map { _ -> setUpFreeformTask() }
+    val freeformTasks = (1..MAX_TASK_LIMIT).map { _ -> setUpFreeformTask() }
     freeformTasks.forEach { markTaskVisible(it) }
     val newFreeformTask = createFreeformTask()
 
@@ -2599,9 +2597,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
     return TransitionRequestInfo(type, task, null /* remoteTransition */)
   }
 
-  companion object {
+  private companion object {
     const val SECOND_DISPLAY = 2
-    private val STABLE_BOUNDS = Rect(0, 0, 1000, 1000)
+    val STABLE_BOUNDS = Rect(0, 0, 1000, 1000)
+    const val MAX_TASK_LIMIT = 6
   }
 }
 
