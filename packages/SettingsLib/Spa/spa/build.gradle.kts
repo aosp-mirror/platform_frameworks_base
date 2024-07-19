@@ -94,10 +94,6 @@ tasks.register<JacocoReport>("coverageReport") {
 
                     // Excludes debug functions
                     "com/android/settingslib/spa/framework/compose/TimeMeasurer*",
-
-                    // Excludes slice demo presenter & provider
-                    "com/android/settingslib/spa/slice/presenter/Demo*",
-                    "com/android/settingslib/spa/slice/provider/Demo*",
                 )
             )
         }
