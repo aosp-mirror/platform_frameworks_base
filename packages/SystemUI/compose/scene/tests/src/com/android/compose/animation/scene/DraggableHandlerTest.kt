@@ -194,7 +194,8 @@ class DraggableHandlerTest {
             draggableHandler: DraggableHandler,
             startedPosition: Offset = Offset.Zero,
             overSlop: Float = 0f,
-            pointersDown: Int = 1
+            pointersDown: Int = 1,
+            expectedConsumed: Boolean = true,
         ): DragController {
             val dragController =
                 draggableHandler.onDragStarted(
@@ -204,17 +205,23 @@ class DraggableHandlerTest {
                 )
 
             // MultiPointerDraggable will always call onDelta with the initial overSlop right after
-            dragController.onDragDelta(pixels = overSlop)
+            dragController.onDragDelta(pixels = overSlop, expectedConsumed = expectedConsumed)
 
             return dragController
         }
 
-        fun DragController.onDragDelta(pixels: Float) {
-            onDrag(delta = pixels)
+        fun DragController.onDragDelta(pixels: Float, expectedConsumed: Boolean = true) {
+            val consumed = onDrag(delta = pixels)
+            assertThat(consumed).isEqualTo(if (expectedConsumed) pixels else 0f)
         }
 
-        fun DragController.onDragStopped(velocity: Float, canChangeScene: Boolean = true) {
-            onStop(velocity, canChangeScene)
+        fun DragController.onDragStopped(
+            velocity: Float,
+            canChangeScene: Boolean = true,
+            expectedConsumed: Boolean = true
+        ) {
+            val consumed = onStop(velocity, canChangeScene)
+            assertThat(consumed).isEqualTo(if (expectedConsumed) velocity else 0f)
         }
 
         fun NestedScrollConnection.scroll(
@@ -342,10 +349,18 @@ class DraggableHandlerTest {
 
     @Test
     fun onDragStartedWithoutActionsInBothDirections_stayIdle() = runGestureTest {
-        onDragStarted(horizontalDraggableHandler, overSlop = up(fractionOfScreen = 0.3f))
+        onDragStarted(
+            horizontalDraggableHandler,
+            overSlop = up(fractionOfScreen = 0.3f),
+            expectedConsumed = false,
+        )
         assertIdle(currentScene = SceneA)
 
-        onDragStarted(horizontalDraggableHandler, overSlop = down(fractionOfScreen = 0.3f))
+        onDragStarted(
+            horizontalDraggableHandler,
+            overSlop = down(fractionOfScreen = 0.3f),
+            expectedConsumed = false,
+        )
         assertIdle(currentScene = SceneA)
     }
 
@@ -473,19 +488,19 @@ class DraggableHandlerTest {
 
         // start accelaratedScroll and scroll over to B -> null
         val dragController2 = onDragStartedImmediately()
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f))
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f))
+        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = false)
+        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = false)
 
         // here onDragStopped is already triggered, but subsequent onDelta/onDragStopped calls may
         // still be called. Make sure that they don't crash or change the scene
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f))
+        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = false)
         dragController2.onDragStopped(velocity = 0f)
 
         advanceUntilIdle()
         assertIdle(SceneB)
 
         // These events can still come in after the animation has settled
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f))
+        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = false)
         dragController2.onDragStopped(velocity = 0f)
         assertIdle(SceneB)
     }
@@ -829,7 +844,7 @@ class DraggableHandlerTest {
         assertThat(progress).isEqualTo(0.2f)
 
         // this should be ignored, we are scrolling now!
-        dragController.onDragStopped(-velocityThreshold)
+        dragController.onDragStopped(-velocityThreshold, expectedConsumed = false)
         assertTransition(currentScene = SceneA)
 
         nestedScroll.scroll(available = -offsetY10)
