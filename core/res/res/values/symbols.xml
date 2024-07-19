@@ -524,6 +524,7 @@
   <java-symbol type="bool" name="config_notificationCloseButtonSupported"/>
   <java-symbol type="bool" name="config_enableGaiaEducationInPrivateSpace"/>
   <java-symbol type="bool" name="config_enableUdcSysfsUsbStateUpdate"/>
+  <java-symbol type="bool" name="config_enableSearchTileHideIllustrationInPrivateSpace"/>
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
