@@ -1374,6 +1374,14 @@ public final class AutofillManager {
                 if (mRelayoutFix && isAuthenticationPending()) {
                     Log.i(TAG, "onInvisibleForAutofill(): Ignoring expiringResponse due to pending"
                             + " authentication");
+                    try {
+                        mService.notifyNotExpiringResponseDuringAuth(
+                                mSessionId, mContext.getUserId());
+                    } catch (RemoteException e) {
+                        // The failure could be a consequence of something going wrong on the
+                        // server side. Do nothing here since it's just logging, but it's
+                        // possible follow-up actions may fail.
+                    }
                     return;
                 }
                 Log.i(TAG, "onInvisibleForAutofill(): expiringResponse");
@@ -1530,6 +1538,20 @@ public final class AutofillManager {
      */
     public boolean isAuthenticationPending() {
         return mState == STATE_PENDING_AUTHENTICATION;
+    }
+
+    /**
+     * Called to log notify view entered was ignored due to pending auth
+     * @hide
+     */
+    public void notifyViewEnteredIgnoredDuringAuthCount() {
+        try {
+            mService.notifyViewEnteredIgnoredDuringAuthCount(mSessionId, mContext.getUserId());
+        } catch (RemoteException e) {
+            // The failure could be a consequence of something going wrong on the
+            // server side. Do nothing here since it's just logging, but it's
+            // possible follow-up actions may fail.
+        }
     }
 
     /**
@@ -3250,7 +3272,7 @@ public final class AutofillManager {
                     failedIds, failedAutofillValues, hideHighlight);
         }
         try {
-            mService.setAutofillFailure(mSessionId, failedIds, mContext.getUserId());
+            mService.setAutofillFailure(mSessionId, failedIds, isRefill, mContext.getUserId());
         } catch (RemoteException e) {
             // In theory, we could ignore this error since it's not a big deal, but
             // in reality, we rather crash the app anyways, as the failure could be
@@ -3273,6 +3295,7 @@ public final class AutofillManager {
                     //  if there was auth previously.
                     Log.i(TAG, "handleFailedIdsLocked(): Attempting refill");
                     attemptRefill();
+                    mFillReAttemptNeeded = false;
                 }
             }
         }
@@ -3306,6 +3329,22 @@ public final class AutofillManager {
             final AutofillClient client = getClient();
             if (client == null) {
                 return;
+            }
+
+            if (ids == null) {
+                Log.i(TAG, "autofill(): No id's to fill");
+                return;
+            }
+
+            if (mRelayoutFix && isRefill) {
+                try {
+                    mService.setAutofillIdsAttemptedForRefill(
+                            mSessionId, ids, mContext.getUserId());
+                } catch (RemoteException e) {
+                    // The failure could be a consequence of something going wrong on the
+                    // server side. Do nothing here since it's just logging, but it's
+                    // possible follow-up actions may fail.
+                }
             }
 
             final int itemCount = ids.size();
@@ -3361,7 +3400,8 @@ public final class AutofillManager {
                 }
             }
 
-            handleFailedIdsLocked(failedIds, failedAutofillValues, hideHighlight, isRefill);
+            handleFailedIdsLocked(
+                    failedIds, failedAutofillValues, hideHighlight, isRefill);
 
             if (virtualValues != null) {
                 for (int i = 0; i < virtualValues.size(); i++) {
@@ -3415,7 +3455,7 @@ public final class AutofillManager {
     private void reportAutofillContentFailure(AutofillId id) {
         try {
             mService.setAutofillFailure(mSessionId, Collections.singletonList(id),
-                    mContext.getUserId());
+                    false /* isRefill */, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
