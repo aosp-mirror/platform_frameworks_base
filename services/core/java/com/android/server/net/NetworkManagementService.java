@@ -831,66 +831,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public boolean getIpForwardingEnabled() throws IllegalStateException{
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        throw new UnsupportedOperationException("NMS#getIpForwardingEnabled not supported in V+");
-    }
-
-    @Override
-    public void setIpForwardingEnabled(boolean enable) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        throw new UnsupportedOperationException("NMS#setIpForwardingEnabled not supported in V+");
-    }
-
-    @Override
-    public void startTethering(String[] dhcpRange) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        throw new UnsupportedOperationException("NMS#startTethering not supported in V+");
-    }
-
-    @Override
-    public void stopTethering() {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        throw new UnsupportedOperationException("NMS#stopTethering not supported in V+");
-    }
-
-    @Override
-    public boolean isTetheringStarted() {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        throw new UnsupportedOperationException("NMS#isTetheringStarted not supported in V+");
-    }
-
-    @Override
-    public void tetherInterface(String iface) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        throw new UnsupportedOperationException("NMS#tetherInterface not supported in V+");
-    }
-
-    @Override
-    public void untetherInterface(String iface) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        throw new UnsupportedOperationException("NMS#untetherInterface not supported in V+");
-    }
-
-    @Override
-    public String[] listTetheredInterfaces() {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        throw new UnsupportedOperationException("NMS#listTetheredInterfaces not supported in V+");
-    }
-
-    @Override
-    public void enableNat(String internalInterface, String externalInterface) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        throw new UnsupportedOperationException("NMS#enableNat not supported in V+");
-    }
-
-    @Override
-    public void disableNat(String internalInterface, String externalInterface) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        throw new UnsupportedOperationException("NMS#disableNat not supported in V+");
-    }
-
-    @Override
     public void setInterfaceQuota(String iface, long quotaBytes) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
 
