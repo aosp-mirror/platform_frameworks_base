@@ -300,6 +300,9 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         HeadsUpEntryPhone headsUpEntry = getHeadsUpEntryPhone(entry.getKey());
         if (headsUpEntry != null && headsUpEntry.mRemoteInputActive != remoteInputActive) {
             headsUpEntry.mRemoteInputActive = remoteInputActive;
+            if (ExpandHeadsUpOnInlineReply.isEnabled() && remoteInputActive) {
+                headsUpEntry.mRemoteInputActivatedAtLeastOnce = true;
+            }
             if (remoteInputActive) {
                 headsUpEntry.cancelAutoRemovalCallbacks("setRemoteInputActive(true)");
             } else {
