@@ -16,12 +16,15 @@
 
 package com.android.wm.shell.shared.desktopmode
 
+import android.os.SystemProperties
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito
+import com.android.modules.utils.testing.ExtendedMockitoRule
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
 import com.android.window.flags.Flags.FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION
@@ -37,6 +40,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 
 /**
  * Test class for [DesktopModeFlags]
@@ -47,7 +53,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidTestingRunner::class)
 class DesktopModeFlagsTest : ShellTestCase() {
 
-  @JvmField @Rule val setFlagsRule = SetFlagsRule()
+  @Rule(order = 1)
+  @JvmField
+  val setFlagsRule = SetFlagsRule()
+
+  @Rule(order = 2)
+  @JvmField
+  val extendedMockitoRule: ExtendedMockitoRule =
+    ExtendedMockitoRule.Builder(this).mockStatic(SystemProperties::class.java).build()
 
   @Before
   fun setUp() {
@@ -119,7 +132,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
   fun isEnabled_unrecognizableOverride_featureFlagOn_returnsTrue() {
-    setOverride(-2)
+    setOverride(INVALID_TOGGLE_OVERRIDE_SETTING)
 
     // For overridableFlag, for recognizable overrides, follow flag
     assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
@@ -129,7 +142,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
   @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
   fun isEnabled_unrecognizableOverride_featureFlagOff_returnsFalse() {
-    setOverride(-2)
+    setOverride(INVALID_TOGGLE_OVERRIDE_SETTING)
 
     // For overridableFlag, for recognizable overrides, follow flag
     assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse()
@@ -187,102 +200,82 @@ class DesktopModeFlagsTest : ShellTestCase() {
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
   @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
   fun isEnabled_noSystemProperty_overrideOn_featureFlagOff_returnsTrueAndStoresPropertyOn() {
-    System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY)
+    setSystemProperty(INVALID_TOGGLE_OVERRIDE_SETTING)
     setOverride(OVERRIDE_ON.setting)
 
     assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
     // Store System Property if not present
-    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-        .isEqualTo(OVERRIDE_ON.setting.toString())
+    verifySystemPropertySet(OVERRIDE_ON.setting)
   }
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
   fun isEnabled_noSystemProperty_overrideUnset_featureFlagOn_returnsTrueAndStoresPropertyUnset() {
-    System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY)
+    setSystemProperty(INVALID_TOGGLE_OVERRIDE_SETTING)
     setOverride(OVERRIDE_UNSET.setting)
 
     assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
     // Store System Property if not present
-    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-        .isEqualTo(OVERRIDE_UNSET.setting.toString())
+    verifySystemPropertySet(OVERRIDE_UNSET.setting)
   }
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
   @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
   fun isEnabled_noSystemProperty_overrideUnset_featureFlagOff_returnsFalseAndStoresPropertyUnset() {
-    System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY)
+    setSystemProperty(INVALID_TOGGLE_OVERRIDE_SETTING)
     setOverride(OVERRIDE_UNSET.setting)
 
     assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse()
     // Store System Property if not present
-    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-        .isEqualTo(OVERRIDE_UNSET.setting.toString())
-  }
-
-  @Test
-  @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-  @Suppress("ktlint:standard:max-line-length")
-  fun isEnabled_systemPropertyNotInteger_overrideOff_featureFlagOn_returnsFalseAndStoresPropertyOff() {
-    System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, "abc")
-    setOverride(OVERRIDE_OFF.setting)
-
-    assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse()
-    // Store System Property if currently invalid
-    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-        .isEqualTo(OVERRIDE_OFF.setting.toString())
+    verifySystemPropertySet(OVERRIDE_UNSET.setting)
   }
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
   @Suppress("ktlint:standard:max-line-length")
   fun isEnabled_systemPropertyInvalidInteger_overrideOff_featureFlagOn_returnsFalseAndStoresPropertyOff() {
-    System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, "-2")
+    setSystemProperty(INVALID_TOGGLE_OVERRIDE_SETTING)
     setOverride(OVERRIDE_OFF.setting)
 
     assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse()
     // Store System Property if currently invalid
-    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-        .isEqualTo(OVERRIDE_OFF.setting.toString())
+    verifySystemPropertySet(OVERRIDE_OFF.setting)
   }
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
   fun isEnabled_systemPropertyOff_overrideOn_featureFlagOn_returnsFalseAndDoesNotUpdateProperty() {
-    System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, OVERRIDE_OFF.setting.toString())
+    setSystemProperty(OVERRIDE_OFF.setting)
     setOverride(OVERRIDE_ON.setting)
 
     // Have a consistent override until reboot
     assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse()
-    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-        .isEqualTo(OVERRIDE_OFF.setting.toString())
+    verifySystemPropertyNotUpdated()
   }
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
   @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
   fun isEnabled_systemPropertyOn_overrideOff_featureFlagOff_returnsTrueAndDoesNotUpdateProperty() {
-    System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, OVERRIDE_ON.setting.toString())
+    setSystemProperty(OVERRIDE_ON.setting)
     setOverride(OVERRIDE_OFF.setting)
 
     // Have a consistent override until reboot
     assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
-    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-        .isEqualTo(OVERRIDE_ON.setting.toString())
+    verifySystemPropertyNotUpdated()
   }
 
   @Test
   @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
   @Suppress("ktlint:standard:max-line-length")
   fun isEnabled_systemPropertyUnset_overrideOff_featureFlagOn_returnsTrueAndDoesNotUpdateProperty() {
-    System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, OVERRIDE_UNSET.setting.toString())
+    setSystemProperty(OVERRIDE_UNSET.setting)
     setOverride(OVERRIDE_OFF.setting)
 
     // Have a consistent override until reboot
     assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue()
-    assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-        .isEqualTo(OVERRIDE_UNSET.setting.toString())
+    verifySystemPropertyNotUpdated()
   }
 
   @Test
@@ -441,16 +434,33 @@ class DesktopModeFlagsTest : ShellTestCase() {
   }
 
   private fun resetCache() {
-    val cachedToggleOverride =
-      DesktopModeFlags::class.java.getDeclaredField("cachedToggleOverride")
+    val cachedToggleOverride = DesktopModeFlags::class.java.getDeclaredField("cachedToggleOverride")
     cachedToggleOverride.isAccessible = true
     cachedToggleOverride.set(null, null)
 
-    // Clear override cache stored in System property
-    System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY)
+    setSystemProperty(INVALID_TOGGLE_OVERRIDE_SETTING)
+  }
+
+  private fun setSystemProperty(systemProperty: Int) {
+    ExtendedMockito.doReturn(systemProperty).`when` {
+      SystemProperties.getInt(eq(SYSTEM_PROPERTY_OVERRIDE_KEY), any())
+    }
+  }
+
+  private fun verifySystemPropertySet(systemProperty: Int) {
+    ExtendedMockito.verify {
+      SystemProperties.set(eq(SYSTEM_PROPERTY_OVERRIDE_KEY), eq(systemProperty.toString()))
+    }
+  }
+
+  private fun verifySystemPropertyNotUpdated() {
+    ExtendedMockito.verify(
+        { SystemProperties.set(eq(SYSTEM_PROPERTY_OVERRIDE_KEY), any()) }, Mockito.never())
   }
 
   private companion object {
     const val SYSTEM_PROPERTY_OVERRIDE_KEY = "sys.wmshell.desktopmode.dev_toggle_override"
+
+    const val INVALID_TOGGLE_OVERRIDE_SETTING = -2
   }
 }
