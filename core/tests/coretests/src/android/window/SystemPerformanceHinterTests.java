@@ -46,10 +46,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.HashMap;
 
@@ -62,6 +64,9 @@ import java.util.HashMap;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class SystemPerformanceHinterTests {
+
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
 
     private static final int DEFAULT_DISPLAY_ID = android.view.Display.DEFAULT_DISPLAY;
     private static final int SECONDARY_DISPLAY_ID = DEFAULT_DISPLAY_ID + 1;
@@ -83,8 +88,6 @@ public class SystemPerformanceHinterTests {
 
     @Before
     public void setUpOnce() {
-        MockitoAnnotations.initMocks(this);
-
         mDefaultDisplayRoot = new SurfaceControl();
         mSecondaryDisplayRoot = new SurfaceControl();
         mRootProvider = new SystemPerformanceHinterTests.RootProvider();

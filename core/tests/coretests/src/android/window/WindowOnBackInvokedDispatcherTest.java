@@ -49,13 +49,15 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +72,10 @@ import java.util.List;
 @SmallTest
 @Presubmit
 public class WindowOnBackInvokedDispatcherTest {
+
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
+
     @Mock
     private IWindowSession mWindowSession;
     @Mock
@@ -106,8 +112,6 @@ public class WindowOnBackInvokedDispatcherTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         doReturn(true).when(mApplicationInfo).isOnBackInvokedCallbackEnabled();
         doReturn(mApplicationInfo).when(mContext).getApplicationInfo();
 

@@ -38,10 +38,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 /**
  * Tests for {@link WindowContextController}
@@ -56,6 +58,10 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @Presubmit
 public class WindowContextControllerTest {
+
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
+
     private WindowContextController mController;
     @Mock
     private WindowTokenClientController mWindowTokenClientController;
@@ -64,7 +70,6 @@ public class WindowContextControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         mController = spy(new WindowContextController(mMockToken));
         doReturn(mWindowTokenClientController).when(mController).getWindowTokenClientController();
         doNothing().when(mMockToken).onConfigurationChanged(any(), anyInt(), anyBoolean());
