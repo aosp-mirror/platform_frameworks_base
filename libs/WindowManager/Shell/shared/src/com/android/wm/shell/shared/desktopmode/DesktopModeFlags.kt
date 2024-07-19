@@ -17,20 +17,16 @@
 package com.android.wm.shell.shared.desktopmode
 
 import android.content.Context
-import android.os.SystemProperties
 import android.provider.Settings
 import android.util.Log
 import com.android.window.flags.Flags
 
-/**
- * Util to check desktop mode flags state.
+/*
+ * A shared class to check desktop mode flags state.
  *
- * This utility is used to allow developer option toggles to override flags related to Desktop
- * Windowing.
- *
- * Computes whether Desktop Windowing related flags should be enabled by using the aconfig flag
+ * The class computes whether a Desktop Windowing flag should be enabled by using the aconfig flag
  * value and the developer option override state (if applicable).
- */
+ **/
 enum class DesktopModeFlags(
     // Function called to obtain aconfig flag value.
     private val flagFunction: () -> Boolean,
@@ -71,52 +67,35 @@ enum class DesktopModeFlags(
               // Cache toggle override the first time we encounter context. Override does not change
               // with context, as context is just used to fetch System Property and Settings.Global
               cachedToggleOverride = override
-              Log.d(TAG, "Local toggle override initialized to: $override")
+              Log.d(TAG, "Toggle override initialized to: $override")
               override
             }
 
     return override
   }
 
-  /**
-   * Returns [ToggleOverride] from a non-persistent system property if present. Otherwise
-   * initializes the system property by reading Settings.Global.
-   */
   private fun getToggleOverrideFromSystem(context: Context): ToggleOverride {
     // A non-persistent System Property is used to store override to ensure it remains
     // constant till reboot.
     val overrideFromSystemProperties: ToggleOverride? =
-        SystemProperties.getInt(SYSTEM_PROPERTY_OVERRIDE_KEY, INVALID_TOGGLE_OVERRIDE_SETTING)
-            .convertToToggleOverride()
-
+        System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, null).convertToToggleOverride()
     return overrideFromSystemProperties
         ?: run {
-          // TODO(b/348193756): Remove the initialization after adding it in core. If
-          //  SystemProperty is still not present then return OVERRIDE_UNSET
-          // Initialize System Property if not present (just after reboot)
-          initializeOverrideInSystemProperty(context)
+          // Read Setting Global if System Property is not present (just after reboot)
+          // or not valid (user manually changed the value)
+          val overrideFromSettingsGlobal =
+              convertToToggleOverrideWithFallback(
+                  Settings.Global.getInt(
+                      context.contentResolver,
+                      Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
+                      ToggleOverride.OVERRIDE_UNSET.setting),
+                  ToggleOverride.OVERRIDE_UNSET)
+          // Initialize System Property
+          System.setProperty(
+              SYSTEM_PROPERTY_OVERRIDE_KEY, overrideFromSettingsGlobal.setting.toString())
+
+          overrideFromSettingsGlobal
         }
-  }
-
-  /** Initializes Override System property based on Settings.Global set by toggle. */
-  private fun initializeOverrideInSystemProperty(context: Context): ToggleOverride {
-    val settingValue =
-        Settings.Global.getInt(
-            context.contentResolver,
-            Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
-            ToggleOverride.OVERRIDE_UNSET.setting)
-    try {
-      SystemProperties.set(SYSTEM_PROPERTY_OVERRIDE_KEY, settingValue.toString())
-      Log.d(TAG, "Initialized system property with override setting: $settingValue")
-    } catch (e: RuntimeException) {
-      // Thrown in device tests that don't mock SystemProperties
-      Log.w(
-          TAG,
-          "Failed to set a system property: key=$SYSTEM_PROPERTY_OVERRIDE_KEY, " +
-              "value=$settingValue, message=${e.message}")
-    }
-
-    return convertToToggleOverrideWithFallback(settingValue, ToggleOverride.OVERRIDE_UNSET)
   }
 
   /**
@@ -134,10 +113,11 @@ enum class DesktopModeFlags(
     OVERRIDE_ON(1)
   }
 
-  private fun Int.convertToToggleOverride(): ToggleOverride? {
-    return settingToToggleOverrideMap[this]
+  private fun String?.convertToToggleOverride(): ToggleOverride? {
+    val intValue = this?.toIntOrNull() ?: return null
+    return settingToToggleOverrideMap[intValue]
         ?: run {
-          Log.w(TAG, "Unknown toggleOverride int $this")
+          Log.w(TAG, "Unknown toggleOverride int $intValue")
           null
         }
   }
@@ -150,8 +130,6 @@ enum class DesktopModeFlags(
      * option overrides.
      */
     private const val SYSTEM_PROPERTY_OVERRIDE_KEY = "sys.wmshell.desktopmode.dev_toggle_override"
-
-    private const val INVALID_TOGGLE_OVERRIDE_SETTING = -2
 
     /**
      * Local cache for toggle override, which is initialized once on its first access. It needs to
