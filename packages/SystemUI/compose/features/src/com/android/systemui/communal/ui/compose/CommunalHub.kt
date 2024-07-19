@@ -1002,6 +1002,7 @@ private fun WidgetContent(
                 }
                 .thenIf(viewModel.isEditMode) {
                     Modifier.semantics {
+                        onClick(clickActionLabel, null)
                         contentDescription = accessibilityLabel
                         val deleteAction =
                             CustomAccessibilityAction(removeWidgetActionLabel) {
