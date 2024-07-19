@@ -947,7 +947,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 } else if (r.isVisibleRequested()) {
                     lifecycleItem = PauseActivityItem.obtain(r.token);
                 } else {
-                    lifecycleItem = StopActivityItem.obtain(r.token);
+                    lifecycleItem = new StopActivityItem(r.token);
                 }
 
                 // Schedule transaction.

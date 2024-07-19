@@ -24,7 +24,6 @@ import static android.app.servertransaction.TestUtils.resultInfoList;
 import static org.junit.Assert.assertNotSame;
 
 import android.annotation.NonNull;
-import android.app.ActivityOptions;
 import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -158,17 +157,6 @@ public class ObjectPoolTests {
     @Test
     public void testRecyclePauseActivityItemItem() {
         testRecycle(() -> PauseActivityItem.obtain(mActivityToken, true, true, true, true));
-    }
-
-    @Test
-    public void testRecycleStartActivityItem() {
-        testRecycle(() -> StartActivityItem.obtain(mActivityToken,
-                new ActivityOptions.SceneTransitionInfo()));
-    }
-
-    @Test
-    public void testRecycleStopItem() {
-        testRecycle(() -> StopActivityItem.obtain(mActivityToken));
     }
 
     private void testRecycle(@NonNull Supplier<? extends ObjectPoolItem> obtain) {

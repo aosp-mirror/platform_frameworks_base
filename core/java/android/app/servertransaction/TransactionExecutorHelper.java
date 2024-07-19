@@ -201,7 +201,7 @@ public class TransactionExecutorHelper {
                 lifecycleItem = PauseActivityItem.obtain(r.token);
                 break;
             case ON_STOP:
-                lifecycleItem = StopActivityItem.obtain(r.token);
+                lifecycleItem = new StopActivityItem(r.token);
                 break;
             default:
                 lifecycleItem = new ResumeActivityItem(r.token, false /* isForward */,

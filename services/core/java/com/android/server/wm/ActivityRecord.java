@@ -5050,13 +5050,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private ActivityLifecycleItem getLifecycleItemForCurrentStateForResult() {
         switch (mState) {
             case STARTED:
-                return StartActivityItem.obtain(token, null);
+                return new StartActivityItem(token, null);
             case PAUSING:
             case PAUSED:
                 return PauseActivityItem.obtain(token);
             case STOPPING:
             case STOPPED:
-                return StopActivityItem.obtain(token);
+                return new StopActivityItem(token);
             default:
                 // Do not send a result immediately if the activity is in state INITIALIZING,
                 // RESTARTING_PROCESS, FINISHING, DESTROYING, or DESTROYED.
@@ -6358,7 +6358,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             try {
                 mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                        StartActivityItem.obtain(token, takeSceneTransitionInfo()));
+                        new StartActivityItem(token, takeSceneTransitionInfo()));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending start: " + intent.getComponent(), e);
             }
@@ -6655,7 +6655,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             EventLogTags.writeWmStopActivity(
                     mUserId, System.identityHashCode(this), shortComponentName);
             mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    StopActivityItem.obtain(token));
+                    new StopActivityItem(token));
 
             mAtmService.mH.postDelayed(mStopTimeoutRunnable, STOP_TIMEOUT);
         } catch (Exception e) {
@@ -10092,7 +10092,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // {@link ActivityTaskManagerService.activityStopped}).
         try {
             mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    StopActivityItem.obtain(token));
+                    new StopActivityItem(token));
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception thrown during restart " + this, e);
         }
