@@ -25,4 +25,7 @@ parcelable ProvisionSubscriberId {
 
     /** carrier id */
     int mCarrierId;
+
+    /** apn */
+    String mNiddApn;
 }
