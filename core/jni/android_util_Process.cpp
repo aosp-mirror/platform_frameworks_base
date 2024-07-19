@@ -818,7 +818,6 @@ jintArray android_os_Process_getPids(JNIEnv* env, jobject clazz,
     }
 
     DIR* dirp = opendir(file8);
-
     env->ReleaseStringUTFChars(file, file8);
 
     if(dirp == NULL) {
@@ -851,6 +850,7 @@ jintArray android_os_Process_getPids(JNIEnv* env, jobject clazz,
             jintArray newArray = env->NewIntArray(newCount);
             if (newArray == NULL) {
                 closedir(dirp);
+                if (curData) env->ReleaseIntArrayElements(lastArray, curData, 0);
                 jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
                 return NULL;
             }
