@@ -669,7 +669,12 @@ class Spaghetti(
         }
 
     fun startTransitionToCredentialUI(isError: Boolean) {
-        applicationScope.launch {
+        if (!constraintBp()) {
+            applicationScope.launch {
+                viewModel.onSwitchToCredential()
+                legacyCallback?.onUseDeviceCredential()
+            }
+        } else {
             viewModel.onSwitchToCredential()
             legacyCallback?.onUseDeviceCredential()
         }
