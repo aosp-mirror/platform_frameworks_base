@@ -2867,7 +2867,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mStartingData != null) {
             if (mStartingData.mAssociatedTask != null) {
                 // The snapshot type may have called associateStartingDataWithTask().
-                attachStartingSurfaceToAssociatedTask();
+                // If this activity is rotated, don't attach to task to preserve the transform.
+                if (!hasFixedRotationTransform()) {
+                    attachStartingSurfaceToAssociatedTask();
+                }
             } else if (isEmbedded()) {
                 associateStartingWindowWithTaskIfNeeded();
             }
@@ -2896,6 +2899,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void associateStartingWindowWithTaskIfNeeded() {
         if (mStartingWindow == null || mStartingData == null
                 || mStartingData.mAssociatedTask != null) {
+            return;
+        }
+        if (task.isVisible() && !task.inTransition()) {
+            // Don't associated with task if the task is visible especially when the activity is
+            // embedded. We just need to show splash screen on the activity in case the first frame
+            // is not ready.
             return;
         }
         associateStartingDataWithTask();

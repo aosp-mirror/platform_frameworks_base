@@ -175,12 +175,14 @@ class SceneContainerStartableTest : SysuiTestCase() {
             transitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Gone)
             assertThat(isVisible).isFalse()
 
-            kosmos.headsUpNotificationRepository.activeHeadsUpRows.value =
+            kosmos.headsUpNotificationRepository.setNotifications(
                 buildNotificationRows(isPinned = true)
+            )
             assertThat(isVisible).isTrue()
 
-            kosmos.headsUpNotificationRepository.activeHeadsUpRows.value =
+            kosmos.headsUpNotificationRepository.setNotifications(
                 buildNotificationRows(isPinned = false)
+            )
             assertThat(isVisible).isFalse()
         }
 
@@ -1699,8 +1701,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
         return transitionStateFlow
     }
 
-    private fun buildNotificationRows(isPinned: Boolean = false): Set<HeadsUpRowRepository> =
-        setOf(
+    private fun buildNotificationRows(isPinned: Boolean = false): List<HeadsUpRowRepository> =
+        listOf(
             fakeHeadsUpRowRepository(key = "0", isPinned = isPinned),
             fakeHeadsUpRowRepository(key = "1", isPinned = isPinned),
             fakeHeadsUpRowRepository(key = "2", isPinned = isPinned),

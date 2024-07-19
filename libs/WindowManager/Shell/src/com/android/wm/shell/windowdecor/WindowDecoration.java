@@ -139,7 +139,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     private SurfaceControlViewHost mViewHost;
     private Configuration mWindowDecorConfig;
     TaskDragResizer mTaskDragResizer;
-    private boolean mIsCaptionVisible;
+    boolean mIsCaptionVisible;
 
     /** The most recent set of insets applied to this window decoration. */
     private WindowDecorationInsets mWindowDecorationInsets;
@@ -508,6 +508,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mTaskDragResizer = taskDragResizer;
     }
 
+    // TODO(b/346441962): Move these three methods closer to implementing or View-level classes to
+    //  keep implementation details more encapsulated.
     private void setCaptionVisibility(View rootView, boolean visible) {
         if (rootView == null) {
             return;

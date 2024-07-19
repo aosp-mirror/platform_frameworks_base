@@ -37,7 +37,7 @@ int register_android_server_SerialService(JNIEnv* env);
 int register_android_server_SystemServer(JNIEnv* env);
 int register_android_server_UsbAlsaJackDetector(JNIEnv* env);
 int register_android_server_UsbAlsaMidiDevice(JNIEnv* env);
-int register_android_server_UsbDeviceManager(JNIEnv* env);
+int register_android_server_UsbDeviceManager(JavaVM* vm, JNIEnv* env);
 int register_android_server_UsbHostManager(JNIEnv* env);
 int register_android_server_vr_VrManagerService(JNIEnv* env);
 int register_android_server_vibrator_VibratorController(JavaVM* vm, JNIEnv* env);
@@ -96,7 +96,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_SerialService(env);
     register_android_server_InputManager(env);
     register_android_server_LightsService(env);
-    register_android_server_UsbDeviceManager(env);
+    register_android_server_UsbDeviceManager(vm, env);
     register_android_server_UsbAlsaJackDetector(env);
     register_android_server_UsbAlsaMidiDevice(env);
     register_android_server_UsbHostManager(env);

@@ -49,12 +49,12 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         ProtoLogDataSource.TlsState,
         ProtoLogDataSource.IncrementalState> {
 
-    private final Consumer<ProtoLogConfig> mOnStart;
+    private final Instance.TracingInstanceStartCallback mOnStart;
     private final Runnable mOnFlush;
-    private final Consumer<ProtoLogConfig> mOnStop;
+    private final Instance.TracingInstanceStopCallback mOnStop;
 
-    public ProtoLogDataSource(Consumer<ProtoLogConfig> onStart, Runnable onFlush,
-            Consumer<ProtoLogConfig> onStop) {
+    public ProtoLogDataSource(Instance.TracingInstanceStartCallback onStart, Runnable onFlush,
+            Instance.TracingInstanceStopCallback onStop) {
         super("android.protolog");
         this.mOnStart = onStart;
         this.mOnFlush = onFlush;
@@ -267,20 +267,30 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
 
     public static class Instance extends DataSourceInstance {
 
-        private final Consumer<ProtoLogConfig> mOnStart;
+        public interface TracingInstanceStartCallback {
+            void run(int instanceIdx, ProtoLogConfig config);
+        }
+
+        public interface TracingInstanceStopCallback {
+            void run(int instanceIdx, ProtoLogConfig config);
+        }
+
+        private final TracingInstanceStartCallback mOnStart;
         private final Runnable mOnFlush;
-        private final Consumer<ProtoLogConfig> mOnStop;
+        private final TracingInstanceStopCallback mOnStop;
         private final ProtoLogConfig mConfig;
+        private final int mInstanceIndex;
 
         public Instance(
                 DataSource<Instance, TlsState, IncrementalState> dataSource,
                 int instanceIdx,
                 ProtoLogConfig config,
-                Consumer<ProtoLogConfig> onStart,
+                TracingInstanceStartCallback onStart,
                 Runnable onFlush,
-                Consumer<ProtoLogConfig> onStop
+                TracingInstanceStopCallback onStop
         ) {
             super(dataSource, instanceIdx);
+            this.mInstanceIndex = instanceIdx;
             this.mOnStart = onStart;
             this.mOnFlush = onFlush;
             this.mOnStop = onStop;
@@ -289,7 +299,7 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
 
         @Override
         public void onStart(StartCallbackArguments args) {
-            this.mOnStart.accept(this.mConfig);
+            this.mOnStart.run(this.mInstanceIndex, this.mConfig);
         }
 
         @Override
@@ -299,7 +309,7 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
 
         @Override
         public void onStop(StopCallbackArguments args) {
-            this.mOnStop.accept(this.mConfig);
+            this.mOnStop.run(this.mInstanceIndex, this.mConfig);
         }
     }
 }

@@ -25,7 +25,6 @@ import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
@@ -38,19 +37,9 @@ class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             TAG_WITH_CLASS_NAME ? "DesktopModeLaunchParamsModifier" : TAG_ATM;
     private static final boolean DEBUG = false;
 
-    public static final float DESKTOP_MODE_INITIAL_BOUNDS_SCALE =
-            SystemProperties
-                    .getInt("persist.wm.debug.desktop_mode_initial_bounds_scale", 75) / 100f;
-
-    /**
-     * Flag to indicate whether to restrict desktop mode to supported devices.
-     */
-    private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
-
     private StringBuilder mLogBuilder;
 
-    private final Context mContext;
+    @NonNull private final Context mContext;
 
     DesktopModeLaunchParamsModifier(@NonNull Context context) {
         mContext = context;

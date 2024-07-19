@@ -23,6 +23,7 @@ import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
+import com.android.app.tracing.coroutines.launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
@@ -64,10 +65,12 @@ import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,6 +97,7 @@ class CommunalInteractor
 @Inject
 constructor(
     @Application val applicationScope: CoroutineScope,
+    @Background private val bgScope: CoroutineScope,
     @Background val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
     private val widgetRepository: CommunalWidgetRepository,
@@ -147,6 +151,17 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 replay = 1,
             )
+
+    private val _isDisclaimerDismissed = MutableStateFlow(false)
+    val isDisclaimerDismissed: Flow<Boolean> = _isDisclaimerDismissed.asStateFlow()
+
+    fun setDisclaimerDismissed() {
+        bgScope.launch("$TAG#setDisclaimerDismissed") {
+            _isDisclaimerDismissed.value = true
+            delay(DISCLAIMER_RESET_MILLIS)
+            _isDisclaimerDismissed.value = false
+        }
+    }
 
     /** Whether to show communal when exiting the occluded state. */
     val showCommunalFromOccluded: Flow<Boolean> =
@@ -510,6 +525,14 @@ constructor(
     }
 
     companion object {
+        const val TAG = "CommunalInteractor"
+
+        /**
+         * The amount of time between showing the widget disclaimer to the user as measured from the
+         * moment the disclaimer is dimsissed.
+         */
+        val DISCLAIMER_RESET_MILLIS = 30.minutes
+
         /**
          * The user activity timeout which should be used when the communal hub is opened. A value
          * of -1 means that the user's chosen screen timeout will be used instead.

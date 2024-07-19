@@ -104,7 +104,6 @@ static const char* VELOCITYTRACKER_STRATEGY = "velocitytracker_strategy";
 
 static struct {
     jclass clazz;
-    jmethodID notifyConfigurationChanged;
     jmethodID notifyInputDevicesChanged;
     jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
@@ -314,7 +313,6 @@ public:
 
     void getReaderConfiguration(InputReaderConfiguration* outConfig) override;
     void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) override;
-    void notifyConfigurationChanged(nsecs_t when) override;
     std::shared_ptr<KeyCharacterMap> getKeyboardLayoutOverlay(
             const InputDeviceIdentifier& identifier,
             const std::optional<KeyboardLayoutInfo> keyboardLayoutInfo) override;
@@ -938,18 +936,6 @@ void NativeInputManager::notifySwitch(nsecs_t when,
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifySwitch,
             when, switchValues, switchMask);
     checkAndClearExceptionFromCallback(env, "notifySwitch");
-}
-
-void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-    ALOGD("notifyConfigurationChanged - when=%lld", when);
-#endif
-    ATRACE_CALL();
-
-    JNIEnv* env = jniEnv();
-
-    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyConfigurationChanged, when);
-    checkAndClearExceptionFromCallback(env, "notifyConfigurationChanged");
 }
 
 static jobject getInputApplicationHandleObjLocalRef(
@@ -2872,9 +2858,6 @@ int register_android_server_InputManager(JNIEnv* env) {
     jclass clazz;
     FIND_CLASS(clazz, "com/android/server/input/InputManagerService");
     gServiceClassInfo.clazz = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
-
-    GET_METHOD_ID(gServiceClassInfo.notifyConfigurationChanged, clazz,
-            "notifyConfigurationChanged", "(J)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyInputDevicesChanged, clazz,
             "notifyInputDevicesChanged", "([Landroid/view/InputDevice;)V");

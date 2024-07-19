@@ -1574,30 +1574,6 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
-    @BrokenWithSceneContainer(339465026)
-    fun aodToOccluded() =
-        testScope.runTest {
-            // GIVEN a prior transition has run to AOD
-            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.AOD)
-            runCurrent()
-
-            // WHEN the keyguard is occluded
-            keyguardRepository.setKeyguardOccluded(true)
-            runCurrent()
-
-            // THEN a transition to OCCLUDED should occur
-            assertThat(transitionRepository)
-                .startedTransition(
-                    ownerName = "FromAodTransitionInteractor(isOccluded = true)",
-                    from = KeyguardState.AOD,
-                    to = KeyguardState.OCCLUDED,
-                    animatorAssertion = { it.isNotNull() },
-                )
-
-            coroutineContext.cancelChildren()
-        }
-
-    @Test
     @DisableSceneContainer
     fun aodToPrimaryBouncer() =
         testScope.runTest {

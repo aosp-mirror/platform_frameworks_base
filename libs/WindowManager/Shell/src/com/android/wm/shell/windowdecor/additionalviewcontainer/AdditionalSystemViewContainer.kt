@@ -30,17 +30,22 @@ import android.view.WindowManager
  */
 class AdditionalSystemViewContainer(
     private val context: Context,
-    layoutId: Int,
     taskId: Int,
     x: Int,
     y: Int,
     width: Int,
-    height: Int
+    height: Int,
+    layoutId: Int? = null
 ) : AdditionalViewContainer() {
     override val view: View
+    val windowManager: WindowManager? = context.getSystemService(WindowManager::class.java)
 
     init {
-        view = LayoutInflater.from(context).inflate(layoutId, null)
+        if (layoutId != null) {
+            view = LayoutInflater.from(context).inflate(layoutId, null)
+        } else {
+            view = View(context)
+        }
         val lp = WindowManager.LayoutParams(
             width, height, x, y,
             WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,
@@ -51,12 +56,11 @@ class AdditionalSystemViewContainer(
             gravity = Gravity.LEFT or Gravity.TOP
             setTrustedOverlay()
         }
-        val wm: WindowManager? = context.getSystemService(WindowManager::class.java)
-        wm?.addView(view, lp)
+        windowManager?.addView(view, lp)
     }
 
     override fun releaseView() {
-        context.getSystemService(WindowManager::class.java)?.removeViewImmediate(view)
+        windowManager?.removeViewImmediate(view)
     }
 
     override fun setPosition(t: SurfaceControl.Transaction, x: Float, y: Float) {
@@ -64,6 +68,6 @@ class AdditionalSystemViewContainer(
             this.x = x.toInt()
             this.y = y.toInt()
         }
-        view.layoutParams = lp
+        windowManager?.updateViewLayout(view, lp)
     }
 }

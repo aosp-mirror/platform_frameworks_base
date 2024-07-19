@@ -79,7 +79,8 @@ public class ShadeTouchHandler implements TouchHandler {
                 if (mCapture != null && mCapture) {
                     sendTouchEvent((MotionEvent) ev);
                 }
-                if (((MotionEvent) ev).getAction() == MotionEvent.ACTION_UP) {
+                if (((MotionEvent) ev).getAction() == MotionEvent.ACTION_UP
+                        || ((MotionEvent) ev).getAction() == MotionEvent.ACTION_CANCEL) {
                     session.pop();
                 }
             }

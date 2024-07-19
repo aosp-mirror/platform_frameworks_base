@@ -226,6 +226,14 @@ class AppCompatAspectRatioOverrides {
                         : getDefaultMinAspectRatio();
     }
 
+    float getDefaultMinAspectRatioForUnresizableAppsFromConfig() {
+        return mAppCompatConfiguration.getDefaultMinAspectRatioForUnresizableApps();
+    }
+
+    boolean isSplitScreenAspectRatioForUnresizableAppsEnabled() {
+        return mAppCompatConfiguration.getIsSplitScreenAspectRatioForUnresizableAppsEnabled();
+    }
+
     private float getDisplaySizeMinAspectRatio() {
         final DisplayArea displayArea = mActivityRecord.getDisplayArea();
         if (displayArea == null) {
@@ -278,7 +286,7 @@ class AppCompatAspectRatioOverrides {
         return getSplitScreenAspectRatio();
     }
 
-    private float getDefaultMinAspectRatio() {
+    float getDefaultMinAspectRatio() {
         if (mActivityRecord.getDisplayArea() == null
                 || !mAppCompatConfiguration
                 .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox()) {

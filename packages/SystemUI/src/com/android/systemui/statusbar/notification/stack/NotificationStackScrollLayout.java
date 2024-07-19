@@ -4862,14 +4862,20 @@ public class NotificationStackScrollLayout
      * @param isHeadsUp true for appear, false for disappear animations
      */
     public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {
-        final boolean add = mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed);
+        final boolean closedAndSeenInShade = !mIsExpanded && row.getEntry() != null
+                && row.getEntry().isSeenInShade();
+        final boolean addAnimation = mAnimationsEnabled && !closedAndSeenInShade &&
+                (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed);
         if (SPEW) {
             Log.v(TAG, "generateHeadsUpAnimation:"
-                    + " willAdd=" + add
-                    + " isHeadsUp=" + isHeadsUp
-                    + " row=" + row.getEntry().getKey());
+                    + " addAnimation=" + addAnimation
+                    + (row.getEntry() == null ? " entry NULL "
+                            : " isSeenInShade=" + row.getEntry().isSeenInShade()
+                                    + " row=" + row.getEntry().getKey())
+                    + " mIsExpanded=" + mIsExpanded
+                    + " isHeadsUp=" + isHeadsUp);
         }
-        if (add) {
+        if (addAnimation) {
             // If we're hiding a HUN we just started showing THIS FRAME, then remove that event,
             // and do not add the disappear event either.
             if (!isHeadsUp && mHeadsUpChangeAnimations.remove(new Pair<>(row, true))) {

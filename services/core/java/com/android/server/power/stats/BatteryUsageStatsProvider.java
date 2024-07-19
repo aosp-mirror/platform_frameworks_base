@@ -201,7 +201,8 @@ public class BatteryUsageStatsProvider {
 
             batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
                     stats.getCustomEnergyConsumerNames(), includePowerModels,
-                    includeProcessStateData, minConsumedPowerThreshold);
+                    includeProcessStateData, query.isScreenStateDataNeeded(),
+                    query.isPowerStateDataNeeded(), minConsumedPowerThreshold);
 
             // TODO(b/188068523): use a monotonic clock to ensure resilience of order and duration
             // of batteryUsageStats sessions to wall-clock adjustments
@@ -348,6 +349,7 @@ public class BatteryUsageStatsProvider {
         final String[] customEnergyConsumerNames = stats.getCustomEnergyConsumerNames();
         final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
                 customEnergyConsumerNames, includePowerModels, includeProcessStateData,
+                query.isScreenStateDataNeeded(), query.isPowerStateDataNeeded(),
                 minConsumedPowerThreshold);
         if (mPowerStatsStore == null) {
             Log.e(TAG, "PowerStatsStore is unavailable");
@@ -408,7 +410,6 @@ public class BatteryUsageStatsProvider {
                             + " does not include process state data");
                     continue;
                 }
-
                 builder.add(snapshot);
             }
         }

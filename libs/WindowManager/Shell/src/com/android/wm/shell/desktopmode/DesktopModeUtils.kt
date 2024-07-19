@@ -66,7 +66,7 @@ fun calculateInitialBounds(
                         idealSize
                     }
                 } else {
-                    maximumSizeMaintainingAspectRatio(taskInfo, idealSize, appAspectRatio)
+                    maximizeSizeGivenAspectRatio(taskInfo, idealSize, appAspectRatio)
                 }
             }
             ORIENTATION_PORTRAIT -> {
@@ -85,13 +85,13 @@ fun calculateInitialBounds(
                 } else {
                     if (isFixedOrientationLandscape(topActivityInfo.screenOrientation)) {
                         // Apply custom app width and calculate maximum size
-                        maximumSizeMaintainingAspectRatio(
+                        maximizeSizeGivenAspectRatio(
                             taskInfo,
                             Size(customPortraitWidthForLandscapeApp, idealSize.height),
                             appAspectRatio
                         )
                     } else {
-                        maximumSizeMaintainingAspectRatio(taskInfo, idealSize, appAspectRatio)
+                        maximizeSizeGivenAspectRatio(taskInfo, idealSize, appAspectRatio)
                     }
                 }
             }
@@ -107,7 +107,7 @@ fun calculateInitialBounds(
  * Calculates the largest size that can fit in a given area while maintaining a specific aspect
  * ratio.
  */
-fun maximumSizeMaintainingAspectRatio(
+fun maximizeSizeGivenAspectRatio(
     taskInfo: RunningTaskInfo,
     targetArea: Size,
     aspectRatio: Float

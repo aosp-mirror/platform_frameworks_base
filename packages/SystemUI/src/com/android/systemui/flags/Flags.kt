@@ -137,12 +137,6 @@ object Flags {
     // TODO(b/267722622): Tracking Bug
     @JvmField val WALLPAPER_PICKER_UI_FOR_AIWP = releasedFlag("wallpaper_picker_ui_for_aiwp")
 
-    /** Whether to allow long-press on the lock screen to directly open wallpaper picker. */
-    // TODO(b/277220285): Tracking bug.
-    @JvmField
-    val LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP =
-        unreleasedFlag("lock_screen_long_press_directly_opens_wallpaper_picker")
-
     /** Whether page transition animations in the wallpaper picker are enabled */
     // TODO(b/291710220): Tracking bug.
     @JvmField
