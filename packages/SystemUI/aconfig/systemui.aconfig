@@ -628,3 +628,13 @@ flag {
     description: "Refactors media code to follow the recommended architecture"
     bug: "326408371"
 }
+
+flag {
+  name: "translucent_occluding_activity_fix"
+  namespace: "systemui"
+  description: "Fixes occlusion animation for transluent activities"
+  bug: "303010980"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
