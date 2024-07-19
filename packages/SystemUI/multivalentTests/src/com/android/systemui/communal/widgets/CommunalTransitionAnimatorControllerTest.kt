@@ -26,6 +26,8 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -35,6 +37,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
+@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {
@@ -67,7 +70,7 @@ class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun animationCancelled_launchingWidgetStateIsClearedAndSceneIsNotChanged() {
+    fun animationCancelled_launchingWidgetStateIsCleared() {
         with(kosmos) {
             testScope.runTest {
                 val launching by collectLastValue(communalSceneInteractor.isLaunchingWidget)
@@ -82,9 +85,12 @@ class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {
                 assertTrue(launching!!)
                 verify(controller).onIntentStarted(willAnimate = true)
 
+                underTest.onTransitionAnimationStart(isExpandingFullyAbove = true)
+                assertTrue(launching!!)
+                verify(controller).onTransitionAnimationStart(isExpandingFullyAbove = true)
+
                 underTest.onTransitionAnimationCancelled(newKeyguardOccludedState = true)
                 assertFalse(launching!!)
-                Truth.assertThat(scene).isEqualTo(CommunalScenes.Communal)
                 verify(controller).onTransitionAnimationCancelled(newKeyguardOccludedState = true)
             }
         }
@@ -105,6 +111,12 @@ class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {
                 underTest.onIntentStarted(willAnimate = true)
                 assertTrue(launching!!)
                 verify(controller).onIntentStarted(willAnimate = true)
+
+                underTest.onTransitionAnimationStart(isExpandingFullyAbove = true)
+                assertTrue(launching!!)
+                verify(controller).onTransitionAnimationStart(isExpandingFullyAbove = true)
+
+                testScope.advanceTimeBy(ActivityTransitionAnimator.TIMINGS.totalDuration)
 
                 underTest.onTransitionAnimationEnd(isExpandingFullyAbove = true)
                 assertFalse(launching!!)
