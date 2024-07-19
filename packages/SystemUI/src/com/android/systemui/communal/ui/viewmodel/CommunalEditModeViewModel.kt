@@ -217,6 +217,14 @@ constructor(
     /** Sets whether edit mode is currently open */
     fun setEditModeOpen(isOpen: Boolean) = communalInteractor.setEditModeOpen(isOpen)
 
+    /**
+     * Sets whether the edit mode activity is currently showing.
+     *
+     * See [CommunalInteractor.editActivityShowing] for more info.
+     */
+    fun setEditActivityShowing(showing: Boolean) =
+        communalInteractor.setEditActivityShowing(showing)
+
     /** Called when exiting the edit mode, before transitioning back to the communal scene. */
     fun cleanupEditModeState() {
         communalSceneInteractor.setEditModeState(null)
