@@ -16,9 +16,11 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
+import android.graphics.ColorFilter
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,31 +39,46 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.LottieProperty
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.LottieDynamicProperties
+import com.airbnb.lottie.compose.LottieDynamicProperty
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.airbnb.lottie.compose.rememberLottieDynamicProperties
+import com.airbnb.lottie.compose.rememberLottieDynamicProperty
+import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGesture.BACK
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
 
-@OptIn(ExperimentalComposeUiApi::class)
+data class TutorialScreenColors(
+    val backgroundColor: Color,
+    val titleColor: Color,
+    val animationProperties: LottieDynamicProperties
+)
+
 @Composable
 fun BackGestureTutorialScreen(
     onDoneButtonClicked: () -> Unit,
     onBack: () -> Unit,
 ) {
+    val screenColors = rememberScreenColors()
     BackHandler(onBack = onBack)
     var gestureDone by remember { mutableStateOf(false) }
     val swipeDistanceThresholdPx =
-        with(LocalContext.current) {
-            resources.getDimensionPixelSize(
-                com.android.internal.R.dimen.system_gestures_distance_threshold
-            )
-        }
+        LocalContext.current.resources.getDimensionPixelSize(
+            com.android.internal.R.dimen.system_gestures_distance_threshold
+        )
     val gestureHandler =
         remember(swipeDistanceThresholdPx) {
             TouchpadGestureHandler(BACK, swipeDistanceThresholdPx, onDone = { gestureDone = true })
@@ -73,17 +90,45 @@ fun BackGestureTutorialScreen(
                 // only available in MotionEvent
                 .pointerInteropFilter(onTouchEvent = gestureHandler::onMotionEvent)
     ) {
-        GestureTutorialContent(gestureDone, onDoneButtonClicked)
+        GestureTutorialContent(gestureDone, onDoneButtonClicked, screenColors)
     }
 }
 
 @Composable
-private fun GestureTutorialContent(gestureDone: Boolean, onDoneButtonClicked: () -> Unit) {
+private fun rememberScreenColors(): TutorialScreenColors {
+    val onTertiary = LocalAndroidColorScheme.current.onTertiary
+    val onTertiaryFixed = LocalAndroidColorScheme.current.onTertiaryFixed
+    val onTertiaryFixedVariant = LocalAndroidColorScheme.current.onTertiaryFixedVariant
+    val tertiaryFixedDim = LocalAndroidColorScheme.current.tertiaryFixedDim
+    val dynamicProperties =
+        rememberLottieDynamicProperties(
+            rememberColorFilterProperty(".tertiaryFixedDim", tertiaryFixedDim),
+            rememberColorFilterProperty(".onTertiaryFixed", onTertiaryFixed),
+            rememberColorFilterProperty(".onTertiary", onTertiary),
+            rememberColorFilterProperty(".onTertiaryFixedVariant", onTertiaryFixedVariant)
+        )
+    val screenColors =
+        remember(onTertiaryFixed, tertiaryFixedDim, dynamicProperties) {
+            TutorialScreenColors(
+                backgroundColor = onTertiaryFixed,
+                titleColor = tertiaryFixedDim,
+                animationProperties = dynamicProperties,
+            )
+        }
+    return screenColors
+}
+
+@Composable
+private fun GestureTutorialContent(
+    gestureDone: Boolean,
+    onDoneButtonClicked: () -> Unit,
+    screenColors: TutorialScreenColors
+) {
     Column(
         verticalArrangement = Arrangement.Center,
         modifier =
             Modifier.fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.surfaceContainer)
+                .background(color = screenColors.backgroundColor)
                 .padding(start = 48.dp, top = 124.dp, end = 48.dp, bottom = 48.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
@@ -91,11 +136,15 @@ private fun GestureTutorialContent(gestureDone: Boolean, onDoneButtonClicked: ()
                 titleTextId =
                     if (gestureDone) R.string.touchpad_tutorial_gesture_done
                     else R.string.touchpad_back_gesture_action_title,
+                titleColor = screenColors.titleColor,
                 bodyTextId = R.string.touchpad_back_gesture_guidance,
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(76.dp))
-            TutorialAnimation(modifier = Modifier.weight(1f).padding(top = 24.dp))
+            TutorialAnimation(
+                screenColors.animationProperties,
+                modifier = Modifier.weight(1f).padding(top = 8.dp)
+            )
         }
         DoneButton(onDoneButtonClicked = onDoneButtonClicked)
     }
@@ -104,34 +153,53 @@ private fun GestureTutorialContent(gestureDone: Boolean, onDoneButtonClicked: ()
 @Composable
 fun TutorialDescription(
     @StringRes titleTextId: Int,
+    titleColor: Color,
     @StringRes bodyTextId: Int,
     modifier: Modifier = Modifier
 ) {
     Column(verticalArrangement = Arrangement.Top, modifier = modifier) {
-        Text(text = stringResource(id = titleTextId), style = MaterialTheme.typography.displayLarge)
+        Text(
+            text = stringResource(id = titleTextId),
+            style = MaterialTheme.typography.displayLarge,
+            color = titleColor
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = stringResource(id = bodyTextId), style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = stringResource(id = bodyTextId),
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.White
+        )
     }
 }
 
 @Composable
-fun TutorialAnimation(modifier: Modifier = Modifier) {
-    // below are just placeholder images, will be substituted by animations soon
+fun TutorialAnimation(animationProperties: LottieDynamicProperties, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Image(
-            painter = painterResource(id = R.drawable.placeholder_touchpad_tablet_back_gesture),
-            contentDescription =
-                stringResource(
-                    id = R.string.touchpad_back_gesture_screen_animation_content_description
-                ),
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Image(
-            painter = painterResource(id = R.drawable.placeholder_touchpad_back_gesture),
-            contentDescription =
-                stringResource(id = R.string.touchpad_back_gesture_animation_content_description),
-            modifier = Modifier.fillMaxWidth()
+        val composition by
+            rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.trackpad_back_edu))
+        val progress by
+            animateLottieCompositionAsState(
+                composition,
+                iterations = LottieConstants.IterateForever
+            )
+        LottieAnimation(
+            composition = composition,
+            progress = { progress },
+            dynamicProperties = animationProperties
         )
     }
+}
+
+@Composable
+fun rememberColorFilterProperty(
+    layerName: String,
+    color: Color
+): LottieDynamicProperty<ColorFilter> {
+    return rememberLottieDynamicProperty(
+        LottieProperty.COLOR_FILTER,
+        value = PorterDuffColorFilter(color.toArgb(), PorterDuff.Mode.SRC_ATOP),
+        // "**" below means match zero or more layers, so ** layerName ** means find layer with that
+        // name at any depth
+        keyPath = arrayOf("**", layerName, "**")
+    )
 }
