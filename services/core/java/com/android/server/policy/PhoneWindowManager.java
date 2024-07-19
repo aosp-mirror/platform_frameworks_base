@@ -734,7 +734,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     KeyEvent.KEYCODE_ASSIST,
                     KeyEvent.KEYCODE_VOICE_ASSIST,
                     KeyEvent.KEYCODE_MUTE,
-                    KeyEvent.KEYCODE_VOLUME_MUTE
+                    KeyEvent.KEYCODE_VOLUME_MUTE,
+                    KeyEvent.KEYCODE_RECENT_APPS,
+                    KeyEvent.KEYCODE_APP_SWITCH,
+                    KeyEvent.KEYCODE_NOTIFICATION
             ));
 
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
@@ -2077,12 +2080,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             switch (mDoubleTapOnHomeBehavior) {
                 case DOUBLE_TAP_HOME_RECENT_SYSTEM_UI:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(), "toggleRecentApps")) {
+                        break;
+                    }
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH);
                     mHomeConsumed = true;
                     toggleRecentApps();
                     break;
                 case DOUBLE_TAP_HOME_PIP_MENU:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(),
+                            "showPictureInPictureMenu")) {
+                        break;
+                    }
                     mHomeConsumed = true;
                     showPictureInPictureMenuInternal();
                     break;
@@ -2111,12 +2123,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     break;
                 case LONG_PRESS_HOME_ASSIST:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(), "launchAssistAction")) {
+                        break;
+                    }
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT);
                     launchAssistAction(null, event.getDeviceId(), event.getEventTime(),
                             AssistUtils.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
                     break;
                 case LONG_PRESS_HOME_NOTIFICATION_PANEL:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(), "toggleNotificationPanel")) {
+                        break;
+                    }
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL);
                     toggleNotificationPanel();
@@ -3477,7 +3497,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (isUserSetupComplete() && !keyguardOn) {
             if (mModifierShortcutManager.interceptKey(event)) {
-                dismissKeyboardShortcutsMenu();
+                if (isKeyEventForCurrentUser(
+                        event.getDisplayId(), event.getKeyCode(),
+                        "dismissKeyboardShortcutsMenu")) {
+                    dismissKeyboardShortcutsMenu();
+                }
                 mPendingMetaAction = false;
                 mPendingCapsLockToggle = false;
                 return true;
@@ -4733,7 +4757,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // no keyguard stuff to worry about, just launch home!
-        if (mRecentsVisible) {
+        // If Recents is visible and the action is not from visible background users,
+        // hide Recents and notify it to launch Home.
+        if (mRecentsVisible
+                && (!mVisibleBackgroundUsersEnabled || displayId == DEFAULT_DISPLAY)) {
             try {
                 ActivityManager.getService().stopAppSwitches();
             } catch (RemoteException e) {}
@@ -5477,6 +5504,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Notify the StatusBar that a system key was pressed.
      */
     private void sendSystemKeyToStatusBar(KeyEvent key) {
+        if (!isKeyEventForCurrentUser(key.getDisplayId(), key.getKeyCode(), "handleSystemKey")) {
+            return;
+        }
         IStatusBarService statusBar = getStatusBarService();
         if (statusBar != null) {
             try {

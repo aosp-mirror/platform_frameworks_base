@@ -3653,6 +3653,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
 
+        // Magnification connection should not be requested for visible background users.
+        // (b/332222893)
+        if (mUmi.isVisibleBackgroundFullUser(userState.mUserId)) {
+            return;
+        }
+
         final boolean shortcutEnabled = (userState.isShortcutMagnificationEnabledLocked()
                 || userState.isMagnificationSingleFingerTripleTapEnabledLocked()
                 || (Flags.enableMagnificationMultipleFingerMultipleTapGesture()
