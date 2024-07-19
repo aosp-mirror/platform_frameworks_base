@@ -81,9 +81,11 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
+import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
@@ -135,6 +137,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     final ApplicationInfo mInfo;
     final String mName;
     final int mUid;
+    final boolean mOptsOutEdgeToEdge;
 
     // The process of this application; 0 if none
     private volatile int mPid;
@@ -349,6 +352,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm = atm;
         mBgLaunchController = new BackgroundLaunchProcessController(
                 atm::hasActiveVisibleWindow, atm.getBackgroundActivityStartCallback());
+
+        final AttributeCache.Entry ent = AttributeCache.instance().get(info.packageName,
+                info.theme, R.styleable.Window, mUserId);
+        mOptsOutEdgeToEdge = ent != null && ent.array.getBoolean(
+                R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false);
 
         boolean isSysUiPackage = info.packageName.equals(
                 mAtm.getSysUiServiceComponentLocked().getPackageName());
@@ -1674,6 +1682,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // Otherwise if other places send wpc.getConfiguration() to client, the configuration may
         // be ignored due to the seq is older.
         resolvedConfig.seq = newParentConfig.seq;
+
+        if (mConfigActivityRecord != null) {
+            // Let the activity decide whether to apply the size override.
+            return;
+        }
+        final DisplayContent displayContent = mAtm.mWindowManager != null
+                ? mAtm.mWindowManager.getDefaultDisplayContentLocked()
+                : null;
+        applySizeOverrideIfNeeded(
+                displayContent,
+                mInfo,
+                newParentConfig,
+                resolvedConfig,
+                mOptsOutEdgeToEdge,
+                false /* hasFixedRotationTransform */,
+                false /* hasCompatDisplayInsets */);
     }
 
     void dispatchConfiguration(@NonNull Configuration config) {
