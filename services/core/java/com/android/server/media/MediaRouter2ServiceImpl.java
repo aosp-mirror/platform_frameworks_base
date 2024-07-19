@@ -328,6 +328,12 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.MEDIA_ROUTING_CONTROL,
+                Manifest.permission.MEDIA_CONTENT_CONTROL
+            },
+            conditional = true)
     public void updateScanningState(
             @NonNull IMediaRouter2 router, @ScanningState int scanningState) {
         Objects.requireNonNull(router, "router must not be null");
@@ -1216,6 +1222,12 @@ class MediaRouter2ServiceImpl {
         disposeUserIfNeededLocked(userRecord); // since router removed from user
     }
 
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.MEDIA_ROUTING_CONTROL,
+                Manifest.permission.MEDIA_CONTENT_CONTROL
+            },
+            conditional = true)
     @GuardedBy("mLock")
     private void updateScanningStateLocked(
             @NonNull IMediaRouter2 router, @ScanningState int scanningState) {
@@ -1226,7 +1238,11 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        boolean enableScanViaMediaContentControl =
+                Flags.enableFullScanWithMediaContentControl()
+                        && routerRecord.mHasMediaContentControlPermission;
         if (scanningState == SCANNING_STATE_SCANNING_FULL
+                && !enableScanViaMediaContentControl
                 && !routerRecord.mHasMediaRoutingControl) {
             throw new SecurityException("Screen off scan requires MEDIA_ROUTING_CONTROL");
         }
@@ -1679,7 +1695,11 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        boolean enableScanViaMediaContentControl =
+                Flags.enableFullScanWithMediaContentControl()
+                        && managerRecord.mHasMediaContentControl;
         if (!managerRecord.mHasMediaRoutingControl
+                && !enableScanViaMediaContentControl
                 && scanningState == SCANNING_STATE_SCANNING_FULL) {
             throw new SecurityException("Screen off scan requires MEDIA_ROUTING_CONTROL");
         }
