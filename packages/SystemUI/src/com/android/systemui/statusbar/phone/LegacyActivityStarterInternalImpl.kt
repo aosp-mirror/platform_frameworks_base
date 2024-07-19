@@ -208,10 +208,16 @@ constructor(
         val cancelRunnable = Runnable {
             callback?.onActivityStarted(ActivityManager.START_CANCELED)
         }
-        // Do not deferKeyguard when occluded because, when keyguard is occluded,
-        // we do not launch the activity until keyguard is done.
+        // Do not deferKeyguard when occluded because, when keyguard is occluded, we do not launch
+        // the activity until keyguard is done. The only exception is when we're on the Hub and want
+        // to dismiss the shade immediately, which means that another animation will take care of
+        // the transition.
         val occluded = (keyguardStateController.isShowing && keyguardStateController.isOccluded)
-        val deferred = !occluded
+        val dismissOnCommunal =
+            communalSettingsInteractor.isCommunalFlagEnabled() &&
+                communalSceneInteractor.isCommunalVisible.value &&
+                dismissShadeDirectly
+        val deferred = !occluded || dismissOnCommunal
         executeRunnableDismissingKeyguard(
             runnable,
             cancelRunnable,
@@ -463,10 +469,18 @@ constructor(
             object : ActivityStarter.OnDismissAction {
                 override fun onDismiss(): Boolean {
                     if (runnable != null) {
+                        // We don't wait for Keyguard to be gone if we're dismissing the shade
+                        // immediately and we're on the Communal Hub. This is to make sure that the
+                        // Hub -> Edit Mode transition is seamless.
+                        val dismissOnCommunal =
+                            communalSettingsInteractor.isCommunalFlagEnabled() &&
+                                communalSceneInteractor.isCommunalVisible.value &&
+                                dismissShade
                         if (
                             keyguardStateController.isShowing &&
                                 keyguardStateController.isOccluded &&
-                                !isCommunalWidgetLaunch()
+                                !isCommunalWidgetLaunch() &&
+                                !dismissOnCommunal
                         ) {
                             statusBarKeyguardViewManagerLazy
                                 .get()
