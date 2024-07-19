@@ -108,7 +108,7 @@ import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.roundToInt
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 object Shade {
     object Elements {
@@ -152,7 +152,11 @@ constructor(
 
     override val key = Scenes.Shade
 
-    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+    override suspend fun activate() {
+        viewModel.activate()
+    }
+
+    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         viewModel.destinationScenes
 
     @Composable

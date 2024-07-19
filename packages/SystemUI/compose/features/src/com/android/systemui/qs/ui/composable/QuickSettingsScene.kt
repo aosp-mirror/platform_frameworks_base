@@ -69,6 +69,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.modifiers.thenIf
@@ -79,7 +81,6 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -109,16 +110,13 @@ import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.roundToInt
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.Flow
 
 /** The Quick Settings (AKA "QS") scene shows the quick setting tiles. */
 @SysUISingleton
 class QuickSettingsScene
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
     private val shadeSession: SaveableSession,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
     private val viewModel: QuickSettingsSceneViewModel,
@@ -131,12 +129,8 @@ constructor(
 ) : ComposableScene {
     override val key = Scenes.QuickSettings
 
-    override val destinationScenes =
-        viewModel.destinationScenes.stateIn(
-            scope = applicationScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = emptyMap(),
-        )
+    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
+        viewModel.destinationScenes
 
     @Composable
     override fun SceneScope.Content(
