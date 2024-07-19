@@ -21,13 +21,17 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
@@ -131,6 +135,41 @@ public class ClientTransactionItemTest {
 
         verify(mHandler).handleDestroyActivity(eq(mActivityClientRecord), eq(false) /* finishing */,
                 eq(false) /* getNonConfigInstance */, any());
+    }
+
+    @Test
+    public void testResumeActivityItem_preExecute_withProcState_updatesProcessState() {
+        final ResumeActivityItem item = new ResumeActivityItem(mActivityToken,
+                ActivityManager.PROCESS_STATE_TOP /* procState */,
+                true /* isForward */,
+                false /* shouldSendCompatFakeFocus*/);
+
+        item.preExecute(mHandler);
+
+        verify(mHandler).updateProcessState(ActivityManager.PROCESS_STATE_TOP, false);
+    }
+
+    @Test
+    public void testResumeActivityItem_preExecute_withUnknownProcState_skipsProcessStateUpdate() {
+        final ResumeActivityItem item = new ResumeActivityItem(mActivityToken,
+                ActivityManager.PROCESS_STATE_UNKNOWN /* procState */,
+                true /* isForward */,
+                false /* shouldSendCompatFakeFocus*/);
+
+        item.preExecute(mHandler);
+
+        verify(mHandler, never()).updateProcessState(anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testResumeActivityItem_preExecute_withoutProcState_skipsProcessStateUpdate() {
+        final ResumeActivityItem item = new ResumeActivityItem(mActivityToken,
+                true /* isForward */,
+                false /* shouldSendCompatFakeFocus*/);
+
+        item.preExecute(mHandler);
+
+        verify(mHandler, never()).updateProcessState(anyInt(), anyBoolean());
     }
 
     @Test

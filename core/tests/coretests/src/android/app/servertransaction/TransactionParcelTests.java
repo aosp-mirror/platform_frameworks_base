@@ -249,12 +249,12 @@ public class TransactionParcelTests {
     @Test
     public void testResume() {
         // Write to parcel
-        ResumeActivityItem item = ResumeActivityItem.obtain(mActivityToken, 27 /* procState */,
+        final ResumeActivityItem item = new ResumeActivityItem(mActivityToken, 27 /* procState */,
                 true /* isForward */, false /* shouldSendCompatFakeFocus */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
-        ResumeActivityItem result = ResumeActivityItem.CREATOR.createFromParcel(mParcel);
+        final ResumeActivityItem result = ResumeActivityItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertEquals(item, result);

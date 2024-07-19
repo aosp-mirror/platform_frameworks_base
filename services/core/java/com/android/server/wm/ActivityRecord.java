@@ -9997,7 +9997,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     preserveWindow, getActivityWindowInfo());
             final ActivityLifecycleItem lifecycleItem;
             if (andResume) {
-                lifecycleItem = ResumeActivityItem.obtain(token, isTransitionForward(),
+                lifecycleItem = new ResumeActivityItem(token, isTransitionForward(),
                         shouldSendCompatFakeFocus());
             } else {
                 lifecycleItem = PauseActivityItem.obtain(token);

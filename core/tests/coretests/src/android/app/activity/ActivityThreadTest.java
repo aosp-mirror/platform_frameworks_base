@@ -983,7 +983,7 @@ public class ActivityThreadTest {
                 new MergedConfiguration(currentConfig, currentConfig),
                 false /* preserveWindow */, activityWindowInfo);
         final ResumeActivityItem resumeStateRequest =
-                ResumeActivityItem.obtain(activity.getActivityToken(), true /* isForward */,
+                new ResumeActivityItem(activity.getActivityToken(), true /* isForward */,
                         false /* shouldSendCompatFakeFocus*/);
 
         final ClientTransaction transaction = newTransaction(activity);
@@ -996,7 +996,7 @@ public class ActivityThreadTest {
     @NonNull
     private static ClientTransaction newResumeTransaction(@NonNull Activity activity) {
         final ResumeActivityItem resumeStateRequest =
-                ResumeActivityItem.obtain(activity.getActivityToken(), true /* isForward */,
+                new ResumeActivityItem(activity.getActivityToken(), true /* isForward */,
                         false /* shouldSendCompatFakeFocus */);
 
         final ClientTransaction transaction = newTransaction(activity);

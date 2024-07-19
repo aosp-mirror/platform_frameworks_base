@@ -86,7 +86,7 @@ class ActivityRefresher {
                         + "activityRecord=%s", activity);
         final RefreshCallbackItem refreshCallbackItem = RefreshCallbackItem.obtain(
                 activity.token, cycleThroughStop ? ON_STOP : ON_PAUSE);
-        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(
+        final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(
                 activity.token, /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
         try {
             activity.mAtmService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
