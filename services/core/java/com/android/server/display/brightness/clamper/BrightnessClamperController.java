@@ -271,8 +271,9 @@ public class BrightnessClamperController {
             ModifiersAggregatedState state2) {
         return !BrightnessSynchronizer.floatEquals(state1.mMaxDesiredHdrRatio,
                 state2.mMaxDesiredHdrRatio)
-                || state1.mSdrHdrRatioSpline != state2.mSdrHdrRatioSpline
-                || state1.mHdrHbmEnabled != state2.mHdrHbmEnabled;
+                || !BrightnessSynchronizer.floatEquals(state1.mMaxHdrBrightness,
+                state2.mMaxHdrBrightness)
+                || state1.mSdrHdrRatioSpline != state2.mSdrHdrRatioSpline;
     }
 
     private void start() {
@@ -470,8 +471,8 @@ public class BrightnessClamperController {
      */
     public static class ModifiersAggregatedState {
         float mMaxDesiredHdrRatio = HdrBrightnessModifier.DEFAULT_MAX_HDR_SDR_RATIO;
+        float mMaxHdrBrightness = PowerManager.BRIGHTNESS_MAX;
         @Nullable
         Spline mSdrHdrRatioSpline = null;
-        boolean mHdrHbmEnabled = false;
     }
 }

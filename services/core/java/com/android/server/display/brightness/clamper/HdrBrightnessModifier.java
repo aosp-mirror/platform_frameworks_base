@@ -16,11 +16,15 @@
 
 package com.android.server.display.brightness.clamper;
 
+import static com.android.server.display.DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
+import static com.android.server.display.brightness.clamper.LightSensorController.INVALID_LUX;
+
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.view.SurfaceControlHdrLayerInfoListener;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -30,6 +34,7 @@ import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.config.HdrBrightnessData;
 
 import java.io.PrintWriter;
+import java.util.Map;
 
 public class HdrBrightnessModifier implements BrightnessStateModifier,
         BrightnessClamperController.DisplayDeviceDataListener,
@@ -53,20 +58,32 @@ public class HdrBrightnessModifier implements BrightnessStateModifier,
     private final Handler mHandler;
     private final BrightnessClamperController.ClamperChangeListener mClamperChangeListener;
     private final Injector mInjector;
+    private final Runnable mDebouncer;
 
     private IBinder mRegisteredDisplayToken;
 
-    private float mScreenSize;
-    private float mHdrLayerSize = DEFAULT_HDR_LAYER_SIZE;
-    private HdrBrightnessData mHdrBrightnessData;
     private DisplayDeviceConfig mDisplayDeviceConfig;
+    @Nullable
+    private HdrBrightnessData mHdrBrightnessData;
+    private float mScreenSize;
+
     private float mMaxDesiredHdrRatio = DEFAULT_MAX_HDR_SDR_RATIO;
+    private float mHdrLayerSize = DEFAULT_HDR_LAYER_SIZE;
+
+    private float mAmbientLux = INVALID_LUX;
+
     private Mode mMode = Mode.NO_HDR;
+    // The maximum brightness allowed for current lux
+    private float mMaxBrightness = PowerManager.BRIGHTNESS_MAX;
+    private float mPendingMaxBrightness = PowerManager.BRIGHTNESS_MAX;
+    // brightness change speed, in units per seconds. Applied only on ambient lux changes
+    private float mTransitionRate = CUSTOM_ANIMATION_RATE_NOT_SET;
+    private float mPendingTransitionRate = CUSTOM_ANIMATION_RATE_NOT_SET;
 
     HdrBrightnessModifier(Handler handler,
             BrightnessClamperController.ClamperChangeListener clamperChangeListener,
             BrightnessClamperController.DisplayDeviceData displayData) {
-        this(handler, clamperChangeListener, new Injector(), displayData);
+        this(new Handler(handler.getLooper()), clamperChangeListener, new Injector(), displayData);
     }
 
     @VisibleForTesting
@@ -77,6 +94,11 @@ public class HdrBrightnessModifier implements BrightnessStateModifier,
         mHandler = handler;
         mClamperChangeListener = clamperChangeListener;
         mInjector = injector;
+        mDebouncer = () -> {
+            mTransitionRate = mPendingTransitionRate;
+            mMaxBrightness = mPendingMaxBrightness;
+            mClamperChangeListener.onChanged();
+        };
         onDisplayChanged(displayData);
     }
 
@@ -90,33 +112,60 @@ public class HdrBrightnessModifier implements BrightnessStateModifier,
         if (mMode == Mode.NO_HDR) {
             return;
         }
-
         float hdrBrightness = mDisplayDeviceConfig.getHdrBrightnessFromSdr(
                 stateBuilder.getBrightness(), mMaxDesiredHdrRatio,
                 mHdrBrightnessData.sdrToHdrRatioSpline);
+        float maxBrightness = getMaxBrightness(mMode, mMaxBrightness, mHdrBrightnessData);
+        hdrBrightness = Math.min(hdrBrightness, maxBrightness);
+
         stateBuilder.setHdrBrightness(hdrBrightness);
+        stateBuilder.setCustomAnimationRate(mTransitionRate);
+        // transition rate applied, reset
+        mTransitionRate = CUSTOM_ANIMATION_RATE_NOT_SET;
     }
 
     @Override
-    public void dump(PrintWriter printWriter) {
-        // noop
+    public void dump(PrintWriter pw) {
+        pw.println("HdrBrightnessModifier:");
+        pw.println("  mHdrBrightnessData=" + mHdrBrightnessData);
+        pw.println("  mScreenSize=" + mScreenSize);
+        pw.println("  mMaxDesiredHdrRatio=" + mMaxDesiredHdrRatio);
+        pw.println("  mHdrLayerSize=" + mHdrLayerSize);
+        pw.println("  mAmbientLux=" + mAmbientLux);
+        pw.println("  mMode=" + mMode);
+        pw.println("  mMaxBrightness=" + mMaxBrightness);
+        pw.println("  mPendingMaxBrightness=" + mPendingMaxBrightness);
+        pw.println("  mTransitionRate=" + mTransitionRate);
+        pw.println("  mPendingTransitionRate=" + mPendingTransitionRate);
+        pw.println("  mHdrListener registered=" + (mRegisteredDisplayToken != null));
     }
 
     // Called in DisplayControllerHandler
     @Override
     public void stop() {
         unregisterHdrListener();
+        mHandler.removeCallbacksAndMessages(null);
     }
 
-
+    // Called in DisplayControllerHandler
     @Override
     public boolean shouldListenToLightSensor() {
-        return false;
+        return hasBrightnessLimits();
     }
 
+    // Called in DisplayControllerHandler
     @Override
     public void setAmbientLux(float lux) {
-        // noop
+        mAmbientLux = lux;
+        if (!hasBrightnessLimits()) {
+            return;
+        }
+        float desiredMaxBrightness = findBrightnessLimit(mHdrBrightnessData, lux);
+        if (mMode == Mode.NO_HDR) {
+            mMaxBrightness = desiredMaxBrightness;
+        } else {
+            scheduleMaxBrightnessUpdate(desiredMaxBrightness, mHdrBrightnessData);
+        }
     }
 
     @Override
@@ -125,15 +174,44 @@ public class HdrBrightnessModifier implements BrightnessStateModifier,
                 displayData.mHeight, displayData.mDisplayDeviceConfig));
     }
 
-    // Called in DisplayControllerHandler
+    // Called in DisplayControllerHandler, when any modifier state changes
     @Override
     public void applyStateChange(
             BrightnessClamperController.ModifiersAggregatedState aggregatedState) {
-        if (mMode != Mode.NO_HDR) {
+        if (mMode != Mode.NO_HDR && mHdrBrightnessData != null) {
             aggregatedState.mMaxDesiredHdrRatio = mMaxDesiredHdrRatio;
             aggregatedState.mSdrHdrRatioSpline = mHdrBrightnessData.sdrToHdrRatioSpline;
-            aggregatedState.mHdrHbmEnabled = (mMode == Mode.HBM_HDR);
+            aggregatedState.mMaxHdrBrightness = getMaxBrightness(
+                    mMode, mMaxBrightness, mHdrBrightnessData);
         }
+    }
+
+    private boolean hasBrightnessLimits() {
+        return mHdrBrightnessData != null && !mHdrBrightnessData.maxBrightnessLimits.isEmpty();
+    }
+
+    private void scheduleMaxBrightnessUpdate(float desiredMaxBrightness, HdrBrightnessData data) {
+        if (mMaxBrightness == desiredMaxBrightness) {
+            mPendingMaxBrightness = mMaxBrightness;
+            mPendingTransitionRate = -1f;
+            mTransitionRate = -1f;
+            mHandler.removeCallbacks(mDebouncer);
+        } else if (mPendingMaxBrightness != desiredMaxBrightness) {
+            mPendingMaxBrightness = desiredMaxBrightness;
+            long debounceTime;
+            if (mPendingMaxBrightness > mMaxBrightness) {
+                debounceTime = data.brightnessIncreaseDebounceMillis;
+                mPendingTransitionRate = data.screenBrightnessRampIncrease;
+            } else {
+                debounceTime = data.brightnessDecreaseDebounceMillis;
+                mPendingTransitionRate = data.screenBrightnessRampDecrease;
+            }
+
+            mHandler.removeCallbacks(mDebouncer);
+            mHandler.postDelayed(mDebouncer, debounceTime);
+        }
+        // do nothing if expectedMaxBrightness == mDesiredMaxBrightness
+        // && expectedMaxBrightness != mMaxBrightness
     }
 
     // Called in DisplayControllerHandler
@@ -168,6 +246,8 @@ public class HdrBrightnessModifier implements BrightnessStateModifier,
         mMaxDesiredHdrRatio = maxDesiredHdrRatio;
 
         if (needToNotifyChange) {
+            // data or hdr layer changed, reset custom transition rate
+            mTransitionRate = CUSTOM_ANIMATION_RATE_NOT_SET;
             mClamperChangeListener.onChanged();
         }
     }
@@ -188,6 +268,32 @@ public class HdrBrightnessModifier implements BrightnessStateModifier,
         }
         // HDR layer > that minHdr % for Hbm
         return Mode.HBM_HDR;
+    }
+
+    private float getMaxBrightness(Mode mode, float maxBrightness, HdrBrightnessData data) {
+        if (mode == Mode.NBM_HDR) {
+            return Math.min(data.hbmTransitionPoint, maxBrightness);
+        } else if (mode == Mode.HBM_HDR) {
+            return maxBrightness;
+        } else {
+            return PowerManager.BRIGHTNESS_MAX;
+        }
+    }
+
+    // Called in DisplayControllerHandler
+    private float findBrightnessLimit(HdrBrightnessData data, float ambientLux) {
+        float foundAmbientBoundary = Float.MAX_VALUE;
+        float foundMaxBrightness = PowerManager.BRIGHTNESS_MAX;
+        for (Map.Entry<Float, Float> brightnessPoint :
+                data.maxBrightnessLimits.entrySet()) {
+            float ambientBoundary = brightnessPoint.getKey();
+            // find ambient lux upper boundary closest to current ambient lux
+            if (ambientBoundary > ambientLux && ambientBoundary < foundAmbientBoundary) {
+                foundMaxBrightness = brightnessPoint.getValue();
+                foundAmbientBoundary = ambientBoundary;
+            }
+        }
+        return foundMaxBrightness;
     }
 
     // Called in DisplayControllerHandler

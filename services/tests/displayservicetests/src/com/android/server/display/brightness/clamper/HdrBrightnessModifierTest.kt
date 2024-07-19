@@ -18,29 +18,39 @@ package com.android.server.display.brightness.clamper
 
 import android.hardware.display.DisplayManagerInternal
 import android.os.IBinder
+import android.os.PowerManager.BRIGHTNESS_MAX
 import android.util.Spline
 import android.view.SurfaceControlHdrLayerInfoListener
 import androidx.test.filters.SmallTest
 import com.android.server.display.DisplayBrightnessState
+import com.android.server.display.DisplayBrightnessState.BRIGHTNESS_NOT_SET
+import com.android.server.display.DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET
 import com.android.server.display.DisplayDeviceConfig
 import com.android.server.display.brightness.clamper.BrightnessClamperController.ClamperChangeListener
 import com.android.server.display.brightness.clamper.BrightnessClamperController.ModifiersAggregatedState
 import com.android.server.display.brightness.clamper.HdrBrightnessModifier.DEFAULT_MAX_HDR_SDR_RATIO
 import com.android.server.display.brightness.clamper.HdrBrightnessModifier.Injector
+import com.android.server.display.config.HdrBrightnessData
 import com.android.server.display.config.createHdrBrightnessData
+import com.android.server.testutils.OffsettableClock
 import com.android.server.testutils.TestHandler
 import com.google.common.truth.Truth.assertThat
+
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+private const val SEND_TIME_TOLERANCE: Long = 100
+
 @SmallTest
 class HdrBrightnessModifierTest {
 
-    private val testHandler = TestHandler(null)
+    private val stoppedClock = OffsettableClock.Stopped()
+    private val testHandler = TestHandler(null, stoppedClock)
     private val testInjector = TestInjector()
     private val mockChangeListener = mock<ClamperChangeListener>()
     private val mockDisplayDeviceConfig = mock<DisplayDeviceConfig>()
@@ -51,7 +61,6 @@ class HdrBrightnessModifierTest {
 
     private lateinit var modifier: HdrBrightnessModifier
     private val dummyData = createDisplayDeviceData(mockDisplayDeviceConfig, mockDisplayBinder)
-    private val dummyHdrData = createHdrBrightnessData()
 
     @Test
     fun `change listener is not called on init`() {
@@ -70,8 +79,7 @@ class HdrBrightnessModifierTest {
 
     @Test
     fun `hdr listener not registered on init if hdr data is missing`() {
-        whenever(mockDisplayDeviceConfig.hdrBrightnessData).thenReturn(null)
-        modifier = HdrBrightnessModifier(testHandler, mockChangeListener, testInjector, dummyData)
+        initHdrModifier(null)
 
         testHandler.flush()
 
@@ -108,128 +116,273 @@ class HdrBrightnessModifierTest {
     @Test
     fun `test NO_HDR mode`() {
         initHdrModifier()
-
-        whenever(mockDisplayDeviceConfig.hdrBrightnessData).thenReturn(createHdrBrightnessData(
+        // screen size = 10_000
+        setupDisplay(width = 100, height = 100, hdrBrightnessData = createHdrBrightnessData(
             minimumHdrPercentOfScreenForNbm = 0.5f,
             minimumHdrPercentOfScreenForHbm = 0.7f,
             sdrToHdrRatioSpline = mockSpline
         ))
-        // screen size = 10_000
-        modifier.onDisplayChanged(createDisplayDeviceData(
-            mockDisplayDeviceConfig, mockDisplayBinder,
-            width = 100,
-            height = 100
-        ))
-        testHandler.flush()
+
         // hdr size = 900
         val desiredMaxHdrRatio = 8f
-        val hdrWidth = 30
-        val hdrHeight = 30
-        testInjector.registeredHdrListener!!.onHdrInfoChanged(
-            mockDisplayBinder, 1, hdrWidth, hdrHeight, 0, desiredMaxHdrRatio
-        )
-        testHandler.flush()
+        setupHdrLayer(width = 30, height = 30, maxHdrRatio = desiredMaxHdrRatio)
 
-        val modifierState = ModifiersAggregatedState()
-        modifier.applyStateChange(modifierState)
-
-        assertThat(modifierState.mHdrHbmEnabled).isFalse()
-        assertThat(modifierState.mMaxDesiredHdrRatio).isEqualTo(DEFAULT_MAX_HDR_SDR_RATIO)
-        assertThat(modifierState.mSdrHdrRatioSpline).isNull()
-
-        val stateBuilder = DisplayBrightnessState.builder()
-        modifier.apply(mockRequest, stateBuilder)
-
-        verify(mockDisplayDeviceConfig, never()).getHdrBrightnessFromSdr(any(), any(), any())
-        assertThat(stateBuilder.hdrBrightness).isEqualTo(DisplayBrightnessState.BRIGHTNESS_NOT_SET)
+        assertModifierState()
     }
 
     @Test
     fun `test NBM_HDR mode`() {
         initHdrModifier()
-        whenever(mockDisplayDeviceConfig.hdrBrightnessData).thenReturn(createHdrBrightnessData(
+        // screen size = 10_000
+        val transitionPoint = 0.55f
+        setupDisplay(width = 100, height = 100, hdrBrightnessData = createHdrBrightnessData(
             minimumHdrPercentOfScreenForNbm = 0.5f,
             minimumHdrPercentOfScreenForHbm = 0.7f,
+            transitionPoint = transitionPoint,
             sdrToHdrRatioSpline = mockSpline
         ))
-        // screen size = 10_000
-        modifier.onDisplayChanged(createDisplayDeviceData(
-            mockDisplayDeviceConfig, mockDisplayBinder,
-            width = 100,
-            height = 100
-        ))
-        testHandler.flush()
         // hdr size = 5_100
         val desiredMaxHdrRatio = 8f
-        val hdrWidth = 100
-        val hdrHeight = 51
-        testInjector.registeredHdrListener!!.onHdrInfoChanged(
-            mockDisplayBinder, 1, hdrWidth, hdrHeight, 0, desiredMaxHdrRatio
-        )
-        testHandler.flush()
+        setupHdrLayer(width = 100, height = 51, maxHdrRatio = desiredMaxHdrRatio)
 
-        val modifierState = ModifiersAggregatedState()
-        modifier.applyStateChange(modifierState)
-
-        assertThat(modifierState.mHdrHbmEnabled).isFalse()
-        assertThat(modifierState.mMaxDesiredHdrRatio).isEqualTo(desiredMaxHdrRatio)
-        assertThat(modifierState.mSdrHdrRatioSpline).isEqualTo(mockSpline)
-
-        val expectedHdrBrightness = 0.85f
         whenever(mockDisplayDeviceConfig.getHdrBrightnessFromSdr(
-            0f, desiredMaxHdrRatio, mockSpline)).thenReturn(expectedHdrBrightness)
-        val stateBuilder = DisplayBrightnessState.builder()
-        modifier.apply(mockRequest, stateBuilder)
+            0f, desiredMaxHdrRatio, mockSpline)).thenReturn(0.85f)
 
-        assertThat(stateBuilder.hdrBrightness).isEqualTo(expectedHdrBrightness)
+        assertModifierState(
+            maxBrightness = transitionPoint,
+            hdrRatio = desiredMaxHdrRatio,
+            hdrBrightness = transitionPoint,
+            spline = mockSpline
+        )
     }
 
     @Test
     fun `test HBM_HDR mode`() {
         initHdrModifier()
-        whenever(mockDisplayDeviceConfig.hdrBrightnessData).thenReturn(createHdrBrightnessData(
+        // screen size = 10_000
+        setupDisplay(width = 100, height = 100, hdrBrightnessData = createHdrBrightnessData(
             minimumHdrPercentOfScreenForNbm = 0.5f,
             minimumHdrPercentOfScreenForHbm = 0.7f,
+            transitionPoint = 0.55f,
             sdrToHdrRatioSpline = mockSpline
         ))
-        // screen size = 10_000
-        modifier.onDisplayChanged(createDisplayDeviceData(
-            mockDisplayDeviceConfig, mockDisplayBinder,
-            width = 100,
-            height = 100
-        ))
-        testHandler.flush()
         // hdr size = 7_100
         val desiredMaxHdrRatio = 8f
-        val hdrWidth = 100
-        val hdrHeight = 71
-        testInjector.registeredHdrListener!!.onHdrInfoChanged(
-            mockDisplayBinder, 1, hdrWidth, hdrHeight, 0, desiredMaxHdrRatio
-        )
-        testHandler.flush()
+        setupHdrLayer(width = 100, height = 71, maxHdrRatio = desiredMaxHdrRatio)
 
-        val modifierState = ModifiersAggregatedState()
-        modifier.applyStateChange(modifierState)
-
-        assertThat(modifierState.mHdrHbmEnabled).isTrue()
-        assertThat(modifierState.mMaxDesiredHdrRatio).isEqualTo(desiredMaxHdrRatio)
-        assertThat(modifierState.mSdrHdrRatioSpline).isEqualTo(mockSpline)
-
-        val expectedHdrBrightness = 0.83f
+        val expectedHdrBrightness = 0.92f
         whenever(mockDisplayDeviceConfig.getHdrBrightnessFromSdr(
             0f, desiredMaxHdrRatio, mockSpline)).thenReturn(expectedHdrBrightness)
-        val stateBuilder = DisplayBrightnessState.builder()
-        modifier.apply(mockRequest, stateBuilder)
 
-        assertThat(stateBuilder.hdrBrightness).isEqualTo(expectedHdrBrightness)
+        assertModifierState(
+            hdrRatio = desiredMaxHdrRatio,
+            hdrBrightness = expectedHdrBrightness,
+            spline = mockSpline
+        )
     }
 
-    private fun initHdrModifier() {
-        whenever(mockDisplayDeviceConfig.hdrBrightnessData).thenReturn(dummyHdrData)
+    @Test
+    fun `test display change no HDR content`() {
+        initHdrModifier()
+        setupDisplay(width = 100, height = 100)
+        assertModifierState()
+        clearInvocations(mockChangeListener)
+        // display change, new instance of HdrBrightnessData
+        setupDisplay(width = 100, height = 100)
+
+        assertModifierState()
+        verify(mockChangeListener, never()).onChanged()
+    }
+
+    @Test
+    fun `test display change with HDR content`() {
+        initHdrModifier()
+        setupDisplay(width = 100, height = 100)
+        setupHdrLayer(width = 100, height = 100, maxHdrRatio = 5f)
+        assertModifierState(
+            hdrBrightness = 0f,
+            hdrRatio = 5f,
+            spline = mockSpline
+        )
+        clearInvocations(mockChangeListener)
+        // display change, new instance of HdrBrightnessData
+        setupDisplay(width = 100, height = 100)
+
+        assertModifierState(
+            hdrBrightness = 0f,
+            hdrRatio = 5f,
+            spline = mockSpline
+        )
+        // new instance of HdrBrightnessData received, notify listener
+        verify(mockChangeListener).onChanged()
+    }
+
+    @Test
+    fun `test ambient lux decrease above maxBrightnessLimits no HDR`() {
+        initHdrModifier()
+        modifier.setAmbientLux(1000f)
+        setupDisplay(width = 100, height = 100, hdrBrightnessData = createHdrBrightnessData(
+            maxBrightnessLimits = mapOf(Pair(500f, 0.6f))
+        ))
+
+        modifier.setAmbientLux(500f)
+        // verify debounce is not scheduled
+        assertThat(testHandler.hasMessagesOrCallbacks()).isFalse()
+
+        assertModifierState()
+        verify(mockDisplayDeviceConfig, never()).getHdrBrightnessFromSdr(any(), any(), any())
+    }
+
+    @Test
+    fun `test ambient lux decrease above maxBrightnessLimits with HDR`() {
+        initHdrModifier()
+        modifier.setAmbientLux(1000f)
+        setupDisplay(width = 200, height = 200, hdrBrightnessData = createHdrBrightnessData(
+            maxBrightnessLimits = mapOf(Pair(500f, 0.6f)),
+            sdrToHdrRatioSpline = mockSpline
+        ))
+        setupHdrLayer(width = 200, height = 200, maxHdrRatio = 8f)
+
+        modifier.setAmbientLux(500f)
+
+        // verify debounce is not scheduled
+        assertThat(testHandler.hasMessagesOrCallbacks()).isFalse()
+
+        val hdrBrightnessFromSdr = 0.83f
+        whenever(mockDisplayDeviceConfig.getHdrBrightnessFromSdr(
+            0f, 8f, mockSpline)).thenReturn(hdrBrightnessFromSdr)
+
+        assertModifierState(
+            hdrBrightness = hdrBrightnessFromSdr,
+            spline = mockSpline,
+            hdrRatio = 8f
+        )
+    }
+
+    @Test
+    fun `test ambient lux decrease below maxBrightnessLimits no HDR`() {
+        initHdrModifier()
+        modifier.setAmbientLux(1000f)
+        setupDisplay(width = 100, height = 100, hdrBrightnessData = createHdrBrightnessData(
+            maxBrightnessLimits = mapOf(Pair(500f, 0.6f))
+        ))
+
+        modifier.setAmbientLux(499f)
+        // verify debounce is not scheduled
+        assertThat(testHandler.hasMessagesOrCallbacks()).isFalse()
+
+        assertModifierState()
+        verify(mockDisplayDeviceConfig, never()).getHdrBrightnessFromSdr(any(), any(), any())
+    }
+
+    @Test
+    fun `test ambient lux decrease below maxBrightnessLimits with HDR`() {
+        initHdrModifier()
+        modifier.setAmbientLux(1000f)
+        val maxBrightness = 0.6f
+        val brightnessDecreaseDebounceMillis = 2800L
+        val animationRate = 0.01f
+        setupDisplay(width = 200, height = 200, hdrBrightnessData = createHdrBrightnessData(
+            maxBrightnessLimits = mapOf(Pair(500f, maxBrightness)),
+            brightnessDecreaseDebounceMillis = brightnessDecreaseDebounceMillis,
+            screenBrightnessRampDecrease = animationRate,
+            sdrToHdrRatioSpline = mockSpline,
+        ))
+        setupHdrLayer(width = 200, height = 200, maxHdrRatio = 8f)
+
+        modifier.setAmbientLux(499f)
+
+        val hdrBrightnessFromSdr = 0.83f
+        whenever(mockDisplayDeviceConfig.getHdrBrightnessFromSdr(
+            0f, 8f, mockSpline)).thenReturn(hdrBrightnessFromSdr)
+        // debounce with brightnessDecreaseDebounceMillis, no changes to the state just yet
+        assertModifierState(
+            hdrBrightness = hdrBrightnessFromSdr,
+            spline = mockSpline,
+            hdrRatio = 8f
+        )
+
+        // verify debounce is scheduled
+        assertThat(testHandler.hasMessagesOrCallbacks()).isTrue()
+        val msgInfo = testHandler.pendingMessages.peek()
+        assertSendTime(brightnessDecreaseDebounceMillis, msgInfo!!.sendTime)
+        clearInvocations(mockChangeListener)
+
+        // triggering debounce, state changes
+        testHandler.flush()
+
+        verify(mockChangeListener).onChanged()
+
+        assertModifierState(
+            hdrBrightness = maxBrightness,
+            spline = mockSpline,
+            hdrRatio = 8f,
+            maxBrightness = maxBrightness,
+            animationRate = animationRate
+        )
+    }
+
+    private fun setupHdrLayer(width: Int = 100, height: Int = 100, maxHdrRatio: Float = 0.8f) {
+        testInjector.registeredHdrListener!!.onHdrInfoChanged(
+            mockDisplayBinder, 1, width, height, 0, maxHdrRatio
+        )
+        testHandler.flush()
+    }
+
+    private fun setupDisplay(
+        width: Int = 100,
+        height: Int = 100,
+        hdrBrightnessData: HdrBrightnessData? = createHdrBrightnessData(
+            minimumHdrPercentOfScreenForNbm = 0.5f,
+            minimumHdrPercentOfScreenForHbm = 0.7f,
+            transitionPoint = 0.68f,
+            sdrToHdrRatioSpline = mockSpline
+        )
+    ) {
+        whenever(mockDisplayDeviceConfig.hdrBrightnessData).thenReturn(hdrBrightnessData)
+        modifier.onDisplayChanged(createDisplayDeviceData(
+            mockDisplayDeviceConfig, mockDisplayBinder,
+            width = width,
+            height = height
+        ))
+        testHandler.flush()
+    }
+
+    private fun initHdrModifier(hdrBrightnessData: HdrBrightnessData? = createHdrBrightnessData()) {
+        whenever(mockDisplayDeviceConfig.hdrBrightnessData).thenReturn(hdrBrightnessData)
         modifier = HdrBrightnessModifier(testHandler, mockChangeListener, testInjector, dummyData)
         testHandler.flush()
     }
 
+    // MsgInfo.sendTime is calculated first by adding SystemClock.uptimeMillis()
+    // (in Handler.sendMessageDelayed) and then by subtracting SystemClock.uptimeMillis()
+    // (in TestHandler.sendMessageAtTime, there might be several milliseconds difference between
+    // SystemClock.uptimeMillis() calls, and subtracted value might be greater than added.
+    private fun assertSendTime(expectedTime: Long, sendTime: Long) {
+        assertThat(sendTime).isAtMost(expectedTime)
+        assertThat(sendTime).isGreaterThan(expectedTime - SEND_TIME_TOLERANCE)
+    }
+
+    private fun assertModifierState(
+        maxBrightness: Float = BRIGHTNESS_MAX,
+        hdrRatio: Float = DEFAULT_MAX_HDR_SDR_RATIO,
+        spline: Spline? = null,
+        hdrBrightness: Float = BRIGHTNESS_NOT_SET,
+        animationRate: Float = CUSTOM_ANIMATION_RATE_NOT_SET
+    ) {
+        val modifierState = ModifiersAggregatedState()
+        modifier.applyStateChange(modifierState)
+
+        assertThat(modifierState.mMaxHdrBrightness).isEqualTo(maxBrightness)
+        assertThat(modifierState.mMaxDesiredHdrRatio).isEqualTo(hdrRatio)
+        assertThat(modifierState.mSdrHdrRatioSpline).isEqualTo(spline)
+
+        val stateBuilder = DisplayBrightnessState.builder()
+        modifier.apply(mockRequest, stateBuilder)
+
+        assertThat(stateBuilder.hdrBrightness).isEqualTo(hdrBrightness)
+        assertThat(stateBuilder.customAnimationRate).isEqualTo(animationRate)
+    }
 
     internal class TestInjector : Injector() {
         var registeredHdrListener: SurfaceControlHdrLayerInfoListener? = null
