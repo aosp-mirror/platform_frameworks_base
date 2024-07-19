@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 /**
  * A base class that works with {@link BaseDataProducer} to add/remove a consumer that should
  * only be used once when {@link BaseDataProducer#notifyDataChanged} is called.
- * @param <T> The type of data this producer returns through {@link DataProducer#getData}.
+ * @param <T> The type of data this producer returns through {@link BaseDataProducer#getData}.
  */
 public class AcceptOnceConsumer<T> implements Consumer<T> {
     private final Consumer<T> mCallback;
