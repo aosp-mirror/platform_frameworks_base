@@ -68,7 +68,6 @@ import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.StrictMode;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
@@ -205,7 +204,6 @@ public class SystemServicesTestRule implements TestRule {
                 .mockStatic(Watchdog.class, mockStubOnly)
                 .spyStatic(DesktopModeHelper.class)
                 .spyStatic(DesktopModeBoundsCalculator.class)
-                .spyStatic(SystemProperties.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
