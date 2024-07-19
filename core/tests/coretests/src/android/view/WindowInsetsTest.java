@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.WindowInsets.Type.SIZE;
+import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static org.junit.Assert.assertEquals;
@@ -31,6 +32,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -67,5 +70,18 @@ public class WindowInsetsTest {
                 0, null, null, null, DisplayShape.NONE, systemBars(),
                 true /* compatIgnoreVisibility */, null, null, 0, 0);
         assertEquals(Insets.of(0, 10, 0, 0), windowInsets.getSystemWindowInsets());
+    }
+
+    @Test
+    public void testSetBoundingRectsInBuilder_noInsets_preservedInWindowInsets() {
+        final List<Rect> rects = List.of(new Rect(0, 0, 50, 100));
+        final WindowInsets insets =
+                new WindowInsets.Builder()
+                        .setBoundingRects(captionBar(), rects)
+                        .setBoundingRectsIgnoringVisibility(captionBar(), rects)
+                        .build();
+
+        assertEquals(rects, insets.getBoundingRects(captionBar()));
+        assertEquals(rects, insets.getBoundingRectsIgnoringVisibility(captionBar()));
     }
 }
