@@ -413,7 +413,6 @@ java_defaults {
         "modules-utils-fastxmlserializer",
         "modules-utils-preconditions",
         "modules-utils-statemachine",
-        "modules-utils-synchronous-result-receiver",
         "modules-utils-os",
         "modules-utils-uieventlogger-interface",
         "framework-permission-aidl-java",
