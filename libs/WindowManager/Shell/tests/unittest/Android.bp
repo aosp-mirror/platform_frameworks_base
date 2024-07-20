@@ -37,6 +37,7 @@ android_test {
     ],
 
     static_libs: [
+        "TestParameterInjector",
         "WindowManager-Shell",
         "junit",
         "flag-junit",

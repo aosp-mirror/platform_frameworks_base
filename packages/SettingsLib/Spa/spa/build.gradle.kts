@@ -54,9 +54,6 @@ android {
 dependencies {
     api(project(":SettingsLibColor"))
     api("androidx.appcompat:appcompat:1.7.0-rc01")
-    api("androidx.slice:slice-builders:1.1.0-alpha02")
-    api("androidx.slice:slice-core:1.1.0-alpha02")
-    api("androidx.slice:slice-view:1.1.0-alpha02")
     api("androidx.compose.material3:material3:1.3.0-beta02")
     api("androidx.compose.material:material-icons-extended:$jetpackComposeVersion")
     api("androidx.compose.runtime:runtime-livedata:$jetpackComposeVersion")
@@ -97,10 +94,6 @@ tasks.register<JacocoReport>("coverageReport") {
 
                     // Excludes debug functions
                     "com/android/settingslib/spa/framework/compose/TimeMeasurer*",
-
-                    // Excludes slice demo presenter & provider
-                    "com/android/settingslib/spa/slice/presenter/Demo*",
-                    "com/android/settingslib/spa/slice/provider/Demo*",
                 )
             )
         }

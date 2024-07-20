@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun PredictiveBackHandler(
-    state: BaseSceneTransitionLayoutState,
+    state: MutableSceneTransitionLayoutStateImpl,
     coroutineScope: CoroutineScope,
     targetSceneForBack: SceneKey? = null,
 ) {
@@ -65,7 +65,7 @@ internal fun PredictiveBackHandler(
 }
 
 private class PredictiveBackTransition(
-    val state: BaseSceneTransitionLayoutState,
+    val state: MutableSceneTransitionLayoutStateImpl,
     val coroutineScope: CoroutineScope,
     fromScene: SceneKey,
     toScene: SceneKey,

@@ -56,7 +56,10 @@ abstract class WindowTracing {
 
     static WindowTracing createDefaultAndStartLooper(WindowManagerService service,
             Choreographer choreographer) {
-        return new WindowTracingLegacy(service, choreographer);
+        if (!android.tracing.Flags.perfettoWmTracing()) {
+            return new WindowTracingLegacy(service, choreographer);
+        }
+        return new WindowTracingPerfetto(service, choreographer);
     }
 
     protected WindowTracing(WindowManagerService service, Choreographer choreographer,

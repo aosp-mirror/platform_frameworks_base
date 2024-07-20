@@ -47,6 +47,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
@@ -103,6 +104,7 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
+import com.android.server.pm.BackgroundUserSoundNotifier;
 
 import org.junit.After;
 import org.junit.Before;
@@ -805,6 +807,32 @@ public class VibratorManagerServiceTest {
 
         VibrationStats.StatsInfo touchMetrics = statsInfoCaptor.getAllValues().get(0);
         assertEquals(Vibration.Status.CANCELLED_BY_APP_OPS.getProtoEnumValue(),
+                touchMetrics.status);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.multiuser.Flags.FLAG_ADD_UI_FOR_SOUNDS_FROM_BACKGROUND_USERS)
+    public void vibrate_thenFgUserRequestsMute_getsCancelled() throws Throwable {
+        mockVibrators(1);
+        VibratorManagerService service = createSystemReadyService();
+
+        var vib = vibrate(service,
+                VibrationEffect.createWaveform(new long[]{100, 100, 100, 100}, 0), ALARM_ATTRS);
+
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+
+        service.mIntentReceiver.onReceive(mContextSpy, new Intent(
+                BackgroundUserSoundNotifier.ACTION_MUTE_SOUND));
+
+        assertTrue(waitUntil(s -> vib.hasEnded(), service, TEST_TIMEOUT_MILLIS));
+
+        var statsInfoCaptor = ArgumentCaptor.forClass(VibrationStats.StatsInfo.class);
+        verify(mVibratorFrameworkStatsLoggerMock, timeout(TEST_TIMEOUT_MILLIS))
+                .writeVibrationReportedAsync(statsInfoCaptor.capture());
+
+        VibrationStats.StatsInfo touchMetrics = statsInfoCaptor.getAllValues().get(0);
+        assertEquals(Vibration.Status.CANCELLED_BY_FOREGROUND_USER.getProtoEnumValue(),
                 touchMetrics.status);
     }
 

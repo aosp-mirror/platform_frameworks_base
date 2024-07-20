@@ -47,6 +47,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -63,6 +64,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.server.LocalServices;
 import com.android.server.PackageWatchdog;
+import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.UserManagerService;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.wm.WindowProcessController;
 
@@ -868,9 +871,6 @@ class AppErrors {
     private boolean handleAppCrashLSPB(ProcessRecord app, String reason,
             String shortMsg, String longMsg, String stackTrace, AppErrorDialog.Data data) {
         final long now = SystemClock.uptimeMillis();
-        final boolean showBackground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ANR_SHOW_BACKGROUND, 0,
-                mService.mUserController.getCurrentUserId()) != 0;
 
         Long crashTime;
         Long crashTimePersistent;
@@ -881,6 +881,8 @@ class AppErrors {
         final boolean persistent = app.isPersistent();
         final WindowProcessController proc = app.getWindowProcessController();
         final ProcessErrorStateRecord errState = app.mErrorState;
+        final boolean showBackground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ANR_SHOW_BACKGROUND, 0, getVisibleUserId(userId)) != 0;
 
         if (!app.isolated) {
             crashTime = mProcessCrashTimes.get(processName, uid);
@@ -1000,9 +1002,6 @@ class AppErrors {
 
     void handleShowAppErrorUi(Message msg) {
         AppErrorDialog.Data data = (AppErrorDialog.Data) msg.obj;
-        boolean showBackground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ANR_SHOW_BACKGROUND, 0,
-                mService.mUserController.getCurrentUserId()) != 0;
 
         final int userId;
         synchronized (mProcLock) {
@@ -1027,7 +1026,11 @@ class AppErrors {
             for (int profileId : mService.mUserController.getCurrentProfileIds()) {
                 isBackground &= (userId != profileId);
             }
-            if (isBackground && !showBackground) {
+            int visibleUserId = getVisibleUserId(userId);
+            boolean isVisibleUser = isVisibleBackgroundUser(visibleUserId);
+            boolean showBackground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ANR_SHOW_BACKGROUND, 0, visibleUserId) != 0;
+            if (isBackground && !showBackground && !isVisibleUser) {
                 Slog.w(TAG, "Skipping crash dialog of " + proc + ": background");
                 if (res != null) {
                     res.set(AppErrorDialog.BACKGROUND_USER);
@@ -1054,7 +1057,7 @@ class AppErrors {
                 final long now = SystemClock.uptimeMillis();
                 final boolean shouldThottle = crashShowErrorTime != null
                         && now < crashShowErrorTime + ActivityManagerConstants.MIN_CRASH_INTERVAL;
-                if ((mService.mAtmInternal.canShowErrorDialogs() || showBackground)
+                if ((mService.mAtmInternal.canShowErrorDialogs(visibleUserId) || showBackground)
                         && !crashSilenced && !shouldThottle
                         && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {
                     Slog.i(TAG, "Showing crash dialog for package " + packageName + " u" + userId);
@@ -1103,10 +1106,10 @@ class AppErrors {
                 return;
             }
 
+            int visibleUserId = getVisibleUserId(proc.userId);
             boolean showBackground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ANR_SHOW_BACKGROUND, 0,
-                    mService.mUserController.getCurrentUserId()) != 0;
-            if (mService.mAtmInternal.canShowErrorDialogs() || showBackground) {
+                    Settings.Secure.ANR_SHOW_BACKGROUND, 0, visibleUserId) != 0;
+            if (mService.mAtmInternal.canShowErrorDialogs(visibleUserId) || showBackground) {
                 AnrController anrController = errState.getDialogController().getAnrController();
                 if (anrController == null) {
                     errState.getDialogController().showAnrDialogs(data);
@@ -1160,6 +1163,43 @@ class AppErrors {
             }
             proc.mErrorState.setAnrData(null);
         }
+    }
+
+    /**
+     * Returns the user ID of the visible user associated with the error occurrence.
+     *
+     * <p>For most cases it will return the current foreground user ID, but on devices that
+     * {@link UserManager#isVisibleBackgroundUsersEnabled() support visible background users},
+     * it will return the given app user ID passed as parameter.
+     *
+     * @param appUserId The user ID of the app where the error occurred.
+     * @return The ID of the visible user associated with the error.
+     */
+    private int getVisibleUserId(int appUserId) {
+        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+            return mService.mUserController.getCurrentUserId();
+        }
+        return appUserId;
+    }
+
+    /**
+     * Checks if the given user is a visible background user, which is a full, background user
+     * assigned to secondary displays on the devices that have
+     * {@link UserManager#isVisibleBackgroundUsersEnabled()
+     * config_multiuserVisibleBackgroundUsers enabled} (for example, passenger users on
+     * automotive builds, using the display associated with their seats).
+     *
+     * @see UserManager#isUserVisible()
+     */
+    private boolean isVisibleBackgroundUser(int userId) {
+        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+            return false;
+        }
+        boolean isForeground = mService.mUserController.getCurrentUserId() == userId;
+        boolean isProfile = UserManagerService.getInstance().isProfile(userId);
+        boolean isVisible = LocalServices.getService(UserManagerInternal.class)
+                .isUserVisible(userId);
+        return isVisible && !isForeground && !isProfile;
     }
 
     /**

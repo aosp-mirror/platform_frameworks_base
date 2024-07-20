@@ -100,6 +100,10 @@ public class MagnificationSettingsController implements ComponentCallbacks {
         mWindowMagnificationSettings.toggleSettingsPanelVisibility();
     }
 
+    void updateSettingsButtonStatusOnRestore(@MagnificationSize int index) {
+        mWindowMagnificationSettings.updateSelectedButton(index);
+    }
+
     void closeMagnificationSettings() {
         mContext.unregisterComponentCallbacks(this);
         mWindowMagnificationSettings.hideSettingPanel();
