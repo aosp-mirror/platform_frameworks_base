@@ -16,6 +16,7 @@
 
 package com.android.settingslib.notification.data.repository
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.NotificationManager.EXTRA_NOTIFICATION_POLICY
 import android.content.BroadcastReceiver
@@ -29,6 +30,7 @@ import android.provider.Settings
 import com.android.settingslib.flags.Flags
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.settingslib.notification.modes.ZenModesBackend
+import java.time.Duration
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -56,8 +58,13 @@ interface ZenModeRepository {
 
     /** A list of all existing priority modes. */
     val modes: Flow<List<ZenMode>>
+
+    fun activateMode(zenMode: ZenMode, duration: Duration? = null)
+
+    fun deactivateMode(zenMode: ZenMode)
 }
 
+@SuppressLint("SharedFlowCreation")
 class ZenModeRepositoryImpl(
     private val context: Context,
     private val notificationManager: NotificationManager,
@@ -100,12 +107,11 @@ class ZenModeRepositoryImpl(
             }
             .let {
                 if (Flags.volumePanelBroadcastFix()) {
+                    // Share the flow to avoid having multiple broadcasts.
                     it.flowOn(backgroundCoroutineContext)
+                        .shareIn(started = SharingStarted.WhileSubscribed(), scope = scope)
                 } else {
-                    it.shareIn(
-                        started = SharingStarted.WhileSubscribed(),
-                        scope = scope,
-                    )
+                    it.shareIn(started = SharingStarted.WhileSubscribed(), scope = scope)
                 }
             }
     }
@@ -176,5 +182,13 @@ class ZenModeRepositoryImpl(
         } else {
             flowOf(emptyList())
         }
+    }
+
+    override fun activateMode(zenMode: ZenMode, duration: Duration?) {
+        backend.activateMode(zenMode, duration)
+    }
+
+    override fun deactivateMode(zenMode: ZenMode) {
+        backend.deactivateMode(zenMode)
     }
 }

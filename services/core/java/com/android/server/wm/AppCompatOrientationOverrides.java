@@ -59,7 +59,7 @@ class AppCompatOrientationOverrides {
     final OrientationOverridesState mOrientationOverridesState;
 
     AppCompatOrientationOverrides(@NonNull ActivityRecord activityRecord,
-            @NonNull LetterboxConfiguration letterboxConfiguration,
+            @NonNull AppCompatConfiguration appCompatConfiguration,
             @NonNull OptPropFactory optPropBuilder,
             @NonNull AppCompatCameraOverrides appCompatCameraOverrides) {
         mActivityRecord = activityRecord;
@@ -67,7 +67,7 @@ class AppCompatOrientationOverrides {
         mOrientationOverridesState = new OrientationOverridesState(mActivityRecord,
                 System::currentTimeMillis);
         final BooleanSupplier isPolicyForIgnoringRequestedOrientationEnabled = asLazy(
-                letterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled);
+                appCompatConfiguration::isPolicyForIgnoringRequestedOrientationEnabled);
         mIgnoreRequestedOrientationOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION,
                 isPolicyForIgnoringRequestedOrientationEnabled);

@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏טעינת שכבות לניפוי באגים ב-GPU לאפליקציות ניפוי באגים"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"הפעלת רישום ספקים מפורט ביומן"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"הוספת רישומי יומן של יצרנים למכשירים ספציפיים בדוחות על באגים. דוחות אלה עשויים להכיל מידע פרטי, להגביר את צריכת הסוללה ולצרוך נפח אחסון גדול יותר."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"השבתה אחרי יום אחד"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"רישום הספקים המפורט ביומן הסתיים"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"בוצעה הפעלה ליום אחד"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"הפעלה ליום אחד נוסף"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"מתבצעת השבתה אחרי יום אחד"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"בוצעה הפעלה ללא הגבלת זמן"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"קנה מידה לאנימציה של חלון"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"קנה מידה לאנימציית מעבר"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"קנה מידה למשך זמן אנימציה"</string>

@@ -27,6 +27,7 @@ import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.widgets.WidgetConfigurator
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.media.controls.ui.view.MediaHost
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,8 +76,16 @@ abstract class BaseCommunalViewModel(
         communalInteractor.signalUserInteraction()
     }
 
-    fun changeScene(scene: SceneKey, transitionKey: TransitionKey? = null) {
-        communalSceneInteractor.changeScene(scene, transitionKey)
+    /**
+     * Asks for an asynchronous scene witch to [newScene], which will use the corresponding
+     * installed transition or the one specified by [transitionKey], if provided.
+     */
+    fun changeScene(
+        scene: SceneKey,
+        transitionKey: TransitionKey? = null,
+        keyguardState: KeyguardState? = null
+    ) {
+        communalSceneInteractor.changeScene(scene, transitionKey, keyguardState)
     }
 
     fun setEditModeState(state: EditModeState?) = communalSceneInteractor.setEditModeState(state)

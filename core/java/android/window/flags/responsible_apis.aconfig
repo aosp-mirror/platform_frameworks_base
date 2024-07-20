@@ -58,6 +58,13 @@ flag {
 }
 
 flag {
+    name: "bal_additional_start_modes"
+    namespace: "responsible_apis"
+    description: "Introduce additional start modes."
+    bug: "352182359"
+}
+
+flag {
     name: "bal_send_intent_with_options"
     namespace: "responsible_apis"
     description: "Add options parameter to IntentSender.sendIntent."

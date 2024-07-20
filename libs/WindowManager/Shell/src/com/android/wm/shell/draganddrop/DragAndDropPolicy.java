@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.draganddrop;
 
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -280,8 +280,7 @@ public class DragAndDropPolicy {
         baseActivityOpts.setDisallowEnterPictureInPictureWhileLaunching(true);
         // Put BAL flags to avoid activity start aborted.
         baseActivityOpts.setPendingIntentBackgroundActivityStartMode(
-                MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-        baseActivityOpts.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+                MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
         final Bundle opts = baseActivityOpts.toBundle();
         if (session.appData.hasExtra(EXTRA_ACTIVITY_OPTIONS)) {
             opts.putAll(session.appData.getBundleExtra(EXTRA_ACTIVITY_OPTIONS));

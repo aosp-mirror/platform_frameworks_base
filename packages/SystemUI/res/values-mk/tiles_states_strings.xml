@@ -56,6 +56,9 @@
     <item msgid="5376619709702103243">"Исклучено"</item>
     <item msgid="4875147066469902392">"Вклучено"</item>
   </string-array>
+    <!-- no translation found for tile_states_modes:0 (7764936419245199023) -->
+    <!-- no translation found for tile_states_modes:1 (2004750556637773692) -->
+    <!-- no translation found for tile_states_modes:2 (8968530753931637871) -->
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"Недостапно"</item>
     <item msgid="5044688398303285224">"Исклучено"</item>

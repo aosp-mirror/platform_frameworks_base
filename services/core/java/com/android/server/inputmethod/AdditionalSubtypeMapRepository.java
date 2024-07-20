@@ -20,9 +20,9 @@ import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
-import android.os.Handler;
 import android.os.Process;
 import android.util.IntArray;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -36,7 +36,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * persistent storages.
  */
 final class AdditionalSubtypeMapRepository {
-    @GuardedBy("ImfLock.class")
+    private static final String TAG = "AdditionalSubtypeMapRepository";
+
+    // TODO(b/352594784): Should we user other lock primitives?
+    @GuardedBy("sPerUserMap")
     @NonNull
     private static final SparseArray<AdditionalSubtypeMap> sPerUserMap = new SparseArray<>();
 
@@ -192,29 +195,77 @@ final class AdditionalSubtypeMapRepository {
     private AdditionalSubtypeMapRepository() {
     }
 
+    /**
+     * Returns {@link AdditionalSubtypeMap} for the given user.
+     *
+     * <p>This method is expected be called after {@link #ensureInitializedAndGet(int)}. Otherwise
+     * {@link AdditionalSubtypeMap#EMPTY_MAP} will be returned.</p>
+     *
+     * @param userId the user to be queried about
+     * @return {@link AdditionalSubtypeMap} for the given user
+     */
+    @AnyThread
     @NonNull
-    @GuardedBy("ImfLock.class")
     static AdditionalSubtypeMap get(@UserIdInt int userId) {
-        final AdditionalSubtypeMap map = sPerUserMap.get(userId);
-        if (map != null) {
-            return map;
+        final AdditionalSubtypeMap map;
+        synchronized (sPerUserMap) {
+            map = sPerUserMap.get(userId);
         }
-        final AdditionalSubtypeMap newMap = AdditionalSubtypeUtils.load(userId);
-        sPerUserMap.put(userId, newMap);
-        return newMap;
+        if (map == null) {
+            Slog.e(TAG, "get(userId=" + userId + ") is called before loadInitialDataAndGet()."
+                    + " Returning an empty map");
+            return AdditionalSubtypeMap.EMPTY_MAP;
+        }
+        return map;
     }
 
-    @GuardedBy("ImfLock.class")
+    /**
+     * Ensures that {@link AdditionalSubtypeMap} is initialized for the given user. Load it from
+     * the persistent storage if {@link #putAndSave(int, AdditionalSubtypeMap, InputMethodMap)} has
+     * not been called yet.
+     *
+     * @param userId the user to be initialized
+     * @return {@link AdditionalSubtypeMap} that is associated with the given user. If
+     *         {@link #putAndSave(int, AdditionalSubtypeMap, InputMethodMap)} is already called
+     *         then the given {@link AdditionalSubtypeMap}.
+     */
+    @AnyThread
+    @NonNull
+    static AdditionalSubtypeMap ensureInitializedAndGet(@UserIdInt int userId) {
+        final var map = AdditionalSubtypeUtils.load(userId);
+        synchronized (sPerUserMap) {
+            final AdditionalSubtypeMap previous = sPerUserMap.get(userId);
+            // If putAndSave() has already been called, then use it.
+            if (previous != null) {
+                return previous;
+            }
+            sPerUserMap.put(userId, map);
+        }
+        return map;
+    }
+
+    /**
+     * Puts {@link AdditionalSubtypeMap} for the given user then schedule an I/O task to save it
+     * to the storage.
+     *
+     * @param userId         the user for the given {@link AdditionalSubtypeMap} is to be saved
+     * @param map            {@link AdditionalSubtypeMap} to be saved
+     * @param inputMethodMap {@link InputMethodMap} to be used while saving the data
+     */
+    @AnyThread
     static void putAndSave(@UserIdInt int userId, @NonNull AdditionalSubtypeMap map,
             @NonNull InputMethodMap inputMethodMap) {
-        final AdditionalSubtypeMap previous = sPerUserMap.get(userId);
-        if (previous == map) {
-            return;
+        synchronized (sPerUserMap) {
+            final AdditionalSubtypeMap previous = sPerUserMap.get(userId);
+            if (previous == map) {
+                return;
+            }
+            sPerUserMap.put(userId, map);
+            sWriter.scheduleWriteTask(userId, map, inputMethodMap);
         }
-        sPerUserMap.put(userId, map);
-        sWriter.scheduleWriteTask(userId, map, inputMethodMap);
     }
 
+    @AnyThread
     static void startWriterThread() {
         sWriter.startThread();
     }
@@ -225,12 +276,10 @@ final class AdditionalSubtypeMapRepository {
     }
 
     @AnyThread
-    static void remove(@UserIdInt int userId, @NonNull Handler ioHandler) {
-        sWriter.onUserRemoved(userId);
-        ioHandler.post(() -> {
-            synchronized (ImfLock.class) {
-                sPerUserMap.remove(userId);
-            }
-        });
+    static void remove(@UserIdInt int userId) {
+        synchronized (sPerUserMap) {
+            sWriter.onUserRemoved(userId);
+            sPerUserMap.remove(userId);
+        }
     }
 }

@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ອະນຸຍາດການໂຫລດຊັ້ນຂໍ້ມູນດີບັກ GPU ສຳລັບແອັບດີບັກ"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ເປີດໃຊ້ການບັນທຶກຜູ້ຂາຍແບບລະອຽດ"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ຮວມທັງການລາຍງານຂໍ້ຜິດພາດການເຂົ້າສູ່ລະບົບຂອງຜູ້ຂາຍສະເພາະອຸປະກອນເພີ່ມເຕີມ, ເຊິ່ງອາດມີຂໍ້ມູນສ່ວນຕົວ, ໃຊ້ແບັດເຕີຣີຫຼາຍຂຶ້ນ ແລະ/ຫຼື ໃຊ້ບ່ອນຈັດເກັບຂໍ້ມູນເພີ່ມເຕີມ."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"ປິດການນຳໃຊ້ຫຼັງຈາກ 1 ມື້"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"ການບັນທຶກຜູ້ຂາຍແບບລະອຽດສິ້ນສຸດແລ້ວ"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"ເປີດການນຳໃຊ້ອີກ 1 ມື້ແລ້ວ"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"ເປີດການນຳໃຊ້ອີກ 1 ມື້"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"ປິດການນຳໃຊ້ຫຼັງຈາກ 1 ມື້"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"ເປີດການນຳໃຊ້ແບບບໍ່ມີກຳນົດສິ້ນສຸດແລ້ວ"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ຂະໜາດໜ້າ​ຈໍ​ຂອງອະນິເມຊັນ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ຂະໜາດສະຫຼັບອະນິເມຊັນ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ໄລຍະເວລາອະນິເມຊັນ"</string>

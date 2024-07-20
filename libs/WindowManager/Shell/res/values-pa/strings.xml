@@ -84,10 +84,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ਬੁਲਬੁਲਾ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ਬਬਲ ਨੂੰ ਖਾਰਜ ਕੀਤਾ ਗਿਆ।"</string>
-    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
-    <skip />
-    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
-    <skip />
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"ਬਬਲ"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"ਬਬਲ ਦਿਖਾਓ"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਵਾਸਤੇ ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ ਇਸ ਐਪ ਦੇ ਆਕਾਰ ਅਨੁਪਾਤ ਨੂੰ ਬਦਲੋ"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"ਆਕਾਰ ਅਨੁਪਾਤ ਬਦਲੋ"</string>
@@ -118,6 +116,8 @@
     <string name="float_button_text" msgid="9221657008391364581">"ਫ਼ਲੋਟ"</string>
     <string name="select_text" msgid="5139083974039906583">"ਚੁਣੋ"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
+    <!-- no translation found for open_in_browser_text (9181692926376072904) -->
+    <skip />
     <string name="close_text" msgid="4986518933445178928">"ਬੰਦ ਕਰੋ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ਮੀਨੂ ਬੰਦ ਕਰੋ"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"ਮੀਨੂ ਖੋਲ੍ਹੋ"</string>

@@ -747,6 +747,8 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         }
     }
 
+    @android.platform.test.annotations.RequiresFlagsDisabled(
+            com.android.window.flags.Flags.FLAG_DO_NOT_SKIP_IME_BY_TARGET_VISIBILITY)
     @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testLaunchRemoteAnimationWithoutImeBehind() {

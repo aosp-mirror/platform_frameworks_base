@@ -17,6 +17,7 @@
 package com.android.systemui.communal.dagger
 
 import android.content.Context
+import com.android.systemui.CoreStartable
 import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalDatabaseModule
 import com.android.systemui.communal.data.repository.CommunalMediaRepositoryModule
@@ -26,6 +27,7 @@ import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryM
 import com.android.systemui.communal.data.repository.CommunalSmartspaceRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalTutorialRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule
+import com.android.systemui.communal.domain.interactor.CommunalSceneTransitionInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.communal.util.CommunalColorsImpl
@@ -40,6 +42,8 @@ import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineScope
 
 @Module(
@@ -68,6 +72,13 @@ interface CommunalModule {
     fun bindCommunalSceneDataSource(@Communal delegator: SceneDataSourceDelegator): SceneDataSource
 
     @Binds fun bindCommunalColors(impl: CommunalColorsImpl): CommunalColors
+
+    @Binds
+    @IntoMap
+    @ClassKey(CommunalSceneTransitionInteractor::class)
+    abstract fun bindCommunalSceneTransitionInteractor(
+        impl: CommunalSceneTransitionInteractor
+    ): CoreStartable
 
     companion object {
         @Provides

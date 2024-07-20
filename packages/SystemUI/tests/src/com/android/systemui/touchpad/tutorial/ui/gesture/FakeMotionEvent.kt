@@ -21,8 +21,10 @@ import android.view.InputDevice.SOURCE_MOUSE
 import android.view.MotionEvent
 import android.view.MotionEvent.CLASSIFICATION_NONE
 import android.view.MotionEvent.TOOL_TYPE_FINGER
+import org.mockito.AdditionalAnswers
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 
 fun motionEvent(
     action: Int,
@@ -37,12 +39,18 @@ fun motionEvent(
     val event =
         MotionEvent.obtain(/* downTime= */ 0, /* eventTime= */ 0, action, x, y, /* metaState= */ 0)
     event.source = source
-    return spy<MotionEvent>(event) {
-        on { getToolType(0) } doReturn toolType
-        on { getPointerCount() } doReturn pointerCount
-        axisValues.forEach { (key, value) -> on { getAxisValue(key) } doReturn value }
-        on { getClassification() } doReturn classification
-    }
+    // we need to use mock with delegation instead of spy because:
+    // 1. Spy will try to deallocate the same memory again when finalize() is called as it keep the
+    // same memory pointer to native MotionEvent
+    // 2. Even after workaround for issue above there still remains problem with destructor of
+    // native event trying to free the same chunk of native memory. I'm not sure why it happens but
+    // mock seems to fix the issue and because it delegates all calls seems safer overall
+    val delegate = mock(MotionEvent::class.java, AdditionalAnswers.delegatesTo<MotionEvent>(event))
+    doReturn(toolType).whenever(delegate).getToolType(0)
+    doReturn(pointerCount).whenever(delegate).pointerCount
+    doReturn(classification).whenever(delegate).classification
+    axisValues.forEach { (key, value) -> doReturn(value).whenever(delegate).getAxisValue(key) }
+    return delegate
 }
 
 fun touchpadEvent(

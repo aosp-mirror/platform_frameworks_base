@@ -16,6 +16,8 @@
 
 package com.android.server.display.brightness.clamper;
 
+import static com.android.server.display.config.DisplayDeviceConfigTestUtilsKt.createSensorData;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -189,7 +191,7 @@ public class BrightnessThermalClamperTest {
         final int severity = PowerManager.THERMAL_STATUS_SEVERE;
         IThermalEventListener thermalEventListener = captureSkinThermalEventListener();
         // Update config to listen to display type sensor.
-        final SensorData tempSensor = new SensorData("DISPLAY", "VIRTUAL-SKIN-DISPLAY");
+        final SensorData tempSensor = createSensorData("DISPLAY", "VIRTUAL-SKIN-DISPLAY");
         final TestThermalData thermalData =
                     new TestThermalData(
                         DISPLAY_ID,

@@ -84,6 +84,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -1058,6 +1059,25 @@ class CommunalInteractorTest : SysuiTestCase() {
             remoteViews = mock(RemoteViews::class.java)
         )
     }
+
+    @Test
+    fun dismissDisclaimerSetsDismissedFlag() =
+        testScope.runTest {
+            val disclaimerDismissed by collectLastValue(underTest.isDisclaimerDismissed)
+            assertThat(disclaimerDismissed).isFalse()
+            underTest.setDisclaimerDismissed()
+            assertThat(disclaimerDismissed).isTrue()
+        }
+
+    @Test
+    fun dismissDisclaimerTimeoutResetsDismissedFlag() =
+        testScope.runTest {
+            val disclaimerDismissed by collectLastValue(underTest.isDisclaimerDismissed)
+            underTest.setDisclaimerDismissed()
+            assertThat(disclaimerDismissed).isTrue()
+            advanceTimeBy(CommunalInteractor.DISCLAIMER_RESET_MILLIS)
+            assertThat(disclaimerDismissed).isFalse()
+        }
 
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {
         whenever(kosmos.devicePolicyManager.getKeyguardDisabledFeatures(nullable(), eq(user.id)))

@@ -49,12 +49,12 @@ import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -82,6 +82,9 @@ public class ObjectPoolTests {
     }
 
     @Rule
+    public final MockitoRule mocks = MockitoJUnit.rule();
+
+    @Rule
     public SetFlagsRule mSetFlagsRule;
 
     @Mock
@@ -91,11 +94,6 @@ public class ObjectPoolTests {
 
     public ObjectPoolTests(FlagsParameterization flags) {
         mSetFlagsRule = new SetFlagsRule(flags);
-    }
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
     }
 
     // 1. Check if two obtained objects from pool are not the same.

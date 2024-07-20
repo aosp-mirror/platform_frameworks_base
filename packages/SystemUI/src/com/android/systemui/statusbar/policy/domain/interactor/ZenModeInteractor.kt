@@ -16,8 +16,14 @@
 
 package com.android.systemui.statusbar.policy.domain.interactor
 
+import android.content.Context
 import android.provider.Settings
+import androidx.concurrent.futures.await
 import com.android.settingslib.notification.data.repository.ZenModeRepository
+import com.android.settingslib.notification.modes.ZenIconLoader
+import com.android.settingslib.notification.modes.ZenMode
+import com.android.systemui.common.shared.model.Icon
+import java.time.Duration
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -28,7 +34,9 @@ import kotlinx.coroutines.flow.map
  * An interactor that performs business logic related to the status and configuration of Zen Mode
  * (or Do Not Disturb/DND Mode).
  */
-class ZenModeInteractor @Inject constructor(repository: ZenModeRepository) {
+class ZenModeInteractor @Inject constructor(private val repository: ZenModeRepository) {
+    private val iconLoader: ZenIconLoader = ZenIconLoader.getInstance()
+
     val isZenModeEnabled: Flow<Boolean> =
         repository.globalZenMode
             .map {
@@ -52,4 +60,18 @@ class ZenModeInteractor @Inject constructor(repository: ZenModeRepository) {
                 }
             }
             .distinctUntilChanged()
+
+    val modes: Flow<List<ZenMode>> = repository.modes
+
+    suspend fun getModeIcon(mode: ZenMode, context: Context): Icon {
+        return Icon.Loaded(mode.getIcon(context, iconLoader).await(), contentDescription = null)
+    }
+
+    fun activateMode(zenMode: ZenMode, duration: Duration? = null) {
+        repository.activateMode(zenMode, duration)
+    }
+
+    fun deactivateMode(zenMode: ZenMode) {
+        repository.deactivateMode(zenMode)
+    }
 }

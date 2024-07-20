@@ -55,7 +55,7 @@ fun LockscreenLongPress(
             modifier
                 .pointerInput(isEnabled) {
                     if (isEnabled) {
-                        detectLongPressGesture { viewModel.onLongPress() }
+                        detectLongPressGesture { viewModel.onLongPress(isA11yAction = false) }
                     }
                 }
                 .pointerInput(Unit) {

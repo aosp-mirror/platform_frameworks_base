@@ -72,6 +72,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.accessibility.AccessibilityManager;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
@@ -302,10 +303,29 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void onImeSwitcherPressed() {
             // TODO(b/204901476) We're intentionally using the default display for now since
             // Launcher/Taskbar isn't display aware.
+            if (Flags.imeSwitcherRevamp()) {
+                mContext.getSystemService(InputMethodManager.class)
+                        .onImeSwitchButtonClickFromSystem(mDisplayTracker.getDefaultDisplayId());
+            } else {
+                mContext.getSystemService(InputMethodManager.class)
+                        .showInputMethodPickerFromSystem(true /* showAuxiliarySubtypes */,
+                                mDisplayTracker.getDefaultDisplayId());
+            }
+            mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);
+        }
+
+        @Override
+        public void onImeSwitcherLongPress() {
+            if (!Flags.imeSwitcherRevamp()) {
+                return;
+            }
+            // TODO(b/204901476) We're intentionally using the default display for now since
+            // Launcher/Taskbar isn't display aware.
             mContext.getSystemService(InputMethodManager.class)
                     .showInputMethodPickerFromSystem(true /* showAuxiliarySubtypes */,
                             mDisplayTracker.getDefaultDisplayId());
-            mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);
+            mUiEventLogger.log(
+                    KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_LONGPRESS);
         }
 
         @Override

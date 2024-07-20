@@ -60,7 +60,7 @@ public final class CameraStateMonitorTests extends WindowTestsBase {
     private static final String TEST_PACKAGE_1_LABEL = "testPackage1";
     private CameraManager mMockCameraManager;
     private Handler mMockHandler;
-    private LetterboxConfiguration mLetterboxConfiguration;
+    private AppCompatConfiguration mAppCompatConfiguration;
 
     private CameraStateMonitor mCameraStateMonitor;
     private CameraManager.AvailabilityCallback mCameraAvailabilityCallback;
@@ -88,13 +88,13 @@ public final class CameraStateMonitorTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mLetterboxConfiguration = mDisplayContent.mWmService.mLetterboxConfiguration;
-        spyOn(mLetterboxConfiguration);
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
+        mAppCompatConfiguration = mDisplayContent.mWmService.mAppCompatConfiguration;
+        spyOn(mAppCompatConfiguration);
+        when(mAppCompatConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(true);
-        when(mLetterboxConfiguration.isCameraCompatRefreshEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshEnabled())
                 .thenReturn(true);
-        when(mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(true);
 
         mMockCameraManager = mock(CameraManager.class);
@@ -256,8 +256,7 @@ public final class CameraStateMonitorTests extends WindowTestsBase {
         }
 
         @Override
-        public boolean onCameraClosed(@NonNull ActivityRecord cameraActivity,
-                @NonNull String cameraId) {
+        public boolean onCameraClosed(@NonNull String cameraId) {
             mOnCameraClosedCounter++;
             boolean returnValue = mOnCameraClosedReturnValue;
             // If false, return false only the first time, so it doesn't fall in the infinite retry

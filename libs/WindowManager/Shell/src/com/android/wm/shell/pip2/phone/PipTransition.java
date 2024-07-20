@@ -53,6 +53,7 @@ import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.PipContentOverlay;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
+import com.android.wm.shell.pip2.animation.PipEnterExitAnimator;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
@@ -378,12 +379,34 @@ public class PipTransition extends PipTransitionController implements
         if (pipChange == null) {
             return false;
         }
-        // cache the PiP task token and leash
-        WindowContainerToken pipTaskToken = pipChange.getContainer();
 
-        startTransaction.apply();
-        // TODO: b/275910498 Use a new implementation of the PiP animator here.
-        finishCallback.onTransitionFinished(null);
+        WindowContainerToken pipTaskToken = pipChange.getContainer();
+        if (pipTaskToken == null) {
+            return false;
+        }
+
+        WindowContainerTransaction finishWct = new WindowContainerTransaction();
+        SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+
+        Rect startBounds = pipChange.getStartAbsBounds();
+        Rect endBounds = pipChange.getEndAbsBounds();
+        SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+        Preconditions.checkNotNull(pipLeash, "Leash is null for bounds transition.");
+
+        PipEnterExitAnimator animator = new PipEnterExitAnimator(mContext, pipLeash,
+                startTransaction, startBounds, startBounds, endBounds,
+                PipEnterExitAnimator.BOUNDS_ENTER);
+
+        tx.addTransactionCommittedListener(mPipScheduler.getMainExecutor(),
+                this::onClientDrawAtTransitionEnd);
+        finishWct.setBoundsChangeTransaction(pipTaskToken, tx);
+
+        animator.setAnimationEndCallback(() -> {
+            mPipTransitionState.setState(PipTransitionState.ENTERED_PIP);
+            finishCallback.onTransitionFinished(finishWct.isEmpty() ? null : finishWct);
+        });
+
+        animator.start();
         return true;
     }
 
@@ -421,10 +444,25 @@ public class PipTransition extends PipTransitionController implements
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        startTransaction.apply();
-        // TODO: b/275910498 Use a new implementation of the PiP animator here.
-        finishCallback.onTransitionFinished(null);
-        mPipTransitionState.setState(PipTransitionState.EXITED_PIP);
+        TransitionInfo.Change pipChange = getPipChange(info);
+        if (pipChange == null) {
+            return false;
+        }
+
+        Rect startBounds = pipChange.getStartAbsBounds();
+        Rect endBounds = pipChange.getEndAbsBounds();
+        SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+        Preconditions.checkNotNull(pipLeash, "Leash is null for bounds transition.");
+
+        PipEnterExitAnimator animator = new PipEnterExitAnimator(mContext, pipLeash,
+                startTransaction, startBounds, startBounds, endBounds,
+                PipEnterExitAnimator.BOUNDS_EXIT);
+        animator.setAnimationEndCallback(() -> {
+            finishCallback.onTransitionFinished(null);
+            mPipTransitionState.setState(PipTransitionState.EXITED_PIP);
+        });
+
+        animator.start();
         return true;
     }
 

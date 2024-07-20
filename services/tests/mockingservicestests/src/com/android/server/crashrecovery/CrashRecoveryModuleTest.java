@@ -84,8 +84,10 @@ public class CrashRecoveryModuleTest {
     @Test
     public void testLifecycleServiceStart() {
         mLifecycle.onStart();
+        doNothing().when(mPackageWatchdog).registerShutdownBroadcastReceiver();
 
         verify(mPackageWatchdog, times(1)).noteBoot();
+        verify(mPackageWatchdog, times(1)).registerShutdownBroadcastReceiver();
         ExtendedMockito.verify(() -> RescueParty.registerHealthObserver(any()),
                 Mockito.times(1));
     }

@@ -145,6 +145,7 @@ fun SceneScope.HeadsUpNotificationSpace(
                     }
                     // Note: boundsInWindow doesn't scroll off the screen
                     stackScrollView.setHeadsUpTop(boundsInWindow.top)
+                    stackScrollView.setHeadsUpBottom(boundsInWindow.bottom)
                 }
     )
 }
@@ -198,6 +199,7 @@ fun SceneScope.SnoozeableHeadsUpNotificationSpace(
 
     LaunchedEffect(scrollableState.isScrollInProgress) {
         if (!scrollableState.isScrollInProgress && scrollOffset <= minScrollOffset) {
+            viewModel.setHeadsUpAnimatingAway(false)
             viewModel.snoozeHun()
         }
     }
@@ -470,7 +472,11 @@ fun SceneScope.NotificationScrollingStack(
             )
         }
         if (shouldIncludeHeadsUpSpace) {
-            HeadsUpNotificationSpace(stackScrollView = stackScrollView, viewModel = viewModel)
+            HeadsUpNotificationSpace(
+                stackScrollView = stackScrollView,
+                viewModel = viewModel,
+                modifier = Modifier.padding(top = topPadding)
+            )
         }
     }
 }

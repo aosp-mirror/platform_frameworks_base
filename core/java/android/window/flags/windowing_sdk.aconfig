@@ -3,16 +3,6 @@ container: "system"
 
 # Project link: https://gantry.corp.google.com/projects/android_platform_windowing_sdk/changes
 
-# Using a fixed read only flag because there are ClientTransaction scheduling before
-# WindowManagerService creation.
-flag {
-    namespace: "windowing_sdk"
-    name: "bundle_client_transaction_flag"
-    description: "To bundle multiple ClientTransactionItems into one ClientTransaction"
-    bug: "260873529"
-    is_fixed_read_only: true
-}
-
 flag {
     namespace: "windowing_sdk"
     name: "activity_embedding_overlay_presentation_flag"

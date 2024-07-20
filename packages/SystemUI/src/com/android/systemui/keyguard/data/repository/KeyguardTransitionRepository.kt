@@ -252,7 +252,10 @@ constructor(
                 return@withContext null
             }
                 ?: run {
-                    emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
+                    emitTransition(
+                        nextStep = TransitionStep(info, startingValue, TransitionState.STARTED),
+                        isManual = true,
+                    )
 
                     // No animator, so it's manual. Provide a mechanism to callback
                     updateTransitionId = UUID.randomUUID()
