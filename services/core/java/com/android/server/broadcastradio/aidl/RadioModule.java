@@ -120,7 +120,7 @@ final class RadioModule {
         public void onCurrentProgramInfoChanged(ProgramInfo halProgramInfo) {
             fireLater(() -> {
                 RadioManager.ProgramInfo currentProgramInfo =
-                        ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
+                        ConversionUtils.tunedProgramInfoFromHalProgramInfo(halProgramInfo);
                 Objects.requireNonNull(currentProgramInfo,
                         "Program info from AIDL HAL is invalid");
                 synchronized (mLock) {

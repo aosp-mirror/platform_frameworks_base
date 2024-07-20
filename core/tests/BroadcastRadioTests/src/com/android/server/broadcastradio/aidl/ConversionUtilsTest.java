@@ -327,13 +327,29 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     @Test
     public void programInfoFromHalProgramInfo_withInvalidDabProgramInfo() {
         android.hardware.broadcastradio.ProgramSelector invalidHalDabSelector =
-                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID,
-                new ProgramIdentifier[]{TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
+                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_ENSEMBLE_ID,
+                        new ProgramIdentifier[]{TEST_HAL_DAB_FREQUENCY_ID});
+        ProgramInfo halProgramInfo = AidlTestUtils.makeHalProgramInfo(invalidHalDabSelector,
+                /* logicallyTunedTo= */ null, /* physicallyTunedTo= */ null,
+                TEST_SIGNAL_QUALITY);
+
+        RadioManager.ProgramInfo programInfo =
+                ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
+
+        expect.withMessage("Invalid DAB program info with incorrect DAB selector")
+                .that(programInfo).isNull();
+    }
+
+    @Test
+    public void tunedProgramInfoFromHalProgramInfo_withInvalidDabProgramInfo() {
+        android.hardware.broadcastradio.ProgramSelector invalidHalDabSelector =
+                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{
+                        TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
         ProgramInfo halProgramInfo = AidlTestUtils.makeHalProgramInfo(invalidHalDabSelector,
                 TEST_HAL_DAB_SID_EXT_ID, TEST_HAL_DAB_ENSEMBLE_ID, TEST_SIGNAL_QUALITY);
 
         RadioManager.ProgramInfo programInfo =
-                ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
+                ConversionUtils.tunedProgramInfoFromHalProgramInfo(halProgramInfo);
 
         expect.withMessage("Invalid DAB program info with incorrect type of physically tuned to id")
                 .that(programInfo).isNull();
@@ -370,13 +386,15 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     public void chunkFromHalProgramListChunk_withInvalidModifiedProgramInfo() {
         boolean purge = true;
         boolean complete = false;
-        android.hardware.broadcastradio.ProgramSelector halDabSelector =
-                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{
-                        TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
-        ProgramInfo halDabInfo = AidlTestUtils.makeHalProgramInfo(halDabSelector,
-                TEST_HAL_DAB_SID_EXT_ID, TEST_HAL_DAB_ENSEMBLE_ID, TEST_SIGNAL_QUALITY);
+        android.hardware.broadcastradio.ProgramSelector invalidHalDabSelector =
+                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_ENSEMBLE_ID,
+                        new ProgramIdentifier[]{TEST_HAL_DAB_FREQUENCY_ID});
+        ProgramInfo halProgramInfo = AidlTestUtils.makeHalProgramInfo(invalidHalDabSelector,
+                /* logicallyTunedTo= */ null, /* physicallyTunedTo= */ null,
+                TEST_SIGNAL_QUALITY);
         ProgramListChunk halChunk = AidlTestUtils.makeHalChunk(purge, complete,
-                new ProgramInfo[]{halDabInfo}, new ProgramIdentifier[]{TEST_HAL_FM_FREQUENCY_ID});
+                new ProgramInfo[]{halProgramInfo},
+                new ProgramIdentifier[]{TEST_HAL_FM_FREQUENCY_ID});
 
         ProgramList.Chunk chunk = ConversionUtils.chunkFromHalProgramListChunk(halChunk);
 
