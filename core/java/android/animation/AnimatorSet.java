@@ -1381,6 +1381,18 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             }
             int toId = findLatestEventIdForTime(playTime);
             handleAnimationEvents(-1, toId, playTime);
+
+            if (mSeekState.isActive()) {
+                // Pump a frame to the on-going animators
+                for (int i = 0; i < mPlayingSet.size(); i++) {
+                    Node node = mPlayingSet.get(i);
+                    if (!node.mEnded) {
+                        pulseFrame(node, getPlayTimeForNodeIncludingDelay(playTime, node));
+                    }
+                }
+            }
+
+            // Remove all the finished anims
             for (int i = mPlayingSet.size() - 1; i >= 0; i--) {
                 if (mPlayingSet.get(i).mEnded) {
                     mPlayingSet.remove(i);

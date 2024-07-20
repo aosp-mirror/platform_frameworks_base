@@ -24,7 +24,6 @@ import android.content.res.Resources
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.Flags.enableWidgetPickerSizeFilter
 import com.android.systemui.communal.data.model.CommunalWidgetCategories
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalPrefsInteractor
@@ -176,16 +175,14 @@ constructor(
 
         return Intent(Intent.ACTION_PICK).apply {
             setPackage(packageName)
-            if (enableWidgetPickerSizeFilter()) {
-                putExtra(
-                    EXTRA_DESIRED_WIDGET_WIDTH,
-                    resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_width)
-                )
-                putExtra(
-                    EXTRA_DESIRED_WIDGET_HEIGHT,
-                    resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_height)
-                )
-            }
+            putExtra(
+                EXTRA_DESIRED_WIDGET_WIDTH,
+                resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_width)
+            )
+            putExtra(
+                EXTRA_DESIRED_WIDGET_HEIGHT,
+                resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_height)
+            )
             putExtra(
                 AppWidgetManager.EXTRA_CATEGORY_FILTER,
                 CommunalWidgetCategories.defaultCategories
@@ -216,6 +213,14 @@ constructor(
 
     /** Sets whether edit mode is currently open */
     fun setEditModeOpen(isOpen: Boolean) = communalInteractor.setEditModeOpen(isOpen)
+
+    /**
+     * Sets whether the edit mode activity is currently showing.
+     *
+     * See [CommunalInteractor.editActivityShowing] for more info.
+     */
+    fun setEditActivityShowing(showing: Boolean) =
+        communalInteractor.setEditActivityShowing(showing)
 
     /** Called when exiting the edit mode, before transitioning back to the communal scene. */
     fun cleanupEditModeState() {

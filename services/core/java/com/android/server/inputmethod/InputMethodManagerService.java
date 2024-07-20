@@ -1406,16 +1406,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 final String defaultImiId = SecureSettingsWrapper.getString(
                         Settings.Secure.DEFAULT_INPUT_METHOD, null, currentUserId);
                 final boolean imeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
-                final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
-                        currentUserId, AdditionalSubtypeMapRepository.get(currentUserId),
-                        DirectBootAwareness.AUTO);
-                InputMethodSettingsRepository.put(currentUserId, newSettings);
+                final var settings = InputMethodSettingsRepository.get(currentUserId);
                 postInputMethodSettingUpdatedLocked(
                         !imeSelectedOnBoot /* resetDefaultEnabledIme */, currentUserId);
                 updateFromSettingsLocked(true, currentUserId);
                 InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
                         getPackageManagerForUser(mContext, currentUserId),
-                        newSettings.getEnabledInputMethodList());
+                        settings.getEnabledInputMethodList());
 
                 AdditionalSubtypeMapRepository.startWriterThread();
 

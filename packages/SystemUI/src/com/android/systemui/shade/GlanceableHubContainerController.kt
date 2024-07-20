@@ -50,6 +50,9 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -76,6 +79,7 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val communalViewModel: CommunalViewModel,
     private val keyguardInteractor: KeyguardInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val powerManager: PowerManager,
     private val communalColors: CommunalColors,
@@ -146,6 +150,19 @@ constructor(
      * Tracks [CommunalInteractor.isCommunalShowing].
      */
     private var hubShowing = false
+
+    /**
+     * True if we're transitioning to or from edit mode
+     *
+     * We block all touches and gestures when edit mode is open to prevent funky transition issues
+     * when entering and exiting edit mode because we delay exiting the hub scene when entering edit
+     * mode and enter the hub scene early when exiting edit mode to make for a smoother transition.
+     * Gestures during these transitions can result in broken and unexpected UI states.
+     *
+     * Tracks [CommunalInteractor.editActivityShowing] and the [KeyguardState.GONE] to
+     * [KeyguardState.GLANCEABLE_HUB] transition.
+     */
+    private var inEditModeTransition = false
 
     /**
      * True if either the primary or alternate bouncer are open, meaning the hub should not receive
@@ -323,6 +340,22 @@ constructor(
         )
         collectFlow(
             containerView,
+            // When leaving edit mode, editActivityShowing is true until the edit mode activity
+            // finishes itself and the device locks, after which isInTransition will be true until
+            // we're fully on the hub.
+            anyOf(
+                communalInteractor.editActivityShowing,
+                keyguardTransitionInteractor.isInTransition(
+                    Edge.create(KeyguardState.GONE, KeyguardState.GLANCEABLE_HUB)
+                )
+            ),
+            {
+                inEditModeTransition = it
+                updateTouchHandlingState()
+            }
+        )
+        collectFlow(
+            containerView,
             combine(
                 shadeInteractor.isAnyFullyExpanded,
                 shadeInteractor.isUserInteracting,
@@ -359,8 +392,11 @@ constructor(
      * Also clears gesture exclusion zones when the hub is occluded or gone.
      */
     private fun updateTouchHandlingState() {
+        // Only listen to gestures when we're settled in the hub keyguard state and the shade
+        // bouncer are not showing on top.
         val shouldInterceptGestures =
-            hubShowing && !(shadeShowingAndConsumingTouches || anyBouncerShowing)
+            hubShowing &&
+                !(shadeShowingAndConsumingTouches || anyBouncerShowing || inEditModeTransition)
         if (shouldInterceptGestures) {
             lifecycleRegistry.currentState = Lifecycle.State.RESUMED
         } else {
@@ -412,10 +448,10 @@ constructor(
             return false
         }
 
-        return communalContainerView?.let { handleTouchEventOnCommunalView(it, ev) } ?: false
+        return communalContainerView?.let { handleTouchEventOnCommunalView(ev) } ?: false
     }
 
-    private fun handleTouchEventOnCommunalView(view: View, ev: MotionEvent): Boolean {
+    private fun handleTouchEventOnCommunalView(ev: MotionEvent): Boolean {
         val isDown = ev.actionMasked == MotionEvent.ACTION_DOWN
         val isUp = ev.actionMasked == MotionEvent.ACTION_UP
         val isMove = ev.actionMasked == MotionEvent.ACTION_MOVE
@@ -431,7 +467,7 @@ constructor(
             if (isUp || isCancel) {
                 isTrackingHubTouch = false
             }
-            return dispatchTouchEvent(view, ev)
+            return dispatchTouchEvent(ev)
         }
 
         return false
@@ -441,7 +477,14 @@ constructor(
      * Dispatches the touch event to the communal container and sends a user activity event to reset
      * the screen timeout.
      */
-    private fun dispatchTouchEvent(view: View, ev: MotionEvent): Boolean {
+    private fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (inEditModeTransition) {
+            // Consume but ignore touches while we're transitioning to or from edit mode so that the
+            // user can't trigger another transition, such as by swiping the hub away, tapping a
+            // widget, or opening the shade/bouncer. Doing any of these while transitioning can
+            // result in broken states.
+            return true
+        }
         try {
             var handled = false
             communalContainerWrapper?.dispatchTouchEvent(ev) {

@@ -38,6 +38,8 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.compatui.AppCompatUtils.isTopActivityExemptFromDesktopWindowing;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
+import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR;
+import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
@@ -326,7 +328,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) return;
         final RunningTaskInfo oldTaskInfo = decoration.mTaskInfo;
 
-        if (taskInfo.displayId != oldTaskInfo.displayId) {
+        if (taskInfo.displayId != oldTaskInfo.displayId
+                && !Flags.enableAdditionalWindowsAboveStatusBar()) {
             removeTaskFromEventReceiver(oldTaskInfo.displayId);
             incrementEventReceiverTasks(taskInfo.displayId);
         }
@@ -390,7 +393,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         decoration.close();
         final int displayId = taskInfo.displayId;
-        if (mEventReceiversByDisplay.contains(displayId)) {
+        if (mEventReceiversByDisplay.contains(displayId)
+                && !Flags.enableAdditionalWindowsAboveStatusBar()) {
             removeTaskFromEventReceiver(displayId);
         }
         // Remove the decoration from the cache last because WindowDecoration#close could still
@@ -515,6 +519,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
             } else if (id == R.id.split_screen_button) {
                 decoration.closeHandleMenu();
+                // When the app enters split-select, the handle will no longer be visible, meaning
+                // we shouldn't receive input for it any longer.
+                decoration.disposeStatusBarInputLayer();
                 mDesktopTasksController.requestSplit(decoration.mTaskInfo);
             } else if (id == R.id.open_in_browser_button) {
                 // TODO(b/346441962): let the decoration handle the click gesture and only call back
@@ -651,13 +658,38 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             final RunningTaskInfo taskInfo = decoration.mTaskInfo;
             if (DesktopModeStatus.canEnterDesktopMode(mContext)
-                    && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-                return false;
+                    && !taskInfo.isFreeform()) {
+                return handleNonFreeformMotionEvent(decoration, v, e);
+            } else {
+                return handleFreeformMotionEvent(decoration, taskInfo, v, e);
             }
+        }
+
+        private boolean handleNonFreeformMotionEvent(DesktopModeWindowDecoration decoration,
+                View v, MotionEvent e) {
+            final int id = v.getId();
+            if (id == R.id.caption_handle) {
+                if (e.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    // Caption handle is located within the status bar region, meaning the
+                    // DisplayPolicy will attempt to transfer this input to status bar if it's
+                    // a swipe down. Pilfer here to keep the gesture in handle alone.
+                    mInputManager.pilferPointers(v.getViewRootImpl().getInputToken());
+                }
+                handleCaptionThroughStatusBar(e, decoration);
+                final boolean wasDragging = mIsDragging;
+                updateDragStatus(e.getActionMasked());
+                // Only prevent onClick from receiving this event if it's a drag.
+                return wasDragging;
+            }
+            return false;
+        }
+
+        private boolean handleFreeformMotionEvent(DesktopModeWindowDecoration decoration,
+                RunningTaskInfo taskInfo, View v, MotionEvent e) {
+            final int id = v.getId();
             if (mGestureDetector.onTouchEvent(e)) {
                 return true;
             }
-            final int id = v.getId();
             final boolean touchingButton = (id == R.id.close_window || id == R.id.maximize_window
                     || id == R.id.open_menu_button);
             switch (e.getActionMasked()) {
@@ -666,7 +698,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mDragPositioningCallback.onDragPositioningStart(
                             0 /* ctrlType */, e.getRawX(0),
                             e.getRawY(0));
-                    mIsDragging = false;
+                    updateDragStatus(e.getActionMasked());
                     mHasLongClicked = false;
                     // Do not consume input event if a button is touched, otherwise it would
                     // prevent the button's ripple effect from showing.
@@ -686,7 +718,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             decoration.mTaskSurface,
                             e.getRawX(dragPointerIdx),
                             newTaskBounds);
-                    mIsDragging = true;
+                    updateDragStatus(e.getActionMasked());
                     return true;
                 }
                 case MotionEvent.ACTION_UP:
@@ -716,12 +748,27 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         // onClick call that results.
                         return false;
                     } else {
-                        mIsDragging = false;
+                        updateDragStatus(e.getActionMasked());
                         return true;
                     }
                 }
             }
             return true;
+        }
+
+        private void updateDragStatus(int eventAction) {
+            switch (eventAction) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL: {
+                    mIsDragging = false;
+                    break;
+                }
+                case MotionEvent.ACTION_MOVE: {
+                    mIsDragging = true;
+                    break;
+                }
+            }
         }
 
         /**
@@ -848,6 +895,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
      *
      * @param relevantDecor the window decoration of the focused task's caption. This method only
      *                      handles motion events outside this caption's bounds.
+     * TODO(b/349135068): Outside-touch detection no longer works with the
+     *  enableAdditionalWindowsAboveStatusBar flag enabled. This
+     *  will be fixed once we can add FLAG_WATCH_OUTSIDE_TOUCH to relevant menus,
+     *  at which point, all EventReceivers and external touch logic should be removed.
      */
     private void handleEventOutsideCaption(MotionEvent ev,
             DesktopModeWindowDecoration relevantDecor) {
@@ -900,9 +951,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     dragFromStatusBarAllowed = windowingMode == WINDOWING_MODE_FULLSCREEN
                             || windowingMode == WINDOWING_MODE_MULTI_WINDOW;
                 }
-
-                if (dragFromStatusBarAllowed
-                        && relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)) {
+                final boolean shouldStartTransitionDrag =
+                        relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)
+                        || Flags.enableAdditionalWindowsAboveStatusBar();
+                if (dragFromStatusBarAllowed && shouldStartTransitionDrag) {
                     mTransitionDragActive = true;
                 }
                 break;
@@ -916,8 +968,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         // Though this isn't a hover event, we need to update handle's hover state
                         // as it likely will change.
                         relevantDecor.updateHoverAndPressStatus(ev);
-                        mDesktopTasksController.onDragPositioningEndThroughStatusBar(
+                        DesktopModeVisualIndicator.IndicatorType resultType =
+                                mDesktopTasksController.onDragPositioningEndThroughStatusBar(
                                 new PointF(ev.getRawX(), ev.getRawY()), relevantDecor.mTaskInfo);
+                        // If we are entering split select, handle will no longer be visible and
+                        // should not be receiving any input.
+                        if (resultType == TO_SPLIT_LEFT_INDICATOR
+                                || resultType != TO_SPLIT_RIGHT_INDICATOR) {
+                            relevantDecor.disposeStatusBarInputLayer();
+                        }
                         mMoveToDesktopAnimator = null;
                         return;
                     } else {
@@ -929,7 +988,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 relevantDecor.checkTouchEvent(ev);
                 break;
             }
-
             case ACTION_MOVE: {
                 if (relevantDecor == null) {
                     return;
@@ -1089,6 +1147,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mDesktopModeWindowDecorFactory.create(
                         mContext,
                         mDisplayController,
+                        mSplitScreenController,
                         mTaskOrganizer,
                         taskInfo,
                         taskSurface,
@@ -1131,7 +1190,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */, false /* shouldSetTaskPositionAndCrop */);
-        incrementEventReceiverTasks(taskInfo.displayId);
+        if (!Flags.enableAdditionalWindowsAboveStatusBar()) {
+            incrementEventReceiverTasks(taskInfo.displayId);
+        }
     }
 
     private RunningTaskInfo getOtherSplitTask(int taskId) {

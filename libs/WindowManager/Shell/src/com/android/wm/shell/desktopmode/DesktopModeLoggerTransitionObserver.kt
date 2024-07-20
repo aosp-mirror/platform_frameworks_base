@@ -347,7 +347,7 @@ class DesktopModeLoggerTransitionObserver(
             else -> {
                 ProtoLog.w(
                     WM_SHELL_DESKTOP_MODE,
-                    "Unknown enter reason for transition type ${transitionInfo.type}",
+                    "Unknown enter reason for transition type: %s",
                     transitionInfo.type
                 )
                 EnterReason.UNKNOWN_ENTER
@@ -368,7 +368,7 @@ class DesktopModeLoggerTransitionObserver(
             else -> {
                 ProtoLog.w(
                     WM_SHELL_DESKTOP_MODE,
-                    "Unknown exit reason for transition type ${transitionInfo.type}",
+                    "Unknown exit reason for transition type: %s",
                     transitionInfo.type
                 )
                 ExitReason.UNKNOWN_EXIT

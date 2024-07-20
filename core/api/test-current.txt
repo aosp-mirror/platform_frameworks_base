@@ -423,6 +423,7 @@ package android.app {
   public final class PictureInPictureParams implements android.os.Parcelable {
     method public float getAspectRatioFloat();
     method public float getExpandedAspectRatioFloat();
+    method public static boolean isSameAspectRatio(@NonNull android.graphics.Rect, @NonNull android.util.Rational);
   }
 
   public final class PictureInPictureUiState implements android.os.Parcelable {
