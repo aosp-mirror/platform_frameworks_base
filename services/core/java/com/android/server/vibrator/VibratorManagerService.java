@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import static android.os.VibrationAttributes.USAGE_CLASS_ALARM;
 import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
 import static android.os.VibrationEffect.VibrationParameter.targetFrequency;
 
@@ -73,6 +74,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.SystemService;
+import com.android.server.pm.BackgroundUserSoundNotifier;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -173,7 +175,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @GuardedBy("mLock")
     @Nullable private HapticFeedbackVibrationProvider mHapticFeedbackVibrationProvider;
 
-    private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+    @VisibleForTesting
+    BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
@@ -187,6 +190,19 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     if (shouldCancelOnScreenOffLocked(mCurrentVibration)) {
                         mCurrentVibration.notifyCancelled(
                                 new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_SCREEN_OFF),
+                                /* immediate= */ false);
+                    }
+                }
+            } else if (android.multiuser.Flags.addUiForSoundsFromBackgroundUsers()
+                    && intent.getAction().equals(BackgroundUserSoundNotifier.ACTION_MUTE_SOUND)) {
+                synchronized (mLock) {
+                    if (shouldCancelOnFgUserRequest(mNextVibration)) {
+                        clearNextVibrationLocked(new Vibration.EndInfo(
+                                Vibration.Status.CANCELLED_BY_FOREGROUND_USER));
+                    }
+                    if (shouldCancelOnFgUserRequest(mCurrentVibration)) {
+                        mCurrentVibration.notifyCancelled(new Vibration.EndInfo(
+                                        Vibration.Status.CANCELLED_BY_FOREGROUND_USER),
                                 /* immediate= */ false);
                     }
                 }
@@ -299,6 +315,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        if (android.multiuser.Flags.addUiForSoundsFromBackgroundUsers()) {
+            filter.addAction(BackgroundUserSoundNotifier.ACTION_MUTE_SOUND);
+        }
         context.registerReceiver(mIntentReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         injector.addService(EXTERNAL_VIBRATOR_SERVICE, new ExternalVibratorService());
@@ -1420,6 +1439,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
         return checkAppOpModeLocked(conductor.getVibration().callerInfo)
                 != AppOpsManager.MODE_ALLOWED;
+    }
+
+    @GuardedBy("mLock")
+    private boolean shouldCancelOnFgUserRequest(@Nullable VibrationStepConductor conductor) {
+        if (conductor == null) {
+            return false;
+        }
+        return conductor.getVibration().callerInfo.attrs.getUsageClass() == USAGE_CLASS_ALARM;
     }
 
     @GuardedBy("mLock")

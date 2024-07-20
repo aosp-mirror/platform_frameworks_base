@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.policy
 
 import android.content.Context
 import android.os.Handler
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
@@ -239,6 +240,7 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
     }
 
     @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
     fun testShowNotification_reorderNotAllowed_notPulsing_seenInShadeTrue() {
         whenever(mVSProvider.isReorderingAllowed).thenReturn(false)
         val hmp = createHeadsUpManagerPhone()
@@ -253,6 +255,7 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
     }
 
     @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
     fun testShowNotification_reorderAllowed_notPulsing_seenInShadeFalse() {
         whenever(mVSProvider.isReorderingAllowed).thenReturn(true)
         val hmp = createHeadsUpManagerPhone()

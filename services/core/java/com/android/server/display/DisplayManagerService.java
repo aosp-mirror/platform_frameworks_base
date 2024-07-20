@@ -3849,9 +3849,10 @@ public final class DisplayManagerService extends SystemService {
             // Ignore redundant events. Further optimization is possible by merging adjacent events.
             Pair<Integer, Integer> last = mDisplayEvents.get(mDisplayEvents.size() - 1);
             if (last.first == displayId && last.second == event) {
-                Slog.d(TAG,
-                        "Ignore redundant display event " + displayId + "/" + event + " to "
-                                + mCallbackRecord.mUid + "/" + mCallbackRecord.mPid);
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignore redundant display event " + displayId + "/" + event + " to "
+                            + mCallbackRecord.mUid + "/" + mCallbackRecord.mPid);
+                }
                 return;
             }
 

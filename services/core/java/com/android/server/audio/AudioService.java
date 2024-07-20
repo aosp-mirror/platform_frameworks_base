@@ -9953,9 +9953,9 @@ public class AudioService extends IAudioService.Stub
             int a2dpDev = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
             synchronized (mCachedAbsVolDrivingStreamsLock) {
                 mCachedAbsVolDrivingStreams.compute(a2dpDev, (dev, stream) -> {
-                    if (stream != null && !mAvrcpAbsVolSupported) {
+                    if (!mAvrcpAbsVolSupported) {
                         mAudioSystem.setDeviceAbsoluteVolumeEnabled(a2dpDev, /*address=*/
-                                "", /*enabled*/false, AudioSystem.DEVICE_NONE);
+                                "", /*enabled*/false, AudioSystem.STREAM_DEFAULT);
                         return null;
                     }
                     // For A2DP and AVRCP we need to set the driving stream based on the

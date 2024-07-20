@@ -124,6 +124,8 @@ public class QuickStepContract {
     public static final long SYSUI_STATE_SHORTCUT_HELPER_SHOWING = 1L << 32;
     // Touchpad gestures are disabled
     public static final long SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED = 1L << 33;
+    // PiP animation is running
+    public static final long SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING = 1L << 34;
     // Communal hub is showing
     public static final long SYSUI_STATE_COMMUNAL_HUB_SHOWING = 1L << 35;
 
@@ -175,6 +177,7 @@ public class QuickStepContract {
             SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY,
             SYSUI_STATE_SHORTCUT_HELPER_SHOWING,
             SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED,
+            SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING,
             SYSUI_STATE_COMMUNAL_HUB_SHOWING,
     })
     public @interface SystemUiStateFlags {}
@@ -279,6 +282,9 @@ public class QuickStepContract {
         }
         if ((flags & SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED) != 0) {
             str.add("touchpad_gestures_disabled");
+        }
+        if ((flags & SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING) != 0) {
+            str.add("disable_gesture_pip_animating");
         }
         if ((flags & SYSUI_STATE_COMMUNAL_HUB_SHOWING) != 0) {
             str.add("communal_hub_showing");

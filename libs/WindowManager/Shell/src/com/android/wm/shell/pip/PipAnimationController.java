@@ -230,6 +230,7 @@ public class PipAnimationController {
 
     /**
      * Quietly cancel the animator by removing the listeners first.
+     * TODO(b/275003573): deprecate this, cancelling without the proper callbacks is problematic.
      */
     static void quietCancel(@NonNull ValueAnimator animator) {
         animator.removeAllUpdateListeners();

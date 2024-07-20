@@ -26,6 +26,7 @@ import com.android.server.display.TestUtils
 import com.android.server.display.brightness.clamper.LightSensorController.Injector
 import com.android.server.display.brightness.clamper.LightSensorController.LightSensorListener
 import com.android.server.display.config.SensorData
+import com.android.server.display.config.createSensorData
 import com.android.server.display.utils.AmbientFilter
 import org.junit.Before
 import org.mockito.kotlin.any
@@ -51,7 +52,7 @@ class LightSensorControllerTest {
     private val mockAmbientFilter: AmbientFilter = mock()
 
     private val testInjector = TestInjector()
-    private val dummySensorData = SensorData()
+    private val dummySensorData = createSensorData()
 
     private lateinit var controller: LightSensorController
 

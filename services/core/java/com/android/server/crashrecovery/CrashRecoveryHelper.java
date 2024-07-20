@@ -24,6 +24,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.net.ConnectivityModuleConnector;
+import android.sysprop.CrashRecoveryProperties;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -35,7 +36,7 @@ import java.util.List;
 
 /**
  * Provides helper methods for the CrashRecovery APEX
- *
+ *  TODO: b/354112511 Add tests for this class when it is finalized.
  * @hide
  */
 public final class CrashRecoveryHelper {
@@ -76,11 +77,13 @@ public final class CrashRecoveryHelper {
     }
 
     /**
-     * Register health listeners for explicit package failures.
-     * Currently only registering for Connectivity Module health.
-     * @hide
+     * Register health listeners for Connectivity packages health.
+     *
+     * TODO: b/354112511 Have an internal method to trigger a rollback by reporting high severity errors,
+     * and rely on ActivityManager to inform the watchdog of severe network stack crashes
+     * instead of having this listener in parallel.
      */
-    public void registerConnectivityModuleHealthListener(@NonNull int failureReason) {
+    public void registerConnectivityModuleHealthListener() {
         // register listener for ConnectivityModule
         mConnectivityModuleConnector.registerHealthListener(
                 packageName -> {
@@ -90,7 +93,7 @@ public final class CrashRecoveryHelper {
                     return;
                 }
                 final List<VersionedPackage> pkgList = Collections.singletonList(pkg);
-                PackageWatchdog.getInstance(mContext).onPackageFailure(pkgList, failureReason);
+                PackageWatchdog.getInstance(mContext).onPackageFailure(pkgList,  PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
             });
     }
 
@@ -125,5 +128,22 @@ public final class CrashRecoveryHelper {
         } catch (PackageManager.NameNotFoundException e) {
             return pm.getPackageInfo(packageName, PackageManager.MATCH_APEX);
         }
+    }
+
+    /**
+     * Check if we're currently attempting to reboot for a factory reset. This method must
+     * return true if RescueParty tries to reboot early during a boot loop, since the device
+     * will not be fully booted at this time.
+     */
+    public static boolean isRecoveryTriggeredReboot() {
+        return isFactoryResetPropertySet() || isRebootPropertySet();
+    }
+
+    static boolean isFactoryResetPropertySet() {
+        return CrashRecoveryProperties.attemptingFactoryReset().orElse(false);
+    }
+
+    static boolean isRebootPropertySet() {
+        return CrashRecoveryProperties.attemptingReboot().orElse(false);
     }
 }

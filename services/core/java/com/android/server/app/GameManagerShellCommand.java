@@ -16,10 +16,13 @@
 
 package com.android.server.app;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.GameManager;
 import android.app.IGameManagerService;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -47,7 +50,10 @@ public class GameManagerShellCommand extends ShellCommand {
     private static final String UNSUPPORTED_MODE_NUM = String.valueOf(
             GameManager.GAME_MODE_UNSUPPORTED);
 
-    public GameManagerShellCommand() {
+    private PackageManager mPackageManager;
+
+    public GameManagerShellCommand(@NonNull PackageManager packageManager) {
+        mPackageManager = packageManager;
     }
 
     @Override
@@ -91,9 +97,29 @@ public class GameManagerShellCommand extends ShellCommand {
         return -1;
     }
 
+    private boolean isPackageGame(String packageName, int userId, PrintWriter pw) {
+        try {
+            final ApplicationInfo applicationInfo = mPackageManager
+                    .getApplicationInfoAsUser(packageName, PackageManager.MATCH_ALL, userId);
+            boolean isGame = applicationInfo.category == ApplicationInfo.CATEGORY_GAME;
+            if (!isGame) {
+                pw.println("Package " + packageName + " is not of game type, to use the game "
+                        + "mode commands, it must specify game category in the manifest as "
+                        + "android:appCategory=\"game\"");
+            }
+            return isGame;
+        } catch (PackageManager.NameNotFoundException e) {
+            pw.println("Package " + packageName + " is not found for user " + userId);
+            return false;
+        }
+    }
+
     private int runListGameModes(PrintWriter pw) throws ServiceNotFoundException, RemoteException {
         final String packageName = getNextArgRequired();
         final int userId = ActivityManager.getCurrentUser();
+        if (!isPackageGame(packageName, userId, pw)) {
+            return -1;
+        }
         final GameManagerService gameManagerService = (GameManagerService)
                 ServiceManager.getService(Context.GAME_SERVICE);
         final String currentMode = gameModeIntToString(
@@ -110,12 +136,15 @@ public class GameManagerShellCommand extends ShellCommand {
     private int runListGameModeConfigs(PrintWriter pw)
             throws ServiceNotFoundException, RemoteException {
         final String packageName = getNextArgRequired();
-
+        final int userId = ActivityManager.getCurrentUser();
+        if (!isPackageGame(packageName, userId, pw)) {
+            return -1;
+        }
         final GameManagerService gameManagerService = (GameManagerService)
                 ServiceManager.getService(Context.GAME_SERVICE);
 
         final String listStr = gameManagerService.getInterventionList(packageName,
-                ActivityManager.getCurrentUser());
+                userId);
 
         if (listStr == null) {
             pw.println("No interventions found for " + packageName);
@@ -131,15 +160,17 @@ public class GameManagerShellCommand extends ShellCommand {
         if (option != null && option.equals("--user")) {
             userIdStr = getNextArgRequired();
         }
-
         final String gameMode = getNextArgRequired();
         final String packageName = getNextArgRequired();
+        int userId = userIdStr != null ? Integer.parseInt(userIdStr)
+                : ActivityManager.getCurrentUser();
+        if (!isPackageGame(packageName, userId, pw)) {
+            return -1;
+        }
         final IGameManagerService service = IGameManagerService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.GAME_SERVICE));
         boolean batteryModeSupported = false;
         boolean perfModeSupported = false;
-        int userId = userIdStr != null ? Integer.parseInt(userIdStr)
-                : ActivityManager.getCurrentUser();
         int[] modes = service.getAvailableGameModes(packageName, userId);
         for (int mode : modes) {
             if (mode == GameManager.GAME_MODE_PERFORMANCE) {
@@ -262,6 +293,9 @@ public class GameManagerShellCommand extends ShellCommand {
 
         int userId = userIdStr != null ? Integer.parseInt(userIdStr)
                 : ActivityManager.getCurrentUser();
+        if (!isPackageGame(packageName, userId, pw)) {
+            return -1;
+        }
 
         final GameManagerService gameManagerService = (GameManagerService)
                 ServiceManager.getService(Context.GAME_SERVICE);
@@ -308,13 +342,14 @@ public class GameManagerShellCommand extends ShellCommand {
         }
 
         final String packageName = getNextArgRequired();
+        int userId = userIdStr != null ? Integer.parseInt(userIdStr)
+                : ActivityManager.getCurrentUser();
+        if (!isPackageGame(packageName, userId, pw)) {
+            return -1;
+        }
 
         final GameManagerService gameManagerService = (GameManagerService)
                 ServiceManager.getService(Context.GAME_SERVICE);
-
-        int userId = userIdStr != null ? Integer.parseInt(userIdStr)
-                : ActivityManager.getCurrentUser();
-
         if (gameMode == null) {
             gameManagerService.resetGameModeConfigOverride(packageName, userId, -1);
             return 0;

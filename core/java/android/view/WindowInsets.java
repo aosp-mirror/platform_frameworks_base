@@ -1708,6 +1708,7 @@ public final class WindowInsets {
                 }
                 mTypeBoundingRectsMap[indexOf(i)] = rects.toArray(new Rect[0]);
             }
+            mSystemInsetsConsumed = false;
             return this;
         }
 
@@ -1736,6 +1737,7 @@ public final class WindowInsets {
                 }
                 mTypeMaxBoundingRectsMap[indexOf(i)] = rects.toArray(new Rect[0]);
             }
+            mStableInsetsConsumed = false;
             return this;
         }
 
