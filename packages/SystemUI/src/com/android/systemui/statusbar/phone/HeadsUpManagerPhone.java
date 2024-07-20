@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRepository;
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.AnimationStateHandler;
@@ -174,9 +175,12 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         });
         javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(),
                     this::onShadeOrQsExpanded);
-        mVisualStabilityProvider.addPersistentReorderingBannedListener(mOnReorderingBannedListener);
-        mVisualStabilityProvider.addPersistentReorderingAllowedListener(
-                mOnReorderingAllowedListener);
+        if (NotificationThrottleHun.isEnabled()) {
+            mVisualStabilityProvider.addPersistentReorderingBannedListener(
+                    mOnReorderingBannedListener);
+            mVisualStabilityProvider.addPersistentReorderingAllowedListener(
+                    mOnReorderingAllowedListener);
+        }
     }
 
     public void setAnimationStateHandler(AnimationStateHandler handler) {
@@ -383,7 +387,9 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     private final OnReorderingAllowedListener mOnReorderingAllowedListener = () -> {
         mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
-        mAvalancheController.setEnableAtRuntime(true);
+        if (NotificationThrottleHun.isEnabled()) {
+            mAvalancheController.setEnableAtRuntime(true);
+        }
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
@@ -586,19 +592,29 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
                 @androidx.annotation.Nullable Runnable removeRunnable) {
             super.setEntry(entry, removeRunnable);
 
-            if (!mVisualStabilityProvider.isReorderingAllowed()
-                    // We don't want to allow reordering while pulsing, but headsup need to
-                    // time out anyway
-                    && !entry.showingPulsing()) {
-                mEntriesToRemoveWhenReorderingAllowed.add(entry);
-                entry.setSeenInShade(true);
+            if (NotificationThrottleHun.isEnabled()) {
+                if (!mVisualStabilityProvider.isReorderingAllowed()
+                        // We don't want to allow reordering while pulsing, but headsup need to
+                        // time out anyway
+                        && !entry.showingPulsing()) {
+                    mEntriesToRemoveWhenReorderingAllowed.add(entry);
+                    entry.setSeenInShade(true);
+                }
             }
         }
 
         @Override
         protected Runnable createRemoveRunnable(NotificationEntry entry) {
             return () -> {
-                if (mTrackingHeadsUp) {
+                if (!NotificationThrottleHun.isEnabled()
+                        && !mVisualStabilityProvider.isReorderingAllowed()
+                        // We don't want to allow reordering while pulsing, but headsup need to
+                        // time out anyway
+                        && !entry.showingPulsing()) {
+                    mEntriesToRemoveWhenReorderingAllowed.add(entry);
+                    mVisualStabilityProvider.addTemporaryReorderingAllowedListener(
+                            mOnReorderingAllowedListener);
+                } else if (mTrackingHeadsUp) {
                     mEntriesToRemoveAfterExpand.add(entry);
                 } else if (mVisualStabilityProvider.isReorderingAllowed()
                         || entry.showingPulsing()) {
@@ -613,6 +629,11 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
             if (mEntriesToRemoveAfterExpand.contains(mEntry)) {
                 mEntriesToRemoveAfterExpand.remove(mEntry);
+            }
+            if (!NotificationThrottleHun.isEnabled()) {
+                if (mEntriesToRemoveWhenReorderingAllowed.contains(mEntry)) {
+                    mEntriesToRemoveWhenReorderingAllowed.remove(mEntry);
+                }
             }
         }
 

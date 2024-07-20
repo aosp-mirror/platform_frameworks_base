@@ -1159,11 +1159,18 @@ public class ZenModeHelper {
                 rule.conditionId = azr.getConditionId();
                 modified = true;
             }
-            boolean shouldPreserveCondition = Flags.modesApi() && Flags.modesUi()
-                    && !isNew && origin == UPDATE_ORIGIN_USER
-                    && rule.enabled == azr.isEnabled()
-                    && rule.conditionId != null && rule.condition != null
-                    && rule.conditionId.equals(rule.condition.id);
+            // This can be removed when {@link Flags#modesUi} is fully ramped up
+            final boolean isWatch =
+                    mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
+            boolean shouldPreserveCondition =
+                    Flags.modesApi()
+                            && (Flags.modesUi() || isWatch)
+                            && !isNew
+                            && origin == UPDATE_ORIGIN_USER
+                            && rule.enabled == azr.isEnabled()
+                            && rule.conditionId != null
+                            && rule.condition != null
+                            && rule.conditionId.equals(rule.condition.id);
             if (!shouldPreserveCondition) {
                 // Do not update 'modified'. If only this changes we treat it as a no-op updateAZR.
                 rule.condition = null;

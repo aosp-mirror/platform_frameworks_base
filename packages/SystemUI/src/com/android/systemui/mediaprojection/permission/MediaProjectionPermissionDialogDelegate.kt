@@ -29,13 +29,20 @@ class MediaProjectionPermissionDialogDelegate(
     mediaProjectionConfig: MediaProjectionConfig?,
     private val onStartRecordingClicked: Consumer<MediaProjectionPermissionDialogDelegate>,
     private val onCancelClicked: Runnable,
-    private val appName: String?,
+    private val hasCastingCapabilities: Boolean,
+    appName: String,
     forceShowPartialScreenshare: Boolean,
     hostUid: Int,
     mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
 ) :
     BaseMediaProjectionPermissionDialogDelegate<AlertDialog>(
-        createOptionList(context, appName, mediaProjectionConfig, forceShowPartialScreenshare),
+        createOptionList(
+            context,
+            appName,
+            hasCastingCapabilities,
+            mediaProjectionConfig,
+            forceShowPartialScreenshare
+        ),
         appName,
         hostUid,
         mediaProjectionMetricsLogger
@@ -43,7 +50,7 @@ class MediaProjectionPermissionDialogDelegate(
     override fun onCreate(dialog: AlertDialog, savedInstanceState: Bundle?) {
         super.onCreate(dialog, savedInstanceState)
         // TODO(b/270018943): Handle the case of System sharing (not recording nor casting)
-        if (appName == null) {
+        if (hasCastingCapabilities) {
             setDialogTitle(R.string.media_projection_entry_cast_permission_dialog_title)
             setStartButtonText(R.string.media_projection_entry_cast_permission_dialog_continue)
         } else {
@@ -65,30 +72,29 @@ class MediaProjectionPermissionDialogDelegate(
     companion object {
         private fun createOptionList(
             context: Context,
-            appName: String?,
+            appName: String,
+            hasCastingCapabilities: Boolean,
             mediaProjectionConfig: MediaProjectionConfig?,
             overrideDisableSingleAppOption: Boolean = false,
         ): List<ScreenShareOption> {
             val singleAppWarningText =
-                if (appName == null) {
+                if (hasCastingCapabilities) {
                     R.string.media_projection_entry_cast_permission_dialog_warning_single_app
                 } else {
                     R.string.media_projection_entry_app_permission_dialog_warning_single_app
                 }
             val entireScreenWarningText =
-                if (appName == null) {
+                if (hasCastingCapabilities) {
                     R.string.media_projection_entry_cast_permission_dialog_warning_entire_screen
                 } else {
                     R.string.media_projection_entry_app_permission_dialog_warning_entire_screen
                 }
 
-            // The single app option should only be disabled if there is an app name provided,
-            // the client has setup a MediaProjection with
-            // MediaProjectionConfig#createConfigForDefaultDisplay, AND it hasn't been overridden by
-            // the OVERRIDE_DISABLE_SINGLE_APP_OPTION per-app override.
+            // The single app option should only be disabled if the client has setup a
+            // MediaProjection with MediaProjectionConfig#createConfigForDefaultDisplay AND
+            // it hasn't been overridden by the OVERRIDE_DISABLE_SINGLE_APP_OPTION per-app override.
             val singleAppOptionDisabled =
-                appName != null &&
-                    !overrideDisableSingleAppOption &&
+                !overrideDisableSingleAppOption &&
                     mediaProjectionConfig?.regionToCapture ==
                         MediaProjectionConfig.CAPTURE_REGION_FIXED_DISPLAY
 

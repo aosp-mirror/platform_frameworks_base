@@ -353,7 +353,8 @@ public class BrightnessClamperControllerTest {
     public void test_notifiesExternalListener_aggregatedStateChanged() {
         doAnswer((invocation) -> {
             ModifiersAggregatedState argument = invocation.getArgument(0);
-            argument.mHdrHbmEnabled = true;
+            // we need to do changes in AggregatedState to trigger onChange
+            argument.mMaxHdrBrightness = 0.5f;
             return null;
         }).when(mMockStatefulModifier).applyStateChange(any());
         mTestInjector.mCapturedChangeListener.onChanged();

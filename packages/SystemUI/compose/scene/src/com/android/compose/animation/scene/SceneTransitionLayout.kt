@@ -514,7 +514,7 @@ internal fun SceneTransitionLayoutForTesting(
     val coroutineScope = rememberCoroutineScope()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
-                state = state as BaseSceneTransitionLayoutState,
+                state = state as MutableSceneTransitionLayoutStateImpl,
                 density = density,
                 layoutDirection = layoutDirection,
                 swipeSourceDetector = swipeSourceDetector,

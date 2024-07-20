@@ -47,13 +47,12 @@ using namespace std;
  */
 
 extern int register_android_os_Binder(JNIEnv* env);
-extern int register_libcore_util_NativeAllocationRegistry_Delegate(JNIEnv* env);
+extern int register_libcore_util_NativeAllocationRegistry(JNIEnv* env);
 
 typedef void (*FreeFunction)(void*);
 
-static void NativeAllocationRegistry_Delegate_nativeApplyFreeFunction(JNIEnv*, jclass,
-                                                                      jlong freeFunction,
-                                                                      jlong ptr) {
+static void NativeAllocationRegistry_applyFreeFunction(JNIEnv*, jclass, jlong freeFunction,
+                                                       jlong ptr) {
     void* nativePtr = reinterpret_cast<void*>(static_cast<uintptr_t>(ptr));
     FreeFunction nativeFreeFunction =
             reinterpret_cast<FreeFunction>(static_cast<uintptr_t>(freeFunction));
@@ -61,11 +60,11 @@ static void NativeAllocationRegistry_Delegate_nativeApplyFreeFunction(JNIEnv*, j
 }
 
 static JNINativeMethod gMethods[] = {
-        NATIVE_METHOD(NativeAllocationRegistry_Delegate, nativeApplyFreeFunction, "(JJ)V"),
+        NATIVE_METHOD(NativeAllocationRegistry, applyFreeFunction, "(JJ)V"),
 };
 
-int register_libcore_util_NativeAllocationRegistry_Delegate(JNIEnv* env) {
-    return jniRegisterNativeMethods(env, "libcore/util/NativeAllocationRegistry_Delegate", gMethods,
+int register_libcore_util_NativeAllocationRegistry(JNIEnv* env) {
+    return jniRegisterNativeMethods(env, "libcore/util/NativeAllocationRegistry", gMethods,
                                     NELEM(gMethods));
 }
 
@@ -147,8 +146,8 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.view.VelocityTracker", REG_JNI(register_android_view_VelocityTracker)},
         {"com.android.internal.util.VirtualRefBasePtr",
          REG_JNI(register_com_android_internal_util_VirtualRefBasePtr)},
-        {"libcore.util.NativeAllocationRegistry_Delegate",
-         REG_JNI(register_libcore_util_NativeAllocationRegistry_Delegate)},
+        {"libcore.util.NativeAllocationRegistry",
+         REG_JNI(register_libcore_util_NativeAllocationRegistry)},
 };
 
 static int register_jni_procs(const std::unordered_map<std::string, RegJNIRec>& jniRegMap,

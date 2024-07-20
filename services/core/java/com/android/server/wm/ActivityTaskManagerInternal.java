@@ -584,7 +584,7 @@ public abstract class ActivityTaskManagerInternal {
 
     public abstract void clearLockedTasks(String reason);
     public abstract void updateUserConfiguration();
-    public abstract boolean canShowErrorDialogs();
+    public abstract boolean canShowErrorDialogs(int userId);
 
     public abstract void setProfileApp(String profileApp);
     public abstract void setProfileProc(WindowProcessController wpc);

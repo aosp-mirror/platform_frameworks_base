@@ -186,6 +186,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.xmlpull.v1.XmlPullParserException;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -204,9 +207,6 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @SuppressLint("GuardedBy") // It's ok for this test to access guarded methods from the service.
@@ -5013,6 +5013,34 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         AutomaticZenRule updateWithDiff = new AutomaticZenRule.Builder(rule)
                 .setTriggerDescription("Whenever")
                 .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, updateWithDiff, UPDATE_ORIGIN_USER, "reason",
+                CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(ruleId).condition).isEqualTo(
+                CONDITION_TRUE);
+    }
+
+    @Test
+    @EnableFlags(FLAG_MODES_API)
+    public void updateAutomaticZenRule_ruleChangedByUser_doesNotDeactivateRule_forWatch() {
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)).thenReturn(true);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
+        AutomaticZenRule rule =
+                new AutomaticZenRule.Builder("rule", CONDITION_ID)
+                        .setConfigurationActivity(new ComponentName(mPkg, "cls"))
+                        .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                        .build();
+        String ruleId =
+                mZenModeHelper.addAutomaticZenRule(
+                        mPkg, rule, UPDATE_ORIGIN_APP, "reason", CUSTOM_PKG_UID);
+        mZenModeHelper.setAutomaticZenRuleState(
+                ruleId, CONDITION_TRUE, UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+
+        AutomaticZenRule updateWithDiff =
+                new AutomaticZenRule.Builder(rule).setTriggerDescription("Whenever").build();
         mZenModeHelper.updateAutomaticZenRule(ruleId, updateWithDiff, UPDATE_ORIGIN_USER, "reason",
                 CUSTOM_PKG_UID);
 

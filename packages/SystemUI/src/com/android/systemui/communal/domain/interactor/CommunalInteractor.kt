@@ -121,8 +121,24 @@ constructor(
 
     private val _editModeOpen = MutableStateFlow(false)
 
-    /** Whether edit mode is currently open. */
+    /**
+     * Whether edit mode is currently open. This will be true from onCreate to onDestroy in
+     * [EditWidgetsActivity] and thus does not correspond to whether or not the activity is visible.
+     *
+     * Note that since this is called in onDestroy, it's not guaranteed to ever be set to false when
+     * edit mode is closed, such as in the case that a user exits edit mode manually with a back
+     * gesture or navigation gesture.
+     */
     val editModeOpen: StateFlow<Boolean> = _editModeOpen.asStateFlow()
+
+    private val _editActivityShowing = MutableStateFlow(false)
+
+    /**
+     * Whether the edit mode activity is currently showing. This is true from onStart to onStop in
+     * [EditWidgetsActivity] so may be false even when the user is in edit mode, such as when a
+     * widget's individual configuration activity has launched.
+     */
+    val editActivityShowing: StateFlow<Boolean> = _editActivityShowing.asStateFlow()
 
     /** Whether communal features are enabled. */
     val isCommunalEnabled: StateFlow<Boolean> = communalSettingsInteractor.isCommunalEnabled
@@ -314,6 +330,10 @@ constructor(
 
     fun setEditModeOpen(isOpen: Boolean) {
         _editModeOpen.value = isOpen
+    }
+
+    fun setEditActivityShowing(isOpen: Boolean) {
+        _editActivityShowing.value = isOpen
     }
 
     /** Show the widget editor Activity. */

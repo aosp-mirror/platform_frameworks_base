@@ -73,7 +73,7 @@ class WindowlessSnapshotWindowCreator {
         final Display display = mDisplayManager.getDisplay(runningTaskInfo.displayId);
         final StartingSurfaceDrawer.WindowlessStartingWindow wlw =
                 new StartingSurfaceDrawer.WindowlessStartingWindow(
-                runningTaskInfo.configuration, rootSurface);
+                        mContext.getResources().getConfiguration(), rootSurface);
         final SurfaceControlViewHost mViewHost = new SurfaceControlViewHost(
                 mContext, display, wlw, "WindowlessSnapshotWindowCreator");
         final Rect windowBounds = runningTaskInfo.configuration.windowConfiguration.getBounds();
