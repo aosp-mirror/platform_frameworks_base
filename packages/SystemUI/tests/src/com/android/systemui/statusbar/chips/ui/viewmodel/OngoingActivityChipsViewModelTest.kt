@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
+import android.content.DialogInterface
+import android.content.packageManager
+import android.content.pm.PackageManager
+import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -33,10 +37,14 @@ import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
+import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runCurrent
@@ -44,9 +52,17 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
@@ -55,6 +71,18 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     private val screenRecordState = kosmos.screenRecordRepository.screenRecordState
     private val mediaProjectionState = kosmos.fakeMediaProjectionRepository.mediaProjectionState
     private val callRepo = kosmos.ongoingCallRepository
+
+    private val mockSystemUIDialog = mock<SystemUIDialog>()
+    private val chipBackgroundView = mock<ChipBackgroundContainer>()
+    private val chipView =
+        mock<View>().apply {
+            whenever(
+                    this.requireViewById<ChipBackgroundContainer>(
+                        R.id.ongoing_activity_chip_background
+                    )
+                )
+                .thenReturn(chipBackgroundView)
+        }
 
     private val underTest = kosmos.ongoingActivityChipsViewModel
 
@@ -72,7 +100,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.chip)
 
-            assertThat(latest).isEqualTo(OngoingActivityChipModel.Hidden)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 
     @Test
@@ -230,7 +258,81 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             job2.cancel()
         }
 
+    @Test
+    fun chip_screenRecordStoppedViaDialog_chipHiddenWithoutAnimation() =
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionState.value = MediaProjectionState.NotProjecting
+            callRepo.setOngoingCallState(OngoingCallModel.NoCall)
+
+            val latest by collectLastValue(underTest.chip)
+
+            assertIsScreenRecordChip(latest)
+
+            // WHEN screen record gets stopped via dialog
+            val dialogStopAction =
+                getStopActionFromDialog(latest, chipView, mockSystemUIDialog, kosmos)
+            dialogStopAction.onClick(mock<DialogInterface>(), 0)
+
+            // THEN the chip is immediately hidden with no animation
+            assertThat(latest).isEqualTo(OngoingActivityChipModel.Hidden(shouldAnimate = false))
+        }
+
+    @Test
+    fun chip_projectionStoppedViaDialog_chipHiddenWithoutAnimation() =
+        testScope.runTest {
+            mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+            screenRecordState.value = ScreenRecordModel.DoingNothing
+            callRepo.setOngoingCallState(OngoingCallModel.NoCall)
+
+            val latest by collectLastValue(underTest.chip)
+
+            assertIsShareToAppChip(latest)
+
+            // WHEN media projection gets stopped via dialog
+            val dialogStopAction =
+                getStopActionFromDialog(latest, chipView, mockSystemUIDialog, kosmos)
+            dialogStopAction.onClick(mock<DialogInterface>(), 0)
+
+            // THEN the chip is immediately hidden with no animation
+            assertThat(latest).isEqualTo(OngoingActivityChipModel.Hidden(shouldAnimate = false))
+        }
+
     companion object {
+        /**
+         * Assuming that the click listener in [latest] opens a dialog, this fetches the action
+         * associated with the positive button, which we assume is the "Stop sharing" action.
+         */
+        fun getStopActionFromDialog(
+            latest: OngoingActivityChipModel?,
+            chipView: View,
+            dialog: SystemUIDialog,
+            kosmos: Kosmos
+        ): DialogInterface.OnClickListener {
+            // Capture the action that would get invoked when the user clicks "Stop" on the dialog
+            lateinit var dialogStopAction: DialogInterface.OnClickListener
+            Mockito.doAnswer {
+                    val delegate = it.arguments[0] as SystemUIDialog.Delegate
+                    delegate.beforeCreate(dialog, /* savedInstanceState= */ null)
+
+                    val stopActionCaptor = argumentCaptor<DialogInterface.OnClickListener>()
+                    verify(dialog).setPositiveButton(any(), stopActionCaptor.capture())
+                    dialogStopAction = stopActionCaptor.firstValue
+
+                    return@doAnswer dialog
+                }
+                .whenever(kosmos.mockSystemUIDialogFactory)
+                .create(any<SystemUIDialog.Delegate>())
+            whenever(kosmos.packageManager.getApplicationInfo(eq(NORMAL_PACKAGE), any<Int>()))
+                .thenThrow(PackageManager.NameNotFoundException())
+            // Click the chip so that we open the dialog and we fill in [dialogStopAction]
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            clickListener!!.onClick(chipView)
+
+            return dialogStopAction
+        }
+
         fun assertIsScreenRecordChip(latest: OngoingActivityChipModel?) {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             val icon = (latest as OngoingActivityChipModel.Shown).icon

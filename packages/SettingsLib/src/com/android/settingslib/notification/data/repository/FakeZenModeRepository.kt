@@ -20,6 +20,7 @@ import android.app.NotificationManager
 import android.provider.Settings
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.settingslib.notification.modes.ZenMode
+import java.time.Duration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,8 +36,7 @@ class FakeZenModeRepository : ZenModeRepository {
     override val globalZenMode: StateFlow<Int>
         get() = mutableZenMode.asStateFlow()
 
-    private val mutableModesFlow: MutableStateFlow<List<ZenMode>> =
-        MutableStateFlow(listOf(TestModeBuilder.EXAMPLE))
+    private val mutableModesFlow: MutableStateFlow<List<ZenMode>> = MutableStateFlow(listOf())
     override val modes: Flow<List<ZenMode>>
         get() = mutableModesFlow.asStateFlow()
 
@@ -52,12 +52,30 @@ class FakeZenModeRepository : ZenModeRepository {
         mutableZenMode.value = zenMode
     }
 
+    fun addModes(zenModes: List<ZenMode>) {
+        mutableModesFlow.value += zenModes
+    }
+
     fun addMode(id: String, active: Boolean = false) {
         mutableModesFlow.value += newMode(id, active)
     }
 
     fun removeMode(id: String) {
         mutableModesFlow.value = mutableModesFlow.value.filter { it.id != id }
+    }
+
+    override fun activateMode(zenMode: ZenMode, duration: Duration?) {
+        activateMode(zenMode.id)
+    }
+
+    override fun deactivateMode(zenMode: ZenMode) {
+        deactivateMode(zenMode.id)
+    }
+
+    fun activateMode(id: String) {
+        val oldMode = mutableModesFlow.value.find { it.id == id } ?: return
+        removeMode(id)
+        mutableModesFlow.value += TestModeBuilder(oldMode).setActive(true).build()
     }
 
     fun deactivateMode(id: String) {

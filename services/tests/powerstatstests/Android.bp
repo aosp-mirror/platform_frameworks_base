@@ -59,6 +59,7 @@ android_ravenwood_test {
     name: "PowerStatsTestsRavenwood",
     static_libs: [
         "services.core",
+        "platformprotosnano",
         "coretests-aidl",
         "ravenwood-junit",
         "truth",

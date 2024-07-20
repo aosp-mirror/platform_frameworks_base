@@ -24,9 +24,15 @@ sealed class OngoingActivityChipModel {
     /** Condensed name representing the model, used for logs. */
     abstract val logName: String
 
-    /** This chip shouldn't be shown. */
-    data object Hidden : OngoingActivityChipModel() {
-        override val logName = "Hidden"
+    /**
+     * This chip shouldn't be shown.
+     *
+     * @property shouldAnimate true if the transition from [Shown] to [Hidden] should be animated,
+     *   and false if that transition should *not* be animated (i.e. the chip view should
+     *   immediately disappear).
+     */
+    data class Hidden(val shouldAnimate: Boolean = true) : OngoingActivityChipModel() {
+        override val logName = "Hidden(anim=$shouldAnimate)"
     }
 
     /** This chip should be shown with the given information. */

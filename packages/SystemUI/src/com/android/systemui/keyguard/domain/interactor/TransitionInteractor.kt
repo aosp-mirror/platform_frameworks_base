@@ -168,8 +168,7 @@ sealed class TransitionInteractor(
      */
     @Deprecated("Will be merged into maybeStartTransitionToOccludedOrInsecureCamera")
     suspend fun maybeHandleInsecurePowerGesture(): Boolean {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
-        if (SceneContainerFlag.isEnabled) return true
+        if (SceneContainerFlag.isEnabled) return false
         if (keyguardOcclusionInteractor.shouldTransitionFromPowerButtonGesture()) {
             if (keyguardInteractor.isKeyguardDismissible.value) {
                 startTransitionTo(

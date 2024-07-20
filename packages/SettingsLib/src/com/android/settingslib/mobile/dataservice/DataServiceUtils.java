@@ -18,9 +18,7 @@ package com.android.settingslib.mobile.dataservice;
 
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
-import android.telephony.UiccCardInfo;
 import android.telephony.UiccPortInfo;
-import android.telephony.UiccSlotInfo;
 import android.telephony.UiccSlotMapping;
 
 public class DataServiceUtils {
@@ -71,53 +69,9 @@ public class DataServiceUtils {
         public static final String COLUMN_ID = "sudId";
 
         /**
-         * The name of the physical slot index column, see
-         * {@link UiccSlotMapping#getPhysicalSlotIndex()}.
-         */
-        public static final String COLUMN_PHYSICAL_SLOT_INDEX = "physicalSlotIndex";
-
-        /**
-         * The name of the logical slot index column, see
-         * {@link UiccSlotMapping#getLogicalSlotIndex()}.
-         */
-        public static final String COLUMN_LOGICAL_SLOT_INDEX = "logicalSlotIndex";
-
-        /**
-         * The name of the card ID column, see {@link UiccCardInfo#getCardId()}.
-         */
-        public static final String COLUMN_CARD_ID = "cardId";
-
-        /**
-         * The name of the eUICC state column, see {@link UiccCardInfo#isEuicc()}.
-         */
-        public static final String COLUMN_IS_EUICC = "isEuicc";
-
-        /**
-         * The name of the multiple enabled profiles supported state column, see
-         * {@link UiccCardInfo#isMultipleEnabledProfilesSupported()}.
-         */
-        public static final String COLUMN_IS_MULTIPLE_ENABLED_PROFILES_SUPPORTED =
-                "isMultipleEnabledProfilesSupported";
-
-        /**
-         * The name of the card state column, see {@link UiccSlotInfo#getCardStateInfo()}.
-         */
-        public static final String COLUMN_CARD_STATE = "cardState";
-
-        /**
-         * The name of the removable state column, see {@link UiccSlotInfo#isRemovable()}.
-         */
-        public static final String COLUMN_IS_REMOVABLE = "isRemovable";
-
-        /**
          * The name of the active state column, see {@link UiccPortInfo#isActive()}.
          */
         public static final String COLUMN_IS_ACTIVE = "isActive";
-
-        /**
-         * The name of the port index column, see {@link UiccPortInfo#getPortIndex()}.
-         */
-        public static final String COLUMN_PORT_INDEX = "portIndex";
     }
 
     /**

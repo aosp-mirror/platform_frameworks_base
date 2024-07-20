@@ -21,7 +21,6 @@ import android.hardware.display.DisplayManager
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
 import android.os.Handler
-import android.util.Log
 import android.view.ContentRecordingSession
 import android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -29,6 +28,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.mediaprojection.MediaProjectionLog
 import com.android.systemui.mediaprojection.MediaProjectionServiceHelper
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.TasksRepository
@@ -56,22 +58,27 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val tasksRepository: TasksRepository,
     private val mediaProjectionServiceHelper: MediaProjectionServiceHelper,
+    @MediaProjectionLog private val logger: LogBuffer,
 ) : MediaProjectionRepository {
 
     override suspend fun switchProjectedTask(task: RunningTaskInfo) {
         withContext(backgroundDispatcher) {
             if (mediaProjectionServiceHelper.updateTaskRecordingSession(task.token)) {
-                Log.d(TAG, "Successfully switched projected task")
+                logger.log(TAG, LogLevel.DEBUG, {}, { "Successfully switched projected task" })
             } else {
-                Log.d(TAG, "Failed to switch projected task")
+                logger.log(TAG, LogLevel.WARNING, {}, { "Failed to switch projected task" })
             }
         }
     }
 
     override suspend fun stopProjecting() {
         withContext(backgroundDispatcher) {
-            // TODO(b/332662551): Convert Logcat to LogBuffer.
-            Log.d(TAG, "Requesting MediaProjectionManager#stopActiveProjection")
+            logger.log(
+                TAG,
+                LogLevel.DEBUG,
+                {},
+                { "Requesting MediaProjectionManager#stopActiveProjection" },
+            )
             mediaProjectionManager.stopActiveProjection()
         }
     }
@@ -81,12 +88,22 @@ constructor(
                 val callback =
                     object : MediaProjectionManager.Callback() {
                         override fun onStart(info: MediaProjectionInfo?) {
-                            Log.d(TAG, "MediaProjectionManager.Callback#onStart")
+                            logger.log(
+                                TAG,
+                                LogLevel.DEBUG,
+                                {},
+                                { "MediaProjectionManager.Callback#onStart" },
+                            )
                             trySendWithFailureLogging(CallbackEvent.OnStart, TAG)
                         }
 
                         override fun onStop(info: MediaProjectionInfo?) {
-                            Log.d(TAG, "MediaProjectionManager.Callback#onStop")
+                            logger.log(
+                                TAG,
+                                LogLevel.DEBUG,
+                                {},
+                                { "MediaProjectionManager.Callback#onStop" },
+                            )
                             trySendWithFailureLogging(CallbackEvent.OnStop, TAG)
                         }
 
@@ -94,7 +111,12 @@ constructor(
                             info: MediaProjectionInfo,
                             session: ContentRecordingSession?
                         ) {
-                            Log.d(TAG, "MediaProjectionManager.Callback#onSessionStarted: $session")
+                            logger.log(
+                                TAG,
+                                LogLevel.DEBUG,
+                                { str1 = session.toString() },
+                                { "MediaProjectionManager.Callback#onSessionStarted: $str1" },
+                            )
                             trySendWithFailureLogging(
                                 CallbackEvent.OnRecordingSessionSet(info, session),
                                 TAG,

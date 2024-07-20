@@ -126,31 +126,27 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Toca per veure-la"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"S\'ha produït un error en desar la gravació de la pantalla"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"S\'ha produït un error en iniciar la gravació de pantalla"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
-    <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Deixaràs de gravar &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Vols aturar la gravació?"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"Ara mateix estàs gravant tota la pantalla"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Ara mateix estàs gravant <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Atura la gravació"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"S\'està compartint la pantalla"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
-    <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Deixaràs de compartir &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
-    <skip />
-    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"S\'està emetent la pantalla"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
-    <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Deixaràs d\'emetre &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
-    <skip />
-    <!-- no translation found for close_dialog_button (4749497706540104133) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Vols deixar de compartir la pantalla?"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Ara mateix estàs compartint tota la pantalla amb <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Ara mateix estàs compartint tota la pantalla amb una aplicació"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Ara mateix estàs compartint <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Ara mateix estàs compartint una aplicació"</string>
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Deixa de compartir"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"S\'està emetent la pantalla"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Vols aturar l\'emissió?"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"Ara mateix estàs emetent tota la pantalla a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"Ara mateix estàs emetent tota la pantalla en un dispositiu proper"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"Ara mateix estàs emetent <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> a <xliff:g id="DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"Ara mateix estàs emetent <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> en un dispositiu proper"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"Ara mateix estàs emetent a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"Ara mateix estàs emetent en un dispositiu proper"</string>
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Atura l\'emissió"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"Tanca"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Gravadora de problemes"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Processant gravació del problema"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Notificació en curs d\'una sessió de recollida de dades del problema"</string>
@@ -161,8 +157,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"S\'ha produït un error en desar la gravació del problema"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"S\'ha produït un error en iniciar la gravació del problema"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Visualització en pantalla completa"</string>
-    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2717426731830851921">"Per sortir, llisca cap avall des de la part superior de la pantalla"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Entesos"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Enrere"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Inici"</string>
@@ -295,6 +290,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Estalvi de pantalla"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"No molestis"</string>
+    <!-- no translation found for quick_settings_modes_label (5407025818652750501) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"No hi ha dispositius vinculats  disponibles"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Toca per connectar o desconnectar un dispositiu"</string>
@@ -306,8 +303,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Desat"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"desconnecta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activa"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Activa automàticament demà"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Les funcions com Quick Share i Troba el meu dispositiu utilitzen el Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"El Bluetooth s\'activarà demà al matí"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Comparteix l\'àudio"</string>
@@ -495,12 +491,11 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"selecciona el widget"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"suprimeix el widget"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"col·loca el widget seleccionat"</string>
-    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
-    <skip />
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"Widgets de la pantalla de bloqueig"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Tothom pot veure widgets a la pantalla de bloqueig, fins i tot amb la tauleta bloquejada."</string>
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Widgets de la pantalla de bloqueig"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Per obrir una aplicació utilitzant un widget, necessitaràs verificar la teva identitat. També has de tenir en compte que qualsevol persona pot veure els widgets, fins i tot quan la tauleta està bloquejada. És possible que alguns widgets no estiguin pensats per a la pantalla de bloqueig i que no sigui segur afegir-los-hi."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Entesos"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Canvia d\'usuari"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menú desplegable"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Totes les aplicacions i les dades d\'aquesta sessió se suprimiran."</string>
@@ -722,7 +717,8 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Predeterminat"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automàtic"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sense so ni vibració"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sense so ni vibració i es mostra més avall a la secció de converses"</string>
+    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
+    <skip />
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Pot sonar o vibrar en funció de la configuració del dispositiu"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Pot sonar o vibrar en funció de la configuració del dispositiu. Les converses de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g> es mostren com a bombolles de manera predeterminada."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Fes que el sistema determini si aquesta notificació ha d\'emetre un so o una vibració"</string>
@@ -779,6 +775,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Re Pàg"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Av Pàg"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Tecla de supressió"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Inici"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Final"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Tecla d\'inserció"</string>
@@ -1361,22 +1358,19 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Pantalla dividida"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Entrada"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Dreceres d\'aplicacions"</string>
+    <!-- no translation found for shortcut_helper_category_current_app_shortcuts (4017840565974573628) -->
+    <skip />
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibilitat"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Tecles de drecera"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Dreceres de cerca"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Replega la icona"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Desplega la icona"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gest Enrere"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gest Inici"</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Tecla d\'acció"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Fet"</string>
+    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Ben fet!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Torna"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Per tornar enrere, llisca cap a l\'esquerra o cap a la dreta amb tres dits en qualsevol lloc del ratolí tàctil."</string>
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Ratolí tàctil que mostra tres dits que es mouen cap a la dreta i cap a l\'esquerra"</string>
@@ -1385,4 +1379,6 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivell %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controls de la llar"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Utilitza controls de la llar com a estalvi de pantalla"</string>
+    <!-- no translation found for volume_undo_action (5815519725211877114) -->
+    <skip />
 </resources>

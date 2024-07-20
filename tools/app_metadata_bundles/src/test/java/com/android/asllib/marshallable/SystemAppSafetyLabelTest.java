@@ -43,6 +43,7 @@ public class SystemAppSafetyLabelTest {
             "com/android/asllib/systemappsafetylabel/od";
 
     private static final String VALID_FILE_NAME = "valid.xml";
+    private static final String VALID_V1_FILE_NAME = "valid-v1.xml";
     private static final String MISSING_BOOL_FILE_NAME = "missing-bool.xml";
 
     /** Logic for setting up tests (empty if not yet needed). */
@@ -57,59 +58,81 @@ public class SystemAppSafetyLabelTest {
     @Test
     public void testValid() throws Exception {
         System.out.println("starting testValid.");
-        testHrToOdSystemAppSafetyLabel(VALID_FILE_NAME);
-        testOdToHrSystemAppSafetyLabel(VALID_FILE_NAME);
+        testHrToOdSystemAppSafetyLabel(VALID_FILE_NAME, DEFAULT_VERSION);
+        testOdToHrSystemAppSafetyLabel(VALID_FILE_NAME, DEFAULT_VERSION);
+    }
+
+    /** Test for valid v1. */
+    @Test
+    public void testValidV1() throws Exception {
+        System.out.println("starting testValidV1.");
+        var doc = TestUtils.document();
+        var unused =
+                new SystemAppSafetyLabelFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(
+                                                SYSTEM_APP_SAFETY_LABEL_OD_PATH,
+                                                VALID_V1_FILE_NAME)),
+                                1L);
+    }
+
+    /** Test for testV1InvalidAsV2. */
+    @Test
+    public void testV1InvalidAsV2() throws Exception {
+        System.out.println("starting testV1InvalidAsV2.");
+        odToHrExpectException(VALID_V1_FILE_NAME, 2L);
     }
 
     /** Tests missing bool. */
     @Test
     public void testMissingBool() throws Exception {
         System.out.println("starting testMissingBool.");
-        hrToOdExpectException(MISSING_BOOL_FILE_NAME);
-        odToHrExpectException(MISSING_BOOL_FILE_NAME);
+        hrToOdExpectException(MISSING_BOOL_FILE_NAME, DEFAULT_VERSION);
+        odToHrExpectException(MISSING_BOOL_FILE_NAME, DEFAULT_VERSION);
     }
 
-    private void hrToOdExpectException(String fileName)
+    private void hrToOdExpectException(String fileName, long version)
             throws ParserConfigurationException, IOException, SAXException {
         var ele =
                 TestUtils.getElementFromResource(
                         Paths.get(SYSTEM_APP_SAFETY_LABEL_HR_PATH, fileName));
         assertThrows(
                 MalformedXmlException.class,
-                () -> new SystemAppSafetyLabelFactory().createFromHrElement(ele, DEFAULT_VERSION));
+                () -> new SystemAppSafetyLabelFactory().createFromHrElement(ele, version));
     }
 
-    private void odToHrExpectException(String fileName)
+    private void odToHrExpectException(String fileName, long version)
             throws ParserConfigurationException, IOException, SAXException {
         var ele =
                 TestUtils.getElementFromResource(
                         Paths.get(SYSTEM_APP_SAFETY_LABEL_OD_PATH, fileName));
         assertThrows(
                 MalformedXmlException.class,
-                () -> new SystemAppSafetyLabelFactory().createFromOdElement(ele, DEFAULT_VERSION));
+                () -> new SystemAppSafetyLabelFactory().createFromOdElement(ele, version));
     }
 
-    private void testHrToOdSystemAppSafetyLabel(String fileName) throws Exception {
+    private void testHrToOdSystemAppSafetyLabel(String fileName, long version) throws Exception {
         var doc = TestUtils.document();
         SystemAppSafetyLabel systemAppSafetyLabel =
                 new SystemAppSafetyLabelFactory()
                         .createFromHrElement(
                                 TestUtils.getElementFromResource(
                                         Paths.get(SYSTEM_APP_SAFETY_LABEL_HR_PATH, fileName)),
-                                DEFAULT_VERSION);
+                                version);
         Element resultingEle = systemAppSafetyLabel.toOdDomElement(doc);
         doc.appendChild(resultingEle);
         TestUtils.testFormatToFormat(doc, Paths.get(SYSTEM_APP_SAFETY_LABEL_OD_PATH, fileName));
     }
 
-    private void testOdToHrSystemAppSafetyLabel(String fileName) throws Exception {
+    private void testOdToHrSystemAppSafetyLabel(String fileName, long version) throws Exception {
         var doc = TestUtils.document();
         SystemAppSafetyLabel systemAppSafetyLabel =
                 new SystemAppSafetyLabelFactory()
                         .createFromOdElement(
                                 TestUtils.getElementFromResource(
                                         Paths.get(SYSTEM_APP_SAFETY_LABEL_OD_PATH, fileName)),
-                                DEFAULT_VERSION);
+                                version);
         Element resultingEle = systemAppSafetyLabel.toHrDomElement(doc);
         doc.appendChild(resultingEle);
         TestUtils.testFormatToFormat(doc, Paths.get(SYSTEM_APP_SAFETY_LABEL_HR_PATH, fileName));

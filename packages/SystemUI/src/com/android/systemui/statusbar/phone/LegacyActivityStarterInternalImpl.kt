@@ -33,14 +33,13 @@ import android.view.View
 import android.view.WindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
-import com.android.systemui.Flags.communalHub
 import com.android.systemui.Flags.mediaLockscreenLaunchAnimation
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.DelegateTransitionAnimatorController
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.camera.CameraIntents
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
-import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.dagger.qualifiers.Main
@@ -94,6 +93,7 @@ constructor(
     private val activityIntentHelper: ActivityIntentHelper,
     @Main private val mainExecutor: DelayableExecutor,
     private val communalSceneInteractor: CommunalSceneInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
 ) : ActivityStarterInternal {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -207,10 +207,16 @@ constructor(
         val cancelRunnable = Runnable {
             callback?.onActivityStarted(ActivityManager.START_CANCELED)
         }
-        // Do not deferKeyguard when occluded because, when keyguard is occluded,
-        // we do not launch the activity until keyguard is done.
+        // Do not deferKeyguard when occluded because, when keyguard is occluded, we do not launch
+        // the activity until keyguard is done. The only exception is when we're on the Hub and want
+        // to dismiss the shade immediately, which means that another animation will take care of
+        // the transition.
         val occluded = (keyguardStateController.isShowing && keyguardStateController.isOccluded)
-        val deferred = !occluded
+        val dismissOnCommunal =
+            communalSettingsInteractor.isCommunalFlagEnabled() &&
+                communalSceneInteractor.isCommunalVisible.value &&
+                dismissShadeDirectly
+        val deferred = !occluded || dismissOnCommunal
         executeRunnableDismissingKeyguard(
             runnable,
             cancelRunnable,
@@ -462,10 +468,18 @@ constructor(
             object : ActivityStarter.OnDismissAction {
                 override fun onDismiss(): Boolean {
                     if (runnable != null) {
+                        // We don't wait for Keyguard to be gone if we're dismissing the shade
+                        // immediately and we're on the Communal Hub. This is to make sure that the
+                        // Hub -> Edit Mode transition is seamless.
+                        val dismissOnCommunal =
+                            communalSettingsInteractor.isCommunalFlagEnabled() &&
+                                communalSceneInteractor.isCommunalVisible.value &&
+                                dismissShade
                         if (
                             keyguardStateController.isShowing &&
                                 keyguardStateController.isOccluded &&
-                                !isCommunalWidgetLaunch()
+                                !isCommunalWidgetLaunch() &&
+                                !dismissOnCommunal
                         ) {
                             statusBarKeyguardViewManagerLazy
                                 .get()
@@ -561,12 +575,6 @@ constructor(
 
                 override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                     super.onTransitionAnimationStart(isExpandingFullyAbove)
-                    if (communalHub()) {
-                        communalSceneInteractor.snapToScene(
-                            CommunalScenes.Blank,
-                            ActivityTransitionAnimator.TIMINGS.totalDuration
-                        )
-                    }
                     // Double check that the keyguard is still showing and not going
                     // away, but if so set the keyguard occluded. Typically, WM will let
                     // KeyguardViewMediator know directly, but we're overriding that to
@@ -658,7 +666,7 @@ constructor(
     }
 
     private fun isCommunalWidgetLaunch(): Boolean {
-        return communalHub() &&
+        return communalSettingsInteractor.isCommunalFlagEnabled() &&
             communalSceneInteractor.isCommunalVisible.value &&
             communalSceneInteractor.isLaunchingWidget.value
     }

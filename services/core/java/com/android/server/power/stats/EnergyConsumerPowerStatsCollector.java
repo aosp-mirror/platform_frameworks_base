@@ -176,9 +176,12 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
 
                 for (EnergyConsumerAttribution attribution : perUid) {
                     int uid = mUidResolver.mapUid(attribution.uid);
-                    long lastEnergy = mLastConsumerEnergyPerUid.get(uid);
-                    long deltaEnergy = attribution.energyUWs - lastEnergy;
+                    long lastEnergy = mLastConsumerEnergyPerUid.get(uid, ENERGY_UNSPECIFIED);
                     mLastConsumerEnergyPerUid.put(uid, attribution.energyUWs);
+                    if (lastEnergy == ENERGY_UNSPECIFIED) {
+                        continue;
+                    }
+                    long deltaEnergy = attribution.energyUWs - lastEnergy;
                     if (deltaEnergy <= 0) {
                         continue;
                     }
@@ -189,7 +192,8 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
                     }
 
                     mLayout.setUidConsumedEnergy(uidStats, 0,
-                            mLayout.getUidConsumedEnergy(uidStats, 0) + deltaEnergy);
+                            mLayout.getUidConsumedEnergy(uidStats, 0)
+                                    + uJtoUc(deltaEnergy, averageVoltage));
                 }
             }
         }

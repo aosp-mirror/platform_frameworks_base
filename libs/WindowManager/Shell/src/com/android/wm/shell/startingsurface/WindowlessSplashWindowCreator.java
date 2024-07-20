@@ -76,7 +76,7 @@ class WindowlessSplashWindowCreator extends AbsSplashWindowCreator {
         }
         final StartingSurfaceDrawer.WindowlessStartingWindow wlw =
                 new StartingSurfaceDrawer.WindowlessStartingWindow(
-                        taskInfo.configuration, rootSurface);
+                        mContext.getResources().getConfiguration(), rootSurface);
         final SurfaceControlViewHost viewHost = new SurfaceControlViewHost(
                 myContext, display, wlw, "WindowlessSplashWindowCreator");
         final String title = "Windowless Splash " + taskInfo.taskId;
@@ -95,7 +95,7 @@ class WindowlessSplashWindowCreator extends AbsSplashWindowCreator {
         }
 
         final FrameLayout rootLayout = new FrameLayout(
-                mSplashscreenContentDrawer.createViewContextWrapper(mContext));
+                mSplashscreenContentDrawer.createViewContextWrapper(myContext));
         viewHost.setView(rootLayout, lp);
 
         final int bgColor = taskDescription.getBackgroundColor();

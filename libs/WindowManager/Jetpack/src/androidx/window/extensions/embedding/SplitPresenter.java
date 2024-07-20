@@ -1359,4 +1359,16 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         return new ParentContainerInfo(taskProperties.getTaskMetrics(), configuration,
                 windowLayoutInfo);
     }
+
+    @VisibleForTesting
+    @NonNull
+    static String positionToString(@ContainerPosition int position) {
+        return switch (position) {
+            case CONTAINER_POSITION_LEFT -> "left";
+            case CONTAINER_POSITION_TOP -> "top";
+            case CONTAINER_POSITION_RIGHT -> "right";
+            case CONTAINER_POSITION_BOTTOM -> "bottom";
+            default -> "Unknown position:" + position;
+        };
+    }
 }

@@ -4648,14 +4648,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!isImeLayeringTarget()) {
             return false;
         }
-        // Note that we don't process IME window if the IME input target is not on the screen.
-        // In case some unexpected IME visibility cases happen like starting the remote
-        // animation on the keyguard but seeing the IME window that originally on the app
-        // which behinds the keyguard.
-        final WindowState imeInputTarget = getImeInputTarget();
-        if (imeInputTarget != null
-                && !(imeInputTarget.isDrawn() || imeInputTarget.isVisibleRequested())) {
-            return false;
+        if (!com.android.window.flags.Flags.doNotSkipImeByTargetVisibility()) {
+            // Note that we don't process IME window if the IME input target is not on the screen.
+            // In case some unexpected IME visibility cases happen like starting the remote
+            // animation on the keyguard but seeing the IME window that originally on the app
+            // which behinds the keyguard.
+            final WindowState imeInputTarget = getImeInputTarget();
+            if (imeInputTarget != null
+                    && !(imeInputTarget.isDrawn() || imeInputTarget.isVisibleRequested())) {
+                return false;
+            }
         }
         return mDisplayContent.forAllImeWindows(callback, traverseTopToBottom);
     }
@@ -5504,7 +5506,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public SurfaceControl getAnimationLeashParent() {
-        if (isStartingWindowAssociatedToTask()) {
+        if (mActivityRecord != null && !mActivityRecord.hasFixedRotationTransform()
+                && isStartingWindowAssociatedToTask()) {
             return mStartingData.mAssociatedTask.mSurfaceControl;
         }
         return super.getAnimationLeashParent();

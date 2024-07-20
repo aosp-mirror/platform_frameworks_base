@@ -42,7 +42,7 @@ public class AppCompatOverrides {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AppCompatOverrides" : TAG_ATM;
 
     @NonNull
-    private final LetterboxConfiguration mLetterboxConfiguration;
+    private final AppCompatConfiguration mAppCompatConfiguration;
 
     @NonNull
     private final ActivityRecord mActivityRecord;
@@ -63,23 +63,23 @@ public class AppCompatOverrides {
     private final AppCompatAspectRatioOverrides mAppCompatAspectRatioOverrides;
 
     AppCompatOverrides(@NonNull ActivityRecord activityRecord,
-            @NonNull LetterboxConfiguration letterboxConfiguration,
+            @NonNull AppCompatConfiguration appCompatConfiguration,
             @NonNull OptPropFactory optPropBuilder) {
-        mLetterboxConfiguration = letterboxConfiguration;
+        mAppCompatConfiguration = appCompatConfiguration;
         mActivityRecord = activityRecord;
 
         mAppCompatCameraOverrides = new AppCompatCameraOverrides(mActivityRecord,
-                mLetterboxConfiguration, optPropBuilder);
+                mAppCompatConfiguration, optPropBuilder);
         mAppCompatOrientationOverrides = new AppCompatOrientationOverrides(mActivityRecord,
-                mLetterboxConfiguration, optPropBuilder, mAppCompatCameraOverrides);
+                mAppCompatConfiguration, optPropBuilder, mAppCompatCameraOverrides);
         // TODO(b/341903757) Remove BooleanSuppliers after fixing dependency with reachability.
         mAppCompatAspectRatioOverrides = new AppCompatAspectRatioOverrides(activityRecord,
-                mLetterboxConfiguration, optPropBuilder,
+                mAppCompatConfiguration, optPropBuilder,
                 activityRecord.mLetterboxUiController::isDisplayFullScreenAndInPosture,
                 activityRecord.mLetterboxUiController::getHorizontalPositionMultiplier);
 
         mFakeFocusOptProp = optPropBuilder.create(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS,
-                mLetterboxConfiguration::isCompatFakeFocusEnabled);
+                mAppCompatConfiguration::isCompatFakeFocusEnabled);
 
 
         mAllowOrientationOverrideOptProp = optPropBuilder.create(

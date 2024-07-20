@@ -20,7 +20,7 @@ import android.animation.ValueAnimator
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.Flags
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -66,6 +66,7 @@ constructor(
     private val shadeRepository: ShadeRepository,
     powerInteractor: PowerInteractor,
     private val glanceableHubTransitions: GlanceableHubTransitions,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val swipeToDismissInteractor: SwipeToDismissInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) :
@@ -349,7 +350,7 @@ constructor(
     private fun listenForLockscreenToGlanceableHub() {
         // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
-        if (!Flags.communalHub()) {
+        if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
         }
         scope.launch(mainDispatcher) {

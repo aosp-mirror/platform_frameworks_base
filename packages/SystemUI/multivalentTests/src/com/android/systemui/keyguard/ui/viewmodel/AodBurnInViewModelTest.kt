@@ -18,6 +18,8 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags as AConfigFlags
@@ -69,10 +71,11 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     private val burnInFlow = MutableStateFlow(BurnInModel())
 
     @Before
+    @DisableFlags(
+        AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
+        AConfigFlags.FLAG_COMPOSE_LOCKSCREEN
+    )
     fun setUp() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
-
         MockitoAnnotations.initMocks(this)
         whenever(burnInInteractor.burnIn(anyInt(), anyInt())).thenReturn(burnInFlow)
         kosmos.burnInInteractor = burnInInteractor
@@ -174,10 +177,9 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun translationAndScale_whenFullyDozing_MigrationFlagOff_staysOutOfTopInset() =
         testScope.runTest {
-            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-
             burnInParameters =
                 burnInParameters.copy(
                     minViewY = 100,
@@ -226,10 +228,9 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun translationAndScale_whenFullyDozing_MigrationFlagOn_staysOutOfTopInset() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-
             burnInParameters =
                 burnInParameters.copy(
                     minViewY = 100,
@@ -310,104 +311,99 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun translationAndScale_composeFlagOff_weatherLargeClock() =
         testBurnInViewModelForClocks(
             isSmallClock = false,
             isWeatherClock = true,
             expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = false
         )
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun translationAndScale_composeFlagOff_weatherSmallClock() =
         testBurnInViewModelForClocks(
             isSmallClock = true,
             isWeatherClock = true,
             expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = false
         )
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun translationAndScale_composeFlagOff_nonWeatherLargeClock() =
         testBurnInViewModelForClocks(
             isSmallClock = false,
             isWeatherClock = false,
             expectedScaleOnly = true,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = false
         )
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun translationAndScale_composeFlagOff_nonWeatherSmallClock() =
         testBurnInViewModelForClocks(
             isSmallClock = true,
             isWeatherClock = false,
             expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = false
         )
 
     @Test
+    @EnableFlags(
+        AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
+        AConfigFlags.FLAG_COMPOSE_LOCKSCREEN
+    )
     fun translationAndScale_composeFlagOn_weatherLargeClock() =
         testBurnInViewModelForClocks(
             isSmallClock = false,
             isWeatherClock = true,
             expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = true
         )
 
     @Test
+    @EnableFlags(
+        AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
+        AConfigFlags.FLAG_COMPOSE_LOCKSCREEN
+    )
     fun translationAndScale_composeFlagOn_weatherSmallClock() =
         testBurnInViewModelForClocks(
             isSmallClock = true,
             isWeatherClock = true,
             expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = true
         )
 
     @Test
+    @EnableFlags(
+        AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
+        AConfigFlags.FLAG_COMPOSE_LOCKSCREEN
+    )
     fun translationAndScale_composeFlagOn_nonWeatherLargeClock() =
         testBurnInViewModelForClocks(
             isSmallClock = false,
             isWeatherClock = false,
             expectedScaleOnly = true,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = true
         )
 
     @Test
+    @EnableFlags(
+        AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
+        AConfigFlags.FLAG_COMPOSE_LOCKSCREEN
+    )
     fun translationAndScale_composeFlagOn_nonWeatherSmallClock() =
         testBurnInViewModelForClocks(
             isSmallClock = true,
             isWeatherClock = false,
             expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = true
         )
 
     private fun testBurnInViewModelForClocks(
         isSmallClock: Boolean,
         isWeatherClock: Boolean,
         expectedScaleOnly: Boolean,
-        enableMigrateClocksToBlueprintFlag: Boolean,
-        enableComposeLockscreenFlag: Boolean
     ) =
         testScope.runTest {
-            if (enableMigrateClocksToBlueprintFlag) {
-                mSetFlagsRule.enableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-            } else {
-                mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-            }
-
-            if (enableComposeLockscreenFlag) {
-                mSetFlagsRule.enableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
-            } else {
-                mSetFlagsRule.disableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
-            }
             if (isSmallClock) {
                 keyguardClockRepository.setClockSize(ClockSize.SMALL)
                 // we need the following step to update stateFlow value

@@ -110,6 +110,11 @@ constructor(
         interactor.setScrolledToTop(scrolledToTop)
     }
 
+    /** Sets whether the heads up notification is animating away. */
+    fun setHeadsUpAnimatingAway(animatingAway: Boolean) {
+        headsUpNotificationInteractor.setHeadsUpAnimatingAway(animatingAway)
+    }
+
     /** Snooze the currently pinned HUN. */
     fun snoozeHun() {
         headsUpNotificationInteractor.snooze()

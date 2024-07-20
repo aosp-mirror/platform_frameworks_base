@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "ResourceParser.h"
 
 #include <functional>
@@ -108,6 +107,7 @@ struct ParsedResource {
   Visibility::Level visibility_level = Visibility::Level::kUndefined;
   bool staged_api = false;
   bool allow_new = false;
+  FlagStatus flag_status;
   std::optional<OverlayableItem> overlayable_item;
   std::optional<StagedId> staged_alias;
 
@@ -160,6 +160,8 @@ static bool AddResourcesToTable(ResourceTable* table, android::IDiagnostics* dia
   if (res->staged_alias) {
     res_builder.SetStagedId(res->staged_alias.value());
   }
+
+  res_builder.SetFlagStatus(res->flag_status);
 
   bool error = false;
   if (!res->name.entry.empty()) {
@@ -544,6 +546,30 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
   });
 
   std::string resource_type = parser->element_name();
+  std::optional<StringPiece> flag =
+      xml::FindAttribute(parser, "http://schemas.android.com/apk/res/android", "featureFlag");
+  out_resource->flag_status = FlagStatus::NoFlag;
+  if (flag) {
+    auto flag_it = options_.feature_flag_values.find(flag.value());
+    if (flag_it == options_.feature_flag_values.end()) {
+      diag_->Error(android::DiagMessage(source_.WithLine(parser->line_number()))
+                   << "Resource flag value undefined");
+      return false;
+    }
+    const auto& flag_properties = flag_it->second;
+    if (!flag_properties.read_only) {
+      diag_->Error(android::DiagMessage(source_.WithLine(parser->line_number()))
+                   << "Only read only flags may be used with resources");
+      return false;
+    }
+    if (!flag_properties.enabled.has_value()) {
+      diag_->Error(android::DiagMessage(source_.WithLine(parser->line_number()))
+                   << "Only flags with a value may be used with resources");
+      return false;
+    }
+    out_resource->flag_status =
+        flag_properties.enabled.value() ? FlagStatus::Enabled : FlagStatus::Disabled;
+  }
 
   // The value format accepted for this resource.
   uint32_t resource_format = 0u;

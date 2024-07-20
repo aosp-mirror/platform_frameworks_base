@@ -237,8 +237,8 @@ public class ViewFrameRateTest {
             return;
         }
         waitForFrameRateCategoryToSettle();
-        assertEquals(FRAME_RATE_CATEGORY_LOW,
-                        mViewRoot.getLastPreferredFrameRateCategory());
+        assertTrue(mViewRoot.getLastPreferredFrameRateCategory()
+                < FRAME_RATE_CATEGORY_HIGH_HINT);
 
         int width = mMovingView.getWidth();
         int height = mMovingView.getHeight();

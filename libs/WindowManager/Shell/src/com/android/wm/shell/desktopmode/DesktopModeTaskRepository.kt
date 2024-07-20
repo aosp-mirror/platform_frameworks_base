@@ -88,13 +88,16 @@ class DesktopModeTaskRepository {
     /** Add a [VisibleTasksListener] to be notified when freeform tasks are visible or not. */
     fun addVisibleTasksListener(visibleTasksListener: VisibleTasksListener, executor: Executor) {
         visibleTasksListeners[visibleTasksListener] = executor
-        displayData.keyIterator().forEach { displayId ->
-            val visibleTasksCount = getVisibleTaskCount(displayId)
+        displayData.keyIterator().forEach {
             executor.execute {
-                visibleTasksListener.onTasksVisibilityChanged(displayId, visibleTasksCount)
+                visibleTasksListener.onTasksVisibilityChanged(it, visibleTaskCount(it))
             }
         }
     }
+
+    /** Returns a list of all [DisplayData]. */
+    private fun displayDataList(): Sequence<DisplayData> =
+        displayData.valueIterator().asSequence()
 
     /**
      * Add a Consumer which will inform other classes of changes to exclusion regions for all
@@ -208,37 +211,17 @@ class DesktopModeTaskRepository {
         return removed
     }
 
-    /** Check if a task with the given [taskId] was marked as an active task */
-    fun isActiveTask(taskId: Int): Boolean {
-        return displayData.valueIterator().asSequence().any { data ->
-            data.activeTasks.contains(taskId)
-        }
-    }
-
-    /** Check if a task with the given [taskId] was marked as a closing task */
-    fun isClosingTask(taskId: Int): Boolean =
-        displayData.valueIterator().asSequence().any { data -> taskId in data.closingTasks }
-
-    /** Whether a task is visible. */
-    fun isVisibleTask(taskId: Int): Boolean {
-        return displayData.valueIterator().asSequence().any { data ->
-            data.visibleTasks.contains(taskId)
-        }
-    }
-
-    /** Return whether the given Task is minimized. */
-    fun isMinimizedTask(taskId: Int): Boolean {
-        return displayData.valueIterator().asSequence().any { data ->
-            data.minimizedTasks.contains(taskId)
-        }
-    }
+    fun isActiveTask(taskId: Int) = displayDataList().any { taskId in it.activeTasks }
+    fun isClosingTask(taskId: Int) = displayDataList().any { taskId in it.closingTasks }
+    fun isVisibleTask(taskId: Int) = displayDataList().any { taskId in it.visibleTasks }
+    fun isMinimizedTask(taskId: Int) = displayDataList().any { taskId in it.minimizedTasks }
 
     /**
      * Check if a task with the given [taskId] is the only visible, non-closing, not-minimized task
      * on its display
      */
     fun isOnlyVisibleNonClosingTask(taskId: Int): Boolean =
-        displayData.valueIterator().asSequence().any { data ->
+        displayDataList().any { data ->
             data.visibleTasks
                 .subtract(data.closingTasks)
                 .subtract(data.minimizedTasks)
@@ -253,12 +236,6 @@ class DesktopModeTaskRepository {
     /** Returns the minimized tasks for the given [displayId]. */
     fun getMinimizedTasks(displayId: Int): ArraySet<Int> =
         ArraySet(displayData[displayId]?.minimizedTasks)
-
-    /**
-     * Returns whether Desktop Mode is currently showing any tasks, i.e. whether any Desktop Tasks
-     * are visible.
-     */
-    fun isDesktopModeShowing(displayId: Int): Boolean = getVisibleTaskCount(displayId) > 0
 
     /**
      * Returns a list of Tasks IDs representing all active non-minimized Tasks on the given display,
@@ -305,14 +282,14 @@ class DesktopModeTaskRepository {
             return
         }
 
-        val prevCount = getVisibleTaskCount(displayId)
+        val prevCount = visibleTaskCount(displayId)
         if (visible) {
             displayData.getOrCreate(displayId).visibleTasks.add(taskId)
             unminimizeTask(displayId, taskId)
         } else {
             displayData[displayId]?.visibleTasks?.remove(taskId)
         }
-        val newCount = getVisibleTaskCount(displayId)
+        val newCount = visibleTaskCount(displayId)
 
         // Check if count changed
         if (prevCount != newCount) {
@@ -340,7 +317,7 @@ class DesktopModeTaskRepository {
     }
 
     /** Get number of tasks that are marked as visible on given [displayId] */
-    fun getVisibleTaskCount(displayId: Int): Int {
+    fun visibleTaskCount(displayId: Int): Int {
         ProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTaskRepo: visibleTaskCount= %d",

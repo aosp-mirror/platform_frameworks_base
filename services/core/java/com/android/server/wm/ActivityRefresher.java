@@ -75,7 +75,7 @@ class ActivityRefresher {
         }
 
         final boolean cycleThroughStop =
-                mWmService.mLetterboxConfiguration
+                mWmService.mAppCompatConfiguration
                         .isCameraCompatRefreshCycleThroughStopEnabled()
                         && !activity.mAppCompatController.getAppCompatCameraOverrides()
                             .shouldRefreshActivityViaPauseForCameraCompat();
@@ -114,7 +114,7 @@ class ActivityRefresher {
 
     private boolean shouldRefreshActivity(@NonNull ActivityRecord activity,
             @NonNull Configuration newConfig, @NonNull Configuration lastReportedConfig) {
-        return mWmService.mLetterboxConfiguration.isCameraCompatRefreshEnabled()
+        return mWmService.mAppCompatConfiguration.isCameraCompatRefreshEnabled()
                 && activity.mAppCompatController.getAppCompatOverrides()
                     .getAppCompatCameraOverrides().shouldRefreshActivityForCameraCompat()
                 && ArrayUtils.find(mEvaluators.toArray(), evaluator ->

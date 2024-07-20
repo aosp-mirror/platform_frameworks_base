@@ -18,8 +18,9 @@ package com.android.systemui.statusbar.notification.row.ui.view
 
 import android.annotation.DrawableRes
 import android.content.Context
+import android.graphics.BlendMode
 import android.util.AttributeSet
-import android.widget.Button
+import com.android.internal.widget.EmphasizedNotificationButton
 
 class TimerButtonView
 @JvmOverloads
@@ -28,14 +29,19 @@ constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0,
-) : Button(context, attrs, defStyleAttr, defStyleRes) {
+) : EmphasizedNotificationButton(context, attrs, defStyleAttr, defStyleRes) {
 
     private val Int.dp: Int
         get() = (this * context.resources.displayMetrics.density).toInt()
 
     fun setIcon(@DrawableRes icon: Int) {
         val drawable = context.getDrawable(icon)
+
+        drawable?.mutate()
+        drawable?.setTintList(textColors)
+        drawable?.setTintBlendMode(BlendMode.SRC_IN)
         drawable?.setBounds(0, 0, 24.dp, 24.dp)
+
         setCompoundDrawablesRelative(drawable, null, null, null)
     }
 }

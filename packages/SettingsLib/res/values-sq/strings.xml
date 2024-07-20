@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Lejo ngarkimin e shtresave të korrigjimit të GPU-së për aplikacionet e korrigjimit"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivizo evidencat e tregtuesit me shumë fjalë"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Përfshi evidenca shtesë të treguesve specifike për pajisjen në raportet e defekteve, që mund të përfshijnë informacion privat, mund të përdorin më shumë bateri dhe/ose të përdorin më shumë hapësirë ruajtëse."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"Çaktivizo pas një dite"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"Evidencat e detajuara të shitësit janë mbyllur"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"Aktivizuar për një ditë"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"Aktivizo për një ditë më shumë"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"Çaktivizohet pas një dite"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Aktivizuar për një kohë të papërcaktuar"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Animacioni i dritares"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Animacioni kalimtar"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Kohëzgjatja e animatorit"</string>
@@ -436,10 +430,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Bën që çdo aplikacion të jetë i përshtatshëm për t\'u shkruar në hapësirën ruajtëse të jashtme, pavarësisht nga vlerat e manifestit"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Detyro madhësinë e ndryshueshme për aktivitetet"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Bëj që të gjitha aktivitetet të kenë madhësi të ndryshueshme për përdorimin me shumë dritare, pavarësisht vlerave të manifestit."</string>
-    <!-- no translation found for enable_freeform_support (8409932201445109106) -->
-    <skip />
-    <!-- no translation found for enable_freeform_support_summary (2242481082356957934) -->
-    <skip />
+    <string name="enable_freeform_support" msgid="8409932201445109106">"Aktivizo dritaret me formë të lirë (të vjetra)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Aktivizo mbështetjen për dritaret eksperimentale me formë të lirë të versionit të vjetër."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Fjalëkalimi i rezervimit të desktopit"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Rezervimet e plota të desktopit nuk janë të mbrojtura aktualisht"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Trokit për të ndryshuar ose hequr fjalëkalimin për rezervime të plota të desktopit"</string>

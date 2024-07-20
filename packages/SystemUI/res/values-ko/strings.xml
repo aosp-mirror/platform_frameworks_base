@@ -126,31 +126,40 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"탭하여 보기"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"화면 녹화 저장 중에 오류가 발생했습니다."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"화면 녹화 시작 중 오류 발생"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <!-- no translation found for screenrecord_stop_dialog_title (8716193661764511095) -->
     <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <!-- no translation found for screenrecord_stop_dialog_message (6262768207331626817) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; 녹화가 중단됩니다."</string>
-    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5995770227684523244) -->
     <skip />
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"녹화 중지"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"화면 공유 중"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"화면 공유를 중지하시겠습니까?"</string>
+    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen_with_host_app (522823522115375414) -->
     <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen (5090115386271179270) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; 공유가 중단됩니다."</string>
-    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <!-- no translation found for share_to_app_stop_dialog_message_single_app_specific (5923772039347985172) -->
     <skip />
-    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"화면 전송 중"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <!-- no translation found for share_to_app_stop_dialog_message_single_app_generic (6681016774654578261) -->
     <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"공유 중지"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"화면 전송 중"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"전송을 중지할까요?"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen_with_device (1474703115926205251) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; 전송이 중단됩니다."</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen (8419219169553867625) -->
     <skip />
-    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app_with_device (2715934698604085519) -->
     <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (8616103075630934513) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic_with_device (9213582497852420203) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic (4100272100480415076) -->
+    <skip />
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"전송 중지"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"닫기"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"문제 녹화 도구"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"문제 녹화 처리 중"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"문제 수집 섹션에 대한 진행 중 알림"</string>
@@ -161,8 +170,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"문제 녹화 저장 중에 오류가 발생했습니다."</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"문제 녹화 시작 중에 오류가 발생했습니다."</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"전체 화면 모드"</string>
-    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2717426731830851921">"종료하려면 화면 상단에서 아래로 스와이프합니다."</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"확인"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"뒤로"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"홈"</string>
@@ -295,6 +303,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"화면 보호기"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"이더넷"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"방해 금지 모드"</string>
+    <!-- no translation found for quick_settings_modes_label (5407025818652750501) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"블루투스"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"페어링된 기기가 없습니다"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"기기를 연결 또는 연결 해제하려면 탭하세요"</string>
@@ -306,8 +316,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"저장됨"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"연결 해제"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"실행"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"내일 자동으로 사용 설정"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share, 내 기기 찾기 등의 기능에서 블루투스를 사용합니다."</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"블루투스가 내일 아침에 켜집니다."</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"오디오 공유"</string>
@@ -495,12 +504,13 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"위젯 선택"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"위젯 삭제"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"선택한 위젯 배치"</string>
-    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <!-- no translation found for communal_widget_picker_title (1953369090475731663) -->
     <skip />
-    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
+    <!-- no translation found for communal_widget_picker_description (490515450110487871) -->
     <skip />
-    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
-    <skip />
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"잠금 화면 위젯"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"위젯을 사용하여 앱을 열려면 본인 인증을 해야 합니다. 또한 태블릿이 잠겨 있더라도 누구나 볼 수 있다는 점을 유의해야 합니다. 일부 위젯은 잠금 화면에 적합하지 않고 여기에 추가하기에 안전하지 않을 수 있습니다."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"확인"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"사용자 전환"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"풀다운 메뉴"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"이 세션에 있는 모든 앱과 데이터가 삭제됩니다."</string>
@@ -722,7 +732,8 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"기본값"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"자동"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"소리 또는 진동 없음"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"소리나 진동이 울리지 않으며 대화 섹션 하단에 표시됨"</string>
+    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
+    <skip />
     <string name="notification_channel_summary_default" msgid="777294388712200605">"기기 설정에 따라 벨소리나 진동이 울릴 수 있음"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"기기 설정에 따라 벨소리나 진동이 울릴 수 있습니다. 기본적으로 <xliff:g id="APP_NAME">%1$s</xliff:g>의 대화는 대화창으로 표시됩니다."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"시스템에서 알림 시 소리 또는 진동을 사용할지 결정하도록 허용합니다."</string>
@@ -779,6 +790,8 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
+    <!-- no translation found for keyboard_key_esc (6230365950511411322) -->
+    <skip />
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -1361,22 +1374,19 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"화면 분할"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"입력"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"앱 바로가기"</string>
+    <!-- no translation found for shortcut_helper_category_current_app_shortcuts (4017840565974573628) -->
+    <skip />
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"접근성"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"단축키"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"검색 바로가기"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"접기 아이콘"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"확장 아이콘"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"또는"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"뒤로 동작"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"홈 동작"</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"작업 키"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"완료"</string>
+    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"아주 좋습니다."</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"뒤로"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"돌아가려면 세 손가락을 사용해 터치패드의 아무 곳이나 왼쪽 또는 오른쪽으로 스와이프합니다."</string>
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"터치패드에서 세 손가락을 좌우로 움직이는 모습"</string>
@@ -1385,4 +1395,6 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d단계 중 %1$d단계"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"홈 컨트롤"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"화면 보호기로 홈 컨트롤에 빠르게 액세스하기"</string>
+    <!-- no translation found for volume_undo_action (5815519725211877114) -->
+    <skip />
 </resources>

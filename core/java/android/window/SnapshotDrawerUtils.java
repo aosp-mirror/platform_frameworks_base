@@ -412,8 +412,7 @@ public class SnapshotDrawerUtils {
         final WindowManager.LayoutParams attrs = Flags.drawSnapshotAspectRatioMatch()
                 ? info.mainWindowLayoutParams : info.topOpaqueWindowLayoutParams;
         final WindowManager.LayoutParams mainWindowParams = info.mainWindowLayoutParams;
-        final InsetsState topWindowInsetsState = info.topOpaqueWindowInsetsState;
-        if (attrs == null || mainWindowParams == null || topWindowInsetsState == null) {
+        if (attrs == null || mainWindowParams == null) {
             Log.w(TAG, "unable to create taskSnapshot surface ");
             return null;
         }
@@ -456,7 +455,10 @@ public class SnapshotDrawerUtils {
         return layoutParams;
     }
 
-    static Rect getSystemBarInsets(Rect frame, InsetsState state) {
+    static Rect getSystemBarInsets(Rect frame, @Nullable InsetsState state) {
+        if (state == null) {
+            return new Rect();
+        }
         return state.calculateInsets(frame, WindowInsets.Type.systemBars(),
                 false /* ignoreVisibility */).toRect();
     }

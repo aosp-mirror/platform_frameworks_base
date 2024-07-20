@@ -1423,11 +1423,8 @@ public class PackageManagerServiceUtils {
      */
     public static void checkDowngrade(@NonNull PackageSetting before,
             @NonNull PackageInfoLite after) throws PackageManagerException {
-        if (after.getLongVersionCode() < before.getVersionCode()) {
-            throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
-                    "Update version code " + after.versionCode + " is older than current "
-                            + before.getVersionCode());
-        }
+        checkDowngrade(before.getVersionCode(), before.getBaseRevisionCode(),
+                before.getSplitNames(), before.getSplitRevisionCodes(), after);
     }
 
     /**
@@ -1436,28 +1433,35 @@ public class PackageManagerServiceUtils {
      */
     public static void checkDowngrade(@NonNull AndroidPackage before,
             @NonNull PackageInfoLite after) throws PackageManagerException {
-        if (after.getLongVersionCode() < before.getLongVersionCode()) {
+        checkDowngrade(before.getLongVersionCode(), before.getBaseRevisionCode(),
+                before.getSplitNames(), before.getSplitRevisionCodes(), after);
+    }
+
+    private static void checkDowngrade(long beforeVersionCode, int beforeBaseRevisionCode,
+            @NonNull String[] beforeSplitNames, @NonNull int[] beforeSplitRevisionCodes,
+            @NonNull PackageInfoLite after) throws PackageManagerException {
+        if (after.getLongVersionCode() < beforeVersionCode) {
             throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
                     "Update version code " + after.versionCode + " is older than current "
-                            + before.getLongVersionCode());
-        } else if (after.getLongVersionCode() == before.getLongVersionCode()) {
-            if (after.baseRevisionCode < before.getBaseRevisionCode()) {
+                            + beforeVersionCode);
+        } else if (after.getLongVersionCode() == beforeVersionCode) {
+            if (after.baseRevisionCode < beforeBaseRevisionCode) {
                 throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
                         "Update base revision code " + after.baseRevisionCode
-                                + " is older than current " + before.getBaseRevisionCode());
+                                + " is older than current " + beforeBaseRevisionCode);
             }
 
             if (!ArrayUtils.isEmpty(after.splitNames)) {
                 for (int i = 0; i < after.splitNames.length; i++) {
                     final String splitName = after.splitNames[i];
-                    final int j = ArrayUtils.indexOf(before.getSplitNames(), splitName);
+                    final int j = ArrayUtils.indexOf(beforeSplitNames, splitName);
                     if (j != -1) {
-                        if (after.splitRevisionCodes[i] < before.getSplitRevisionCodes()[j]) {
+                        if (after.splitRevisionCodes[i] < beforeSplitRevisionCodes[j]) {
                             throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
                                     "Update split " + splitName + " revision code "
                                             + after.splitRevisionCodes[i]
                                             + " is older than current "
-                                            + before.getSplitRevisionCodes()[j]);
+                                            + beforeSplitRevisionCodes[j]);
                         }
                     }
                 }

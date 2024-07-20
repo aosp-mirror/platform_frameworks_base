@@ -16,13 +16,18 @@
 
 package com.android.server;
 
+import static android.content.Intent.ACTION_REBOOT;
+import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
@@ -2001,6 +2006,31 @@ public class PackageWatchdog {
                 }
             }
         }
+    }
 
+    /**
+     * Register broadcast receiver for shutdown.
+     * We would save the observer state to persist across boots.
+     *
+     * @hide
+     */
+    public void registerShutdownBroadcastReceiver() {
+        BroadcastReceiver shutdownEventReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // Only write if intent is relevant to device reboot or shutdown.
+                String intentAction = intent.getAction();
+                if (ACTION_REBOOT.equals(intentAction)
+                        || ACTION_SHUTDOWN.equals(intentAction)) {
+                    writeNow();
+                }
+            }
+        };
+
+        // Setup receiver for device reboots or shutdowns.
+        IntentFilter filter = new IntentFilter(ACTION_REBOOT);
+        filter.addAction(ACTION_SHUTDOWN);
+        mContext.registerReceiverForAllUsers(shutdownEventReceiver, filter, null,
+                /* run on main thread */ null);
     }
 }

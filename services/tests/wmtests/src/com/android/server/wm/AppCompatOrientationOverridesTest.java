@@ -162,7 +162,7 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<OrientationOverridesRobotTest> consumer) {
-        spyOn(mWm.mLetterboxConfiguration);
+        spyOn(mWm.mAppCompatConfiguration);
         final OrientationOverridesRobotTest robot =
                 new OrientationOverridesRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);

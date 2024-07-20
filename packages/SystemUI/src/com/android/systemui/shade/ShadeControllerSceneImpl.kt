@@ -76,7 +76,7 @@ constructor(
         scope.launch {
             shadeInteractor.isAnyExpanded.collect {
                 if (!it) {
-                    runPostCollapseActions()
+                    withContext(mainDispatcher) { runPostCollapseActions() }
                 }
             }
         }

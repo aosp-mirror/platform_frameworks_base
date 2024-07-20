@@ -17,7 +17,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="7384524142163511792">"Διαχειριστής διαπιστευτηρίων"</string>
+    <string name="app_name" msgid="7384524142163511792">"Διαχείριση διαπιστευτηρίων"</string>
     <string name="use_passkey_title" msgid="716598039340757817">"Χρήση κλειδιού πρόσβασης;"</string>
     <string name="use_password_title" msgid="4655101984031246476">"Χρήση κωδικού πρόσβασης;"</string>
     <string name="dialog_dismiss_button" msgid="989567669882005067">"Παράβλεψη"</string>

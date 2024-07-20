@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
+import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_DRAG_WINDOW;
 import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_RESIZE_WINDOW;
 
 import android.graphics.Point;
@@ -103,6 +104,9 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
                 wct.reorder(mDesktopWindowDecoration.mTaskInfo.token, true);
                 mTaskOrganizer.applyTransaction(wct);
             }
+        } else {
+            mInteractionJankMonitor.begin(mDesktopWindowDecoration.mTaskSurface,
+                    mDesktopWindowDecoration.mContext, CUJ_DESKTOP_MODE_DRAG_WINDOW);
         }
         mDragStartListener.onDragStart(mDesktopWindowDecoration.mTaskInfo.taskId);
         mRepositionTaskBounds.set(mTaskBoundsAtDragStart);
@@ -157,11 +161,16 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
             }
             mInteractionJankMonitor.end(CUJ_DESKTOP_MODE_RESIZE_WINDOW);
         } else {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
             DragPositioningCallbackUtility.updateTaskBounds(mRepositionTaskBounds,
                     mTaskBoundsAtDragStart, mRepositionStartPoint, x, y);
-            wct.setBounds(mDesktopWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
-            mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
+            if (!mTaskBoundsAtDragStart.equals(mRepositionTaskBounds)) {
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                wct.setBounds(mDesktopWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
+                mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
+            } else {
+                // Drag-move ended where it originally started, no need to update WM.
+                mInteractionJankMonitor.end(CUJ_DESKTOP_MODE_DRAG_WINDOW);
+            }
         }
 
         mCtrlType = CTRL_TYPE_UNDEFINED;
@@ -202,6 +211,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         mCtrlType = CTRL_TYPE_UNDEFINED;
         finishCallback.onTransitionFinished(null);
         mIsResizingOrAnimatingResize = false;
+        mInteractionJankMonitor.end(CUJ_DESKTOP_MODE_DRAG_WINDOW);
         return true;
     }
 
