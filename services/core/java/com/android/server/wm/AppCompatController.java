@@ -44,9 +44,9 @@ class AppCompatController {
         final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
                 activityRecord.packageName);
         mTransparentPolicy = new TransparentPolicy(activityRecord,
-                wmService.mLetterboxConfiguration);
+                wmService.mAppCompatConfiguration);
         mAppCompatOverrides = new AppCompatOverrides(activityRecord,
-                wmService.mLetterboxConfiguration, optPropBuilder);
+                wmService.mAppCompatConfiguration, optPropBuilder);
         mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord, mAppCompatOverrides);
         mAppCompatAspectRatioPolicy = new AppCompatAspectRatioPolicy(activityRecord,
                 mTransparentPolicy, mAppCompatOverrides);

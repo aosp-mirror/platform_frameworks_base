@@ -21,14 +21,23 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandlerSubject
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
+import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
 import com.google.common.truth.Truth
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -36,7 +45,33 @@ import org.junit.runner.RunWith
 class ModesTileUserActionInteractorTest : SysuiTestCase() {
     private val inputHandler = FakeQSTileIntentUserInputHandler()
 
-    val underTest = ModesTileUserActionInteractor(inputHandler)
+    @Mock private lateinit var dialogTransitionAnimator: DialogTransitionAnimator
+    @Mock private lateinit var dialogDelegate: ModesDialogDelegate
+    @Mock private lateinit var mockDialog: SystemUIDialog
+
+    private lateinit var underTest: ModesTileUserActionInteractor
+
+    @Before
+    fun setup() {
+        MockitoAnnotations.initMocks(this)
+
+        whenever(dialogDelegate.createDialog()).thenReturn(mockDialog)
+
+        underTest =
+            ModesTileUserActionInteractor(
+                EmptyCoroutineContext,
+                inputHandler,
+                dialogTransitionAnimator,
+                dialogDelegate,
+            )
+    }
+
+    @Test
+    fun handleClick() = runTest {
+        underTest.handleInput(QSTileInputTestKtx.click(ModesTileModel(false)))
+
+        verify(mockDialog).show()
+    }
 
     @Test
     fun handleLongClick() = runTest {

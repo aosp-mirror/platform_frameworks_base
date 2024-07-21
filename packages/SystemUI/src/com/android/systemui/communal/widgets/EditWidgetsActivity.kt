@@ -96,8 +96,7 @@ constructor(
                                 run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
                             }
                         }
-                    }
-                        ?: run { Log.w(TAG, "No data in result.") }
+                    } ?: run { Log.w(TAG, "No data in result.") }
                 }
                 else ->
                     Log.w(
@@ -195,6 +194,8 @@ constructor(
     override fun onStart() {
         super.onStart()
 
+        communalViewModel.setEditActivityShowing(true)
+
         if (shouldOpenWidgetPickerOnStart) {
             onOpenWidgetPicker()
             shouldOpenWidgetPickerOnStart = false
@@ -206,6 +207,7 @@ constructor(
 
     override fun onStop() {
         super.onStop()
+        communalViewModel.setEditActivityShowing(false)
 
         logger.i("Stopping the communal widget editor activity")
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_GONE)

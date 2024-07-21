@@ -152,7 +152,6 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
         val featureFlags =
             FakeFeatureFlags().apply {
                 set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
-                set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, false)
             }
 
         val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)

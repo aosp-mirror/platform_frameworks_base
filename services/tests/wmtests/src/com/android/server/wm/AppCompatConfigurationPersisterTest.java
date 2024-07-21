@@ -18,8 +18,8 @@ package com.android.server.wm;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -44,14 +44,14 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Tests for the {@link LetterboxConfigurationPersister} class.
+ * Tests for the {@link AppCompatConfigurationPersister} class.
  *
  * Build/Install/Run:
- *  atest WmTests:LetterboxConfigurationPersisterTest
+ *  atest WmTests:AppCompatConfigurationPersisterTest
  */
 @SmallTest
 @Presubmit
-public class LetterboxConfigurationPersisterTest {
+public class AppCompatConfigurationPersisterTest {
 
     private static final long TIMEOUT = 2000L; // 2 secs
 
@@ -61,7 +61,7 @@ public class LetterboxConfigurationPersisterTest {
 
     private static final String LETTERBOX_CONFIGURATION_TEST_FILENAME = "letterbox_config_test";
 
-    private LetterboxConfigurationPersister mLetterboxConfigurationPersister;
+    private AppCompatConfigurationPersister mAppCompatConfigurationPersister;
     private Context mContext;
     private PersisterQueue mPersisterQueue;
     private QueueState mQueueState;
@@ -74,7 +74,7 @@ public class LetterboxConfigurationPersisterTest {
         mConfigFolder = mContext.getFilesDir();
         mPersisterQueue = new PersisterQueue();
         mQueueState = new QueueState();
-        mLetterboxConfigurationPersister = new LetterboxConfigurationPersister(
+        mAppCompatConfigurationPersister = new AppCompatConfigurationPersister(
                 () -> mContext.getResources().getInteger(
                         R.integer.config_letterboxDefaultPositionForHorizontalReachability),
                 () -> mContext.getResources().getInteger(
@@ -88,12 +88,12 @@ public class LetterboxConfigurationPersisterTest {
                 LETTERBOX_CONFIGURATION_TEST_FILENAME);
         mQueueListener = queueEmpty -> mQueueState.onItemAdded();
         mPersisterQueue.addListener(mQueueListener);
-        mLetterboxConfigurationPersister.start();
+        mAppCompatConfigurationPersister.start();
     }
 
     @After
     public void tearDown() throws InterruptedException {
-        deleteConfiguration(mLetterboxConfigurationPersister, mPersisterQueue);
+        deleteConfiguration(mAppCompatConfigurationPersister, mPersisterQueue);
         waitForCompletion(mPersisterQueue);
         mPersisterQueue.removeListener(mQueueListener);
         stopPersisterSafe(mPersisterQueue);
@@ -102,7 +102,7 @@ public class LetterboxConfigurationPersisterTest {
     @Test
     public void test_whenStoreIsCreated_valuesAreDefaults() {
         final int positionForHorizontalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
+                mAppCompatConfigurationPersister.getLetterboxPositionForHorizontalReachability(
                         false);
         final int defaultPositionForHorizontalReachability =
                 mContext.getResources().getInteger(
@@ -110,7 +110,7 @@ public class LetterboxConfigurationPersisterTest {
         Assert.assertEquals(defaultPositionForHorizontalReachability,
                 positionForHorizontalReachability);
         final int positionForVerticalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(false);
+                mAppCompatConfigurationPersister.getLetterboxPositionForVerticalReachability(false);
         final int defaultPositionForVerticalReachability =
                 mContext.getResources().getInteger(
                         R.integer.config_letterboxDefaultPositionForVerticalReachability);
@@ -120,16 +120,16 @@ public class LetterboxConfigurationPersisterTest {
 
     @Test
     public void test_whenUpdatedWithNewValues_valuesAreWritten() {
-        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(false,
+        mAppCompatConfigurationPersister.setLetterboxPositionForHorizontalReachability(false,
                 LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT);
-        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(false,
+        mAppCompatConfigurationPersister.setLetterboxPositionForVerticalReachability(false,
                 LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP);
         waitForCompletion(mPersisterQueue);
         final int newPositionForHorizontalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
+                mAppCompatConfigurationPersister.getLetterboxPositionForHorizontalReachability(
                         false);
         final int newPositionForVerticalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(false);
+                mAppCompatConfigurationPersister.getLetterboxPositionForVerticalReachability(false);
         Assert.assertEquals(LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
                 newPositionForHorizontalReachability);
         Assert.assertEquals(LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
@@ -139,7 +139,7 @@ public class LetterboxConfigurationPersisterTest {
     @Test
     public void test_whenUpdatedWithNewValues_valuesAreReadAfterRestart() {
         final PersisterQueue firstPersisterQueue = new PersisterQueue();
-        final LetterboxConfigurationPersister firstPersister = new LetterboxConfigurationPersister(
+        final AppCompatConfigurationPersister firstPersister = new AppCompatConfigurationPersister(
                 DEFAULT_REACHABILITY_SUPPLIER_TEST, DEFAULT_REACHABILITY_SUPPLIER_TEST,
                 DEFAULT_REACHABILITY_SUPPLIER_TEST, DEFAULT_REACHABILITY_SUPPLIER_TEST,
                 mContext.getFilesDir(), firstPersisterQueue, mQueueState,
@@ -152,7 +152,7 @@ public class LetterboxConfigurationPersisterTest {
         waitForCompletion(firstPersisterQueue);
         stopPersisterSafe(firstPersisterQueue);
         final PersisterQueue secondPersisterQueue = new PersisterQueue();
-        final LetterboxConfigurationPersister secondPersister = new LetterboxConfigurationPersister(
+        final AppCompatConfigurationPersister secondPersister = new AppCompatConfigurationPersister(
                 DEFAULT_REACHABILITY_SUPPLIER_TEST, DEFAULT_REACHABILITY_SUPPLIER_TEST,
                 DEFAULT_REACHABILITY_SUPPLIER_TEST, DEFAULT_REACHABILITY_SUPPLIER_TEST,
                 mContext.getFilesDir(), secondPersisterQueue, mQueueState,
@@ -174,7 +174,7 @@ public class LetterboxConfigurationPersisterTest {
     @Test
     public void test_whenUpdatedWithNewValuesAndDeleted_valuesAreDefaults() {
         final PersisterQueue firstPersisterQueue = new PersisterQueue();
-        final LetterboxConfigurationPersister firstPersister = new LetterboxConfigurationPersister(
+        final AppCompatConfigurationPersister firstPersister = new AppCompatConfigurationPersister(
                 DEFAULT_REACHABILITY_SUPPLIER_TEST, DEFAULT_REACHABILITY_SUPPLIER_TEST,
                 DEFAULT_REACHABILITY_SUPPLIER_TEST, DEFAULT_REACHABILITY_SUPPLIER_TEST,
                 mContext.getFilesDir(), firstPersisterQueue, mQueueState,
@@ -198,7 +198,7 @@ public class LetterboxConfigurationPersisterTest {
         stopPersisterSafe(firstPersisterQueue);
 
         final PersisterQueue secondPersisterQueue = new PersisterQueue();
-        final LetterboxConfigurationPersister secondPersister = new LetterboxConfigurationPersister(
+        final AppCompatConfigurationPersister secondPersister = new AppCompatConfigurationPersister(
                 DEFAULT_REACHABILITY_SUPPLIER_TEST, DEFAULT_REACHABILITY_SUPPLIER_TEST,
                 DEFAULT_REACHABILITY_SUPPLIER_TEST, DEFAULT_REACHABILITY_SUPPLIER_TEST,
                 mContext.getFilesDir(), secondPersisterQueue, mQueueState,
@@ -245,7 +245,7 @@ public class LetterboxConfigurationPersisterTest {
         return mQueueState.isEmpty();
     }
 
-    private void deleteConfiguration(LetterboxConfigurationPersister persister,
+    private void deleteConfiguration(AppCompatConfigurationPersister persister,
             PersisterQueue persisterQueue) {
         final AtomicFile fileToDelete = new AtomicFile(
                 new File(mConfigFolder, LETTERBOX_CONFIGURATION_TEST_FILENAME));

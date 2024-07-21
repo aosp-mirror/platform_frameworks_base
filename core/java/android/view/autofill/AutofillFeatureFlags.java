@@ -563,7 +563,7 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_ENABLE_RELAYOUT,
-                true);
+                false);
     }
 
     /** @hide */

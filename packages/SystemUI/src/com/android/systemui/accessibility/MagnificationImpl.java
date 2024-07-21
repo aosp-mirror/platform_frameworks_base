@@ -363,6 +363,16 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
     }
 
     @MainThread
+    void updateSettingsButtonStatus(int displayId,
+            @WindowMagnificationSettings.MagnificationSize int index) {
+        final MagnificationSettingsController magnificationSettingsController =
+                mMagnificationSettingsSupplier.get(displayId);
+        if (magnificationSettingsController != null) {
+            magnificationSettingsController.updateSettingsButtonStatusOnRestore(index);
+        }
+    }
+
+    @MainThread
     void toggleSettingsPanelVisibility(int displayId) {
         final MagnificationSettingsController magnificationSettingsController =
                 mMagnificationSettingsSupplier.get(displayId);
@@ -445,6 +455,11 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
 
     @VisibleForTesting
     final WindowMagnifierCallback mWindowMagnifierCallback = new WindowMagnifierCallback() {
+        @Override
+        public void onWindowMagnifierBoundsRestored(int displayId, int index) {
+            mHandler.post(() -> updateSettingsButtonStatus(displayId, index));
+        }
+
         @Override
         public void onWindowMagnifierBoundsChanged(int displayId, Rect frame) {
             if (mMagnificationConnectionImpl != null) {

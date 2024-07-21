@@ -67,9 +67,8 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
@@ -130,14 +129,12 @@ import java.util.function.Supplier;
 @LargeTest
 @TestableLooper.RunWithLooper
 @RunWith(AndroidJUnit4.class)
-@RequiresFlagsEnabled(Flags.FLAG_CREATE_WINDOWLESS_WINDOW_MAGNIFIER)
+@EnableFlags(Flags.FLAG_CREATE_WINDOWLESS_WINDOW_MAGNIFIER)
 public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiTestCase {
 
     @Rule
     // NOTE: pass 'null' to allow this test advances time on the main thread.
     public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(/* test= */ null);
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final int LAYOUT_CHANGE_TIMEOUT_MS = 5000;
     @Mock
@@ -625,6 +622,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
                 0);
     }
 
+    @DisableFlags(Flags.FLAG_SAVE_AND_RESTORE_MAGNIFICATION_SETTINGS_BUTTONS)
     @Test
     public void onScreenSizeAndDensityChanged_enabled_restoreSavedMagnifierWindow() {
         int newSmallestScreenWidthDp =
@@ -655,6 +653,50 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
 
         // wait for rect update
         waitForIdleSync();
+        ViewGroup.LayoutParams params = mSurfaceControlViewHost.getView().getLayoutParams();
+        final int mirrorSurfaceMargin = mResources.getDimensionPixelSize(
+                R.dimen.magnification_mirror_surface_margin);
+        // The width and height of the view include the magnification frame and the margins.
+        assertTrue(params.width == (windowFrameSize + 2 * mirrorSurfaceMargin));
+        assertTrue(params.height == (windowFrameSize + 2 * mirrorSurfaceMargin));
+    }
+
+    @EnableFlags(Flags.FLAG_SAVE_AND_RESTORE_MAGNIFICATION_SETTINGS_BUTTONS)
+    @Test
+    public void onScreenSizeAndDensityChanged_enabled_restoreSavedMagnifierIndexAndWindow() {
+        int newSmallestScreenWidthDp =
+                mContext.getResources().getConfiguration().smallestScreenWidthDp * 2;
+        int windowFrameSize = mResources.getDimensionPixelSize(
+                com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
+        Size preferredWindowSize = new Size(windowFrameSize, windowFrameSize);
+        mSharedPreferences
+                .edit()
+                .putString(String.valueOf(newSmallestScreenWidthDp),
+                        WindowMagnificationFrameSpec.serialize(
+                                WindowMagnificationSettings.MagnificationSize.CUSTOM,
+                                preferredWindowSize))
+                .commit();
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+
+        // Screen density and size change
+        mContext.getResources().getConfiguration().smallestScreenWidthDp = newSmallestScreenWidthDp;
+        final Rect testWindowBounds = new Rect(
+                mWindowManager.getCurrentWindowMetrics().getBounds());
+        testWindowBounds.set(testWindowBounds.left, testWindowBounds.top,
+                testWindowBounds.right + 100, testWindowBounds.bottom + 100);
+        mWindowManager.setWindowBounds(testWindowBounds);
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_SCREEN_SIZE);
+        });
+
+        // wait for rect update
+        waitForIdleSync();
+        verify(mWindowMagnifierCallback).onWindowMagnifierBoundsRestored(
+                eq(mContext.getDisplayId()),
+                eq(WindowMagnificationSettings.MagnificationSize.CUSTOM));
         ViewGroup.LayoutParams params = mSurfaceControlViewHost.getView().getLayoutParams();
         final int mirrorSurfaceMargin = mResources.getDimensionPixelSize(
                 R.dimen.magnification_mirror_surface_margin);

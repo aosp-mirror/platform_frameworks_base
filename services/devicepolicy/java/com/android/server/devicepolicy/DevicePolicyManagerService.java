@@ -1378,7 +1378,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // Clear always-on configuration if it wasn't set by the admin.
         if (adminConfiguredVpnPkg == null) {
-            mInjector.getVpnManager().setAlwaysOnVpnPackageForUser(userId, null, false, null);
+            VpnManager vpnManager = mInjector.getVpnManager();
+            if (vpnManager != null) {
+                vpnManager.setAlwaysOnVpnPackageForUser(userId, null, false, null);
+            }
         }
 
         // Clear app authorizations to establish VPNs. When DISALLOW_CONFIG_VPN is enforced apps
@@ -1789,6 +1792,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return mContext.getSystemService(ConnectivityManager.class);
         }
 
+        @Nullable
         VpnManager getVpnManager() {
             return mContext.getSystemService(VpnManager.class);
         }
@@ -3943,10 +3947,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /**
      * @param adminReceiver The admin to add
      * @param refreshing true = update an active admin, no error
+     * @param userHandle which user this admin will be set on
+     * @param provisioningContext additional information for debugging
      */
     @Override
     public void setActiveAdmin(
-            ComponentName adminReceiver, boolean refreshing, int userHandle) {
+            ComponentName adminReceiver,
+            boolean refreshing,
+            int userHandle,
+            @Nullable String provisioningContext
+    ) {
         if (!mHasFeature) {
             return;
         }
@@ -3972,6 +3982,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 newAdmin.testOnlyAdmin =
                         (existingAdmin != null) ? existingAdmin.testOnlyAdmin
                                 : isPackageTestOnly(adminReceiver.getPackageName(), userHandle);
+                newAdmin.setProvisioningContext(provisioningContext);
                 policy.mAdminMap.put(adminReceiver, newAdmin);
                 int replaceIndex = -1;
                 final int N = policy.mAdminList.size();
@@ -7697,8 +7708,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             // If some package is uninstalled after the check above, it will be ignored by CM.
-            if (!mInjector.getVpnManager().setAlwaysOnVpnPackageForUser(
-                    userId, vpnPackage, lockdown, lockdownAllowlist)) {
+            VpnManager vpnManager = mInjector.getVpnManager();
+            if (vpnManager == null
+                    || !mInjector.getVpnManager().setAlwaysOnVpnPackageForUser(
+                            userId, vpnPackage, lockdown, lockdownAllowlist)) {
                 throw new UnsupportedOperationException();
             }
         });
@@ -7746,8 +7759,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwner(caller));
 
+        VpnManager vpnManager = mInjector.getVpnManager();
+        if (vpnManager == null) {
+            return null;
+        }
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getVpnManager().getAlwaysOnVpnPackageForUser(caller.getUserId()));
+                () -> vpnManager.getAlwaysOnVpnPackageForUser(caller.getUserId()));
     }
 
     @Override
@@ -7774,8 +7791,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     isDefaultDeviceOwner(caller) || isProfileOwner(caller));
         }
 
+        VpnManager vpnManager = mInjector.getVpnManager();
+        if (vpnManager == null) {
+            return false;
+        }
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getVpnManager().isVpnLockdownEnabled(caller.getUserId()));
+                () -> vpnManager.isVpnLockdownEnabled(caller.getUserId()));
     }
 
     @Override
@@ -7797,8 +7818,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwner(caller));
 
+        VpnManager vpnManager = mInjector.getVpnManager();
+        if (vpnManager == null) {
+            return null;
+        }
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getVpnManager().getVpnLockdownAllowlist(caller.getUserId()));
+                () -> vpnManager.getVpnLockdownAllowlist(caller.getUserId()));
     }
 
     private void forceWipeDeviceNoLock(boolean wipeExtRequested, String reason, boolean wipeEuicc,
@@ -12830,7 +12855,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         });
 
         // Set admin.
-        setActiveAdmin(profileOwner, /* refreshing= */ true, userId);
+        setActiveAdmin(profileOwner, /* refreshing= */ true, userId, null);
         setProfileOwner(profileOwner, userId);
 
         synchronized (getLockObject()) {
@@ -21883,7 +21908,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             @UserIdInt int userId, @UserIdInt int callingUserId, ComponentName adminComponent) {
         final String adminPackage = adminComponent.getPackageName();
         enablePackage(adminPackage, callingUserId);
-        setActiveAdmin(adminComponent, /* refreshing= */ true, userId);
+        setActiveAdmin(adminComponent, /* refreshing= */ true, userId, null);
     }
 
     private void enablePackage(String packageName, @UserIdInt int userId) {

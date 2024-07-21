@@ -64,6 +64,7 @@ internal class DraggableHandlerImpl(
     internal val orientation: Orientation,
     internal val coroutineScope: CoroutineScope,
 ) : DraggableHandler {
+    internal val nestedScrollKey = Any()
     /** The [DraggableHandler] can only have one active [DragController] at a time. */
     private var dragController: DragControllerImpl? = null
 
@@ -369,9 +370,6 @@ private class DragControllerImpl(
             // immediately go back B => A.
             if (targetScene != swipeTransition._currentScene) {
                 swipeTransition._currentScene = targetScene
-                with(draggableHandler.layoutImpl.state) {
-                    draggableHandler.coroutineScope.onChangeScene(targetScene.key)
-                }
             }
 
             swipeTransition.animateOffset(
@@ -511,7 +509,7 @@ private class DragControllerImpl(
 }
 
 private fun SwipeTransition(
-    layoutState: BaseSceneTransitionLayoutState,
+    layoutState: MutableSceneTransitionLayoutStateImpl,
     coroutineScope: CoroutineScope,
     fromScene: Scene,
     result: UserActionResult,
@@ -566,7 +564,7 @@ private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
 
 private class SwipeTransition(
     val layoutImpl: SceneTransitionLayoutImpl,
-    val layoutState: BaseSceneTransitionLayoutState,
+    val layoutState: MutableSceneTransitionLayoutStateImpl,
     val coroutineScope: CoroutineScope,
     override val key: TransitionKey?,
     val _fromScene: Scene,
@@ -912,9 +910,9 @@ private class Swipes(
 internal class NestedScrollHandlerImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val orientation: Orientation,
-    private val topOrLeftBehavior: NestedScrollBehavior,
-    private val bottomOrRightBehavior: NestedScrollBehavior,
-    private val isExternalOverscrollGesture: () -> Boolean,
+    internal var topOrLeftBehavior: NestedScrollBehavior,
+    internal var bottomOrRightBehavior: NestedScrollBehavior,
+    internal var isExternalOverscrollGesture: () -> Boolean,
     private val pointersInfoOwner: PointersInfoOwner,
 ) {
     private val layoutState = layoutImpl.state

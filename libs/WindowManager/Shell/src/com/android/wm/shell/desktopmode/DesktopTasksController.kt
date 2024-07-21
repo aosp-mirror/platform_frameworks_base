@@ -69,6 +69,7 @@ import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
+import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
@@ -671,7 +672,7 @@ class DesktopTasksController(
             } else {
                 // if non-resizable then calculate max bounds according to aspect ratio
                 val activityAspectRatio = calculateAspectRatio(taskInfo)
-                val newSize = maximumSizeMaintainingAspectRatio(taskInfo,
+                val newSize = maximizeSizeGivenAspectRatio(taskInfo,
                     Size(stableBounds.width(), stableBounds.height()), activityAspectRatio)
                 val newBounds = centerInArea(
                     newSize, stableBounds, stableBounds.left, stableBounds.top)
@@ -818,9 +819,8 @@ class DesktopTasksController(
         val intent = Intent(context, DesktopWallpaperActivity::class.java)
         val options =
             ActivityOptions.makeBasic().apply {
-                isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
                 pendingIntentBackgroundActivityStartMode =
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
             }
         val pendingIntent =
             PendingIntent.getActivity(
@@ -983,6 +983,7 @@ class DesktopTasksController(
             ProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: skip keyguard is locked")
             return null
         }
+        val wct = WindowContainerTransaction()
         if (!isDesktopModeShowing(task.displayId)) {
             ProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
@@ -990,12 +991,17 @@ class DesktopTasksController(
                     " taskId=%d",
                 task.taskId
             )
-            return WindowContainerTransaction().also { wct ->
-                bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
-                wct.reorder(task.token, true)
+            // We are outside of desktop mode and already existing desktop task is being launched.
+            // We should make this task go to fullscreen instead of freeform. Note that this means
+            // any re-launch of a freeform window outside of desktop will be in fullscreen.
+            if (desktopModeTaskRepository.isActiveTask(task.taskId)) {
+                addMoveToFullscreenChanges(wct, task)
+                return wct
             }
+            bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
+            wct.reorder(task.token, true)
+            return wct
         }
-        val wct = WindowContainerTransaction()
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(task.token, DESKTOP_DENSITY_OVERRIDE)
         }
@@ -1074,7 +1080,6 @@ class DesktopTasksController(
         wct: WindowContainerTransaction,
         taskInfo: RunningTaskInfo
     ) {
-        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
         val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(taskInfo.displayId)!!
         val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
         val targetWindowingMode =
@@ -1084,9 +1089,6 @@ class DesktopTasksController(
             } else {
                 WINDOWING_MODE_FREEFORM
             }
-        if (Flags.enableWindowingDynamicInitialBounds()) {
-            wct.setBounds(taskInfo.token, calculateInitialBounds(displayLayout, taskInfo))
-        }
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
         wct.reorder(taskInfo.token, true /* onTop */)
         if (useDesktopOverrideDensity()) {
@@ -1333,33 +1335,36 @@ class DesktopTasksController(
      *
      * @param taskInfo the task being dragged.
      * @param y height of drag, to be checked against status bar height.
+     * @return the [IndicatorType] used for the resulting transition
      */
     fun onDragPositioningEndThroughStatusBar(
         inputCoordinates: PointF,
         taskInfo: RunningTaskInfo,
-    ) {
-        val indicator = getVisualIndicator() ?: return
+    ): IndicatorType {
+        val indicator = getVisualIndicator() ?: return IndicatorType.NO_INDICATOR
         val indicatorType = indicator.updateIndicatorType(inputCoordinates, taskInfo.windowingMode)
         when (indicatorType) {
-            DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR -> {
-                val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
+            IndicatorType.TO_DESKTOP_INDICATOR -> {
+                val displayLayout = displayController.getDisplayLayout(taskInfo.displayId)
+                    ?: return IndicatorType.NO_INDICATOR
                 if (Flags.enableWindowingDynamicInitialBounds()) {
                     finalizeDragToDesktop(taskInfo, calculateInitialBounds(displayLayout, taskInfo))
                 } else {
                     finalizeDragToDesktop(taskInfo, getDefaultDesktopTaskBounds(displayLayout))
                 }
             }
-            DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR,
-            DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR -> {
+            IndicatorType.NO_INDICATOR,
+            IndicatorType.TO_FULLSCREEN_INDICATOR -> {
                 cancelDragToDesktop(taskInfo)
             }
-            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
+            IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
                 requestSplit(taskInfo, leftOrTop = true)
             }
-            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
+            IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
                 requestSplit(taskInfo, leftOrTop = false)
             }
         }
+        return indicatorType
     }
 
     /** Update the exclusion region for a specified task */
@@ -1420,7 +1425,6 @@ class DesktopTasksController(
                 setPendingIntentBackgroundActivityStartMode(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED
                 )
-                isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
             }
         val wct = WindowContainerTransaction()
         wct.sendPendingIntent(launchIntent, null, opts.toBundle())

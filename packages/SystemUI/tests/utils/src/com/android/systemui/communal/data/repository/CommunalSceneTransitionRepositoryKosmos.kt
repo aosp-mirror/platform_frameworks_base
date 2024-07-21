@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.stack.data.repository
+package com.android.systemui.communal.data.repository
 
-import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
+import com.android.systemui.kosmos.Kosmos
 
-fun FakeHeadsUpNotificationRepository.setNotifications(notifications: List<HeadsUpRowRepository>) {
-    setNotifications(*notifications.toTypedArray())
-}
-
-fun FakeHeadsUpNotificationRepository.setNotifications(vararg notifications: HeadsUpRowRepository) {
-    this.activeHeadsUpRows.value = notifications.toSet()
-}
+val Kosmos.communalSceneTransitionRepository: CommunalSceneTransitionRepository by
+    Kosmos.Fixture { CommunalSceneTransitionRepository() }

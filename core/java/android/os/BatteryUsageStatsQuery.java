@@ -73,6 +73,10 @@ public final class BatteryUsageStatsQuery implements Parcelable {
 
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS = 0x0010;
 
+    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_SCREEN_STATE = 0x0020;
+
+    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE = 0x0040;
+
     private static final long DEFAULT_MAX_STATS_AGE_MS = 5 * 60 * 1000;
 
     private final int mFlags;
@@ -121,6 +125,14 @@ public final class BatteryUsageStatsQuery implements Parcelable {
 
     public boolean isProcessStateDataNeeded() {
         return (mFlags & FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0;
+    }
+
+    public boolean isScreenStateDataNeeded() {
+        return (mFlags & FLAG_BATTERY_USAGE_STATS_INCLUDE_SCREEN_STATE) != 0;
+    }
+
+    public boolean isPowerStateDataNeeded() {
+        return (mFlags & FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE) != 0;
     }
 
     /**
@@ -293,6 +305,24 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          */
         public Builder includeVirtualUids() {
             mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS;
+            return this;
+        }
+
+        /**
+         * Requests that screen state data (screen-on, screen-other) be included in the
+         * BatteryUsageStats, if available.
+         */
+        public Builder includeScreenStateData() {
+            mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_SCREEN_STATE;
+            return this;
+        }
+
+        /**
+         * Requests that power state data (on-battery, power-other) be included in the
+         * BatteryUsageStats, if available.
+         */
+        public Builder includePowerStateData() {
+            mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE;
             return this;
         }
 

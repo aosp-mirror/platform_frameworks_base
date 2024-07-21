@@ -18,7 +18,6 @@ package com.android.systemui.shade;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -404,7 +403,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.QS_USER_DETAIL_SHORTCUT, false);
 
         mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
-        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
         mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
 
         mMainDispatcher = getMainDispatcher();
@@ -677,8 +675,14 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
         mMainHandler = new Handler(Looper.getMainLooper());
 
+        LongPressHandlingView longPressHandlingView = mock(LongPressHandlingView.class);
         when(mView.requireViewById(R.id.keyguard_long_press))
-                .thenReturn(mock(LongPressHandlingView.class));
+                .thenReturn(longPressHandlingView);
+
+        Resources longPressHandlingViewRes = mock(Resources.class);
+        when(longPressHandlingView.getResources()).thenReturn(longPressHandlingViewRes);
+        when(longPressHandlingViewRes.getString(anyInt())).thenReturn("");
+
 
         mHeadsUpNotificationInteractor =
                 new HeadsUpNotificationInteractor(mFakeHeadsUpNotificationRepository,
@@ -801,7 +805,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 .setHeadsUpAppearanceController(mock(HeadsUpAppearanceController.class));
         verify(mNotificationStackScrollLayoutController)
                 .setOnEmptySpaceClickListener(mEmptySpaceClickListenerCaptor.capture());
-        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
         reset(mKeyguardStatusViewController);
 
         when(mNotificationPanelViewControllerLazy.get())

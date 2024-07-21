@@ -47,10 +47,10 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -1390,8 +1390,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     private boolean setupLetterboxConfigurationWithBackgroundType(
-            @LetterboxConfiguration.LetterboxBackgroundType int letterboxBackgroundType) {
-        mWm.mLetterboxConfiguration.setLetterboxBackgroundTypeOverride(letterboxBackgroundType);
+            @AppCompatConfiguration.LetterboxBackgroundType int letterboxBackgroundType) {
+        mWm.mAppCompatConfiguration.setLetterboxBackgroundTypeOverride(letterboxBackgroundType);
         return mWm.isLetterboxBackgroundMultiColored();
     }
 }

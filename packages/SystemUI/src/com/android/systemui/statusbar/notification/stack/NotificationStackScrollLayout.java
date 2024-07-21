@@ -111,6 +111,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.shared.NotificationHeadsUpCycling;
+import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
@@ -4862,14 +4863,23 @@ public class NotificationStackScrollLayout
      * @param isHeadsUp true for appear, false for disappear animations
      */
     public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {
-        final boolean add = mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed);
+        boolean addAnimation =
+                mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed);
+        if (NotificationThrottleHun.isEnabled()) {
+            final boolean closedAndSeenInShade = !mIsExpanded && row.getEntry() != null
+                    && row.getEntry().isSeenInShade();
+            addAnimation = addAnimation && !closedAndSeenInShade;
+        }
         if (SPEW) {
             Log.v(TAG, "generateHeadsUpAnimation:"
-                    + " willAdd=" + add
-                    + " isHeadsUp=" + isHeadsUp
-                    + " row=" + row.getEntry().getKey());
+                    + " addAnimation=" + addAnimation
+                    + (row.getEntry() == null ? " entry NULL "
+                            : " isSeenInShade=" + row.getEntry().isSeenInShade()
+                                    + " row=" + row.getEntry().getKey())
+                    + " mIsExpanded=" + mIsExpanded
+                    + " isHeadsUp=" + isHeadsUp);
         }
-        if (add) {
+        if (addAnimation) {
             // If we're hiding a HUN we just started showing THIS FRAME, then remove that event,
             // and do not add the disappear event either.
             if (!isHeadsUp && mHeadsUpChangeAnimations.remove(new Pair<>(row, true))) {

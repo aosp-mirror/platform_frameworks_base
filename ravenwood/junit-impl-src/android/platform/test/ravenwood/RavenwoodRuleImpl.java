@@ -33,14 +33,17 @@ import com.android.internal.os.RuntimeInit;
 import com.android.server.LocalServices;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.Statement;
 
 import java.io.PrintStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -230,6 +233,18 @@ public class RavenwoodRuleImpl {
         }
     }
 
+    /**
+     * @return if a method has any of annotations.
+     */
+    private static boolean hasAnyAnnotations(Method m, Class<? extends Annotation>... annotations) {
+        for (var anno : annotations) {
+            if (m.getAnnotation(anno) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void validateTestAnnotations(Statement base, Description description,
             boolean enableOptionalValidation) {
         final var testClass = description.getTestClass();
@@ -239,13 +254,14 @@ public class RavenwoodRuleImpl {
         boolean hasErrors = false;
         for (Method m : collectMethods(testClass)) {
             if (Modifier.isPublic(m.getModifiers()) && m.getName().startsWith("test")) {
-                if (m.getAnnotation(Test.class) == null) {
+                if (!hasAnyAnnotations(m, Test.class, Before.class, After.class,
+                        BeforeClass.class, AfterClass.class)) {
                     message.append("\nMethod " + m.getName() + "() doesn't have @Test");
                     hasErrors = true;
                 }
             }
             if ("setUp".equals(m.getName())) {
-                if (m.getAnnotation(Before.class) == null) {
+                if (!hasAnyAnnotations(m, Before.class)) {
                     message.append("\nMethod " + m.getName() + "() doesn't have @Before");
                     hasErrors = true;
                 }
@@ -255,7 +271,7 @@ public class RavenwoodRuleImpl {
                 }
             }
             if ("tearDown".equals(m.getName())) {
-                if (m.getAnnotation(After.class) == null) {
+                if (!hasAnyAnnotations(m, After.class)) {
                     message.append("\nMethod " + m.getName() + "() doesn't have @After");
                     hasErrors = true;
                 }

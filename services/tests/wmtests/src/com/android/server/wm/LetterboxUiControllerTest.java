@@ -106,15 +106,15 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     private Task mTask;
     private DisplayContent mDisplayContent;
     private LetterboxUiController mController;
-    private LetterboxConfiguration mLetterboxConfiguration;
+    private AppCompatConfiguration mAppCompatConfiguration;
     private final Rect mLetterboxedPortraitTaskBounds = new Rect();
 
     @Before
     public void setUp() throws Exception {
         mActivity = setUpActivityWithComponent();
 
-        mLetterboxConfiguration = mWm.mLetterboxConfiguration;
-        spyOn(mLetterboxConfiguration);
+        mAppCompatConfiguration = mWm.mAppCompatConfiguration;
+        spyOn(mAppCompatConfiguration);
 
         mController = new LetterboxUiController(mWm, mActivity);
     }
@@ -238,7 +238,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
                     /*centerX=*/ 1, /*centerY=*/ 1)
         );
         insets.setRoundedCorners(roundedCorners);
-        mLetterboxConfiguration.setLetterboxActivityCornersRadius(-1);
+        mAppCompatConfiguration.setLetterboxActivityCornersRadius(-1);
 
         assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
     }
@@ -251,7 +251,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(/*taskbar=*/ null);
         mainWindow.mInvGlobalScale = invGlobalScale;
-        mLetterboxConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
+        mAppCompatConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
 
         doReturn(true).when(mActivity).isInLetterboxAnimation();
         assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
@@ -272,7 +272,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         final int configurationRadius = 15;
 
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(/*taskbar=*/ null);
-        mLetterboxConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
+        mAppCompatConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
 
         mainWindow.mInvGlobalScale = -1f;
         assertEquals(configurationRadius, mController.getRoundedCornersRadius(mainWindow));
@@ -310,7 +310,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(true).when(mainWindow).isOnScreen();
         doReturn(false).when(mainWindow).isLetterboxedForDisplayCutout();
         doReturn(true).when(mainWindow).areAppWindowBoundsLetterboxed();
-        doReturn(true).when(mLetterboxConfiguration).isLetterboxActivityCornersRounded();
+        doReturn(true).when(mAppCompatConfiguration).isLetterboxActivityCornersRounded();
         doReturn(TASKBAR_EXPANDED_HEIGHT).when(resources).getDimensionPixelSize(
                 R.dimen.taskbar_frame_height);
 
@@ -326,7 +326,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
                 /* value */ true);
 
-        doReturn(false).when(mLetterboxConfiguration).isUserAppAspectRatioFullscreenEnabled();
+        doReturn(false).when(mAppCompatConfiguration).isUserAppAspectRatioFullscreenEnabled();
         mActivity = setUpActivityWithComponent();
 
         assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides()
@@ -420,7 +420,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testShouldApplyUserMinAspectRatioOverride_trueProperty_returnsFalse()
             throws Exception {
-        doReturn(false).when(mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
+        doReturn(false).when(mAppCompatConfiguration).isUserAppAspectRatioSettingsEnabled();
         mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ true);
 
         mActivity = setUpActivityWithComponent();
@@ -458,7 +458,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
             boolean orientationRequest) {
         spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
         doReturn(orientationRequest).when(
-                mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
+                mAppCompatConfiguration).isUserAppAspectRatioSettingsEnabled();
         mDisplayContent.setIgnoreOrientationRequest(true);
         doReturn(USER_MIN_ASPECT_RATIO_3_2)
                 .when(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
@@ -471,7 +471,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
     private void prepareActivityThatShouldApplyUserFullscreenOverride() {
         spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
-        doReturn(true).when(mLetterboxConfiguration).isUserAppAspectRatioFullscreenEnabled();
+        doReturn(true).when(mAppCompatConfiguration).isUserAppAspectRatioFullscreenEnabled();
         mDisplayContent.setIgnoreOrientationRequest(true);
         doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN)
                 .when(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
@@ -531,7 +531,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
     public void testShouldSendFakeFocus_overrideEnabled_returnsTrue() {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
+        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
 
         mController = new LetterboxUiController(mWm, mActivity);
 
@@ -541,7 +541,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     @DisableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
     public void testShouldSendFakeFocus_overrideDisabled_returnsFalse() {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
+        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
 
         mController = new LetterboxUiController(mWm, mActivity);
 
@@ -552,7 +552,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
     public void testIsCompatFakeFocusEnabled_propertyDisabledAndOverrideEnabled_fakeFocusDisabled()
             throws Exception {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
+        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
         mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ false);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -564,7 +564,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @DisableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
     public void testIsCompatFakeFocusEnabled_propertyEnabled_noOverride_fakeFocusEnabled()
             throws Exception {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
+        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
         mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ true);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -575,7 +575,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testIsCompatFakeFocusEnabled_propertyDisabled_fakeFocusDisabled()
             throws Exception {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
+        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
         mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ false);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -586,7 +586,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testIsCompatFakeFocusEnabled_propertyEnabled_fakeFocusEnabled()
             throws Exception {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
+        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
         mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ true);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -862,15 +862,15 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
     @Test
     public void testgetFixedOrientationLetterboxAspectRatio_splitScreenAspectEnabled() {
-        doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
                 .isCameraCompatTreatmentEnabled();
-        doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
                 .isCameraCompatTreatmentEnabledAtBuildTime();
-        doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
                 .isCameraCompatSplitScreenAspectRatioEnabled();
-        doReturn(false).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(false).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
-        doReturn(1.5f).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(1.5f).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getFixedOrientationLetterboxAspectRatio();
 
         // Recreate DisplayContent with DisplayRotationCompatPolicy
@@ -894,13 +894,13 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testIsVerticalThinLetterboxed() {
         // Vertical thin letterbox disabled
-        doReturn(-1).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(-1).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getThinLetterboxHeightPx();
         assertFalse(mController.isVerticalThinLetterboxed());
         // Define a Task 100x100
         final Task task = mock(Task.class);
         doReturn(new Rect(0, 0, 100, 100)).when(task).getBounds();
-        doReturn(10).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(10).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getThinLetterboxHeightPx();
 
         // Vertical thin letterbox disabled without Task
@@ -925,13 +925,13 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testIsHorizontalThinLetterboxed() {
         // Horizontal thin letterbox disabled
-        doReturn(-1).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(-1).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getThinLetterboxWidthPx();
         assertFalse(mController.isHorizontalThinLetterboxed());
         // Define a Task 100x100
         final Task task = mock(Task.class);
         doReturn(new Rect(0, 0, 100, 100)).when(task).getBounds();
-        doReturn(10).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(10).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getThinLetterboxWidthPx();
 
         // Vertical thin letterbox disabled without Task
@@ -986,7 +986,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testIsLetterboxEducationEnabled() {
         mController.isLetterboxEducationEnabled();
-        verify(mLetterboxConfiguration).getIsEducationEnabled();
+        verify(mAppCompatConfiguration).getIsEducationEnabled();
     }
 
     private void mockThatProperty(String propertyName, boolean value) throws Exception {

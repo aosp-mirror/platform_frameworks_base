@@ -82,9 +82,12 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
+import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams;
 import com.android.wm.shell.windowdecor.common.OnTaskActionClickListener;
 
@@ -127,6 +130,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Mock
     private DisplayController mMockDisplayController;
     @Mock
+    private SplitScreenController mMockSplitScreenController;
+    @Mock
     private ShellTaskOrganizer mMockShellTaskOrganizer;
     @Mock
     private Choreographer mMockChoreographer;
@@ -165,6 +170,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private SurfaceControl.Transaction mMockTransaction;
     private StaticMockitoSession mMockitoSession;
     private TestableContext mTestableContext;
+    private ShellExecutor mBgExecutor = new TestShellExecutor();
 
     /** Set up run before test class. */
     @BeforeClass
@@ -392,6 +398,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void relayout_fullscreenTask_appliesTransactionImmediately() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -418,6 +425,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void relayout_fullscreenTask_doesNotCreateViewHostImmediately() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -429,6 +437,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void relayout_fullscreenTask_postsViewHostCreation() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -457,6 +466,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void relayout_removesExistingHandlerCallback() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -471,6 +481,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void close_removesExistingHandlerCallback() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -656,8 +667,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
             ActivityManager.RunningTaskInfo taskInfo,
             MaximizeMenuFactory maximizeMenuFactory) {
         final DesktopModeWindowDecoration windowDecor = new DesktopModeWindowDecoration(mContext,
-                mMockDisplayController, mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl,
-                mMockHandler, mMockChoreographer, mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
+                mMockDisplayController, mMockSplitScreenController, mMockShellTaskOrganizer,
+                taskInfo, mMockSurfaceControl, mMockHandler, mBgExecutor, mMockChoreographer,
+                mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
                 SurfaceControl.Builder::new, mMockTransactionSupplier,
                 WindowContainerTransaction::new, SurfaceControl::new,
                 mMockSurfaceControlViewHostFactory, maximizeMenuFactory);

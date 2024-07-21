@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.bubbles;
 
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
@@ -225,8 +225,7 @@ public class BubbleExpandedView extends LinearLayout {
                     options.setTaskAlwaysOnTop(true);
                     options.setLaunchedFromBubble(true);
                     options.setPendingIntentBackgroundActivityStartMode(
-                            MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-                    options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+                            MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
 
                     Intent fillInIntent = new Intent();
                     // Apply flags to make behaviour match documentLaunchMode=always.

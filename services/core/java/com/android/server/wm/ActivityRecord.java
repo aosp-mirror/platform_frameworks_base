@@ -2867,7 +2867,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mStartingData != null) {
             if (mStartingData.mAssociatedTask != null) {
                 // The snapshot type may have called associateStartingDataWithTask().
-                attachStartingSurfaceToAssociatedTask();
+                // If this activity is rotated, don't attach to task to preserve the transform.
+                if (!hasFixedRotationTransform()) {
+                    attachStartingSurfaceToAssociatedTask();
+                }
             } else if (isEmbedded()) {
                 associateStartingWindowWithTaskIfNeeded();
             }
@@ -2896,6 +2899,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void associateStartingWindowWithTaskIfNeeded() {
         if (mStartingWindow == null || mStartingData == null
                 || mStartingData.mAssociatedTask != null) {
+            return;
+        }
+        if (task.isVisible() && !task.inTransition()) {
+            // Don't associated with task if the task is visible especially when the activity is
+            // embedded. We just need to show splash screen on the activity in case the first frame
+            // is not ready.
             return;
         }
         associateStartingDataWithTask();
@@ -8964,7 +8973,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * <p>Conditions that need to be met:
      *
      * <ul>
-     *     <li>{@link LetterboxConfiguration#getIsEducationEnabled} is true.
+     *     <li>{@link AppCompatConfiguration#getIsEducationEnabled} is true.
      *     <li>The activity is eligible for fixed orientation letterbox.
      *     <li>The activity is in fullscreen.
      *     <li>The activity is portrait-only.
@@ -8973,7 +8982,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * </ul>
      */
     boolean isEligibleForLetterboxEducation() {
-        return mWmService.mLetterboxConfiguration.getIsEducationEnabled()
+        return mWmService.mAppCompatConfiguration.getIsEducationEnabled()
                 && mIsEligibleForFixedOrientationLetterbox
                 && getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                 && getRequestedConfigurationOrientation() == ORIENTATION_PORTRAIT

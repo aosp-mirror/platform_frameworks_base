@@ -30,8 +30,8 @@ import android.util.AtomicFile;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.wm.LetterboxConfiguration.LetterboxHorizontalReachabilityPosition;
-import com.android.server.wm.LetterboxConfiguration.LetterboxVerticalReachabilityPosition;
+import com.android.server.wm.AppCompatConfiguration.LetterboxHorizontalReachabilityPosition;
+import com.android.server.wm.AppCompatConfiguration.LetterboxVerticalReachabilityPosition;
 import com.android.server.wm.nano.WindowManagerProtos;
 
 import java.io.ByteArrayOutputStream;
@@ -45,12 +45,12 @@ import java.util.function.Supplier;
 
 /**
  * Persists the values of letterboxPositionForHorizontalReachability and
- * letterboxPositionForVerticalReachability for {@link LetterboxConfiguration}.
+ * letterboxPositionForVerticalReachability for {@link AppCompatConfiguration}.
  */
-class LetterboxConfigurationPersister {
+class AppCompatConfigurationPersister {
 
     private static final String TAG =
-            TAG_WITH_CLASS_NAME ? "LetterboxConfigurationPersister" : TAG_WM;
+            TAG_WITH_CLASS_NAME ? "AppCompatConfigurationPersister" : TAG_WM;
 
     private static final String LETTERBOX_CONFIGURATION_FILENAME = "letterbox_config";
 
@@ -94,7 +94,7 @@ class LetterboxConfigurationPersister {
     @NonNull
     private final PersisterQueue mPersisterQueue;
 
-    LetterboxConfigurationPersister(
+    AppCompatConfigurationPersister(
             @NonNull Supplier<Integer> defaultHorizontalReachabilitySupplier,
             @NonNull Supplier<Integer> defaultVerticalReachabilitySupplier,
             @NonNull Supplier<Integer> defaultBookModeReachabilitySupplier,
@@ -106,7 +106,7 @@ class LetterboxConfigurationPersister {
     }
 
     @VisibleForTesting
-    LetterboxConfigurationPersister(
+    AppCompatConfigurationPersister(
             @NonNull Supplier<Integer> defaultHorizontalReachabilitySupplier,
             @NonNull Supplier<Integer> defaultVerticalReachabilitySupplier,
             @NonNull Supplier<Integer> defaultBookModeReachabilitySupplier,
@@ -233,7 +233,7 @@ class LetterboxConfigurationPersister {
                     letterboxData.letterboxPositionForTabletopModeReachability;
         } catch (IOException ioe) {
             Slog.e(TAG,
-                    "Error reading from LetterboxConfigurationPersister. "
+                    "Error reading from AppCompatConfigurationPersister. "
                             + "Using default values!", ioe);
             useDefaultValue();
         } finally {
@@ -242,7 +242,7 @@ class LetterboxConfigurationPersister {
                     fis.close();
                 } catch (IOException e) {
                     useDefaultValue();
-                    Slog.e(TAG, "Error reading from LetterboxConfigurationPersister ", e);
+                    Slog.e(TAG, "Error reading from AppCompatConfigurationPersister ", e);
                 }
             }
         }
@@ -332,7 +332,7 @@ class LetterboxConfigurationPersister {
             } catch (IOException ioe) {
                 mFileToUpdate.failWrite(fos);
                 Slog.e(TAG,
-                        "Error writing to LetterboxConfigurationPersister. "
+                        "Error writing to AppCompatConfigurationPersister. "
                                 + "Using default values!", ioe);
             } finally {
                 if (mOnComplete != null) {

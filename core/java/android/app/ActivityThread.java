@@ -2105,8 +2105,7 @@ public final class ActivityThread extends ClientTransactionHandler
         @Override
         public void scheduleTaskFragmentTransaction(@NonNull ITaskFragmentOrganizer organizer,
                 @NonNull TaskFragmentTransaction transaction) throws RemoteException {
-            // TODO(b/260873529): ITaskFragmentOrganizer can be cleanup to be a IBinder token
-            // after flag removal.
+            // TODO(b/352665082): ITaskFragmentOrganizer can be cleanup to be a IBinder token
             organizer.onTransactionReady(transaction);
         }
 

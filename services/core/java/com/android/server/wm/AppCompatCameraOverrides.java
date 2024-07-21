@@ -52,7 +52,7 @@ class AppCompatCameraOverrides {
     @NonNull
     private final AppCompatCameraOverridesState mAppCompatCameraOverridesState;
     @NonNull
-    private final LetterboxConfiguration mLetterboxConfiguration;
+    private final AppCompatConfiguration mAppCompatConfiguration;
     @NonNull
     private final OptPropFactory.OptProp mAllowMinAspectRatioOverrideOptProp;
     @NonNull
@@ -63,15 +63,15 @@ class AppCompatCameraOverrides {
     private final OptPropFactory.OptProp mCameraCompatAllowForceRotationOptProp;
 
     AppCompatCameraOverrides(@NonNull ActivityRecord activityRecord,
-            @NonNull LetterboxConfiguration letterboxConfiguration,
+            @NonNull AppCompatConfiguration appCompatConfiguration,
             @NonNull OptPropFactory optPropBuilder) {
         mActivityRecord = activityRecord;
-        mLetterboxConfiguration = letterboxConfiguration;
+        mAppCompatConfiguration = appCompatConfiguration;
         mAppCompatCameraOverridesState = new AppCompatCameraOverridesState();
         mAllowMinAspectRatioOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
         final BooleanSupplier isCameraCompatTreatmentEnabled = AppCompatUtils.asLazy(
-                mLetterboxConfiguration::isCameraCompatTreatmentEnabled);
+                mAppCompatConfiguration::isCameraCompatTreatmentEnabled);
         mCameraCompatAllowRefreshOptProp = optPropBuilder.create(
                 PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH,
                 isCameraCompatTreatmentEnabled);
@@ -214,7 +214,7 @@ class AppCompatCameraOverrides {
      * is active because the corresponding config is enabled and activity supports resizing.
      */
     boolean isCameraCompatSplitScreenAspectRatioAllowed() {
-        return mLetterboxConfiguration.isCameraCompatSplitScreenAspectRatioEnabled()
+        return mAppCompatConfiguration.isCameraCompatSplitScreenAspectRatioEnabled()
                 && !mActivityRecord.shouldCreateCompatDisplayInsets();
     }
 

@@ -580,138 +580,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
-  fun moveToDesktop_landscapeDevice_resizable_undefinedOrientation_defaultLandscapeBounds() {
-    val task = setUpFullscreenTask()
-    setUpLandscapeDisplay()
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestEnterDesktopWct()
-    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
-  }
-
-  @Test
-  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
-  fun moveToDesktop_landscapeDevice_resizable_landscapeOrientation_defaultLandscapeBounds() {
-    val task = setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_LANDSCAPE)
-    setUpLandscapeDisplay()
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestEnterDesktopWct()
-    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
-  }
-
-  @Test
-  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
-  fun moveToDesktop_landscapeDevice_resizable_portraitOrientation_resizablePortraitBounds() {
-    val task =
-        setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_PORTRAIT, shouldLetterbox = true)
-    setUpLandscapeDisplay()
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestEnterDesktopWct()
-    assertThat(findBoundsChange(wct, task)).isEqualTo(RESIZABLE_PORTRAIT_BOUNDS)
-  }
-
-  @Test
-  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
-  fun moveToDesktop_landscapeDevice_unResizable_landscapeOrientation_defaultLandscapeBounds() {
-    val task =
-        setUpFullscreenTask(isResizable = false, screenOrientation = SCREEN_ORIENTATION_LANDSCAPE)
-    setUpLandscapeDisplay()
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestEnterDesktopWct()
-    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
-  }
-
-  @Test
-  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
-  fun moveToDesktop_landscapeDevice_unResizable_portraitOrientation_unResizablePortraitBounds() {
-    val task =
-        setUpFullscreenTask(
-            isResizable = false,
-            screenOrientation = SCREEN_ORIENTATION_PORTRAIT,
-            shouldLetterbox = true)
-    setUpLandscapeDisplay()
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestEnterDesktopWct()
-    assertThat(findBoundsChange(wct, task)).isEqualTo(UNRESIZABLE_PORTRAIT_BOUNDS)
-  }
-
-  @Test
-  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
-  fun moveToDesktop_portraitDevice_resizable_undefinedOrientation_defaultPortraitBounds() {
-    val task = setUpFullscreenTask(deviceOrientation = ORIENTATION_PORTRAIT)
-    setUpPortraitDisplay()
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestEnterDesktopWct()
-    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
-  }
-
-  @Test
-  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
-  fun moveToDesktop_portraitDevice_resizable_portraitOrientation_defaultPortraitBounds() {
-    val task =
-        setUpFullscreenTask(
-            deviceOrientation = ORIENTATION_PORTRAIT,
-            screenOrientation = SCREEN_ORIENTATION_PORTRAIT)
-    setUpPortraitDisplay()
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestEnterDesktopWct()
-    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
-  }
-
-  @Test
-  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
-  fun moveToDesktop_portraitDevice_resizable_landscapeOrientation_resizableLandscapeBounds() {
-    val task =
-        setUpFullscreenTask(
-            deviceOrientation = ORIENTATION_PORTRAIT,
-            screenOrientation = SCREEN_ORIENTATION_LANDSCAPE,
-            shouldLetterbox = true)
-    setUpPortraitDisplay()
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestEnterDesktopWct()
-    assertThat(findBoundsChange(wct, task)).isEqualTo(RESIZABLE_LANDSCAPE_BOUNDS)
-  }
-
-  @Test
-  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
-  fun moveToDesktop_portraitDevice_unResizable_portraitOrientation_defaultPortraitBounds() {
-    val task =
-        setUpFullscreenTask(
-            isResizable = false,
-            deviceOrientation = ORIENTATION_PORTRAIT,
-            screenOrientation = SCREEN_ORIENTATION_PORTRAIT)
-    setUpPortraitDisplay()
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestEnterDesktopWct()
-    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
-  }
-
-  @Test
-  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
-  fun moveToDesktop_portraitDevice_unResizable_landscapeOrientation_unResizableLandscapeBounds() {
-    val task =
-        setUpFullscreenTask(
-            isResizable = false,
-            deviceOrientation = ORIENTATION_PORTRAIT,
-            screenOrientation = SCREEN_ORIENTATION_LANDSCAPE,
-            shouldLetterbox = true)
-    setUpPortraitDisplay()
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestEnterDesktopWct()
-    assertThat(findBoundsChange(wct, task)).isEqualTo(UNRESIZABLE_LANDSCAPE_BOUNDS)
-  }
-
-  @Test
   fun moveToDesktop_tdaFullscreen_windowingModeSetToFreeform() {
     val task = setUpFullscreenTask()
     val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
@@ -1326,6 +1194,22 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun handleRequest_freeformTask_relaunchActiveTask_taskBecomesUndefined() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+    val freeformTask = setUpFreeformTask()
+    markTaskHidden(freeformTask)
+
+    val wct =
+      controller.handleRequest(Binder(), createTransition(freeformTask))
+
+    // Should become undefined as the TDA is set to fullscreen. It will inherit from the TDA.
+    assertNotNull(wct, "should handle request")
+    assertThat(wct.changes[freeformTask.token.asBinder()]?.windowingMode)
+      .isEqualTo(WINDOWING_MODE_UNDEFINED)
+  }
+
+  @Test
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun handleRequest_freeformTask_desktopWallpaperDisabled_freeformNotVisible_reorderedToTop() {
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
@@ -1574,7 +1458,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION,
   )
-  fun handleRequest_backTransition_singleActiveTaskNoToken_wallpaperDisabled_backNavDisabled_doesNotHandle() {
+  fun handleRequest_backTransition_singleTaskNoToken_noWallpaper_noBackNav_doesNotHandle() {
     val task = setUpFreeformTask()
 
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
@@ -1587,7 +1471,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_backTransition_singleActiveTaskNoToken_wallpaperEnabled_backNavEnabled_removesTask() {
+  fun handleRequest_backTransition_singleTaskNoToken_withWallpaper_withBackNav_removesTask() {
     val task = setUpFreeformTask()
 
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
@@ -1598,7 +1482,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-  fun handleRequest_backTransition_singleActiveTaskNoToken_backNavigationDisabled_doesNotHandle() {
+  fun handleRequest_backTransition_singleTaskNoToken_noBackNav_doesNotHandle() {
     val task = setUpFreeformTask()
 
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
@@ -1611,7 +1495,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_backTransition_singleActiveTaskWithToken_wallpaperDisabled_backNavDisabled_doesNotHandle() {
+  fun handleRequest_backTransition_singleTaskWithToken_noWallpaper_noBackNav_doesNotHandle() {
     val task = setUpFreeformTask()
 
     desktopModeTaskRepository.wallpaperActivityToken = MockToken().token()
@@ -1625,7 +1509,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_backTransition_singleActiveTaskWithToken_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
+  fun handleRequest_backTransition_singleTask_withWallpaper_withBackNav_removesWallpaperAndTask() {
     val task = setUpFreeformTask()
     val wallpaperToken = MockToken().token()
 
@@ -1640,7 +1524,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-  fun handleRequest_backTransition_singleActiveTaskWithToken_backNavigationDisabled_removesWallpaper() {
+  fun handleRequest_backTransition_singleTaskWithToken_noBackNav_removesWallpaper() {
     val task = setUpFreeformTask()
     val wallpaperToken = MockToken().token()
 
@@ -1656,7 +1540,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_backTransition_multipleTasks_wallpaperDisabled_backNavDisabled_doesNotHandle() {
+  fun handleRequest_backTransition_multipleTasks_noWallpaper_noBackNav_doesNotHandle() {
     val task1 = setUpFreeformTask()
     setUpFreeformTask()
 
@@ -1671,7 +1555,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_backTransition_multipleTasks_wallpaperEnabled_backNavEnabled_removesTask() {
+  fun handleRequest_backTransition_multipleTasks_withWallpaper_withBackNav_removesTask() {
     val task1 = setUpFreeformTask()
     setUpFreeformTask()
 
@@ -1684,7 +1568,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-  fun handleRequest_backTransition_multipleTasks_backNavigationDisabled_doesNotHandle() {
+  fun handleRequest_backTransition_multipleTasks_noBackNav_doesNotHandle() {
     val task1 = setUpFreeformTask()
     setUpFreeformTask()
 
@@ -1699,7 +1583,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_backTransition_multipleTasksSingleNonClosing_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
+  fun handleRequest_backTransition_multipleTasksSingleNonClosing_removesWallpaperAndTask() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1716,7 +1600,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-  fun handleRequest_backTransition_multipleTasksSingleNonClosing_backNavigationDisabled_removesWallpaper() {
+  fun handleRequest_backTransition_multipleTasksSingleNonClosing_noBackNav_removesWallpaper() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1734,7 +1618,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_backTransition_multipleTasksSingleNonMinimized_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
+  fun handleRequest_backTransition_multipleTasksSingleNonMinimized_removesWallpaperAndTask() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1751,7 +1635,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-  fun handleRequest_backTransition_multipleTasksSingleNonMinimized_backNavigationDisabled_removesWallpaper() {
+  fun handleRequest_backTransition_multipleTasksSingleNonMinimized_noBackNav_removesWallpaper() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1769,7 +1653,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_backTransition_nonMinimizadTask_wallpaperEnabled_backNavEnabled_removesWallpaper() {
+  fun handleRequest_backTransition_nonMinimizadTask_withWallpaper_withBackNav_removesWallpaper() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1789,7 +1673,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_closeTransition_singleActiveTaskNoToken_wallpaperDisabled_backNavDisabled_doesNotHandle() {
+  fun handleRequest_closeTransition_singleTaskNoToken_noWallpaper_noBackNav_doesNotHandle() {
     val task = setUpFreeformTask()
 
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
@@ -1802,7 +1686,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_closeTransition_singleActiveTaskNoToken_wallpaperEnabled_backNavEnabled_removesTask() {
+  fun handleRequest_closeTransition_singleTaskNoToken_withWallpaper_withBackNav_removesTask() {
     val task = setUpFreeformTask()
 
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
@@ -1813,7 +1697,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-  fun handleRequest_closeTransition_singleActiveTaskNoToken_backNavigationDisabled_doesNotHandle() {
+  fun handleRequest_closeTransition_singleTaskNoToken_noBackNav_doesNotHandle() {
     val task = setUpFreeformTask()
 
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
@@ -1826,7 +1710,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_closeTransition_singleActiveTaskWithToken_wallpaperDisabled_backNavDisabled_doesNotHandle() {
+  fun handleRequest_closeTransition_singleTaskWithToken_noWallpaper_noBackNav_doesNotHandle() {
     val task = setUpFreeformTask()
 
     desktopModeTaskRepository.wallpaperActivityToken = MockToken().token()
@@ -1840,7 +1724,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_closeTransition_singleActiveTaskWithToken_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
+  fun handleRequest_closeTransition_singleTaskWithToken_removesWallpaperAndTask() {
     val task = setUpFreeformTask()
     val wallpaperToken = MockToken().token()
 
@@ -1855,7 +1739,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-  fun handleRequest_closeTransition_singleActiveTaskWithToken_backNavigationDisabled_removesWallpaper() {
+  fun handleRequest_closeTransition_singleTaskWithToken_withWallpaper_noBackNav_removesWallpaper() {
     val task = setUpFreeformTask()
     val wallpaperToken = MockToken().token()
 
@@ -1871,7 +1755,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_closeTransition_multipleTasks_wallpaperDisabled_backNavDisabled_doesNotHandle() {
+  fun handleRequest_closeTransition_multipleTasks_noWallpaper_noBackNav_doesNotHandle() {
     val task1 = setUpFreeformTask()
     setUpFreeformTask()
 
@@ -1886,7 +1770,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_closeTransition_multipleTasks_wallpaperEnabled_backNavEnabled_removesTask() {
+  fun handleRequest_closeTransition_multipleTasks_withWallpaper_withBackNav_removesTask() {
     val task1 = setUpFreeformTask()
     setUpFreeformTask()
 
@@ -1900,7 +1784,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-  fun handleRequest_closeTransition_multipleTasksFlagEnabled_backNavigationDisabled_doesNotHandle() {
+  fun handleRequest_closeTransition_multipleTasksFlagEnabled_noBackNav_doesNotHandle() {
     val task1 = setUpFreeformTask()
     setUpFreeformTask()
 
@@ -1915,7 +1799,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_closeTransition_multipleTasksSingleNonClosing_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
+  fun handleRequest_closeTransition_multipleTasksSingleNonClosing_removesWallpaperAndTask() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1932,7 +1816,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-  fun handleRequest_closeTransition_multipleTasksSingleNonClosing_backNavigationDisabled_removesWallpaper() {
+  fun handleRequest_closeTransition_multipleTasksSingleNonClosing_noBackNav_removesWallpaper() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1950,7 +1834,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_closeTransition_multipleTasksOneNonMinimized_wallpaperEnabled_backNavEnabled_removesWallpaperAndTask() {
+  fun handleRequest_closeTransition_multipleTasksOneNonMinimized_removesWallpaperAndTask() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1967,7 +1851,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
-  fun handleRequest_closeTransition_multipleTasksSingleNonMinimized_backNavigationDisabled_removesWallpaper() {
+  fun handleRequest_closeTransition_multipleTasksSingleNonMinimized_noBackNav_removesWallpaper() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()
@@ -1985,7 +1869,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
     Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
   )
-  fun handleRequest_closeTransition_minimizadTask_wallpaperEnabled_backNavEnabled_removesWallpaper() {
+  fun handleRequest_closeTransition_minimizadTask_withWallpaper_withBackNav_removesWallpaper() {
     val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val wallpaperToken = MockToken().token()

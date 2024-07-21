@@ -870,6 +870,13 @@ flag {
 }
 
 flag {
+    name: "qs_ui_refactor_compose_fragment"
+    namespace: "systemui"
+    description: "Uses a different QS fragment in NPVC that uses the new compose UI and recommended architecture. This flag depends on qs_ui_refactor flag."
+    bug: "325099249"
+}
+
+flag {
   name: "remove_dream_overlay_hide_on_touch"
   namespace: "systemui"
   description: "Removes logic to hide the dream overlay on user interaction, as it conflicts with various transitions"
@@ -975,6 +982,16 @@ flag {
   namespace: "systemui"
   description: "do not modify notification shade when handling bouncer expansion."
   bug: "338252661"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "communal_scene_ktf_refactor"
+  namespace: "systemui"
+  description: "refactors the syncing mechanism between communal STL and KTF state."
+  bug: "327225415"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
@@ -1189,10 +1206,40 @@ flag {
 }
 
 flag {
+   namespace: "systemui"
+   name: "remove_update_listener_in_qs_icon_view_impl"
+   description: "Remove update listeners in QsIconViewImpl class to avoid memory leak."
+   bug: "327078684"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "sim_pin_race_condition_on_restart"
    namespace: "systemui"
    description: "The SIM PIN screen may be shown incorrectly on reboot"
    bug: "351426938"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "sim_pin_talkback_fix_for_double_submit"
+   namespace: "systemui"
+   description: "The SIM PIN entry screens show the wrong message due"
+   bug: "346932439"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "lockscreen_preview_renderer_create_on_main_thread"
+   namespace: "systemui"
+   description: "Force preview renderer to be created on the main thread"
+   bug: "343732179"
    metadata {
         purpose: PURPOSE_BUGFIX
    }

@@ -28,9 +28,9 @@ import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_BLOCKED_
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
-import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 import static android.companion.virtualdevice.flags.Flags.virtualCameraServiceDiscovery;
 import static android.companion.virtualdevice.flags.Flags.intentInterceptionActionMatchingFix;
+import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
@@ -561,8 +561,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private void sendPendingIntent(int displayId, PendingIntent pendingIntent)
             throws PendingIntent.CanceledException {
         final ActivityOptions options = ActivityOptions.makeBasic().setLaunchDisplayId(displayId);
-        options.setPendingIntentBackgroundActivityLaunchAllowed(true);
-        options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+        options.setPendingIntentBackgroundActivityStartMode(
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
         pendingIntent.send(
                 mContext,
                 /* code= */ 0,
