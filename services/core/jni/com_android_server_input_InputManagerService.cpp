@@ -1956,10 +1956,6 @@ static void handleInputChannelDisposed(JNIEnv* env, jobject /* inputChannelObj *
                                        const std::shared_ptr<InputChannel>& inputChannel,
                                        void* data) {
     NativeInputManager* im = static_cast<NativeInputManager*>(data);
-
-    ALOGW("Input channel object '%s' was disposed without first being removed with "
-          "the input manager!",
-          inputChannel->getName().c_str());
     im->removeInputChannel(inputChannel->getConnectionToken());
 }
 

@@ -16,6 +16,8 @@
 
 package com.android.server.trust;
 
+import static android.security.Flags.FLAG_SHOULD_TRUST_MANAGER_LISTEN_FOR_PRIMARY_AUTH;
+import static android.security.Flags.shouldTrustManagerListenForPrimaryAuth;
 import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -73,6 +75,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.flag.junit.FlagsParameterization;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.security.KeyStoreAuthorization;
 import android.service.trust.GrantTrustResult;
@@ -91,6 +95,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker;
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.StrongAuthFlags;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.internal.widget.LockSettingsStateListener;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -101,6 +106,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
@@ -112,7 +118,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+@RunWith(ParameterizedAndroidJunit4.class)
 public class TrustManagerServiceTest {
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(
+                FLAG_SHOULD_TRUST_MANAGER_LISTEN_FOR_PRIMARY_AUTH);
+    }
 
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
@@ -120,6 +135,9 @@ public class TrustManagerServiceTest {
             .mockStatic(ServiceManager.class)
             .mockStatic(WindowManagerGlobal.class)
             .build();
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule;
 
     @Rule
     public final MockContext mMockContext = new MockContext(
@@ -161,6 +179,10 @@ public class TrustManagerServiceTest {
     private TrustManagerService mService;
     private ITrustManager mTrustManager;
     private ActivityManagerInternal mPreviousActivityManagerInternal;
+
+    public TrustManagerServiceTest(FlagsParameterization flags) {
+        mSetFlagsRule = new SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT, flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -594,11 +616,27 @@ public class TrustManagerServiceTest {
     }
 
     private void attemptSuccessfulUnlock(int userId) throws RemoteException {
-        mTrustManager.reportUnlockAttempt(/* successful= */ true, userId);
+        if (shouldTrustManagerListenForPrimaryAuth()) {
+            ArgumentCaptor<LockSettingsStateListener> captor =
+                    ArgumentCaptor.forClass(LockSettingsStateListener.class);
+            verify(mLockSettingsInternal).registerLockSettingsStateListener(captor.capture());
+            LockSettingsStateListener listener = captor.getValue();
+            listener.onAuthenticationSucceeded(userId);
+        } else {
+            mTrustManager.reportUnlockAttempt(/* successful= */ true, userId);
+        }
     }
 
     private void attemptFailedUnlock(int userId) throws RemoteException {
-        mTrustManager.reportUnlockAttempt(/* successful= */ false, userId);
+        if (shouldTrustManagerListenForPrimaryAuth()) {
+            ArgumentCaptor<LockSettingsStateListener> captor =
+                    ArgumentCaptor.forClass(LockSettingsStateListener.class);
+            verify(mLockSettingsInternal).registerLockSettingsStateListener(captor.capture());
+            LockSettingsStateListener listener = captor.getValue();
+            listener.onAuthenticationFailed(userId);
+        } else {
+            mTrustManager.reportUnlockAttempt(/* successful= */ false, userId);
+        }
     }
 
     private void grantRenewableTrust(ITrustAgentServiceCallback callback) throws RemoteException {
