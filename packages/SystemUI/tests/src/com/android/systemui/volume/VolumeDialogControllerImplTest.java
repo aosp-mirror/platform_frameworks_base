@@ -18,6 +18,8 @@ package com.android.systemui.volume;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -37,16 +39,19 @@ import android.media.IAudioService;
 import android.media.session.MediaSession;
 import android.os.Handler;
 import android.os.Process;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.settingslib.flags.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.RingerModeLiveData;
@@ -54,7 +59,9 @@ import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
 import com.android.systemui.util.concurrency.ThreadFactory;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.volume.domain.interactor.AudioSharingInteractor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -63,6 +70,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 @RunWith(AndroidJUnit4.class)
@@ -104,6 +112,10 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private DumpManager mDumpManager;
+    @Mock
+    private AudioSharingInteractor mAudioSharingInteractor;
+    @Mock
+    private JavaAdapter mJavaAdapter;
 
 
     @Before
@@ -124,11 +136,26 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
 
         mCallback = mock(VolumeDialogControllerImpl.C.class);
         mThreadFactory.setLooper(TestableLooper.get(this).getLooper());
-        mVolumeController = new TestableVolumeDialogControllerImpl(mContext,
-                mBroadcastDispatcher, mRingerModeTracker, mThreadFactory, mAudioManager,
-                mNotificationManager, mVibrator, mIAudioService, mAccessibilityManager,
-                mPackageManager, mWakefullnessLifcycle, mKeyguardManager,
-                mActivityManager, mUserTracker, mDumpManager, mCallback);
+        mVolumeController =
+                new TestableVolumeDialogControllerImpl(
+                        mContext,
+                        mBroadcastDispatcher,
+                        mRingerModeTracker,
+                        mThreadFactory,
+                        mAudioManager,
+                        mNotificationManager,
+                        mVibrator,
+                        mIAudioService,
+                        mAccessibilityManager,
+                        mPackageManager,
+                        mWakefullnessLifcycle,
+                        mKeyguardManager,
+                        mActivityManager,
+                        mUserTracker,
+                        mDumpManager,
+                        mCallback,
+                        mAudioSharingInteractor,
+                        mJavaAdapter);
         mVolumeController.setEnableDialogs(true, true);
     }
 
@@ -224,6 +251,41 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         verify(mUserTracker).addCallback(any(UserTracker.Callback.class), any(Executor.class));
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
+    public void handleAudioSharingStreamVolumeChanges_updateState() {
+        ArgumentCaptor<VolumeDialogController.State> stateCaptor =
+                ArgumentCaptor.forClass(VolumeDialogController.State.class);
+        int broadcastStream = VolumeDialogControllerImpl.DYNAMIC_STREAM_BROADCAST;
+
+        mVolumeController.handleAudioSharingStreamVolumeChanges(100);
+
+        verify(mCallback).onStateChanged(stateCaptor.capture());
+        assertThat(stateCaptor.getValue().states.contains(broadcastStream)).isTrue();
+        assertThat(stateCaptor.getValue().states.get(broadcastStream).level).isEqualTo(100);
+
+        mVolumeController.handleAudioSharingStreamVolumeChanges(200);
+
+        verify(mCallback, times(2)).onStateChanged(stateCaptor.capture());
+        assertThat(stateCaptor.getValue().states.contains(broadcastStream)).isTrue();
+        assertThat(stateCaptor.getValue().states.get(broadcastStream).level).isEqualTo(200);
+
+        mVolumeController.handleAudioSharingStreamVolumeChanges(null);
+
+        verify(mCallback, times(3)).onStateChanged(stateCaptor.capture());
+        assertThat(stateCaptor.getValue().states.contains(broadcastStream)).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
+    public void testSetStreamVolume_setSecondaryDeviceVolume() {
+        mVolumeController.setStreamVolume(
+                VolumeDialogControllerImpl.DYNAMIC_STREAM_BROADCAST, /* level= */ 100);
+        Objects.requireNonNull(TestableLooper.get(this)).processAllMessages();
+
+        verify(mAudioSharingInteractor).setStreamVolume(100);
+    }
+
     static class TestableVolumeDialogControllerImpl extends VolumeDialogControllerImpl {
         private final WakefulnessLifecycle.Observer mWakefullessLifecycleObserver;
 
@@ -243,11 +305,27 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 ActivityManager activityManager,
                 UserTracker userTracker,
                 DumpManager dumpManager,
-                C callback) {
-            super(context, broadcastDispatcher, ringerModeTracker, theadFactory, audioManager,
-                    notificationManager, optionalVibrator, iAudioService, accessibilityManager,
-                    packageManager, wakefulnessLifecycle, keyguardManager,
-                    activityManager, userTracker, dumpManager);
+                C callback,
+                AudioSharingInteractor audioSharingInteractor,
+                JavaAdapter javaAdapter) {
+            super(
+                    context,
+                    broadcastDispatcher,
+                    ringerModeTracker,
+                    theadFactory,
+                    audioManager,
+                    notificationManager,
+                    optionalVibrator,
+                    iAudioService,
+                    accessibilityManager,
+                    packageManager,
+                    wakefulnessLifecycle,
+                    keyguardManager,
+                    activityManager,
+                    userTracker,
+                    dumpManager,
+                    audioSharingInteractor,
+                    javaAdapter);
             mCallbacks = callback;
 
             ArgumentCaptor<WakefulnessLifecycle.Observer> observerCaptor =

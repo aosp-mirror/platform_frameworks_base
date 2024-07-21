@@ -45,9 +45,9 @@ class AppCompatCameraPolicy {
         // Not checking DeviceConfig value here to allow enabling via DeviceConfig
         // without the need to restart the device.
         final boolean needsDisplayRotationCompatPolicy =
-                wmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
+                wmService.mAppCompatConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
         final boolean needsCameraCompatFreeformPolicy = Flags.cameraCompatForFreeform()
-                && DesktopModeLaunchParamsModifier.canEnterDesktopMode(wmService.mContext);
+                && DesktopModeHelper.canEnterDesktopMode(wmService.mContext);
         if (needsDisplayRotationCompatPolicy || needsCameraCompatFreeformPolicy) {
             mCameraStateMonitor = new CameraStateMonitor(displayContent, wmService.mH);
             mActivityRefresher = new ActivityRefresher(wmService, wmService.mH);

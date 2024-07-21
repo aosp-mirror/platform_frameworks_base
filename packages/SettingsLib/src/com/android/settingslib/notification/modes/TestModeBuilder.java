@@ -37,6 +37,13 @@ public class TestModeBuilder {
     private ZenModeConfig.ZenRule mConfigZenRule;
 
     public static final ZenMode EXAMPLE = new TestModeBuilder().build();
+    public static final ZenMode MANUAL_DND = ZenMode.manualDndMode(
+            new AutomaticZenRule.Builder("Manual DND", Uri.parse("rule://dnd"))
+                    .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
+                    .setZenPolicy(new ZenPolicy.Builder().disallowAllSounds().build())
+                    .build(),
+            true /* isActive */
+    );
 
     public TestModeBuilder() {
         // Reasonable defaults

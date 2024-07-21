@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.ui.view.layout.sections
 
+import android.platform.test.annotations.EnableFlags
 import android.view.View
 import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -48,6 +49,7 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
+@EnableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 class SmartspaceSectionTest : SysuiTestCase() {
     private lateinit var underTest: SmartspaceSection
     @Mock private lateinit var keyguardClockViewModel: KeyguardClockViewModel
@@ -70,7 +72,6 @@ class SmartspaceSectionTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        mSetFlagsRule.enableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         underTest =
             SmartspaceSection(
                 mContext,

@@ -22,9 +22,9 @@ import android.widget.ImageView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.flags.Flags.FLAG_NEW_STATUS_BAR_ICONS
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.battery.BatteryMeterView.BatteryEstimateFetcher
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.BatteryController.EstimateFetchCompletion
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -67,9 +67,8 @@ class BatteryMeterViewTest : SysuiTestCase() {
     fun contentDescription_unknown() {
         mBatteryMeterView.onBatteryUnknownStateChanged(true)
 
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-                context.getString(R.string.accessibility_battery_unknown)
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(context.getString(R.string.accessibility_battery_unknown))
     }
 
     @Test
@@ -80,11 +79,10 @@ class BatteryMeterViewTest : SysuiTestCase() {
 
         mBatteryMeterView.updatePercentText()
 
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-                context.getString(
-                        R.string.accessibility_battery_level_with_estimate, 15, ESTIMATE
-                )
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(
+                context.getString(R.string.accessibility_battery_level_with_estimate, 15, ESTIMATE)
+            )
     }
 
     @Test
@@ -96,13 +94,14 @@ class BatteryMeterViewTest : SysuiTestCase() {
 
         mBatteryMeterView.updatePercentText()
 
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(
                 context.getString(
-                        R.string.accessibility_battery_level_charging_paused_with_estimate,
-                        17,
-                        ESTIMATE,
+                    R.string.accessibility_battery_level_charging_paused_with_estimate,
+                    17,
+                    ESTIMATE,
                 )
-        )
+            )
     }
 
     @Test
@@ -110,27 +109,24 @@ class BatteryMeterViewTest : SysuiTestCase() {
         mBatteryMeterView.onBatteryLevelChanged(90, false)
         mBatteryMeterView.onIsBatteryDefenderChanged(true)
 
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-                context.getString(R.string.accessibility_battery_level_charging_paused, 90)
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(context.getString(R.string.accessibility_battery_level_charging_paused, 90))
     }
 
     @Test
     fun contentDescription_charging() {
         mBatteryMeterView.onBatteryLevelChanged(45, true)
 
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-                context.getString(R.string.accessibility_battery_level_charging, 45)
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(context.getString(R.string.accessibility_battery_level_charging, 45))
     }
 
     @Test
     fun contentDescription_notCharging() {
         mBatteryMeterView.onBatteryLevelChanged(45, false)
 
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-                context.getString(R.string.accessibility_battery_level, 45)
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(context.getString(R.string.accessibility_battery_level, 45))
     }
 
     @Test
@@ -138,9 +134,8 @@ class BatteryMeterViewTest : SysuiTestCase() {
         mBatteryMeterView.onBatteryLevelChanged(45, true)
         mBatteryMeterView.onIsIncompatibleChargingChanged(true)
 
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-                context.getString(R.string.accessibility_battery_level, 45)
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(context.getString(R.string.accessibility_battery_level, 45))
     }
 
     @Test
@@ -152,19 +147,17 @@ class BatteryMeterViewTest : SysuiTestCase() {
 
         mBatteryMeterView.updatePercentText()
 
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-                context.getString(
-                        R.string.accessibility_battery_level_with_estimate, 15, ESTIMATE
-                )
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(
+                context.getString(R.string.accessibility_battery_level_with_estimate, 15, ESTIMATE)
+            )
 
         // Update the show mode from estimate to percent
         mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ON)
 
         assertThat(mBatteryMeterView.batteryPercentViewText).isEqualTo("15%")
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-                context.getString(R.string.accessibility_battery_level, 15)
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(context.getString(R.string.accessibility_battery_level, 15))
     }
 
     @Test
@@ -176,19 +169,17 @@ class BatteryMeterViewTest : SysuiTestCase() {
 
         mBatteryMeterView.updatePercentText()
 
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-            context.getString(
-                R.string.accessibility_battery_level_with_estimate, 15, ESTIMATE
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(
+                context.getString(R.string.accessibility_battery_level_with_estimate, 15, ESTIMATE)
             )
-        )
 
         // Update the show mode from estimate to percent
         mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ON)
 
         assertThat(mBatteryMeterView.batteryPercentView).isNull()
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-            context.getString(R.string.accessibility_battery_level, 15)
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(context.getString(R.string.accessibility_battery_level, 15))
         assertThat(mBatteryMeterView.unifiedBatteryState.showPercent).isTrue()
     }
 
@@ -225,49 +216,47 @@ class BatteryMeterViewTest : SysuiTestCase() {
         // BatteryDefender
         mBatteryMeterView.onBatteryLevelChanged(90, false)
         mBatteryMeterView.onIsBatteryDefenderChanged(true)
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-                context.getString(R.string.accessibility_battery_level_charging_paused, 90)
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(context.getString(R.string.accessibility_battery_level_charging_paused, 90))
 
         // BatteryDefender & estimate
         mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
         mBatteryMeterView.setBatteryEstimateFetcher(Fetcher())
         mBatteryMeterView.updatePercentText()
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(
                 context.getString(
-                        R.string.accessibility_battery_level_charging_paused_with_estimate,
-                        90,
-                        ESTIMATE,
+                    R.string.accessibility_battery_level_charging_paused_with_estimate,
+                    90,
+                    ESTIMATE,
                 )
-        )
+            )
 
         // Just estimate
         mBatteryMeterView.onIsBatteryDefenderChanged(false)
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(
                 context.getString(
-                        R.string.accessibility_battery_level_with_estimate,
-                        90,
-                        ESTIMATE,
+                    R.string.accessibility_battery_level_with_estimate,
+                    90,
+                    ESTIMATE,
                 )
-        )
+            )
 
         // Just percent
         mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ON)
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-                context.getString(R.string.accessibility_battery_level, 90)
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(context.getString(R.string.accessibility_battery_level, 90))
 
         // Charging
         mBatteryMeterView.onBatteryLevelChanged(90, true)
-        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
-                context.getString(R.string.accessibility_battery_level_charging, 90)
-        )
+        assertThat(mBatteryMeterView.contentDescription)
+            .isEqualTo(context.getString(R.string.accessibility_battery_level_charging, 90))
     }
 
     @Test
     @DisableFlags(FLAG_NEW_STATUS_BAR_ICONS)
     fun isBatteryDefenderChanged_true_drawableGetsTrue_flagOff() {
-        mBatteryMeterView.setDisplayShieldEnabled(true)
         val drawable = getBatteryDrawable()
 
         mBatteryMeterView.onIsBatteryDefenderChanged(true)
@@ -278,8 +267,6 @@ class BatteryMeterViewTest : SysuiTestCase() {
     @Test
     @EnableFlags(FLAG_NEW_STATUS_BAR_ICONS)
     fun isBatteryDefenderChanged_true_drawableGetsTrue_flagOn() {
-        mBatteryMeterView.setDisplayShieldEnabled(true)
-
         mBatteryMeterView.onIsBatteryDefenderChanged(true)
 
         assertThat(mBatteryMeterView.unifiedBatteryState.attribution).isNotNull()
@@ -288,7 +275,6 @@ class BatteryMeterViewTest : SysuiTestCase() {
     @Test
     @DisableFlags(FLAG_NEW_STATUS_BAR_ICONS)
     fun isBatteryDefenderChanged_false_drawableGetsFalse_flagOff() {
-        mBatteryMeterView.setDisplayShieldEnabled(true)
         val drawable = getBatteryDrawable()
 
         // Start as true
@@ -303,34 +289,11 @@ class BatteryMeterViewTest : SysuiTestCase() {
     @Test
     @EnableFlags(FLAG_NEW_STATUS_BAR_ICONS)
     fun isBatteryDefenderChanged_false_drawableGetsFalse_flagOn() {
-        mBatteryMeterView.setDisplayShieldEnabled(true)
-
         // Start as true
         mBatteryMeterView.onIsBatteryDefenderChanged(true)
 
         // Update to false
         mBatteryMeterView.onIsBatteryDefenderChanged(false)
-
-        assertThat(mBatteryMeterView.unifiedBatteryState.attribution).isNull()
-    }
-
-    @Test
-    @DisableFlags(FLAG_NEW_STATUS_BAR_ICONS)
-    fun isBatteryDefenderChanged_true_featureflagOff_drawableGetsFalse_flagOff() {
-        mBatteryMeterView.setDisplayShieldEnabled(false)
-        val drawable = getBatteryDrawable()
-
-        mBatteryMeterView.onIsBatteryDefenderChanged(true)
-
-        assertThat(drawable.displayShield).isFalse()
-    }
-
-    @Test
-    @EnableFlags(FLAG_NEW_STATUS_BAR_ICONS)
-    fun isBatteryDefenderChanged_true_featureflagOff_drawableGetsFalse_flagOn() {
-        mBatteryMeterView.setDisplayShieldEnabled(false)
-
-        mBatteryMeterView.onIsBatteryDefenderChanged(true)
 
         assertThat(mBatteryMeterView.unifiedBatteryState.attribution).isNull()
     }
@@ -381,8 +344,8 @@ class BatteryMeterViewTest : SysuiTestCase() {
     }
 
     private fun getBatteryDrawable(): AccessorizedBatteryDrawable {
-        return (mBatteryMeterView.getChildAt(0) as ImageView)
-                .drawable as AccessorizedBatteryDrawable
+        return (mBatteryMeterView.getChildAt(0) as ImageView).drawable
+            as AccessorizedBatteryDrawable
     }
 
     private class Fetcher : BatteryEstimateFetcher {

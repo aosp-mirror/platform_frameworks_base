@@ -149,6 +149,7 @@ constructor(
             resetShadeSessions()
             handleKeyguardEnabledness()
             notifyKeyguardDismissCallbacks()
+            refreshLockscreenEnabled()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -186,7 +187,6 @@ constructor(
         applicationScope.launch {
             // TODO(b/296114544): Combine with some global hun state to make it visible!
             deviceProvisioningInteractor.isDeviceProvisioned
-                .distinctUntilChanged()
                 .flatMapLatest { isAllowedToBeVisible ->
                     if (isAllowedToBeVisible) {
                         combine(
@@ -733,6 +733,24 @@ constructor(
                     else -> dismissCallbackRegistry.notifyDismissCancelled()
                 }
             }
+        }
+    }
+
+    /**
+     * Keeps the value of [DeviceEntryInteractor.isLockscreenEnabled] fresh.
+     *
+     * This is needed because that value is sourced from a non-observable data source
+     * (`LockPatternUtils`, which doesn't expose a listener or callback for this value). Therefore,
+     * every time a transition to the `Lockscreen` scene is started, the value is re-fetched and
+     * cached.
+     */
+    private fun refreshLockscreenEnabled() {
+        applicationScope.launch {
+            sceneInteractor.transitionState
+                .map { it.isTransitioning(to = Scenes.Lockscreen) }
+                .distinctUntilChanged()
+                .filter { it }
+                .collectLatest { deviceEntryInteractor.refreshLockscreenEnabled() }
         }
     }
 }

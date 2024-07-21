@@ -16356,6 +16356,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBluetoothPowerStatsCollector.collectAndDump(pw);
         mCameraPowerStatsCollector.collectAndDump(pw);
         mGnssPowerStatsCollector.collectAndDump(pw);
+        mCustomEnergyConsumerPowerStatsCollector.collectAndDump(pw);
     }
 
     private final Runnable mWriteAsyncRunnable = () -> {

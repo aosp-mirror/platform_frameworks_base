@@ -4118,7 +4118,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.increaseIndent();
                 for (int i = 0; i < mSubscriptionPlans.size(); i++) {
                     final int subId = mSubscriptionPlans.keyAt(i);
-                    fout.println("Subscriber ID " + subId + ":");
+                    fout.println("Subscription ID " + subId + ":");
                     fout.increaseIndent();
                     final SubscriptionPlan[] plans = mSubscriptionPlans.valueAt(i);
                     if (!ArrayUtils.isEmpty(plans)) {

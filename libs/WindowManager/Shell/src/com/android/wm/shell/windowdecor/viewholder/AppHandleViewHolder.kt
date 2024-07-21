@@ -20,37 +20,68 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.Point
+import android.view.SurfaceControl
 import android.view.View
+import android.view.View.OnClickListener
+import android.view.View.OnHoverListener
 import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+import android.view.WindowManager
 import android.widget.ImageButton
+import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.animation.Interpolators
+import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 
 /**
  * A desktop mode window decoration used when the window is in full "focus" (i.e. fullscreen/split).
  * It hosts a simple handle bar from which to initiate a drag motion to enter desktop mode.
  */
 internal class AppHandleViewHolder(
-        rootView: View,
-        onCaptionTouchListener: View.OnTouchListener,
-        onCaptionButtonClickListener: View.OnClickListener
+    rootView: View,
+    private val onCaptionTouchListener: View.OnTouchListener,
+    private val onCaptionButtonClickListener: OnClickListener,
+    private val onCaptionHoverListener: OnHoverListener,
 ) : WindowDecorationViewHolder(rootView) {
 
     companion object {
         private const val CAPTION_HANDLE_ANIMATION_DURATION: Long = 100
     }
-
+    private lateinit var taskInfo: RunningTaskInfo
+    private val windowManager = context.getSystemService(WindowManager::class.java)
     private val captionView: View = rootView.requireViewById(R.id.desktop_mode_caption)
     private val captionHandle: ImageButton = rootView.requireViewById(R.id.caption_handle)
+
+    // An invisible View that takes up the same coordinates as captionHandle but is layered
+    // above the status bar. The purpose of this View is to receive input intended for
+    // captionHandle.
+    private var statusBarInputLayer: AdditionalSystemViewContainer? = null
 
     init {
         captionView.setOnTouchListener(onCaptionTouchListener)
         captionHandle.setOnTouchListener(onCaptionTouchListener)
         captionHandle.setOnClickListener(onCaptionButtonClickListener)
+        captionHandle.setOnHoverListener(onCaptionHoverListener)
     }
 
-    override fun bindData(taskInfo: RunningTaskInfo) {
+    override fun bindData(
+        taskInfo: RunningTaskInfo,
+        position: Point,
+        width: Int,
+        height: Int,
+        isCaptionVisible: Boolean
+    ) {
         captionHandle.imageTintList = ColorStateList.valueOf(getCaptionHandleBarColor(taskInfo))
+        this.taskInfo = taskInfo
+        if (!isCaptionVisible && hasStatusBarInputLayer()) {
+            disposeStatusBarInputLayer()
+            return
+        }
+        if (hasStatusBarInputLayer()) {
+            updateStatusBarInputLayer(position)
+        } else {
+            createStatusBarInputLayer(position, width, height)
+        }
     }
 
     override fun onHandleMenuOpened() {
@@ -59,6 +90,45 @@ internal class AppHandleViewHolder(
 
     override fun onHandleMenuClosed() {
         animateCaptionHandleAlpha(startValue = 0f, endValue = 1f)
+    }
+
+    private fun createStatusBarInputLayer(handlePosition: Point,
+                                          handleWidth: Int,
+                                          handleHeight: Int) {
+        if (!Flags.enableAdditionalWindowsAboveStatusBar()) return
+        statusBarInputLayer = AdditionalSystemViewContainer(context, taskInfo.taskId,
+            handlePosition.x, handlePosition.y, handleWidth, handleHeight)
+        val view = statusBarInputLayer?.view
+        val lp = view?.layoutParams as WindowManager.LayoutParams
+        lp.title = "Handle Input Layer of task " + taskInfo.taskId
+        lp.setTrustedOverlay()
+        // Make this window a spy window to enable it to pilfer pointers from the system-wide
+        // gesture listener that receives events before window. This is to prevent notification
+        // shade gesture when we swipe down to enter desktop.
+        lp.inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
+        view.id = R.id.caption_handle
+        view.setOnClickListener(onCaptionButtonClickListener)
+        view.setOnTouchListener(onCaptionTouchListener)
+        view.setOnHoverListener(onCaptionHoverListener)
+        windowManager.updateViewLayout(view, lp)
+    }
+
+    private fun updateStatusBarInputLayer(globalPosition: Point) {
+        statusBarInputLayer?.setPosition(SurfaceControl.Transaction(), globalPosition.x.toFloat(),
+            globalPosition.y.toFloat()) ?: return
+    }
+
+    private fun hasStatusBarInputLayer(): Boolean {
+        return statusBarInputLayer != null
+    }
+
+    /**
+     * Remove the input layer from [WindowManager]. Should be used when caption handle
+     * is not visible.
+     */
+    fun disposeStatusBarInputLayer() {
+        statusBarInputLayer?.releaseView()
+        statusBarInputLayer = null
     }
 
     private fun getCaptionHandleBarColor(taskInfo: RunningTaskInfo): Int {

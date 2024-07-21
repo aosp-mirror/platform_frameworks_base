@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.chips.ui.model
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.view.ContextThemeWrapper
 import androidx.annotation.ColorInt
 import com.android.settingslib.Utils
 import com.android.systemui.res.R
@@ -41,8 +42,11 @@ sealed interface ColorsModel {
 
     /** The chip should have a red background with white text. */
     data object Red : ColorsModel {
-        override fun background(context: Context): ColorStateList =
-            ColorStateList.valueOf(context.getColor(R.color.GM2_red_600))
+        override fun background(context: Context): ColorStateList {
+            val themedContext =
+                ContextThemeWrapper(context, com.android.internal.R.style.Theme_DeviceDefault_Light)
+            return Utils.getColorAttr(themedContext, com.android.internal.R.attr.materialColorError)
+        }
 
         override fun text(context: Context) = context.getColor(android.R.color.white)
     }

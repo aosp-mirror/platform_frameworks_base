@@ -35,7 +35,6 @@ import com.android.systemui.statusbar.domain.interactor.keyguardStatusBarInterac
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
-import com.android.systemui.statusbar.notification.stack.data.repository.setNotifications
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.batteryController

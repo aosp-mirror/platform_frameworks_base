@@ -797,8 +797,6 @@ class ElementTest {
                 scene(SceneB, userActions = mapOf(Swipe.Up to SceneA)) {
                     Box(
                         Modifier
-                            // Unconsumed scroll gesture will be intercepted by STL
-                            .verticalNestedScrollToScene()
                             // A scrollable that does not consume the scroll gesture
                             .scrollable(
                                 rememberScrollableState(consumeScrollDelta = { 0f }),
@@ -875,8 +873,6 @@ class ElementTest {
                 ) {
                     Box(
                         Modifier
-                            // Unconsumed scroll gesture will be intercepted by STL
-                            .verticalNestedScrollToScene()
                             // A scrollable that does not consume the scroll gesture
                             .scrollable(
                                 rememberScrollableState(consumeScrollDelta = { 0f }),

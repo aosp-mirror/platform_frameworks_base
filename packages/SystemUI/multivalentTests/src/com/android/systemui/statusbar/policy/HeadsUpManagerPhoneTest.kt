@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.policy
 
 import android.content.Context
 import android.os.Handler
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
@@ -33,6 +34,7 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
@@ -42,6 +44,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.kotlin.JavaAdapter
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.SystemClock
 import junit.framework.Assert
@@ -234,6 +237,36 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         hmp.extendHeadsUp()
         mSystemClock.advanceTime((TEST_AUTO_DISMISS_TIME + hmp.mExtensionTime / 2).toLong())
         Assert.assertTrue(hmp.isHeadsUpEntry(entry.key))
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testShowNotification_reorderNotAllowed_notPulsing_seenInShadeTrue() {
+        whenever(mVSProvider.isReorderingAllowed).thenReturn(false)
+        val hmp = createHeadsUpManagerPhone()
+
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        val row = mock<ExpandableNotificationRow>()
+        whenever(row.showingPulsing()).thenReturn(false)
+        notifEntry.row = row
+
+        hmp.showNotification(notifEntry)
+        Assert.assertTrue(notifEntry.isSeenInShade)
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testShowNotification_reorderAllowed_notPulsing_seenInShadeFalse() {
+        whenever(mVSProvider.isReorderingAllowed).thenReturn(true)
+        val hmp = createHeadsUpManagerPhone()
+
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        val row = mock<ExpandableNotificationRow>()
+        whenever(row.showingPulsing()).thenReturn(false)
+        notifEntry.row = row
+
+        hmp.showNotification(notifEntry)
+        Assert.assertFalse(notifEntry.isSeenInShade)
     }
 
     @Test

@@ -44,7 +44,7 @@ internal typealias MovableElementContent = @Composable (@Composable () -> Unit) 
 
 @Stable
 internal class SceneTransitionLayoutImpl(
-    internal val state: BaseSceneTransitionLayoutState,
+    internal val state: MutableSceneTransitionLayoutStateImpl,
     internal var density: Density,
     internal var layoutDirection: LayoutDirection,
     internal var swipeSourceDetector: SwipeSourceDetector,

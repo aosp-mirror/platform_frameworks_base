@@ -383,7 +383,7 @@ TEST(UtilTest, ParseFeatureFlagsParameter_InvalidValue) {
 TEST(UtilTest, ParseFeatureFlagsParameter_DuplicateFlag) {
   auto diagnostics = test::ContextBuilder().Build()->GetDiagnostics();
   FeatureFlagValues feature_flag_values;
-  ASSERT_TRUE(ParseFeatureFlagsParameter("foo=true,bar=true,foo:ro=false", diagnostics,
+  ASSERT_TRUE(ParseFeatureFlagsParameter("foo=true,bar:READ_WRITE=true,foo:ro=false", diagnostics,
                                          &feature_flag_values));
   EXPECT_THAT(
       feature_flag_values,
@@ -394,11 +394,11 @@ TEST(UtilTest, ParseFeatureFlagsParameter_DuplicateFlag) {
 TEST(UtilTest, ParseFeatureFlagsParameter_Valid) {
   auto diagnostics = test::ContextBuilder().Build()->GetDiagnostics();
   FeatureFlagValues feature_flag_values;
-  ASSERT_TRUE(ParseFeatureFlagsParameter("foo= true, bar:ro =FALSE,baz=, quux", diagnostics,
-                                         &feature_flag_values));
+  ASSERT_TRUE(ParseFeatureFlagsParameter("foo:READ_ONLY= true, bar:ro =FALSE,baz:READ_WRITE=, quux",
+                                         diagnostics, &feature_flag_values));
   EXPECT_THAT(
       feature_flag_values,
-      UnorderedElementsAre(Pair("foo", FeatureFlagProperties{false, std::optional<bool>(true)}),
+      UnorderedElementsAre(Pair("foo", FeatureFlagProperties{true, std::optional<bool>(true)}),
                            Pair("bar", FeatureFlagProperties{true, std::optional<bool>(false)}),
                            Pair("baz", FeatureFlagProperties{false, std::nullopt}),
                            Pair("quux", FeatureFlagProperties{false, std::nullopt})));

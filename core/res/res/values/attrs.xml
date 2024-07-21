@@ -5243,6 +5243,11 @@
              the VISIBLE or INVISIBLE state when measuring. Defaults to false. -->
         <attr name="measureAllChildren" format="boolean" />
     </declare-styleable>
+    <!-- @hide -->
+    <declare-styleable name="MaxHeightFrameLayout">
+        <!-- An optional argument to supply a maximum height for this view. -->
+        <attr name="maxHeight" format="dimension" />
+    </declare-styleable>
     <declare-styleable name="ExpandableListView">
         <!-- Indicator shown beside the group View. This can be a stateful Drawable. -->
         <attr name="groupIndicator" format="reference" />

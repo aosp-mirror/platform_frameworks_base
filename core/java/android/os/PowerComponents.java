@@ -17,8 +17,12 @@ package android.os;
 
 import static android.os.BatteryConsumer.BatteryConsumerDataLayout.POWER_MODEL_NOT_INCLUDED;
 import static android.os.BatteryConsumer.POWER_COMPONENT_ANY;
+import static android.os.BatteryConsumer.POWER_STATE_ANY;
+import static android.os.BatteryConsumer.POWER_STATE_UNSPECIFIED;
 import static android.os.BatteryConsumer.PROCESS_STATE_ANY;
 import static android.os.BatteryConsumer.PROCESS_STATE_UNSPECIFIED;
+import static android.os.BatteryConsumer.SCREEN_STATE_ANY;
+import static android.os.BatteryConsumer.SCREEN_STATE_UNSPECIFIED;
 import static android.os.BatteryConsumer.convertMahToDeciCoulombs;
 
 import android.annotation.NonNull;
@@ -56,23 +60,100 @@ class PowerComponents {
      * Total power consumed by this consumer, aggregated over the specified dimensions, in mAh.
      */
     public double getConsumedPower(@NonNull BatteryConsumer.Dimensions dimensions) {
-        if (dimensions.powerComponent != POWER_COMPONENT_ANY) {
-            return mData.getDouble(mData.getKeyOrThrow(dimensions.powerComponent,
-                    dimensions.processState).mPowerColumnIndex);
-        } else if (dimensions.processState != PROCESS_STATE_ANY) {
-            if (!mData.layout.processStateDataIncluded) {
-                throw new IllegalArgumentException(
-                        "No data included in BatteryUsageStats for " + dimensions);
-            }
-            final BatteryConsumer.Key[] keys =
-                    mData.layout.processStateKeys[dimensions.processState];
-            double totalPowerMah = 0;
-            for (int i = keys.length - 1; i >= 0; i--) {
-                totalPowerMah += mData.getDouble(keys[i].mPowerColumnIndex);
-            }
-            return totalPowerMah;
-        } else {
+        return getConsumedPower(dimensions.powerComponent, dimensions.processState,
+                dimensions.screenState, dimensions.powerState);
+    }
+
+    /**
+     * Total power consumed by this consumer, aggregated over the specified dimensions, in mAh.
+     */
+    public double getConsumedPower(@BatteryConsumer.PowerComponent int powerComponent,
+            @BatteryConsumer.ProcessState int processState,
+            @BatteryConsumer.ScreenState int screenState,
+            @BatteryConsumer.PowerState int powerState) {
+        if (powerComponent == POWER_COMPONENT_ANY && processState == PROCESS_STATE_ANY
+                && screenState == SCREEN_STATE_ANY && powerState == POWER_STATE_ANY) {
             return mData.getDouble(mData.layout.totalConsumedPowerColumnIndex);
+        }
+
+        if (powerComponent != POWER_COMPONENT_ANY
+                && ((mData.layout.screenStateDataIncluded && screenState != SCREEN_STATE_ANY)
+                || (mData.layout.powerStateDataIncluded && powerState != POWER_STATE_ANY))) {
+            BatteryConsumer.Key key = mData.layout.getKey(powerComponent,
+                    processState, screenState, powerState);
+            if (key != null) {
+                return mData.getDouble(key.mPowerColumnIndex);
+            }
+            return 0;
+        }
+
+        if (mData.layout.processStateDataIncluded || mData.layout.screenStateDataIncluded
+                || mData.layout.powerStateDataIncluded) {
+            double total = 0;
+            for (BatteryConsumer.Key key : mData.layout.keys) {
+                if (key.processState != PROCESS_STATE_UNSPECIFIED
+                        && key.matches(powerComponent, processState, screenState, powerState)) {
+                    total += mData.getDouble(key.mPowerColumnIndex);
+                }
+            }
+            if (total != 0) {
+                return total;
+            }
+        }
+
+        BatteryConsumer.Key key = mData.layout.getKey(powerComponent, processState,
+                SCREEN_STATE_UNSPECIFIED, POWER_STATE_UNSPECIFIED);
+        if (key != null) {
+            return mData.getDouble(key.mPowerColumnIndex);
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Total usage duration by this consumer, aggregated over the specified dimensions, in ms.
+     */
+    public long getUsageDurationMillis(@NonNull BatteryConsumer.Dimensions dimensions) {
+        return getUsageDurationMillis(dimensions.powerComponent, dimensions.processState,
+                dimensions.screenState, dimensions.powerState);
+    }
+
+    /**
+     * Total usage duration by this consumer, aggregated over the specified dimensions, in ms.
+     */
+    public long getUsageDurationMillis(@BatteryConsumer.PowerComponent int powerComponent,
+            @BatteryConsumer.ProcessState int processState,
+            @BatteryConsumer.ScreenState int screenState,
+            @BatteryConsumer.PowerState int powerState) {
+        if ((mData.layout.screenStateDataIncluded && screenState != SCREEN_STATE_ANY)
+                || (mData.layout.powerStateDataIncluded && powerState != POWER_STATE_ANY)) {
+            BatteryConsumer.Key key = mData.layout.getKey(powerComponent,
+                    processState, screenState, powerState);
+            if (key != null) {
+                return mData.getLong(key.mDurationColumnIndex);
+            }
+            return 0;
+        }
+
+        if (mData.layout.screenStateDataIncluded || mData.layout.powerStateDataIncluded) {
+            long total = 0;
+            for (BatteryConsumer.Key key : mData.layout.keys) {
+                if (key.processState != PROCESS_STATE_UNSPECIFIED
+                        && key.matches(powerComponent, processState, screenState, powerState)) {
+                    total += mData.getLong(key.mDurationColumnIndex);
+                }
+            }
+            if (total != 0) {
+                return total;
+            }
+        }
+
+        BatteryConsumer.Key key = mData.layout.getKey(powerComponent, processState,
+                SCREEN_STATE_UNSPECIFIED, POWER_STATE_UNSPECIFIED);
+        if (key != null) {
+            return mData.getLong(key.mDurationColumnIndex);
+        } else {
+            return 0;
         }
     }
 
@@ -84,7 +165,11 @@ class PowerComponents {
      * @return Amount of consumed power in mAh.
      */
     public double getConsumedPower(@NonNull BatteryConsumer.Key key) {
-        return mData.getDouble(key.mPowerColumnIndex);
+        if (mData.hasValue(key.mPowerColumnIndex)) {
+            return mData.getDouble(key.mPowerColumnIndex);
+        }
+        return getConsumedPower(key.powerComponent, key.processState, key.screenState,
+                key.powerState);
     }
 
     /**
@@ -135,7 +220,12 @@ class PowerComponents {
      * @return Amount of time in milliseconds.
      */
     public long getUsageDurationMillis(BatteryConsumer.Key key) {
-        return mData.getLong(key.mDurationColumnIndex);
+        if (mData.hasValue(key.mDurationColumnIndex)) {
+            return mData.getLong(key.mDurationColumnIndex);
+        }
+
+        return getUsageDurationMillis(key.powerComponent, key.processState, key.screenState,
+                key.powerState);
     }
 
     /**
@@ -154,51 +244,77 @@ class PowerComponents {
         }
     }
 
-    public void dump(PrintWriter pw, boolean skipEmptyComponents) {
-        String separator = "";
+    void dump(PrintWriter pw, @BatteryConsumer.ScreenState int screenState,
+            @BatteryConsumer.PowerState int powerState, boolean skipEmptyComponents) {
         StringBuilder sb = new StringBuilder();
-
         for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
                 componentId++) {
-            for (BatteryConsumer.Key key: mData.getKeys(componentId)) {
-                final double componentPower = getConsumedPower(key);
-                final long durationMs = getUsageDurationMillis(key);
-                if (skipEmptyComponents && componentPower == 0 && durationMs == 0) {
+            dump(sb, componentId, PROCESS_STATE_ANY, screenState, powerState, skipEmptyComponents);
+            if (mData.layout.processStateDataIncluded) {
+                for (int processState = 0; processState < BatteryConsumer.PROCESS_STATE_COUNT;
+                        processState++) {
+                    if (processState == PROCESS_STATE_UNSPECIFIED) {
+                        continue;
+                    }
+                    dump(sb, componentId, processState, screenState, powerState,
+                            skipEmptyComponents);
+                }
+            }
+        }
+
+        // TODO(b/352835319): take into account screen and power states
+        if (screenState == SCREEN_STATE_ANY && powerState == POWER_STATE_ANY) {
+            final int customComponentCount = mData.layout.customPowerComponentCount;
+            for (int customComponentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+                    customComponentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
+                            + customComponentCount;
+                    customComponentId++) {
+                final double customComponentPower =
+                        getConsumedPowerForCustomComponent(customComponentId);
+                if (skipEmptyComponents && customComponentPower == 0) {
                     continue;
                 }
-
-                sb.append(separator);
-                separator = " ";
-                sb.append(key.toShortString());
+                sb.append(getCustomPowerComponentName(customComponentId));
                 sb.append("=");
-                sb.append(BatteryStats.formatCharge(componentPower));
-
-                if (durationMs != 0) {
-                    sb.append(" (");
-                    BatteryStats.formatTimeMsNoSpace(sb, durationMs);
-                    sb.append(")");
-                }
+                sb.append(BatteryStats.formatCharge(customComponentPower));
+                sb.append(" ");
             }
         }
 
-        final int customComponentCount = mData.layout.customPowerComponentCount;
-        for (int customComponentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
-                customComponentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
-                        + customComponentCount;
-                customComponentId++) {
-            final double customComponentPower =
-                    getConsumedPowerForCustomComponent(customComponentId);
-            if (skipEmptyComponents && customComponentPower == 0) {
-                continue;
-            }
-            sb.append(separator);
-            separator = " ";
-            sb.append(getCustomPowerComponentName(customComponentId));
-            sb.append("=");
-            sb.append(BatteryStats.formatCharge(customComponentPower));
+        // Remove trailing spaces
+        while (!sb.isEmpty() && Character.isWhitespace(sb.charAt(sb.length() - 1))) {
+            sb.setLength(sb.length() - 1);
         }
 
-        pw.print(sb);
+        pw.println(sb);
+    }
+
+    private void dump(StringBuilder sb, @BatteryConsumer.PowerComponent int powerComponent,
+            @BatteryConsumer.ProcessState int processState,
+            @BatteryConsumer.ScreenState int screenState,
+            @BatteryConsumer.PowerState int powerState, boolean skipEmptyComponents) {
+        final double componentPower = getConsumedPower(powerComponent, processState, screenState,
+                powerState);
+        final long durationMs = getUsageDurationMillis(powerComponent, processState, screenState,
+                powerState);
+        if (skipEmptyComponents && componentPower == 0 && durationMs == 0) {
+            return;
+        }
+
+        sb.append(BatteryConsumer.powerComponentIdToString(powerComponent));
+        if (processState != PROCESS_STATE_UNSPECIFIED) {
+            sb.append(':');
+            sb.append(BatteryConsumer.processStateToString(processState));
+        }
+        sb.append("=");
+        sb.append(BatteryStats.formatCharge(componentPower));
+
+        if (durationMs != 0) {
+            sb.append(" (");
+            BatteryStats.formatTimeMsNoSpace(sb, durationMs);
+            sb.append(")");
+        }
+        sb.append(' ');
     }
 
     /** Returns whether there are any atoms.proto POWER_COMPONENTS data to write to a proto. */
@@ -220,11 +336,13 @@ class PowerComponents {
 
         for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
                 componentId++) {
-
-            final BatteryConsumer.Key[] keys = mData.getKeys(componentId);
+            final BatteryConsumer.Key[] keys = mData.layout.getKeys(componentId);
             for (BatteryConsumer.Key key : keys) {
-                final long powerDeciCoulombs = convertMahToDeciCoulombs(getConsumedPower(key));
-                final long durationMs = getUsageDurationMillis(key);
+                final long powerDeciCoulombs = convertMahToDeciCoulombs(
+                        getConsumedPower(key.powerComponent, key.processState, key.screenState,
+                                key.powerState));
+                final long durationMs = getUsageDurationMillis(key.powerComponent, key.processState,
+                        key.screenState, key.powerState);
 
                 if (powerDeciCoulombs == 0 && durationMs == 0) {
                     // No interesting data. Make sure not to even write the COMPONENT int.
@@ -329,34 +447,43 @@ class PowerComponents {
 
     void writeToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.startTag(null, BatteryUsageStats.XML_TAG_POWER_COMPONENTS);
-        for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
-                componentId++) {
-            final BatteryConsumer.Key[] keys = mData.getKeys(componentId);
-            for (BatteryConsumer.Key key : keys) {
-                final double powerMah = getConsumedPower(key);
-                final long durationMs = getUsageDurationMillis(key);
-                if (powerMah == 0 && durationMs == 0) {
-                    continue;
-                }
-
-                serializer.startTag(null, BatteryUsageStats.XML_TAG_COMPONENT);
-                serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_ID, componentId);
-                if (key.processState != PROCESS_STATE_UNSPECIFIED) {
-                    serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_PROCESS_STATE,
-                            key.processState);
-                }
-                if (powerMah != 0) {
-                    serializer.attributeDouble(null, BatteryUsageStats.XML_ATTR_POWER, powerMah);
-                }
-                if (durationMs != 0) {
-                    serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_DURATION, durationMs);
-                }
-                if (mData.layout.powerModelsIncluded) {
-                    serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_MODEL,
-                            getPowerModel(key));
-                }
-                serializer.endTag(null, BatteryUsageStats.XML_TAG_COMPONENT);
+        for (BatteryConsumer.Key key : mData.layout.keys) {
+            if (!mData.hasValue(key.mPowerColumnIndex)
+                    && !mData.hasValue(key.mDurationColumnIndex)) {
+                continue;
             }
+
+            final double powerMah = getConsumedPower(key);
+            final long durationMs = getUsageDurationMillis(key);
+            if (powerMah == 0 && durationMs == 0) {
+                continue;
+            }
+
+            serializer.startTag(null, BatteryUsageStats.XML_TAG_COMPONENT);
+            serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_ID, key.powerComponent);
+            if (key.processState != PROCESS_STATE_UNSPECIFIED) {
+                serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_PROCESS_STATE,
+                        key.processState);
+            }
+            if (key.screenState != SCREEN_STATE_UNSPECIFIED) {
+                serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_SCREEN_STATE,
+                        key.screenState);
+            }
+            if (key.powerState != POWER_STATE_UNSPECIFIED) {
+                serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_POWER_STATE,
+                        key.powerState);
+            }
+            if (powerMah != 0) {
+                serializer.attributeDouble(null, BatteryUsageStats.XML_ATTR_POWER, powerMah);
+            }
+            if (durationMs != 0) {
+                serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_DURATION, durationMs);
+            }
+            if (mData.layout.powerModelsIncluded) {
+                serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_MODEL,
+                        getPowerModel(key));
+            }
+            serializer.endTag(null, BatteryUsageStats.XML_TAG_COMPONENT);
         }
 
         final int customComponentEnd = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
@@ -401,6 +528,8 @@ class PowerComponents {
                     case BatteryUsageStats.XML_TAG_COMPONENT: {
                         int componentId = -1;
                         int processState = PROCESS_STATE_UNSPECIFIED;
+                        int screenState = SCREEN_STATE_UNSPECIFIED;
+                        int powerState = POWER_STATE_UNSPECIFIED;
                         double powerMah = 0;
                         long durationMs = 0;
                         int model = BatteryConsumer.POWER_MODEL_UNDEFINED;
@@ -411,6 +540,12 @@ class PowerComponents {
                                     break;
                                 case BatteryUsageStats.XML_ATTR_PROCESS_STATE:
                                     processState = parser.getAttributeInt(i);
+                                    break;
+                                case BatteryUsageStats.XML_ATTR_SCREEN_STATE:
+                                    screenState = parser.getAttributeInt(i);
+                                    break;
+                                case BatteryUsageStats.XML_ATTR_POWER_STATE:
+                                    powerState = parser.getAttributeInt(i);
                                     break;
                                 case BatteryUsageStats.XML_ATTR_POWER:
                                     powerMah = parser.getAttributeDouble(i);
@@ -423,8 +558,8 @@ class PowerComponents {
                                     break;
                             }
                         }
-                        final BatteryConsumer.Key key =
-                                builder.mData.getKey(componentId, processState);
+                        final BatteryConsumer.Key key = builder.mData.layout.getKey(componentId,
+                                processState, screenState, powerState);
                         builder.setConsumedPower(key, powerMah, model);
                         builder.setUsageDurationMillis(key, durationMs);
                         break;
@@ -468,11 +603,9 @@ class PowerComponents {
         Builder(BatteryConsumer.BatteryConsumerData data, double minConsumedPowerThreshold) {
             mData = data;
             mMinConsumedPowerThreshold = minConsumedPowerThreshold;
-            for (BatteryConsumer.Key[] keys : mData.layout.keys) {
-                for (BatteryConsumer.Key key : keys) {
-                    if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
-                        mData.putInt(key.mPowerModelColumnIndex, POWER_MODEL_UNINITIALIZED);
-                    }
+            for (BatteryConsumer.Key key : mData.layout.keys) {
+                if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
+                    mData.putInt(key.mPowerModelColumnIndex, POWER_MODEL_UNINITIALIZED);
                 }
             }
         }
@@ -572,51 +705,41 @@ class PowerComponents {
                                 + ", expected: " + mData.layout.customPowerComponentCount);
             }
 
-            for (int componentId = BatteryConsumer.POWER_COMPONENT_COUNT - 1; componentId >= 0;
-                    componentId--) {
-                final BatteryConsumer.Key[] keys = mData.layout.keys[componentId];
-                for (BatteryConsumer.Key key: keys) {
-                    BatteryConsumer.Key otherKey = null;
-                    for (BatteryConsumer.Key aKey: otherData.layout.keys[componentId]) {
-                        if (aKey.equals(key)) {
-                            otherKey = aKey;
-                            break;
-                        }
-                    }
+            for (BatteryConsumer.Key key : mData.layout.keys) {
+                BatteryConsumer.Key otherKey = otherData.layout.getKey(key.powerComponent,
+                        key.processState, key.screenState, key.powerState);
+                if (otherKey == null) {
+                    continue;
+                }
 
-                    if (otherKey == null) {
-                        continue;
-                    }
+                mData.putDouble(key.mPowerColumnIndex,
+                        mData.getDouble(key.mPowerColumnIndex)
+                                + otherData.getDouble(otherKey.mPowerColumnIndex));
+                mData.putLong(key.mDurationColumnIndex,
+                        mData.getLong(key.mDurationColumnIndex)
+                                + otherData.getLong(otherKey.mDurationColumnIndex));
 
-                    mData.putDouble(key.mPowerColumnIndex,
-                            mData.getDouble(key.mPowerColumnIndex)
-                                    + otherData.getDouble(otherKey.mPowerColumnIndex));
-                    mData.putLong(key.mDurationColumnIndex,
-                            mData.getLong(key.mDurationColumnIndex)
-                                    + otherData.getLong(otherKey.mDurationColumnIndex));
+                if (key.mPowerModelColumnIndex == POWER_MODEL_NOT_INCLUDED) {
+                    continue;
+                }
 
-                    if (key.mPowerModelColumnIndex == POWER_MODEL_NOT_INCLUDED) {
-                        continue;
-                    }
-
-                    boolean undefined = false;
-                    if (otherKey.mPowerModelColumnIndex == POWER_MODEL_NOT_INCLUDED) {
+                boolean undefined = false;
+                if (otherKey.mPowerModelColumnIndex == POWER_MODEL_NOT_INCLUDED) {
+                    undefined = true;
+                } else {
+                    final int powerModel = mData.getInt(key.mPowerModelColumnIndex);
+                    int otherPowerModel = otherData.getInt(otherKey.mPowerModelColumnIndex);
+                    if (powerModel == POWER_MODEL_UNINITIALIZED) {
+                        mData.putInt(key.mPowerModelColumnIndex, otherPowerModel);
+                    } else if (powerModel != otherPowerModel
+                            && otherPowerModel != POWER_MODEL_UNINITIALIZED) {
                         undefined = true;
-                    } else {
-                        final int powerModel = mData.getInt(key.mPowerModelColumnIndex);
-                        int otherPowerModel = otherData.getInt(otherKey.mPowerModelColumnIndex);
-                        if (powerModel == POWER_MODEL_UNINITIALIZED) {
-                            mData.putInt(key.mPowerModelColumnIndex, otherPowerModel);
-                        } else if (powerModel != otherPowerModel
-                                && otherPowerModel != POWER_MODEL_UNINITIALIZED) {
-                            undefined = true;
-                        }
                     }
+                }
 
-                    if (undefined) {
-                        mData.putInt(key.mPowerModelColumnIndex,
-                                BatteryConsumer.POWER_MODEL_UNDEFINED);
-                    }
+                if (undefined) {
+                    mData.putInt(key.mPowerModelColumnIndex,
+                            BatteryConsumer.POWER_MODEL_UNDEFINED);
                 }
             }
 
@@ -631,10 +754,8 @@ class PowerComponents {
                 final int usageColumnIndex = mData.layout.firstCustomUsageDurationColumn + i;
                 final int otherDurationColumnIndex =
                         otherData.layout.firstCustomUsageDurationColumn + i;
-                mData.putLong(usageColumnIndex,
-                        mData.getLong(usageColumnIndex) + otherData.getLong(
-                                otherDurationColumnIndex)
-                );
+                mData.putLong(usageColumnIndex, mData.getLong(usageColumnIndex)
+                        + otherData.getLong(otherDurationColumnIndex));
             }
         }
 
@@ -647,7 +768,8 @@ class PowerComponents {
             for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
                     componentId++) {
                 totalPowerMah += mData.getDouble(
-                        mData.getKeyOrThrow(componentId, PROCESS_STATE_ANY).mPowerColumnIndex);
+                        mData.layout.getKeyOrThrow(componentId, PROCESS_STATE_ANY, SCREEN_STATE_ANY,
+                                POWER_STATE_ANY).mPowerColumnIndex);
             }
             for (int i = 0; i < mData.layout.customPowerComponentCount; i++) {
                 totalPowerMah += mData.getDouble(
@@ -661,19 +783,17 @@ class PowerComponents {
          */
         @NonNull
         public PowerComponents build() {
-            for (BatteryConsumer.Key[] keys : mData.layout.keys) {
-                for (BatteryConsumer.Key key : keys) {
-                    if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
-                        if (mData.getInt(key.mPowerModelColumnIndex) == POWER_MODEL_UNINITIALIZED) {
-                            mData.putInt(key.mPowerModelColumnIndex,
-                                    BatteryConsumer.POWER_MODEL_UNDEFINED);
-                        }
+            for (BatteryConsumer.Key key: mData.layout.keys) {
+                if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
+                    if (mData.getInt(key.mPowerModelColumnIndex) == POWER_MODEL_UNINITIALIZED) {
+                        mData.putInt(key.mPowerModelColumnIndex,
+                                BatteryConsumer.POWER_MODEL_UNDEFINED);
                     }
+                }
 
-                    if (mMinConsumedPowerThreshold != 0) {
-                        if (mData.getDouble(key.mPowerColumnIndex) < mMinConsumedPowerThreshold) {
-                            mData.putDouble(key.mPowerColumnIndex, 0);
-                        }
+                if (mMinConsumedPowerThreshold != 0) {
+                    if (mData.getDouble(key.mPowerColumnIndex) < mMinConsumedPowerThreshold) {
+                        mData.putDouble(key.mPowerColumnIndex, 0);
                     }
                 }
             }

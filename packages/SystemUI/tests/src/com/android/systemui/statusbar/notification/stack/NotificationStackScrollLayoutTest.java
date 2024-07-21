@@ -91,6 +91,7 @@ import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefac
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
@@ -1193,6 +1194,26 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // THEN headsUpAnimatingWay is not set
         verify(headsUpAnimatingAwayListener, never()).accept(anyBoolean());
         assertFalse(mStackScroller.mHeadsUpAnimatingAway);
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testGenerateHeadsUpAnimation_isSeenInShade_noAnimation() {
+        // GIVEN NSSL is ready for HUN animations
+        Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);
+        prepareStackScrollerForHunAnimations(headsUpAnimatingAwayListener);
+
+        // Entry was seen in shade
+        NotificationEntry entry = mock(NotificationEntry.class);
+        when(entry.isSeenInShade()).thenReturn(true);
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        when(row.getEntry()).thenReturn(entry);
+
+        // WHEN we generate an add event
+        mStackScroller.generateHeadsUpAnimation(row, /* isHeadsUp = */ true);
+
+        // THEN nothing happens
+        assertThat(mStackScroller.isAddOrRemoveAnimationPending()).isFalse();
     }
 
     @Test

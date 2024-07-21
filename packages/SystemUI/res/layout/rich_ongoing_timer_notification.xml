@@ -33,7 +33,6 @@
         android:id="@+id/icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:src="@drawable/ic_close"
         app:tint="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/label"
@@ -88,11 +87,10 @@
         />
 
     <com.android.systemui.statusbar.notification.row.ui.view.TimerButtonView
+        style="@*android:style/NotificationEmphasizedAction"
         android:id="@+id/mainButton"
         android:layout_width="124dp"
         android:layout_height="wrap_content"
-        tools:text="Reset"
-        tools:drawableStart="@android:drawable/ic_menu_add"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/altButton"
         app:layout_constraintTop_toBottomOf="@id/bottomOfTop"
@@ -101,15 +99,23 @@
         />
 
     <com.android.systemui.statusbar.notification.row.ui.view.TimerButtonView
+        style="@*android:style/NotificationEmphasizedAction"
         android:id="@+id/altButton"
-        tools:text="Reset"
-        tools:drawableStart="@android:drawable/ic_menu_add"
-        android:drawablePadding="2dp"
-        android:drawableTint="@android:color/white"
         android:layout_width="124dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/bottomOfTop"
         app:layout_constraintStart_toEndOf="@id/mainButton"
+        app:layout_constraintEnd_toEndOf="@id/resetButton"
+        android:paddingEnd="4dp"
+        />
+
+    <com.android.systemui.statusbar.notification.row.ui.view.TimerButtonView
+        style="@*android:style/NotificationEmphasizedAction"
+        android:id="@+id/resetButton"
+        android:layout_width="124dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/bottomOfTop"
+        app:layout_constraintStart_toEndOf="@id/altButton"
         app:layout_constraintEnd_toEndOf="parent"
         android:paddingEnd="4dp"
         />

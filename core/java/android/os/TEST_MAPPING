@@ -119,7 +119,7 @@
         "PowerComponents\\.java",
         "[^/]*BatteryConsumer[^/]*\\.java"
       ],
-      "name": "BatteryUsageStatsProtoTests"
+      "name": "PowerStatsTests"
     },
     {
       "file_patterns": ["SharedMemory[^/]*\\.java"],

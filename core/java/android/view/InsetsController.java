@@ -765,7 +765,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     public InsetsController(Host host) {
         this(host, (controller, id, type) -> {
-            if (type == ime()) {
+            if (!Flags.refactorInsetsController() &&  type == ime()) {
                 return new ImeInsetsSourceConsumer(id, controller.mState,
                         Transaction::new, controller);
             } else {

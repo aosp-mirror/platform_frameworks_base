@@ -112,7 +112,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<DisplayRotationPolicyRobotTest> consumer) {
-        spyOn(mWm.mLetterboxConfiguration);
+        spyOn(mWm.mAppCompatConfiguration);
         final DisplayRotationPolicyRobotTest robot =
                 new DisplayRotationPolicyRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);
@@ -168,7 +168,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
         // TODO(b/350460645): Create Desktop Windowing Robot to reuse common functionalities.
         void allowEnterDesktopMode(boolean isAllowed) {
             doReturn(isAllowed).when(() ->
-                    DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
+                    DesktopModeHelper.canEnterDesktopMode(any()));
         }
 
         private AppCompatCameraPolicy getTopAppCompatCameraPolicy() {

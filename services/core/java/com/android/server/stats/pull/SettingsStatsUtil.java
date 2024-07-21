@@ -107,8 +107,8 @@ final class SettingsStatsUtil {
             }
             for (String key : proto.element) {
                 final String value = Settings.System.getStringForUser(resolver, key, userId);
-                final String telemetryValue =
-                        RawSettingsTelemetryUtil.getTelemetrySettingFromRawVal(context, key, value);
+                final String telemetryValue = RawSettingsTelemetryUtils
+                        .getTelemetrySettingFromRawVal(context, key, value);
                 output.add(createStatsEvent(atomTag, key, telemetryValue, userId,
                         flagsData.mDataType));
             }

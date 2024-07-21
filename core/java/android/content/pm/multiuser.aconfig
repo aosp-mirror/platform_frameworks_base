@@ -327,3 +327,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "fix_large_display_private_space_settings"
+  namespace: "profile_experiences"
+  description: "Fix tablet and foldable specific bugs for private space"
+  bug: "342563741"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

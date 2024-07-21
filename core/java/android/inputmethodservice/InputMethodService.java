@@ -4341,7 +4341,8 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * Called when the IME switch button was clicked from the client. This will show the input
+     * Called when the IME switch button was clicked from the client. Depending on the number of
+     * enabled IME subtypes, this will either switch to the next IME/subtype, or show the input
      * method picker dialog.
      *
      * @hide

@@ -115,6 +115,9 @@ public class AppInfoFactory implements AslMarshallableFactory<AppInfo> {
     /** Creates a {@link AppInfo} from the human-readable DOM element. */
     public AppInfo createFromHrElement(Element appInfoEle, long version)
             throws MalformedXmlException {
+        if (appInfoEle == null) {
+            return null;
+        }
         XmlUtils.throwIfExtraneousAttributes(
                 appInfoEle, XmlUtils.getMostRecentVersion(mRecognizedHrAttrs, version));
         XmlUtils.throwIfExtraneousChildrenHr(
@@ -184,6 +187,9 @@ public class AppInfoFactory implements AslMarshallableFactory<AppInfo> {
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
     public AppInfo createFromOdElement(Element appInfoEle, long version)
             throws MalformedXmlException {
+        if (appInfoEle == null) {
+            return null;
+        }
         XmlUtils.throwIfExtraneousChildrenOd(
                 appInfoEle, XmlUtils.getMostRecentVersion(mRecognizedOdEleNames, version));
         var requiredOdEles = XmlUtils.getMostRecentVersion(mRequiredOdEles, version);
