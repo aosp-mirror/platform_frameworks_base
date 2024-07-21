@@ -150,8 +150,11 @@ public class BubbleData {
                     : null;
             for (int i = 0; i < removedBubbles.size(); i++) {
                 Pair<Bubble, Integer> pair = removedBubbles.get(i);
-                bubbleBarUpdate.removedBubbles.add(
-                        new RemovedBubble(pair.first.getKey(), pair.second));
+                // if the removal happened in launcher, don't send it back
+                if (pair.second != Bubbles.DISMISS_USER_GESTURE_FROM_LAUNCHER) {
+                    bubbleBarUpdate.removedBubbles.add(
+                            new RemovedBubble(pair.first.getKey(), pair.second));
+                }
             }
             if (orderChanged) {
                 // Include the new order
@@ -502,12 +505,34 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
+    /** Dismisses the bubble with the matching key, if it exists. */
+    public void dismissBubbleWithKey(String key, @DismissReason int reason) {
+        dismissBubbleWithKey(key, reason, mTimeSource.currentTimeMillis());
+    }
+
     /**
      * Dismisses the bubble with the matching key, if it exists.
+     *
+     * <p>This is used when the bubble was dismissed in launcher, where the {@code removalTimestamp}
+     * represents when the removal happened and can be used to check whether or not the bubble has
+     * been updated after the removal. If no updates, it's safe to remove the bubble, otherwise the
+     * removal is ignored.
      */
-    public void dismissBubbleWithKey(String key, @DismissReason int reason) {
-        doRemove(key, reason);
-        dispatchPendingChanges();
+    public void dismissBubbleWithKey(String key, @DismissReason int reason, long removalTimestamp) {
+        boolean shouldRemove = true;
+        // if the bubble was removed from launcher, verify that the removal happened after the last
+        // time it was updated
+        if (reason == Bubbles.DISMISS_USER_GESTURE_FROM_LAUNCHER) {
+            // if the bubble was removed from launcher it must be active.
+            Bubble bubble = getBubbleInStackWithKey(key);
+            if (bubble != null && bubble.getLastActivity() > removalTimestamp) {
+                shouldRemove = false;
+            }
+        }
+        if (shouldRemove) {
+            doRemove(key, reason);
+            dispatchPendingChanges();
+        }
     }
 
     /**

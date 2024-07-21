@@ -17,10 +17,14 @@
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import android.view.View
+import com.android.systemui.animation.DialogCuj
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import kotlinx.coroutines.flow.StateFlow
 
@@ -36,13 +40,19 @@ interface OngoingActivityChipViewModel {
         /** Creates a chip click listener that launches a dialog created by [dialogDelegate]. */
         fun createDialogLaunchOnClickListener(
             dialogDelegate: SystemUIDialog.Delegate,
+            dialogTransitionAnimator: DialogTransitionAnimator,
+            cuj: DialogCuj,
             @StatusBarChipsLog logger: LogBuffer,
             tag: String,
         ): View.OnClickListener {
-            return View.OnClickListener { _ ->
+            return View.OnClickListener { view ->
                 logger.log(tag, LogLevel.INFO, {}, { "Chip clicked" })
                 val dialog = dialogDelegate.createDialog()
-                dialog.show()
+                val launchableView =
+                    view.requireViewById<ChipBackgroundContainer>(
+                        R.id.ongoing_activity_chip_background
+                    )
+                dialogTransitionAnimator.showFromView(dialog, launchableView, cuj)
             }
         }
     }

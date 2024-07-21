@@ -18,12 +18,15 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.view.View
+import android.view.accessibility.AccessibilityNodeInfo
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launch
 import com.android.systemui.common.ui.view.LongPressHandlingView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
 import com.android.systemui.plugins.FalsingManager
 
 object KeyguardLongPressViewBinder {
@@ -43,14 +46,19 @@ object KeyguardLongPressViewBinder {
         onSingleTap: () -> Unit,
         falsingManager: FalsingManager,
     ) {
+        view.accessibilityHintLongPressAction =
+            AccessibilityNodeInfo.AccessibilityAction(
+                AccessibilityNodeInfoCompat.ACTION_LONG_CLICK,
+                view.resources.getString(R.string.lock_screen_settings)
+            )
         view.listener =
             object : LongPressHandlingView.Listener {
-                override fun onLongPressDetected(view: View, x: Int, y: Int) {
-                    if (falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) {
+                override fun onLongPressDetected(view: View, x: Int, y: Int, isA11yAction: Boolean) {
+                    if (!isA11yAction && falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) {
                         return
                     }
 
-                    viewModel.onLongPress()
+                    viewModel.onLongPress(isA11yAction)
                 }
 
                 override fun onSingleTapDetected(view: View) {

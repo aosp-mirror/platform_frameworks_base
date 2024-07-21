@@ -16,92 +16,29 @@
 
 package com.android.systemui.keyboard.shortcut.data.source
 
-import android.content.Intent
-import android.content.res.Resources
-import android.view.KeyEvent
 import android.view.KeyboardShortcutGroup
-import android.view.KeyboardShortcutInfo
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.res.R
-import com.android.systemui.util.icons.AppCategoryIconProvider
+import android.view.WindowManager
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyboard.shortcut.extensions.copy
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 class AppCategoriesShortcutsSource
 @Inject
 constructor(
-    private val appCategoryIconProvider: AppCategoryIconProvider,
-    @Main private val resources: Resources,
+    private val windowManager: WindowManager,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : KeyboardShortcutGroupsSource {
 
-    override suspend fun shortcutGroups(deviceId: Int) =
-        listOf(
-            KeyboardShortcutGroup(
-                /* label = */ resources.getString(R.string.keyboard_shortcut_group_applications),
-                /* items = */ shortcuts()
-            )
-        )
-
-    private suspend fun shortcuts(): List<KeyboardShortcutInfo> =
-        listOfNotNull(
-                assistantAppShortcutInfo(),
-                appCategoryShortcutInfo(
-                    Intent.CATEGORY_APP_BROWSER,
-                    R.string.keyboard_shortcut_group_applications_browser,
-                    KeyEvent.KEYCODE_B
-                ),
-                appCategoryShortcutInfo(
-                    Intent.CATEGORY_APP_CONTACTS,
-                    R.string.keyboard_shortcut_group_applications_contacts,
-                    KeyEvent.KEYCODE_C
-                ),
-                appCategoryShortcutInfo(
-                    Intent.CATEGORY_APP_EMAIL,
-                    R.string.keyboard_shortcut_group_applications_email,
-                    KeyEvent.KEYCODE_E
-                ),
-                appCategoryShortcutInfo(
-                    Intent.CATEGORY_APP_CALENDAR,
-                    R.string.keyboard_shortcut_group_applications_calendar,
-                    KeyEvent.KEYCODE_K
-                ),
-                appCategoryShortcutInfo(
-                    Intent.CATEGORY_APP_MAPS,
-                    R.string.keyboard_shortcut_group_applications_maps,
-                    KeyEvent.KEYCODE_M
-                ),
-                appCategoryShortcutInfo(
-                    Intent.CATEGORY_APP_MUSIC,
-                    R.string.keyboard_shortcut_group_applications_music,
-                    KeyEvent.KEYCODE_P
-                ),
-                appCategoryShortcutInfo(
-                    Intent.CATEGORY_APP_MESSAGING,
-                    R.string.keyboard_shortcut_group_applications_sms,
-                    KeyEvent.KEYCODE_S
-                ),
-                appCategoryShortcutInfo(
-                    Intent.CATEGORY_APP_CALCULATOR,
-                    R.string.keyboard_shortcut_group_applications_calculator,
-                    KeyEvent.KEYCODE_U
-                ),
-            )
-            .sortedBy { it.label!!.toString().lowercase() }
-
-    private suspend fun assistantAppShortcutInfo(): KeyboardShortcutInfo? {
-        val assistantIcon = appCategoryIconProvider.assistantAppIcon() ?: return null
-        return KeyboardShortcutInfo(
-            /* label = */ resources.getString(R.string.keyboard_shortcut_group_applications_assist),
-            /* icon = */ assistantIcon,
-            /* keycode = */ KeyEvent.KEYCODE_A,
-            /* modifiers = */ KeyEvent.META_META_ON,
-        )
-    }
-
-    private suspend fun appCategoryShortcutInfo(category: String, labelResId: Int, keycode: Int) =
-        KeyboardShortcutInfo(
-            /* label = */ resources.getString(labelResId),
-            /* icon = */ appCategoryIconProvider.categoryAppIcon(category),
-            /* keycode = */ keycode,
-            /* modifiers = */ KeyEvent.META_META_ON,
-        )
+    override suspend fun shortcutGroups(deviceId: Int): List<KeyboardShortcutGroup> =
+        withContext(backgroundDispatcher) {
+            val group = windowManager.getApplicationLaunchKeyboardShortcuts(deviceId)
+            return@withContext if (group == null) {
+                emptyList()
+            } else {
+                val sortedShortcutItems = group.items.sortedBy { it.label!!.toString().lowercase() }
+                listOf(group.copy(items = sortedShortcutItems))
+            }
+        }
 }

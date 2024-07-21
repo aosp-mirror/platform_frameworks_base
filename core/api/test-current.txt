@@ -423,6 +423,7 @@ package android.app {
   public final class PictureInPictureParams implements android.os.Parcelable {
     method public float getAspectRatioFloat();
     method public float getExpandedAspectRatioFloat();
+    method public static boolean isSameAspectRatio(@NonNull android.graphics.Rect, @NonNull android.util.Rational);
   }
 
   public final class PictureInPictureUiState implements android.os.Parcelable {
@@ -618,6 +619,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void resetDefaultCrossProfileIntentFilters(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void resetShouldAllowBypassingDevicePolicyManagementRoleQualificationState();
     method @RequiresPermission(allOf={android.Manifest.permission.MANAGE_DEVICE_ADMINS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setActiveAdmin(@NonNull android.content.ComponentName, boolean, int);
+    method @FlaggedApi("android.app.admin.flags.provisioning_context_parameter") @RequiresPermission(allOf={android.Manifest.permission.MANAGE_DEVICE_ADMINS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setActiveAdmin(@NonNull android.content.ComponentName, boolean, int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwner(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwnerOnly(@NonNull android.content.ComponentName, int);
     method public void setDeviceOwnerType(@NonNull android.content.ComponentName, int);
@@ -1796,8 +1798,10 @@ package android.hardware.input {
   public class InputSettings {
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_bounce_keys_flag") public static int getAccessibilityBounceKeysThreshold(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_slow_keys_flag") public static int getAccessibilitySlowKeysThreshold(@NonNull android.content.Context);
+    method @FlaggedApi("com.android.hardware.input.keyboard_a11y_mouse_keys") public static boolean isAccessibilityMouseKeysEnabled(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_sticky_keys_flag") public static boolean isAccessibilityStickyKeysEnabled(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_bounce_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityBounceKeysThreshold(@NonNull android.content.Context, int);
+    method @FlaggedApi("com.android.hardware.input.keyboard_a11y_mouse_keys") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityMouseKeysEnabled(@NonNull android.content.Context, boolean);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_slow_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilitySlowKeysThreshold(@NonNull android.content.Context, int);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_sticky_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityStickyKeysEnabled(@NonNull android.content.Context, boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void setMaximumObscuringOpacityForTouch(@NonNull android.content.Context, @FloatRange(from=0, to=1) float);

@@ -56,6 +56,11 @@
     <item msgid="5376619709702103243">"Off"</item>
     <item msgid="4875147066469902392">"On"</item>
   </string-array>
+  <string-array name="tile_states_modes">
+    <item msgid="7764936419245199023">"Unavailable"</item>
+    <item msgid="2004750556637773692">"Off"</item>
+    <item msgid="8968530753931637871">"On"</item>
+  </string-array>
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"Unavailable"</item>
     <item msgid="5044688398303285224">"Off"</item>

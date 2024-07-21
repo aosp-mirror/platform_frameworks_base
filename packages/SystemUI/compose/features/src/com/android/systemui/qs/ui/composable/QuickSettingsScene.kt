@@ -305,8 +305,7 @@ private fun SceneScope.QuickSettingsScene(
                     if (isCustomizerShowing) {
                         Modifier.fillMaxHeight().align(Alignment.TopCenter)
                     } else {
-                        Modifier.verticalNestedScrollToScene()
-                            .verticalScroll(
+                        Modifier.verticalScroll(
                                 scrollState,
                                 enabled = isScrollable,
                             )
@@ -408,7 +407,7 @@ private fun SceneScope.QuickSettingsScene(
         HeadsUpNotificationSpace(
             stackScrollView = notificationStackScrollView,
             viewModel = notificationsPlaceholderViewModel,
-            modifier = Modifier.align(Alignment.BottomCenter),
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding(),
             isPeekFromBottom = true,
         )
         NotificationScrollingStack(

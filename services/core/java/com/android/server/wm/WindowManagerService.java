@@ -120,10 +120,10 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_W
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
@@ -1054,7 +1054,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mAnimationsDisabled = false;
     boolean mPointerLocationEnabled = false;
 
-    final LetterboxConfiguration mLetterboxConfiguration;
+    final AppCompatConfiguration mAppCompatConfiguration;
 
     private boolean mIsIgnoreOrientationRequestDisabled;
 
@@ -1294,7 +1294,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     | WindowInsets.Type.navigationBars();
         }
 
-        mLetterboxConfiguration = new LetterboxConfiguration(
+        mAppCompatConfiguration = new AppCompatConfiguration(
                 // Using SysUI context to have access to Material colors extracted from Wallpaper.
                 ActivityThread.currentActivityThread().getSystemUiContext());
 
@@ -2570,7 +2570,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // surface, let the client use that, but don't create new surface at this
                         // point.
                         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: getSurface");
-                        winAnimator.mSurfaceController.getSurfaceControl(outSurfaceControl);
+                        winAnimator.getSurfaceControl(outSurfaceControl);
                         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     } else {
                         if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Releasing surface in: " + win);
@@ -2766,15 +2766,15 @@ public class WindowManagerService extends IWindowManager.Stub
             result |= RELAYOUT_RES_SURFACE_CHANGED;
         }
 
-        WindowSurfaceController surfaceController;
+        SurfaceControl surfaceControl;
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "createSurfaceControl");
-            surfaceController = winAnimator.createSurfaceLocked();
+            surfaceControl = winAnimator.createSurfaceLocked();
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        if (surfaceController != null) {
-            surfaceController.getSurfaceControl(outSurfaceControl);
+        if (surfaceControl != null) {
+            winAnimator.getSurfaceControl(outSurfaceControl);
             ProtoLog.i(WM_SHOW_TRANSACTIONS, "OUT SURFACE %s: copied", outSurfaceControl);
 
         } else {
@@ -4441,7 +4441,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     boolean isIgnoreOrientationRequestDisabled() {
         return mIsIgnoreOrientationRequestDisabled
-                || !mLetterboxConfiguration.isIgnoreOrientationRequestAllowed();
+                || !mAppCompatConfiguration.isIgnoreOrientationRequestAllowed();
     }
 
     @Override
@@ -6773,11 +6773,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (windowState == null) {
                 return false;
             }
-            WindowSurfaceController surfaceController = windowState.mWinAnimator.mSurfaceController;
-            if (surfaceController == null) {
+            final SurfaceControl surfaceControl = windowState.mWinAnimator.mSurfaceControl;
+            if (surfaceControl == null) {
                 return false;
             }
-            return surfaceController.clearWindowContentFrameStats();
+            return surfaceControl.clearContentFrameStats();
         }
     }
 
@@ -6792,15 +6792,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (windowState == null) {
                 return null;
             }
-            WindowSurfaceController surfaceController = windowState.mWinAnimator.mSurfaceController;
-            if (surfaceController == null) {
+            final SurfaceControl surfaceControl = windowState.mWinAnimator.mSurfaceControl;
+            if (surfaceControl == null) {
                 return null;
             }
             if (mTempWindowRenderStats == null) {
                 mTempWindowRenderStats = new WindowContentFrameStats();
             }
             WindowContentFrameStats stats = mTempWindowRenderStats;
-            if (!surfaceController.getWindowContentFrameStats(stats)) {
+            if (!surfaceControl.getContentFrameStats(stats)) {
                 return null;
             }
             return stats;
@@ -9992,7 +9992,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public int getLetterboxBackgroundColorInArgb() {
-        return mLetterboxConfiguration.getLetterboxBackgroundColor().toArgb();
+        return mAppCompatConfiguration.getLetterboxBackgroundColor().toArgb();
     }
 
     /**
@@ -10000,8 +10000,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public boolean isLetterboxBackgroundMultiColored() {
-        @LetterboxConfiguration.LetterboxBackgroundType int letterboxBackgroundType =
-                mLetterboxConfiguration.getLetterboxBackgroundType();
+        @AppCompatConfiguration.LetterboxBackgroundType int letterboxBackgroundType =
+                mAppCompatConfiguration.getLetterboxBackgroundType();
         switch (letterboxBackgroundType) {
             case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING:
             case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND:

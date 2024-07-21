@@ -580,10 +580,15 @@ public final class PowerStats {
         }
         PowerStatsFormatter uidStatsFormatter = descriptor.getUidStatsFormatter();
         for (int i = 0; i < uidStats.size(); i++) {
+            String formattedStats = uidStatsFormatter.format(uidStats.valueAt(i));
+            if (formattedStats.isBlank()) {
+                continue;
+            }
+
             pw.print("UID ");
             pw.print(UserHandle.formatUid(uidStats.keyAt(i)));
             pw.print(": ");
-            pw.print(uidStatsFormatter.format(uidStats.valueAt(i)));
+            pw.print(formattedStats);
             pw.println();
         }
         pw.decreaseIndent();

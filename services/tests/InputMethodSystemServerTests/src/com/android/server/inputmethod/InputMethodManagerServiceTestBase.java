@@ -59,6 +59,7 @@ import android.window.ImeOnBackInvokedDispatcher;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.compat.IPlatformCompat;
+import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IInputMethodSession;
@@ -68,7 +69,6 @@ import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.view.IInputMethodManager;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
-import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.pm.UserManagerInternal;
@@ -161,7 +161,8 @@ public class InputMethodManagerServiceTestBase {
                         .strictness(Strictness.LENIENT)
                         .spyStatic(InputMethodUtils.class)
                         .mockStatic(ServiceManager.class)
-                        .mockStatic(SystemServerInitThreadPool.class)
+                        .spyStatic(AdditionalSubtypeMapRepository.class)
+                        .spyStatic(AdditionalSubtypeUtils.class)
                         .startMocking();
 
         mContext = spy(InstrumentationRegistry.getInstrumentation().getContext());
@@ -234,9 +235,9 @@ public class InputMethodManagerServiceTestBase {
         doNothing().when(() -> InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
                         any(PackageManager.class), anyList()));
 
-        // Used by lazy initializing draw IMS nav bar at InputMethodManagerService#systemRunning(),
-        // which is ok to be mocked out for now.
-        doReturn(null).when(() -> SystemServerInitThreadPool.submit(any(), anyString()));
+        // The background writer thread in AdditionalSubtypeMapRepository should be stubbed out.
+        doNothing().when(AdditionalSubtypeMapRepository::startWriterThread);
+        doReturn(AdditionalSubtypeMap.EMPTY_MAP).when(() -> AdditionalSubtypeUtils.load(anyInt()));
 
         mServiceThread =
                 new ServiceThread(
@@ -269,6 +270,17 @@ public class InputMethodManagerServiceTestBase {
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         lifecycle.onStart();
 
+        // Certain tests rely on TEST_IME_ID that is installed with AndroidTest.xml.
+        // TODO(b/352615651): Consider just synthesizing test InputMethodInfo then injecting it.
+        AdditionalSubtypeMapRepository.ensureInitializedAndGet(mCallingUserId);
+        final var settings = InputMethodManagerService.queryInputMethodServicesInternal(mContext,
+                mCallingUserId, AdditionalSubtypeMapRepository.get(mCallingUserId),
+                DirectBootAwareness.AUTO);
+        InputMethodSettingsRepository.put(mCallingUserId, settings);
+
+        // Emulate that the user initialization is done.
+        mInputMethodManagerService.getUserData(mCallingUserId).mBackgroundLoadLatch.countDown();
+
         // After this boot phase, services can broadcast Intents.
         lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
 
@@ -279,6 +291,8 @@ public class InputMethodManagerServiceTestBase {
 
     @After
     public void tearDown() {
+        InputMethodSettingsRepository.remove(mCallingUserId);
+
         if (mInputMethodManagerService != null) {
             mInputMethodManagerService.mInputMethodDeviceConfigs.destroy();
         }

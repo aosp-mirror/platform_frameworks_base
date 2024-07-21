@@ -24,12 +24,13 @@ import java.util.Set;
 import java.util.TreeMap;
 
 public class ProtoLogViewerConfigReader {
+    @NonNull
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
     private final Map<String, Set<Long>> mGroupHashes = new TreeMap<>();
     private final LongSparseArray<String> mLogMessageMap = new LongSparseArray<>();
 
     public ProtoLogViewerConfigReader(
-            ViewerConfigInputStreamProvider viewerConfigInputStreamProvider) {
+            @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider) {
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
     }
 

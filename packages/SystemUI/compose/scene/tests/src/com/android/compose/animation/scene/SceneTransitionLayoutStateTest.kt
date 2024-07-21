@@ -153,7 +153,7 @@ class SceneTransitionLayoutStateTest {
         sourceTo: SceneKey? = SceneB,
         targetFrom: SceneKey? = SceneC,
         targetTo: SceneKey = SceneD
-    ): Pair<BaseSceneTransitionLayoutState, BaseSceneTransitionLayoutState> {
+    ): Pair<MutableSceneTransitionLayoutStateImpl, MutableSceneTransitionLayoutStateImpl> {
         val parentState = MutableSceneTransitionLayoutState(parentInitialScene)
         val link =
             listOf(
@@ -164,8 +164,8 @@ class SceneTransitionLayoutStateTest {
             )
         val childState = MutableSceneTransitionLayoutState(childInitialScene, stateLinks = link)
         return Pair(
-            parentState as BaseSceneTransitionLayoutState,
-            childState as BaseSceneTransitionLayoutState
+            parentState as MutableSceneTransitionLayoutStateImpl,
+            childState as MutableSceneTransitionLayoutStateImpl
         )
     }
 
@@ -187,7 +187,7 @@ class SceneTransitionLayoutStateTest {
     @Test
     fun linkedTransition_transitiveLink() {
         val parentParentState =
-            MutableSceneTransitionLayoutState(SceneB) as BaseSceneTransitionLayoutState
+            MutableSceneTransitionLayoutState(SceneB) as MutableSceneTransitionLayoutStateImpl
         val parentLink =
             listOf(
                 StateLink(
@@ -197,7 +197,7 @@ class SceneTransitionLayoutStateTest {
             )
         val parentState =
             MutableSceneTransitionLayoutState(SceneC, stateLinks = parentLink)
-                as BaseSceneTransitionLayoutState
+                as MutableSceneTransitionLayoutStateImpl
         val link =
             listOf(
                 StateLink(
@@ -207,7 +207,7 @@ class SceneTransitionLayoutStateTest {
             )
         val childState =
             MutableSceneTransitionLayoutState(SceneA, stateLinks = link)
-                as BaseSceneTransitionLayoutState
+                as MutableSceneTransitionLayoutStateImpl
 
         val childTransition = transition(SceneA, SceneB)
 

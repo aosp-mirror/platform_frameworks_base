@@ -47,10 +47,12 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 /**
  * Tests for subtypes of {@link ClientTransactionItem}.
@@ -62,6 +64,9 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @Presubmit
 public class ClientTransactionItemTest {
+
+    @Rule
+    public final MockitoRule mocks = MockitoJUnit.rule();
 
     @Mock
     private ClientTransactionHandler mHandler;
@@ -89,7 +94,6 @@ public class ClientTransactionItemTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mGlobalConfig = new Configuration();
         mConfiguration = new Configuration();
         mActivitiesToBeDestroyed = new ArrayMap<>();

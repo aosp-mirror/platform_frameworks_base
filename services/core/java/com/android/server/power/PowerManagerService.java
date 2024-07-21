@@ -33,6 +33,7 @@ import static android.os.PowerManagerInternal.wakefulnessToString;
 
 import static com.android.internal.util.LatencyTracker.ACTION_TURN_ON_SCREEN;
 import static com.android.server.deviceidle.Flags.disableWakelocksInLightIdle;
+import static com.android.server.display.DisplayDeviceConfig.INVALID_BRIGHTNESS_IN_CONFIG;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -238,9 +239,6 @@ public final class PowerManagerService extends SystemService
     // Hardcoded for now until we decide what the right policy should be.
     // This should perhaps be a setting.
     private static final int SCREEN_BRIGHTNESS_BOOST_TIMEOUT = 5 * 1000;
-
-    // Float.NaN cannot be stored in config.xml so -2 is used instead
-    private static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
 
     // How long a partial wake lock must be held until we consider it a long wake lock.
     static final long MIN_LONG_WAKE_CHECK_INTERVAL = 60*1000;
@@ -619,7 +617,6 @@ public final class PowerManagerService extends SystemService
     public final float mScreenBrightnessMinimum;
     public final float mScreenBrightnessMaximum;
     public final float mScreenBrightnessDefault;
-    public final float mScreenBrightnessDoze;
     public final float mScreenBrightnessDim;
 
     // Value we store for tracking face down behavior.
@@ -1219,8 +1216,6 @@ public final class PowerManagerService extends SystemService
                 .config_screenBrightnessSettingMaximumFloat);
         final float def = mContext.getResources().getFloat(com.android.internal.R.dimen
                 .config_screenBrightnessSettingDefaultFloat);
-        final float doze = mContext.getResources().getFloat(com.android.internal.R.dimen
-                .config_screenBrightnessDozeFloat);
         final float dim = mContext.getResources().getFloat(com.android.internal.R.dimen
                 .config_screenBrightnessDimFloat);
 
@@ -1239,13 +1234,6 @@ public final class PowerManagerService extends SystemService
             mScreenBrightnessMinimum = min;
             mScreenBrightnessMaximum = max;
             mScreenBrightnessDefault = def;
-        }
-        if (doze == INVALID_BRIGHTNESS_IN_CONFIG) {
-            mScreenBrightnessDoze = BrightnessSynchronizer.brightnessIntToFloat(
-                    mContext.getResources().getInteger(com.android.internal.R.integer
-                            .config_screenBrightnessDoze));
-        } else {
-            mScreenBrightnessDoze = doze;
         }
         if (dim == INVALID_BRIGHTNESS_IN_CONFIG) {
             mScreenBrightnessDim = BrightnessSynchronizer.brightnessIntToFloat(
@@ -6090,8 +6078,6 @@ public final class PowerManagerService extends SystemService
                     return mScreenBrightnessDefault;
                 case PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DIM:
                     return mScreenBrightnessDim;
-                case PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE:
-                    return mScreenBrightnessDoze;
                 default:
                     return PowerManager.BRIGHTNESS_INVALID_FLOAT;
             }

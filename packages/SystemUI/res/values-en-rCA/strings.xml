@@ -126,19 +126,25 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Tap to view"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Error saving screen recording"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Error starting screen recording"</string>
-    <string name="screenrecord_stop_dialog_title" msgid="2685522129492260887">"Stop recording screen?"</string>
-    <string name="screenrecord_stop_dialog_message" msgid="1926783607059442889">"You will stop recording your screen"</string>
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"You will stop recording &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Stop recording?"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"You\'re currently recording your entire screen"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"You\'re currently recording <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Stop recording"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Sharing screen"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Stop sharing screen?"</string>
-    <string name="share_to_app_stop_dialog_message" msgid="3181723638915877339">"You will stop sharing your screen"</string>
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"You will stop sharing &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"You\'re currently sharing your entire screen with <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"You\'re currently sharing your entire screen with an app"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"You\'re currently sharing <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"You\'re currently sharing an app"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Stop sharing"</string>
-    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"Casting screen"</string>
-    <string name="cast_to_other_device_stop_dialog_title" msgid="1910372600290258193">"Stop casting screen?"</string>
-    <string name="cast_to_other_device_stop_dialog_message" msgid="1502520537030715412">"You will stop casting your screen"</string>
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"You will stop casting &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Casting screen"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Stop casting?"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"You\'re currently casting your entire screen to <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"You\'re currently casting your entire screen to a nearby device"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"You\'re currently casting <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> to <xliff:g id="DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"You\'re currently casting <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> to a nearby device"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"You\'re currently casting to <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"You\'re currently casting to a nearby device"</string>
     <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Stop casting"</string>
     <string name="close_dialog_button" msgid="4749497706540104133">"Close"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Issue Recorder"</string>
@@ -284,6 +290,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Screen saver"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Do Not Disturb"</string>
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Priority modes"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"No paired devices available"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Tap to connect or disconnect a device"</string>
@@ -483,6 +490,8 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"select widget"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"remove widget"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"place selected widget"</string>
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"Lock screen widgets"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Anyone can view widgets on your lock screen, even if your tablet\'s locked."</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Lock screen widgets"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"To open an app using a widget, you’ll need to verify it’s you. Also, keep in mind that anyone can view them, even when your tablet’s locked. Some widgets may not have been intended for your lock screen and may be unsafe to add here."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Got it"</string>
@@ -707,7 +716,8 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Default"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatic"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"No sound or vibration"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"No sound or vibration and appears lower in conversation section"</string>
+    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
+    <skip />
     <string name="notification_channel_summary_default" msgid="777294388712200605">"May ring or vibrate based on device settings"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"May ring or vibrate based on device settings. Conversations from <xliff:g id="APP_NAME">%1$s</xliff:g> bubble by default."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Have the system determine if this notification should make sound or vibration"</string>
@@ -764,6 +774,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -1346,6 +1357,7 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Split screen"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Input"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"App shortcuts"</string>
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Current App"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibility"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Keyboard shortcuts"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Search shortcuts"</string>
@@ -1356,8 +1368,7 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Home gesture"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Action key"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Done"</string>
-    <!-- no translation found for touchpad_tutorial_gesture_done (4784438360736821255) -->
-    <skip />
+    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Great job!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Go back"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"To go back, swipe left or right using three fingers anywhere on the touchpad."</string>
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Touchpad showing three fingers moving right and left"</string>
@@ -1366,4 +1377,5 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Level %1$d of %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Home Controls"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Quickly access your home controls as a screensaver"</string>
+    <string name="volume_undo_action" msgid="5815519725211877114">"Undo"</string>
 </resources>

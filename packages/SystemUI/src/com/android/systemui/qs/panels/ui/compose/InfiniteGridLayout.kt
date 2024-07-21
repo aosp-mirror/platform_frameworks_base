@@ -84,7 +84,7 @@ constructor(
         DefaultEditTileGrid(
             tiles = tiles,
             isIconOnly = isIcon,
-            columns = GridCells.Fixed(columns),
+            columns = columns,
             modifier = modifier,
             onAddTile = onAddTile,
             onRemoveTile = onRemoveTile,

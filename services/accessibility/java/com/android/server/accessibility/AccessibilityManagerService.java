@@ -161,6 +161,7 @@ import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.accessibility.AccessibilityShortcutController.ExtraDimFrameworkFeatureInfo;
 import com.android.internal.accessibility.AccessibilityShortcutController.FrameworkFeatureInfo;
 import com.android.internal.accessibility.AccessibilityShortcutController.LaunchableFrameworkFeatureInfo;
 import com.android.internal.accessibility.common.ShortcutConstants;
@@ -3910,6 +3911,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             Slog.d(LOG_TAG, "Perform shortcut failed, invalid target name:" + targetName);
             return;
         }
+
         // In case user assigned an accessibility framework feature to the given shortcut.
         if (performAccessibilityFrameworkFeature(displayId, targetComponentName, shortcutType)) {
             return;
@@ -3933,6 +3935,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (!frameworkFeatureMap.containsKey(assignedTarget)) {
             return false;
         }
+        final int userId;
+        synchronized (mLock) {
+            userId = mCurrentUserId;
+        }
         final FrameworkFeatureInfo featureInfo = frameworkFeatureMap.get(assignedTarget);
         final SettingStringHelper setting = new SettingStringHelper(mContext.getContentResolver(),
                 featureInfo.getSettingKey(), mCurrentUserId);
@@ -3941,6 +3947,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
                     /* serviceEnabled= */ true);
             launchAccessibilityFrameworkFeature(displayId, assignedTarget);
+            return true;
+        }
+
+        if (featureInfo instanceof ExtraDimFrameworkFeatureInfo) {
+            boolean serviceEnabled =
+                    ((ExtraDimFrameworkFeatureInfo) featureInfo)
+                            .activateShortcut(mContext, userId);
+            logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
+                    serviceEnabled);
             return true;
         }
 

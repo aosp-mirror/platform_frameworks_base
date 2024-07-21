@@ -118,6 +118,7 @@
     <string name="float_button_text" msgid="9221657008391364581">"Flotante"</string>
     <string name="select_text" msgid="5139083974039906583">"Seleccionar"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Captura de pantalla"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"Abrir no navegador"</string>
     <string name="close_text" msgid="4986518933445178928">"Pechar"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Pechar o menú"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Abrir menú"</string>

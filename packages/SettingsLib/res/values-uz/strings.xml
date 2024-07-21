@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Grafik protsessorni tuzatish qatlamlarini yuklashni yoqish"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Taʼminotchining batafsil jurnali"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Xatoliklar hisobotiga shaxsiy maʼlumotlari bor va koʻp joy olishi mumkin boʻlgan qurilma haqida taʼminotchining qoʻshimcha yozuvlari kiradi. Bunda batareya quvvati tezroq sarflanishi mumkin."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"Bir kundan keyin faolsizlantirish"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"Taʼminotchi tafsilotlarini qayd qilish tugadi"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"Bir kunga yoqilgan"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"Yana bir kunga yoqish"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"Bir kundan keyin faolsizlantiriladi"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Oʻchirilmaguncha yoqilgan"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Oynalar animatsiyasi"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"O‘tish animatsiyasi"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatsiya tezligi"</string>

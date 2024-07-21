@@ -99,6 +99,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -619,6 +620,15 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *     </idleScreenRefreshRateTimeout>
  *     <supportsVrr>true</supportsVrr>
  *
+ *     <dozeBrightnessSensorValueToBrightness>
+ *         <item>-1</item> <!-- 0: OFF -->
+ *         <item>0.003937008</item> <!-- 1: NIGHT -->
+ *         <item>0.015748031</item> <!-- 2: LOW -->
+ *         <item>0.102362205</item> <!-- 3: HIGH -->
+ *         <item>0.106299213</item> <!-- 4: SUN -->
+ *     </dozeBrightnessSensorValueToBrightness>
+ *     <defaultDozeBrightness>0.235</defaultDozeBrightness>
+ *
  *    </displayConfiguration>
  *  }
  *  </pre>
@@ -638,6 +648,10 @@ public class DisplayDeviceConfig {
 
     public static final int DEFAULT_LOW_REFRESH_RATE = 60;
 
+    // Float.NaN (used as invalid for brightness) cannot be stored in config.xml
+    // so -2 is used instead
+    public static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
+
     @VisibleForTesting
     static final float BRIGHTNESS_DEFAULT = 0.5f;
     private static final String ETC_DIR = "etc";
@@ -656,10 +670,6 @@ public class DisplayDeviceConfig {
     private static final int INTERPOLATION_DEFAULT = 0;
     private static final int INTERPOLATION_LINEAR = 1;
 
-    // Float.NaN (used as invalid for brightness) cannot be stored in config.xml
-    // so -2 is used instead
-    private static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
-
     // Length of the ambient light horizon used to calculate the long term estimate of ambient
     // light.
     private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 10000;
@@ -669,6 +679,11 @@ public class DisplayDeviceConfig {
 
     // Invalid value of AutoBrightness brightening and darkening light debounce
     private static final int INVALID_AUTO_BRIGHTNESS_LIGHT_DEBOUNCE = -1;
+
+    @VisibleForTesting
+    static final float HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT = 0.5f;
+
+    private static final int KEEP_CURRENT_BRIGHTNESS = -1;
 
     private final Context mContext;
 
@@ -876,6 +891,10 @@ public class DisplayDeviceConfig {
     private float mBrightnessCapForWearBedtimeMode;
 
     private boolean mVrrSupportEnabled;
+
+    @Nullable
+    private float[] mDozeBrightnessSensorValueToBrightness;
+    private float mDefaultDozeBrightness;
 
     private final DisplayManagerFlags mFlags;
 
@@ -1174,6 +1193,18 @@ public class DisplayDeviceConfig {
      */
     public float getHdrBrightnessFromSdr(float brightness, float maxDesiredHdrSdrRatio) {
         Spline sdrToHdrSpline = mHbmData != null ? mHbmData.sdrToHdrRatioSpline : null;
+        return getHdrBrightnessFromSdr(brightness, maxDesiredHdrSdrRatio, sdrToHdrSpline);
+    }
+
+    /**
+     * Calculate the HDR brightness for the specified SDR brightenss, restricted by the
+     * maxDesiredHdrSdrRatio (the ratio between the HDR luminance and SDR luminance) and specific
+     * sdrToHdrSpline
+     *
+     * @return the HDR brightness or BRIGHTNESS_INVALID when no mapping exists.
+     */
+    public float getHdrBrightnessFromSdr(float brightness, float maxDesiredHdrSdrRatio,
+            @Nullable Spline sdrToHdrSpline) {
         if (sdrToHdrSpline == null) {
             return PowerManager.BRIGHTNESS_INVALID;
         }
@@ -1592,6 +1623,24 @@ public class DisplayDeviceConfig {
         return mVrrSupportEnabled;
     }
 
+    /**
+     * While the device is dozing, a designated light sensor is used to determine the brightness.
+     * @return The mapping between doze brightness sensor values and brightness values. The value
+     * -1 means that the current brightness should be kept.
+     */
+    @Nullable
+    public float[] getDozeBrightnessSensorValueToBrightness() {
+        return mDozeBrightnessSensorValueToBrightness;
+    }
+
+    /**
+     * @return The default doze brightness to use while no other doze brightness is available. Can
+     * be {@link PowerManager#BRIGHTNESS_INVALID_FLOAT} if undefined.
+     */
+    public float getDefaultDozeBrightness() {
+        return mDefaultDozeBrightness;
+    }
+
     @Override
     public String toString() {
         return "DisplayDeviceConfig{"
@@ -1689,6 +1738,9 @@ public class DisplayDeviceConfig {
                 ? mEvenDimmerBrightnessData.toString() : "null")
                 + "\n"
                 + "mVrrSupported= " + mVrrSupportEnabled + "\n"
+                + "mDozeBrightnessSensorValueToBrightness= "
+                + Arrays.toString(mDozeBrightnessSensorValueToBrightness) + "\n"
+                + "mDefaultDozeBrightness= " + mDefaultDozeBrightness + "\n"
                 + "}";
     }
 
@@ -1747,15 +1799,17 @@ public class DisplayDeviceConfig {
                 loadThermalThrottlingConfig(config);
                 loadPowerThrottlingConfigData(config);
                 // Backlight and evenDimmer data should be loaded for HbmData
-                mHbmData = HighBrightnessModeData.loadHighBrightnessModeData(config, (hbm) -> {
+                Function<HighBrightnessMode, Float> transitionPointProvider = (hbm) -> {
                     float transitionPointBacklightScale = hbm.getTransitionPoint_all().floatValue();
                     if (transitionPointBacklightScale >= mBacklightMaximum) {
                         throw new IllegalArgumentException("HBM transition point invalid. "
-                                + mHbmData.transitionPoint + " is not less than "
+                                + transitionPointBacklightScale + " is not less than "
                                 + mBacklightMaximum);
                     }
                     return  getBrightnessFromBacklight(transitionPointBacklightScale);
-                });
+                };
+                mHbmData = HighBrightnessModeData.loadHighBrightnessModeData(config,
+                        transitionPointProvider);
                 if (mHbmData.isHighBrightnessModeEnabled && mHbmData.refreshRateLimit != null) {
                     // TODO(b/331650248): cleanup, DMD can use mHbmData.refreshRateLimit
                     mRefreshRateLimitations.add(new RefreshRateLimitation(
@@ -1779,10 +1833,11 @@ public class DisplayDeviceConfig {
                 loadRefreshRateSetting(config);
                 loadScreenOffBrightnessSensorValueToLuxFromDdc(config);
                 loadUsiVersion(config);
-                mHdrBrightnessData = HdrBrightnessData.loadConfig(config);
+                mHdrBrightnessData = HdrBrightnessData.loadConfig(config, transitionPointProvider);
                 loadBrightnessCapForWearBedtimeMode(config);
                 loadIdleScreenRefreshRateTimeoutConfigs(config);
                 mVrrSupportEnabled = config.getSupportsVrr();
+                loadDozeBrightness(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
@@ -1811,6 +1866,7 @@ public class DisplayDeviceConfig {
         loadRefreshRateSetting(null);
         loadBrightnessCapForWearBedtimeModeFromConfigXml();
         loadIdleScreenRefreshRateTimeoutConfigs(null);
+        loadDozeBrightness(null);
         mLoadedFrom = "<config.xml>";
     }
 
@@ -2742,6 +2798,37 @@ public class DisplayDeviceConfig {
                     config.getIdleScreenRefreshRateTimeout());
             mIdleScreenRefreshRateTimeoutLuxThresholds = config
                     .getIdleScreenRefreshRateTimeout().getLuxThresholds().getPoint();
+        }
+    }
+
+    private void loadDozeBrightness(DisplayConfiguration config) {
+        if (mFlags.isDozeBrightnessFloatEnabled() && config != null
+                && config.getDozeBrightnessSensorValueToBrightness() != null) {
+            List<BigDecimal> values = config.getDozeBrightnessSensorValueToBrightness().getItem();
+            mDozeBrightnessSensorValueToBrightness = new float[values.size()];
+            for (int i = 0; i < values.size(); i++) {
+                float backlight = values.get(i).floatValue();
+                if (backlight != KEEP_CURRENT_BRIGHTNESS) {
+                    mDozeBrightnessSensorValueToBrightness[i] =
+                            getBrightnessFromBacklight(backlight);
+                } else {
+                    mDozeBrightnessSensorValueToBrightness[i] = KEEP_CURRENT_BRIGHTNESS;
+                }
+            }
+        }
+
+        if (mFlags.isDozeBrightnessFloatEnabled() && config != null
+                && config.getDefaultDozeBrightness() != null) {
+            float backlight = config.getDefaultDozeBrightness().floatValue();
+            mDefaultDozeBrightness = getBrightnessFromBacklight(backlight);
+        } else {
+            mDefaultDozeBrightness = mContext.getResources().getFloat(
+                    com.android.internal.R.dimen.config_screenBrightnessDozeFloat);
+            if (mDefaultDozeBrightness == INVALID_BRIGHTNESS_IN_CONFIG) {
+                mDefaultDozeBrightness = BrightnessSynchronizer.brightnessIntToFloat(
+                        mContext.getResources().getInteger(
+                                com.android.internal.R.integer.config_screenBrightnessDoze));
+            }
         }
     }
 

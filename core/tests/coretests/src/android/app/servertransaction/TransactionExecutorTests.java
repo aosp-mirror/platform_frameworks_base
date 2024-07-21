@@ -57,11 +57,13 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -83,6 +85,9 @@ import java.util.stream.Collectors;
 @Presubmit
 public class TransactionExecutorTests {
 
+    @Rule
+    public final MockitoRule mocks = MockitoJUnit.rule();
+
     @Mock
     private ClientTransactionHandler mTransactionHandler;
     @Mock
@@ -98,8 +103,6 @@ public class TransactionExecutorTests {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mClientRecord = new ActivityClientRecord();
         when(mTransactionHandler.getActivityClient(any())).thenReturn(mClientRecord);
 

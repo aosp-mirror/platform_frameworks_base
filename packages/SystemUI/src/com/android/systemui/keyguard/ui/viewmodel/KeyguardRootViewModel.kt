@@ -91,8 +91,9 @@ constructor(
     private val dozingToGoneTransitionViewModel: DozingToGoneTransitionViewModel,
     private val dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
     private val dozingToOccludedTransitionViewModel: DozingToOccludedTransitionViewModel,
-    private val dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
+    private val dreamingToAodTransitionViewModel: DreamingToAodTransitionViewModel,
     private val dreamingToGoneTransitionViewModel: DreamingToGoneTransitionViewModel,
+    private val dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     private val glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel,
     private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
@@ -243,6 +244,7 @@ constructor(
                         dozingToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToLockscreenTransitionViewModel.lockscreenAlpha,
                         dozingToOccludedTransitionViewModel.lockscreenAlpha(viewState),
+                        dreamingToAodTransitionViewModel.lockscreenAlpha,
                         dreamingToGoneTransitionViewModel.lockscreenAlpha,
                         dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
                         glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,

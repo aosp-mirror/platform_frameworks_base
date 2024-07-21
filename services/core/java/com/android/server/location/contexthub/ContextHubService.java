@@ -333,8 +333,14 @@ public class ContextHubService extends IContextHubService.Stub {
         return new IContextHubClientCallback.Stub() {
             private void finishCallback() {
                 try {
-                    IContextHubClient client = mDefaultClientMap.get(contextHubId);
-                    client.callbackFinished();
+                    if (mDefaultClientMap != null && mDefaultClientMap.containsKey(contextHubId)) {
+                        IContextHubClient client = mDefaultClientMap.get(contextHubId);
+                        client.callbackFinished();
+                    } else {
+                        Log.e(TAG, "Default client not found for hub (ID = " + contextHubId + "): "
+                                + mDefaultClientMap == null ? "map was null"
+                                                            : "map did not contain the hub");
+                    }
                 } catch (RemoteException e) {
                     Log.e(
                             TAG,

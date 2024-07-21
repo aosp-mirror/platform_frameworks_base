@@ -3849,9 +3849,10 @@ public final class DisplayManagerService extends SystemService {
             // Ignore redundant events. Further optimization is possible by merging adjacent events.
             Pair<Integer, Integer> last = mDisplayEvents.get(mDisplayEvents.size() - 1);
             if (last.first == displayId && last.second == event) {
-                Slog.d(TAG,
-                        "Ignore redundant display event " + displayId + "/" + event + " to "
-                                + mCallbackRecord.mUid + "/" + mCallbackRecord.mPid);
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignore redundant display event " + displayId + "/" + event + " to "
+                            + mCallbackRecord.mUid + "/" + mCallbackRecord.mPid);
+                }
                 return;
             }
 
@@ -4725,6 +4726,32 @@ public final class DisplayManagerService extends SystemService {
             requestDisplayModes_enforcePermission();
             DisplayManagerService.this.mDisplayModeDirector.requestDisplayModes(
                     token, displayId, modeIds);
+        }
+
+        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @Override // Binder call
+        public float[] getDozeBrightnessSensorValueToBrightness(int displayId) {
+            getDozeBrightnessSensorValueToBrightness_enforcePermission();
+            DisplayDeviceConfig ddc =
+                    mDisplayDeviceConfigProvider.getDisplayDeviceConfig(displayId);
+            if (ddc == null) {
+                throw new IllegalArgumentException(
+                        "Display ID does not have a config: " + displayId);
+            }
+            return ddc.getDozeBrightnessSensorValueToBrightness();
+        }
+
+        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @Override // Binder call
+        public float getDefaultDozeBrightness(int displayId) {
+            getDefaultDozeBrightness_enforcePermission();
+            DisplayDeviceConfig ddc =
+                    mDisplayDeviceConfigProvider.getDisplayDeviceConfig(displayId);
+            if (ddc == null) {
+                throw new IllegalArgumentException(
+                        "Display ID does not have a config for doze-default: " + displayId);
+            }
+            return ddc.getDefaultDozeBrightness();
         }
     }
 

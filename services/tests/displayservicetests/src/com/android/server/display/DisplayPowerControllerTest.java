@@ -21,6 +21,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
+import static com.android.server.display.config.DisplayDeviceConfigTestUtilsKt.createSensorData;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -85,7 +86,6 @@ import com.android.server.display.brightness.clamper.HdrClamper;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.display.config.HighBrightnessModeData;
 import com.android.server.display.config.HysteresisLevels;
-import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.feature.flags.Flags;
 import com.android.server.display.layout.Layout;
@@ -117,6 +117,7 @@ public final class DisplayPowerControllerTest {
     private static final String SECOND_FOLLOWER_UNIQUE_DISPLAY_ID = "unique_id_789";
     private static final float PROX_SENSOR_MAX_RANGE = 5;
     private static final float DOZE_SCALE_FACTOR = 0.34f;
+    private static final float DEFAULT_DOZE_BRIGHTNESS = 0.121f;
 
     private static final float BRIGHTNESS_RAMP_RATE_MINIMUM = 0.0f;
     private static final float BRIGHTNESS_RAMP_RATE_FAST_DECREASE = 0.3f;
@@ -2051,9 +2052,6 @@ public final class DisplayPowerControllerTest {
 
     @Test
     public void testDefaultDozeBrightness() {
-        float brightness = 0.121f;
-        when(mPowerManagerMock.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE)).thenReturn(brightness);
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, false);
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
@@ -2069,15 +2067,25 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        verify(mHolder.animator).animateTo(eq(brightness), /* linearSecondTarget= */ anyFloat(),
-                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE), eq(false));
+        verify(mHolder.animator).animateTo(eq(DEFAULT_DOZE_BRIGHTNESS),
+                /* linearSecondTarget= */ anyFloat(), eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE),
+                eq(false));
+
+        // The display device changes and the default doze brightness changes
+        setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
+                mHolder.config, /* isEnabled= */ true);
+        when(mHolder.config.getDefaultDozeBrightness()).thenReturn(DEFAULT_DOZE_BRIGHTNESS / 2);
+        mHolder.dpc.onDisplayChanged(mHolder.hbmMetadata, Layout.NO_LEAD_DISPLAY);
+
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.animator).animateTo(eq(DEFAULT_DOZE_BRIGHTNESS / 2),
+                /* linearSecondTarget= */ anyFloat(), eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE),
+                eq(false));
     }
 
     @Test
     public void testDefaultDozeBrightness_ShouldNotBeUsedIfAutoBrightnessAllowedInDoze() {
-        float brightness = 0.121f;
-        when(mPowerManagerMock.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE)).thenReturn(brightness);
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, true);
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
@@ -2093,7 +2101,7 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        verify(mHolder.animator, never()).animateTo(eq(brightness),
+        verify(mHolder.animator, never()).animateTo(eq(DEFAULT_DOZE_BRIGHTNESS),
                 /* linearSecondTarget= */ anyFloat(), /* rate= */ anyFloat(),
                 /* ignoreAnimationLimits= */ anyBoolean());
     }
@@ -2129,6 +2137,14 @@ public final class DisplayPowerControllerTest {
     private void setUpDisplay(int displayId, String uniqueId, LogicalDisplay logicalDisplayMock,
             DisplayDevice displayDeviceMock, DisplayDeviceConfig displayDeviceConfigMock,
             boolean isEnabled) {
+
+        setUpDisplay(displayId, uniqueId, logicalDisplayMock, displayDeviceMock,
+                displayDeviceConfigMock, isEnabled, "display_name");
+    }
+
+    private void setUpDisplay(int displayId, String uniqueId, LogicalDisplay logicalDisplayMock,
+            DisplayDevice displayDeviceMock, DisplayDeviceConfig displayDeviceConfigMock,
+            boolean isEnabled, String displayName) {
         DisplayInfo info = new DisplayInfo();
         DisplayDeviceInfo deviceInfo = new DisplayDeviceInfo();
         deviceInfo.uniqueId = uniqueId;
@@ -2140,17 +2156,20 @@ public final class DisplayPowerControllerTest {
         when(logicalDisplayMock.isInTransitionLocked()).thenReturn(false);
         when(displayDeviceMock.getDisplayDeviceInfoLocked()).thenReturn(deviceInfo);
         when(displayDeviceMock.getUniqueId()).thenReturn(uniqueId);
+        when(displayDeviceMock.getNameLocked()).thenReturn(displayName);
         when(displayDeviceMock.getDisplayDeviceConfig()).thenReturn(displayDeviceConfigMock);
         when(displayDeviceConfigMock.getProximitySensor()).thenReturn(
-                new SensorData(Sensor.STRING_TYPE_PROXIMITY, null));
+                createSensorData(Sensor.STRING_TYPE_PROXIMITY));
         when(displayDeviceConfigMock.getNits()).thenReturn(new float[]{2, 500});
         when(displayDeviceConfigMock.isAutoBrightnessAvailable()).thenReturn(true);
         when(displayDeviceConfigMock.getAmbientLightSensor()).thenReturn(
-                new SensorData());
+                createSensorData());
         when(displayDeviceConfigMock.getScreenOffBrightnessSensor()).thenReturn(
-                new SensorData(Sensor.STRING_TYPE_LIGHT, null));
+                createSensorData(Sensor.STRING_TYPE_LIGHT));
         when(displayDeviceConfigMock.getScreenOffBrightnessSensorValueToLux())
                 .thenReturn(new int[0]);
+        when(displayDeviceConfigMock.getDefaultDozeBrightness())
+                .thenReturn(DEFAULT_DOZE_BRIGHTNESS);
 
         when(displayDeviceConfigMock.getBrightnessRampFastDecrease())
                 .thenReturn(BRIGHTNESS_RAMP_RATE_FAST_DECREASE);

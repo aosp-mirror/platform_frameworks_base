@@ -31,6 +31,7 @@ import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.server.display.ExternalDisplayPolicy.ENABLE_ON_CONNECT;
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
+import static com.android.server.display.config.DisplayDeviceConfigTestUtilsKt.createSensorData;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -2423,7 +2424,7 @@ public class DisplayManagerServiceTest {
         String testSensorType = "testType";
         Sensor testSensor = TestUtils.createSensor(testSensorType, testSensorName);
 
-        SensorData sensorData = new SensorData(testSensorType, testSensorName,
+        SensorData sensorData = createSensorData(testSensorType, testSensorName,
                 /* minRefreshRate= */ 10f, /* maxRefreshRate= */ 100f);
 
         when(mMockDisplayDeviceConfig.getProximitySensor()).thenReturn(sensorData);
