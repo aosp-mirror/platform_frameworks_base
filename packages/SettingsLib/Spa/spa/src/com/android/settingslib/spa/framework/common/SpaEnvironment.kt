@@ -74,7 +74,7 @@ abstract class SpaEnvironment(context: Context) {
     // Set your SpaLogger implementation, for any SPA events logging.
     open val logger: SpaLogger = object : SpaLogger {}
 
-    // Specify class name of browse activity and slice broadcast receiver, which is used to
+    // Specify class name of browse activity, which is used to
     // generate the necessary intents.
     open val browseActivityClass: Class<out Activity>? = null
 

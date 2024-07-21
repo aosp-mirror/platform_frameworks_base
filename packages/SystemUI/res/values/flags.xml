@@ -33,9 +33,4 @@
     <!--  Whether the user switcher chip shows in the status bar. When true, the multi user
       avatar will no longer show on the lockscreen -->
     <bool name="flag_user_switcher_chip">false</bool>
-
-    <!-- Whether the battery icon is allowed to display a shield when battery life is being
-         protected. -->
-    <bool name="flag_battery_shield_icon">false</bool>
-
 </resources>

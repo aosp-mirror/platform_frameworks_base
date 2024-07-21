@@ -48,6 +48,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.provider.SettingsStringUtil;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.Voice;
 import android.text.TextUtils;
@@ -151,7 +152,8 @@ public class AccessibilityShortcutController {
      *         info for toggling a framework feature
      */
     public static Map<ComponentName, FrameworkFeatureInfo>
-        getFrameworkShortcutFeaturesMap() {
+            getFrameworkShortcutFeaturesMap() {
+
         if (sFrameworkShortcutFeaturesMap == null) {
             Map<ComponentName, FrameworkFeatureInfo> featuresMap = new ArrayMap<>(4);
             featuresMap.put(COLOR_INVERSION_COMPONENT_NAME,
@@ -172,7 +174,7 @@ public class AccessibilityShortcutController {
                                 R.string.one_handed_mode_feature_name));
             }
             featuresMap.put(REDUCE_BRIGHT_COLORS_COMPONENT_NAME,
-                    new ToggleableFrameworkFeatureInfo(
+                    new ExtraDimFrameworkFeatureInfo(
                             Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
                             "1" /* Value to enable */, "0" /* Value to disable */,
                             R.string.reduce_bright_colors_feature_name));
@@ -825,6 +827,44 @@ public class AccessibilityShortcutController {
         LaunchableFrameworkFeatureInfo(int labelStringResourceId) {
             super(/* settingKey= */ null, /* settingOnValue= */ null, /* settingOffValue= */ null,
                     labelStringResourceId);
+        }
+    }
+
+
+    public static class ExtraDimFrameworkFeatureInfo extends FrameworkFeatureInfo {
+        ExtraDimFrameworkFeatureInfo(String settingKey, String settingOnValue,
+                String settingOffValue, int labelStringResourceId) {
+            super(settingKey, settingOnValue, settingOffValue, labelStringResourceId);
+        }
+
+        /**
+         * Perform shortcut action.
+         *
+         * @return True if the accessibility service is enabled, false otherwise.
+         */
+        public boolean activateShortcut(Context context, int userId) {
+            if (com.android.server.display.feature.flags.Flags.evenDimmer()
+                    && context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_evenDimmerEnabled)) {
+                launchExtraDimDialog();
+                return true;
+            } else {
+                // Assuming that the default state will be to have the feature off
+                final SettingsStringUtil.SettingStringHelper
+                        setting = new SettingsStringUtil.SettingStringHelper(
+                        context.getContentResolver(), getSettingKey(), userId);
+                if (!TextUtils.equals(getSettingOnValue(), setting.read())) {
+                    setting.write(getSettingOnValue());
+                    return true;
+                } else {
+                    setting.write(getSettingOffValue());
+                    return false;
+                }
+            }
+        }
+
+        private void launchExtraDimDialog() {
+            // TODO: launch Extra dim dialog for feature migration
         }
     }
 

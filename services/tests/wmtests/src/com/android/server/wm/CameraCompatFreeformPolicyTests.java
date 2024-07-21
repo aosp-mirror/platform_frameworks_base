@@ -88,7 +88,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     private static final String CAMERA_ID_2 = "camera-2";
     private CameraManager mMockCameraManager;
     private Handler mMockHandler;
-    private LetterboxConfiguration mLetterboxConfiguration;
+    private AppCompatConfiguration mAppCompatConfiguration;
 
     private CameraManager.AvailabilityCallback mCameraAvailabilityCallback;
     private CameraCompatFreeformPolicy mCameraCompatFreeformPolicy;
@@ -98,13 +98,13 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mLetterboxConfiguration = mDisplayContent.mWmService.mLetterboxConfiguration;
-        spyOn(mLetterboxConfiguration);
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
+        mAppCompatConfiguration = mDisplayContent.mWmService.mAppCompatConfiguration;
+        spyOn(mAppCompatConfiguration);
+        when(mAppCompatConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(true);
-        when(mLetterboxConfiguration.isCameraCompatRefreshEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshEnabled())
                 .thenReturn(true);
-        when(mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(true);
 
         mMockCameraManager = mock(CameraManager.class);
@@ -228,7 +228,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabled() throws Exception {
-        when(mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);

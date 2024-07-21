@@ -50,7 +50,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.Handler;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
 
@@ -104,6 +104,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Mock SyncTransactionQueue mSyncQueue;
     @Mock RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     @Mock ShellExecutor mMainExecutor;
+    @Mock Handler mMainHandler;
     @Mock DisplayController mDisplayController;
     @Mock DisplayImeController mDisplayImeController;
     @Mock DisplayInsetsController mDisplayInsetsController;
@@ -134,7 +135,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
                 mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
                 mIconProvider, Optional.of(mRecentTasks), mLaunchAdjacentController,
                 Optional.of(mWindowDecorViewModel), Optional.of(mDesktopTasksController),
-                mStageCoordinator, mMultiInstanceHelper, mMainExecutor));
+                mStageCoordinator, mMultiInstanceHelper, mMainExecutor, mMainHandler));
     }
 
     @Test

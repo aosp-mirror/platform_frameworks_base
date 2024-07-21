@@ -69,6 +69,8 @@ enum class ResourceType {
   kXml,
 };
 
+enum class FlagStatus { NoFlag = 0, Disabled = 1, Enabled = 2 };
+
 android::StringPiece to_string(ResourceType type);
 
 /**

@@ -171,14 +171,15 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun longPressed_openWppDirectlyEnabled_doesNotShowMenu_opensSettings() =
+    fun longPressed_isA11yAction_doesNotShowMenu_opensSettings() =
         testScope.runTest {
-            createUnderTest(isOpenWppDirectlyEnabled = true)
+            createUnderTest()
             val isMenuVisible by collectLastValue(underTest.isMenuVisible)
             val shouldOpenSettings by collectLastValue(underTest.shouldOpenSettings)
+            val isA11yAction = true
             runCurrent()
 
-            underTest.onLongPress()
+            underTest.onLongPress(isA11yAction)
 
             assertThat(isMenuVisible).isFalse()
             assertThat(shouldOpenSettings).isTrue()
@@ -284,7 +285,6 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
     private suspend fun createUnderTest(
         isLongPressFeatureEnabled: Boolean = true,
         isRevampedWppFeatureEnabled: Boolean = true,
-        isOpenWppDirectlyEnabled: Boolean = false,
     ) {
         // This needs to be re-created for each test outside of kosmos since the flag values are
         // read during initialization to set up flows. Maybe there is a better way to handle that.
@@ -298,7 +298,6 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
                 featureFlags =
                     kosmos.fakeFeatureFlagsClassic.apply {
                         set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, isLongPressFeatureEnabled)
-                        set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, isOpenWppDirectlyEnabled)
                     },
                 broadcastDispatcher = fakeBroadcastDispatcher,
                 accessibilityManager = kosmos.accessibilityManagerWrapper,

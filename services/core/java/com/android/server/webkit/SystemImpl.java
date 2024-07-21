@@ -67,19 +67,13 @@ public class SystemImpl implements SystemInterface {
     private static final String TAG_SIGNATURE = "signature";
     private static final String TAG_FALLBACK = "isFallback";
     private static final String PIN_GROUP = "webview";
+
+    private final Context mContext;
     private final WebViewProviderInfo[] mWebViewProviderPackages;
 
-    // Initialization-on-demand holder idiom for getting the WebView provider packages once and
-    // for all in a thread-safe manner.
-    private static class LazyHolder {
-        private static final SystemImpl INSTANCE = new SystemImpl();
-    }
+    SystemImpl(Context context) {
+        mContext = context;
 
-    public static SystemImpl getInstance() {
-        return LazyHolder.INSTANCE;
-    }
-
-    private SystemImpl() {
         int numFallbackPackages = 0;
         int numAvailableByDefaultPackages = 0;
         XmlResourceParser parser = null;
@@ -184,14 +178,14 @@ public class SystemImpl implements SystemInterface {
     }
 
     @Override
-    public String getUserChosenWebViewProvider(Context context) {
-        return Settings.Global.getString(context.getContentResolver(),
+    public String getUserChosenWebViewProvider() {
+        return Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.WEBVIEW_PROVIDER);
     }
 
     @Override
-    public void updateUserSetting(Context context, String newProviderName) {
-        Settings.Global.putString(context.getContentResolver(),
+    public void updateUserSetting(String newProviderName) {
+        Settings.Global.putString(mContext.getContentResolver(),
                 Settings.Global.WEBVIEW_PROVIDER,
                 newProviderName == null ? "" : newProviderName);
     }
@@ -207,8 +201,8 @@ public class SystemImpl implements SystemInterface {
     }
 
     @Override
-    public void enablePackageForAllUsers(Context context, String packageName, boolean enable) {
-        UserManager userManager = (UserManager)context.getSystemService(Context.USER_SERVICE);
+    public void enablePackageForAllUsers(String packageName, boolean enable) {
+        UserManager userManager = mContext.getSystemService(UserManager.class);
         for(UserInfo userInfo : userManager.getUsers()) {
             enablePackageForUser(packageName, enable, userInfo.id);
         }
@@ -228,16 +222,15 @@ public class SystemImpl implements SystemInterface {
     }
 
     @Override
-    public void installExistingPackageForAllUsers(Context context, String packageName) {
-        UserManager userManager = context.getSystemService(UserManager.class);
+    public void installExistingPackageForAllUsers(String packageName) {
+        UserManager userManager = mContext.getSystemService(UserManager.class);
         for (UserInfo userInfo : userManager.getUsers()) {
             installPackageForUser(packageName, userInfo.id);
         }
     }
 
     private void installPackageForUser(String packageName, int userId) {
-        final Context context = AppGlobals.getInitialApplication();
-        final Context contextAsUser = context.createContextAsUser(UserHandle.of(userId), 0);
+        final Context contextAsUser = mContext.createContextAsUser(UserHandle.of(userId), 0);
         final PackageInstaller installer = contextAsUser.getPackageManager().getPackageInstaller();
         installer.installExistingPackage(packageName, PackageManager.INSTALL_REASON_UNKNOWN, null);
     }
@@ -255,29 +248,28 @@ public class SystemImpl implements SystemInterface {
     }
 
     @Override
-    public List<UserPackage> getPackageInfoForProviderAllUsers(Context context,
-            WebViewProviderInfo configInfo) {
-        return UserPackage.getPackageInfosAllUsers(context, configInfo.packageName, PACKAGE_FLAGS);
+    public List<UserPackage> getPackageInfoForProviderAllUsers(WebViewProviderInfo configInfo) {
+        return UserPackage.getPackageInfosAllUsers(mContext, configInfo.packageName, PACKAGE_FLAGS);
     }
 
     @Override
-    public int getMultiProcessSetting(Context context) {
+    public int getMultiProcessSetting() {
         if (updateServiceV2()) {
             throw new IllegalStateException(
                     "getMultiProcessSetting shouldn't be called if update_service_v2 flag is set.");
         }
         return Settings.Global.getInt(
-                context.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, 0);
+                mContext.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, 0);
     }
 
     @Override
-    public void setMultiProcessSetting(Context context, int value) {
+    public void setMultiProcessSetting(int value) {
         if (updateServiceV2()) {
             throw new IllegalStateException(
                     "setMultiProcessSetting shouldn't be called if update_service_v2 flag is set.");
         }
         Settings.Global.putInt(
-                context.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, value);
+                mContext.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, value);
     }
 
     @Override

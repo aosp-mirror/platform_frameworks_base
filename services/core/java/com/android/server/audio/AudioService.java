@@ -739,6 +739,8 @@ public class AudioService extends IAudioService.Stub
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
+    private final Executor mAudioServerLifecycleExecutor;
+
     private IMediaProjectionManager mProjectionService; // to validate projection token
 
     /** Interface for UserManagerService. */
@@ -1059,7 +1061,8 @@ public class AudioService extends IAudioService.Stub
                               audioserverPermissions() ?
                                 initializeAudioServerPermissionProvider(
                                     context, audioPolicyFacade, audioserverLifecycleExecutor) :
-                                    null
+                                    null,
+                              audioserverLifecycleExecutor
                               );
         }
 
@@ -1145,13 +1148,16 @@ public class AudioService extends IAudioService.Stub
      *               {@link AudioSystemThread} is created as the messaging thread instead.
      * @param appOps {@link AppOpsManager} system service
      * @param enforcer Used for permission enforcing
+     * @param permissionProvider Used to push permissions to audioserver
+     * @param audioserverLifecycleExecutor Used for tasks managing audioserver lifecycle
      */
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public AudioService(Context context, AudioSystemAdapter audioSystem,
             SystemServerAdapter systemServer, SettingsAdapter settings,
             AudioVolumeGroupHelperBase audioVolumeGroupHelper, AudioPolicyFacade audioPolicy,
             @Nullable Looper looper, AppOpsManager appOps, @NonNull PermissionEnforcer enforcer,
-            /* @NonNull */ AudioServerPermissionProvider permissionProvider) {
+            /* @NonNull */ AudioServerPermissionProvider permissionProvider,
+            Executor audioserverLifecycleExecutor) {
         super(enforcer);
         sLifecycleLogger.enqueue(new EventLogger.StringEvent("AudioService()"));
         mContext = context;
@@ -1159,6 +1165,7 @@ public class AudioService extends IAudioService.Stub
         mAppOps = appOps;
 
         mPermissionProvider = permissionProvider;
+        mAudioServerLifecycleExecutor = audioserverLifecycleExecutor;
 
         mAudioSystem = audioSystem;
         mSystemServer = systemServer;
@@ -1169,6 +1176,34 @@ public class AudioService extends IAudioService.Stub
 
         mBroadcastHandlerThread = new HandlerThread("AudioService Broadcast");
         mBroadcastHandlerThread.start();
+
+        // Listen to permission invalidations for the PermissionProvider
+        if (audioserverPermissions()) {
+            final Handler broadcastHandler = mBroadcastHandlerThread.getThreadHandler();
+            mAudioSystem.listenForSystemPropertyChange(PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    new Runnable() {
+                        // Roughly chosen to be long enough to suppress the autocork behavior
+                        // of the permission cache (50ms), and longer than the task could reasonably
+                        // take, even with many packages and users, while not introducing visible
+                        // permission leaks - since the app needs to restart, and trigger an action
+                        // which requires permissions from audioserver before this delay.
+                        // For RECORD_AUDIO, we are additionally protected by appops.
+                        final long UPDATE_DELAY_MS = 110;
+                        final AtomicLong scheduledUpdateTimestamp = new AtomicLong(0);
+                        @Override
+                        public void run() {
+                            var currentTime = SystemClock.uptimeMillis();
+                            if (currentTime > scheduledUpdateTimestamp.get()) {
+                                scheduledUpdateTimestamp.set(currentTime + UPDATE_DELAY_MS);
+                                broadcastHandler.postAtTime( () ->
+                                        mAudioServerLifecycleExecutor.execute(mPermissionProvider
+                                            ::onPermissionStateChanged),
+                                        currentTime + UPDATE_DELAY_MS
+                                    );
+                            }
+                        }
+            });
+        }
 
         mDeviceBroker = new AudioDeviceBroker(mContext, this, mAudioSystem);
 
@@ -5719,16 +5754,25 @@ public class AudioService extends IAudioService.Stub
                 || ringerMode == AudioManager.RINGER_MODE_SILENT;
         final boolean shouldRingSco = ringerMode == AudioManager.RINGER_MODE_VIBRATE
                 && mDeviceBroker.isBluetoothScoActive();
-        // Ask audio policy engine to force use Bluetooth SCO channel if needed
+        final boolean shouldRingBle = ringerMode == AudioManager.RINGER_MODE_VIBRATE
+                && (mDeviceBroker.isBluetoothBleHeadsetActive()
+                || mDeviceBroker.isBluetoothBleSpeakerActive());
+        // Ask audio policy engine to force use Bluetooth SCO/BLE channel if needed
         final String eventSource = "muteRingerModeStreams() from u/pid:" + Binder.getCallingUid()
                 + "/" + Binder.getCallingPid();
+        int forceUse = AudioSystem.FORCE_NONE;
+        if (shouldRingSco) {
+            forceUse = AudioSystem.FORCE_BT_SCO;
+        } else if (shouldRingBle) {
+            forceUse = AudioSystem.FORCE_BT_BLE;
+        }
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE, AudioSystem.FOR_VIBRATE_RINGING,
-                shouldRingSco ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE, eventSource, 0);
+                forceUse, eventSource, 0);
 
         for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
             final boolean isMuted = isStreamMutedByRingerOrZenMode(streamType);
             final boolean muteAllowedBySco =
-                    !(shouldRingSco && streamType == AudioSystem.STREAM_RING);
+                    !((shouldRingSco || shouldRingBle) && streamType == AudioSystem.STREAM_RING);
             final boolean shouldZenMute = isStreamAffectedByCurrentZen(streamType);
             final boolean shouldMute = shouldZenMute || (ringerModeMute
                     && isStreamAffectedByRingerMode(streamType) && muteAllowedBySco);
@@ -9909,9 +9953,9 @@ public class AudioService extends IAudioService.Stub
             int a2dpDev = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
             synchronized (mCachedAbsVolDrivingStreamsLock) {
                 mCachedAbsVolDrivingStreams.compute(a2dpDev, (dev, stream) -> {
-                    if (stream != null && !mAvrcpAbsVolSupported) {
+                    if (!mAvrcpAbsVolSupported) {
                         mAudioSystem.setDeviceAbsoluteVolumeEnabled(a2dpDev, /*address=*/
-                                "", /*enabled*/false, AudioSystem.DEVICE_NONE);
+                                "", /*enabled*/false, AudioSystem.STREAM_DEFAULT);
                         return null;
                     }
                     // For A2DP and AVRCP we need to set the driving stream based on the
@@ -11964,29 +12008,6 @@ public class AudioService extends IAudioService.Stub
         audioPolicy.registerOnStartTask(() -> {
             provider.onServiceStart(audioPolicy.getPermissionController());
         });
-
-        // Set up event listeners
-        // Must be kept in sync with PermissionManager
-        Runnable cacheSysPropHandler = new Runnable() {
-            private AtomicReference<SystemProperties.Handle> mHandle = new AtomicReference();
-            private AtomicLong mNonce = new AtomicLong();
-            @Override
-            public void run() {
-                if (mHandle.get() == null) {
-                    // Cache the handle
-                    mHandle.compareAndSet(null, SystemProperties.find(
-                            PermissionManager.CACHE_KEY_PACKAGE_INFO));
-                }
-                long nonce;
-                SystemProperties.Handle ref;
-                if ((ref = mHandle.get()) != null && (nonce = ref.getLong(0)) != 0 &&
-                        mNonce.getAndSet(nonce) != nonce) {
-                    audioserverExecutor.execute(() -> provider.onPermissionStateChanged());
-                }
-            }
-        };
-
-        SystemProperties.addChangeCallback(cacheSysPropHandler);
 
         IntentFilter packageUpdateFilter = new IntentFilter();
         packageUpdateFilter.addAction(ACTION_PACKAGE_ADDED);

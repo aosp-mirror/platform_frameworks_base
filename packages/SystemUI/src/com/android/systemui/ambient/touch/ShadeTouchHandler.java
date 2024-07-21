@@ -26,7 +26,7 @@ import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.Flags;
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
@@ -44,6 +44,8 @@ public class ShadeTouchHandler implements TouchHandler {
     private final ShadeViewController mShadeViewController;
     private final DreamManager mDreamManager;
     private final int mInitiationHeight;
+    private final CommunalSettingsInteractor
+            mCommunalSettingsInteractor;
 
     /**
      * Tracks whether or not we are capturing a given touch. Will be null before and after a touch.
@@ -54,10 +56,12 @@ public class ShadeTouchHandler implements TouchHandler {
     ShadeTouchHandler(Optional<CentralSurfaces> centralSurfaces,
             ShadeViewController shadeViewController,
             DreamManager dreamManager,
+            CommunalSettingsInteractor communalSettingsInteractor,
             @Named(NOTIFICATION_SHADE_GESTURE_INITIATION_HEIGHT) int initiationHeight) {
         mSurfaces = centralSurfaces;
         mShadeViewController = shadeViewController;
         mDreamManager = dreamManager;
+        mCommunalSettingsInteractor = communalSettingsInteractor;
         mInitiationHeight = initiationHeight;
     }
 
@@ -75,7 +79,8 @@ public class ShadeTouchHandler implements TouchHandler {
                 if (mCapture != null && mCapture) {
                     sendTouchEvent((MotionEvent) ev);
                 }
-                if (((MotionEvent) ev).getAction() == MotionEvent.ACTION_UP) {
+                if (((MotionEvent) ev).getAction() == MotionEvent.ACTION_UP
+                        || ((MotionEvent) ev).getAction() == MotionEvent.ACTION_CANCEL) {
                     session.pop();
                 }
             }
@@ -107,7 +112,7 @@ public class ShadeTouchHandler implements TouchHandler {
     }
 
     private void sendTouchEvent(MotionEvent event) {
-        if (Flags.communalHub() && !mDreamManager.isDreaming()) {
+        if (mCommunalSettingsInteractor.isCommunalFlagEnabled() && !mDreamManager.isDreaming()) {
             // Send touches to central surfaces only when on the glanceable hub while not dreaming.
             // While sending touches where while dreaming will open the shade, the shade
             // while closing if opened then closed in the same gesture.

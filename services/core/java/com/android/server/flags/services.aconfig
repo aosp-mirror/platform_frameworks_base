@@ -35,3 +35,13 @@ flag {
     description: "Enable BackgroundInstallControl based on system feature to prevent it from starting on form factors."
     bug: "340928990"
 }
+
+flag {
+    namespace: "input"
+    name: "modifier_shortcut_manager_multiuser"
+    description: "Update Modifier Shortcut Manager to work correctly with multiple users, including HSUM"
+    bug: "351963350"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

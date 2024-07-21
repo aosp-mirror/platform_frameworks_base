@@ -28,6 +28,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.ComposeLockscreen
+import com.android.systemui.qs.flags.NewQsUI
+import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
@@ -35,6 +37,8 @@ import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefac
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import javax.inject.Inject
@@ -53,6 +57,7 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         FooterViewRefactor.token dependsOn NotificationIconContainerRefactor.token
         NotificationAvalancheSuppression.token dependsOn VisualInterruptionRefactor.token
         PriorityPeopleSection.token dependsOn SortBySectionTimeFlag.token
+        NotificationMinimalismPrototype.token dependsOn NotificationsHeadsUpRefactor.token
 
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }
@@ -66,14 +71,20 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
         // DualShade dependencies
         DualShade.token dependsOn SceneContainerFlag.getMainAconfigFlag()
+
+        // QS Fragment using Compose dependencies
+        QSComposeFragment.token dependsOn NewQsUI.token
     }
 
     private inline val politeNotifications
         get() = FlagToken(FLAG_POLITE_NOTIFICATIONS, politeNotifications())
+
     private inline val crossAppPoliteNotifications
         get() = FlagToken(FLAG_CROSS_APP_POLITE_NOTIFICATIONS, crossAppPoliteNotifications())
+
     private inline val vibrateWhileUnlockedToken: FlagToken
         get() = FlagToken(FLAG_VIBRATE_WHILE_UNLOCKED, vibrateWhileUnlocked())
+
     private inline val communalHub
         get() = FlagToken(FLAG_COMMUNAL_HUB, communalHub())
 }

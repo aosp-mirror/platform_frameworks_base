@@ -41,6 +41,7 @@ public class CrashRecoveryModule {
         @Override
         public void onStart() {
             RescueParty.registerHealthObserver(mSystemContext);
+            mPackageWatchdog.registerShutdownBroadcastReceiver();
             mPackageWatchdog.noteBoot();
         }
 

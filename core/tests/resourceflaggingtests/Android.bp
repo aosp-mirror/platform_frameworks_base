@@ -1,0 +1,75 @@
+// Copyright (C) 2024 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+    default_team: "trendy_team_android_resources",
+}
+
+genrule {
+    name: "resource-flagging-test-app-resources-compile",
+    tools: ["aapt2"],
+    srcs: [
+        "flagged_resources_res/values/bools.xml",
+    ],
+    out: ["values_bools.arsc.flat"],
+    cmd: "$(location aapt2) compile $(in) -o $(genDir) " +
+        "--feature-flags test.package.falseFlag:ro=false,test.package.trueFlag:ro=true",
+}
+
+genrule {
+    name: "resource-flagging-test-app-apk",
+    tools: ["aapt2"],
+    // The first input file in the list must be the manifest
+    srcs: [
+        "TestAppAndroidManifest.xml",
+        ":resource-flagging-test-app-resources-compile",
+    ],
+    out: ["resapp.apk"],
+    cmd: "$(location aapt2) link -o $(out) --manifest $(in)",
+}
+
+java_genrule {
+    name: "resource-flagging-apk-as-resource",
+    srcs: [
+        ":resource-flagging-test-app-apk",
+    ],
+    out: ["apks_as_resources.res.zip"],
+    tools: ["soong_zip"],
+
+    cmd: "mkdir -p $(genDir)/res/raw && " +
+        "cp $(in) $(genDir)/res/raw/$$(basename $(in)) && " +
+        "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
+}
+
+android_test {
+    name: "ResourceFlaggingTests",
+    srcs: [
+        "src/**/*.java",
+    ],
+    platform_apis: true,
+    certificate: "platform",
+    static_libs: [
+        "androidx.test.rules",
+        "testng",
+        "compatibility-device-util-axt",
+    ],
+    resource_zips: [":resource-flagging-apk-as-resource"],
+    test_suites: ["device-tests"],
+}

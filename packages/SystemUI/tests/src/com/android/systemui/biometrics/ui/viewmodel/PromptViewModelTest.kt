@@ -449,96 +449,115 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun shows_authenticated_no_errors_no_confirmation_required() = runGenericTest {
+    fun shows_error_to_unlock_or_success() {
+        // Face-only auth does not use error -> unlock or error -> success assets
+        if (testCase.isFingerprintOnly || testCase.isCoex) {
+            runGenericTest {
+                // Distinct asset for error -> success only applicable for fingerprint-only /
+                // explicit co-ex auth
+                val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+                val iconContentDescriptionId by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
+                val shouldAnimateIconView by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+
+                var forceExplicitFlow =
+                    testCase.isCoex && testCase.confirmationRequested ||
+                        testCase.authenticatedByFingerprint
+                if (forceExplicitFlow) {
+                    kosmos.promptViewModel.ensureFingerprintHasStarted(isDelayed = true)
+                }
+                verifyIconSize(forceExplicitFlow)
+
+                kosmos.promptViewModel.ensureFingerprintHasStarted(isDelayed = true)
+                kosmos.promptViewModel.iconViewModel.setPreviousIconWasError(true)
+
+                kosmos.promptViewModel.showAuthenticated(
+                    modality = testCase.authenticatedModality,
+                    dismissAfterDelay = DELAY
+                )
+
+                // TODO(b/350121748): SFPS test cases to be added after SFPS assets update
+                if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                    // Non-SFPS (UDFPS / rear-FPS) test cases
+                    // Covers (1) fingerprint-only (2) co-ex, authenticated by fingerprint
+                    if (testCase.authenticatedByFingerprint) {
+                        assertThat(iconAsset)
+                            .isEqualTo(R.raw.fingerprint_dialogue_error_to_success_lottie)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    } else { //  co-ex, authenticated by face
+                        assertThat(iconAsset)
+                            .isEqualTo(R.raw.fingerprint_dialogue_error_to_unlock_lottie)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_authenticated_confirmation)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+
+                        // Confirm authentication
+                        kosmos.promptViewModel.confirmAuthenticated()
+
+                        assertThat(iconAsset)
+                            .isEqualTo(
+                                R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie
+                            )
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun shows_authenticated_no_errors_no_confirmation_required() {
         if (!testCase.confirmationRequested) {
-            val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
-            val iconOverlayAsset by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.iconOverlayAsset)
-            val iconContentDescriptionId by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
-            val shouldAnimateIconView by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
-            val shouldAnimateIconOverlay by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconOverlay)
-            verifyIconSize()
+            runGenericTest {
+                val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+                val iconOverlayAsset by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.iconOverlayAsset)
+                val iconContentDescriptionId by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
+                val shouldAnimateIconView by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+                val shouldAnimateIconOverlay by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconOverlay)
+                verifyIconSize()
 
-            kosmos.promptViewModel.showAuthenticated(
-                modality = testCase.authenticatedModality,
-                dismissAfterDelay = DELAY
-            )
+                kosmos.promptViewModel.showAuthenticated(
+                    modality = testCase.authenticatedModality,
+                    dismissAfterDelay = DELAY
+                )
 
-            if (testCase.isFingerprintOnly) {
-                // Fingerprint icon asset assertions
-                if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                    assertThat(iconAsset).isEqualTo(getSfpsBaseIconAsset())
-                    assertThat(iconOverlayAsset)
-                        .isEqualTo(R.raw.biometricprompt_symbol_fingerprint_to_success_landscape)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
-                    assertThat(shouldAnimateIconView).isEqualTo(true)
-                    assertThat(shouldAnimateIconOverlay).isEqualTo(true)
-                } else {
-                    assertThat(iconAsset)
-                        .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_success_lottie)
+                if (testCase.isFingerprintOnly) {
+                    // Fingerprint icon asset assertions
+                    if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                        assertThat(iconAsset).isEqualTo(getSfpsBaseIconAsset())
+                        assertThat(iconOverlayAsset)
+                            .isEqualTo(
+                                R.raw.biometricprompt_symbol_fingerprint_to_success_landscape
+                            )
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                        assertThat(shouldAnimateIconOverlay).isEqualTo(true)
+                    } else {
+                        assertThat(iconAsset)
+                            .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_success_lottie)
+                        assertThat(iconOverlayAsset).isEqualTo(-1)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                        assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+                    }
+                } else if (testCase.isFaceOnly || testCase.isCoex) {
+                    // Face icon asset assertions
+                    // If co-ex, use implicit flow (explicit flow always requires confirmation)
+                    assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_checkmark)
                     assertThat(iconOverlayAsset).isEqualTo(-1)
                     assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
-                    assertThat(shouldAnimateIconView).isEqualTo(true)
-                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-                }
-            } else if (testCase.isFaceOnly || testCase.isCoex) {
-                // Face icon asset assertions
-                // If co-ex, use implicit flow (explicit flow always requires confirmation)
-                assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_checkmark)
-                assertThat(iconOverlayAsset).isEqualTo(-1)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
-                assertThat(shouldAnimateIconView).isEqualTo(true)
-                assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-            }
-        }
-    }
-
-    @Test
-    fun shows_pending_confirmation() = runGenericTest {
-        if (
-            (testCase.isFaceOnly || testCase.isCoex) &&
-                testCase.authenticatedByFace &&
-                testCase.confirmationRequested
-        ) {
-            val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
-            val iconOverlayAsset by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.iconOverlayAsset)
-            val iconContentDescriptionId by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
-            val shouldAnimateIconView by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
-            val shouldAnimateIconOverlay by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconOverlay)
-
-            val forceExplicitFlow = testCase.isCoex && testCase.confirmationRequested
-            verifyIconSize(forceExplicitFlow = forceExplicitFlow)
-
-            kosmos.promptViewModel.showAuthenticated(
-                modality = testCase.authenticatedModality,
-                dismissAfterDelay = DELAY
-            )
-
-            if (testCase.isFaceOnly) {
-                assertThat(iconAsset).isEqualTo(R.raw.face_dialog_wink_from_dark)
-                assertThat(iconOverlayAsset).isEqualTo(-1)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
-                assertThat(shouldAnimateIconView).isEqualTo(true)
-                assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-            } else if (testCase.isCoex) { // explicit flow, confirmation requested
-                // TODO: Update when SFPS co-ex is implemented
-                if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                    assertThat(iconAsset)
-                        .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie)
-                    assertThat(iconOverlayAsset).isEqualTo(-1)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.fingerprint_dialog_authenticated_confirmation)
+                        .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
                     assertThat(shouldAnimateIconView).isEqualTo(true)
                     assertThat(shouldAnimateIconOverlay).isEqualTo(false)
                 }
@@ -547,51 +566,96 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun shows_authenticated_explicitly_confirmed_iconUpdate() = runGenericTest {
-        if (
-            (testCase.isFaceOnly || testCase.isCoex) &&
-                testCase.authenticatedByFace &&
-                testCase.confirmationRequested
-        ) {
-            val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
-            val iconOverlayAsset by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.iconOverlayAsset)
-            val iconContentDescriptionId by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
-            val shouldAnimateIconView by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
-            val shouldAnimateIconOverlay by
-                collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconOverlay)
-            val forceExplicitFlow = testCase.isCoex && testCase.confirmationRequested
-            verifyIconSize(forceExplicitFlow = forceExplicitFlow)
+    fun shows_pending_confirmation() {
+        if (testCase.authenticatedByFace && testCase.confirmationRequested) {
+            runGenericTest {
+                val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+                val iconOverlayAsset by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.iconOverlayAsset)
+                val iconContentDescriptionId by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
+                val shouldAnimateIconView by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+                val shouldAnimateIconOverlay by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconOverlay)
 
-            kosmos.promptViewModel.showAuthenticated(
-                modality = testCase.authenticatedModality,
-                dismissAfterDelay = DELAY
-            )
+                val forceExplicitFlow = testCase.isCoex && testCase.confirmationRequested
+                verifyIconSize(forceExplicitFlow = forceExplicitFlow)
 
-            kosmos.promptViewModel.confirmAuthenticated()
+                kosmos.promptViewModel.showAuthenticated(
+                    modality = testCase.authenticatedModality,
+                    dismissAfterDelay = DELAY
+                )
 
-            if (testCase.isFaceOnly) {
-                assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_checkmark)
-                assertThat(iconOverlayAsset).isEqualTo(-1)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.biometric_dialog_face_icon_description_confirmed)
-                assertThat(shouldAnimateIconView).isEqualTo(true)
-                assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-            }
-
-            // explicit flow because confirmation requested
-            if (testCase.isCoex) {
-                // TODO: Update when SFPS co-ex is implemented
-                if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                    assertThat(iconAsset)
-                        .isEqualTo(R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie)
+                if (testCase.isFaceOnly) {
+                    assertThat(iconAsset).isEqualTo(R.raw.face_dialog_wink_from_dark)
                     assertThat(iconOverlayAsset).isEqualTo(-1)
                     assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
                     assertThat(shouldAnimateIconView).isEqualTo(true)
                     assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+                } else if (testCase.isCoex) { // explicit flow, confirmation requested
+                    // TODO: Update when SFPS co-ex is implemented
+                    if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                        assertThat(iconAsset)
+                            .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie)
+                        assertThat(iconOverlayAsset).isEqualTo(-1)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_authenticated_confirmation)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                        assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun shows_authenticated_explicitly_confirmed() {
+        if (testCase.authenticatedByFace && testCase.confirmationRequested) {
+            runGenericTest {
+                val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+                val iconOverlayAsset by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.iconOverlayAsset)
+                val iconContentDescriptionId by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
+                val shouldAnimateIconView by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+                val shouldAnimateIconOverlay by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconOverlay)
+                val forceExplicitFlow = testCase.isCoex && testCase.confirmationRequested
+                verifyIconSize(forceExplicitFlow = forceExplicitFlow)
+
+                kosmos.promptViewModel.showAuthenticated(
+                    modality = testCase.authenticatedModality,
+                    dismissAfterDelay = DELAY
+                )
+
+                kosmos.promptViewModel.confirmAuthenticated()
+
+                if (testCase.isFaceOnly) {
+                    assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_checkmark)
+                    assertThat(iconOverlayAsset).isEqualTo(-1)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.biometric_dialog_face_icon_description_confirmed)
+                    assertThat(shouldAnimateIconView).isEqualTo(true)
+                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+                }
+
+                // explicit flow because confirmation requested
+                if (testCase.isCoex) {
+                    // TODO: Update when SFPS co-ex is implemented
+                    if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                        assertThat(iconAsset)
+                            .isEqualTo(
+                                R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie
+                            )
+                        assertThat(iconOverlayAsset).isEqualTo(-1)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                        assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+                    }
                 }
             }
         }
@@ -700,58 +764,68 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun sfpsIconUpdates_onFoldConfigurationChanged() = runGenericTest {
+    fun sfpsIconUpdates_onFoldConfigurationChanged() {
         if (
             testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON &&
                 !testCase.isInRearDisplayMode
         ) {
-            val currentIcon by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+            runGenericTest {
+                val currentIcon by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
 
-            kosmos.promptViewModel.iconViewModel.onConfigurationChanged(getFoldedConfiguration())
-            val foldedIcon = currentIcon
+                kosmos.promptViewModel.iconViewModel.onConfigurationChanged(
+                    getFoldedConfiguration()
+                )
+                val foldedIcon = currentIcon
 
-            kosmos.promptViewModel.iconViewModel.onConfigurationChanged(getUnfoldedConfiguration())
-            val unfoldedIcon = currentIcon
+                kosmos.promptViewModel.iconViewModel.onConfigurationChanged(
+                    getUnfoldedConfiguration()
+                )
+                val unfoldedIcon = currentIcon
 
-            assertThat(foldedIcon).isNotEqualTo(unfoldedIcon)
+                assertThat(foldedIcon).isNotEqualTo(unfoldedIcon)
+            }
         }
     }
 
     @Test
-    fun sfpsIconUpdates_onRotation() = runGenericTest {
+    fun sfpsIconUpdates_onRotation() {
         if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-            val currentIcon by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+            runGenericTest {
+                val currentIcon by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
 
-            kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
-            val iconRotation0 = currentIcon
+                kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
+                val iconRotation0 = currentIcon
 
-            kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
-            val iconRotation90 = currentIcon
+                kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
+                val iconRotation90 = currentIcon
 
-            kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
-            val iconRotation180 = currentIcon
+                kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
+                val iconRotation180 = currentIcon
 
-            kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
-            val iconRotation270 = currentIcon
+                kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+                val iconRotation270 = currentIcon
 
-            assertThat(iconRotation0).isEqualTo(iconRotation180)
-            assertThat(iconRotation0).isNotEqualTo(iconRotation90)
-            assertThat(iconRotation0).isNotEqualTo(iconRotation270)
+                assertThat(iconRotation0).isEqualTo(iconRotation180)
+                assertThat(iconRotation0).isNotEqualTo(iconRotation90)
+                assertThat(iconRotation0).isNotEqualTo(iconRotation270)
+            }
         }
     }
 
     @Test
-    fun sfpsIconUpdates_onRearDisplayMode() = runGenericTest {
+    fun sfpsIconUpdates_onRearDisplayMode() {
         if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-            val currentIcon by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+            runGenericTest {
+                val currentIcon by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
 
-            kosmos.displayStateRepository.setIsInRearDisplayMode(false)
-            val iconNotRearDisplayMode = currentIcon
+                kosmos.displayStateRepository.setIsInRearDisplayMode(false)
+                val iconNotRearDisplayMode = currentIcon
 
-            kosmos.displayStateRepository.setIsInRearDisplayMode(true)
-            val iconRearDisplayMode = currentIcon
+                kosmos.displayStateRepository.setIsInRearDisplayMode(true)
+                val iconRearDisplayMode = currentIcon
 
-            assertThat(iconNotRearDisplayMode).isNotEqualTo(iconRearDisplayMode)
+                assertThat(iconNotRearDisplayMode).isNotEqualTo(iconRearDisplayMode)
+            }
         }
     }
 

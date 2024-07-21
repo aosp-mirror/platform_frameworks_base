@@ -49,6 +49,7 @@ import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -107,6 +108,7 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private IconProvider mIconProvider;
     @Mock private WindowDecorViewModel mWindowDecorViewModel;
     @Mock private ShellExecutor mMainExecutor;
+    @Mock private Handler mMainHandler;
     @Mock private LaunchAdjacentController mLaunchAdjacentController;
     @Mock private DefaultMixedHandler mMixedHandler;
     @Mock private SplitScreen.SplitInvocationListener mInvocationListener;
@@ -140,7 +142,7 @@ public class SplitTransitionTests extends ShellTestCase {
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
                 mSyncQueue, mTaskOrganizer, mMainStage, mSideStage, mDisplayController,
                 mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
-                mTransactionPool, mMainExecutor, Optional.empty(),
+                mTransactionPool, mMainExecutor, mMainHandler, Optional.empty(),
                 mLaunchAdjacentController, Optional.empty());
         mStageCoordinator.setMixedHandler(mMixedHandler);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();

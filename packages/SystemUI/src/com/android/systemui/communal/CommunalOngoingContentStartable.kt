@@ -20,10 +20,9 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalSmartspaceRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -35,15 +34,12 @@ constructor(
     @Background val bgScope: CoroutineScope,
     private val communalInteractor: CommunalInteractor,
     private val communalMediaRepository: CommunalMediaRepository,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val communalSmartspaceRepository: CommunalSmartspaceRepository,
-    private val featureFlags: FeatureFlagsClassic,
 ) : CoreStartable {
 
     override fun start() {
-        if (
-            !featureFlags.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) ||
-                !com.android.systemui.Flags.communalHub()
-        ) {
+        if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
         }
 

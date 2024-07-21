@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row.ui.viewbinder
 
+import android.content.res.ColorStateList
+import android.graphics.drawable.Icon
 import android.view.View
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
@@ -46,12 +48,43 @@ object TimerViewBinder {
         launch { viewModel.countdownTime.collect { view.setCountdownTime(it) } }
         launch { viewModel.mainButtonModel.collect { bind(view.mainButton, it) } }
         launch { viewModel.altButtonModel.collect { bind(view.altButton, it) } }
+        launch { viewModel.resetButtonModel.collect { bind(view.resetButton, it) } }
     }
 
     fun bind(buttonView: TimerButtonView, model: TimerViewModel.ButtonViewModel?) {
         if (model != null) {
-            buttonView.setIcon(model.iconRes)
-            buttonView.setText(model.labelRes)
+            buttonView.setButtonBackground(
+                ColorStateList.valueOf(
+                    buttonView.context.getColor(com.android.internal.R.color.system_accent2_100)
+                )
+            )
+            buttonView.setTextColor(
+                buttonView.context.getColor(
+                    com.android.internal.R.color.notification_primary_text_color_light
+                )
+            )
+
+            when (model) {
+                is TimerViewModel.ButtonViewModel.WithSystemAttrs -> {
+                    buttonView.setIcon(model.iconRes)
+                    buttonView.setText(model.labelRes)
+                }
+                is TimerViewModel.ButtonViewModel.WithCustomAttrs -> {
+                    // TODO: b/352142761 - is there a better way to deal with TYPE_RESOURCE icons
+                    // with empty resPackage? RemoteViews handles this by using a  different
+                    // `contextForResources` for inflation.
+                    val icon =
+                        if (model.icon.type == Icon.TYPE_RESOURCE && model.icon.resPackage == "")
+                            Icon.createWithResource(
+                                "com.google.android.deskclock",
+                                model.icon.resId
+                            )
+                        else model.icon
+                    buttonView.setImageIcon(icon)
+                    buttonView.text = model.label
+                }
+            }
+
             buttonView.setOnClickListener(
                 model.pendingIntent?.let { pendingIntent ->
                     View.OnClickListener { pendingIntent.send() }

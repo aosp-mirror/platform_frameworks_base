@@ -393,3 +393,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "provisioning_context_parameter"
+    namespace: "enterprise"
+    description: "Add provisioningContext to store metadata about when the admin was set"
+    bug: "326525847"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

@@ -16,12 +16,21 @@
 
 package com.android.systemui.education.dagger
 
+import com.android.systemui.CoreStartable
+import com.android.systemui.Flags
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.data.repository.ContextualEducationRepository
 import com.android.systemui.education.data.repository.ContextualEducationRepositoryImpl
+import com.android.systemui.education.domain.interactor.ContextualEducationInteractor
+import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractor
+import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractorImpl
+import com.android.systemui.shared.education.GestureType
 import dagger.Binds
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import java.time.Clock
 import javax.inject.Qualifier
 import kotlinx.coroutines.CoroutineDispatcher
@@ -53,5 +62,41 @@ interface ContextualEducationModule {
         fun provideEduClock(): Clock {
             return Clock.systemUTC()
         }
+
+        @Provides
+        @IntoMap
+        @ClassKey(ContextualEducationInteractor::class)
+        fun provideContextualEducationInteractor(
+            implLazy: Lazy<ContextualEducationInteractor>
+        ): CoreStartable {
+            return if (Flags.keyboardTouchpadContextualEducation()) {
+                implLazy.get()
+            } else {
+                // No-op implementation when the flag is disabled.
+                return NoOpCoreStartable
+            }
+        }
+
+        @Provides
+        fun provideKeyboardTouchpadEduStatsInteractor(
+            implLazy: Lazy<KeyboardTouchpadEduStatsInteractorImpl>
+        ): KeyboardTouchpadEduStatsInteractor {
+            return if (Flags.keyboardTouchpadContextualEducation()) {
+                implLazy.get()
+            } else {
+                // No-op implementation when the flag is disabled.
+                return NoOpKeyboardTouchpadEduStatsInteractor
+            }
+        }
+    }
+
+    private object NoOpKeyboardTouchpadEduStatsInteractor : KeyboardTouchpadEduStatsInteractor {
+        override fun incrementSignalCount(gestureType: GestureType) {}
+
+        override fun updateShortcutTriggerTime(gestureType: GestureType) {}
+    }
+
+    private object NoOpCoreStartable : CoreStartable {
+        override fun start() {}
     }
 }

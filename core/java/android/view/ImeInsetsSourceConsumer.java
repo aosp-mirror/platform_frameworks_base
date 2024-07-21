@@ -119,9 +119,11 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
     @Override
     public boolean applyLocalVisibilityOverride() {
-        ImeTracing.getInstance().triggerClientDump(
-                "ImeInsetsSourceConsumer#applyLocalVisibilityOverride",
-                mController.getHost().getInputMethodManager(), null /* icProto */);
+        if (!Flags.refactorInsetsController()) {
+            ImeTracing.getInstance().triggerClientDump(
+                    "ImeInsetsSourceConsumer#applyLocalVisibilityOverride",
+                    mController.getHost().getInputMethodManager(), null /* icProto */);
+        }
         return super.applyLocalVisibilityOverride();
     }
 
@@ -205,9 +207,13 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
     @Override
     public void removeSurface() {
-        final IBinder window = mController.getHost().getWindowToken();
-        if (window != null) {
-            getImm().removeImeSurface(window);
+        if (Flags.refactorInsetsController()) {
+            super.removeSurface();
+        } else {
+            final IBinder window = mController.getHost().getWindowToken();
+            if (window != null) {
+                getImm().removeImeSurface(window);
+            }
         }
     }
 

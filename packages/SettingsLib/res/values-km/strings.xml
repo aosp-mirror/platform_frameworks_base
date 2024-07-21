@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"អនុញ្ញាតឱ្យ​ផ្ទុក​ស្រទាប់​ជួស​ជុល GPU សម្រាប់​កម្មវិធី​ជួសជុល"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"បើកការកត់ត្រាអ្នកផ្គត់ផ្គង់ឥតសំចៃ"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"រួមបញ្ចូលកំណត់​ហេតុ​អ្នកផ្គត់ផ្គង់​ពាក់ព័ន្ធ​នឹងឧបករណ៍បន្ថែមទៀតនៅក្នុងរបាយការណ៍​អំពីបញ្ហា ដែលអាច​មានផ្ទុកព័ត៌មាន​ឯកជន ប្រើប្រាស់​ថ្មច្រើនជាង និង/ឬប្រើប្រាស់​ទំហំផ្ទុកច្រើនជាង។"</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"បិទក្រោយពេលមួយថ្ងៃ"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"ការចុះកំណត់ហេតុអ្នកផ្គត់ផ្គង់លម្អិតបានចប់"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"បានបើករយៈពេលមួយថ្ងៃ"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"បើករយៈពេលលើសពីមួយថ្ងៃ"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"បិទក្រោយពេលមួយថ្ងៃ"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"បានបើកដោយគ្មានពេលកំណត់"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"មាត្រដ្ឋាន​ចលនា​វិនដូ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"មាត្រដ្ឋាន​ដំណើរ​ផ្លាស់ប្ដូរ​ចលនា"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"មាត្រដ្ឋាន​រយៈពេល​នៃ​កម្មវិធី​ចលនា"</string>

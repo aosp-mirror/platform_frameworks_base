@@ -251,6 +251,10 @@ class MediaRouter2ServiceImpl {
                         systemRoutes = providerInfo.getRoutes();
                     } else {
                         systemRoutes = Collections.emptyList();
+                        Slog.e(
+                                TAG,
+                                "Returning empty system routes list because "
+                                    + "system provider has null providerInfo.");
                     }
                 } else {
                     systemRoutes = new ArrayList<>();

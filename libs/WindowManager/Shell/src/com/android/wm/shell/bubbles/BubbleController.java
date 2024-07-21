@@ -1230,10 +1230,14 @@ public class BubbleController implements ConfigurationChangeListener,
      * A bubble was dragged and is released in dismiss target in Launcher.
      *
      * @param bubbleKey key of the bubble being dragged to dismiss target
+     * @param timestamp the timestamp of the removal
      */
-    public void dragBubbleToDismiss(String bubbleKey) {
+    public void dragBubbleToDismiss(String bubbleKey, long timestamp) {
         String selectedBubbleKey = mBubbleData.getSelectedBubbleKey();
-        removeBubble(bubbleKey, Bubbles.DISMISS_USER_GESTURE);
+        if (mBubbleData.hasAnyBubbleWithKey(bubbleKey)) {
+            mBubbleData.dismissBubbleWithKey(
+                    bubbleKey, Bubbles.DISMISS_USER_GESTURE_FROM_LAUNCHER, timestamp);
+        }
         if (selectedBubbleKey != null && !selectedBubbleKey.equals(bubbleKey)) {
             // We did not remove the selected bubble. Expand it again
             mBubbleBarViewCallback.expansionChanged(/* isExpanded = */ true);
@@ -2458,8 +2462,8 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void dragBubbleToDismiss(String key) {
-            mMainExecutor.execute(() -> mController.dragBubbleToDismiss(key));
+        public void dragBubbleToDismiss(String key, long timestamp) {
+            mMainExecutor.execute(() -> mController.dragBubbleToDismiss(key, timestamp));
         }
 
         @Override

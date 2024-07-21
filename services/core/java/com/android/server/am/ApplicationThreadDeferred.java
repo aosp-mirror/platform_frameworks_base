@@ -38,7 +38,7 @@ import java.util.Arrays;
  *
  * {@hide}
  */
-class ApplicationThreadDeferred extends ApplicationThreadFilter {
+final class ApplicationThreadDeferred extends IApplicationThread.Delegator {
 
     static final String TAG = TAG_WITH_CLASS_NAME ? "ApplicationThreadDeferred" : TAG_AM;
 
@@ -87,11 +87,15 @@ class ApplicationThreadDeferred extends ApplicationThreadFilter {
     // When true, binder calls to paused processes will be deferred until the process is unpaused.
     private final boolean mDefer;
 
+    // The base thread, because Delegator does not expose it.
+    private final IApplicationThread mBase;
+
     /** Create an instance with a base thread and a deferral enable flag. */
     @VisibleForTesting
     public ApplicationThreadDeferred(IApplicationThread thread, boolean defer) {
         super(thread);
 
+        mBase = thread;
         mDefer = defer;
 
         mOperations[CLEAR_DNS_CACHE] = () -> { super.clearDnsCache(); };
@@ -103,6 +107,15 @@ class ApplicationThreadDeferred extends ApplicationThreadFilter {
     /** Create an instance with a base flag, using the system deferral enable flag. */
     public ApplicationThreadDeferred(IApplicationThread thread) {
         this(thread, deferBindersWhenPaused());
+    }
+
+    /**
+     * Return the implementation's value of asBinder(). super.asBinder() is not a real Binder
+     * object.
+     */
+    @Override
+    public  android.os.IBinder asBinder() {
+        return mBase.asBinder();
     }
 
     /** The process is being paused.  Start deferring calls. */

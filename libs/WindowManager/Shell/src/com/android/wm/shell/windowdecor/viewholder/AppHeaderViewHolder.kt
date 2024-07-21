@@ -21,6 +21,7 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Point
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
@@ -136,7 +137,13 @@ internal class AppHeaderViewHolder(
                 onMaximizeHoverAnimationFinishedListener
     }
 
-    override fun bindData(taskInfo: RunningTaskInfo) {
+    override fun bindData(
+        taskInfo: RunningTaskInfo,
+        position: Point,
+        width: Int,
+        height: Int,
+        isCaptionVisible: Boolean
+    ) {
         if (Flags.enableThemedAppHeaders()) {
             bindDataWithThemedHeaders(taskInfo)
         } else {

@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.Flags
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -48,6 +48,7 @@ constructor(
     @Main mainDispatcher: CoroutineDispatcher,
     @Background bgDispatcher: CoroutineDispatcher,
     private val glanceableHubTransitions: GlanceableHubTransitions,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     keyguardInteractor: KeyguardInteractor,
     override val transitionRepository: KeyguardTransitionRepository,
     override val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
@@ -68,7 +69,7 @@ constructor(
     override fun start() {
         // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
-        if (!Flags.communalHub()) {
+        if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
         }
         listenForHubToLockscreenOrDreaming()

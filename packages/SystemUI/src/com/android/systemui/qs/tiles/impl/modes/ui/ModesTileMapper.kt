@@ -34,13 +34,17 @@ constructor(
 ) : QSTileDataToStateMapper<ModesTileModel> {
     override fun map(config: QSTileConfig, data: ModesTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            val iconRes =
+            iconRes =
                 if (data.isActivated) {
                     R.drawable.qs_dnd_icon_on
                 } else {
                     R.drawable.qs_dnd_icon_off
                 }
-            val icon = Icon.Loaded(resources.getDrawable(iconRes, theme), contentDescription = null)
+            val icon =
+                Icon.Loaded(
+                    resources.getDrawable(iconRes!!, theme),
+                    contentDescription = null,
+                )
             this.icon = { icon }
             if (data.isActivated) {
                 activationState = QSTileState.ActivationState.ACTIVE
@@ -55,5 +59,6 @@ constructor(
                     QSTileState.UserAction.CLICK,
                     QSTileState.UserAction.LONG_CLICK,
                 )
+            sideViewIcon = QSTileState.SideViewIcon.Chevron
         }
 }

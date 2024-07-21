@@ -200,7 +200,7 @@ sealed interface TransitionState {
          * transition.
          *
          * Important: These will be set exactly once, when this transition is
-         * [started][BaseSceneTransitionLayoutState.startTransition].
+         * [started][MutableSceneTransitionLayoutStateImpl.startTransition].
          */
         internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
         private var fromOverscrollSpec: OverscrollSpecImpl? = null
@@ -332,13 +332,16 @@ sealed interface TransitionState {
     }
 }
 
-internal abstract class BaseSceneTransitionLayoutState(
+/** A [MutableSceneTransitionLayoutState] that holds the value for the current scene. */
+internal class MutableSceneTransitionLayoutStateImpl(
     initialScene: SceneKey,
-    protected var stateLinks: List<StateLink>,
+    override var transitions: SceneTransitions = transitions {},
+    internal val canChangeScene: (SceneKey) -> Boolean = { true },
+    private val stateLinks: List<StateLink> = emptyList(),
 
     // TODO(b/290930950): Remove this flag.
-    internal var enableInterruptions: Boolean,
-) : SceneTransitionLayoutState {
+    internal val enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
+) : MutableSceneTransitionLayoutState {
     private val creationThread: Thread = Thread.currentThread()
 
     /**
@@ -374,17 +377,6 @@ internal abstract class BaseSceneTransitionLayoutState(
     @VisibleForTesting
     internal val finishedTransitions = mutableMapOf<TransitionState.Transition, SceneKey>()
 
-    /** Whether we can transition to the given [scene]. */
-    internal abstract fun canChangeScene(scene: SceneKey): Boolean
-
-    /**
-     * Called when the [current scene][TransitionState.currentScene] should be changed to [scene].
-     *
-     * When this is called, the source of truth for the current scene should be changed so that
-     * [transitionState] will animate and settle to [scene].
-     */
-    internal abstract fun CoroutineScope.onChangeScene(scene: SceneKey)
-
     internal fun checkThread() {
         val current = Thread.currentThread()
         if (current !== creationThread) {
@@ -407,6 +399,20 @@ internal abstract class BaseSceneTransitionLayoutState(
     override fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean {
         val transition = currentTransition ?: return false
         return transition.isTransitioningBetween(scene, other)
+    }
+
+    override fun setTargetScene(
+        targetScene: SceneKey,
+        coroutineScope: CoroutineScope,
+        transitionKey: TransitionKey?,
+    ): TransitionState.Transition? {
+        checkThread()
+
+        return coroutineScope.animateToScene(
+            layoutState = this@MutableSceneTransitionLayoutStateImpl,
+            target = targetScene,
+            transitionKey = transitionKey,
+        )
     }
 
     /**
@@ -600,7 +606,7 @@ internal abstract class BaseSceneTransitionLayoutState(
         }
     }
 
-    fun snapToScene(scene: SceneKey) {
+    override fun snapToScene(scene: SceneKey) {
         checkThread()
 
         // Force finish all transitions.
@@ -671,37 +677,6 @@ internal abstract class BaseSceneTransitionLayoutState(
             }
             else -> false
         }
-    }
-}
-
-/** A [MutableSceneTransitionLayoutState] that holds the value for the current scene. */
-internal class MutableSceneTransitionLayoutStateImpl(
-    initialScene: SceneKey,
-    override var transitions: SceneTransitions = transitions {},
-    private val canChangeScene: (SceneKey) -> Boolean = { true },
-    stateLinks: List<StateLink> = emptyList(),
-    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
-) :
-    MutableSceneTransitionLayoutState,
-    BaseSceneTransitionLayoutState(initialScene, stateLinks, enableInterruptions) {
-    override fun setTargetScene(
-        targetScene: SceneKey,
-        coroutineScope: CoroutineScope,
-        transitionKey: TransitionKey?,
-    ): TransitionState.Transition? {
-        checkThread()
-
-        return coroutineScope.animateToScene(
-            layoutState = this@MutableSceneTransitionLayoutStateImpl,
-            target = targetScene,
-            transitionKey = transitionKey,
-        )
-    }
-
-    override fun canChangeScene(scene: SceneKey): Boolean = canChangeScene.invoke(scene)
-
-    override fun CoroutineScope.onChangeScene(scene: SceneKey) {
-        setTargetScene(scene, coroutineScope = this)
     }
 }
 

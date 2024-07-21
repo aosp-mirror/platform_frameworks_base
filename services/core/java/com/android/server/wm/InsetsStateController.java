@@ -397,9 +397,11 @@ class InsetsStateController {
                 onRequestedVisibleTypesChanged(newControlTargets.valueAt(i));
             }
             newControlTargets.clear();
-            // Check for and try to run the scheduled show IME request (if it exists), as we
-            // now applied the surface transaction and notified the target of the new control.
-            getImeSourceProvider().checkAndStartShowImePostLayout();
+            if (!android.view.inputmethod.Flags.refactorInsetsController()) {
+                // Check for and try to run the scheduled show IME request (if it exists), as we
+                // now applied the surface transaction and notified the target of the new control.
+                getImeSourceProvider().checkAndStartShowImePostLayout();
+            }
         });
     }
 

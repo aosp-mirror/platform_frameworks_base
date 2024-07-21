@@ -969,6 +969,8 @@ private fun WidgetContent(
     val clickActionLabel = stringResource(R.string.accessibility_action_label_select_widget)
     val removeWidgetActionLabel = stringResource(R.string.accessibility_action_label_remove_widget)
     val placeWidgetActionLabel = stringResource(R.string.accessibility_action_label_place_widget)
+    val unselectWidgetActionLabel =
+        stringResource(R.string.accessibility_action_label_unselect_widget)
     val selectedKey by viewModel.selectedKey.collectAsStateWithLifecycle()
     val selectedIndex =
         selectedKey?.let { key -> contentListState.list.indexOfFirst { it.key == key } }
@@ -1003,25 +1005,13 @@ private fun WidgetContent(
                 .thenIf(viewModel.isEditMode) {
                     Modifier.semantics {
                         contentDescription = accessibilityLabel
-                        onClick(label = clickActionLabel, action = null)
                         val deleteAction =
                             CustomAccessibilityAction(removeWidgetActionLabel) {
                                 contentListState.onRemove(index)
                                 contentListState.onSaveList()
                                 true
                             }
-                        val selectWidgetAction =
-                            CustomAccessibilityAction(clickActionLabel) {
-                                val currentWidgetKey =
-                                    index?.let {
-                                        keyAtIndexIfEditable(contentListState.list, index)
-                                    }
-                                viewModel.setSelectedKey(currentWidgetKey)
-                                true
-                            }
-
-                        val actions = mutableListOf(deleteAction, selectWidgetAction)
-
+                        val actions = mutableListOf(deleteAction)
                         if (selectedIndex != null && selectedIndex != index) {
                             actions.add(
                                 CustomAccessibilityAction(placeWidgetActionLabel) {
@@ -1033,6 +1023,21 @@ private fun WidgetContent(
                             )
                         }
 
+                        if (!selected) {
+                            actions.add(
+                                CustomAccessibilityAction(clickActionLabel) {
+                                    viewModel.setSelectedKey(model.key)
+                                    true
+                                }
+                            )
+                        } else {
+                            actions.add(
+                                CustomAccessibilityAction(unselectWidgetActionLabel) {
+                                    viewModel.setSelectedKey(null)
+                                    true
+                                }
+                            )
+                        }
                         customActions = actions
                     }
                 }

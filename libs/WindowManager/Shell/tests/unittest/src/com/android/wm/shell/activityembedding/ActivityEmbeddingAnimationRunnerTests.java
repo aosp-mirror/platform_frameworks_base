@@ -46,11 +46,13 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.window.TransitionInfo;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
+
+import com.google.testing.junit.testparameterinjector.TestParameter;
+import com.google.testing.junit.testparameterinjector.TestParameterInjector;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -59,6 +61,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Tests for {@link ActivityEmbeddingAnimationRunner}.
@@ -67,7 +70,7 @@ import java.util.ArrayList;
  *  atest WMShellUnitTests:ActivityEmbeddingAnimationRunnerTests
  */
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(TestParameterInjector.class)
 public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnimationTestBase {
 
     @Rule
@@ -204,15 +207,13 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
     // TODO(b/243518738): Rewrite with TestParameter
     @EnableFlags(Flags.FLAG_ACTIVITY_EMBEDDING_OVERLAY_PRESENTATION_FLAG)
     @Test
-    public void testCalculateParentBounds_flagEnabled() {
+    public void testCalculateParentBounds_flagEnabled_emptyParentSize() {
         TransitionInfo.Change change;
         final TransitionInfo.Change stubChange = createChange(0 /* flags */);
         final Rect actualParentBounds = new Rect();
-        Rect parentBounds = new Rect(0, 0, 2000, 2000);
-        Rect endAbsBounds = new Rect(0, 0, 2000, 2000);
         change = prepareChangeForParentBoundsCalculationTest(
                 new Point(0, 0) /* endRelOffset */,
-                endAbsBounds,
+                new Rect(0, 0, 2000, 2000),
                 new Point() /* endParentSize */
         );
 
@@ -220,69 +221,80 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
 
         assertTrue("Parent bounds must be empty because end parent size is not set.",
                 actualParentBounds.isEmpty());
+    }
 
-        String testString = "Parent start with (0, 0)";
-        change = prepareChangeForParentBoundsCalculationTest(
+    @EnableFlags(Flags.FLAG_ACTIVITY_EMBEDDING_OVERLAY_PRESENTATION_FLAG)
+    @Test
+    public void testCalculateParentBounds_flagEnabled(
+            @TestParameter ParentBoundsTestParameters params) {
+        final TransitionInfo.Change stubChange = createChange(0 /*flags*/);
+        final Rect parentBounds = params.getParentBounds();
+        final Rect endAbsBounds = params.getEndAbsBounds();
+        final TransitionInfo.Change change = prepareChangeForParentBoundsCalculationTest(
                 new Point(endAbsBounds.left - parentBounds.left,
                         endAbsBounds.top - parentBounds.top),
                 endAbsBounds, new Point(parentBounds.width(), parentBounds.height()));
+        final Rect actualParentBounds = new Rect();
 
         calculateParentBounds(change, stubChange, actualParentBounds);
 
-        assertEquals(testString + ": Parent bounds must be " + parentBounds, parentBounds,
-                actualParentBounds);
+        assertEquals(parentBounds, actualParentBounds);
+    }
 
-        testString = "Container not start with (0, 0)";
-        parentBounds = new Rect(0, 0, 2000, 2000);
-        endAbsBounds = new Rect(1000, 500, 2000, 1500);
-        change = prepareChangeForParentBoundsCalculationTest(
-                new Point(endAbsBounds.left - parentBounds.left,
-                        endAbsBounds.top - parentBounds.top),
-                endAbsBounds, new Point(parentBounds.width(), parentBounds.height()));
+    private enum ParentBoundsTestParameters {
+        PARENT_START_WITH_0_0(
+                new int[]{0, 0, 2000, 2000},
+                new int[]{0, 0, 2000, 2000}),
+        CONTAINER_NOT_START_WITH_0_0(
+                new int[] {0, 0, 2000, 2000},
+                new int[] {1000, 500, 1500, 1500}),
+        PARENT_ON_THE_RIGHT(
+                new int[] {1000, 0, 2000, 2000},
+                new int[] {1000, 500, 1500, 1500}),
+        PARENT_ON_THE_BOTTOM(
+                new int[] {0, 1000, 2000, 2000},
+                new int[] {500, 1500, 1500, 2000}),
+        PARENT_IN_THE_MIDDLE(
+                new int[] {500, 500, 1500, 1500},
+                new int[] {1000, 500, 1500, 1000});
 
-        calculateParentBounds(change, stubChange, actualParentBounds);
+        /**
+         * An int array to present {left, top, right, bottom} of the parent {@link Rect bounds}.
+         */
+        @NonNull
+        private final int[] mParentBounds;
 
-        assertEquals(testString + ": Parent bounds must be " + parentBounds, parentBounds,
-                actualParentBounds);
+        /**
+         * An int array to present {left, top, right, bottom} of the absolute container
+         * {@link Rect bounds} after the transition finishes.
+         */
+        @NonNull
+        private final int[] mEndAbsBounds;
 
-        testString = "Parent container on the right";
-        parentBounds = new Rect(1000, 0, 2000, 2000);
-        endAbsBounds = new Rect(1000, 500, 1500, 1500);
-        change = prepareChangeForParentBoundsCalculationTest(
-                new Point(endAbsBounds.left - parentBounds.left,
-                        endAbsBounds.top - parentBounds.top),
-                endAbsBounds, new Point(parentBounds.width(), parentBounds.height()));
+        ParentBoundsTestParameters(
+                @NonNull int[] parentBounds, @NonNull int[] endAbsBounds) {
+            mParentBounds = parentBounds;
+            mEndAbsBounds = endAbsBounds;
+        }
 
-        calculateParentBounds(change, stubChange, actualParentBounds);
+        @NonNull
+        private Rect getParentBounds() {
+            return asRect(mParentBounds);
+        }
 
-        assertEquals(testString + ": Parent bounds must be " + parentBounds, parentBounds,
-                actualParentBounds);
+        @NonNull
+        private Rect getEndAbsBounds() {
+            return asRect(mEndAbsBounds);
+        }
 
-        testString = "Parent container on the bottom";
-        parentBounds = new Rect(0, 1000, 2000, 2000);
-        endAbsBounds = new Rect(500, 1500, 1500, 2000);
-        change = prepareChangeForParentBoundsCalculationTest(
-                new Point(endAbsBounds.left - parentBounds.left,
-                        endAbsBounds.top - parentBounds.top),
-                endAbsBounds, new Point(parentBounds.width(), parentBounds.height()));
-
-        calculateParentBounds(change, stubChange, actualParentBounds);
-
-        assertEquals(testString + ": Parent bounds must be " + parentBounds, parentBounds,
-                actualParentBounds);
-
-        testString = "Parent container in the middle";
-        parentBounds = new Rect(500, 500, 1500, 1500);
-        endAbsBounds = new Rect(1000, 500, 1500, 1000);
-        change = prepareChangeForParentBoundsCalculationTest(
-                new Point(endAbsBounds.left - parentBounds.left,
-                        endAbsBounds.top - parentBounds.top),
-                endAbsBounds, new Point(parentBounds.width(), parentBounds.height()));
-
-        calculateParentBounds(change, stubChange, actualParentBounds);
-
-        assertEquals(testString + ": Parent bounds must be " + parentBounds, parentBounds,
-                actualParentBounds);
+        @NonNull
+        private static Rect asRect(@NonNull int[] bounds) {
+            if (bounds.length != 4) {
+                throw new IllegalArgumentException("There must be exactly 4 elements in bounds, "
+                        + "but found " + bounds.length + ": " + Arrays.toString(bounds));
+            }
+            return new Rect(bounds[0], bounds[1], bounds[2], bounds[3]);
+        }
     }
 
     @Test
