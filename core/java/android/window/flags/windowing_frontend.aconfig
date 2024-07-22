@@ -180,6 +180,17 @@ flag {
 }
 
 flag {
+  name: "use_tasks_dim_only"
+  namespace: "windowing_frontend"
+  description: "Only use the task's dim and reparent it to the display area when needed instead of coordinating multiple dimmers"
+  bug: "352522056"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "release_snapshot_aggressively"
     namespace: "windowing_frontend"
     description: "Actively release task snapshot memory"

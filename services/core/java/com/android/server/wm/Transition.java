@@ -463,14 +463,26 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     boolean canApplyDim(@NonNull Task task) {
         if (mTransientLaunches == null) return true;
-        final Dimmer dimmer = task.getDimmer();
-        if (dimmer == null) {
-            return false;
-        }
-        if (dimmer.hostIsTask()) {
+        if (Flags.useTasksDimOnly()) {
+            WindowContainer<?> dimmerParent = task.getDimmerParent();
+            if (dimmerParent == null) {
+                return false;
+            }
             // Always allow to dim if the host only affects its task.
-            return true;
+            if (dimmerParent.asTask() == task) {
+                return true;
+            }
+        } else {
+            final Dimmer dimmer = task.getDimmer();
+            if (dimmer == null) {
+                return false;
+            }
+            if (dimmer.hostIsTask()) {
+                // Always allow to dim if the host only affects its task.
+                return true;
+            }
         }
+
         // The dimmer host of a translucent task can be a display, then it is not in transient-hide.
         for (int i = mTransientLaunches.size() - 1; i >= 0; --i) {
             // The transient task is usually the task of recents/home activity.

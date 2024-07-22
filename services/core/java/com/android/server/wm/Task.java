@@ -3201,6 +3201,14 @@ class Task extends TaskFragment {
         return "Task=" + mTaskId;
     }
 
+    WindowContainer<?> getDimmerParent() {
+        if (!inMultiWindowMode() && isTranslucentForTransition()) {
+            return getRootDisplayArea();
+        }
+        return this;
+    }
+
+    @Deprecated
     @Override
     Dimmer getDimmer() {
         // If the window is in multi-window mode, we want to dim at the Task level to ensure the dim
