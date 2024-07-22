@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.view.InputDevice.SOURCE_MOUSE;
+import static android.view.InputDevice.SOURCE_STYLUS;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
@@ -183,7 +185,10 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     private final int mMinimumVelocity;
     private final int mMaximumVelocity;
 
-    public FullScreenMagnificationGestureHandler(@UiContext Context context,
+    private MouseEventHandler mMouseEventHandler;
+
+    public FullScreenMagnificationGestureHandler(
+            @UiContext Context context,
             FullScreenMagnificationController fullScreenMagnificationController,
             AccessibilityTraceManager trace,
             Callback callback,
@@ -192,7 +197,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             boolean detectShortcutTrigger,
             @NonNull WindowMagnificationPromptController promptController,
             int displayId,
-            FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper) {
+            FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper,
+            MouseEventHandler mouseEventHandler) {
         this(
                 context,
                 fullScreenMagnificationController,
@@ -207,9 +213,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 /* magnificationLogger= */ null,
                 ViewConfiguration.get(context),
                 new OneFingerPanningSettingsProvider(
-                        context,
-                        Flags.enableMagnificationOneFingerPanningGesture()
-                ));
+                        context, Flags.enableMagnificationOneFingerPanningGesture()),
+                mouseEventHandler);
     }
 
     /** Constructor for tests. */
@@ -227,8 +232,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper,
             MagnificationLogger magnificationLogger,
             ViewConfiguration viewConfiguration,
-            OneFingerPanningSettingsProvider oneFingerPanningSettingsProvider
-    ) {
+            OneFingerPanningSettingsProvider oneFingerPanningSettingsProvider,
+            MouseEventHandler mouseEventHandler) {
         super(displayId, detectSingleFingerTripleTap, detectTwoFingerTripleTap,
                 detectShortcutTrigger, trace, callback);
         if (DEBUG_ALL) {
@@ -318,6 +323,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         mOverscrollEdgeSlop = context.getResources().getDimensionPixelSize(
                 R.dimen.accessibility_fullscreen_magnification_gesture_edge_slop);
         mIsWatch = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
+        mMouseEventHandler = mouseEventHandler;
 
         if (mDetectShortcutTrigger) {
             mScreenStateReceiver = new ScreenStateReceiver(context, this);
@@ -331,15 +337,28 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     @Override
     void onMotionEventInternal(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        if (event.getActionMasked() == ACTION_DOWN) {
-            cancelFling();
-        }
+        if (event.getSource() == SOURCE_TOUCHSCREEN) {
+            if (event.getActionMasked() == ACTION_DOWN) {
+                cancelFling();
+            }
+            handleTouchEventWith(mCurrentState, event, rawEvent, policyFlags);
+        } else if (Flags.enableMagnificationFollowsMouse()
+                && (event.getSource() == SOURCE_MOUSE || event.getSource() == SOURCE_STYLUS)) {
+            if (mFullScreenMagnificationController.isActivated(mDisplayId)) {
+                // TODO(b/354696546): Allow mouse/stylus to activate whichever display they are
+                // over, rather than only interacting with the current display.
 
-        handleEventWith(mCurrentState, event, rawEvent, policyFlags);
+                // Send through the mouse/stylus event handler.
+                mMouseEventHandler.onEvent(event, mDisplayId);
+            }
+            // Dispatch to normal event handling flow.
+            dispatchTransformedEvent(event, rawEvent, policyFlags);
+        }
     }
 
-    private void handleEventWith(State stateHandler,
-            MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+    private void handleTouchEventWith(
+            State stateHandler, MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+
         // To keep InputEventConsistencyVerifiers within GestureDetectors happy
         mPanningScalingState.mScrollGestureDetector.onTouchEvent(event);
         mPanningScalingState.mScaleGestureDetector.onTouchEvent(event);
@@ -1421,6 +1440,11 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
         protected void cacheDelayedMotionEvent(MotionEvent event, MotionEvent rawEvent,
                 int policyFlags) {
+            if (Flags.enableMagnificationFollowsMouse()
+                    && !event.isFromSource(SOURCE_TOUCHSCREEN)) {
+                // Only touch events need to be cached and sent later.
+                return;
+            }
             if (event.getActionMasked() == ACTION_DOWN) {
                 mPreLastDown = mLastDown;
                 mLastDown = MotionEvent.obtain(event);
@@ -1458,7 +1482,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 mDelayedEventQueue = info.mNext;
 
                 info.event.setDownTime(info.event.getDownTime() + offset);
-                handleEventWith(mDelegatingState, info.event, info.rawEvent, info.policyFlags);
+                handleTouchEventWith(mDelegatingState, info.event, info.rawEvent, info.policyFlags);
 
                 info.recycle();
             } while (mDelayedEventQueue != null);
