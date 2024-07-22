@@ -34,28 +34,25 @@ fun rememberEditListState(
 class EditTileListState(tiles: List<EditTileViewModel>) {
     val tiles: SnapshotStateList<EditTileViewModel> = tiles.toMutableStateList()
 
-    fun move(tileSpec: TileSpec, target: TileSpec) {
-        val fromIndex = indexOf(tileSpec)
+    fun move(tile: EditTileViewModel, target: TileSpec) {
+        val fromIndex = indexOf(tile.tileSpec)
         val toIndex = indexOf(target)
 
-        if (fromIndex == -1 || toIndex == -1 || fromIndex == toIndex) {
+        if (toIndex == -1 || fromIndex == toIndex) {
             return
         }
 
-        val isMovingToCurrent = tiles[toIndex].isCurrent
-        tiles.apply { add(toIndex, removeAt(fromIndex).copy(isCurrent = isMovingToCurrent)) }
+        if (fromIndex == -1) {
+            // If tile isn't in the list, simply insert it
+            tiles.add(toIndex, tile)
+        } else {
+            // If tile is present in the list, move it
+            tiles.apply { add(toIndex, removeAt(fromIndex)) }
+        }
     }
 
-    /**
-     * Sets the [TileSpec] as a non-current tile. Use this when a tile is dragged out of the current
-     * tile grid.
-     */
-    fun removeFromCurrent(tileSpec: TileSpec) {
-        val fromIndex = indexOf(tileSpec)
-        if (fromIndex >= 0 && fromIndex < tiles.size) {
-            // Mark the moving tile as non-current
-            tiles[fromIndex] = tiles[fromIndex].copy(isCurrent = false)
-        }
+    fun remove(tileSpec: TileSpec) {
+        tiles.removeIf { it.tileSpec == tileSpec }
     }
 
     fun indexOf(tileSpec: TileSpec): Int {
