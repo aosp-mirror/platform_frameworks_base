@@ -9991,7 +9991,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         try {
             ProtoLog.i(WM_DEBUG_STATES, "Moving to %s Relaunching %s callers=%s" ,
                     (andResume ? "RESUMED" : "PAUSED"), this, Debug.getCallers(6));
-            final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(token,
+            final ClientTransactionItem callbackItem = new ActivityRelaunchItem(token,
                     pendingResults, pendingNewIntents, configChangeFlags,
                     new MergedConfiguration(getProcessGlobalConfiguration(),
                             getMergedOverrideConfiguration()),

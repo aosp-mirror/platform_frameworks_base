@@ -6239,7 +6239,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 r.createdConfig != null
                         ? r.createdConfig : mConfigurationController.getConfiguration(),
                 r.overrideConfig);
-        final ActivityRelaunchItem activityRelaunchItem = ActivityRelaunchItem.obtain(
+        final ActivityRelaunchItem activityRelaunchItem = new ActivityRelaunchItem(
                 r.token, null /* pendingResults */, null /* pendingIntents */,
                 0 /* configChanges */, mergedConfiguration, r.mPreserveWindow,
                 r.getActivityWindowInfo());

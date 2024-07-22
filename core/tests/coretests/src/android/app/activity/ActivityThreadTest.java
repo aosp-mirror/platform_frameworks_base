@@ -847,7 +847,7 @@ public class ActivityThreadTest {
             final ActivityWindowInfo newInfo = new ActivityWindowInfo();
             newInfo.set(true /* isEmbedded */, new Rect(0, 0, 1000, 2000),
                     new Rect(0, 0, 1000, 1000));
-            final ActivityRelaunchItem relaunchItem = ActivityRelaunchItem.obtain(
+            final ActivityRelaunchItem relaunchItem = new ActivityRelaunchItem(
                     activity.getActivityToken(), null, null, 0,
                     new MergedConfiguration(currentConfig, currentConfig),
                     false /* preserveWindow */, newInfo);
@@ -978,7 +978,7 @@ public class ActivityThreadTest {
         } else {
             activityWindowInfo = record.getActivityWindowInfo();
         }
-        final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(
+        final ClientTransactionItem callbackItem = new ActivityRelaunchItem(
                 activity.getActivityToken(), null, null, 0,
                 new MergedConfiguration(currentConfig, currentConfig),
                 false /* preserveWindow */, activityWindowInfo);
