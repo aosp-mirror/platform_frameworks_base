@@ -5053,7 +5053,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return new StartActivityItem(token, null);
             case PAUSING:
             case PAUSED:
-                return PauseActivityItem.obtain(token);
+                return new PauseActivityItem(token);
             case STOPPING:
             case STOPPED:
                 return new StopActivityItem(token);
@@ -6344,9 +6344,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             EventLogTags.writeWmPauseActivity(mUserId, System.identityHashCode(this),
                     shortComponentName, "userLeaving=false", "make-active");
             try {
-                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                        PauseActivityItem.obtain(token, finishing, false /* userLeaving */,
-                                false /* dontReport */, mAutoEnteringPip));
+                final PauseActivityItem item = new PauseActivityItem(token, finishing,
+                        false /* userLeaving */, false /* dontReport */, mAutoEnteringPip);
+                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(), item);
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending pause: " + intent.getComponent(), e);
             }
@@ -10000,7 +10000,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 lifecycleItem = new ResumeActivityItem(token, isTransitionForward(),
                         shouldSendCompatFakeFocus());
             } else {
-                lifecycleItem = PauseActivityItem.obtain(token);
+                lifecycleItem = new PauseActivityItem(token);
             }
             mAtmService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
                     app.getThread(), callbackItem, lifecycleItem);

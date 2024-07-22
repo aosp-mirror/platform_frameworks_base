@@ -235,12 +235,12 @@ public class TransactionParcelTests {
     @Test
     public void testPause() {
         // Write to parcel
-        PauseActivityItem item = PauseActivityItem.obtain(mActivityToken, true /* finished */,
+        final PauseActivityItem item = new PauseActivityItem(mActivityToken, true /* finished */,
                 true /* userLeaving */, true /* dontReport */, true /* autoEnteringPip */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
-        PauseActivityItem result = PauseActivityItem.CREATOR.createFromParcel(mParcel);
+        final PauseActivityItem result = PauseActivityItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertEquals(item, result);

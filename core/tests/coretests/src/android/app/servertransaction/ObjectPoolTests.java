@@ -154,11 +154,6 @@ public class ObjectPoolTests {
         testRecycle(() -> NewIntentItem.obtain(mActivityToken, referrerIntentList(), false));
     }
 
-    @Test
-    public void testRecyclePauseActivityItemItem() {
-        testRecycle(() -> PauseActivityItem.obtain(mActivityToken, true, true, true, true));
-    }
-
     private void testRecycle(@NonNull Supplier<? extends ObjectPoolItem> obtain) {
         // Reuse the same object after recycle.
         final ObjectPoolItem item = obtain.get();
