@@ -17,7 +17,6 @@
 package android.app.servertransaction;
 
 import static android.app.servertransaction.TestUtils.config;
-import static android.app.servertransaction.TestUtils.referrerIntentList;
 
 import static org.junit.Assert.assertNotSame;
 
@@ -64,11 +63,6 @@ public class ObjectPoolTests {
     @Test
     public void testRecycleConfigurationChangeItem() {
         testRecycle(() -> ConfigurationChangeItem.obtain(config(), 1));
-    }
-
-    @Test
-    public void testRecycleNewIntentItem() {
-        testRecycle(() -> NewIntentItem.obtain(mActivityToken, referrerIntentList(), false));
     }
 
     private void testRecycle(@NonNull Supplier<? extends ObjectPoolItem> obtain) {

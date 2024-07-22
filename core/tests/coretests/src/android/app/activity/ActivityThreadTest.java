@@ -1030,8 +1030,7 @@ public class ActivityThreadTest {
     @NonNull
     private static ClientTransaction newNewIntentTransaction(@NonNull Activity activity,
             @NonNull List<ReferrerIntent> intents, boolean resume) {
-        final NewIntentItem item = NewIntentItem.obtain(activity.getActivityToken(), intents,
-                resume);
+        final NewIntentItem item = new NewIntentItem(activity.getActivityToken(), intents, resume);
 
         final ClientTransaction transaction = newTransaction(activity);
         transaction.addTransactionItem(item);

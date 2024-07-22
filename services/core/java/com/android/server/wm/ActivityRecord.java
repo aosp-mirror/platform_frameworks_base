@@ -1508,8 +1508,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             ProtoLog.v(WM_DEBUG_STATES, "Sending position change to %s, onTop: %b",
                     this, onTop);
 
-            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    TopResumedActivityChangeItem.obtain(token, onTop));
+            final TopResumedActivityChangeItem item =
+                    new TopResumedActivityChangeItem(token, onTop);
+            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(), item);
         } catch (RemoteException e) {
             // If process died, whatever.
             Slog.w(TAG, "Failed to send top-resumed=" + onTop + " to " + this, e);
@@ -5113,8 +5114,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Making sure the client state is RESUMED after transaction completed and doing
                 // so only if activity is currently RESUMED. Otherwise, client may have extra
                 // life-cycle calls to RESUMED (and PAUSED later).
-                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                        NewIntentItem.obtain(token, ar, mState == RESUMED));
+                final NewIntentItem item =
+                        new NewIntentItem(token, ar, mState == RESUMED /* resume */);
+                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(), item);
                 unsent = false;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending new intent to " + this, e);

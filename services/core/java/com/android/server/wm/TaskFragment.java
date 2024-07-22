@@ -1617,10 +1617,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 }
 
                 if (next.newIntents != null) {
-                    final NewIntentItem newIntentItem = NewIntentItem.obtain(
-                            next.token, next.newIntents, true /* resume */);
-                    mAtmService.getLifecycleManager().scheduleTransactionItem(
-                            appThread, newIntentItem);
+                    final NewIntentItem item =
+                            new NewIntentItem(next.token, next.newIntents, true /* resume */);
+                    mAtmService.getLifecycleManager().scheduleTransactionItem(appThread, item);
                 }
 
                 // Well the app will no longer be stopped.
