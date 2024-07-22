@@ -220,3 +220,23 @@ flag {
   is_fixed_read_only: true
   bug: "346915432"
 }
+
+flag {
+  name: "clear_font_variation_settings"
+  namespace: "text"
+  description: "The font variation settings must be cleared when the new Typeface is set"
+  bug: "353609778"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "portuguese_hyphenator"
+  namespace: "text"
+  description: "Portuguese taiored hyphenator"
+  bug: "344656282"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

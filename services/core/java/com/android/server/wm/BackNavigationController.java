@@ -166,15 +166,14 @@ class BackNavigationController {
                 return null;
             }
 
-            // Move focus to the top embedded window if possible
-            if (mWindowManagerService.moveFocusToAdjacentEmbeddedWindow(window)) {
-                window = wmService.getFocusedWindowLocked();
-                if (window == null) {
-                    Slog.e(TAG, "New focused window is null, returning null.");
-                    return null;
-                }
+            // Updating the window to the most recently used one among the embedded windows
+            // that are displayed adjacently, unless the IME is visible.
+            // When the IME is visible, the IME is displayed on top of embedded activities.
+            // In that case, the back event should still be delivered to focused activity in
+            // order to dismiss the IME.
+            if (!window.getDisplayContent().getImeContainer().isVisible()) {
+                window = mWindowManagerService.getMostRecentUsedEmbeddedWindowForBack(window);
             }
-
             if (!window.isDrawn()) {
                 ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                         "Focused window didn't have a valid surface drawn.");

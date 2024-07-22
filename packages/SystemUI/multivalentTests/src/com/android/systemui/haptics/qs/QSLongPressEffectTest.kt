@@ -22,6 +22,7 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.classifier.falsingManager
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.kosmos.testScope
@@ -52,6 +53,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
     private val vibratorHelper = kosmos.vibratorHelper
     private val qsTile = kosmos.qsTileFactory.createTile("Test Tile")
     @Mock private lateinit var callback: QSLongPressEffect.Callback
+    @Mock private lateinit var controller: ActivityTransitionAnimator.Controller
 
     private val effectDuration = 400
     private val lowTickDuration = 12
@@ -218,8 +220,9 @@ class QSLongPressEffectTest : SysuiTestCase() {
             // GIVEN that the animation completes
             longPressEffect.handleAnimationComplete()
 
-            // THEN the effect ends in the idle state.
+            // THEN the effect ends in the idle state and the reversed callback is used.
             assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.IDLE)
+            verify(callback, times(1)).onEffectFinishedReversing()
         }
 
     @Test
@@ -347,6 +350,23 @@ class QSLongPressEffectTest : SysuiTestCase() {
         // THEN the state is IDLE
         assertThat(clickState).isEqualTo(QSLongPressEffect.State.IDLE)
     }
+
+    @Test
+    fun onLongClickTransitionCancelled_whileInLongClickState_reversesEffect() =
+        testWhileInState(QSLongPressEffect.State.LONG_CLICKED) {
+            // GIVEN a transition controller delegate
+            val delegate = longPressEffect.createTransitionControllerDelegate(controller)
+
+            // WHEN the activity launch animation is cancelled
+            val newOccludedState = false
+            delegate.onTransitionAnimationCancelled(newOccludedState)
+
+            // THEN the effect reverses and ends in RUNNING_BACKWARDS_FROM_CANCEL
+            assertThat(longPressEffect.state)
+                .isEqualTo(QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_CANCEL)
+            verify(callback, times(1)).onReverseAnimator(false)
+            verify(controller).onTransitionAnimationCancelled(newOccludedState)
+        }
 
     private fun testWithScope(initialize: Boolean = true, test: suspend TestScope.() -> Unit) =
         with(kosmos) {

@@ -698,7 +698,7 @@ public class PerfettoProtoLogImplTest {
             traceMonitor.start();
 
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP,
-                    "My test null string: %s", null);
+                    "My test null string: %s", (Object) null);
         } finally {
             traceMonitor.stop(mWriter);
         }

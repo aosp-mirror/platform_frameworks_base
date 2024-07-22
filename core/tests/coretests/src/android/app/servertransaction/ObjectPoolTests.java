@@ -21,12 +21,7 @@ import static android.app.servertransaction.TestUtils.mergedConfig;
 import static android.app.servertransaction.TestUtils.referrerIntentList;
 import static android.app.servertransaction.TestUtils.resultInfoList;
 
-import static com.android.window.flags.Flags.FLAG_DISABLE_OBJECT_POOL;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 
 import android.annotation.NonNull;
 import android.app.ActivityOptions;
@@ -41,13 +36,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.flag.junit.FlagsParameterization;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.window.ActivityWindowInfo;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-
-import com.android.window.flags.Flags;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,11 +48,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.List;
 import java.util.function.Supplier;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
 
 /**
  * Tests for {@link ObjectPool}.
@@ -71,30 +59,18 @@ import platform.test.runner.parameterized.Parameters;
  * <p>This test class is a part of Window Manager Service tests and specified in
  * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
-@RunWith(ParameterizedAndroidJunit4.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit
 public class ObjectPoolTests {
 
-    @Parameters(name = "{0}")
-    public static List<FlagsParameterization> getParams() {
-        return FlagsParameterization.allCombinationsOf(FLAG_DISABLE_OBJECT_POOL);
-    }
-
     @Rule
     public final MockitoRule mocks = MockitoJUnit.rule();
-
-    @Rule
-    public SetFlagsRule mSetFlagsRule;
 
     @Mock
     private IApplicationThread mApplicationThread;
     @Mock
     private IBinder mActivityToken;
-
-    public ObjectPoolTests(FlagsParameterization flags) {
-        mSetFlagsRule = new SetFlagsRule(flags);
-    }
 
     // 1. Check if two obtained objects from pool are not the same.
     // 2. Check if the state of the object is cleared after recycling.
@@ -219,30 +195,11 @@ public class ObjectPoolTests {
         item.recycle();
         final ObjectPoolItem item2 = obtain.get();
 
-        if (Flags.disableObjectPool()) {
-            assertNotSame(item, item2);  // Different instance.
-        } else {
-            assertSame(item, item2);
-        }
+        assertNotSame(item, item2);  // Different instance.
 
         // Create new object when the pool is empty.
         final ObjectPoolItem item3 = obtain.get();
 
         assertNotSame(item, item3);
-        if (Flags.disableObjectPool()) {
-            // Skip recycle if flag enabled, compare unnecessary.
-            return;
-        }
-        assertEquals(item, item3);
-
-        // Reset fields after recycle.
-        item.recycle();
-
-        assertNotEquals(item, item3);
-
-        // Recycled objects are equal.
-        item3.recycle();
-
-        assertEquals(item, item3);
     }
 }

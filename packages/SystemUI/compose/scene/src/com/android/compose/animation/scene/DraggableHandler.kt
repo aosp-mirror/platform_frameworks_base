@@ -52,11 +52,19 @@ internal interface DraggableHandler {
  * and [onStop] methods.
  */
 internal interface DragController {
-    /** Drag the current scene by [delta] pixels. */
-    fun onDrag(delta: Float)
+    /**
+     * Drag the current scene by [delta] pixels.
+     *
+     * @return the consumed [delta]
+     */
+    fun onDrag(delta: Float): Float
 
-    /** Starts a transition to a target scene. */
-    fun onStop(velocity: Float, canChangeScene: Boolean)
+    /**
+     * Starts a transition to a target scene.
+     *
+     * @return the consumed [velocity]
+     */
+    fun onStop(velocity: Float, canChangeScene: Boolean): Float
 }
 
 internal class DraggableHandlerImpl(
@@ -272,8 +280,10 @@ private class DragControllerImpl(
      *
      * @return the consumed delta
      */
-    override fun onDrag(delta: Float) {
-        if (delta == 0f || !isDrivingTransition || swipeTransition.isFinishing) return
+    override fun onDrag(delta: Float): Float {
+        if (delta == 0f || !isDrivingTransition || swipeTransition.isFinishing) {
+            return 0f
+        }
         swipeTransition.dragOffset += delta
 
         val (fromScene, acceleratedOffset) =
@@ -289,7 +299,7 @@ private class DragControllerImpl(
 
         if (result == null) {
             onStop(velocity = delta, canChangeScene = true)
-            return
+            return 0f
         }
 
         if (
@@ -314,6 +324,8 @@ private class DragControllerImpl(
 
             updateTransition(swipeTransition)
         }
+
+        return delta
     }
 
     /**
@@ -351,10 +363,10 @@ private class DragControllerImpl(
         }
     }
 
-    override fun onStop(velocity: Float, canChangeScene: Boolean) {
+    override fun onStop(velocity: Float, canChangeScene: Boolean): Float {
         // The state was changed since the drag started; don't do anything.
         if (!isDrivingTransition || swipeTransition.isFinishing) {
-            return
+            return 0f
         }
 
         // Important: Make sure that all the code here references the current transition when
@@ -440,7 +452,7 @@ private class DragControllerImpl(
                 if (result == null) {
                     // We will not animate
                     swipeTransition.snapToScene(fromScene.key)
-                    return
+                    return 0f
                 }
 
                 val newSwipeTransition =
@@ -462,6 +474,9 @@ private class DragControllerImpl(
                 animateTo(targetScene = fromScene, targetOffset = 0f)
             }
         }
+
+        // The onStop animation consumes any remaining velocity.
+        return velocity
     }
 
     /**
@@ -1081,17 +1096,13 @@ internal class NestedScrollHandlerImpl(
                 // TODO(b/297842071) We should handle the overscroll or slow drag if the gesture is
                 // initiated in a nested child.
                 controller.onDrag(delta = offsetAvailable)
-
-                offsetAvailable
             },
             onStop = { velocityAvailable ->
                 val controller = dragController ?: error("Should be called after onStart")
 
-                controller.onStop(velocity = velocityAvailable, canChangeScene = canChangeScene)
-
-                dragController = null
-                // The onDragStopped animation consumes any remaining velocity.
-                velocityAvailable
+                controller
+                    .onStop(velocity = velocityAvailable, canChangeScene = canChangeScene)
+                    .also { dragController = null }
             },
         )
     }
@@ -1106,7 +1117,7 @@ internal class NestedScrollHandlerImpl(
 internal const val OffsetVisibilityThreshold = 0.5f
 
 private object NoOpDragController : DragController {
-    override fun onDrag(delta: Float) {}
+    override fun onDrag(delta: Float) = 0f
 
-    override fun onStop(velocity: Float, canChangeScene: Boolean) {}
+    override fun onStop(velocity: Float, canChangeScene: Boolean) = 0f
 }
