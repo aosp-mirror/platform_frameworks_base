@@ -126,7 +126,16 @@ private class PredictiveBackTransition(
         return coroutineScope
             .launch(start = CoroutineStart.ATOMIC) {
                 try {
-                    animatable.animateTo(targetProgress)
+                    if (currentScene == toScene) {
+                        animatable.animateTo(targetProgress, transformationSpec.progressSpec)
+                    } else {
+                        // If the back gesture is cancelled, the progress is animated back to 0f by
+                        // the system. But we need this animate call anyways because
+                        // PredictiveBackHandler doesn't guarantee that it ends at 0f. Since the
+                        // remaining change in progress is usually very small, the progressSpec is
+                        // omitted and the default spring spec used instead.
+                        animatable.animateTo(targetProgress)
+                    }
                 } finally {
                     state.finishTransition(this@PredictiveBackTransition, scene)
                 }
