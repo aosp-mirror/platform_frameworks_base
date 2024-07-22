@@ -3818,8 +3818,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final ArrayList<ResultInfo> list = new ArrayList<>();
         list.add(new ResultInfo(id, requestCode, resultCode, data, activityToken));
         final ClientTransaction clientTransaction = new ClientTransaction(mAppThread);
-        final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
-                activityToken, list);
+        final ActivityResultItem activityResultItem = new ActivityResultItem(activityToken, list);
         clientTransaction.addTransactionItem(activityResultItem);
         try {
             mAppThread.scheduleTransaction(clientTransaction);

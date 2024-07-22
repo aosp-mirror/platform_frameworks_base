@@ -1611,10 +1611,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         if (DEBUG_RESULTS) {
                             Slog.v(TAG_RESULTS, "Delivering results to " + next + ": " + a);
                         }
-                        final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
-                                next.token, a);
-                        mAtmService.getLifecycleManager().scheduleTransactionItem(
-                                appThread, activityResultItem);
+                        final ActivityResultItem item = new ActivityResultItem(next.token, a);
+                        mAtmService.getLifecycleManager().scheduleTransactionItem(appThread, item);
                     }
                 }
 
