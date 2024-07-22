@@ -48,7 +48,6 @@ android_test {
         "testables",
         "testng",
         "truth",
-        "ui-trace-collector",
     ],
     libs: [
         "android.test.mock",
