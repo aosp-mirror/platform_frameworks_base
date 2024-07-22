@@ -95,8 +95,8 @@ import javax.inject.Provider;
 /**
  * Controls the state and flow for screenshots.
  */
-public class ScreenshotController implements InteractiveScreenshotHandler {
-    private static final String TAG = logTag(ScreenshotController.class);
+public class LegacyScreenshotController implements InteractiveScreenshotHandler {
+    private static final String TAG = logTag(LegacyScreenshotController.class);
 
     // From WizardManagerHelper.java
     private static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
@@ -155,7 +155,7 @@ public class ScreenshotController implements InteractiveScreenshotHandler {
 
 
     @AssistedInject
-    ScreenshotController(
+    LegacyScreenshotController(
             Context context,
             WindowManager windowManager,
             FeatureFlags flags,
