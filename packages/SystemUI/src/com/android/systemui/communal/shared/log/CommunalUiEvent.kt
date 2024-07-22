@@ -53,7 +53,15 @@ enum class CommunalUiEvent(private val id: Int) : UiEventEnum {
     @UiEvent(doc = "User performs a swipe up gesture from bottom to enter bouncer")
     COMMUNAL_HUB_SWIPE_UP_TO_BOUNCER(1573),
     @UiEvent(doc = "User performs a swipe down gesture from top to enter shade")
-    COMMUNAL_HUB_SWIPE_DOWN_TO_SHADE(1574);
+    COMMUNAL_HUB_SWIPE_DOWN_TO_SHADE(1574),
+    @UiEvent(doc = "User performs a tap gesture on the UMO in Communal Hub")
+    COMMUNAL_HUB_UMO_TAP(1858),
+    @UiEvent(
+        doc =
+            "A transition from dream to Communal Hub starts. This can be triggered by a tap on " +
+                "the dream."
+    )
+    FROM_DREAM_TO_COMMUNAL_HUB_TRANSITION_START(1859);
 
     override fun getId(): Int {
         return id
