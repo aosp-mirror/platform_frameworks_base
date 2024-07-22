@@ -64,7 +64,8 @@ fun createFilterFromTextPolicyFile(
     log.i("Loading offloaded annotations from $filename ...")
     log.withIndent {
         val subclassFilter = SubclassFilter(classes, fallback)
-        val imf = InMemoryOutputFilter(classes, subclassFilter)
+        val packageFilter = PackageFilter(subclassFilter)
+        val imf = InMemoryOutputFilter(classes, packageFilter)
 
         var lineNo = 0
 
@@ -78,10 +79,7 @@ fun createFilterFromTextPolicyFile(
                 var className = ""
 
                 while (true) {
-                    var line = reader.readLine()
-                    if (line == null) {
-                        break
-                    }
+                    var line = reader.readLine() ?: break
                     lineNo++
 
                     line = normalizeTextLine(line)
@@ -95,6 +93,31 @@ fun createFilterFromTextPolicyFile(
 
                     val fields = line.split(whitespaceRegex).toTypedArray()
                     when (fields[0].lowercase()) {
+                        "p", "package" -> {
+                            if (fields.size < 3) {
+                                throw ParseException("Package ('p') expects 2 fields.")
+                            }
+                            val name = fields[1]
+                            val rawPolicy = fields[2]
+                            if (resolveExtendingClass(name) != null) {
+                                throw ParseException("Package can't be a super class type")
+                            }
+                            if (resolveSpecialClass(name) != SpecialClass.NotSpecial) {
+                                throw ParseException("Package can't be a special class type")
+                            }
+                            if (rawPolicy.startsWith("!")) {
+                                throw ParseException("Package can't have a substitution")
+                            }
+                            if (rawPolicy.startsWith("~")) {
+                                throw ParseException("Package can't have a class load hook")
+                            }
+                            val policy = parsePolicy(rawPolicy)
+                            if (!policy.isUsableWithClasses) {
+                                throw ParseException("Package can't have policy '$policy'")
+                            }
+                            packageFilter.addPolicy(name, policy.withReason(FILTER_REASON))
+                        }
+
                         "c", "class" -> {
                             if (fields.size < 3) {
                                 throw ParseException("Class ('c') expects 2 fields.")

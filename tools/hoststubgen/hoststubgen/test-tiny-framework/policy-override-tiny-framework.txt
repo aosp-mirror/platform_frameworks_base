@@ -40,3 +40,11 @@ class *com.android.hoststubgen.test.tinyframework.subclasstest.CA remove
 
 class *com.android.hoststubgen.test.tinyframework.subclasstest.I1 keep
 class *com.android.hoststubgen.test.tinyframework.subclasstest.IA remove
+
+# Test package directive
+package com.android.hoststubgen.test.tinyframework.packagetest stub
+class com.android.hoststubgen.test.tinyframework.packagetest.B remove
+class com.android.hoststubgen.test.tinyframework.packagetest.sub.B remove
+# The following rules are the same as above
+# class com.android.hoststubgen.test.tinyframework.packagetest.A stub
+# class com.android.hoststubgen.test.tinyframework.packagetest.sub.A stub
