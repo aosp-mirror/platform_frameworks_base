@@ -27,6 +27,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.InlineSuggestionsRequestCallback;
@@ -98,6 +99,18 @@ public abstract class InputMethodManagerInternal {
      * @return a list of {@link InputMethodInfo} that are enabled for {@code userId}
      */
     public abstract List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId);
+
+    /**
+     * Returns the list of installed input methods that are enabled for the specified user.
+     *
+     * @param imiId                           IME ID to be queried about
+     * @param allowsImplicitlyEnabledSubtypes {@code true} to return the implicitly enabled subtypes
+     * @param userId                          the user ID to be queried about
+     * @return a list of {@link InputMethodSubtype} that are enabled for {@code userId}
+     */
+    @NonNull
+    public abstract List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
+            String imiId, boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId);
 
     /**
      * Called by the Autofill Frameworks to request an {@link InlineSuggestionsRequest} from
@@ -309,6 +322,13 @@ public abstract class InputMethodManagerInternal {
                 @Override
                 public List<InputMethodInfo> getEnabledInputMethodListAsUser(
                         @UserIdInt int userId) {
+                    return Collections.emptyList();
+                }
+
+                @NonNull
+                @Override
+                public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(String imiId,
+                        boolean allowsImplicitlyEnabledSubtypes, int userId) {
                     return Collections.emptyList();
                 }
 

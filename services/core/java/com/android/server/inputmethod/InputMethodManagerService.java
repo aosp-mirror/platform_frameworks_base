@@ -5865,6 +5865,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
         }
 
+        @NonNull
+        @Override
+        public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
+                String imiId, boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
+            synchronized (ImfLock.class) {
+                return getEnabledInputMethodSubtypeListLocked(imiId,
+                        allowsImplicitlyEnabledSubtypes,
+                        userId, Process.SYSTEM_UID);
+            }
+        }
+
         @Override
         public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
                 InlineSuggestionsRequestInfo requestInfo, InlineSuggestionsRequestCallback cb) {
