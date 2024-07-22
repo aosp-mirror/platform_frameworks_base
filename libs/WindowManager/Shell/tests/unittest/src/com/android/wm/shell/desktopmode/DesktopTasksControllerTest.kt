@@ -211,7 +211,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
             desktopModeTaskRepository,
             shellTaskOrganizer,
             MAX_TASK_LIMIT,
-        )
+            mockInteractionJankMonitor,
+            mContext)
 
     whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
     whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }

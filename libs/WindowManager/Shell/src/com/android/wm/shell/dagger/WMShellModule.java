@@ -566,7 +566,8 @@ public abstract class WMShellModule {
             Context context,
             Transitions transitions,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
-            ShellTaskOrganizer shellTaskOrganizer) {
+            ShellTaskOrganizer shellTaskOrganizer,
+            InteractionJankMonitor interactionJankMonitor) {
         int maxTaskLimit = DesktopModeStatus.getMaxTaskLimit(context);
         if (!DesktopModeStatus.canEnterDesktopMode(context)
                 || !DESKTOP_WINDOWING_MODE.isEnabled(context)
@@ -575,7 +576,13 @@ public abstract class WMShellModule {
         }
         return Optional.of(
                 new DesktopTasksLimiter(
-                        transitions, desktopModeTaskRepository, shellTaskOrganizer, maxTaskLimit));
+                        transitions,
+                        desktopModeTaskRepository,
+                        shellTaskOrganizer,
+                        maxTaskLimit,
+                        interactionJankMonitor,
+                        context)
+        );
     }
 
 
