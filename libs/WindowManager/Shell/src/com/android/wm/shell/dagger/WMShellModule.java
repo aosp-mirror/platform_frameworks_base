@@ -35,6 +35,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
+import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
@@ -223,7 +224,8 @@ public abstract class WMShellModule {
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            AppToWebGenericLinksParser genericLinksParser) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -242,7 +244,8 @@ public abstract class WMShellModule {
                     transitions,
                     desktopTasksController,
                     rootTaskDisplayAreaOrganizer,
-                    interactionJankMonitor);
+                    interactionJankMonitor,
+                    genericLinksParser);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -257,6 +260,15 @@ public abstract class WMShellModule {
                 rootTaskDisplayAreaOrganizer,
                 syncQueue,
                 transitions);
+    }
+
+    @WMSingleton
+    @Provides
+    static AppToWebGenericLinksParser provideGenericLinksParser(
+            Context context,
+            @ShellMainThread ShellExecutor mainExecutor
+    ) {
+        return new AppToWebGenericLinksParser(context, mainExecutor);
     }
 
     //

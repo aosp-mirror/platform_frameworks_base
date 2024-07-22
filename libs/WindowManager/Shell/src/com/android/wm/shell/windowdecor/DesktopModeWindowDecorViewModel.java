@@ -87,6 +87,7 @@ import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
@@ -162,6 +163,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final DesktopModeKeyguardChangeListener mDesktopModeKeyguardChangeListener =
             new DesktopModeKeyguardChangeListener();
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
+    private final AppToWebGenericLinksParser mGenericLinksParser;
     private final DisplayInsetsController mDisplayInsetsController;
     private final Region mExclusionRegion = Region.obtain();
     private boolean mInImmersiveMode;
@@ -198,7 +200,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            InteractionJankMonitor interactionJankMonitor
+            InteractionJankMonitor interactionJankMonitor,
+            AppToWebGenericLinksParser genericLinksParser
     ) {
         this(
                 context,
@@ -216,6 +219,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 syncQueue,
                 transitions,
                 desktopTasksController,
+                genericLinksParser,
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
                 SurfaceControl.Transaction::new,
@@ -241,6 +245,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
+            AppToWebGenericLinksParser genericLinksParser,
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
@@ -266,6 +271,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mInputMonitorFactory = inputMonitorFactory;
         mTransactionFactory = transactionFactory;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
+        mGenericLinksParser = genericLinksParser;
         mInputManager = mContext.getSystemService(InputManager.class);
         mWindowDecorByTaskId = windowDecorByTaskId;
         mSysUIPackageName = mContext.getResources().getString(
@@ -1151,7 +1157,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mBgExecutor,
                         mMainChoreographer,
                         mSyncQueue,
-                        mRootTaskDisplayAreaOrganizer);
+                        mRootTaskDisplayAreaOrganizer,
+                        mGenericLinksParser);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final DragPositioningCallback dragPositioningCallback;

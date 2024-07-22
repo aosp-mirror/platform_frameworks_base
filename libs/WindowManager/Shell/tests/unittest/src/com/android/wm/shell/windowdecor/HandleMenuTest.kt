@@ -229,7 +229,7 @@ class HandleMenuTest : ShellTestCase() {
         val handleMenu = HandleMenu(mockDesktopWindowDecoration, layoutId,
                 onClickListener, onTouchListener, appIcon, appName, displayController,
                 splitScreenController, shouldShowWindowingPill = true,
-                shouldShowBrowserPill = true, captionWidth = HANDLE_WIDTH, captionHeight = 50,
+                null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
                 captionX = captionX
         )
         handleMenu.show()
