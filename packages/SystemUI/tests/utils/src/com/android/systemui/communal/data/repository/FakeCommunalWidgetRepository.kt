@@ -2,6 +2,9 @@ package com.android.systemui.communal.data.repository
 
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
+import android.content.pm.ActivityInfo
+import android.content.pm.ApplicationInfo
+import android.graphics.Bitmap
 import android.os.UserHandle
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
@@ -13,6 +16,8 @@ import kotlinx.coroutines.launch
 /** Fake implementation of [CommunalWidgetRepository] */
 class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
     CommunalWidgetRepository {
+    private val fakeDatabase = mutableMapOf<Int, CommunalWidgetContentModel>()
+
     private val _communalWidgets = MutableStateFlow<List<CommunalWidgetContentModel>>(emptyList())
     override val communalWidgets: Flow<List<CommunalWidgetContentModel>> = _communalWidgets
 
@@ -38,12 +43,54 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
         }
     }
 
-    override fun deleteWidget(widgetId: Int) {
-        if (_communalWidgets.value.none { it.appWidgetId == widgetId }) {
-            return
-        }
+    fun addWidget(
+        appWidgetId: Int,
+        componentName: String = "pkg/cls",
+        priority: Int = 0,
+        category: Int = AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
+        userId: Int = 0,
+    ) {
+        fakeDatabase[appWidgetId] =
+            CommunalWidgetContentModel.Available(
+                appWidgetId = appWidgetId,
+                priority = priority,
+                providerInfo =
+                    AppWidgetProviderInfo().apply {
+                        provider = ComponentName.unflattenFromString(componentName)!!
+                        widgetCategory = category
+                        providerInfo =
+                            ActivityInfo().apply {
+                                applicationInfo =
+                                    ApplicationInfo().apply {
+                                        uid = userId * UserHandle.PER_USER_RANGE
+                                    }
+                            }
+                    },
+            )
+        _communalWidgets.value = fakeDatabase.values.toList()
+    }
 
-        _communalWidgets.value = _communalWidgets.value.filter { it.appWidgetId != widgetId }
+    fun addPendingWidget(
+        appWidgetId: Int,
+        componentName: String = "pkg/cls",
+        priority: Int = 0,
+        icon: Bitmap? = null,
+        userId: Int = 0,
+    ) {
+        fakeDatabase[appWidgetId] =
+            CommunalWidgetContentModel.Pending(
+                appWidgetId = appWidgetId,
+                priority = priority,
+                componentName = ComponentName.unflattenFromString(componentName)!!,
+                icon = icon,
+                user = UserHandle(userId),
+            )
+        _communalWidgets.value = fakeDatabase.values.toList()
+    }
+
+    override fun deleteWidget(widgetId: Int) {
+        fakeDatabase.remove(widgetId)
+        _communalWidgets.value = fakeDatabase.values.toList()
     }
 
     override fun restoreWidgets(oldToNewWidgetIdMap: Map<Int, Int>) {}
