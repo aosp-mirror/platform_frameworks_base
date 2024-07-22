@@ -36,6 +36,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -398,17 +399,22 @@ public class PipTransition extends PipTransitionController implements
         SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
         Preconditions.checkNotNull(pipLeash, "Leash is null for bounds transition.");
 
+        Rect sourceRectHint = null;
+        if (pipChange.getTaskInfo() != null
+                && pipChange.getTaskInfo().pictureInPictureParams != null) {
+            sourceRectHint = pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint();
+        }
+
         PipEnterExitAnimator animator = new PipEnterExitAnimator(mContext, pipLeash,
-                startTransaction, startBounds, startBounds, endBounds,
-                PipEnterExitAnimator.BOUNDS_ENTER);
+                startTransaction, finishTransaction, startBounds, startBounds, endBounds,
+                sourceRectHint, PipEnterExitAnimator.BOUNDS_ENTER, Surface.ROTATION_0);
 
         tx.addTransactionCommittedListener(mPipScheduler.getMainExecutor(),
                 this::onClientDrawAtTransitionEnd);
         finishWct.setBoundsChangeTransaction(pipTaskToken, tx);
 
-        animator.setAnimationEndCallback(() -> {
-            finishCallback.onTransitionFinished(finishWct.isEmpty() ? null : finishWct);
-        });
+        animator.setAnimationEndCallback(() ->
+                finishCallback.onTransitionFinished(finishWct));
 
         animator.start();
         return true;
@@ -452,19 +458,53 @@ public class PipTransition extends PipTransitionController implements
 
         TransitionInfo.Change pipChange = getChangeByToken(info, pipToken);
         if (pipChange == null) {
-            return false;
+            // pipChange is null, check to see if we've reparented the PIP activity for
+            // the multi activity case. If so we should use the activity leash instead
+            for (TransitionInfo.Change change : info.getChanges()) {
+                if (change.getTaskInfo() == null
+                        && change.getLastParent() != null
+                        && change.getLastParent().equals(pipToken)) {
+                    pipChange = change;
+                    break;
+                }
+            }
+
+            // failsafe
+            if (pipChange == null) {
+                return false;
+            }
+        }
+
+        // for multi activity, we need to manually set the leash layer
+        if (pipChange.getTaskInfo() == null) {
+            TransitionInfo.Change parent = getChangeByToken(info, pipChange.getParent());
+            if (parent != null) {
+                startTransaction.setLayer(parent.getLeash(), Integer.MAX_VALUE - 1);
+            }
         }
 
         Rect startBounds = pipChange.getStartAbsBounds();
         Rect endBounds = pipChange.getEndAbsBounds();
         SurfaceControl pipLeash = pipChange.getLeash();
+        Preconditions.checkNotNull(pipLeash, "Leash is null for exit transition.");
+
+        Rect sourceRectHint = null;
+        if (pipChange.getTaskInfo() != null
+                && pipChange.getTaskInfo().pictureInPictureParams != null) {
+            // single activity
+            sourceRectHint = pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint();
+        } else if (mPipTaskListener.getPictureInPictureParams().hasSourceBoundsHint()) {
+            // multi activity
+            sourceRectHint = mPipTaskListener.getPictureInPictureParams().getSourceRectHint();
+        }
 
         PipEnterExitAnimator animator = new PipEnterExitAnimator(mContext, pipLeash,
-                startTransaction, startBounds, startBounds, endBounds,
-                PipEnterExitAnimator.BOUNDS_EXIT);
+                startTransaction, finishTransaction, endBounds, startBounds, endBounds,
+                sourceRectHint, PipEnterExitAnimator.BOUNDS_EXIT, Surface.ROTATION_0);
+
         animator.setAnimationEndCallback(() -> {
-            finishCallback.onTransitionFinished(null);
             mPipTransitionState.setState(PipTransitionState.EXITED_PIP);
+            finishCallback.onTransitionFinished(null);
         });
 
         animator.start();
