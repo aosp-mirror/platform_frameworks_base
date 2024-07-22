@@ -9446,8 +9446,13 @@ public class WindowManagerService extends IWindowManager.Stub
      * Returns {@code true} if the focused window is changed. Otherwise, returns {@code false}.
      */
     boolean moveFocusToAdjacentEmbeddedWindow(@NonNull WindowState focusedWindow) {
+        final ActivityRecord activity = focusedWindow.getActivityRecord();
+        if (activity == null) {
+            return false;
+        }
+
         final ActivityRecord mostRecentActivityInAdjacent = getMostRecentActivityInAdjacent(
-                focusedWindow.getActivityRecord());
+                activity);
 
         moveFocusToActivity(mostRecentActivityInAdjacent);
         return !focusedWindow.isFocused();
