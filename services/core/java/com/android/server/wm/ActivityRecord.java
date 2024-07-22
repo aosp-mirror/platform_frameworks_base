@@ -2812,9 +2812,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         try {
             mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_ATTACH_TO_CLIENT;
-            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    TransferSplashScreenViewStateItem.obtain(token, parcelable,
-                            windowAnimationLeash));
+            final TransferSplashScreenViewStateItem item =
+                    new TransferSplashScreenViewStateItem(token, parcelable, windowAnimationLeash);
+            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(), item);
             scheduleTransferSplashScreenTimeout();
         } catch (Exception e) {
             Slog.w(TAG, "onCopySplashScreenComplete fail: " + this);
