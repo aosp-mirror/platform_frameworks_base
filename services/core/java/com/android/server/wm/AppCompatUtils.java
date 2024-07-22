@@ -89,13 +89,32 @@ class AppCompatUtils {
         return activityRecord.info.isChangeEnabled(overrideChangeId);
     }
 
+    /**
+     * Attempts to return the app bounds (bounds without insets) of the top most opaque activity. If
+     * these are not available, it defaults to the bounds of the activity which include insets. In
+     * the event the activity is in Size Compat Mode, the Size Compat bounds are returned instead.
+     */
+    @NonNull
+    static Rect getAppBounds(@NonNull ActivityRecord activityRecord) {
+        // TODO(b/268458693): Refactor configuration inheritance in case of translucent activities
+        final Rect appBounds = activityRecord.getConfiguration().windowConfiguration.getAppBounds();
+        if (appBounds == null) {
+            return activityRecord.getBounds();
+        }
+        return activityRecord.mAppCompatController.getTransparentPolicy()
+                .findOpaqueNotFinishingActivityBelow()
+                .map(AppCompatUtils::getAppBounds)
+                .orElseGet(() -> {
+                    if (activityRecord.hasSizeCompatBounds()) {
+                        return activityRecord.getScreenResolvedBounds();
+                    }
+                    return appBounds;
+                });
+    }
+
     static void fillAppCompatTaskInfo(@NonNull Task task, @NonNull TaskInfo info,
             @Nullable ActivityRecord top) {
         final AppCompatTaskInfo appCompatTaskInfo = info.appCompatTaskInfo;
-        appCompatTaskInfo.topActivityLetterboxVerticalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
-        appCompatTaskInfo.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
-        appCompatTaskInfo.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
-        appCompatTaskInfo.topActivityLetterboxHeight = TaskInfo.PROPERTY_VALUE_UNSET;
         appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode =
                 CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
         if (top == null) {
@@ -124,8 +143,13 @@ class AppCompatUtils {
                 .getAppCompatAspectRatioOverrides().isSystemOverrideToFullscreenEnabled();
 
         appCompatTaskInfo.isFromLetterboxDoubleTap = reachabilityOverrides.isFromDoubleTap();
-        appCompatTaskInfo.topActivityLetterboxWidth = top.getBounds().width();
-        appCompatTaskInfo.topActivityLetterboxHeight = top.getBounds().height();
+        final Rect bounds = top.getBounds();
+        final Rect appBounds = getAppBounds(top);
+        appCompatTaskInfo.topActivityLetterboxWidth = bounds.width();
+        appCompatTaskInfo.topActivityLetterboxHeight = bounds.height();
+        appCompatTaskInfo.topActivityLetterboxAppWidth = appBounds.width();
+        appCompatTaskInfo.topActivityLetterboxAppHeight = appBounds.height();
+
         // We need to consider if letterboxed or pillarboxed.
         // TODO(b/336807329) Encapsulate reachability logic
         appCompatTaskInfo.isLetterboxDoubleTapEnabled = reachabilityOverrides
