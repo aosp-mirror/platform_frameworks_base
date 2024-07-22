@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.view.viewmodel
 
+import android.content.ComponentName
 import android.content.pm.UserInfo
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
@@ -41,6 +42,7 @@ import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.communalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.log.CommunalMetricsLogger
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
@@ -107,6 +109,7 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
+    @Mock private lateinit var metricsLogger: CommunalMetricsLogger
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -170,7 +173,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 kosmos.communalTutorialInteractor,
                 kosmos.shadeInteractor,
                 mediaHost,
-                logcatLogBuffer("CommunalViewModelTest")
+                logcatLogBuffer("CommunalViewModelTest"),
+                metricsLogger,
             )
     }
 
@@ -744,6 +748,12 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         underTest.onOpenWidgetEditor(false)
 
         verify(communalInteractor).setScrollPosition(eq(index), eq(offset))
+    }
+
+    @Test
+    fun onTapWidget_logEvent() {
+        underTest.onTapWidget(ComponentName("test_pkg", "test_cls"), priority = 10)
+        verify(metricsLogger).logTapWidget("test_pkg/test_cls", rank = 10)
     }
 
     private suspend fun setIsMainUser(isMainUser: Boolean) {
