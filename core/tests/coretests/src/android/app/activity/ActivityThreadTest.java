@@ -271,7 +271,7 @@ public class ActivityThreadTest {
             newConfig.seq++;
             newConfig.smallestScreenWidthDp++;
             transaction = newTransaction(activityThread);
-            transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
+            transaction.addTransactionItem(new ActivityConfigurationChangeItem(
                     activity.getActivityToken(), newConfig, new ActivityWindowInfo()));
             appThread.scheduleTransaction(transaction);
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
@@ -479,11 +479,11 @@ public class ActivityThreadTest {
         appThread.scheduleTransaction(transaction);
 
         transaction = newTransaction(activityThread);
-        transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
+        transaction.addTransactionItem(new ActivityConfigurationChangeItem(
                 activity.getActivityToken(), activityConfigLandscape, new ActivityWindowInfo()));
         transaction.addTransactionItem(ConfigurationChangeItem.obtain(
                 processConfigPortrait, DEVICE_ID_INVALID));
-        transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
+        transaction.addTransactionItem(new ActivityConfigurationChangeItem(
                 activity.getActivityToken(), activityConfigPortrait, new ActivityWindowInfo()));
         appThread.scheduleTransaction(transaction);
 
@@ -881,7 +881,7 @@ public class ActivityThreadTest {
             final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
             activityWindowInfo.set(true /* isEmbedded */, taskBounds, taskFragmentBounds);
             final ActivityConfigurationChangeItem activityConfigurationChangeItem =
-                    ActivityConfigurationChangeItem.obtain(
+                    new ActivityConfigurationChangeItem(
                             activity.getActivityToken(), config, activityWindowInfo);
             final ClientTransaction transaction = newTransaction(activity);
             transaction.addTransactionItem(activityConfigurationChangeItem);
@@ -898,7 +898,7 @@ public class ActivityThreadTest {
                     new ActivityWindowInfo(activityWindowInfo);
             config.seq++;
             final ActivityConfigurationChangeItem activityConfigurationChangeItem2 =
-                    ActivityConfigurationChangeItem.obtain(
+                    new ActivityConfigurationChangeItem(
                             activity.getActivityToken(), config, activityWindowInfo2);
             final ClientTransaction transaction2 = newTransaction(activity);
             transaction2.addTransactionItem(activityConfigurationChangeItem2);
@@ -1018,7 +1018,7 @@ public class ActivityThreadTest {
     @NonNull
     private static ClientTransaction newActivityConfigTransaction(@NonNull Activity activity,
             @NonNull Configuration config) {
-        final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(
+        final ActivityConfigurationChangeItem item = new ActivityConfigurationChangeItem(
                 activity.getActivityToken(), config, new ActivityWindowInfo());
 
         final ClientTransaction transaction = newTransaction(activity);

@@ -1485,8 +1485,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending new config to %s, "
                     + "config: %s", this, config);
 
-            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    ActivityConfigurationChangeItem.obtain(token, config, activityWindowInfo));
+            final ActivityConfigurationChangeItem item =
+                    new ActivityConfigurationChangeItem(token, config, activityWindowInfo);
+            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(), item);
         } catch (RemoteException e) {
             // If process died, whatever.
         }

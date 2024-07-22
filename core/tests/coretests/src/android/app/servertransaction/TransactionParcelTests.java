@@ -90,7 +90,7 @@ public class TransactionParcelTests {
         final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
         activityWindowInfo.set(true /* isEmbedded */, new Rect(0, 0, 500, 1000),
                 new Rect(0, 0, 500, 500));
-        ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(
+        final ActivityConfigurationChangeItem item = new ActivityConfigurationChangeItem(
                 mActivityToken, config(), activityWindowInfo);
         writeAndPrepareForReading(item);
 
@@ -290,8 +290,9 @@ public class TransactionParcelTests {
     @Test
     public void testClientTransaction() {
         // Write to parcel
-        NewIntentItem callback1 = NewIntentItem.obtain(mActivityToken, new ArrayList<>(), true);
-        ActivityConfigurationChangeItem callback2 = ActivityConfigurationChangeItem.obtain(
+        final NewIntentItem callback1 = NewIntentItem.obtain(
+                mActivityToken, new ArrayList<>(), true);
+        final ActivityConfigurationChangeItem callback2 = new ActivityConfigurationChangeItem(
                 mActivityToken, config(), new ActivityWindowInfo());
 
         final StopActivityItem lifecycleRequest = new StopActivityItem(mActivityToken);

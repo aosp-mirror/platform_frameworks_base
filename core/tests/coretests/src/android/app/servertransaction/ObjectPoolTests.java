@@ -73,12 +73,6 @@ public class ObjectPoolTests {
     // 3. Check if the same object is obtained from pool after recycling.
 
     @Test
-    public void testRecycleActivityConfigurationChangeItem() {
-        testRecycle(() -> ActivityConfigurationChangeItem.obtain(mActivityToken, config(),
-                new ActivityWindowInfo()));
-    }
-
-    @Test
     public void testRecycleActivityResultItem() {
         testRecycle(() -> ActivityResultItem.obtain(mActivityToken, resultInfoList()));
     }

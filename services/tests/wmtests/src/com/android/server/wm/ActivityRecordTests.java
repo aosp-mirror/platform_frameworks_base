@@ -523,9 +523,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(newConfig.uiMode, activityConfig.uiMode);
 
         // The configuration change is still sent to the activity, even if it doesn't relaunch.
-        final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, activityConfig,
-                        activity.getActivityWindowInfo());
+        final ActivityConfigurationChangeItem expected = new ActivityConfigurationChangeItem(
+                activity.token, activityConfig, activity.getActivityWindowInfo());
         verify(mClientLifecycleManager).scheduleTransactionItem(
                 eq(activity.app.getThread()), eq(expected));
     }
@@ -596,9 +595,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         final Configuration currentConfig = activity.getConfiguration();
         assertEquals(expectedOrientation, currentConfig.orientation);
-        final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, currentConfig,
-                        activity.getActivityWindowInfo());
+        final ActivityConfigurationChangeItem expected = new ActivityConfigurationChangeItem(
+                activity.token, currentConfig, activity.getActivityWindowInfo());
         verify(mClientLifecycleManager).scheduleTransactionItem(activity.app.getThread(), expected);
         verify(displayRotation).onSetRequestedOrientation();
     }
@@ -817,9 +815,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
             activity.ensureActivityConfiguration(true /* ignoreVisibility */);
 
-            final ActivityConfigurationChangeItem expected =
-                    ActivityConfigurationChangeItem.obtain(activity.token,
-                            activity.getConfiguration(), activity.getActivityWindowInfo());
+            final ActivityConfigurationChangeItem expected = new ActivityConfigurationChangeItem(
+                    activity.token, activity.getConfiguration(), activity.getActivityWindowInfo());
             verify(mClientLifecycleManager).scheduleTransactionItem(
                     activity.app.getThread(), expected);
         } finally {
