@@ -15,6 +15,7 @@ import android.window.TransitionInfo
 import android.window.TransitionInfo.FLAG_IS_WALLPAPER
 import android.window.WindowContainerTransaction
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
@@ -51,6 +52,8 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
     @Mock private lateinit var taskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock private lateinit var splitScreenController: SplitScreenController
     @Mock private lateinit var dragAnimator: MoveToDesktopAnimator
+    @Mock
+    private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
 
     private val transactionSupplier = Supplier { mock<SurfaceControl.Transaction>() }
 
@@ -63,7 +66,8 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
                     context,
                     transitions,
                     taskDisplayAreaOrganizer,
-                    transactionSupplier
+                    mockInteractionJankMonitor,
+                    transactionSupplier,
                 )
                 .apply { setSplitScreenController(splitScreenController) }
     }
