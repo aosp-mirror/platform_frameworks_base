@@ -916,8 +916,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 result.mRequestedVisibleTypes, result.mPackageName, result.mLetterboxDetails);
 
         // StatusBarManagerService has a back up of IME token and it's restored here.
-        mCommandQueueCallbacks.setImeWindowStatus(mDisplayId, result.mImeToken,
-                result.mImeWindowVis, result.mImeBackDisposition, result.mShowImeSwitcher);
+        mCommandQueueCallbacks.setImeWindowStatus(mDisplayId, result.mImeWindowVis,
+                result.mImeBackDisposition, result.mShowImeSwitcher);
 
         // Set up the initial icon state
         int numIcons = result.mIcons.size();
