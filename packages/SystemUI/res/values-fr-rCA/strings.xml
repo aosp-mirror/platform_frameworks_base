@@ -162,7 +162,7 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Si vous entrez un schéma incorrect à la prochaine tentative, cet utilisateur sera supprimé."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Si vous entrez un NIP incorrect à la prochaine tentative, cet utilisateur sera supprimé."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Si vous entrez un mot de passe incorrect à la prochaine tentative, cet utilisateur sera supprimé."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Si vous entrez un schéma incorrect à la prochaine tentative suivante, votre profil professionnel et ses données seront supprimés."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Si vous entrez un schéma incorrect à la prochaine tentative, votre profil professionnel et ses données seront supprimés."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Si vous entrez un NIP incorrect à la prochaine tentative, votre profil professionnel et ses données seront supprimés."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Si vous entrez un mot de passe incorrect à la prochaine tentative suivante, votre profil professionnel et ses données seront supprimés."</string>
     <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Configuration"</string>
@@ -389,7 +389,7 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Vous êtes en mode Invité"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Si vous ajoutez un nouvel utilisateur, vous quitterez le mode Invité, et toutes les applis et données de la session d\'invité en cours seront supprimées."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite d\'utilisateurs atteinte"</string>
-    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Vous ne pouvez créer qu\'un seul utilisateur.}one{Vous pouvez ajouter jusqu\'à # utilisateur.}many{Vous pouvez ajouter jusqu\'à # d\'utilisateurs.}other{Vous pouvez ajouter jusqu\'à # utilisateurs.}}"</string>
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Un seul utilisateur peut être créé}one{Vous pouvez ajouter jusqu\'à # utilisateur.}many{Vous pouvez ajouter jusqu\'à # d\'utilisateurs.}other{Vous pouvez ajouter jusqu\'à # utilisateurs.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Supprimer l\'utilisateur?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Toutes les applis et les données de cet utilisateur seront supprimées."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Supprimer"</string>
@@ -751,7 +751,7 @@
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Ouvrir les paramètres."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Ouvrir les réglages rapides."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Fermer les réglages rapides."</string>
-    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Connecté comme <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Personne connectée en tant que <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"choisir un utilisateur"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Aucune connexion Internet"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Ouvrir les paramètres <xliff:g id="ID_1">%s</xliff:g>."</string>
