@@ -108,12 +108,12 @@ public class TransactionParcelTests {
         final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
         activityWindowInfo.set(true /* isEmbedded */, new Rect(0, 0, 500, 1000),
                 new Rect(0, 0, 500, 500));
-        MoveToDisplayItem item = MoveToDisplayItem.obtain(mActivityToken, 4 /* targetDisplayId */,
-                config(), activityWindowInfo);
+        final MoveToDisplayItem item = new MoveToDisplayItem(mActivityToken,
+                4 /* targetDisplayId */, config(), activityWindowInfo);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
-        MoveToDisplayItem result = MoveToDisplayItem.CREATOR.createFromParcel(mParcel);
+        final MoveToDisplayItem result = MoveToDisplayItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertEquals(item, result);

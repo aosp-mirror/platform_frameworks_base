@@ -24,7 +24,6 @@ import static org.junit.Assert.assertNotSame;
 import android.annotation.NonNull;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
-import android.window.ActivityWindowInfo;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -65,12 +64,6 @@ public class ObjectPoolTests {
     @Test
     public void testRecycleConfigurationChangeItem() {
         testRecycle(() -> ConfigurationChangeItem.obtain(config(), 1));
-    }
-
-    @Test
-    public void testRecycleMoveToDisplayItem() {
-        testRecycle(() -> MoveToDisplayItem.obtain(mActivityToken, 4, config(),
-                new ActivityWindowInfo()));
     }
 
     @Test
