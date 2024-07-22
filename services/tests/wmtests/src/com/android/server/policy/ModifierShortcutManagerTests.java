@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,22 @@ package com.android.server.policy;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Handler;
@@ -58,27 +65,56 @@ public class ModifierShortcutManagerTests {
     private Handler mHandler;
     private Context mContext;
     private Resources mResources;
+    private PackageManager mPackageManager;
 
     @Before
     public void setUp() {
         mHandler = new Handler(Looper.getMainLooper());
         mContext = spy(getInstrumentation().getTargetContext());
         mResources = spy(mContext.getResources());
+        mPackageManager = spy(mContext.getPackageManager());
 
         XmlResourceParser testBookmarks = mResources.getXml(
                 com.android.frameworks.wmtests.R.xml.bookmarks);
 
         when(mContext.getResources()).thenReturn(mResources);
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mResources.getXml(R.xml.bookmarks)).thenReturn(testBookmarks);
+        try {
+            // Keep packageName / className in sync with
+            // services/tests/wmtests/res/xml/bookmarks.xml
+            ActivityInfo testActivityInfo = new ActivityInfo();
+            testActivityInfo.applicationInfo = new ApplicationInfo();
+            testActivityInfo.packageName =
+                    testActivityInfo.applicationInfo.packageName = "com.test";
+
+            doReturn(testActivityInfo).when(mPackageManager).getActivityInfo(
+                    eq(new ComponentName("com.test", "com.test.BookmarkTest")), anyInt());
+            doThrow(new PackageManager.NameNotFoundException("com.test3")).when(mPackageManager)
+                    .getActivityInfo(eq(new ComponentName("com.test3", "com.test.BookmarkTest")),
+                        anyInt());
+        } catch (PackageManager.NameNotFoundException ignored) { }
+        doReturn(new String[] { "com.test" }).when(mPackageManager)
+                .canonicalToCurrentPackageNames(aryEq(new String[] { "com.test2" }));
+
 
         mModifierShortcutManager = new ModifierShortcutManager(mContext, mHandler);
     }
 
     @Test
     public void test_getApplicationLaunchKeyboardShortcuts() {
+        // Expected values here determined by the number of shortcuts defined in
+        // services/tests/wmtests/res/xml/bookmarks.xml
+
+        // Total valid shortcuts.
         KeyboardShortcutGroup group =
                 mModifierShortcutManager.getApplicationLaunchKeyboardShortcuts(-1);
-        assertEquals(8, group.getItems().size());
+        assertEquals(13, group.getItems().size());
+
+        // Total valid shift shortcuts.
+        assertEquals(3, group.getItems().stream()
+                .filter(s -> s.getModifiers() == (KeyEvent.META_SHIFT_ON | KeyEvent.META_META_ON))
+                .count());
     }
 
     @Test
