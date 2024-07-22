@@ -426,6 +426,11 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Buka Tetapan"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Peranti lain"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Togol Ikhtisar"</string>
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Mod keutamaan"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Selesai"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Tetapan"</string>
+    <string name="zen_mode_on" msgid="9085304934016242591">"Hidup"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"Mati"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Anda tidak akan diganggu oleh bunyi dan getaran, kecuali daripada penggera, peringatan, acara dan pemanggil yang anda tetapkan. Anda masih mendengar item lain yang anda pilih untuk dimainkan termasuk muzik, video dan permainan."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Anda tidak akan diganggu oleh bunyi dan getaran, kecuali daripada penggera. Anda masih mendengar item lain yang anda pilih untuk dimainkan termasuk muzik, video dan permainan."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Peribadikan"</string>
@@ -492,6 +497,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"letakkan widget dipilih"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Widget skrin kunci"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Sesiapa sahaja boleh melihat widget pada skrin kunci, walaupun tablet dikunci."</string>
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"nyahpilih widget"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Widget skrin kunci"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Untuk membuka apl menggunakan widget, anda perlu mengesahkan identiti anda. Selain itu, perlu diingat bahawa sesiapa sahaja boleh melihat widget tersebut, walaupun semasa tablet anda dikunci. Sesetengah widget mungkin tidak sesuai untuk skrin kunci anda dan mungkin tidak selamat untuk ditambahkan di sini."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
@@ -548,8 +554,10 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Mulakan sekarang"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Tiada pemberitahuan"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Tiada pemberitahuan baharu"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Pemberitahuan boleh suai dihidupkan"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Kelantangan &amp; tetingkap timbul pada skrin peranti anda dikurangkan selama dua minit apabila banyak pemberitahuan diterima dalam masa yang singkat."</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
+    <skip />
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Matikan"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Buka kunci untuk melihat pemberitahuan lama"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Peranti ini diurus oleh ibu bapa anda"</string>
@@ -716,8 +724,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Lalai"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatik"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Tiada bunyi atau getaran"</string>
-    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
-    <skip />
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"Tiada bunyi atau getaran tetapi masih dipaparkan dalam bahagian perbualan"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Mungkin berbunyi atau bergetar berdasarkan tetapan peranti"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Mungkin berbunyi atau bergetar berdasarkan tetapan peranti. Perbualan daripada gelembung <xliff:g id="APP_NAME">%1$s</xliff:g> secara lalai."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Minta sistem menentukan jika pemberitahuan ini patut menghasilkan bunyi atau getaran"</string>
@@ -1378,4 +1385,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kawalan Rumah"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Jadikan kawalan rumah anda sebagai penyelamat skrin"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Buat asal"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Untuk kembali, leret ke kiri atau ke kanan dengan tiga jari pada pad sentuh"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"Untuk mengakses laman utama, leret ke atas dengan tiga jari pada pad sentuh"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Untuk melihat apl terbaharu, leret ke atas dan tahan dengan tiga jari pada pad sentuh"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Untuk melihat semua apl anda, tekan kekunci tindakan pada papan kekunci anda"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"Gunakan pad sentuh anda untuk kembali"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"Leret ke kiri atau ke kanan dengan tiga jari. Ketik dan ketahui lebih lanjut tentang gerak isyarat."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"Gunakan pad sentuh untuk mengakses laman utama"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"Leret ke atas menggunakan tiga jari. Ketik untuk mengetahui lebih lanjut tentang gerak isyarat."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"Gunakan pad sentuh anda untuk melihat apl terbaharu"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Leret ke atas, tahan dengan tiga jari. Ketik untuk mengetahui lebih lanjut tentang gerak isyarat."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Gunakan papan kekunci anda untuk melihat semua apl"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Tekan kekunci tindakan pada bila-bila masa. Ketik dan ketahui lebih lanjut tentang gerak isyarat."</string>
 </resources>
