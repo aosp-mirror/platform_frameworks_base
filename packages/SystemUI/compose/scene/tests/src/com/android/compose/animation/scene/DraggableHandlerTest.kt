@@ -1054,7 +1054,7 @@ class DraggableHandlerTest {
     @Test
     fun emptyOverscrollImmediatelyAbortsSettleAnimationWhenOverProgress() = runGestureTest {
         // Overscrolling on scene B does nothing.
-        layoutState.transitions = transitions { overscroll(SceneB, Orientation.Vertical) {} }
+        layoutState.transitions = transitions { overscrollDisabled(SceneB, Orientation.Vertical) }
 
         // Swipe up to scene B at progress = 200%.
         val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)

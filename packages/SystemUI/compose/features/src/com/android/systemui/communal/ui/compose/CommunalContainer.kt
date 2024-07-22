@@ -128,7 +128,7 @@ val sceneTransitions = transitions {
     }
     // Disable horizontal overscroll. If the scene is overscrolled too soon after showing, this
     // can lead to inconsistent KeyguardState changes.
-    overscroll(CommunalScenes.Communal, Orientation.Horizontal) {}
+    overscrollDisabled(CommunalScenes.Communal, Orientation.Horizontal)
 }
 
 /**

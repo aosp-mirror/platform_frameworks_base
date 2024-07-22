@@ -812,7 +812,7 @@ class SwipeToSceneTest {
                     SceneA,
                     transitions {
                         from(SceneA, to = SceneB) { distance = FixedDistance(swipeDistance) }
-                        overscroll(SceneB, Orientation.Vertical)
+                        overscrollDisabled(SceneB, Orientation.Vertical)
                     }
                 )
             }

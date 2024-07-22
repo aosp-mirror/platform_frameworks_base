@@ -1513,7 +1513,7 @@ class ElementTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                         SceneA,
-                        transitions { overscroll(SceneA, Orientation.Horizontal) {} }
+                        transitions { overscrollDisabled(SceneA, Orientation.Horizontal) }
                     )
                     .apply {
                         startTransition(
@@ -1666,8 +1666,8 @@ class ElementTest {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
                     transitions {
-                        overscroll(SceneA, Orientation.Horizontal)
-                        overscroll(SceneB, Orientation.Horizontal)
+                        overscrollDisabled(SceneA, Orientation.Horizontal)
+                        overscrollDisabled(SceneB, Orientation.Horizontal)
                     }
                 )
             }
@@ -1714,8 +1714,8 @@ class ElementTest {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
                     transitions {
-                        overscroll(SceneA, Orientation.Horizontal)
-                        overscroll(SceneB, Orientation.Horizontal)
+                        overscrollDisabled(SceneA, Orientation.Horizontal)
+                        overscrollDisabled(SceneB, Orientation.Horizontal)
                     }
                 )
             }
@@ -2036,7 +2036,7 @@ class ElementTest {
             rule.runOnIdle {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { overscroll(SceneA, Orientation.Horizontal) }
+                    transitions { overscrollDisabled(SceneA, Orientation.Horizontal) }
                 )
             }
 

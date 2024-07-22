@@ -104,8 +104,14 @@ interface SceneTransitionsBuilder {
     fun overscroll(
         scene: SceneKey,
         orientation: Orientation,
-        builder: OverscrollBuilder.() -> Unit = {},
+        builder: OverscrollBuilder.() -> Unit,
     ): OverscrollSpec
+
+    /**
+     * Prevents overscroll the [scene] in the given [orientation], allowing ancestors to eventually
+     * consume the remaining gesture.
+     */
+    fun overscrollDisabled(scene: SceneKey, orientation: Orientation): OverscrollSpec
 }
 
 interface BaseTransitionBuilder : PropertyTransformationBuilder {
