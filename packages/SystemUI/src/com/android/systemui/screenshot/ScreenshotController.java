@@ -98,25 +98,6 @@ import javax.inject.Provider;
 public class ScreenshotController implements ScreenshotHandler {
     private static final String TAG = logTag(ScreenshotController.class);
 
-    public interface TransitionDestination {
-        /**
-         * Allows the long screenshot activity to call back with a destination location (the bounds
-         * on screen of the destination for the transitioning view) and a Runnable to be run once
-         * the transition animation is complete.
-         */
-        void setTransitionDestination(Rect transitionDestination, Runnable onTransitionEnd);
-    }
-
-    // These strings are used for communicating the action invoked to
-    // ScreenshotNotificationSmartActionsProvider.
-    public static final String EXTRA_ACTION_TYPE = "android:screenshot_action_type";
-    public static final String EXTRA_ID = "android:screenshot_id";
-    public static final String EXTRA_SMART_ACTIONS_ENABLED = "android:smart_actions_enabled";
-    public static final String EXTRA_ACTION_INTENT = "android:screenshot_action_intent";
-    public static final String EXTRA_ACTION_INTENT_FILLIN =
-            "android:screenshot_action_intent_fillin";
-
-
     // From WizardManagerHelper.java
     private static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
 
@@ -378,9 +359,7 @@ public class ScreenshotController implements ScreenshotHandler {
             if (screenshotPrivateProfileAccessibilityAnnouncementFix()) {
                 mAnnouncementResolver.getScreenshotAnnouncement(
                         screenshot.getUserHandle().getIdentifier(),
-                        announcement -> {
-                            mViewProxy.announceForAccessibility(announcement);
-                        });
+                        mViewProxy::announceForAccessibility);
             } else {
                 if (mUserManager.isManagedProfile(screenshot.getUserHandle().getIdentifier())) {
                     mViewProxy.announceForAccessibility(mContext.getResources().getString(

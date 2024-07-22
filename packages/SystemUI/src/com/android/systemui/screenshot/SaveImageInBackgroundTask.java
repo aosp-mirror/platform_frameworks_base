@@ -286,7 +286,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     ScreenshotNotificationSmartActionsProvider.ACTION_TYPE,
                     ScreenshotNotificationSmartActionsProvider.DEFAULT_ACTION_TYPE);
             Intent intent = new Intent(context, SmartActionsReceiver.class)
-                    .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, action.actionIntent)
+                    .putExtra(SmartActionsReceiver.EXTRA_ACTION_INTENT, action.actionIntent)
                     .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             addIntentExtras(mScreenshotId, intent, actionType, true /* smartActionsEnabled */);
             PendingIntent broadcastIntent = PendingIntent.getBroadcast(context,
@@ -302,9 +302,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private static void addIntentExtras(String screenshotId, Intent intent, String actionType,
             boolean smartActionsEnabled) {
         intent
-                .putExtra(ScreenshotController.EXTRA_ACTION_TYPE, actionType)
-                .putExtra(ScreenshotController.EXTRA_ID, screenshotId)
-                .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED, smartActionsEnabled);
+                .putExtra(SmartActionsReceiver.EXTRA_ACTION_TYPE, actionType)
+                .putExtra(SmartActionsReceiver.EXTRA_ID, screenshotId)
+                .putExtra(SmartActionsReceiver.EXTRA_SMART_ACTIONS_ENABLED, smartActionsEnabled);
     }
 
     /**
@@ -327,8 +327,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         }
 
         Intent wrappedIntent = new Intent(mContext, SmartActionsReceiver.class)
-                .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, quickShare.actionIntent)
-                .putExtra(ScreenshotController.EXTRA_ACTION_INTENT_FILLIN,
+                .putExtra(SmartActionsReceiver.EXTRA_ACTION_INTENT, quickShare.actionIntent)
+                .putExtra(SmartActionsReceiver.EXTRA_ACTION_INTENT_FILLIN,
                         createFillInIntent(uri, imageTime))
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         Bundle extras = quickShare.getExtras();
