@@ -26,7 +26,6 @@ import com.android.systemui.animation.DelegateTransitionAnimatorController
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
-import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -48,7 +47,6 @@ class QSLongPressEffect
 constructor(
     private val vibratorHelper: VibratorHelper?,
     private val keyguardStateController: KeyguardStateController,
-    private val falsingManager: FalsingManager,
 ) {
 
     var effectDuration = 0
@@ -195,11 +193,8 @@ constructor(
     @VisibleForTesting
     fun getStateForClick(): State {
         val isTileUnavailable = qsTile?.state?.state == Tile.STATE_UNAVAILABLE
-        val isFalseTapWhileLocked =
-            !keyguardStateController.isUnlocked &&
-                falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)
         val handlesLongClick = qsTile?.state?.handlesLongClick == true
-        return if (isTileUnavailable || isFalseTapWhileLocked || !handlesLongClick) {
+        return if (isTileUnavailable || !handlesLongClick || keyguardStateController.isShowing) {
             // The click event will not perform an action that resets the state. Therefore, this is
             // the last opportunity to reset the state back to IDLE.
             State.IDLE
