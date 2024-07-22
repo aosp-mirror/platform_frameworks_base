@@ -31,6 +31,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
 
 /**
  * Viewmodel for the priority ("zen") modes dialog that can be opened from quick settings. It allows
@@ -46,13 +47,30 @@ constructor(
     private val dialogDelegate: ModesDialogDelegate,
 ) {
     // Modes that should be displayed in the dialog
-    // TODO(b/346519570): Include modes that have not been set up yet.
     private val visibleModes: Flow<List<ZenMode>> =
-        zenModeInteractor.modes.map {
-            it.filter { mode ->
-                mode.rule.isEnabled && (mode.isActive || mode.rule.isManualInvocationAllowed)
+        zenModeInteractor.modes
+            // While this is being collected (or in other words, while the dialog is open), we don't
+            // want a mode to disappear from the list if, for instance, the user deactivates it,
+            // since that can be confusing (similar to how we have visual stability for
+            // notifications while the shade is open).
+            // This ensures new modes are added to the list, and updates to modes already in the
+            // list are registered correctly.
+            .scan(listOf()) { prev, modes ->
+                val prevIds = prev.map { it.id }.toSet()
+
+                modes.filter { mode ->
+                    when {
+                        // Mode appeared previously -> keep it even if otherwise we may have
+                        // filtered it
+                        mode.id in prevIds -> true
+                        // Mode is enabled -> show if active (so user can toggle off), or if it
+                        // can be manually toggled on
+                        mode.rule.isEnabled -> mode.isActive || mode.rule.isManualInvocationAllowed
+                        // TODO(b/346519570): Include modes that have not been set up yet.
+                        else -> false
+                    }
+                }
             }
-        }
 
     val tiles: Flow<List<ModeTileViewModel>> =
         visibleModes

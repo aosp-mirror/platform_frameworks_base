@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogDelegate
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -137,6 +138,117 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                 assertThat(this.subtext).isEqualTo("Off")
                 assertThat(this.enabled).isEqualTo(false)
             }
+        }
+
+    @Test
+    fun tiles_stableWhileCollecting() =
+        testScope.runTest {
+            val job = Job()
+            val tiles by collectLastValue(underTest.tiles, context = job)
+
+            repository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setName("Active without manual")
+                        .setActive(true)
+                        .setManualInvocationAllowed(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Active with manual")
+                        .setActive(true)
+                        .setManualInvocationAllowed(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Inactive with manual")
+                        .setActive(false)
+                        .setManualInvocationAllowed(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Inactive without manual")
+                        .setActive(false)
+                        .setManualInvocationAllowed(false)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles?.size).isEqualTo(3)
+
+            // Check that tile is initially present
+            with(tiles?.elementAt(0)!!) {
+                assertThat(this.text).isEqualTo("Active without manual")
+                assertThat(this.subtext).isEqualTo("On")
+                assertThat(this.enabled).isEqualTo(true)
+
+                // Click tile to toggle it
+                this.onClick()
+                runCurrent()
+            }
+            // Check that tile is still present at the same location, but turned off
+            assertThat(tiles?.size).isEqualTo(3)
+            with(tiles?.elementAt(0)!!) {
+                assertThat(this.text).isEqualTo("Active without manual")
+                assertThat(this.subtext).isEqualTo("Off")
+                assertThat(this.enabled).isEqualTo(false)
+            }
+
+            // Stop collecting, then start again
+            job.cancel()
+            val tiles2 by collectLastValue(underTest.tiles)
+            runCurrent()
+
+            // Check that tile is now gone
+            assertThat(tiles2?.size).isEqualTo(2)
+            assertThat(tiles2?.elementAt(0)!!.text).isEqualTo("Active with manual")
+            assertThat(tiles2?.elementAt(1)!!.text).isEqualTo("Inactive with manual")
+        }
+
+    @Test
+    fun tiles_filtersOutRemovedModes() =
+        testScope.runTest {
+            val job = Job()
+            val tiles by collectLastValue(underTest.tiles, context = job)
+
+            repository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setId("A")
+                        .setName("Active without manual")
+                        .setActive(true)
+                        .setManualInvocationAllowed(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setId("B")
+                        .setName("Active with manual")
+                        .setActive(true)
+                        .setManualInvocationAllowed(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setId("C")
+                        .setName("Inactive with manual")
+                        .setActive(false)
+                        .setManualInvocationAllowed(true)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles?.size).isEqualTo(3)
+
+            repository.removeMode("A")
+            runCurrent()
+
+            assertThat(tiles?.size).isEqualTo(2)
+
+            repository.removeMode("B")
+            runCurrent()
+
+            assertThat(tiles?.size).isEqualTo(1)
+
+            repository.removeMode("C")
+            runCurrent()
+
+            assertThat(tiles?.size).isEqualTo(0)
         }
 
     @Test
