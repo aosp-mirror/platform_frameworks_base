@@ -44,8 +44,10 @@ class SystemCastPermissionDialogDelegateTest : SysuiTestCase() {
 
     private val appName = "Test App"
 
-    private val resIdSingleApp = R.string.screen_share_permission_dialog_option_single_app
-    private val resIdFullScreen = R.string.screen_share_permission_dialog_option_entire_screen
+    private val resIdSingleApp =
+        R.string.media_projection_entry_cast_permission_dialog_option_text_single_app
+    private val resIdFullScreen =
+        R.string.media_projection_entry_cast_permission_dialog_option_text_entire_screen
     private val resIdSingleAppDisabled =
         R.string.media_projection_entry_app_permission_dialog_single_app_disabled
 

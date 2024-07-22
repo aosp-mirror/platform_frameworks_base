@@ -1360,11 +1360,15 @@
 
     <!-- Casting that launched by SysUI (i.e. when there is no app name) -->
     <!-- System casting media projection permission dialog title. [CHAR LIMIT=100] -->
-    <string name="media_projection_entry_cast_permission_dialog_title">Start casting?</string>
+    <string name="media_projection_entry_cast_permission_dialog_title">Cast your screen?</string>
+    <!-- System casting media projection permission option for capturing just a single app [CHAR LIMIT=50] -->
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app">Cast one app</string>
+    <!-- System casting media projection permission option for capturing the whole screen [CHAR LIMIT=50] -->
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen">Cast entire screen</string>
     <!-- System casting media projection permission warning for capturing the whole screen when SysUI casting requests it. [CHAR LIMIT=350] -->
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen">When you’re casting, Android has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen">When you’re casting your entire screen, anything on your screen is visible. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- System casting media projection permission warning for capturing a single app when SysUI casting requests it. [CHAR LIMIT=350] -->
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app">When you’re casting an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app">When you’re casting an app, anything shown or played in that app is visible. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- System casting media projection permission button to continue for SysUI casting. [CHAR LIMIT=60] -->
     <string name="media_projection_entry_cast_permission_dialog_continue">Start casting</string>
 
