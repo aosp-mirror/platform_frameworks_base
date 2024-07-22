@@ -1010,10 +1010,8 @@
     <!-- UI debug setting: force allow on external summary [CHAR LIMIT=150] -->
     <string name="force_resizable_activities_summary">Make all activities resizable for multi-window, regardless of manifest values.</string>
 
-    <!-- UI debug setting: enable legacy freeform window support [CHAR LIMIT=50] -->
-    <string name="enable_freeform_support">Enable freeform windows (legacy)</string>
-    <!-- UI debug setting: enable legacy freeform window support summary [CHAR LIMIT=150] -->
-    <string name="enable_freeform_support_summary">Enable support for experimental legacy freeform windows.</string>
+    <!-- Title for a toggle that enables support for windows to be in freeform (apps run in resizable windows). [CHAR LIMIT=50] -->
+    <string name="enable_freeform_support">Enable freeform window support</string>
 
     <!-- Local (desktop) backup password menu title [CHAR LIMIT=25] -->
     <string name="local_backup_password_title">Desktop backup password</string>
