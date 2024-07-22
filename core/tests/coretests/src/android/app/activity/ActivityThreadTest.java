@@ -254,8 +254,8 @@ public class ActivityThreadTest {
         try {
             // Send process level config change.
             ClientTransaction transaction = newTransaction(activityThread);
-            transaction.addTransactionItem(ConfigurationChangeItem.obtain(
-                    newConfig, DEVICE_ID_INVALID));
+            transaction.addTransactionItem(
+                    new ConfigurationChangeItem(newConfig, DEVICE_ID_INVALID));
             appThread.scheduleTransaction(transaction);
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
@@ -474,15 +474,15 @@ public class ActivityThreadTest {
         activity.mTestLatch = new CountDownLatch(1);
 
         ClientTransaction transaction = newTransaction(activityThread);
-        transaction.addTransactionItem(ConfigurationChangeItem.obtain(
-                processConfigLandscape, DEVICE_ID_INVALID));
+        transaction.addTransactionItem(
+                new ConfigurationChangeItem(processConfigLandscape, DEVICE_ID_INVALID));
         appThread.scheduleTransaction(transaction);
 
         transaction = newTransaction(activityThread);
         transaction.addTransactionItem(new ActivityConfigurationChangeItem(
                 activity.getActivityToken(), activityConfigLandscape, new ActivityWindowInfo()));
-        transaction.addTransactionItem(ConfigurationChangeItem.obtain(
-                processConfigPortrait, DEVICE_ID_INVALID));
+        transaction.addTransactionItem(
+                new ConfigurationChangeItem(processConfigPortrait, DEVICE_ID_INVALID));
         transaction.addTransactionItem(new ActivityConfigurationChangeItem(
                 activity.getActivityToken(), activityConfigPortrait, new ActivityWindowInfo()));
         appThread.scheduleTransaction(transaction);

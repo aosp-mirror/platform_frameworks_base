@@ -74,11 +74,13 @@ public class TransactionParcelTests {
     @Test
     public void testConfigurationChange() {
         // Write to parcel
-        ConfigurationChangeItem item = ConfigurationChangeItem.obtain(config(), 1 /* deviceId */);
+        final ConfigurationChangeItem item =
+                new ConfigurationChangeItem(config(), 1 /* deviceId */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
-        ConfigurationChangeItem result = ConfigurationChangeItem.CREATOR.createFromParcel(mParcel);
+        final ConfigurationChangeItem result =
+                ConfigurationChangeItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertEquals(item, result);
