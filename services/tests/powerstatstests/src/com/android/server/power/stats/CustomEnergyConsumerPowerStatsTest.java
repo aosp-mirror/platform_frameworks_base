@@ -149,9 +149,9 @@ public class CustomEnergyConsumerPowerStatsTest {
                 .isEqualTo(20000);
         assertThat(ps2.uidStats.size()).isEqualTo(2);
         assertThat(POWER_STATS_LAYOUT.getUidConsumedEnergy(ps2.uidStats.get(APP_UID1), 0))
-                .isEqualTo(14000);
+                .isEqualTo(4000);
         assertThat(POWER_STATS_LAYOUT.getUidConsumedEnergy(ps2.uidStats.get(APP_UID2), 0))
-                .isEqualTo(21000);
+                .isEqualTo(6000);
     }
 
     @Test
@@ -209,8 +209,8 @@ public class CustomEnergyConsumerPowerStatsTest {
         assertThat(POWER_STATS_LAYOUT.getDevicePowerEstimate(deviceStats))
                 .isWithin(PRECISION).of(expectedPower * 0.75);
 
-        // UID1: estimated power = 14,000 uC = 0.00388 mAh
-        expectedPower = 0.00388;
+        // UID1: estimated power = 4,000 uC = 0.00111 mAh
+        expectedPower = 0.00111;
         ps2.getUidStats(uidStats, APP_UID1,
                 states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_FOREGROUND));
         assertThat(POWER_STATS_LAYOUT.getUidPowerEstimate(uidStats))
@@ -221,8 +221,8 @@ public class CustomEnergyConsumerPowerStatsTest {
         assertThat(POWER_STATS_LAYOUT.getUidPowerEstimate(uidStats))
                 .isWithin(PRECISION).of(expectedPower * 0.75);
 
-        // UID2: estimated power = 21,000 uC = 0.00583 mAh
-        expectedPower = 0.00583;
+        // UID2: estimated power = 6,000 uC = 0.00166 mAh
+        expectedPower = 0.00167;
         ps2.getUidStats(uidStats, APP_UID2,
                 states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_CACHED));
         assertThat(POWER_STATS_LAYOUT.getUidPowerEstimate(uidStats))
