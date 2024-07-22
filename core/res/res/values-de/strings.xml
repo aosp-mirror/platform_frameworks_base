@@ -1428,6 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"TEILEN"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ABLEHNEN"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Eingabemethode wählen"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Spracheinstellungen"</string>
     <string name="show_ime" msgid="6406112007347443383">"Bildschirmtastatur auch dann anzeigen, wenn physische Tastatur aktiv ist"</string>
     <string name="hardware" msgid="3611039921284836033">"Bildschirmtastatur verwenden"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> konfigurieren"</string>
@@ -2437,22 +2438,13 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Nutzer wechseln"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Stummschalten"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Zum Stummschalten tippen"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Browser"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Kontakte"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"E‑Mail"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Musik"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalender"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Rechner"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Anwendungen"</string>
 </resources>
