@@ -196,12 +196,11 @@ public abstract class PowerStatsCollector {
         }
 
         IndentingPrintWriter out = new IndentingPrintWriter(pw);
-        out.print(getClass().getSimpleName());
         if (!isEnabled()) {
+            out.print(getClass().getSimpleName());
             out.println(": disabled");
             return;
         }
-        out.println();
 
         ArrayList<PowerStats> collected = new ArrayList<>();
         Consumer<PowerStats> consumer = collected::add;
@@ -215,11 +214,9 @@ public abstract class PowerStatsCollector {
             removeConsumer(consumer);
         }
 
-        out.increaseIndent();
         for (PowerStats stats : collected) {
             stats.dump(out);
         }
-        out.decreaseIndent();
     }
 
     private void awaitCompletion() {
