@@ -156,6 +156,8 @@ import com.android.systemui.communal.ui.compose.extensions.observeTaps
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.util.DensityUtils.Companion.adjustedDp
+import com.android.systemui.communal.util.DensityUtils.Companion.scalingAdjustment
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
@@ -604,11 +606,11 @@ private fun EmptyStateCta(
     Card(
         modifier = Modifier.height(hubDimensions.GridHeight).padding(contentPadding),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(3.dp, colors.secondary),
-        shape = RoundedCornerShape(size = 80.dp)
+        border = BorderStroke(3.adjustedDp, colors.secondary),
+        shape = RoundedCornerShape(size = 80.adjustedDp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 110.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 110.adjustedDp),
             verticalArrangement =
                 Arrangement.spacedBy(Dimensions.Spacing, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -862,15 +864,15 @@ fun HighlightedItem(modifier: Modifier = Modifier, alpha: Float = 1.0f) {
             // resize grid items to account for the border.
             modifier.drawBehind {
                 // 8dp of padding between the widget and the highlight on every side.
-                val padding = 8.dp.toPx()
+                val padding = 8.adjustedDp.toPx()
                 drawRoundRect(
                     brush,
                     alpha = alpha,
                     topLeft = Offset(-padding, -padding),
                     size =
                         Size(width = size.width + padding * 2, height = size.height + padding * 2),
-                    cornerRadius = CornerRadius(37.dp.toPx()),
-                    style = Stroke(width = 3.dp.toPx())
+                    cornerRadius = CornerRadius(37.adjustedDp.toPx()),
+                    style = Stroke(width = 3.adjustedDp.toPx())
                 )
             }
     )
@@ -890,7 +892,7 @@ private fun CtaTileInViewModeContent(
                 containerColor = colors.primary,
                 contentColor = colors.onPrimary,
             ),
-        shape = RoundedCornerShape(68.dp, 34.dp, 68.dp, 34.dp)
+        shape = RoundedCornerShape(68.adjustedDp, 34.adjustedDp, 68.adjustedDp, 34.adjustedDp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(vertical = 32.dp, horizontal = 50.dp),
@@ -1102,11 +1104,11 @@ fun WidgetConfigureButton(
         visible = visible,
         enter = fadeIn(),
         exit = fadeOut(),
-        modifier = modifier.padding(16.dp),
+        modifier = modifier.padding(16.adjustedDp),
     ) {
         FilledIconButton(
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.size(48.dp),
+            shape = RoundedCornerShape(16.adjustedDp),
+            modifier = Modifier.size(48.adjustedDp),
             colors =
                 IconButtonColors(
                     containerColor = colors.primary,
@@ -1119,7 +1121,7 @@ fun WidgetConfigureButton(
             Icon(
                 imageVector = Icons.Outlined.Edit,
                 contentDescription = stringResource(id = R.string.edit_widget),
-                modifier = Modifier.padding(12.dp)
+                modifier = Modifier.padding(12.adjustedDp)
             )
         }
     }
@@ -1182,7 +1184,9 @@ fun PendingWidgetPlaceholder(
         modifier =
             modifier.background(
                 MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
+                RoundedCornerShape(
+                    dimensionResource(system_app_widget_background_radius) * scalingAdjustment
+                )
             ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1363,11 +1367,11 @@ class Dimensions(val context: Context, val config: Configuration, val density: D
     val GridTopSpacing: Dp
         get() {
             if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                return 114.dp
+                return 114.adjustedDp
             } else {
                 val windowMetrics =
                     WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
-                val screenHeight = with(density) { windowMetrics.bounds.height().toDp() }
+                val screenHeight = with(density) { windowMetrics.bounds.height().adjustedDp }
 
                 return (screenHeight - CardHeightFull) / 2
             }
@@ -1376,26 +1380,47 @@ class Dimensions(val context: Context, val config: Configuration, val density: D
     val GridHeight = CardHeightFull + GridTopSpacing
 
     companion object {
-        val CardHeightFull = 530.dp
-        val ItemSpacing = 50.dp
-        val CardHeightHalf = (CardHeightFull - ItemSpacing) / 2
-        val CardHeightThird = (CardHeightFull - (2 * ItemSpacing)) / 3
-        val CardWidth = 360.dp
-        val CardOutlineWidth = 3.dp
-        val Spacing = ItemSpacing / 2
+        val CardHeightFull
+            get() = 530.adjustedDp
+
+        val ItemSpacing
+            get() = 50.adjustedDp
+
+        val CardHeightHalf
+            get() = (CardHeightFull - ItemSpacing) / 2
+
+        val CardHeightThird
+            get() = (CardHeightFull - (2 * ItemSpacing)) / 3
+
+        val CardWidth
+            get() = 360.adjustedDp
+
+        val CardOutlineWidth
+            get() = 3.adjustedDp
+
+        val Spacing
+            get() = ItemSpacing / 2
 
         // The sizing/padding of the toolbar in glanceable hub edit mode
-        val ToolbarPaddingTop = 27.dp
-        val ToolbarPaddingHorizontal = ItemSpacing
-        val ToolbarButtonPaddingHorizontal = 24.dp
-        val ToolbarButtonPaddingVertical = 16.dp
+        val ToolbarPaddingTop
+            get() = 27.adjustedDp
+
+        val ToolbarPaddingHorizontal
+            get() = ItemSpacing
+
+        val ToolbarButtonPaddingHorizontal
+            get() = 24.adjustedDp
+
+        val ToolbarButtonPaddingVertical
+            get() = 16.adjustedDp
+
         val ButtonPadding =
             PaddingValues(
                 vertical = ToolbarButtonPaddingVertical,
                 horizontal = ToolbarButtonPaddingHorizontal,
             )
-        val IconSize = 40.dp
-        val SlideOffsetY = 30.dp
+        val IconSize = 40.adjustedDp
+        val SlideOffsetY = 30.adjustedDp
     }
 }
 
