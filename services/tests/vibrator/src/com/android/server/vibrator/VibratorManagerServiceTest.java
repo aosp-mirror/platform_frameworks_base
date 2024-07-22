@@ -1690,40 +1690,6 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void vibrate_withBypassScaleFlag_ignoresIntensitySettingsAndResolvesAmplitude()
-            throws Exception {
-        // Permission needed for bypassing user settings
-        grantPermission(android.Manifest.permission.MODIFY_PHONE_STATE);
-
-        int defaultTouchIntensity =
-                mVibrator.getDefaultVibrationIntensity(VibrationAttributes.USAGE_TOUCH);
-        // This will scale down touch vibrations.
-        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
-                defaultTouchIntensity > Vibrator.VIBRATION_INTENSITY_LOW
-                        ? defaultTouchIntensity - 1
-                        : defaultTouchIntensity);
-
-        int defaultAmplitude = mContextSpy.getResources().getInteger(
-                com.android.internal.R.integer.config_defaultVibrationAmplitude);
-
-        mockVibrators(1);
-        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
-        fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
-        VibratorManagerService service = createSystemReadyService();
-
-        vibrateAndWaitUntilFinished(service,
-                VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE),
-                new VibrationAttributes.Builder()
-                        .setUsage(VibrationAttributes.USAGE_TOUCH)
-                        .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)
-                        .build());
-
-        assertEquals(1, fakeVibrator.getAllEffectSegments().size());
-
-        assertEquals(defaultAmplitude / 255f, fakeVibrator.getAmplitudes().get(0), 1e-5);
-    }
-
-    @Test
     @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
     public void vibrate_withAdaptiveHaptics_appliesCorrectAdaptiveScales() throws Exception {
         // Keep user settings the same as device default so only adaptive scale is applied.

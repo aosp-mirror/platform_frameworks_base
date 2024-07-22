@@ -184,7 +184,6 @@ public final class VibrationAttributes implements Parcelable {
             FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF,
             FLAG_INVALIDATE_SETTINGS_CACHE,
             FLAG_PIPELINED_EFFECT,
-            FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flag{}
@@ -238,31 +237,12 @@ public final class VibrationAttributes implements Parcelable {
     public static final int FLAG_PIPELINED_EFFECT = 1 << 3;
 
     /**
-     * Flag requesting that this vibration effect to be played without applying the user
-     * intensity setting to scale the vibration.
-     *
-     * <p>The user setting is still applied to enable/disable the vibration, but the vibration
-     * effect strength will not be scaled based on the enabled setting value.
-     *
-     * <p>This is intended to be used on scenarios where the system needs to enforce a specific
-     * strength for the vibration effect, regardless of the user preference. Only privileged apps
-     * can ignore user settings, and this flag will be ignored otherwise.
-     *
-     * <p>If you need to bypass the user setting when it's disabling vibrations then this also
-     * needs the flag {@link #FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF} to be set.
-     *
-     * @hide
-     */
-    public static final int FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE = 1 << 4;
-
-    /**
      * All flags supported by vibrator service, update it when adding new flag.
      * @hide
      */
     public static final int FLAG_ALL_SUPPORTED =
             FLAG_BYPASS_INTERRUPTION_POLICY | FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF
-                    | FLAG_INVALIDATE_SETTINGS_CACHE | FLAG_PIPELINED_EFFECT
-                    | FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
+                    | FLAG_INVALIDATE_SETTINGS_CACHE | FLAG_PIPELINED_EFFECT;
 
     /** Creates a new {@link VibrationAttributes} instance with given usage. */
     public static @NonNull VibrationAttributes createForUsage(@Usage int usage) {
