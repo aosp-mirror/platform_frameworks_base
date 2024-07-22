@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -52,7 +52,7 @@ constructor(
     @Main mainDispatcher: CoroutineDispatcher,
     keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
-    private val communalInteractor: CommunalInteractor,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val keyguardRepository: KeyguardRepository,
@@ -88,7 +88,7 @@ constructor(
                 biometricSettingsRepository.isCurrentUserInLockdown
                     .distinctUntilChanged()
                     .filterRelevantKeyguardStateAnd { inLockdown -> inLockdown }
-                    .sample(communalInteractor.isIdleOnCommunal, ::Pair)
+                    .sample(communalSceneInteractor.isIdleOnCommunalNotEditMode, ::Pair)
                     .collect { (_, isIdleOnCommunal) ->
                         val to =
                             if (isIdleOnCommunal) {
@@ -120,7 +120,7 @@ constructor(
             scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
                 keyguardInteractor.isKeyguardShowing
                     .filterRelevantKeyguardStateAnd { isKeyguardShowing -> isKeyguardShowing }
-                    .sample(communalInteractor.isIdleOnCommunal, ::Pair)
+                    .sample(communalSceneInteractor.isIdleOnCommunalNotEditMode, ::Pair)
                     .collect { (_, isIdleOnCommunal) ->
                         val to =
                             if (isIdleOnCommunal) {
