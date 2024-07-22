@@ -6927,6 +6927,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         /** Whether {@link #mAnimatingRecents} is going to be the top activity. */
         private boolean mRecentsWillBeTop;
 
+        FixedRotationTransitionListener() {
+            super(DisplayContent.this.mDisplayId);
+        }
+
         /**
          * If the recents activity has a fixed orientation which is different from the current top
          * activity, it will be rotated before being shown so we avoid a screen rotation animation
