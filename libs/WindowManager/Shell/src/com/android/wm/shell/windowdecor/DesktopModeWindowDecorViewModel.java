@@ -89,6 +89,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
+import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
@@ -175,6 +176,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private boolean mInImmersiveMode;
     private final String mSysUIPackageName;
 
+    private final DisplayChangeController.OnDisplayChangingListener mOnDisplayChangingListener;
     private final ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
                 @Override
@@ -287,6 +289,31 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mSysUIPackageName = mContext.getResources().getString(
                 com.android.internal.R.string.config_systemUi);
         mInteractionJankMonitor = interactionJankMonitor;
+        mOnDisplayChangingListener = (displayId, fromRotation, toRotation, displayAreaInfo, t) -> {
+            DesktopModeWindowDecoration decoration;
+            RunningTaskInfo taskInfo;
+            for (int i = 0; i < mWindowDecorByTaskId.size(); i++) {
+                decoration = mWindowDecorByTaskId.valueAt(i);
+                if (decoration == null) {
+                    continue;
+                } else {
+                    taskInfo = decoration.mTaskInfo;
+                }
+
+                // Check if display has been rotated between portrait & landscape
+                if (displayId == taskInfo.displayId && taskInfo.isFreeform()
+                        && (fromRotation % 2 != toRotation % 2)) {
+                    // Check if the task bounds on the rotated display will be out of bounds.
+                    // If so, then update task bounds to be within reachable area.
+                    final Rect taskBounds = new Rect(
+                            taskInfo.configuration.windowConfiguration.getBounds());
+                    if (DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(
+                            taskBounds, decoration.calculateValidDragArea())) {
+                        t.setBounds(taskInfo.token, taskBounds);
+                    }
+                }
+            }
+        };
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -298,6 +325,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new DesktopModeOnInsetsChangedListener());
         mDesktopTasksController.setOnTaskResizeAnimationListener(
                 new DesktopModeOnTaskResizeAnimationListener());
+        mDisplayController.addDisplayChangingController(mOnDisplayChangingListener);
         try {
             mWindowManager.registerSystemGestureExclusionListener(mGestureExclusionListener,
                     mContext.getDisplayId());

@@ -312,8 +312,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // transaction (that applies task crop) is synced with the buffer transaction (that draws
         // the View). Both will be shown on screen at the same, whereas applying them independently
         // causes flickering. See b/270202228.
-        final boolean applyTransactionOnDraw =
-                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
+        final boolean applyTransactionOnDraw = taskInfo.isFreeform();
         relayout(taskInfo, t, t, applyTransactionOnDraw, shouldSetTaskPositionAndCrop);
         if (!applyTransactionOnDraw) {
             t.apply();
@@ -324,7 +323,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
             boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
         Trace.beginSection("DesktopModeWindowDecoration#relayout");
-        if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+        if (taskInfo.isFreeform()) {
             // The Task is in Freeform mode -> show its header in sync since it's an integral part
             // of the window itself - a delayed header might cause bad UX.
             relayoutInSync(taskInfo, startT, finishT, applyStartTransactionOnDraw,
@@ -524,9 +523,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo) {
-        final boolean isFreeform =
-                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
-        return isFreeform && taskInfo.isResizeable;
+        return taskInfo.isFreeform() && taskInfo.isResizeable;
     }
 
     private void updateMaximizeMenu(SurfaceControl.Transaction startT) {
