@@ -231,3 +231,12 @@ flag {
   }
 }
 
+flag {
+  name: "portuguese_hyphenator"
+  namespace: "text"
+  description: "Portuguese taiored hyphenator"
+  bug: "344656282"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
