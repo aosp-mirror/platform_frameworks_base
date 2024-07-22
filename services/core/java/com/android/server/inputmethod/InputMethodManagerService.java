@@ -1483,17 +1483,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
+        if (!mUserManagerInternal.exists(userId)) {
+            return InputMethodInfoSafeList.empty();
+        }
         synchronized (ImfLock.class) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
-                    mCurrentUserId, null);
-            if (resolvedUserIds.length != 1) {
-                return InputMethodInfoSafeList.empty();
-            }
             final int callingUid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
                 return InputMethodInfoSafeList.create(getInputMethodListLocked(
-                        resolvedUserIds[0], directBootAwareness, callingUid));
+                        userId, directBootAwareness, callingUid));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1508,17 +1506,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
+        if (!mUserManagerInternal.exists(userId)) {
+            return InputMethodInfoSafeList.empty();
+        }
         synchronized (ImfLock.class) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
-                    mCurrentUserId, null);
-            if (resolvedUserIds.length != 1) {
-                return InputMethodInfoSafeList.empty();
-            }
             final int callingUid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
                 return InputMethodInfoSafeList.create(
-                        getEnabledInputMethodListLocked(resolvedUserIds[0], callingUid));
+                        getEnabledInputMethodListLocked(userId, callingUid));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1534,17 +1530,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
+        if (!mUserManagerInternal.exists(userId)) {
+            return Collections.emptyList();
+        }
         synchronized (ImfLock.class) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
-                    mCurrentUserId, null);
-            if (resolvedUserIds.length != 1) {
-                return Collections.emptyList();
-            }
             final int callingUid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                return getInputMethodListLocked(
-                        resolvedUserIds[0], directBootAwareness, callingUid);
+                return getInputMethodListLocked(userId, directBootAwareness, callingUid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1559,16 +1552,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
+        if (!mUserManagerInternal.exists(userId)) {
+            return Collections.emptyList();
+        }
         synchronized (ImfLock.class) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
-                    mCurrentUserId, null);
-            if (resolvedUserIds.length != 1) {
-                return Collections.emptyList();
-            }
             final int callingUid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                return getEnabledInputMethodListLocked(resolvedUserIds[0], callingUid);
+                return getEnabledInputMethodListLocked(userId, callingUid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
