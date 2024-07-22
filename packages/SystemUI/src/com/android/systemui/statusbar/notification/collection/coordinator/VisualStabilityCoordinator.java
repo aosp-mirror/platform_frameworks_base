@@ -384,6 +384,10 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         }
 
         final boolean isShowing = value > 0.0f;
+        if (isShowing == mLockscreenShowing) {
+            return;
+        }
+
         mLockscreenShowing = isShowing;
         updateAllowedStates("lockscreenShowing", isShowing);
     }
