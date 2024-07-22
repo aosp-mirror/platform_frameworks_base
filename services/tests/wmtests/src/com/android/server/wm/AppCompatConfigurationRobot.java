@@ -66,6 +66,4 @@ class AppCompatConfigurationRobot {
         doReturn(enabled).when(mAppCompatConfiguration)
                 .isCameraCompatSplitScreenAspectRatioEnabled();
     }
-
-
 }
