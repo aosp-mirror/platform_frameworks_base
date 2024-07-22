@@ -18,7 +18,9 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.keyguard.KeyguardSecurityModel
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.Flags.communalSceneKtfRefactor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -55,7 +57,7 @@ constructor(
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
     keyguardInteractor: KeyguardInteractor,
-    private val communalInteractor: CommunalInteractor,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     private val keyguardSecurityModel: KeyguardSecurityModel,
     private val selectedUserInteractor: SelectedUserInteractor,
     powerInteractor: PowerInteractor,
@@ -94,7 +96,10 @@ constructor(
             .distinctUntilChanged()
 
     fun dismissPrimaryBouncer() {
-        scope.launch { startTransitionTo(KeyguardState.GONE) }
+        scope.launch {
+            startTransitionTo(KeyguardState.GONE)
+            closeHubImmediatelyIfNeeded()
+        }
     }
 
     private fun listenForPrimaryBouncerToLockscreenHubOrOccluded() {
@@ -106,7 +111,7 @@ constructor(
                     .sample(
                         powerInteractor.isAwake,
                         keyguardInteractor.isActiveDreamLockscreenHosted,
-                        communalInteractor.isIdleOnCommunal
+                        communalSceneInteractor.isIdleOnCommunal
                     )
                     .filterRelevantKeyguardState()
                     .collect {
@@ -135,7 +140,7 @@ constructor(
                         keyguardInteractor.isKeyguardOccluded,
                         keyguardInteractor.isDreaming,
                         keyguardInteractor.isActiveDreamLockscreenHosted,
-                        communalInteractor.isIdleOnCommunal,
+                        communalSceneInteractor.isIdleOnCommunal,
                     )
                     .filterRelevantKeyguardStateAnd {
                         (isBouncerShowing, isAwake, _, _, isActiveDreamLockscreenHosted, _) ->
@@ -155,6 +160,19 @@ constructor(
                         startTransitionTo(toState)
                     }
             }
+        }
+    }
+
+    private fun closeHubImmediatelyIfNeeded() {
+        // If the hub is showing, and we are not animating a widget launch nor transitioning to
+        // edit mode, then close the hub immediately.
+        if (
+            communalSceneKtfRefactor() &&
+                communalSceneInteractor.isIdleOnCommunal.value &&
+                !communalSceneInteractor.isLaunchingWidget.value &&
+                communalSceneInteractor.editModeState.value == null
+        ) {
+            communalSceneInteractor.snapToScene(CommunalScenes.Blank)
         }
     }
 
@@ -212,6 +230,7 @@ constructor(
                             },
                         modeOnCanceled = TransitionModeOnCanceled.RESET,
                     )
+                    closeHubImmediatelyIfNeeded()
                 }
         }
     }

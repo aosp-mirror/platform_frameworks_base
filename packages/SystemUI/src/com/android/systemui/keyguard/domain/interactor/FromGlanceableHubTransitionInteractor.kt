@@ -24,6 +24,7 @@ import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -36,6 +37,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.noneOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -240,12 +242,21 @@ constructor(
                         ),
                     )
                     .filterRelevantKeyguardStateAnd { isKeyguardGoingAway -> isKeyguardGoingAway }
-                    .collect {
-                        communalSceneInteractor.changeScene(
-                            newScene = CommunalScenes.Blank,
-                            transitionKey = CommunalTransitionKeys.SimpleFade,
-                            keyguardState = KeyguardState.GONE
-                        )
+                    .sample(communalSceneInteractor.editModeState, ::Pair)
+                    .collect { (_, editModeState) ->
+                        if (
+                            editModeState == EditModeState.STARTING ||
+                                editModeState == EditModeState.SHOWING
+                        ) {
+                            // Don't change scenes here as that is handled by the edit activity.
+                            startTransitionTo(KeyguardState.GONE)
+                        } else {
+                            communalSceneInteractor.changeScene(
+                                newScene = CommunalScenes.Blank,
+                                transitionKey = CommunalTransitionKeys.SimpleFade,
+                                keyguardState = KeyguardState.GONE
+                            )
+                        }
                     }
             }
         } else {

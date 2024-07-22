@@ -20,6 +20,7 @@ import android.provider.Settings
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
@@ -96,20 +97,22 @@ constructor(
             return
         }
 
-        // Handle automatically switching based on keyguard state.
-        keyguardTransitionInteractor.startedKeyguardTransitionStep
-            .mapLatest(::determineSceneAfterTransition)
-            .filterNotNull()
-            .onEach { (nextScene, nextTransition) ->
-                if (!communalSceneInteractor.isLaunchingWidget.value) {
-                    // When launching a widget, we don't want to animate the scene change or the
-                    // Communal Hub will reveal the wallpaper even though it shouldn't. Instead we
-                    // snap to the new scene as part of the launch animation, once the activity
-                    // launch is done, so we don't change scene here.
-                    communalSceneInteractor.changeScene(nextScene, nextTransition)
+        if (!communalSceneKtfRefactor()) {
+            // Handle automatically switching based on keyguard state.
+            keyguardTransitionInteractor.startedKeyguardTransitionStep
+                .mapLatest(::determineSceneAfterTransition)
+                .filterNotNull()
+                .onEach { (nextScene, nextTransition) ->
+                    if (!communalSceneInteractor.isLaunchingWidget.value) {
+                        // When launching a widget, we don't want to animate the scene change or the
+                        // Communal Hub will reveal the wallpaper even though it shouldn't. Instead
+                        // we snap to the new scene as part of the launch animation, once the
+                        // activity launch is done, so we don't change scene here.
+                        communalSceneInteractor.changeScene(nextScene, nextTransition)
+                    }
                 }
-            }
-            .launchIn(applicationScope)
+                .launchIn(applicationScope)
+        }
 
         // TODO(b/322787129): re-enable once custom animations are in place
         // Handle automatically switching to communal when docked.
