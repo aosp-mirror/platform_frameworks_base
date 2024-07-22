@@ -1114,9 +1114,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         @Override
-        public void onUserUnlocked(@NonNull TargetUser user) {
-            if (user.isPreCreated()) return;
-            mService.handleOnUserUnlocked(user.getUserIdentifier());
+        public void onUserSwitching(@NonNull TargetUser from, @NonNull TargetUser to) {
+            if (to.isPreCreated()) return;
+            mService.handleOnUserSwitching(from.getUserIdentifier(), to.getUserIdentifier());
         }
     }
 
@@ -3696,8 +3696,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mDevicePolicyEngine.handleUnlockUser(userId);
     }
 
-    void handleOnUserUnlocked(int userId) {
-        showNewUserDisclaimerIfNecessary(userId);
+    void handleOnUserSwitching(int fromUserId, int toUserId) {
+        showNewUserDisclaimerIfNecessary(toUserId);
     }
 
     void handleStopUser(int userId) {
