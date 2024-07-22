@@ -1518,7 +1518,8 @@ public class BiometricServiceTest {
         mBiometricService.onStart();
 
         when(mTrustManager.isInSignificantPlace()).thenReturn(false);
-        when(mBiometricService.mSettingObserver.getMandatoryBiometricsEnabledForUser(anyInt()))
+        when(mBiometricService.mSettingObserver
+                .getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(anyInt()))
                 .thenReturn(true);
 
         setupAuthForOnly(TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
@@ -1540,7 +1541,8 @@ public class BiometricServiceTest {
         mBiometricService.onStart();
 
         when(mTrustManager.isInSignificantPlace()).thenReturn(false);
-        when(mBiometricService.mSettingObserver.getMandatoryBiometricsEnabledForUser(anyInt()))
+        when(mBiometricService.mSettingObserver
+                .getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(anyInt()))
                 .thenReturn(true);
 
         setupAuthForOnly(TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
@@ -1564,7 +1566,8 @@ public class BiometricServiceTest {
         mBiometricService.onStart();
 
         when(mTrustManager.isInSignificantPlace()).thenReturn(false);
-        when(mBiometricService.mSettingObserver.getMandatoryBiometricsEnabledForUser(anyInt()))
+        when(mBiometricService.mSettingObserver
+                .getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(anyInt()))
                 .thenReturn(true);
 
         setupAuthForOnly(TYPE_CREDENTIAL, Authenticators.DEVICE_CREDENTIAL);
