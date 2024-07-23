@@ -1066,7 +1066,7 @@ public class StackScrollAlgorithm {
     private void clampHunToMaxTranslation(float headsUpTop, float headsUpBottom,
             ExpandableViewState viewState) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
-        final float maxHeight = headsUpTop - headsUpBottom;
+        final float maxHeight = Math.max(0f, headsUpBottom - headsUpTop);
         viewState.setYTranslation(Math.min(headsUpTop, viewState.getYTranslation()));
         viewState.height = (int) Math.min(maxHeight, viewState.height);
     }
