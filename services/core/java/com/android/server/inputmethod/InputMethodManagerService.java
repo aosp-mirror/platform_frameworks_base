@@ -6707,36 +6707,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private boolean handleShellCommandEnableDisableInputMethodInternalLocked(
             @UserIdInt int userId, String imeId, boolean enabled, PrintWriter out,
             PrintWriter error) {
-        boolean failedToEnableUnknownIme = false;
-        boolean previouslyEnabled = false;
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-        if (userId == mCurrentUserId) {
-            if (enabled && !settings.getMethodMap().containsKey(imeId)) {
-                failedToEnableUnknownIme = true;
-            } else {
-                previouslyEnabled = setInputMethodEnabledLocked(imeId, enabled, userId);
-            }
-        } else {
-            if (enabled) {
-                if (!settings.getMethodMap().containsKey(imeId)) {
-                    failedToEnableUnknownIme = true;
-                } else {
-                    final String enabledImeIdsStr = settings.getEnabledInputMethodsStr();
-                    final String newEnabledImeIdsStr = InputMethodUtils.concatEnabledImeIds(
-                            enabledImeIdsStr, imeId);
-                    previouslyEnabled = TextUtils.equals(enabledImeIdsStr, newEnabledImeIdsStr);
-                    if (!previouslyEnabled) {
-                        settings.putEnabledInputMethodsStr(newEnabledImeIdsStr);
-                    }
-                }
-            } else {
-                previouslyEnabled =
-                        settings.buildAndPutEnabledInputMethodsStrRemovingId(
-                                new StringBuilder(),
-                                settings.getEnabledInputMethodsAndSubtypeList(), imeId);
-            }
-        }
-        if (failedToEnableUnknownIme) {
+        if (enabled && !settings.getMethodMap().containsKey(imeId)) {
             error.print("Unknown input method ");
             error.print(imeId);
             error.println(" cannot be enabled for user #" + userId);
@@ -6745,6 +6717,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     + " failed due to its unrecognized IME ID.");
             return false;
         }
+
+        final boolean previouslyEnabled = setInputMethodEnabledLocked(imeId, enabled, userId);
         out.print("Input method ");
         out.print(imeId);
         out.print(": ");
