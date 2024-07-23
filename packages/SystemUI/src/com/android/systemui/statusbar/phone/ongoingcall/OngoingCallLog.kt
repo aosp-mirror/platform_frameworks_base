@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone.ongoingcall.data.repository
+package com.android.systemui.statusbar.phone.ongoingcall
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.log.logcatLogBuffer
+import javax.inject.Qualifier
 
-val Kosmos.ongoingCallRepository: OngoingCallRepository by
-    Kosmos.Fixture { OngoingCallRepository(logcatLogBuffer("OngoingCallRepositoryKosmos")) }
+/**
+ * Logs for events related to ongoing call notifications and their corresponding status bar chip.
+ */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class OngoingCallLog

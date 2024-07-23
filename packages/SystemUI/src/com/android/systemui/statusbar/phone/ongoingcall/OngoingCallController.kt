@@ -23,7 +23,6 @@ import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
 import android.app.PendingIntent
 import android.app.UidObserver
 import android.content.Context
-import android.util.Log
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
@@ -35,6 +34,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
@@ -68,11 +69,11 @@ constructor(
     private val activityStarter: ActivityStarter,
     @Main private val mainExecutor: Executor,
     private val iActivityManager: IActivityManager,
-    private val logger: OngoingCallLogger,
     private val dumpManager: DumpManager,
     private val statusBarWindowController: StatusBarWindowController,
     private val swipeStatusBarAwayGestureHandler: SwipeStatusBarAwayGestureHandler,
     private val statusBarModeRepository: StatusBarModeRepositoryStore,
+    @OngoingCallLog private val logger: LogBuffer,
 ) : CallbackController<OngoingCallListener>, Dumpable, CoreStartable {
     private var isFullscreen: Boolean = false
     /** Non-null if there's an active call notification. */
@@ -122,8 +123,20 @@ constructor(
 
                     callNotificationInfo = newOngoingCallInfo
                     if (newOngoingCallInfo.isOngoing) {
+                        logger.log(
+                            TAG,
+                            LogLevel.DEBUG,
+                            { str1 = newOngoingCallInfo.key },
+                            { "Call notif *is* ongoing -> showing chip. key=$str1" },
+                        )
                         updateChip()
                     } else {
+                        logger.log(
+                            TAG,
+                            LogLevel.DEBUG,
+                            { str1 = newOngoingCallInfo.key },
+                            { "Call notif not ongoing -> hiding chip. key=$str1" },
+                        )
                         removeChip()
                     }
                 }
@@ -131,6 +144,12 @@ constructor(
 
             override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
                 if (entry.sbn.key == callNotificationInfo?.key) {
+                    logger.log(
+                        TAG,
+                        LogLevel.DEBUG,
+                        { str1 = entry.sbn.key },
+                        { "Call notif removed -> hiding chip. key=$str1" },
+                    )
                     removeChip()
                 }
             }
@@ -151,7 +170,8 @@ constructor(
     /**
      * Sets the chip view that will contain ongoing call information.
      *
-     * Should only be called from [CollapsedStatusBarFragment].
+     * Should only be called from
+     * [com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment].
      */
     fun setChipView(chipView: View) {
         tearDownChipView()
@@ -162,15 +182,6 @@ constructor(
         if (hasOngoingCall()) {
             updateChip()
         }
-    }
-
-    /**
-     * Called when the chip's visibility may have changed.
-     *
-     * Should only be called from [CollapsedStatusBarFragment].
-     */
-    fun notifyChipVisibilityChanged(chipIsVisible: Boolean) {
-        logger.logChipVisibilityChanged(chipIsVisible)
     }
 
     /**
@@ -250,14 +261,12 @@ constructor(
             // If we failed to update the chip, don't store the call info. Then [hasOngoingCall]
             // will return false and we fall back to typical notification handling.
             callNotificationInfo = null
-
-            if (DEBUG) {
-                Log.w(
-                    TAG,
-                    "Ongoing call chip view could not be found; " +
-                        "Not displaying chip in status bar"
-                )
-            }
+            logger.log(
+                TAG,
+                LogLevel.WARNING,
+                {},
+                { "Ongoing call chip view could not be found; Not displaying chip in status bar" },
+            )
         }
     }
 
@@ -275,7 +284,6 @@ constructor(
         val intent = callNotificationInfo?.intent
         if (currentChipView != null && backgroundView != null && intent != null) {
             currentChipView.setOnClickListener {
-                logger.logChipClicked()
                 activityStarter.postStartActivityDismissingKeyguard(
                     intent,
                     ActivityTransitionAnimator.Controller.fromView(
@@ -333,9 +341,7 @@ constructor(
      * detected.
      */
     private fun onSwipeAwayGestureDetected() {
-        if (DEBUG) {
-            Log.d(TAG, "Swipe away gesture detected")
-        }
+        logger.log(TAG, LogLevel.DEBUG, {}, { "Swipe away gesture detected" })
         callNotificationInfo = callNotificationInfo?.copy(statusBarSwipedAway = true)
         statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(false)
         swipeStatusBarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
@@ -368,7 +374,10 @@ constructor(
         pw.println("Call app visible: ${uidObserver.isCallAppVisible}")
     }
 
-    /** Our implementation of a [IUidObserver]. */
+    /**
+     * Observer to tell us when the app that posted the ongoing call notification is visible so that
+     * we don't show the call chip at the same time (since the timers could be out-of-sync).
+     */
     inner class CallAppUidObserver : UidObserver() {
         /** True if the application managing the call is visible to the user. */
         var isCallAppVisible: Boolean = false
@@ -395,6 +404,12 @@ constructor(
                     isProcessVisibleToUser(
                         iActivityManager.getUidProcessState(uid, context.opPackageName)
                     )
+                logger.log(
+                    TAG,
+                    LogLevel.DEBUG,
+                    { bool1 = isCallAppVisible },
+                    { "On uid observer registration, isCallAppVisible=$bool1" },
+                )
                 if (isRegistered) {
                     return
                 }
@@ -406,7 +421,13 @@ constructor(
                 )
                 isRegistered = true
             } catch (se: SecurityException) {
-                Log.e(TAG, "Security exception when trying to set up uid observer: $se")
+                logger.log(
+                    TAG,
+                    LogLevel.ERROR,
+                    {},
+                    { "Security exception when trying to set up uid observer" },
+                    se,
+                )
             }
         }
 
@@ -431,6 +452,12 @@ constructor(
             val oldIsCallAppVisible = isCallAppVisible
             isCallAppVisible = isProcessVisibleToUser(procState)
             if (oldIsCallAppVisible != isCallAppVisible) {
+                logger.log(
+                    TAG,
+                    LogLevel.DEBUG,
+                    { bool1 = isCallAppVisible },
+                    { "#onUidStateChanged. isCallAppVisible=$bool1" },
+                )
                 // Animations may be run as a result of the call's state change, so ensure
                 // the listener is notified on the main thread.
                 mainExecutor.execute { sendStateChangeEvent() }
@@ -443,5 +470,4 @@ private fun isCallNotification(entry: NotificationEntry): Boolean {
     return entry.sbn.notification.isStyle(Notification.CallStyle::class.java)
 }
 
-private const val TAG = "OngoingCallController"
-private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
+private const val TAG = OngoingCallRepository.TAG
