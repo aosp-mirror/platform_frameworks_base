@@ -27,6 +27,7 @@ import android.provider.DeviceConfig
 import androidx.core.os.bundleOf
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.TestableDependency
 import com.android.systemui.classifier.FalsingManagerFake
@@ -357,7 +358,8 @@ class ExpandableNotificationRowBuilder(
             mSmartReplyConstants,
             mSmartReplyController,
             featureFlags,
-            Mockito.mock(IStatusBarService::class.java)
+            Mockito.mock(IStatusBarService::class.java),
+            Mockito.mock(UiEventLogger::class.java)
         )
         row.setAboveShelfChangedListener { aboveShelf: Boolean -> }
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags)
