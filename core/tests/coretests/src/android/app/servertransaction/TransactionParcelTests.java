@@ -295,7 +295,7 @@ public class TransactionParcelTests {
 
         StopActivityItem lifecycleRequest = StopActivityItem.obtain(mActivityToken);
 
-        ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        final ClientTransaction transaction = new ClientTransaction();
         transaction.addTransactionItem(callback1);
         transaction.addTransactionItem(callback2);
         transaction.addTransactionItem(lifecycleRequest);

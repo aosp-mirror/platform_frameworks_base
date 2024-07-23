@@ -25,7 +25,6 @@ import static org.junit.Assert.assertNotSame;
 
 import android.annotation.NonNull;
 import android.app.ActivityOptions;
-import android.app.IApplicationThread;
 import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -67,8 +66,6 @@ public class ObjectPoolTests {
     @Rule
     public final MockitoRule mocks = MockitoJUnit.rule();
 
-    @Mock
-    private IApplicationThread mApplicationThread;
     @Mock
     private IBinder mActivityToken;
 
@@ -182,11 +179,6 @@ public class ObjectPoolTests {
     @Test
     public void testRecycleStopItem() {
         testRecycle(() -> StopActivityItem.obtain(mActivityToken));
-    }
-
-    @Test
-    public void testRecycleClientTransaction() {
-        testRecycle(() -> ClientTransaction.obtain(mApplicationThread));
     }
 
     private void testRecycle(@NonNull Supplier<? extends ObjectPoolItem> obtain) {

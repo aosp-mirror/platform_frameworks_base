@@ -52,7 +52,7 @@ public class ClientTransactionTests {
         final ClientTransactionHandler clientTransactionHandler =
                 mock(ClientTransactionHandler.class);
 
-        final ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        final ClientTransaction transaction = new ClientTransaction();
         transaction.addTransactionItem(callback1);
         transaction.addTransactionItem(callback2);
         transaction.addTransactionItem(stateRequest);
