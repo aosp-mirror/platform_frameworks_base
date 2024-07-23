@@ -5706,13 +5706,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (!CollectionUtils.any(enabledImes, imi -> imi.getId().equals(imeId))) {
             return false; // IME is not found or not enabled.
         }
-        if (mConcurrentMultiUserModeEnabled || userId == mCurrentUserId) {
-            setInputMethodLocked(imeId, subtypeId, userId);
-            return true;
-        }
-        settings.putSelectedInputMethod(imeId);
-        // For non-current user, only reset subtypeId (instead of setting the given one).
-        settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
+        setInputMethodLocked(imeId, subtypeId, userId);
         return true;
     }
 
