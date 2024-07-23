@@ -170,6 +170,7 @@ import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.AccessibilityManagerInternal;
@@ -5700,20 +5701,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     private boolean switchToInputMethodLocked(@NonNull String imeId, int subtypeId,
             @UserIdInt int userId) {
-        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
+        final var settings = InputMethodSettingsRepository.get(userId);
+        final var enabledImes = settings.getEnabledInputMethodList();
+        if (!CollectionUtils.any(enabledImes, imi -> imi.getId().equals(imeId))) {
+            return false; // IME is not found or not enabled.
+        }
         if (mConcurrentMultiUserModeEnabled || userId == mCurrentUserId) {
-            if (!settings.getMethodMap().containsKey(imeId)
-                    || !settings.getEnabledInputMethodList()
-                    .contains(settings.getMethodMap().get(imeId))) {
-                return false; // IME is not found or not enabled.
-            }
             setInputMethodLocked(imeId, subtypeId, userId);
             return true;
-        }
-        if (!settings.getMethodMap().containsKey(imeId)
-                || !settings.getEnabledInputMethodList().contains(
-                settings.getMethodMap().get(imeId))) {
-            return false; // IME is not found or not enabled.
         }
         settings.putSelectedInputMethod(imeId);
         // For non-current user, only reset subtypeId (instead of setting the given one).
