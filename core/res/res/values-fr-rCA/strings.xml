@@ -373,7 +373,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"afficher les notifications en mode plein écran sur un appareil verrouillé"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Permet à l\'appli d\'afficher les notifications en mode plein écran sur un appareil verrouillé."</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Installer des raccourcis"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permet à une appli d\'ajouter des raccourcis sans l\'intervention de l\'utilisateur."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permet à une application d\'ajouter des raccourcis à l\'écran d\'accueil sans l\'intervention de l\'utilisateur."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"désinstaller des raccourcis"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permet à l\'appli de supprimer des raccourcis de la page d\'accueil sans intervention de l\'utilisateur."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"transférer les appels sortants"</string>
@@ -740,7 +740,7 @@
     <string name="face_error_timeout" msgid="2598544068593889762">"Réessayez déverrouillage reconnaissance faciale"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Impossible de stocker de nouveaux visages. Supprimez-en un."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Opération de reconnaissance du visage annulée."</string>
-    <string name="face_error_user_canceled" msgid="5766472033202928373">"Le déverrouillage par reconnaissance faciale a été annulé"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Déverrouillage par reconnaissance faciale annulé par l\'utilisateur"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Trop de tentatives. Veuillez réessayer plus tard."</string>
     <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Trop de tentatives. Le déverrouillage par reconnaissance faciale est inaccessible."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Trop de tentatives. Entrez plutôt le verrouillage de l\'écran."</string>
@@ -977,7 +977,7 @@
     <string name="relationTypeReferredBy" msgid="5285082289602849400">"Recommandé par"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"Proche"</string>
     <string name="relationTypeSister" msgid="3721676005094140671">"Sœur"</string>
-    <string name="relationTypeSpouse" msgid="6916682664436031703">"Conjoint(e)"</string>
+    <string name="relationTypeSpouse" msgid="6916682664436031703">"Conjoint/Conjointe"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"Personnaliser"</string>
     <string name="sipAddressTypeHome" msgid="5918441930656878367">"Domicile"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"Travail"</string>
@@ -987,7 +987,7 @@
     <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"Saisissez la clé PUK et le nouveau NIP."</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="2825313071899938305">"Clé PUK"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"Nouveau NIP"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"Touchez pour entrer le m. de p."</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"Touch. pour taper mot de passe"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"Saisissez le mot de passe pour déverrouiller le clavier."</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Saisissez le NIP pour déverrouiller le clavier."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"NIP erroné."</string>
@@ -1023,7 +1023,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"Appels d\'urgence uniquement"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Réseau verrouillé"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"La carte SIM est verrouillée par clé PUK."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Veuillez consulter le guide d\'utilisation ou contacter le service à la clientèle."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Veuillez consulter le guide d\'utilisation ou contacter l\'assistance à la clientèle."</string>
     <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"La carte SIM est verrouillée."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Déverrouillage de la carte SIM en cours…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises.\n\nVeuillez réessayer dans <xliff:g id="NUMBER_1">%2$d</xliff:g> secondes."</string>
@@ -1160,7 +1160,7 @@
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Il y a # an}one{Il y a # an}many{Il y a # ans}other{Il y a # ans}}"</string>
     <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minute}one{# minute}many{# minutes}other{# minutes}}"</string>
     <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# heure}one{# heure}many{# heures}other{# heures}}"</string>
-    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# jour}one{# jour}many{# jours}other{# jours}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# jour}one{# jour}many{# de jours}other{# jours}}"</string>
     <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# an}one{# an}many{# ans}other{# ans}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problème vidéo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Impossible de lire cette vidéo en continu sur cet appareil."</string>
@@ -1208,8 +1208,8 @@
     <string name="loading" msgid="3138021523725055037">"Chargement en cours..."</string>
     <string name="capital_on" msgid="2770685323900821829">"ACTIVÉ"</string>
     <string name="capital_off" msgid="7443704171014626777">"DÉSACTIVÉ"</string>
-    <string name="checked" msgid="9179896827054513119">"coché"</string>
-    <string name="not_checked" msgid="7972320087569023342">"non coché"</string>
+    <string name="checked" msgid="9179896827054513119">"Coché"</string>
+    <string name="not_checked" msgid="7972320087569023342">"Non coché"</string>
     <string name="selected" msgid="6614607926197755875">"sélectionné"</string>
     <string name="not_selected" msgid="410652016565864475">"non sélectionné"</string>
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Une étoile sur {max}}one{# étoile sur {max}}many{# d\'étoiles sur {max}}other{# étoiles sur {max}}}"</string>
@@ -1328,7 +1328,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume des notifications"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Sonnerie par défaut"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Défaut (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Aucun(e)"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Aucune"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Sonneries"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Sons d\'alarme"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Sons de notification"</string>
@@ -1429,6 +1429,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"PARTAGER"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"REFUSER"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Sélectionnez le mode de saisie"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Paramètres de langue"</string>
     <string name="show_ime" msgid="6406112007347443383">"Afficher lorsque le clavier physique est activé"</string>
     <string name="hardware" msgid="3611039921284836033">"Utiliser le clavier à l\'écran"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configurer <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1473,7 +1474,7 @@
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Changer de sortie"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"Mémoire de stockage <xliff:g id="NAME">%s</xliff:g> manquante"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Insérez l\'appareil de nouveau"</string>
-    <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Déplacement de <xliff:g id="NAME">%s</xliff:g> en cours..."</string>
+    <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Déplacement de <xliff:g id="NAME">%s</xliff:g> en cours…"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Déplacement des données..."</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Transfert de contenu terminé"</string>
     <string name="ext_media_move_success_message" msgid="9159542002276982979">"Contenu déplacé vers <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1489,7 +1490,7 @@
     <string name="ext_media_status_unsupported" msgid="5460509911660539317">"Non compatible"</string>
     <string name="ext_media_status_ejecting" msgid="7532403368044013797">"Éjection en cours..."</string>
     <string name="ext_media_status_formatting" msgid="774148701503179906">"Formatage en cours..."</string>
-    <string name="ext_media_status_missing" msgid="6520746443048867314">"Non insérée"</string>
+    <string name="ext_media_status_missing" msgid="6520746443048867314">"Non inséré"</string>
     <string name="activity_list_empty" msgid="4219430010716034252">"Aucune activité correspondante trouvée."</string>
     <string name="permlab_route_media_output" msgid="8048124531439513118">"diriger la sortie multimédia"</string>
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"Permet à une appli de diriger la sortie multimédia vers d\'autres appareils externes."</string>
@@ -1508,7 +1509,7 @@
     <string name="ime_action_go" msgid="5536744546326495436">"Aller"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"Rechercher"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"Envoyer"</string>
-    <string name="ime_action_next" msgid="4169702997635728543">"Suivante"</string>
+    <string name="ime_action_next" msgid="4169702997635728543">"Suivant"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"Terminé"</string>
     <string name="ime_action_previous" msgid="6548799326860401611">"Précédente"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Exécuter"</string>
@@ -1549,7 +1550,7 @@
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"L\'appli de conduite est en cours d\'exécution"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Touchez pour quitter l\'appli de conduite."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Précédent"</string>
-    <string name="next_button_label" msgid="6040209156399907780">"Suivante"</string>
+    <string name="next_button_label" msgid="6040209156399907780">"Suivant"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"Ignorer"</string>
     <string name="no_matches" msgid="6472699895759164599">"Aucune partie"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Rechercher sur la page"</string>
@@ -1938,7 +1939,7 @@
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sommeil"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Géré par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activé"</string>
-    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Désactivé"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Désactivée"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"N\'importe quel agenda"</string>
@@ -2437,23 +2438,14 @@
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarme pour <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Changer d\'utilisateur"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Désactiver le son"</string>
-    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Toucher pour désactiver le son"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Touchez pour désactiver le son"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Navigateur"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Contacts"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Courriel"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"Messages texte"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Musique"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Agenda"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculatrice"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Applications"</string>
 </resources>
