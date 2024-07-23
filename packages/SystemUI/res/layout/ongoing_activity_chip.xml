@@ -23,8 +23,7 @@
     android:layout_gravity="center_vertical|start"
     android:layout_marginStart="5dp"
 >
-    <!-- TODO(b/332662551): Update this content description when this supports more than just
-         phone calls. -->
+    <!-- TODO(b/354930838): Fix these paddings for the new screen chips. -->
     <com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
         android:id="@+id/ongoing_activity_chip_background"
         android:layout_width="wrap_content"
@@ -32,9 +31,8 @@
         android:layout_gravity="center_vertical"
         android:gravity="center"
         android:background="@drawable/ongoing_activity_chip_bg"
-        android:paddingStart="@dimen/ongoing_activity_chip_side_padding"
-        android:paddingEnd="@dimen/ongoing_activity_chip_side_padding"
-        android:contentDescription="@string/ongoing_phone_call_content_description"
+        android:paddingStart="@dimen/ongoing_activity_chip_side_padding_with_notif_icon"
+        android:paddingEnd="@dimen/ongoing_activity_chip_side_padding_with_notif_icon"
         android:minWidth="@dimen/min_clickable_item_size"
     >
 
@@ -44,6 +42,7 @@
             android:layout_width="@dimen/ongoing_activity_chip_icon_size"
             android:layout_height="@dimen/ongoing_activity_chip_icon_size"
             android:tint="?android:attr/colorPrimary"
+            android:visibility="gone"
         />
 
         <com.android.systemui.statusbar.chips.ui.view.ChipChronometer
@@ -52,7 +51,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:gravity="center|start"
-            android:paddingStart="@dimen/ongoing_activity_chip_icon_text_padding"
+            android:paddingEnd="@dimen/ongoing_activity_chip_text_end_padding_with_notif_icon"
             android:textAppearance="@android:style/TextAppearance.Material.Small"
             android:fontFamily="@*android:string/config_headlineFontFamily"
             android:textColor="?android:attr/colorPrimary"
