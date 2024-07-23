@@ -94,7 +94,7 @@ constructor(
                             with(topAreaSection) {
                                 DefaultClockLayout(
                                     modifier =
-                                        Modifier.graphicsLayer {
+                                        Modifier.fillMaxWidth(0.5f).graphicsLayer {
                                             translationX = unfoldTranslations.start
                                         }
                                 )
