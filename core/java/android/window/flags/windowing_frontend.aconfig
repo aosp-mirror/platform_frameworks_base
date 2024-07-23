@@ -80,6 +80,17 @@ flag {
 }
 
 flag {
+  name: "reduce_keyguard_transitions"
+  namespace: "windowing_frontend"
+  description: "Avoid setting keyguard transitions ready unless there are no other changes"
+  bug: "354647472"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "transit_ready_tracking"
   namespace: "windowing_frontend"
   description: "Enable accurate transition readiness tracking"
