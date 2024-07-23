@@ -116,8 +116,7 @@
     <string name="float_button_text" msgid="9221657008391364581">"悬浮"</string>
     <string name="select_text" msgid="5139083974039906583">"选择"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"屏幕截图"</string>
-    <!-- no translation found for open_in_browser_text (9181692926376072904) -->
-    <skip />
+    <string name="open_in_browser_text" msgid="9181692926376072904">"在浏览器中打开"</string>
     <string name="close_text" msgid="4986518933445178928">"关闭"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"关闭菜单"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"打开菜单"</string>
