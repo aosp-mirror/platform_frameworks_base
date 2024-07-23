@@ -440,7 +440,6 @@ internal constructor(
 
     internal companion object {
         const val MIN_HEIGHT_CHANGE_INTERVAL_MS = 800L
-        const val MAX_DEVICE_ITEM_ENTRY = 3
         const val ACTION_BLUETOOTH_DEVICE_DETAILS =
             "com.android.settings.BLUETOOTH_DEVICE_DETAIL_SETTINGS"
         const val ACTION_PREVIOUSLY_CONNECTED_DEVICE =

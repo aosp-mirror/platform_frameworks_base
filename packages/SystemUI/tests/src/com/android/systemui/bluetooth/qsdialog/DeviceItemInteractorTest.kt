@@ -113,9 +113,11 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
+            val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
             interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(emptyList<DeviceItem>())
+            assertThat(latestShowSeeAll).isFalse()
         }
     }
 
@@ -128,9 +130,11 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
+            val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
             interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(emptyList<DeviceItem>())
+            assertThat(latestShowSeeAll).isFalse()
         }
     }
 
@@ -143,9 +147,11 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
+            val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
             interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(listOf(deviceItem1))
+            assertThat(latestShowSeeAll).isFalse()
         }
     }
 
@@ -158,9 +164,11 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
+            val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
             interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(listOf(deviceItem2, deviceItem2))
+            assertThat(latestShowSeeAll).isFalse()
         }
     }
 
@@ -184,9 +192,11 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             `when`(deviceItem2.type).thenReturn(DeviceItemType.SAVED_BLUETOOTH_DEVICE)
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
+            val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
             interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(listOf(deviceItem2, deviceItem1))
+            assertThat(latestShowSeeAll).isFalse()
         }
     }
 
@@ -207,9 +217,30 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             `when`(deviceItem2.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
+            val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
             interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(listOf(deviceItem2, deviceItem1))
+            assertThat(latestShowSeeAll).isFalse()
+        }
+    }
+
+    @Test
+    fun testUpdateDeviceItems_showMaxDeviceItems_showSeeAll() {
+        testScope.runTest {
+            `when`(bluetoothTileDialogRepository.cachedDevices)
+                .thenReturn(listOf(cachedDevice2, cachedDevice2, cachedDevice2, cachedDevice2))
+            `when`(adapter.mostRecentlyConnectedDevices).thenReturn(null)
+            interactor.setDeviceItemFactoryListForTesting(
+                listOf(createFactory({ true }, deviceItem2))
+            )
+
+            val latest by collectLastValue(interactor.deviceItemUpdate)
+            val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
+            interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
+
+            assertThat(latest).isEqualTo(listOf(deviceItem2, deviceItem2, deviceItem2))
+            assertThat(latestShowSeeAll).isTrue()
         }
     }
 
