@@ -54,6 +54,7 @@ import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
+import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutEngine
@@ -660,6 +661,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             verify(mDreamOverlayCallback).onRedirectWake(true)
             client.onWakeRequested()
             verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Communal), isNull())
+            verify(mUiEventLogger).log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START)
         }
 
     @Test
