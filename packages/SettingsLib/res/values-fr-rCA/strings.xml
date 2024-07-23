@@ -62,7 +62,7 @@
     <string name="wifi_no_internet" msgid="1774198889176926299">"Aucun accès à Internet"</string>
     <string name="saved_network" msgid="7143698034077223645">"Enregistrés par <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatiquement connecté par %1$s"</string>
-    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Connecté automatiquement par le fournisseur d\'avis sur le réseau"</string>
+    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Connecté automatiquement par l\'utilitaire d\'évaluation des réseaux"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Connecté sur le réseau <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Toucher pour vous connecter"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Aucune connexion Internet"</string>
@@ -129,7 +129,7 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Connecté au point d\'accès au service"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Connexion au serveur de transfert de fichiers non établie"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Connecté au périphérique d\'entrée"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Connecté à l\'appareil pour accès Internet"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Connecté à l\'appareil pour un accès Internet"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Connexion Internet locale partagée avec appareil"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Utiliser pour l\'accès à Internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Utiliser pour la carte"</string>
@@ -143,7 +143,7 @@
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Associer"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ASSOCIER"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annuler"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"L\'association vous permet d\'accéder à vos contacts et à l\'historique des appels lorsque vous êtes connecté."</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"L\'association vous permet d\'accéder à vos contacts et à l\'historique des appels lorsque votre connexion est active."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Impossible d\'associer à <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossible d\'établir l\'association avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g> en raison d\'un NIP ou d\'une clé d\'accès incorrects."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Impossible d\'établir la communication avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -167,7 +167,7 @@
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Réseau sécurisé"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Système d\'exploitation Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Applis supprimées"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Applis et utilisateurs supprimés"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Applis et utilisateurs retirés"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Mises à jour du système"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"Partage de connexion par USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Point d\'accès Wi-Fi mobile"</string>
@@ -226,7 +226,7 @@
     <string name="development_settings_title" msgid="140296922921597393">"Options pour les développeurs"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Activer les options pour les développeurs"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Définir les options pour le développement de l\'appli"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"Les options proposées aux développeurs ne sont pas disponibles pour cet utilisateur."</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"Les options pour les développeurs ne sont pas disponibles pour cet utilisateur"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Les paramètres de RPV ne sont pas disponibles pour cet utilisateur"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Les paramètres de partage de connexion ne sont pas disponibles pour cet utilisateur"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Les paramètres de point d\'accès ne sont pas disponibles pour cet utilisateur"</string>
@@ -510,9 +510,9 @@
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"Il y a <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Temps restant : <xliff:g id="ID_1">%1$s</xliff:g>"</string>
-    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Petite"</string>
+    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Petit"</string>
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Par défaut"</string>
-    <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Grande"</string>
+    <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Grand"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Plus grande"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"La plus grande"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Personnalisée (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
@@ -534,7 +534,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Plus longtemps."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Moins longtemps."</string>
     <string name="cancel" msgid="5665114069455378395">"Annuler"</string>
-    <string name="next" msgid="2699398661093607009">"Suivant"</string>
+    <string name="next" msgid="2699398661093607009">"Suivante"</string>
     <string name="back" msgid="5554327870352703710">"Retour"</string>
     <string name="save" msgid="3745809743277153149">"Enregistrer"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
