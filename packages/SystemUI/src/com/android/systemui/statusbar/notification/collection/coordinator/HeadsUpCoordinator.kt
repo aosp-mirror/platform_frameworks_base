@@ -713,6 +713,10 @@ class HeadsUpCoordinator @Inject constructor(
                 endNotifLifetimeExtensionIfExtended(entry)
             }
         }
+
+        override fun onHeadsUpAnimatingAwayEnded(entry: NotificationEntry) {
+            mNotifPromoter.invalidateList("headsUpAnimatingAwayEnded: ${entry.logKey}")
+        }
     }
 
     private fun isSticky(entry: NotificationEntry) = mHeadsUpManager.isSticky(entry.key)

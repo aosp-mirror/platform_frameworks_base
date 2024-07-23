@@ -451,6 +451,15 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     }
 
     /**
+     * Called to notify the listeners that the HUN animating away animation has ended.
+     */
+    public void onEntryAnimatingAwayEnded(@NonNull NotificationEntry entry) {
+        for (OnHeadsUpChangedListener listener : mListeners) {
+            listener.onHeadsUpAnimatingAwayEnded(entry);
+        }
+    }
+
+    /**
      * Manager-specific logic, that should occur, when the entry is updated, and its posted time has
      * changed.
      *
