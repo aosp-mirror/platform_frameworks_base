@@ -198,7 +198,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     }
 
     @Override
-    public void onDeviceItemOnClicked(@NonNull DeviceItem deviceItem, @NonNull View view) {
+    public void onDeviceItemClicked(@NonNull DeviceItem deviceItem, @NonNull View view) {
         CachedBluetoothDevice cachedBluetoothDevice = deviceItem.getCachedBluetoothDevice();
         switch (deviceItem.getType()) {
             case ACTIVE_MEDIA_BLUETOOTH_DEVICE, CONNECTED_BLUETOOTH_DEVICE ->
@@ -346,7 +346,6 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mPresetsController.selectPreset(
                         mPresetsController.getAllPresetInfo().get(position).getIndex());
-                mPresetSpinner.setSelection(position);
             }
 
             @Override
@@ -413,7 +412,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
             final int size = mPresetInfoAdapter.getCount();
             for (int position = 0; position < size; position++) {
                 if (presetInfos.get(position).getIndex() == activePresetIndex) {
-                    mPresetSpinner.setSelection(position);
+                    mPresetSpinner.setSelection(position, /* animate= */ false);
                 }
             }
         }

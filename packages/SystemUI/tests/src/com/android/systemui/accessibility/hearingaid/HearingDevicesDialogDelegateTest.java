@@ -200,7 +200,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         setUpDeviceListDialog();
         when(mHearingDeviceItem.getType()).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE);
 
-        mDialogDelegate.onDeviceItemOnClicked(mHearingDeviceItem, new View(mContext));
+        mDialogDelegate.onDeviceItemClicked(mHearingDeviceItem, new View(mContext));
 
         verify(mCachedDevice).disconnect();
     }
