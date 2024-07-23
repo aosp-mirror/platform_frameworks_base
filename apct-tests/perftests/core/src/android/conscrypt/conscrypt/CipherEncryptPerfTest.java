@@ -23,6 +23,9 @@ import androidx.test.filters.LargeTest;
 import org.conscrypt.TestUtils;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import javax.crypto.Cipher;
@@ -91,21 +94,17 @@ public final class CipherEncryptPerfTest {
         }
     }
 
-    private Object[] getParams() {
-        return new Object[][] {
-            new Object[] {new Config(BufferType.ARRAY,
-                              MyCipherFactory.CONSCRYPT,
-                              Transformation.AES_CBC_PKCS5)},
-            new Object[] {new Config(BufferType.ARRAY,
-                              MyCipherFactory.CONSCRYPT,
-                              Transformation.AES_ECB_PKCS5)},
-            new Object[] {new Config(BufferType.ARRAY,
-                              MyCipherFactory.CONSCRYPT,
-                              Transformation.AES_GCM_NO)},
-            new Object[] {new Config(BufferType.ARRAY,
-                              MyCipherFactory.CONSCRYPT,
-                              Transformation.AES_GCM_SIV)},
-        };
+    public Collection <Object[]> getParams() {
+        final List<Object[]> params = new ArrayList<>();
+        for (BufferType bufferType : BufferType.values()) {
+            for (CipherFactory cipherFactory : MyCipherFactory.values()) {
+                for (Transformation transformation : Transformation.values()) {
+                  params.add(new Object[] {new Config(
+                                bufferType, cipherFactory, transformation)});
+                }
+            }
+        }
+        return params;
     }
 
     private EncryptStrategy encryptStrategy;
