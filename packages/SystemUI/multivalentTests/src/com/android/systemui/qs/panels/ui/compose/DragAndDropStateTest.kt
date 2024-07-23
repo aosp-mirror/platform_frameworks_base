@@ -40,21 +40,19 @@ class DragAndDropStateTest : SysuiTestCase() {
         TestEditTiles.forEach { assertThat(underTest.isMoving(it.tileSpec)).isFalse() }
 
         // Start the drag movement
-        val movingTileSpec = TestEditTiles[0].tileSpec
-        underTest.onStarted(movingTileSpec)
+        underTest.onStarted(TestEditTiles[0])
 
         // Assert that the correct tile is marked as moving
         TestEditTiles.forEach {
-            assertThat(underTest.isMoving(it.tileSpec)).isEqualTo(movingTileSpec == it.tileSpec)
+            assertThat(underTest.isMoving(it.tileSpec))
+                .isEqualTo(TestEditTiles[0].tileSpec == it.tileSpec)
         }
     }
 
     @Test
     fun onMoved_updatesList() {
-        val movingTileSpec = TestEditTiles[0].tileSpec
-
         // Start the drag movement
-        underTest.onStarted(movingTileSpec)
+        underTest.onStarted(TestEditTiles[0])
 
         // Move the tile to the end of the list
         underTest.onMoved(listState.tiles[5].tileSpec)
@@ -67,10 +65,8 @@ class DragAndDropStateTest : SysuiTestCase() {
 
     @Test
     fun onDrop_resetsMovingTile() {
-        val movingTileSpec = TestEditTiles[0].tileSpec
-
         // Start the drag movement
-        underTest.onStarted(movingTileSpec)
+        underTest.onStarted(TestEditTiles[0])
 
         // Move the tile to the end of the list
         underTest.onMoved(listState.tiles[5].tileSpec)
@@ -84,16 +80,15 @@ class DragAndDropStateTest : SysuiTestCase() {
 
     @Test
     fun onMoveOutOfBounds_removeMovingTileFromCurrentList() {
-        val movingTileSpec = TestEditTiles[0].tileSpec
-
         // Start the drag movement
-        underTest.onStarted(movingTileSpec)
+        underTest.onStarted(TestEditTiles[0])
 
         // Move the tile outside of the list
         underTest.movedOutOfBounds()
 
         // Asserts the moving tile is not current
-        assertThat(listState.tiles.first { it.tileSpec == movingTileSpec }.isCurrent).isFalse()
+        assertThat(listState.tiles.firstOrNull { it.tileSpec == TestEditTiles[0].tileSpec })
+            .isNull()
     }
 
     companion object {
