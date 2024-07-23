@@ -67,6 +67,7 @@ import com.android.wm.shell.common.RemoteCallable
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.WALLPAPER_ACTIVITY
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
@@ -786,7 +787,7 @@ class DesktopTasksController(
         moveHomeTask(wct, toTop = true)
 
         // Currently, we only handle the desktop on the default display really.
-        if (displayId == DEFAULT_DISPLAY && Flags.enableDesktopWindowingWallpaperActivity()) {
+        if (displayId == DEFAULT_DISPLAY && WALLPAPER_ACTIVITY.isEnabled(context)) {
             // Add translucent wallpaper activity to show the wallpaper underneath
             addWallpaperActivity(wct)
         }
@@ -974,7 +975,7 @@ class DesktopTasksController(
                 && isTopActivityExemptFromDesktopWindowing(context, task)
 
     private fun shouldHandleTaskClosing(request: TransitionRequestInfo): Boolean {
-        return Flags.enableDesktopWindowingWallpaperActivity() &&
+        return WALLPAPER_ACTIVITY.isEnabled(context) &&
             TransitionUtil.isClosingType(request.type) &&
             request.triggerTask != null
     }
