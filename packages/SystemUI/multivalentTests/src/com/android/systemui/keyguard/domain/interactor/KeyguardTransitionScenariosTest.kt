@@ -16,7 +16,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.app.StatusBarManager
+import android.app.StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
@@ -42,7 +42,6 @@ import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
@@ -59,7 +58,6 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shadeTestUtil
-import com.android.systemui.statusbar.commandQueue
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -93,13 +91,12 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     private val kosmos =
         testKosmos().apply {
             fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
-            this.commandQueue = fakeCommandQueue
         }
     private val testScope = kosmos.testScope
 
     private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
+    private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
     private val bouncerRepository by lazy { kosmos.fakeKeyguardBouncerRepository }
-    private var commandQueue = kosmos.fakeCommandQueue
     private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
     private val transitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
     private lateinit var featureFlags: FakeFeatureFlags
@@ -1724,11 +1721,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             reset(transitionRepository)
 
             // ...AND WHEN the camera gesture is detected quickly afterwards
-            commandQueue.doForEachCallback {
-                it.onCameraLaunchGestureDetected(
-                    StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
-                )
-            }
+            keyguardInteractor.onCameraLaunchDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
             runCurrent()
 
             // THEN a transition from DOZING => OCCLUDED should occur

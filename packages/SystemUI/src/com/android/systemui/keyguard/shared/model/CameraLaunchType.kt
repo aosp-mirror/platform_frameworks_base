@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,16 @@
  */
 package com.android.systemui.keyguard.shared.model
 
-/** Camera launch source, with type and time detected */
-data class CameraLaunchSourceModel(
-    val type: CameraLaunchType = CameraLaunchType.IGNORE,
-    val detectedTime: Long = System.currentTimeMillis(),
-)
+/** Camera launch sources */
+enum class CameraLaunchType {
+    /** Models no value */
+    IGNORE,
+    /** Device is wiggled */
+    WIGGLE,
+    /** Power button has been double tapped */
+    POWER_DOUBLE_TAP,
+    /** Device has been lifted */
+    LIFT_TRIGGER,
+    /** Quick affordance button has been pressed */
+    QUICK_AFFORDANCE,
+}
