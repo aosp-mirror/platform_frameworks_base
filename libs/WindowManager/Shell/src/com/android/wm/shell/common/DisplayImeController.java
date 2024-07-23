@@ -344,8 +344,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
             if (android.view.inputmethod.Flags.refactorInsetsController()) {
                 if (pendingImeStartAnimation) {
-                    startAnimation(true, true /* forceRestart */,
-                            null /* statsToken */);
+                    startAnimation(true, true /* forceRestart */);
                 }
             }
         }
@@ -398,8 +397,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 // already (e.g., when focussing an editText in activity B, while and editText in
                 // activity A is focussed), we will not get a call of #insetsControlChanged, and
                 // therefore have to start the show animation from here
-                startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */,
-                        null /* TODO statsToken */);
+                startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */);
             }
         }
 
@@ -436,16 +434,31 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     .navBarFrameHeight();
         }
 
+        private void startAnimation(final boolean show, final boolean forceRestart) {
+            final var imeSource = mInsetsState.peekSource(InsetsSource.ID_IME);
+            if (imeSource == null || mImeSourceControl == null) {
+                return;
+            }
+            final var statsToken = mImeSourceControl.getImeStatsToken();
+
+            startAnimation(show, forceRestart, statsToken);
+        }
+
         private void startAnimation(final boolean show, final boolean forceRestart,
                 @SoftInputShowHideReason int reason) {
             final var imeSource = mInsetsState.peekSource(InsetsSource.ID_IME);
             if (imeSource == null || mImeSourceControl == null) {
                 return;
             }
-            final var statsToken = ImeTracker.forLogging().onStart(
-                    show ? ImeTracker.TYPE_SHOW : ImeTracker.TYPE_HIDE, ImeTracker.ORIGIN_WM_SHELL,
-                    reason, false /* fromUser */);
-
+            final ImeTracker.Token statsToken;
+            if (android.view.inputmethod.Flags.refactorInsetsController()
+                    && mImeSourceControl.getImeStatsToken() != null) {
+                statsToken = mImeSourceControl.getImeStatsToken();
+            } else {
+                statsToken = ImeTracker.forLogging().onStart(
+                        show ? ImeTracker.TYPE_SHOW : ImeTracker.TYPE_HIDE,
+                        ImeTracker.ORIGIN_WM_SHELL, reason, false /* fromUser */);
+            }
             startAnimation(show, forceRestart, statsToken);
         }
 

@@ -10057,6 +10057,24 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Dispatches the statsToken and IME visibility to the ImeInsetsSourceProvider.
+     *
+     * @param visible {@code true} if it became visible, {@code false} otherwise.
+     * @param statsToken the token tracking the current IME request.
+     *
+     * @hide
+     */
+    public void notifyImeVisibilityChanged(boolean visible, @NonNull ImeTracker.Token statsToken) {
+        ImeTracker.forLogging().onProgress(statsToken,
+                ImeTracker.PHASE_CLIENT_NOTIFY_IME_VISIBILITY_CHANGED);
+        try {
+            mWindowSession.notifyImeWindowVisibilityChangedFromClient(mWindow, visible, statsToken);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Represents a pending input event that is waiting in a queue.
      *
      * Input events are processed in serial order by the timestamp specified by

@@ -3354,7 +3354,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // app1 requests IME visible.
         app1.setRequestedVisibleTypes(ime(), ime());
-        mDisplayContent.getInsetsStateController().onRequestedVisibleTypesChanged(app1);
+        mDisplayContent.getInsetsStateController().onRequestedVisibleTypesChanged(app1,
+                null /* statsToken */);
 
         // Verify app1's IME insets is visible and app2's IME insets frozen flag set.
         assertTrue(app1.getInsetsState().peekSource(ID_IME).isVisible());
@@ -3425,7 +3426,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(activity2.mImeInsetsFrozenUntilStartInput);
 
         app1.setRequestedVisibleTypes(ime());
-        controller.onRequestedVisibleTypesChanged(app1);
+        controller.onRequestedVisibleTypesChanged(app1, null /* statsToken */);
 
         // Expect all activities in split-screen will get IME insets visible state
         assertTrue(app1.getInsetsState().peekSource(ID_IME).isVisible());

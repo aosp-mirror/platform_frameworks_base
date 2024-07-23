@@ -472,7 +472,7 @@ public class WindowStateTests extends WindowTestsBase {
         app.setRequestedVisibleTypes(0, statusBars());
         mDisplayContent.getInsetsStateController()
                 .getOrCreateSourceProvider(statusBarId, statusBars())
-                .updateClientVisibility(app);
+                .updateClientVisibility(app, null /* statsToken */);
         waitUntilHandlersIdle();
         assertFalse(statusBar.isVisible());
     }
