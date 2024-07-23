@@ -307,7 +307,10 @@ public class PowerStatsExporter {
                 }
             }
             if (powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
-                builder.addConsumedPowerForCustomComponent(powerComponentId, powerAllProcStates);
+                if (batteryUsageStatsBuilder.isSupportedCustomPowerComponent(powerComponentId)) {
+                    builder.addConsumedPowerForCustomComponent(powerComponentId,
+                            powerAllProcStates);
+                }
             } else {
                 builder.addConsumedPower(powerComponentId, powerAllProcStates,
                         BatteryConsumer.POWER_MODEL_UNDEFINED);
@@ -319,7 +322,9 @@ public class PowerStatsExporter {
                 batteryUsageStatsBuilder.getAggregateBatteryConsumerBuilder(
                         BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
         if (powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
-            allAppsScope.addConsumedPowerForCustomComponent(powerComponentId, powerAllApps);
+            if (batteryUsageStatsBuilder.isSupportedCustomPowerComponent(powerComponentId)) {
+                allAppsScope.addConsumedPowerForCustomComponent(powerComponentId, powerAllApps);
+            }
         } else {
             BatteryConsumer.Key key = allAppsScope.getKey(powerComponentId,
                     BatteryConsumer.PROCESS_STATE_ANY, screenState, powerState);
