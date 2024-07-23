@@ -507,11 +507,31 @@ public class AudioService extends IAudioService.Stub
         return streamState != null ? streamState.getIndex(device) : -1;
     }
 
+    /**
+     * Returns the {@link VolumeStreamState} corresponding to the passed stream type. This can be
+     * {@code null} since not all possible stream types have a valid {@link VolumeStreamState} (e.g.
+     * {@link AudioSystem#STREAM_BLUETOOTH_SCO}) is deprecated and will return a {@code null} stream
+     * state).
+     *
+     * @param stream the stream type for querying the stream state
+     *
+     * @return the {@link VolumeStreamState} corresponding to the passed stream type or {@code null}
+     */
     @Nullable
     /*package*/ VolumeStreamState getVssForStream(int stream) {
         return mStreamStates.get(stream);
     }
 
+    /**
+     * Returns the {@link VolumeStreamState} corresponding to the passed stream type. In case
+     * there is no associated stream state for the given stream type we return the default stream
+     * state for {@link AudioSystem#STREAM_MUSIC} (or throw an {@link IllegalArgumentException} in
+     * the ramp up phase of the replaceStreamBtSco flag to ensure that this case will never happen).
+     *
+     * @param stream the stream type for querying the stream state
+     *
+     * @return the {@link VolumeStreamState} corresponding to the passed stream type
+     */
     @NonNull
     /*package*/ VolumeStreamState getVssForStreamOrDefault(int stream) {
         VolumeStreamState streamState = mStreamStates.get(stream);
