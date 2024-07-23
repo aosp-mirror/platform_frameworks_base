@@ -185,8 +185,8 @@ public class ClientTransactionItemTest {
 
     @Test
     public void testWindowContextWindowRemovalItem_execute() {
-        final WindowContextWindowRemovalItem item = WindowContextWindowRemovalItem.obtain(
-                mWindowClientToken);
+        final WindowContextWindowRemovalItem item =
+                new WindowContextWindowRemovalItem(mWindowClientToken);
 
         item.execute(mHandler, mPendingActions);
 

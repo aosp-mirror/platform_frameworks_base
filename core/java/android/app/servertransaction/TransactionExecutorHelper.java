@@ -55,7 +55,7 @@ public class TransactionExecutorHelper {
     // Temp holder for lifecycle path.
     // No direct transition between two states should take more than one complete cycle of 6 states.
     @ActivityLifecycleItem.LifecycleState
-    private IntArray mLifecycleSequence = new IntArray(6);
+    private final IntArray mLifecycleSequence = new IntArray(6 /* initialCapacity */);
 
     /**
      * Calculate the path through main lifecycle states for an activity and fill
