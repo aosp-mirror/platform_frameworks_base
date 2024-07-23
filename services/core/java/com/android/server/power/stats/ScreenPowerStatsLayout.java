@@ -16,8 +16,11 @@
 
 package com.android.server.power.stats;
 
+import android.annotation.NonNull;
 import android.os.BatteryStats;
 import android.os.PersistableBundle;
+
+import com.android.internal.os.PowerStats;
 
 /**
  * Captures the positions and lengths of sections of the stats array, such as time-in-state,
@@ -28,13 +31,22 @@ public class ScreenPowerStatsLayout extends PowerStatsLayout {
     private static final String EXTRA_DEVICE_SCREEN_ON_DURATION_POSITION = "dsd";
     private static final String EXTRA_DEVICE_BRIGHTNESS_DURATION_POSITIONS = "dbd";
     private static final String EXTRA_DEVICE_DOZE_DURATION_POSITION = "ddd";
+    private static final String EXTRA_DEVICE_DOZE_POWER_POSITION = "ddp";
     private static final String EXTRA_UID_FOREGROUND_DURATION = "uf";
 
     private int mDisplayCount;
     private int mDeviceScreenOnDurationPosition;
     private int[] mDeviceBrightnessDurationPositions;
     private int mDeviceScreenDozeDurationPosition;
+    private int mDeviceScreenDozePowerPosition;
     private int mUidTopActivityTimePosition;
+
+    ScreenPowerStatsLayout() {
+    }
+
+    ScreenPowerStatsLayout(@NonNull PowerStats.Descriptor descriptor) {
+        super(descriptor);
+    }
 
     void addDeviceScreenUsageDurationSection(int displayCount) {
         mDisplayCount = displayCount;
@@ -45,6 +57,13 @@ public class ScreenPowerStatsLayout extends PowerStatsLayout {
                     addDeviceSection(displayCount, BatteryStats.SCREEN_BRIGHTNESS_NAMES[level]);
         }
         mDeviceScreenDozeDurationPosition = addDeviceSection(displayCount, "doze");
+    }
+
+    @Override
+    public void addDeviceSectionPowerEstimate() {
+        super.addDeviceSectionPowerEstimate();
+        // Used by AmbientDisplayPowerStatsProcessor
+        mDeviceScreenDozePowerPosition = addDeviceSection(1, "doze-power", FLAG_HIDDEN);
     }
 
     public int getDisplayCount() {
@@ -94,6 +113,20 @@ public class ScreenPowerStatsLayout extends PowerStatsLayout {
         return stats[mDeviceScreenDozeDurationPosition + display];
     }
 
+    /**
+     * Stores estimated power in the doze (ambient) state.
+     */
+    public void setScreenDozePowerEstimate(long[] stats, double power) {
+        stats[mDeviceScreenDozePowerPosition] = (long) (power * MILLI_TO_NANO_MULTIPLIER);
+    }
+
+    /**
+     * Retrieves estimated power in the doze (ambient) state.
+     */
+    public double getScreenDozePowerEstimate(long[] stats) {
+        return stats[mDeviceScreenDozePowerPosition] / MILLI_TO_NANO_MULTIPLIER;
+    }
+
     void addUidTopActivitiyDuration() {
         mUidTopActivityTimePosition = addUidSection(1, "top");
     }
@@ -120,6 +153,7 @@ public class ScreenPowerStatsLayout extends PowerStatsLayout {
         extras.putIntArray(EXTRA_DEVICE_BRIGHTNESS_DURATION_POSITIONS,
                 mDeviceBrightnessDurationPositions);
         extras.putInt(EXTRA_DEVICE_DOZE_DURATION_POSITION, mDeviceScreenDozeDurationPosition);
+        extras.putInt(EXTRA_DEVICE_DOZE_POWER_POSITION, mDeviceScreenDozePowerPosition);
         extras.putInt(EXTRA_UID_FOREGROUND_DURATION, mUidTopActivityTimePosition);
     }
 
@@ -131,6 +165,7 @@ public class ScreenPowerStatsLayout extends PowerStatsLayout {
         mDeviceBrightnessDurationPositions = extras.getIntArray(
                 EXTRA_DEVICE_BRIGHTNESS_DURATION_POSITIONS);
         mDeviceScreenDozeDurationPosition = extras.getInt(EXTRA_DEVICE_DOZE_DURATION_POSITION);
+        mDeviceScreenDozePowerPosition = extras.getInt(EXTRA_DEVICE_DOZE_POWER_POSITION);
         mUidTopActivityTimePosition = extras.getInt(EXTRA_UID_FOREGROUND_DURATION);
     }
 }
