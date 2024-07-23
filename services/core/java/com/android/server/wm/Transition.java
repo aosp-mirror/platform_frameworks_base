@@ -467,7 +467,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (dimmer == null) {
             return false;
         }
-        if (dimmer.getHost().asTask() != null) {
+        if (dimmer.hostIsTask()) {
             // Always allow to dim if the host only affects its task.
             return true;
         }
