@@ -12900,11 +12900,6 @@ public final class ViewRootImpl implements ViewParent,
                     mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
         }
 
-        // If it's currently an intermittent update,
-        // we should keep mPreferredFrameRateCategory as NORMAL
-        if (intermittentUpdateState() == INTERMITTENT_STATE_INTERMITTENT) {
-            return;
-        }
 
         if (mFrameRateCategoryHighCount > 0) {
             mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
