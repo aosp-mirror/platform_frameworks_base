@@ -114,7 +114,7 @@ class DisabledByPolicyInteractorTest : SysuiTestCase() {
                 DisabledByPolicyInteractor.PolicyResult.TileDisabled(ADMIN)
             )
 
-        val expectedIntent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(context, ADMIN)
+        val expectedIntent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(ADMIN)
         assertThat(result).isTrue()
         verify(activityStarter).postStartActivityDismissingKeyguard(intentCaptor.capture(), any())
         assertThat(intentCaptor.value.filterEquals(expectedIntent)).isTrue()
