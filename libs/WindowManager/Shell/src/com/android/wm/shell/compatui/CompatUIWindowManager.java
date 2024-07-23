@@ -23,6 +23,8 @@ import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_S
 import static android.view.WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
+import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.DESKTOP_WINDOWING_MODE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.CameraCompatTaskInfo.CameraCompatControlState;
@@ -91,7 +93,8 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mCallback = callback;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
-        if (Flags.enableDesktopWindowingMode() && Flags.enableWindowingDynamicInitialBounds()) {
+        if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
+                && Flags.enableWindowingDynamicInitialBounds()) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
         }
@@ -150,7 +153,8 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         final boolean prevHasSizeCompat = mHasSizeCompat;
         final int prevCameraCompatControlState = mCameraCompatControlState;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
-        if (Flags.enableDesktopWindowingMode() && Flags.enableWindowingDynamicInitialBounds()) {
+        if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
+                && Flags.enableWindowingDynamicInitialBounds()) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
         }

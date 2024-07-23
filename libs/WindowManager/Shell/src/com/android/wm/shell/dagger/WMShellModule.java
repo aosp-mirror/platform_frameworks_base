@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.dagger;
 
+import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.DESKTOP_WINDOWING_MODE;
+
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -30,7 +32,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.IconProvider;
-import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -567,7 +568,7 @@ public abstract class WMShellModule {
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             ShellTaskOrganizer shellTaskOrganizer) {
         if (!DesktopModeStatus.canEnterDesktopMode(context)
-                || !Flags.enableDesktopWindowingTaskLimit()) {
+                || DESKTOP_WINDOWING_MODE.isEnabled(context)) {
             return Optional.empty();
         }
         return Optional.of(
