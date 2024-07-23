@@ -560,6 +560,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for keyguard quick affordances-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardQuickAffordancesLog
+    public static LogBuffer provideKeyguardQuickAffordancesLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyguardQuickAffordancesLog", 25);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for keyguard transition animation logs.
      */
     @Provides

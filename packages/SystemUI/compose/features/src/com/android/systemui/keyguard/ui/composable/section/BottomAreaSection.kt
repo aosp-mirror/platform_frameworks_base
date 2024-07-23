@@ -32,6 +32,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
@@ -55,6 +56,7 @@ constructor(
     private val vibratorHelper: VibratorHelper,
     private val indicationController: KeyguardIndicationController,
     private val indicationAreaViewModel: KeyguardIndicationAreaViewModel,
+    private val shortcutsLogger: KeyguardQuickAffordancesLogger,
 ) {
     /**
      * Renders a single lockscreen shortcut.
@@ -162,6 +164,7 @@ constructor(
                         transitionAlpha,
                         falsingManager,
                         vibratorHelper,
+                        shortcutsLogger,
                     ) {
                         indicationController.showTransientIndication(it)
                     }
