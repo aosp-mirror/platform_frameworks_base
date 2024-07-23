@@ -44,9 +44,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 abstract class Vibration {
     private static final DateTimeFormatter DEBUG_TIME_FORMATTER = DateTimeFormatter.ofPattern(
-            "HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
+            "HH:mm:ss.SSS");
     private static final DateTimeFormatter DEBUG_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(
-            "MM-dd HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
+            "MM-dd HH:mm:ss.SSS");
 
     // Used to generate globally unique vibration ids.
     private static final AtomicInteger sNextVibrationId = new AtomicInteger(1); // 0 = no callback
@@ -244,12 +244,10 @@ abstract class Vibration {
 
         @Override
         public String toString() {
-            return "createTime: " + DEBUG_DATE_TIME_FORMATTER.format(
-                    Instant.ofEpochMilli(mCreateTime))
-                    + ", startTime: " + DEBUG_DATE_TIME_FORMATTER.format(
-                    Instant.ofEpochMilli(mStartTime))
-                    + ", endTime: " + (mEndTime == 0 ? null : DEBUG_DATE_TIME_FORMATTER.format(
-                    Instant.ofEpochMilli(mEndTime)))
+            return "createTime: " + formatTime(mCreateTime, /*includeDate=*/ true)
+                    + ", startTime: " + formatTime(mStartTime, /*includeDate=*/ true)
+                    + ", endTime: " + (mEndTime == 0 ? null : formatTime(mEndTime,
+                    /*includeDate=*/ true))
                     + ", durationMs: " + mDurationMs
                     + ", status: " + mStatus.name().toLowerCase(Locale.ROOT)
                     + ", playedEffect: " + mPlayedEffect
@@ -273,14 +271,12 @@ abstract class Vibration {
             boolean isExternalVibration = mPlayedEffect == null;
             String timingsStr = String.format(Locale.ROOT,
                     "%s | %8s | %20s | duration: %5dms | start: %12s | end: %12s",
-                    DEBUG_DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(mCreateTime)),
+                    formatTime(mCreateTime, /*includeDate=*/ true),
                     isExternalVibration ? "external" : "effect",
                     mStatus.name().toLowerCase(Locale.ROOT),
                     mDurationMs,
-                    mStartTime == 0 ? ""
-                            : DEBUG_TIME_FORMATTER.format(Instant.ofEpochMilli(mStartTime)),
-                    mEndTime == 0 ? ""
-                            : DEBUG_TIME_FORMATTER.format(Instant.ofEpochMilli(mEndTime)));
+                    mStartTime == 0 ? "" : formatTime(mStartTime, /*includeDate=*/ false),
+                    mEndTime == 0 ? "" : formatTime(mEndTime, /*includeDate=*/ false));
             String paramStr = String.format(Locale.ROOT,
                     " | scale: %8s (adaptive=%.2f) | flags: %4s | usage: %s",
                     VibrationScaler.scaleLevelToString(mScaleLevel), mAdaptiveScale,
@@ -315,12 +311,10 @@ abstract class Vibration {
             pw.increaseIndent();
             pw.println("status = " + mStatus.name().toLowerCase(Locale.ROOT));
             pw.println("durationMs = " + mDurationMs);
-            pw.println("createTime = " + DEBUG_DATE_TIME_FORMATTER.format(
-                    Instant.ofEpochMilli(mCreateTime)));
-            pw.println("startTime = " + DEBUG_DATE_TIME_FORMATTER.format(
-                    Instant.ofEpochMilli(mStartTime)));
+            pw.println("createTime = " + formatTime(mCreateTime, /*includeDate=*/ true));
+            pw.println("startTime = " + formatTime(mStartTime, /*includeDate=*/ true));
             pw.println("endTime = " + (mEndTime == 0 ? null
-                    : DEBUG_DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(mEndTime))));
+                    : formatTime(mEndTime, /*includeDate=*/ true)));
             pw.println("playedEffect = " + mPlayedEffect);
             pw.println("originalEffect = " + mOriginalEffect);
             pw.println("scale = " + VibrationScaler.scaleLevelToString(mScaleLevel));
@@ -457,6 +451,13 @@ abstract class Vibration {
             proto.write(PrimitiveSegmentProto.SCALE, segment.getScale());
             proto.write(PrimitiveSegmentProto.DELAY, segment.getDelay());
             proto.end(token);
+        }
+
+        private String formatTime(long timeInMillis, boolean includeDate) {
+            return (includeDate ? DEBUG_DATE_TIME_FORMATTER : DEBUG_TIME_FORMATTER)
+                    // Ensure timezone is retrieved at formatting time
+                    .withZone(ZoneId.systemDefault())
+                    .format(Instant.ofEpochMilli(timeInMillis));
         }
     }
 }
