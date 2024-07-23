@@ -914,7 +914,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"జోడించండి"</string>
     <string name="controls_dialog_remove" msgid="3775288002711561936">"తీసివేయండి"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ద్వారా సూచించబడింది"</string>
-    <string name="controls_tile_locked" msgid="731547768182831938">"పరికరంలాక్ చేయబడింది"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"డివైజ్ లాక్ అయ్యింది"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"లాక్ స్క్రీన్ నుండి పరికరాలను చూపించాలా, కంట్రోల్ చేయాలా?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"మీరు లాక్ స్క్రీన్‌కు మీ బాహ్య పరికరాల కోసం కంట్రోల్స్‌ను జోడించవచ్చు.\n\nమీ ఫోన్ లేదా టాబ్లెట్‌ను అన్‌లాక్ చేయకుండానే కొన్ని పరికరాలను కంట్రోల్ చేయడానికి మీ పరికర యాప్ మిమ్మల్ని అనుమతించవచ్చు.\n\nమీరు సెట్టింగ్‌లలో ఎప్పుడైనా మార్పులు చేయవచ్చు."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"లాక్ స్క్రీన్ నుండి పరికరాలను కంట్రోల్ చేయాలా?"</string>
