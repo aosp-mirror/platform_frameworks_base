@@ -569,13 +569,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     private void onSecureSettingsChangedLocked(@NonNull String key, @UserIdInt int userId) {
-        if (!mConcurrentMultiUserModeEnabled && userId != mCurrentUserId) {
-            return;
-        }
         switch (key) {
             case Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD: {
                 if (!Flags.imeSwitcherRevamp()) {
-                    mMenuController.updateKeyboardFromSettingsLocked();
+                    if (userId == mCurrentUserId) {
+                        mMenuController.updateKeyboardFromSettingsLocked();
+                    }
                 }
                 break;
             }
