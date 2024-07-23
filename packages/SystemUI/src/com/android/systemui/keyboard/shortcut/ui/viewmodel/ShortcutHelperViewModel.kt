@@ -19,14 +19,18 @@ package com.android.systemui.keyboard.shortcut.ui.viewmodel
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperStateInteractor
+import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.CurrentApp
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -41,6 +45,8 @@ constructor(
     categoriesInteractor: ShortcutHelperCategoriesInteractor,
 ) {
 
+    private val searchQuery = MutableStateFlow("")
+
     val shouldShow =
         categoriesInteractor.shortcutCategories
             .map { it.isNotEmpty() }
@@ -48,14 +54,15 @@ constructor(
             .flowOn(backgroundDispatcher)
 
     val shortcutsUiState =
-        categoriesInteractor.shortcutCategories
-            .map {
-                if (it.isEmpty()) {
+        combine(searchQuery, categoriesInteractor.shortcutCategories) { query, categories ->
+                if (categories.isEmpty()) {
                     ShortcutsUiState.Inactive
                 } else {
+                    val filteredCategories = filterCategoriesBySearchQuery(query, categories)
                     ShortcutsUiState.Active(
-                        shortcutCategories = it,
-                        defaultSelectedCategory = getDefaultSelectedCategory(it),
+                        searchQuery = query,
+                        shortcutCategories = filteredCategories,
+                        defaultSelectedCategory = getDefaultSelectedCategory(filteredCategories),
                     )
                 }
             }
@@ -67,10 +74,46 @@ constructor(
 
     private fun getDefaultSelectedCategory(
         categories: List<ShortcutCategory>
-    ): ShortcutCategoryType {
+    ): ShortcutCategoryType? {
         val currentAppShortcuts = categories.firstOrNull { it.type is CurrentApp }
-        return currentAppShortcuts?.type ?: categories.first().type
+        return currentAppShortcuts?.type ?: categories.firstOrNull()?.type
     }
+
+    private fun filterCategoriesBySearchQuery(
+        query: String,
+        categories: List<ShortcutCategory>
+    ): List<ShortcutCategory> {
+        val lowerCaseTrimmedQuery = query.trim().lowercase()
+        if (lowerCaseTrimmedQuery.isEmpty()) {
+            return categories
+        }
+        return categories
+            .map { category ->
+                category.copy(
+                    subCategories =
+                        filterSubCategoriesBySearchQuery(
+                            subCategories = category.subCategories,
+                            query = lowerCaseTrimmedQuery,
+                        )
+                )
+            }
+            .filter { it.subCategories.isNotEmpty() }
+    }
+
+    private fun filterSubCategoriesBySearchQuery(
+        subCategories: List<ShortcutSubCategory>,
+        query: String
+    ) =
+        subCategories
+            .map { subCategory ->
+                subCategory.copy(
+                    shortcuts = filterShortcutsBySearchQuery(subCategory.shortcuts, query)
+                )
+            }
+            .filter { it.shortcuts.isNotEmpty() }
+
+    private fun filterShortcutsBySearchQuery(shortcuts: List<Shortcut>, query: String) =
+        shortcuts.filter { shortcut -> shortcut.label.trim().lowercase().contains(query) }
 
     fun onViewClosed() {
         stateInteractor.onViewClosed()
@@ -78,5 +121,9 @@ constructor(
 
     fun onViewOpened() {
         stateInteractor.onViewOpened()
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        searchQuery.value = query
     }
 }
