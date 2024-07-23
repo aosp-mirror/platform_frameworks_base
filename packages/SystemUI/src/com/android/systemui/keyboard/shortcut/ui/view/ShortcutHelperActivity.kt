@@ -84,6 +84,7 @@ constructor(
                     ShortcutHelper(
                         shortcutsUiState = shortcutsUiState,
                         onKeyboardSettingsClicked = ::onKeyboardSettingsClicked,
+                        onSearchQueryChanged = { viewModel.onSearchQueryChanged(it) },
                     )
                 }
             }

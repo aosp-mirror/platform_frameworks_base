@@ -2230,11 +2230,13 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     fun glanceableHubToDreaming_communalKtfRefactor() =
         testScope.runTest {
             // GIVEN that we are dreaming and not dozing
+            powerInteractor.setAwakeForTest()
             keyguardRepository.setDreaming(true)
+            keyguardRepository.setDreamingWithOverlay(true)
             keyguardRepository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
-            runCurrent()
+            advanceTimeBy(100L)
 
             // GIVEN a prior transition has run to GLANCEABLE_HUB
             communalSceneInteractor.changeScene(CommunalScenes.Communal)

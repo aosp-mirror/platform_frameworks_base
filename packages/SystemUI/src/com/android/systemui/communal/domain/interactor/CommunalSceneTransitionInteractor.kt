@@ -85,16 +85,16 @@ constructor(
      */
     private val nextKeyguardStateInternal =
         combine(
-            keyguardInteractor.isDreaming,
+            keyguardInteractor.isAbleToDream,
             keyguardInteractor.isKeyguardOccluded,
             keyguardInteractor.isKeyguardGoingAway,
         ) { dreaming, occluded, keyguardGoingAway ->
             if (keyguardGoingAway) {
                 KeyguardState.GONE
+            } else if (occluded && !dreaming) {
+                KeyguardState.OCCLUDED
             } else if (dreaming) {
                 KeyguardState.DREAMING
-            } else if (occluded) {
-                KeyguardState.OCCLUDED
             } else {
                 KeyguardState.LOCKSCREEN
             }
@@ -162,10 +162,13 @@ constructor(
             // We may receive an Idle event without a corresponding Transition
             // event, such as when snapping to a scene without an animation.
             val targetState =
-                if (idle.currentScene == CommunalScenes.Blank) {
+                if (idle.currentScene == CommunalScenes.Communal) {
+                    KeyguardState.GLANCEABLE_HUB
+                } else if (currentToState == KeyguardState.GLANCEABLE_HUB) {
                     nextKeyguardState.value
                 } else {
-                    KeyguardState.GLANCEABLE_HUB
+                    // Do nothing as we are no longer in the hub state.
+                    return
                 }
             transitionKtfTo(targetState)
             repository.nextLockscreenTargetState.value = null
@@ -188,7 +191,7 @@ constructor(
                 from = internalTransitionInteractor.currentTransitionInfoInternal.value.to,
                 to = state,
                 animator = null,
-                modeOnCanceled = TransitionModeOnCanceled.REVERSE
+                modeOnCanceled = TransitionModeOnCanceled.REVERSE,
             )
         currentTransitionId = internalTransitionInteractor.startTransition(newTransition)
         internalTransitionInteractor.updateTransition(

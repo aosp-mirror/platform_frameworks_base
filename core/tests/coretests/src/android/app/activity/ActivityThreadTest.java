@@ -78,10 +78,10 @@ import android.window.ActivityWindowInfo;
 import android.window.WindowContextInfo;
 import android.window.WindowTokenClientController;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.content.ReferrerIntent;
 
@@ -1047,7 +1047,7 @@ public class ActivityThreadTest {
 
     @NonNull
     private static ClientTransaction newTransaction(@NonNull ActivityThread activityThread) {
-        return ClientTransaction.obtain(activityThread.getApplicationThread());
+        return new ClientTransaction(activityThread.getApplicationThread());
     }
 
     // Test activity

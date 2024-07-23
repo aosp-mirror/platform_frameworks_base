@@ -33,6 +33,7 @@ import android.util.Log
 import androidx.annotation.WorkerThread
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.recordissue.IssueRecordingState.Companion.TAG_TITLE_DELIMITER
 import com.android.traceur.FileSender
 import com.android.traceur.MessageConstants
 import com.android.traceur.TraceConfig
@@ -112,8 +113,8 @@ class TraceurMessageSender @Inject constructor(@Background private val backgroun
     }
 
     @WorkerThread
-    fun getTags() {
-        val replyHandler = Messenger(TagsHandler(backgroundLooper))
+    fun getTags(state: IssueRecordingState) {
+        val replyHandler = Messenger(TagsHandler(backgroundLooper, state))
         notifyTraceur(MessageConstants.TAGS_WHAT, replyTo = replyHandler)
     }
 
@@ -165,7 +166,8 @@ class TraceurMessageSender @Inject constructor(@Background private val backgroun
         }
     }
 
-    private class TagsHandler(looper: Looper) : Handler(looper) {
+    private class TagsHandler(looper: Looper, private val state: IssueRecordingState) :
+        Handler(looper) {
 
         override fun handleMessage(msg: Message) {
             if (MessageConstants.TAGS_WHAT == msg.what) {
@@ -174,16 +176,11 @@ class TraceurMessageSender @Inject constructor(@Background private val backgroun
                     msg.data.getStringArrayList(MessageConstants.BUNDLE_KEY_TAG_DESCRIPTIONS)
                 if (keys == null || values == null) {
                     throw IllegalArgumentException(
-                        "Neither keys: $keys, nor values: $values can " + "be null"
+                        "Neither keys: $keys, nor values: $values can be null"
                     )
                 }
-
-                val tags = keys.zip(values).map { "${it.first}: ${it.second}" }.toSet()
-                Log.e(
-                    TAG,
-                    "These tags: $tags will be saved and used for the Custom Trace" +
-                        " Config dialog in a future CL. This log will be removed."
-                )
+                state.tagTitles =
+                    keys.zip(values).map { it.first + TAG_TITLE_DELIMITER + it.second }.toSet()
             } else {
                 throw IllegalArgumentException("received unknown msg.what: " + msg.what)
             }

@@ -25,7 +25,6 @@ import static org.junit.Assert.assertNotSame;
 
 import android.annotation.NonNull;
 import android.app.ActivityOptions;
-import android.app.IApplicationThread;
 import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -68,8 +67,6 @@ public class ObjectPoolTests {
     public final MockitoRule mocks = MockitoJUnit.rule();
 
     @Mock
-    private IApplicationThread mApplicationThread;
-    @Mock
     private IBinder mActivityToken;
 
     // 1. Check if two obtained objects from pool are not the same.
@@ -90,11 +87,6 @@ public class ObjectPoolTests {
     @Test
     public void testRecycleConfigurationChangeItem() {
         testRecycle(() -> ConfigurationChangeItem.obtain(config(), 1));
-    }
-
-    @Test
-    public void testRecycleDestroyActivityItem() {
-        testRecycle(() -> DestroyActivityItem.obtain(mActivityToken, true));
     }
 
     @Test
@@ -182,11 +174,6 @@ public class ObjectPoolTests {
     @Test
     public void testRecycleStopItem() {
         testRecycle(() -> StopActivityItem.obtain(mActivityToken));
-    }
-
-    @Test
-    public void testRecycleClientTransaction() {
-        testRecycle(() -> ClientTransaction.obtain(mApplicationThread));
     }
 
     private void testRecycle(@NonNull Supplier<? extends ObjectPoolItem> obtain) {

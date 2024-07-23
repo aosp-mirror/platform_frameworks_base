@@ -30,6 +30,7 @@ import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLarge
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration.WindowingMode;
@@ -49,8 +50,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Trace;
-import android.util.Log;
 import android.util.Size;
+import android.util.Slog;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
@@ -68,6 +69,7 @@ import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -133,12 +135,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private CharSequence mAppName;
     private CapturedLink mCapturedLink;
+    private Uri mGenericLink;
     private OpenInBrowserClickListener mOpenInBrowserClickListener;
 
     private ExclusionRegionListener mExclusionRegionListener;
 
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final MaximizeMenuFactory mMaximizeMenuFactory;
+    private final HandleMenuFactory mHandleMenuFactory;
+    private final AppToWebGenericLinksParser mGenericLinksParser;
 
     // Hover state for the maximize menu and button. The menu will remain open as long as either of
     // these is true. See {@link #onMaximizeHoverStateChanged()}.
@@ -161,13 +166,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            AppToWebGenericLinksParser genericLinksParser) {
         this (context, displayController, splitScreenController, taskOrganizer, taskInfo,
                 taskSurface, handler, bgExecutor, choreographer, syncQueue,
-                rootTaskDisplayAreaOrganizer, SurfaceControl.Builder::new,
+                rootTaskDisplayAreaOrganizer, genericLinksParser, SurfaceControl.Builder::new,
                 SurfaceControl.Transaction::new,  WindowContainerTransaction::new,
                 SurfaceControl::new, new SurfaceControlViewHostFactory() {},
-                DefaultMaximizeMenuFactory.INSTANCE);
+                DefaultMaximizeMenuFactory.INSTANCE, DefaultHandleMenuFactory.INSTANCE);
     }
 
     DesktopModeWindowDecoration(
@@ -182,12 +188,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            AppToWebGenericLinksParser genericLinksParser,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
             Supplier<SurfaceControl> surfaceControlSupplier,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory,
-            MaximizeMenuFactory maximizeMenuFactory) {
+            MaximizeMenuFactory maximizeMenuFactory,
+            HandleMenuFactory handleMenuFactory) {
         super(context, displayController, taskOrganizer, taskInfo, taskSurface,
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
@@ -198,7 +206,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
+        mGenericLinksParser = genericLinksParser;
         mMaximizeMenuFactory = maximizeMenuFactory;
+        mHandleMenuFactory = handleMenuFactory;
     }
 
     /**
@@ -425,9 +435,21 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     void onOpenInBrowserClick() {
-        if (mOpenInBrowserClickListener == null || mCapturedLink == null) return;
-        mOpenInBrowserClickListener.onClick(this, mCapturedLink.mUri);
+        if (mOpenInBrowserClickListener == null || mHandleMenu == null) {
+            return;
+        }
+        mOpenInBrowserClickListener.onClick(this, mHandleMenu.getOpenInBrowserLink());
         onCapturedLinkExpired();
+    }
+
+    @Nullable
+    private Uri getBrowserLink() {
+        // If the captured link is available and has not expired, return the captured link.
+        // Otherwise, return the generic link which is set to null if a generic link is unavailable.
+        if (mCapturedLink != null && !mCapturedLink.mExpired) {
+            return mCapturedLink.mUri;
+        }
+        return mGenericLink;
     }
 
     private void updateDragResizeListener(SurfaceControl oldDecorationSurface) {
@@ -520,11 +542,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return new AppHandleViewHolder(
                     mResult.mRootView,
                     mOnCaptionTouchListener,
-                    mOnCaptionButtonClickListener,
-                    (v, event) -> {
-                        updateHoverAndPressStatus(event);
-                        return true;
-                    }
+                    mOnCaptionButtonClickListener
             );
         } else if (mRelayoutParams.mLayoutResId
                 == R.layout.desktop_mode_app_header) {
@@ -589,9 +607,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             controlsElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_end;
             controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
             relayoutParams.mOccludingCaptionElements.add(controlsElement);
-        } else if (isAppHandle) {
+        } else if (isAppHandle && !Flags.enableAdditionalWindowsAboveStatusBar()) {
             // The focused decor (fullscreen/split) does not need to handle input because input in
             // the App Handle is handled by the InputMonitor in DesktopModeWindowDecorViewModel.
+            // Note: This does not apply with the above flag enabled as the status bar input layer
+            // will forward events to the handle directly.
             relayoutParams.mInputFeatures
                     |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
         }
@@ -700,7 +720,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             }
             final ComponentName baseActivity = mTaskInfo.baseActivity;
             if (baseActivity == null) {
-                Log.e(TAG, "Base activity component not found in task");
+                Slog.e(TAG, "Base activity component not found in task");
                 return;
             }
             final PackageManager pm = mContext.getApplicationContext().getPackageManager();
@@ -719,7 +739,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             final ApplicationInfo applicationInfo = activityInfo.applicationInfo;
             mAppName = pm.getApplicationLabel(applicationInfo);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Base activity's component name cannot be found on the system");
+            Slog.e(TAG, "Base activity's component name cannot be found on the system", e);
         } finally {
             Trace.endSection();
         }
@@ -914,7 +934,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void createHandleMenu(SplitScreenController splitScreenController) {
         loadAppInfoIfNeeded();
-        mHandleMenu = new HandleMenu(
+        updateGenericLink();
+        mHandleMenu = mHandleMenuFactory.create(
                 this,
                 mRelayoutParams.mLayoutResId,
                 mOnCaptionButtonClickListener,
@@ -924,7 +945,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mDisplayController,
                 splitScreenController,
                 DesktopModeStatus.canEnterDesktopMode(mContext),
-                browserLinkAvailable(),
+                getBrowserLink(),
                 mResult.mCaptionWidth,
                 mResult.mCaptionHeight,
                 mResult.mCaptionX
@@ -933,9 +954,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mHandleMenu.show();
     }
 
-    @VisibleForTesting
-    boolean browserLinkAvailable() {
-        return mCapturedLink != null && !mCapturedLink.mExpired;
+    private void updateGenericLink() {
+        final ComponentName baseActivity = mTaskInfo.baseActivity;
+        if (baseActivity == null) {
+            return;
+        }
+
+        final String genericLink =
+                mGenericLinksParser.getGenericLink(baseActivity.getPackageName());
+        mGenericLink = genericLink == null ? null : Uri.parse(genericLink);
     }
 
     /**
@@ -1219,7 +1246,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 @ShellBackgroundThread ShellExecutor bgExecutor,
                 Choreographer choreographer,
                 SyncTransactionQueue syncQueue,
-                RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+                RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+                AppToWebGenericLinksParser genericLinksParser) {
             return new DesktopModeWindowDecoration(
                     context,
                     displayController,
@@ -1231,7 +1259,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     bgExecutor,
                     choreographer,
                     syncQueue,
-                    rootTaskDisplayAreaOrganizer);
+                    rootTaskDisplayAreaOrganizer,
+                    genericLinksParser);
         }
     }
 

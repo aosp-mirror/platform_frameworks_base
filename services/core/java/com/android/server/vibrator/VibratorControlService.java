@@ -68,7 +68,7 @@ final class VibratorControlService extends IVibratorControlService.Stub {
     private static final int NO_SCALE = -1;
 
     private static final DateTimeFormatter DEBUG_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(
-            "MM-dd HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
+            "MM-dd HH:mm:ss.SSS");
 
     private final VibrationParamsRecords mVibrationParamsRecords;
     private final VibratorControllerHolder mVibratorControllerHolder;
@@ -591,7 +591,8 @@ final class VibratorControlService extends IVibratorControlService.Stub {
         public void dump(IndentingPrintWriter pw) {
             String line = String.format(Locale.ROOT,
                     "%s | %6s | scale: %5s | typesMask: %6s | usages: %s",
-                    DEBUG_DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(mCreateTime)),
+                    DEBUG_DATE_TIME_FORMATTER.withZone(ZoneId.systemDefault()).format(
+                            Instant.ofEpochMilli(mCreateTime)),
                     mOperation.name().toLowerCase(Locale.ROOT),
                     (mScale == NO_SCALE) ? "" : String.format(Locale.ROOT, "%.2f", mScale),
                     Long.toBinaryString(mTypesMask), createVibrationUsagesString());

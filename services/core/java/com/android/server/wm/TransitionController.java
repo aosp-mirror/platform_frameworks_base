@@ -1350,7 +1350,8 @@ class TransitionController {
     private static boolean shouldDispatchLegacyListener(
             WindowManagerInternal.AppTransitionListener listener, int displayId) {
         // INVALID_DISPLAY means that it is a global listener.
-        return listener.mDisplayId == Display.INVALID_DISPLAY || listener.mDisplayId == displayId;
+        return listener.mTargetDisplayId == Display.INVALID_DISPLAY
+                || listener.mTargetDisplayId == displayId;
     }
 
     void dispatchLegacyAppTransitionPending(int displayId) {
